@@ -9,6 +9,7 @@ import type {
 import { getDefaultCampaignDeadlines } from "~/modules/domain";
 import { civilDate } from "~/modules/domain/shared/civilDate";
 import {
+	COMPLIANCE_PATH,
 	DECLARATION_REMUNERATION,
 	DECLARATION_REMUNERATION_RECAP,
 	DECLARATION_REMUNERATION_RECAP_CORRECTION,
@@ -17,6 +18,7 @@ import {
 } from "~/modules/routes";
 import type { PanelVariant } from "../DeclarationProcessPanel";
 import { DeclarationProcessPanel } from "../DeclarationProcessPanel";
+import { isPathChoiceModifiable } from "../VerticalStepper";
 
 const FUTURE_YEAR = 2099;
 const PAST_YEAR = 2020;
@@ -459,7 +461,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 
 	describe("rendu conditionnel des étapes selon le parcours (#3939)", () => {
 		const STEP2_TITLE = /Parcours de mise en conformité/;
-		const STEP3_TITLE = "Dépôt du ou des avis du CSE";
+		const STEP3_TITLE = "Transmission du ou des avis du CSE";
 		const STEP1_TITLE = "Déclaration des indicateurs de rémunération";
 
 		it("renders steps 2 and 3 when both compliancePathApplicable and cseOpinionRequired are true", () => {
@@ -497,9 +499,9 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 	});
 
 	describe("puces de l'étape 1 selon indicatorGRequired (#4267)", () => {
-		const PREFILLED_BULLET = /Indicateurs pré-remplis à vérifier/;
-		const CATEGORY_BULLET =
-			/Indicateur de rémunération par catégorie d'emplois à remplir/;
+		const PREFILLED_BULLET =
+			/Indicateurs pour l'ensemble des salariés pré-remplis à vérifier/;
+		const CATEGORY_BULLET = /Indicateur par catégorie d'emplois à remplir/;
 
 		it("renders both bullets on the start variant when indicator G applies", () => {
 			const { panel } = renderPanel("start", { indicatorGRequired: true });
@@ -978,5 +980,115 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 				"Modifier",
 			);
 		});
+	});
+});
+
+describe("« Modifier » du choix de parcours, dernière étape transmise (#4898)", () => {
+	const PATH_CHOICE_MODIFY = `a[href="${COMPLIANCE_PATH}"]`;
+	const PATH_CHOICE_LABEL = "Votre choix de parcours a été transmis";
+
+	it.each<{
+		label: string;
+		variant: PanelVariant;
+		overrides: PanelOverrides;
+	}>([
+		{
+			label: "actions correctives choisies, seconde déclaration à venir",
+			variant: "compliance",
+			overrides: { displayContext: makeDisplayContext("corrective_action") },
+		},
+		{
+			label: "évaluation conjointe choisie, rapport à venir",
+			variant: "evaluation",
+			overrides: { displayContext: makeDisplayContext("joint_evaluation") },
+		},
+		{
+			label: "justification choisie, avis du CSE à venir",
+			variant: "cse",
+			overrides: { displayContext: makeDisplayContext("justify") },
+		},
+		{
+			label: "évaluation conjointe choisie au second tour",
+			variant: "evaluation",
+			overrides: {
+				declarationFsmStatus: "revised_joint_evaluation_chosen",
+				displayContext: makeDisplayContext(
+					"corrective_action",
+					"joint_evaluation",
+				),
+				hasSubmittedSecondDeclaration: true,
+			},
+		},
+	])("offers Modifier on the transmitted path choice: $label", ({
+		variant,
+		overrides,
+	}) => {
+		const { panel, dialog } = renderPanel(variant, overrides);
+		expect(panel.getByText(PATH_CHOICE_LABEL)).toBeInTheDocument();
+		expect(
+			panel.getAllByText("Modifiable jusqu'à votre prochaine transmission")
+				.length,
+		).toBeGreaterThan(0);
+		expect(dialog.querySelector(PATH_CHOICE_MODIFY)).toHaveTextContent(
+			"Modifier",
+		);
+	});
+
+	it.each<{
+		label: string;
+		variant: PanelVariant;
+		overrides: PanelOverrides;
+	}>([
+		{
+			label: "aucun parcours encore choisi",
+			variant: "compliance_choice",
+			overrides: {},
+		},
+		{
+			label: "seconde déclaration transmise après les actions correctives",
+			variant: "compliance_choice",
+			overrides: {
+				declarationFsmStatus: "awaiting_revision_choice",
+				displayContext: makeDisplayContext("corrective_action"),
+				hasSubmittedSecondDeclaration: true,
+			},
+		},
+		{
+			label: "rapport d'évaluation conjointe transmis",
+			variant: "cse",
+			overrides: {
+				displayContext: makeDisplayContext("joint_evaluation"),
+				hasSubmittedJointEvaluation: true,
+			},
+		},
+		{
+			label: "démarche close après l'avis du CSE",
+			variant: "closed",
+			overrides: {
+				displayContext: makeDisplayContext("justify"),
+				hasSubmittedCseOpinion: true,
+			},
+		},
+	])("withholds the path choice Modifier once something later was transmitted: $label", ({
+		variant,
+		overrides,
+	}) => {
+		const { panel, dialog } = renderPanel(variant, overrides);
+		expect(panel.queryByText(PATH_CHOICE_LABEL)).toBeNull();
+		expect(dialog.querySelector(PATH_CHOICE_MODIFY)).not.toBeInTheDocument();
+	});
+
+	it("treats a missing FSM status as not modifiable", () => {
+		expect(
+			isPathChoiceModifiable({
+				declarationFsmStatus: null,
+				displayContext: makeDisplayContext("justify"),
+				submitted: {
+					cseOpinion: false,
+					jointEvaluation: false,
+					secondDeclaration: false,
+				},
+			}),
+		).toBe(false);
 	});
 });

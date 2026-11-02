@@ -41,15 +41,33 @@ export function buildColumnId(declarationNumber: number, type: string): string {
 	return `${declarationNumber}:${type}`;
 }
 
+export function getContentTypeDescription(
+	declarationNumber: DeclarationNumber,
+	type: ContentType,
+): string {
+	return type === "accuracy"
+		? ACCURACY_DESCRIPTIONS[declarationNumber]
+		: GAP_DESCRIPTION;
+}
+
+export function getContentTypeHeader(
+	declarationNumber: DeclarationNumber,
+	type: ContentType,
+	hasSecondDeclaration: boolean,
+): Pick<ContentTypeColumn, "label" | "declarationLabel"> {
+	return {
+		label: TYPE_LABELS[type],
+		declarationLabel: hasSecondDeclaration
+			? DECLARATION_LABELS[declarationNumber]
+			: null,
+	};
+}
+
 function buildColumn(
 	declarationNumber: DeclarationNumber,
 	type: ContentType,
 	hasSecondDeclaration: boolean,
 ): ContentTypeColumn {
-	const description =
-		type === "accuracy"
-			? ACCURACY_DESCRIPTIONS[declarationNumber]
-			: GAP_DESCRIPTION;
 	const declarationPart = hasSecondDeclaration
 		? ` de la ${DECLARATION_ORDINALS[declarationNumber]} déclaration`
 		: "";
@@ -58,11 +76,8 @@ function buildColumn(
 		id: buildColumnId(declarationNumber, type),
 		declarationNumber,
 		type,
-		label: TYPE_LABELS[type],
-		declarationLabel: hasSecondDeclaration
-			? DECLARATION_LABELS[declarationNumber]
-			: null,
-		description,
+		...getContentTypeHeader(declarationNumber, type, hasSecondDeclaration),
+		description: getContentTypeDescription(declarationNumber, type),
 		missingMessage: `Ajoutez l'avis ${TYPE_ERROR_PHRASES[type]}${declarationPart}, ou indiquez s'il est déjà inclus dans l'un des fichiers déposés.`,
 	};
 }

@@ -25,10 +25,10 @@ export default async function CseOpinionConfirmationPage() {
 		redirect(MY_SPACE);
 	}
 
-	const transmittedJointEvaluation = await findTransmittedJointEvaluation(
-		db,
-		declarationData.declaration.id,
-	);
+	const [transmittedJointEvaluation, company] = await Promise.all([
+		findTransmittedJointEvaluation(db, declarationData.declaration.id),
+		api.company.get({ siren: declarationData.declaration.siren }),
+	]);
 
 	return (
 		<>
@@ -37,6 +37,7 @@ export default async function CseOpinionConfirmationPage() {
 				dimensions={campaignYearDimension(declarationData.declaration.year)}
 			/>
 			<ConfirmationPage
+				companyName={company.name}
 				dataYear={getReferenceYearFor(declarationData.declaration.year)}
 				declarationYear={declarationData.declaration.year}
 				email={session?.user?.email ?? undefined}

@@ -1,4 +1,4 @@
-import type { CompliancePathReadOnlyReason } from "./constants";
+import type { CompliancePathReadOnlyReason } from "~/modules/domain";
 
 const READ_ONLY_MESSAGES: Record<CompliancePathReadOnlyReason, string> = {
 	demarche_completed:

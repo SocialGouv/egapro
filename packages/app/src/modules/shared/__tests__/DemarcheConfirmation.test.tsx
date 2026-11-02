@@ -14,6 +14,7 @@ import type { DemarcheDocument } from "../demarcheDocuments";
 const YEAR = 2025;
 const DATA_YEAR = YEAR - 1;
 const EMAIL = "declarant@example.fr";
+const COMPANY_NAME = "Société Démo";
 const TITLE = `Démarche des indicateurs de rémunération ${YEAR}`;
 const SUCCESS_MESSAGE = `Votre parcours ${YEAR} est désormais terminé`;
 
@@ -41,6 +42,7 @@ type Overrides = {
 function renderConfirmation({ documents = [RECAP], ...rest }: Overrides = {}) {
 	return render(
 		<DemarcheConfirmation
+			companyName={COMPANY_NAME}
 			documents={documents}
 			email={EMAIL}
 			receiptKind="declaration"
@@ -192,6 +194,33 @@ describe("DemarcheConfirmation", () => {
 		expect(
 			screen.getByRole("link", { name: /Je donne mon avis/ }),
 		).toBeInTheDocument();
+	});
+
+	it("names the company in the publication notice, between the documents and the feedback banner", () => {
+		const { container } = renderConfirmation();
+
+		expect(
+			screen.getByRole("heading", {
+				level: 2,
+				name: "Publication des résultats",
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(new RegExp(`déclarés par ${COMPANY_NAME}`)),
+		).toBeInTheDocument();
+
+		const sections = Array.from(container.firstElementChild?.children ?? []);
+		const documentsIndex = sections.findIndex((section) =>
+			section.querySelector("h2")?.textContent?.includes("Documents"),
+		);
+		const noticeIndex = sections.findIndex((section) =>
+			section.querySelector("h2")?.textContent?.includes("Publication"),
+		);
+		const feedbackIndex = sections.findIndex((section) =>
+			section.textContent?.includes("Comment s'est passée votre démarche ?"),
+		);
+		expect(documentsIndex).toBeLessThan(noticeIndex);
+		expect(noticeIndex).toBeLessThan(feedbackIndex);
 	});
 
 	it("closes the démarche on a single Mon espace action", () => {

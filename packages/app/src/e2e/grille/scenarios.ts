@@ -23,6 +23,10 @@ import {
 	submitFromStep6Recap,
 } from "../helpers/declaration-flows";
 import { recapStepperLabel } from "../helpers/indicator-g";
+import {
+	belowHundredNextSteps,
+	expectRecapNextSteps,
+} from "../helpers/next-steps";
 import { openPanneauDemarche, transmittedRow } from "../helpers/process-panel";
 import { expectCompletionReceiptWhenMailChainUp } from "../helpers/receipts";
 import { urlGlob, urlPattern } from "../helpers/routes";
@@ -168,7 +172,9 @@ export const FICHE_SCENARIOS = {
 	},
 
 	"CAS-02": async ({ page }) => {
-		await completeDeclaration(page, { hasGap: false });
+		await reachStep6Recap(page, { hasGap: false });
+		await expectRecapNextSteps(page, ["cse-inform-and-consult"]);
+		await submitFromStep6Recap(page);
 		await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), { timeout: 10_000 });
 		await fillCseStep1(page, { firstDeclGapCardHidden: true });
 		await submitCseStep2(page);
@@ -380,6 +386,7 @@ export const FICHE_SCENARIOS = {
 				await reachRecapWithoutGap(page, {
 					indicatorGRequired: coordinate.indicatorGRequired,
 				});
+				await expectRecapNextSteps(page, ["cse-inform-and-consult"]);
 				await submitFromStep6Recap(page);
 				await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), {
 					timeout: 10_000,
@@ -391,7 +398,7 @@ export const FICHE_SCENARIOS = {
 		);
 	},
 
-	"CAS-13": async ({ page }) => {
+	"CAS-13": async ({ page, coordinate }) => {
 		await reachStep6Recap(page, { hasGap: false });
 		await expect(
 			page.getByText("Étape 6 sur 6", { exact: true }),
@@ -401,6 +408,10 @@ export const FICHE_SCENARIOS = {
 				name: "Indicateur par catégorie d'emplois",
 			}),
 		).toBeVisible();
+		await expectRecapNextSteps(
+			page,
+			belowHundredNextSteps(coordinate.workforce, { hasGap: false }),
+		);
 		await submitFromStep6Recap(page);
 		await finDeDemarche(page, {
 			url: urlGlob(CONFIRMATION_PATH),
@@ -408,19 +419,14 @@ export const FICHE_SCENARIOS = {
 		});
 	},
 
-	"CAS-14": async ({ page }) => {
+	"CAS-14": async ({ page, coordinate }) => {
 		await reachStep6ComplianceRecap(page);
-		// Same gap inputs that render "Prochaines étapes" at 200 salariés: below
-		// 100 nothing is due, so the box is absent altogether.
-		await expect(
-			page.getByRole("heading", { name: "Prochaines étapes" }),
-		).toHaveCount(0);
-		await expect(
-			page.getByText("Écarts détectés", { exact: true }),
-		).toHaveCount(0);
-		await expect(
-			page.getByRole("heading", { name: "Actions à engager" }),
-		).toHaveCount(0);
+		// Same gap inputs that open the compliance process at 200 salariés: below
+		// 100 the box never carries it, only the remediation reminder from 50.
+		await expectRecapNextSteps(
+			page,
+			belowHundredNextSteps(coordinate.workforce, { hasGap: true }),
+		);
 
 		await page.goto(remunerationStepHref(6));
 		await submitFromStep6Recap(page);
@@ -469,6 +475,10 @@ export const FICHE_SCENARIOS = {
 		await expect(
 			page.getByText(recapStepperLabel(indicatorGRequired), { exact: true }),
 		).toBeVisible();
+		await expectRecapNextSteps(
+			page,
+			belowHundredNextSteps(coordinate.workforce, { hasGap: false }),
+		);
 		await submitFromStep6Recap(page);
 		await finDeDemarche(page, {
 			url: urlGlob(CONFIRMATION_PATH),

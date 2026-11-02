@@ -461,7 +461,7 @@ Comportements testés en E2E qui ne figurent pas dans le fichier de Laetitia mai
 |---|---|---|
 | ANX-01 | Tâtonnement : changer de parcours de conformité avant toute action aval (le dernier choix gagne, les deux événements sont historisés) | `compliance.e2e.ts` — `[ANX-01] Path change before downstream action` |
 | ANX-02 | Démarche terminée → toute navigation vers le parcours de conformité redirige | `compliance.e2e.ts` — `[ANX-02] Path 12` |
-| ANX-03 | Bouton « Précédent » sur `/avis-cse` : retour contextuel selon l'état (récap étape 6, choix de parcours, récap 2ᵉ déclaration) | `compliance.e2e.ts` — `[ANX-03] Paths 13.a / 13.b / 13.c` |
+| ANX-03 | Pas de bouton « Précédent » vers une étape déjà transmise : absent sur `/avis-cse` quel que soit l'état d'arrivée (récap étape 6, choix de parcours, récap 2ᵉ déclaration) et sur le récap étape 6 une fois la déclaration transmise | `compliance.e2e.ts` — `[ANX-03] Paths 13.a / 13.b / 13.c` |
 | ANX-04 | Tranche 100-149, année triennale ≥ 2030 : l'indicateur G redevient obligatoire, le funnel repasse à 6 étapes. Contre-branche de `CAS-01-6IND` / `CAS-02-6IND`, qui n'exerceraient sinon qu'une seule de leurs deux branches — et basculeraient silencieusement au rouge en 2030 | `compliance.e2e.ts` — `[ANX-04] Path 14bis` (effectif GIP 120, année épinglée 2030) |
 | ANX-05 | Tranche 50-99 : la composition du funnel suit l'année épinglée — étape catégories absente et inatteignable par URL directe en année « 6 indicateurs » (2029), présente en année triennale ≥ 2030 | `compliance.e2e.ts` — `[ANX-05] Path 13` (effectif GIP 75, années épinglées 2029 et 2030) |
 

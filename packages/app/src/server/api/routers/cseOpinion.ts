@@ -1,10 +1,11 @@
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import {
 	deleteFileSchema,
 	saveOpinionsSchema,
 	setFileContentTypesSchema,
 } from "~/modules/cseOpinion/schemas";
+import { assembleCseOpinionRecap } from "~/modules/declarationPdf/buildCseOpinionRecapData";
 import { getCurrentYear } from "~/modules/domain";
 import {
 	createTRPCRouter,
@@ -12,13 +13,11 @@ import {
 	declarationWriteProcedure,
 } from "~/server/api/trpc";
 import {
-	companies,
 	cseOpinionFiles,
 	cseOpinions,
 	declarationStatusHistory,
 	declarations,
 	files,
-	users,
 } from "~/server/db/schema";
 import { loadRules } from "~/server/rules/engine";
 import {
@@ -27,7 +26,10 @@ import {
 	pruneStaleContentTypeAssociations,
 } from "~/server/services/cseRequiredContentTypes";
 import { deleteFile as deleteS3File, getFileSize } from "~/server/services/s3";
-import { findJointEvaluationFile } from "./declarationHelpers";
+import {
+	findTransmittedCseOpinions,
+	findTransmittedJointEvaluation,
+} from "./declarationHelpers";
 import {
 	applyActionOrRefuse,
 	buildHistoryInserts,
@@ -67,139 +69,21 @@ function assertRequiredContentTypesCovered(
 
 export const cseOpinionRouter = createTRPCRouter({
 	getSubmittedView: declarationProcedure.query(async ({ ctx }) => {
-		// The revision marker and mutable opinion/file rows must come from one
-		// snapshot: a concurrent edit commits marker + content atomically.
-		return ctx.db.transaction(
-			async (tx) => {
-				const [submission] = await tx
-					.select({ createdAt: declarationStatusHistory.createdAt })
-					.from(declarationStatusHistory)
-					.where(
-						and(
-							eq(declarationStatusHistory.declarationId, ctx.declarationId),
-							eq(declarationStatusHistory.eventType, "cse_opinion_submit"),
-						),
-					)
-					.orderBy(desc(declarationStatusHistory.createdAt))
-					.limit(1);
-
-				if (!submission) {
-					throw new TRPCError({
-						code: "NOT_FOUND",
-						message: "Aucun avis du CSE transmis pour cette déclaration.",
-					});
-				}
-
-				const [identity] = await tx
-					.select({
-						companyName: companies.name,
-						siren: companies.siren,
-						declarationYear: declarations.year,
-						declarantFirstName: users.firstName,
-						declarantLastName: users.lastName,
-						declarantEmail: users.email,
-						declarantPhone: users.phone,
-						secondDeclReferencePeriodStart:
-							declarations.secondDeclReferencePeriodStart,
-						secondDeclReferencePeriodEnd:
-							declarations.secondDeclReferencePeriodEnd,
-						cseOpinionDraftUpdatedAt: declarations.cseOpinionDraftUpdatedAt,
-					})
-					.from(declarations)
-					.innerJoin(companies, eq(declarations.siren, companies.siren))
-					.innerJoin(users, eq(declarations.declarantId, users.id))
-					.where(eq(declarations.id, ctx.declarationId))
-					.limit(1);
-
-				if (!identity) {
-					throw new TRPCError({ code: "NOT_FOUND" });
-				}
-				if (identity.cseOpinionDraftUpdatedAt) {
-					throw new TRPCError({
-						code: "NOT_FOUND",
-						message:
-							"Les avis du CSE ont été modifiés depuis leur dernière transmission.",
-					});
-				}
-				const [jointSubmission] = await tx
-					.select({ createdAt: declarationStatusHistory.createdAt })
-					.from(declarationStatusHistory)
-					.where(
-						and(
-							eq(declarationStatusHistory.declarationId, ctx.declarationId),
-							eq(declarationStatusHistory.eventType, "joint_evaluation_submit"),
-						),
-					)
-					.orderBy(desc(declarationStatusHistory.createdAt))
-					.limit(1);
-				const jointFile = jointSubmission
-					? await findJointEvaluationFile(tx, ctx.declarationId)
-					: null;
-				const hasSubmittedJointEvaluation = Boolean(
-					jointSubmission &&
-						jointFile &&
-						jointFile.uploadedAt <= jointSubmission.createdAt,
-				);
-
-				const [opinions, associations, secondSubmissions] = await Promise.all([
-					tx
-						.select({
-							declarationNumber: cseOpinions.declarationNumber,
-							type: cseOpinions.type,
-							gapConsulted: cseOpinions.gapConsulted,
-							opinion: cseOpinions.opinion,
-							opinionDate: cseOpinions.opinionDate,
-						})
-						.from(cseOpinions)
-						.where(eq(cseOpinions.declarationId, ctx.declarationId)),
-					tx
-						.select({
-							declarationNumber: cseOpinionFiles.declarationNumber,
-							type: cseOpinionFiles.type,
-							fileId: files.id,
-							fileName: files.fileName,
-							uploadedAt: files.uploadedAt,
-						})
-						.from(cseOpinionFiles)
-						.innerJoin(
-							files,
-							and(
-								eq(cseOpinionFiles.fileId, files.id),
-								eq(files.declarationId, ctx.declarationId),
-								eq(files.type, "cse_opinion"),
-							),
-						)
-						.where(eq(cseOpinionFiles.declarationId, ctx.declarationId)),
-					tx
-						.select({ id: declarationStatusHistory.id })
-						.from(declarationStatusHistory)
-						.where(
-							and(
-								eq(declarationStatusHistory.declarationId, ctx.declarationId),
-								eq(
-									declarationStatusHistory.eventType,
-									"second_declaration_submit",
-								),
-							),
-						)
-						.limit(1),
-				]);
-
-				const {
-					cseOpinionDraftUpdatedAt: _draftRevision,
-					...submittedIdentity
-				} = identity;
-				return {
-					...submittedIdentity,
-					submittedAt: submission.createdAt,
-					opinions,
-					associations,
-					hasSubmittedSecondDeclaration: secondSubmissions.length > 0,
-					hasSubmittedJointEvaluation,
-				};
-			},
-			{ isolationLevel: "repeatable read" },
+		const transmitted = await findTransmittedCseOpinions(
+			ctx.db,
+			ctx.declarationId,
 		);
+		if (!transmitted) {
+			throw new TRPCError({
+				code: "NOT_FOUND",
+				message: "Aucun avis du CSE transmis pour cette déclaration.",
+			});
+		}
+		const [recap, jointEvaluation] = await Promise.all([
+			assembleCseOpinionRecap(transmitted),
+			findTransmittedJointEvaluation(ctx.db, ctx.declarationId),
+		]);
+		return { ...recap, hasSubmittedJointEvaluation: jointEvaluation !== null };
 	}),
 
 	get: declarationProcedure.query(async ({ ctx }) => {

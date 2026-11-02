@@ -221,3 +221,34 @@ export function applyDeclarationClosure(params: {
 	}
 	return status;
 }
+
+export type CompliancePathReadOnlyReason =
+	| "demarche_completed"
+	| "cse_opinion_submitted"
+	| "second_declaration_submitted"
+	| "joint_evaluation_submitted";
+
+export function getCompliancePathReadOnlyReason(params: {
+	status: DeclarationFsmStatus;
+	pathChoice: CompliancePath | null;
+	hasSubmittedSecondDeclaration: boolean;
+	hasSubmittedCseOpinion: boolean;
+	hasSubmittedJointEvaluation: boolean;
+}): CompliancePathReadOnlyReason | null {
+	const {
+		status,
+		pathChoice,
+		hasSubmittedSecondDeclaration,
+		hasSubmittedCseOpinion,
+		hasSubmittedJointEvaluation,
+	} = params;
+
+	if (isComplianceProcessCompleted(status)) return "demarche_completed";
+	if (pathChoice === "justify" && hasSubmittedCseOpinion)
+		return "cse_opinion_submitted";
+	if (pathChoice === "corrective_action" && hasSubmittedSecondDeclaration)
+		return "second_declaration_submitted";
+	if (pathChoice === "joint_evaluation" && hasSubmittedJointEvaluation)
+		return "joint_evaluation_submitted";
+	return null;
+}

@@ -36,6 +36,7 @@ export {
 } from "./shared/adminRoutes";
 export {
 	API_AUTH_LOGOUT,
+	API_CSE_OPINION_PDF,
 	API_DECLARATION_LOCK_RELEASE,
 	API_DECLARATION_PDF,
 	API_E2E_CLOCK,

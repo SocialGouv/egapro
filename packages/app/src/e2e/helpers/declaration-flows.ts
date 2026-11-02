@@ -351,7 +351,7 @@ export async function submitIndicatorGStep(
 
 /**
  * Fill steps 1 → 5 and stop on the step 6 review recap without submitting, so a
- * caller can assert on the recap ("Prochaines étapes" box) before certification.
+ * caller can assert on the recap (its end-of-page box) before certification.
  * Requires a company subject to indicator G (step 5), i.e. the suite baseline workforce.
  */
 export async function reachStep6Recap(
@@ -384,7 +384,7 @@ export async function reachRecapWithoutGap(
 /**
  * Fill steps 1 → 5 with an indicator A annual gap ≥ 5% and stop on the step 6
  * review recap. The annual gap makes isComplianceProcessRequired true, so the
- * recap renders the "Prochaines étapes" (NextStepsBox) compliance box — the
+ * recap renders the gap compliance block of its end-of-page box — the
  * surface that must gate its CSE-opinion mention on the declared CSE existence.
  */
 export async function reachStep6ComplianceRecap(page: Page) {
