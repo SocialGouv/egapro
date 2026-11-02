@@ -24,12 +24,10 @@ function gapReadingNote(rows: PayGapRow[], subject: string): string | null {
 	return `Note de lecture : L'écart de ${subject} est de ${formatGap(gapMagnitude(gap))}${mention}.`;
 }
 
-/** Reading note for the step 2 "Rémunération" table, from its "Annuelle brute moyenne" row. */
 export function payGapReadingNote(rows: PayGapRow[]): string | null {
 	return gapReadingNote(rows, "rémunération annuelle brute moyenne");
 }
 
-/** Reading note for the step 3 variable-pay gap table, from its "Annuelle brute moyenne" row. */
 export function variablePayGapReadingNote(rows: PayGapRow[]): string | null {
 	return gapReadingNote(
 		rows,
@@ -37,7 +35,6 @@ export function variablePayGapReadingNote(rows: PayGapRow[]): string | null {
 	);
 }
 
-/** Reading note for the step 3 beneficiaries table. */
 export function beneficiariesReadingNote(
 	beneficiaryWomen: string,
 	maxWomen: number | undefined,
@@ -60,14 +57,12 @@ function quartileReadingNote(
 	return `Note de lecture : ${womenPct} des femmes du premier quartile ont perçu une rémunération ${basis} brute moyenne inférieure à ${threshold} contre ${menPct} d'hommes.`;
 }
 
-/** Reading note for the step 4 annual quartile table, from its 1st quartile row. */
 export function annualQuartileReadingNote(
 	firstQuartile: QuartileData | undefined,
 ): string | null {
 	return quartileReadingNote(firstQuartile, "annuelle");
 }
 
-/** Reading note for the step 4 hourly quartile table, from its 1st quartile row. */
 export function hourlyQuartileReadingNote(
 	firstQuartile: QuartileData | undefined,
 ): string | null {

@@ -26,7 +26,6 @@ type Props = {
 		QuartileFieldErrors,
 		QuartileFieldErrors,
 	];
-	/** The reading note shown in the title's tooltip, or `null` to show the title alone. */
 	readingNote: string | null;
 	tooltipId: string;
 	sourceNote?: React.ReactNode;

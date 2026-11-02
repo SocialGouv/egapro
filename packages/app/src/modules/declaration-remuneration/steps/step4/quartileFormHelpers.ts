@@ -52,7 +52,6 @@ export function emptyQuartiles(): QuartileTuple {
 	];
 }
 
-/** Share of one sex within a quartile row: "- %" while the row carries nobody. */
 export function quartileGenderPercentage(
 	quartile: QuartileData,
 	gender: "women" | "men",

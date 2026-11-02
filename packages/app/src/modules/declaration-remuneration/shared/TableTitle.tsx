@@ -5,7 +5,6 @@ import styles from "./TableTitle.module.scss";
 type TableTitleProps = {
 	level: "h2" | "h3";
 	title: string;
-	/** The reading note shown in the tooltip, or `null` to render the title alone. */
 	readingNote: string | null;
 	tooltipId: string;
 };
