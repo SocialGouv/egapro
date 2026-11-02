@@ -53,7 +53,7 @@ function collectOutput(document: PDFDocument): Promise<Buffer> {
 
 function imageKey(source: unknown): string {
 	return Buffer.isBuffer(source)
-		? createHash("sha1").update(source).digest("hex")
+		? createHash("sha256").update(source).digest("hex")
 		: String(source);
 }
 
