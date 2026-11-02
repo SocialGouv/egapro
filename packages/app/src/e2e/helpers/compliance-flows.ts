@@ -9,10 +9,12 @@ import {
 	CSE_OPINION_CONFIRMATION,
 	complianceStepHref,
 	cseOpinionStepHref,
+	OBSERVATORY_SEARCH,
 } from "~/modules/routes";
 // Leaf module, not the barrel: the Playwright runner cannot load the CSS
 // modules the barrel pulls in through its React components.
 import { SUBMIT_LABEL } from "~/modules/shared/submitLabels";
+import { getTestCompanyName } from "./db";
 import {
 	categoryWorkforceInput,
 	fillCategoryPayAmounts,
@@ -392,5 +394,25 @@ export async function completeSecondDeclaration(
 			.click();
 		await page.getByRole("button", { name: "Valider" }).click();
 		await expect(page.locator("#submit-declaration-modal")).not.toBeVisible();
+	});
+}
+
+/** The "Publication des résultats" notice closing a remuneration démarche, wherever it ends. */
+export async function expectResultsPublicationNotice(page: Page) {
+	await test.step("encart « Publication des résultats »", async () => {
+		const companyName = await getTestCompanyName();
+		const heading = page.getByRole("heading", {
+			level: 2,
+			name: "Publication des résultats",
+		});
+		await expect(heading).toBeVisible();
+		await expect(
+			page.getByText(
+				`Les résultats déclarés par ${companyName} seront rendus publics`,
+			),
+		).toBeVisible();
+		await expect(
+			page.getByRole("link", { name: "Consulter l'observatoire" }),
+		).toHaveAttribute("href", OBSERVATORY_SEARCH);
 	});
 }
