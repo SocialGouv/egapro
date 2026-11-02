@@ -11,6 +11,7 @@ import {
 	YAxis,
 } from "recharts";
 
+import { renderLegendLabel } from "./renderLegendLabel";
 import styles from "./StatsBarChart.module.scss";
 
 export type BarSeries<Row> = {
@@ -84,7 +85,7 @@ export function StatsBarChart<Row extends { label: string }>({
 							width={260}
 						/>
 						<Tooltip />
-						{series.length > 1 && <Legend />}
+						{series.length > 1 && <Legend formatter={renderLegendLabel} />}
 						{series.map((serie) => (
 							<Bar
 								dataKey={serie.key}
