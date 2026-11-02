@@ -152,6 +152,13 @@ export function StepPageClient({
 					<Step5EmployeeCategories
 						declarationSiren={declaration.siren}
 						declarationYear={declaration.year}
+						hourlyMaxMen={declaration.hourlyMen ?? undefined}
+						hourlyMaxWomen={declaration.hourlyWomen ?? undefined}
+						indicatorGRequired={indicatorGRequired}
+						initialCategories={step5Categories}
+						initialSource={initialSource}
+						maxMen={declaration.totalMen ?? undefined}
+						maxWomen={declaration.totalWomen ?? undefined}
 						sameWorkforceByPayBasis={
 							declaration.totalWomen !== null &&
 							declaration.hourlyWomen !== null &&
@@ -160,13 +167,6 @@ export function StepPageClient({
 							declaration.hourlyMen !== null &&
 							declaration.totalMen === declaration.hourlyMen
 						}
-						hourlyMaxMen={declaration.hourlyMen ?? undefined}
-						hourlyMaxWomen={declaration.hourlyWomen ?? undefined}
-						indicatorGRequired={indicatorGRequired}
-						initialCategories={step5Categories}
-						initialSource={initialSource}
-						maxMen={declaration.totalMen ?? undefined}
-						maxWomen={declaration.totalWomen ?? undefined}
 					/>
 				);
 			case 6:

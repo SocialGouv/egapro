@@ -116,7 +116,6 @@ export function Step5EmployeeCategories({
 			initialCategories={initialCategories ?? []}
 			initialSource={initialSource}
 			instructionText="Renseignez les informations nécessaires pour le calcul de l'indicateur ou importez-les via le bouton ci-dessous"
-			sameWorkforceByPayBasis={sameWorkforceByPayBasis}
 			isPendingSaveOverride={isPendingSave}
 			isSavingOverride={isSaving}
 			isSubmitting={mutation.isPending}
@@ -135,6 +134,7 @@ export function Step5EmployeeCategories({
 			readOnly={isLocked}
 			referenceYear={getReferenceYearFor(declarationYear)}
 			reminderText={STEP5_WORKFORCE_REMINDER}
+			sameWorkforceByPayBasis={sameWorkforceByPayBasis}
 			stepper={
 				<StepIndicator
 					currentStep={5}

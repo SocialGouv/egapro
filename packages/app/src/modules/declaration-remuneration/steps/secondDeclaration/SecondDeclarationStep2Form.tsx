@@ -109,7 +109,6 @@ export function SecondDeclarationStep2Form({
 			isSubmitting={mutation.isPending}
 			mimoquageNextHref={mimoquageNextHref}
 			nextHref={nextHref}
-			sameWorkforceByPayBasis={sameWorkforceByPayBasis}
 			onSubmit={(data) => {
 				if (!isWritable) return;
 				if (!startDate || !endDate) {
@@ -141,6 +140,7 @@ export function SecondDeclarationStep2Form({
 				/>
 			}
 			referenceYear={getReferenceYearFor(declarationYear)}
+			sameWorkforceByPayBasis={sameWorkforceByPayBasis}
 			stepper={<SecondDeclarationStepIndicator currentStep={2} />}
 			submitError={periodError || mutation.error?.message}
 			title={

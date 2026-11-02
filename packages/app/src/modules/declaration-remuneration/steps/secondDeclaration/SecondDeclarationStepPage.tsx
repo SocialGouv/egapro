@@ -95,14 +95,6 @@ export async function SecondDeclarationStepPage({ step: rawStep }: Props) {
 					<SecondDeclarationStep2Form
 						declarationSiren={data.declaration.siren}
 						declarationYear={currentYear}
-						sameWorkforceByPayBasis={
-							data.declaration.totalWomen !== null &&
-							data.declaration.hourlyWomen !== null &&
-							data.declaration.totalWomen === data.declaration.hourlyWomen &&
-							data.declaration.totalMen !== null &&
-							data.declaration.hourlyMen !== null &&
-							data.declaration.totalMen === data.declaration.hourlyMen
-						}
 						initialEndDate={
 							data.declaration.secondDeclReferencePeriodEnd ?? undefined
 						}
@@ -113,6 +105,14 @@ export async function SecondDeclarationStepPage({ step: rawStep }: Props) {
 						initialSource={initialSource}
 						initialStartDate={
 							data.declaration.secondDeclReferencePeriodStart ?? undefined
+						}
+						sameWorkforceByPayBasis={
+							data.declaration.totalWomen !== null &&
+							data.declaration.hourlyWomen !== null &&
+							data.declaration.totalWomen === data.declaration.hourlyWomen &&
+							data.declaration.totalMen !== null &&
+							data.declaration.hourlyMen !== null &&
+							data.declaration.totalMen === data.declaration.hourlyMen
 						}
 						status={data.declaration.status}
 					/>

@@ -830,7 +830,6 @@ export function CategoryForm({
 									accordionHeaderRefs.current[index] = node;
 								}}
 								hourlyPayApplicable={payApplicability.hourly}
-								sameWorkforceByPayBasis={sameWorkforceByPayBasis}
 								index={index}
 								isExpanded={expandedByFieldId[field.id] ?? true}
 								key={field.id}
@@ -861,6 +860,7 @@ export function CategoryForm({
 								payApplicable={payApplicability.category}
 								readOnly={readOnly}
 								readOnlyLabel={readOnlyLabel}
+								sameWorkforceByPayBasis={sameWorkforceByPayBasis}
 								showDelete={!readOnlyLabel && !readOnly && fields.length > 1}
 							/>
 						);
