@@ -383,6 +383,44 @@ describe("ProfileModal — validation", () => {
 	});
 });
 
+describe("ProfileModal — required-fields mention", () => {
+	const REQUIRED_MENTION = "Tous les champs sont obligatoires.";
+	const requiredFieldIds = [
+		"profile-last-name",
+		"profile-first-name",
+		"profile-phone",
+	];
+
+	it.each(
+		requiredFieldIds,
+	)("describes #%s with the form-level mention", async (inputId) => {
+		await renderOpenModal();
+
+		expect(getElement(inputId)).toHaveAccessibleDescription(
+			expect.stringContaining(REQUIRED_MENTION),
+		);
+	});
+
+	it.each(
+		requiredFieldIds,
+	)("keeps the mention and the error message on #%s once it is flagged", async (inputId) => {
+		await renderOpenModal();
+		fireEvent.change(getElement(inputId), { target: { value: "" } });
+		fireEvent.submit(getElement("profile-form"));
+
+		await waitFor(() => {
+			expect(getElement(inputId)).toHaveAttribute("aria-invalid", "true");
+		});
+		const errorMessage = document.querySelector(
+			`#${inputId}-messages .fr-message--error`,
+		)?.textContent;
+		expect(errorMessage).toBeTruthy();
+		expect(getElement(inputId)).toHaveAccessibleDescription(
+			`${REQUIRED_MENTION} ${errorMessage}`,
+		);
+	});
+});
+
 describe("ProfileModal — submission", () => {
 	it("sends the edited identity along with the canonical phone", async () => {
 		await renderOpenModal();
