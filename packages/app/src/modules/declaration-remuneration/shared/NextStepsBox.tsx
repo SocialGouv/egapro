@@ -1,8 +1,9 @@
 "use client";
 
-import { TrackedLink } from "~/modules/analytics";
-import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
+import { CseOpinionCtaGroup } from "./CseOpinionCtaGroup";
+import { HelpLink } from "./HelpLink";
 import styles from "./NextStepsBox.module.scss";
+import { UpdateCseButton } from "./UpdateCseButton";
 import { UpdateCseModal } from "./UpdateCseModal";
 
 type Props = {
@@ -10,7 +11,6 @@ type Props = {
 	cseOpinionRequired: boolean;
 	hasGapsAboveThreshold: boolean;
 	siren: string;
-	isSecondDeclaration?: boolean;
 };
 
 /** Shared "Prochaines étapes" box with CSE consultation info and gap warnings */
@@ -19,7 +19,6 @@ export function NextStepsBox({
 	cseOpinionRequired,
 	hasGapsAboveThreshold,
 	siren,
-	isSecondDeclaration,
 }: Props) {
 	return (
 		<>
@@ -42,39 +41,14 @@ export function NextStepsBox({
 							.
 						</p>
 
-						<div className={styles.ctaGroup}>
-							<p className="fr-mb-0">
-								L&apos;avis du CSE devra être transmis lors de la dernière étape
-								de la démarche.
-							</p>
-							<p className="fr-mb-0">
-								Les modèles d&apos;avis du CSE ne sont pas encore disponibles.
-							</p>
-							{cseApplicable && (
-								<button
-									aria-controls="update-cse-modal"
-									className="fr-btn fr-btn--secondary"
-									data-fr-opened="false"
-									type="button"
-								>
-									Mettre à jour l&apos;existence d&apos;un CSE
-								</button>
-							)}
-						</div>
+						<CseOpinionCtaGroup cseApplicable={cseApplicable} />
 					</div>
 				)}
 
 				{!cseOpinionRequired && cseApplicable && (
 					<div className={styles.section}>
 						<div className={styles.ctaGroup}>
-							<button
-								aria-controls="update-cse-modal"
-								className="fr-btn fr-btn--secondary"
-								data-fr-opened="false"
-								type="button"
-							>
-								Mettre à jour l&apos;existence d&apos;un CSE
-							</button>
+							<UpdateCseButton />
 						</div>
 					</div>
 				)}
@@ -96,17 +70,16 @@ export function NextStepsBox({
 
 						<p className="fr-mb-0">
 							À la suite de l&apos;analyse de vos données de l&apos;indicateur
-							par catégorie d&apos;emplois, des écarts &ge; 5 % ont{" "}
-							{isSecondDeclaration ? "encore été identifiés" : "été identifiés"}
-							. Vous devez engager un des parcours de mise en conformité
-							suivant&nbsp;:
+							par catégorie d&apos;emplois, des écarts &ge; 5 % ont été
+							identifiés. Vous devez engager un des parcours de mise en
+							conformité suivant&nbsp;:
 						</p>
 
 						<ul>
 							<li>
 								<strong>
-									Justifier les écarts par des critères objectifs et non
-									sexistes.
+									Justifier les écarts par des critères objectifs et non fondés
+									sur le sexe.
 								</strong>{" "}
 								Si vous choisissez ce parcours, vous devez informer et consulter
 								le CSE sur cette justification
@@ -117,23 +90,18 @@ export function NextStepsBox({
 						</ul>
 						<p className="fr-mb-0">
 							Si la justification n&apos;est pas possible par des critères
-							objectifs et non sexistes, vous{" "}
-							{isSecondDeclaration ? "devez" : "pouvez"}&nbsp;:
+							objectifs et non fondés sur le sexe, vous pouvez&nbsp;:
 						</p>
 						<ul>
-							{!isSecondDeclaration && (
-								<li>
-									<strong>
-										Soit mettre en place des actions correctives et effectuer
-										une seconde déclaration dans un délai de 6 mois
-									</strong>
-								</li>
-							)}
 							<li>
 								<strong>
-									{isSecondDeclaration
-										? "Réaliser une évaluation conjointe des rémunérations"
-										: "Soit réaliser une évaluation conjointe des rémunérations"}
+									Soit mettre en place des actions correctives et effectuer une
+									seconde déclaration dans un délai de 6 mois
+								</strong>
+							</li>
+							<li>
+								<strong>
+									Soit réaliser une évaluation conjointe des rémunérations
 								</strong>
 							</li>
 						</ul>
@@ -146,40 +114,20 @@ export function NextStepsBox({
 					<h4 className="fr-text--bold fr-text--md fr-mb-0">Pour vous aider</h4>
 					<ul className="fr-raw-list fr-links-group">
 						<li>
-							<TrackedLink
-								className="fr-link"
-								href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
-								rel="noopener noreferrer"
-								target="_blank"
-								trackingId="objective_criteria"
-							>
-								Qu&apos;entend-on par critères objectifs et non sexistes ?
-								<NewTabNotice />
-							</TrackedLink>
+							<HelpLink trackingId="objective_criteria">
+								Qu&apos;entend-on par critères objectifs et non fondés sur le
+								sexe ?
+							</HelpLink>
 						</li>
 						<li>
-							<TrackedLink
-								className="fr-link"
-								href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
-								rel="noopener noreferrer"
-								target="_blank"
-								trackingId="corrective_actions"
-							>
+							<HelpLink trackingId="corrective_actions">
 								En savoir plus sur actions correctives et seconde déclaration
-								<NewTabNotice />
-							</TrackedLink>
+							</HelpLink>
 						</li>
 						<li>
-							<TrackedLink
-								className="fr-link"
-								href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
-								rel="noopener noreferrer"
-								target="_blank"
-								trackingId="joint_evaluation"
-							>
-								En savoir plus sur évaluation conjointe des rémunérations
-								<NewTabNotice />
-							</TrackedLink>
+							<HelpLink trackingId="joint_evaluation">
+								En savoir plus sur l&apos;évaluation conjointe des rémunérations
+							</HelpLink>
 						</li>
 					</ul>
 				</div>

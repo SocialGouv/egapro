@@ -1,10 +1,16 @@
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
+import {
+	getMissingOpinionMessage,
+	NO_FILE_ALERT,
+	UNASSOCIATED_FILE_ALERT,
+} from "~/modules/cseOpinion/contentTypeColumns";
 import {
 	deleteFileSchema,
 	saveOpinionsSchema,
 	setFileContentTypesSchema,
 } from "~/modules/cseOpinion/schemas";
+import { assembleCseOpinionRecap } from "~/modules/declarationPdf/buildCseOpinionRecapData";
 import { getCurrentYear } from "~/modules/domain";
 import {
 	createTRPCRouter,
@@ -12,22 +18,24 @@ import {
 	declarationWriteProcedure,
 } from "~/server/api/trpc";
 import {
-	companies,
 	cseOpinionFiles,
 	cseOpinions,
 	declarationStatusHistory,
 	declarations,
 	files,
-	users,
 } from "~/server/db/schema";
 import { loadRules } from "~/server/rules/engine";
 import {
 	contentTypeKey,
+	getJustificationRequirements,
 	getRequiredContentTypes,
 	pruneStaleContentTypeAssociations,
 } from "~/server/services/cseRequiredContentTypes";
 import { deleteFile as deleteS3File, getFileSize } from "~/server/services/s3";
-import { findJointEvaluationFile } from "./declarationHelpers";
+import {
+	findTransmittedCseOpinions,
+	findTransmittedJointEvaluation,
+} from "./declarationHelpers";
 import {
 	applyActionOrRefuse,
 	buildHistoryInserts,
@@ -39,6 +47,9 @@ import {
 const CSE_OPINION_UNAVAILABLE_ERROR =
 	"Les avis du CSE ne peuvent pas être transmis à cette étape de la démarche.";
 
+const JUSTIFICATION_OPINION_MISSING_ERROR =
+	"L'avis du CSE sur la justification des écarts et sa date doivent être renseignés.";
+
 function assertRequiredContentTypesCovered(
 	requiredTypes: Awaited<ReturnType<typeof getRequiredContentTypes>>,
 	associations: Array<{ declarationNumber: number; type: string }>,
@@ -48,158 +59,65 @@ function assertRequiredContentTypesCovered(
 			contentTypeKey(association.declarationNumber, association.type),
 		),
 	);
-	for (const required of requiredTypes) {
-		const key = contentTypeKey(required.declarationNumber, required.type);
-		if (!coveredKeys.has(key)) {
-			const typeLabel =
-				required.type === "accuracy" ? "Exactitude" : "Justification";
-			const declLabel =
-				required.declarationNumber === 1
-					? "première déclaration"
-					: "deuxième déclaration";
-			throw new TRPCError({
-				code: "PRECONDITION_FAILED",
-				message: `Le type de contenu « ${typeLabel} » de la ${declLabel} doit être associé à un fichier avant validation.`,
-			});
-		}
+	const hasSecondDeclaration = requiredTypes.some(
+		(required) => required.declarationNumber === 2,
+	);
+	const missing = requiredTypes.find(
+		(required) =>
+			!coveredKeys.has(
+				contentTypeKey(required.declarationNumber, required.type),
+			),
+	);
+	if (missing) {
+		throw new TRPCError({
+			code: "PRECONDITION_FAILED",
+			message: getMissingOpinionMessage(missing, hasSecondDeclaration),
+		});
 	}
+}
+
+type JustificationOpinionInput = {
+	gapOpinion: "favorable" | "unfavorable" | null;
+	gapDate: string | null;
+};
+
+function buildJustificationOpinion(
+	input: JustificationOpinionInput,
+	required: boolean,
+) {
+	if (!required) {
+		return { gapConsulted: false, opinion: null, opinionDate: null };
+	}
+	if (!input.gapOpinion || !input.gapDate) {
+		throw new TRPCError({
+			code: "BAD_REQUEST",
+			message: JUSTIFICATION_OPINION_MISSING_ERROR,
+		});
+	}
+	return {
+		gapConsulted: true,
+		opinion: input.gapOpinion,
+		opinionDate: input.gapDate,
+	};
 }
 
 export const cseOpinionRouter = createTRPCRouter({
 	getSubmittedView: declarationProcedure.query(async ({ ctx }) => {
-		// The revision marker and mutable opinion/file rows must come from one
-		// snapshot: a concurrent edit commits marker + content atomically.
-		return ctx.db.transaction(
-			async (tx) => {
-				const [submission] = await tx
-					.select({ createdAt: declarationStatusHistory.createdAt })
-					.from(declarationStatusHistory)
-					.where(
-						and(
-							eq(declarationStatusHistory.declarationId, ctx.declarationId),
-							eq(declarationStatusHistory.eventType, "cse_opinion_submit"),
-						),
-					)
-					.orderBy(desc(declarationStatusHistory.createdAt))
-					.limit(1);
-
-				if (!submission) {
-					throw new TRPCError({
-						code: "NOT_FOUND",
-						message: "Aucun avis du CSE transmis pour cette déclaration.",
-					});
-				}
-
-				const [identity] = await tx
-					.select({
-						companyName: companies.name,
-						siren: companies.siren,
-						declarationYear: declarations.year,
-						declarantFirstName: users.firstName,
-						declarantLastName: users.lastName,
-						declarantEmail: users.email,
-						declarantPhone: users.phone,
-						secondDeclReferencePeriodStart:
-							declarations.secondDeclReferencePeriodStart,
-						secondDeclReferencePeriodEnd:
-							declarations.secondDeclReferencePeriodEnd,
-						cseOpinionDraftUpdatedAt: declarations.cseOpinionDraftUpdatedAt,
-					})
-					.from(declarations)
-					.innerJoin(companies, eq(declarations.siren, companies.siren))
-					.innerJoin(users, eq(declarations.declarantId, users.id))
-					.where(eq(declarations.id, ctx.declarationId))
-					.limit(1);
-
-				if (!identity) {
-					throw new TRPCError({ code: "NOT_FOUND" });
-				}
-				if (identity.cseOpinionDraftUpdatedAt) {
-					throw new TRPCError({
-						code: "NOT_FOUND",
-						message:
-							"Les avis du CSE ont été modifiés depuis leur dernière transmission.",
-					});
-				}
-				const [jointSubmission] = await tx
-					.select({ createdAt: declarationStatusHistory.createdAt })
-					.from(declarationStatusHistory)
-					.where(
-						and(
-							eq(declarationStatusHistory.declarationId, ctx.declarationId),
-							eq(declarationStatusHistory.eventType, "joint_evaluation_submit"),
-						),
-					)
-					.orderBy(desc(declarationStatusHistory.createdAt))
-					.limit(1);
-				const jointFile = jointSubmission
-					? await findJointEvaluationFile(tx, ctx.declarationId)
-					: null;
-				const hasSubmittedJointEvaluation = Boolean(
-					jointSubmission &&
-						jointFile &&
-						jointFile.uploadedAt <= jointSubmission.createdAt,
-				);
-
-				const [opinions, associations, secondSubmissions] = await Promise.all([
-					tx
-						.select({
-							declarationNumber: cseOpinions.declarationNumber,
-							type: cseOpinions.type,
-							gapConsulted: cseOpinions.gapConsulted,
-							opinion: cseOpinions.opinion,
-							opinionDate: cseOpinions.opinionDate,
-						})
-						.from(cseOpinions)
-						.where(eq(cseOpinions.declarationId, ctx.declarationId)),
-					tx
-						.select({
-							declarationNumber: cseOpinionFiles.declarationNumber,
-							type: cseOpinionFiles.type,
-							fileId: files.id,
-							fileName: files.fileName,
-							uploadedAt: files.uploadedAt,
-						})
-						.from(cseOpinionFiles)
-						.innerJoin(
-							files,
-							and(
-								eq(cseOpinionFiles.fileId, files.id),
-								eq(files.declarationId, ctx.declarationId),
-								eq(files.type, "cse_opinion"),
-							),
-						)
-						.where(eq(cseOpinionFiles.declarationId, ctx.declarationId)),
-					tx
-						.select({ id: declarationStatusHistory.id })
-						.from(declarationStatusHistory)
-						.where(
-							and(
-								eq(declarationStatusHistory.declarationId, ctx.declarationId),
-								eq(
-									declarationStatusHistory.eventType,
-									"second_declaration_submit",
-								),
-							),
-						)
-						.limit(1),
-				]);
-
-				const {
-					cseOpinionDraftUpdatedAt: _draftRevision,
-					...submittedIdentity
-				} = identity;
-				return {
-					...submittedIdentity,
-					submittedAt: submission.createdAt,
-					opinions,
-					associations,
-					hasSubmittedSecondDeclaration: secondSubmissions.length > 0,
-					hasSubmittedJointEvaluation,
-				};
-			},
-			{ isolationLevel: "repeatable read" },
+		const transmitted = await findTransmittedCseOpinions(
+			ctx.db,
+			ctx.declarationId,
 		);
+		if (!transmitted) {
+			throw new TRPCError({
+				code: "NOT_FOUND",
+				message: "Aucun avis du CSE transmis pour cette déclaration.",
+			});
+		}
+		const [recap, jointEvaluation] = await Promise.all([
+			assembleCseOpinionRecap(transmitted),
+			findTransmittedJointEvaluation(ctx.db, ctx.declarationId),
+		]);
+		return { ...recap, hasSubmittedJointEvaluation: jointEvaluation !== null };
 	}),
 
 	get: declarationProcedure.query(async ({ ctx }) => {
@@ -222,6 +140,20 @@ export const cseOpinionRouter = createTRPCRouter({
 		.mutation(async ({ ctx, input }) => {
 			await ctx.db.transaction(async (tx) => {
 				await lockDeclaration(tx, ctx.declarationId);
+				const {
+					firstDeclJustificationRequired,
+					secondDeclJustificationRequired,
+				} = await getJustificationRequirements(tx, ctx.declarationId);
+				const firstJustification = buildJustificationOpinion(
+					input.firstDeclaration,
+					firstDeclJustificationRequired,
+				);
+				const secondJustification = input.secondDeclaration
+					? buildJustificationOpinion(
+							input.secondDeclaration,
+							secondDeclJustificationRequired,
+						)
+					: null;
 				await tx
 					.update(declarations)
 					.set({ cseOpinionDraftUpdatedAt: new Date() })
@@ -244,12 +176,10 @@ export const cseOpinionRouter = createTRPCRouter({
 					declarationId: ctx.declarationId,
 					declarationNumber: 1,
 					type: "gap",
-					gapConsulted: input.firstDeclaration.gapConsulted,
-					opinion: input.firstDeclaration.gapOpinion,
-					opinionDate: input.firstDeclaration.gapDate,
+					...firstJustification,
 				});
 
-				if (input.secondDeclaration) {
+				if (input.secondDeclaration && secondJustification) {
 					rows.push({
 						declarationId: ctx.declarationId,
 						declarationNumber: 2,
@@ -262,9 +192,7 @@ export const cseOpinionRouter = createTRPCRouter({
 						declarationId: ctx.declarationId,
 						declarationNumber: 2,
 						type: "gap",
-						gapConsulted: input.secondDeclaration.gapConsulted,
-						opinion: input.secondDeclaration.gapOpinion,
-						opinionDate: input.secondDeclaration.gapDate,
+						...secondJustification,
 					});
 				}
 
@@ -421,7 +349,7 @@ export const cseOpinionRouter = createTRPCRouter({
 			if (fileRows.length === 0) {
 				throw new TRPCError({
 					code: "PRECONDITION_FAILED",
-					message: "Au moins un fichier d'avis CSE doit être transmis.",
+					message: NO_FILE_ALERT.message,
 				});
 			}
 
@@ -445,7 +373,7 @@ export const cseOpinionRouter = createTRPCRouter({
 			if (orphanFile) {
 				throw new TRPCError({
 					code: "PRECONDITION_FAILED",
-					message: `Le fichier « ${orphanFile.fileName} » n'est associé à aucun type de contenu. Cochez au moins un type, ou supprimez le fichier.`,
+					message: UNASSOCIATED_FILE_ALERT.message,
 				});
 			}
 

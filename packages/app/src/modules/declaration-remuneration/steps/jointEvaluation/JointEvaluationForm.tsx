@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { useReadOnlyGuard } from "~/modules/auth";
@@ -10,7 +9,6 @@ import { FormErrors } from "~/modules/declaration-remuneration/shared/FormErrors
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { getPostComplianceDestination } from "~/modules/navigation";
-import { COMPLIANCE_PATH } from "~/modules/routes";
 import { SUBMIT_LABEL, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import {
@@ -19,8 +17,8 @@ import {
 	type JointEvaluationExistingFile,
 	JointEvaluationExistingReport,
 	JointEvaluationHeading,
-	JointEvaluationReminder,
 	JointEvaluationReportUpload,
+	JointEvaluationTodo,
 } from "./JointEvaluationReportBlocks";
 import { JointEvaluationSubmitModal } from "./JointEvaluationSubmitModal";
 
@@ -107,14 +105,14 @@ export function JointEvaluationForm({
 
 					<JointEvaluationHeading title="Évaluation conjointe des rémunérations" />
 
-					<JointEvaluationReminder />
+					<JointEvaluationTodo title="Rappel : Ce que vous devez faire dans un délai de 2 mois" />
 
 					{existingFile && (
 						<JointEvaluationExistingReport file={existingFile} />
 					)}
 
 					<JointEvaluationReportUpload
-						beforeUpload={
+						beforeDropzone={
 							<JointEvaluationDeadline deadline={jointEvaluationDeadline} />
 						}
 						disabled={isReadOnly}
@@ -132,12 +130,7 @@ export function JointEvaluationForm({
 					/>
 
 					<div className={common.flexBetween}>
-						<Link
-							className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
-							href={COMPLIANCE_PATH}
-						>
-							Précédent
-						</Link>
+						<span />
 						<span>
 							<button
 								{...readOnlyGuard.buttonProps}

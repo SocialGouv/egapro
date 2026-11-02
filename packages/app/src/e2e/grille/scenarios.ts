@@ -8,8 +8,10 @@ import {
 } from "~/modules/routes";
 import { withCampaignYear } from "../helpers/campaign-year";
 import {
+	CORRECTIVE_PATH_TITLE,
 	completeSecondDeclaration,
 	fillCseStep1,
+	GAP_JUSTIFICATION_TITLES,
 	selectCompliancePath,
 	submitCseStep2,
 	uploadJointEvalPdf,
@@ -23,6 +25,10 @@ import {
 	submitFromStep6Recap,
 } from "../helpers/declaration-flows";
 import { recapStepperLabel } from "../helpers/indicator-g";
+import {
+	belowHundredNextSteps,
+	expectRecapNextSteps,
+} from "../helpers/next-steps";
 import { openPanneauDemarche, transmittedRow } from "../helpers/process-panel";
 import { expectCompletionReceiptWhenMailChainUp } from "../helpers/receipts";
 import { urlGlob, urlPattern } from "../helpers/routes";
@@ -52,30 +58,33 @@ async function finDeDemarche(
 	});
 }
 
-async function expectComplianceOptions(
+// Round 2 leads straight to the joint evaluation, so no corrective wording at all.
+async function expectGapJustificationOptions(
 	page: Page,
-	options: { corrective: boolean; joint: boolean; justify: boolean },
+	options: { round: 1 | 2 },
 ): Promise<void> {
-	await test.step("choix du parcours de conformité", async () => {
-		const corrective = page.getByText(
-			"Effectuer des actions correctives et une seconde déclaration",
+	await test.step("qualification des écarts", async () => {
+		for (const title of Object.values(GAP_JUSTIFICATION_TITLES)) {
+			await expect(page.getByText(title, { exact: true })).toBeVisible();
+		}
+		const correctiveAlternative = page.getByText(
+			"Soit effectuer des actions correctives et une seconde déclaration",
 			{ exact: true },
 		);
-		const joint = page.getByText(
-			"Mettre en place une évaluation conjointe des rémunérations",
+		const jointObligation = page.getByText(
+			"Élaborer le rapport de l'évaluation conjointe et le transmettre",
 			{ exact: true },
 		);
-		const justify = page.getByText(
-			"Justifier les écarts de rémunération ≥ 5 %",
-			{
-				exact: true,
-			},
-		);
-		await (options.corrective
-			? expect(corrective).toBeVisible()
-			: expect(corrective).not.toBeVisible());
-		if (options.joint) await expect(joint).toBeVisible();
-		if (options.justify) await expect(justify).toBeVisible();
+		if (options.round === 1) {
+			await expect(correctiveAlternative).toHaveCount(2);
+			await expect(jointObligation).toHaveCount(0);
+		} else {
+			await expect(jointObligation).toHaveCount(2);
+			await expect(correctiveAlternative).toHaveCount(0);
+			await expect(
+				page.getByText(CORRECTIVE_PATH_TITLE, { exact: true }),
+			).toHaveCount(0);
+		}
 	});
 }
 
@@ -168,9 +177,11 @@ export const FICHE_SCENARIOS = {
 	},
 
 	"CAS-02": async ({ page }) => {
-		await completeDeclaration(page, { hasGap: false });
+		await reachStep6Recap(page, { hasGap: false });
+		await expectRecapNextSteps(page, ["cse-inform-and-consult"]);
+		await submitFromStep6Recap(page);
 		await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), { timeout: 10_000 });
-		await fillCseStep1(page, { firstDeclGapCardHidden: true });
+		await fillCseStep1(page);
 		await submitCseStep2(page);
 		await finDeDemarche(page, { completed: true });
 	},
@@ -196,24 +207,10 @@ export const FICHE_SCENARIOS = {
 	"CAS-04": async ({ page, opinion = "favorable" }) => {
 		await completeDeclaration(page, { hasGap: true });
 		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });
-		await expectComplianceOptions(page, {
-			corrective: true,
-			joint: true,
-			justify: true,
-		});
+		await expectGapJustificationOptions(page, { round: 1 });
 		await selectCompliancePath(page, "path-justify");
 		await page.waitForURL(urlGlob(cseOpinionStepHref(1)), { timeout: 10_000 });
-		// Pin the opinion fieldset — it only renders once consultation is truthy —
-		// before reading the negative assertion below: the loading placeholder
-		// would otherwise satisfy toHaveCount(0) without proving anything.
-		await expect(page.locator("#first-decl-gap-opinion-legend")).toBeVisible();
-		await expect(page.locator("#first-decl-gap-question-legend")).toHaveCount(
-			0,
-		);
-		await fillCseStep1(page, {
-			firstDeclGapConsultationImplicit: true,
-			opinion,
-		});
+		await fillCseStep1(page, { firstDeclJustification: true, opinion });
 		await submitCseStep2(page, {
 			columns: [
 				{ declarationNumber: 1, type: "accuracy" },
@@ -225,12 +222,10 @@ export const FICHE_SCENARIOS = {
 
 	"CAS-05": async ({ page }) => {
 		await completeDeclaration(page, { hasGap: true });
-		await expectComplianceOptions(page, {
-			corrective: true,
-			joint: true,
-			justify: true,
+		await expectGapJustificationOptions(page, { round: 1 });
+		await selectCompliancePath(page, "path-joint", {
+			gapJustification: "none",
 		});
-		await selectCompliancePath(page, "path-joint");
 		await uploadJointEvalPdf(page);
 		await finDeDemarche(page, { url: urlGlob(CONFIRMATION_PATH) });
 	},
@@ -240,8 +235,13 @@ export const FICHE_SCENARIOS = {
 		await selectCompliancePath(page, "path-joint");
 		await uploadJointEvalPdf(page);
 		await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), { timeout: 10_000 });
-		await fillCseStep1(page);
-		await submitCseStep2(page);
+		await fillCseStep1(page, { firstDeclJustification: true });
+		await submitCseStep2(page, {
+			columns: [
+				{ declarationNumber: 1, type: "accuracy" },
+				{ declarationNumber: 1, type: "gap" },
+			],
+		});
 		await finDeDemarche(page, { completed: true });
 	},
 
@@ -254,13 +254,12 @@ export const FICHE_SCENARIOS = {
 
 	"CAS-08": async ({ page }) => {
 		await completeDeclaration(page, { hasGap: true });
-		await selectCompliancePath(page, "path-corrective");
+		await selectCompliancePath(page, "path-corrective", {
+			gapJustification: "none",
+		});
 		await completeSecondDeclaration(page, { hasGap: false });
 		await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), { timeout: 10_000 });
-		await fillCseStep1(page, {
-			hasSecondDeclaration: true,
-			secondDeclGapCardHidden: true,
-		});
+		await fillCseStep1(page, { hasSecondDeclaration: true });
 		await submitCseStep2(page, {
 			hasSecondDeclaration: true,
 			columns: [
@@ -296,25 +295,19 @@ export const FICHE_SCENARIOS = {
 		await completeSecondDeclaration(page, { hasGap: true });
 		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });
 		await page.goto(COMPLIANCE_PATH);
-		await expectComplianceOptions(page, {
-			corrective: false,
-			joint: true,
-			justify: true,
-		});
+		await expectGapJustificationOptions(page, { round: 2 });
 		await selectCompliancePath(page, "path-justify");
 		await page.waitForURL(urlGlob(cseOpinionStepHref(1)), { timeout: 10_000 });
-		await expect(page.locator("#first-decl-gap-question-legend")).toBeVisible();
-		await expect(page.locator("#second-decl-gap-question-legend")).toHaveCount(
-			0,
-		);
 		await fillCseStep1(page, {
 			hasSecondDeclaration: true,
-			secondDeclGapConsultationImplicit: true,
+			firstDeclJustification: true,
+			secondDeclJustification: true,
 		});
 		await submitCseStep2(page, {
 			hasSecondDeclaration: true,
 			columns: [
 				{ declarationNumber: 1, type: "accuracy" },
+				{ declarationNumber: 1, type: "gap" },
 				{ declarationNumber: 2, type: "accuracy" },
 				{ declarationNumber: 2, type: "gap" },
 			],
@@ -326,7 +319,9 @@ export const FICHE_SCENARIOS = {
 		await completeDeclaration(page, { hasGap: true });
 		await selectCompliancePath(page, "path-corrective");
 		await completeSecondDeclaration(page, { hasGap: true });
-		await selectCompliancePath(page, "path-joint");
+		await selectCompliancePath(page, "path-joint", {
+			gapJustification: "none",
+		});
 		await uploadJointEvalPdf(page);
 		await finDeDemarche(page, { url: urlGlob(CONFIRMATION_PATH) });
 	},
@@ -338,12 +333,18 @@ export const FICHE_SCENARIOS = {
 		await selectCompliancePath(page, "path-joint");
 		await uploadJointEvalPdf(page);
 		await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), { timeout: 10_000 });
-		await fillCseStep1(page, { hasSecondDeclaration: true });
+		await fillCseStep1(page, {
+			hasSecondDeclaration: true,
+			firstDeclJustification: true,
+			secondDeclJustification: true,
+		});
 		await submitCseStep2(page, {
 			hasSecondDeclaration: true,
 			columns: [
 				{ declarationNumber: 1, type: "accuracy" },
+				{ declarationNumber: 1, type: "gap" },
 				{ declarationNumber: 2, type: "accuracy" },
+				{ declarationNumber: 2, type: "gap" },
 			],
 		});
 		await finDeDemarche(page, { completed: true });
@@ -380,18 +381,19 @@ export const FICHE_SCENARIOS = {
 				await reachRecapWithoutGap(page, {
 					indicatorGRequired: coordinate.indicatorGRequired,
 				});
+				await expectRecapNextSteps(page, ["cse-inform-and-consult"]);
 				await submitFromStep6Recap(page);
 				await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), {
 					timeout: 10_000,
 				});
-				await fillCseStep1(page, { firstDeclGapCardHidden: true });
+				await fillCseStep1(page);
 				await submitCseStep2(page);
 				await finDeDemarche(page, { completed: true });
 			},
 		);
 	},
 
-	"CAS-13": async ({ page }) => {
+	"CAS-13": async ({ page, coordinate }) => {
 		await reachStep6Recap(page, { hasGap: false });
 		await expect(
 			page.getByText("Étape 6 sur 6", { exact: true }),
@@ -401,6 +403,10 @@ export const FICHE_SCENARIOS = {
 				name: "Indicateur par catégorie d'emplois",
 			}),
 		).toBeVisible();
+		await expectRecapNextSteps(
+			page,
+			belowHundredNextSteps(coordinate.workforce, { hasGap: false }),
+		);
 		await submitFromStep6Recap(page);
 		await finDeDemarche(page, {
 			url: urlGlob(CONFIRMATION_PATH),
@@ -408,19 +414,14 @@ export const FICHE_SCENARIOS = {
 		});
 	},
 
-	"CAS-14": async ({ page }) => {
+	"CAS-14": async ({ page, coordinate }) => {
 		await reachStep6ComplianceRecap(page);
-		// Same gap inputs that render "Prochaines étapes" at 200 salariés: below
-		// 100 nothing is due, so the box is absent altogether.
-		await expect(
-			page.getByRole("heading", { name: "Prochaines étapes" }),
-		).toHaveCount(0);
-		await expect(
-			page.getByText("Écarts détectés", { exact: true }),
-		).toHaveCount(0);
-		await expect(
-			page.getByRole("heading", { name: "Actions à engager" }),
-		).toHaveCount(0);
+		// Same gap inputs that open the compliance process at 200 salariés: below
+		// 100 the box never carries it, only the remediation reminder from 50.
+		await expectRecapNextSteps(
+			page,
+			belowHundredNextSteps(coordinate.workforce, { hasGap: true }),
+		);
 
 		await page.goto(remunerationStepHref(6));
 		await submitFromStep6Recap(page);
@@ -442,7 +443,7 @@ export const FICHE_SCENARIOS = {
 		expect(new URL(page.url()).pathname).toBe(CONFIRMATION_PATH);
 		await expect(
 			page.getByRole("heading", {
-				name: "Dépôt du ou des avis du CSE",
+				name: "Transmission du ou des avis du CSE",
 			}),
 		).toHaveCount(0);
 		await expect(page.locator("#first-decl-accuracy-favorable")).toHaveCount(0);
@@ -469,6 +470,10 @@ export const FICHE_SCENARIOS = {
 		await expect(
 			page.getByText(recapStepperLabel(indicatorGRequired), { exact: true }),
 		).toBeVisible();
+		await expectRecapNextSteps(
+			page,
+			belowHundredNextSteps(coordinate.workforce, { hasGap: false }),
+		);
 		await submitFromStep6Recap(page);
 		await finDeDemarche(page, {
 			url: urlGlob(CONFIRMATION_PATH),

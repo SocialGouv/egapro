@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import {
-	type CompliancePathValue,
 	type DeclarationFsmStatus,
+	getCompliancePathReadOnlyReason,
 	getObligationWorkforce,
 	hasGapsAboveThreshold,
 	isComplianceProcessCompleted,
@@ -19,7 +19,6 @@ import { auth } from "~/server/auth";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api, HydrateClient } from "~/trpc/server";
 import { CompliancePathChoice } from "./CompliancePathChoice";
-import type { CompliancePathReadOnlyReason } from "./compliancePath/constants";
 
 type ComplianceState =
 	| { type: "no_gap" }
@@ -45,31 +44,6 @@ export function getComplianceState(
 	}
 
 	return { type: "first_round" };
-}
-
-export function getCompliancePathReadOnlyReason(params: {
-	status: DeclarationFsmStatus;
-	pathChoice: CompliancePathValue | null;
-	hasSubmittedSecondDeclaration: boolean;
-	hasSubmittedCseOpinion: boolean;
-	hasSubmittedJointEvaluation: boolean;
-}): CompliancePathReadOnlyReason | null {
-	const {
-		status,
-		pathChoice,
-		hasSubmittedSecondDeclaration,
-		hasSubmittedCseOpinion,
-		hasSubmittedJointEvaluation,
-	} = params;
-
-	if (isComplianceProcessCompleted(status)) return "demarche_completed";
-	if (pathChoice === "justify" && hasSubmittedCseOpinion)
-		return "cse_opinion_submitted";
-	if (pathChoice === "corrective_action" && hasSubmittedSecondDeclaration)
-		return "second_declaration_submitted";
-	if (pathChoice === "joint_evaluation" && hasSubmittedJointEvaluation)
-		return "joint_evaluation_submitted";
-	return null;
 }
 
 export function isConcernedDeclarationModifiable(params: {
@@ -134,6 +108,9 @@ export async function CompliancePathPage() {
 	const pathChoice = isSecondRound
 		? data.declaration.secondDeclarationPathChoice
 		: data.declaration.firstDeclarationPathChoice;
+	const gapJustification = isSecondRound
+		? data.declaration.secondDeclarationGapJustification
+		: data.declaration.firstDeclarationGapJustification;
 	const readOnlyReason = getCompliancePathReadOnlyReason({
 		status: data.declaration.status,
 		pathChoice,
@@ -158,6 +135,7 @@ export async function CompliancePathPage() {
 				declarationSiren={data.declaration.siren}
 				declarationYear={currentYear}
 				email={email}
+				initialGapJustification={gapJustification ?? undefined}
 				initialPath={pathChoice ?? undefined}
 				isSecondRound={isSecondRound}
 				pdfDownloadHref={

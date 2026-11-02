@@ -15,6 +15,7 @@ import {
 } from "~/modules/declaration-remuneration/schemas";
 import { mapGipToFormData } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import {
+	compliancePathsForGapJustification,
 	deriveSubsequentSubmissions,
 	getCurrentYear,
 	getObligationWorkforce,
@@ -81,6 +82,9 @@ const INDICATOR_G_MISSING_ERROR =
 
 const PATH_LOCKED_ERROR =
 	"Le choix du parcours ne peut plus être modifié : une action aval a déjà été enregistrée.";
+
+const PATH_JUSTIFICATION_MISMATCH_ERROR =
+	"Le parcours choisi ne correspond pas à la qualification des écarts.";
 
 const PATH_CHOICE_UNAVAILABLE_ERROR =
 	"Le choix du parcours de mise en conformité n'est pas ouvert à cette étape de la démarche.";
@@ -850,6 +854,18 @@ export const declarationRouter = createTRPCRouter({
 					});
 				}
 
+				if (
+					!compliancePathsForGapJustification(
+						input.gapJustification,
+						round,
+					).includes(input.path)
+				) {
+					throw new TRPCError({
+						code: "BAD_REQUEST",
+						message: PATH_JUSTIFICATION_MISMATCH_ERROR,
+					});
+				}
+
 				if (await hasLockingEventForRound(tx, declaration.id, round)) {
 					throw new TRPCError({
 						code: "CONFLICT",
@@ -873,6 +889,9 @@ export const declarationRouter = createTRPCRouter({
 					.update(declarations)
 					.set({
 						...computeProjectionUpdates(events, nextStatus),
+						...(round === 2
+							? { secondDeclarationGapJustification: input.gapJustification }
+							: { firstDeclarationGapJustification: input.gapJustification }),
 						updatedAt: new Date(),
 					})
 					.where(activeDeclarationFilter(siren, year));

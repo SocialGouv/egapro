@@ -15,13 +15,14 @@ export async function ComplianceConfirmation() {
 		api.declaration.getOrCreate(),
 	]);
 	const currentYear = data.declaration.year;
-	const transmittedJointEvaluation = await findTransmittedJointEvaluation(
-		db,
-		data.declaration.id,
-	);
+	const [transmittedJointEvaluation, company] = await Promise.all([
+		findTransmittedJointEvaluation(db, data.declaration.id),
+		api.company.get({ siren: data.declaration.siren }),
+	]);
 
 	return (
 		<DemarcheConfirmation
+			companyName={company.name}
 			documents={buildRemunerationDocuments({
 				dataYear: getReferenceYearFor(currentYear),
 				hasSecondDeclaration: data.hasSubmittedSecondDeclaration,

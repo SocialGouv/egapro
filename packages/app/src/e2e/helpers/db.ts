@@ -789,6 +789,20 @@ export async function getCompanyLocation(): Promise<CompanyLocation> {
 	}
 }
 
+export async function getTestCompanyName(): Promise<string> {
+	const sql = createConnection();
+	try {
+		const rows = await sql<[{ name: string }]>`
+			SELECT name FROM app_company WHERE siren = ${TEST_SIREN}
+		`;
+		const name = rows[0]?.name;
+		if (!name) throw new Error(`No app_company row for SIREN ${TEST_SIREN}`);
+		return name;
+	} finally {
+		await sql.end();
+	}
+}
+
 export async function setCompanyLocation(location: CompanyLocation) {
 	const sql = createConnection();
 	try {

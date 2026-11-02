@@ -124,8 +124,8 @@ describe("FormalNoticeForm", () => {
 		render(<FormalNoticeForm existingFile={null} />);
 
 		expect(
-			screen.getByText(
-				"déposer le rapport de l'évaluation conjointe, ci-dessous.",
+			screen.getByLabelText(
+				/Veuillez déposer le rapport de l'évaluation conjointe\./,
 			),
 		).toBeInTheDocument();
 		expect(
@@ -162,7 +162,15 @@ describe("FormalNoticeForm", () => {
 			screen.queryByText(/dans un délai de 2 mois/),
 		).not.toBeInTheDocument();
 		expect(
-			screen.getByRole("heading", { level: 3, name: "Après dépôt du rapport" }),
+			screen.getByText(
+				"Réaliser l'analyse conjointe et définir des actions correctrices",
+			),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", {
+				level: 3,
+				name: "Après élaboration du rapport",
+			}),
 		).toBeInTheDocument();
 	});
 

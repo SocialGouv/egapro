@@ -8,7 +8,9 @@ import { useLockContext } from "./lock/LockContext";
 
 type FormActionsProps = {
 	previousHref?: AppHref;
+	onPrevious?: () => void;
 	nextHref?: AppHref;
+	onNext?: () => void;
 	nextLabel?: string;
 	isSubmitting?: boolean;
 	nextDisabled?: boolean;
@@ -26,7 +28,9 @@ type FormActionsProps = {
 
 export function FormActions({
 	previousHref,
+	onPrevious,
 	nextHref,
+	onNext,
 	nextLabel = "Suivant",
 	isSubmitting = false,
 	nextDisabled = false,
@@ -45,10 +49,26 @@ export function FormActions({
 				>
 					Précédent
 				</Link>
+			) : onPrevious ? (
+				<button
+					className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
+					onClick={onPrevious}
+					type="button"
+				>
+					Précédent
+				</button>
 			) : (
 				<span />
 			)}
-			{nextHref ? (
+			{onNext ? (
+				<button
+					className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
+					onClick={onNext}
+					type="button"
+				>
+					{nextLabel}
+				</button>
+			) : nextHref ? (
 				<Link
 					className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
 					href={nextHref}

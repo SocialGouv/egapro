@@ -47,7 +47,7 @@ import { loginWithProConnect } from "./helpers/login";
 const PANEL_ID = "declaration-process-panel";
 // Matches the year the panel renders and the year ensureCurrentYearDeclaration inserts.
 const CURRENT_YEAR = getCurrentYear();
-const STEP3_TITLE = "Dépôt du ou des avis du CSE";
+const STEP3_TITLE = "Transmission du ou des avis du CSE";
 
 function bannerSourceButton(page: Page) {
 	return page.getByRole("button", {
@@ -112,6 +112,9 @@ test.describe("Declaration process panel", () => {
 			await expect(
 				panel.getByTitle("Voir le récapitulatif de la déclaration"),
 			).toBeVisible();
+			await expect(
+				panel.getByRole("link", { name: "Voir la déclaration" }),
+			).toHaveCount(0);
 		});
 
 		// #4113 — the panel and the funnel read one shared state table, and this
@@ -280,9 +283,9 @@ test.describe("Declaration process panel", () => {
 					panel.getByTitle("Voir le récapitulatif de la déclaration"),
 				).toBeVisible();
 
-				const cta = panel.getByRole("link", { name: "Voir la déclaration" });
-				await expect(cta).toBeVisible();
-				await expect(cta).not.toHaveAttribute("href", /avis-cse/);
+				await expect(
+					panel.getByRole("link", { name: "Voir la déclaration" }),
+				).toHaveCount(0);
 			});
 		});
 	});
@@ -375,9 +378,9 @@ test.describe("Declaration process panel", () => {
 				).toHaveCount(0);
 				await expect(panel.getByText(STEP3_TITLE)).toHaveCount(0);
 
-				const cta = panel.getByRole("link", { name: "Voir la déclaration" });
-				await expect(cta).toBeVisible();
-				await expect(cta).not.toHaveAttribute("href", /avis-cse/);
+				await expect(
+					panel.getByRole("link", { name: "Voir la déclaration" }),
+				).toHaveCount(0);
 			});
 		});
 	});

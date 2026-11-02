@@ -236,30 +236,6 @@ describe("JointEvaluationForm", () => {
 		).not.toBeInTheDocument();
 	});
 
-	it("orders the reminder, deposit label, deadline, upload zone and after-report boxes", () => {
-		const { container } = render(<JointEvaluationForm {...defaultProps} />);
-
-		const texts = Array.from(
-			container.querySelectorAll("h2, h3, label, p, input[type='file']"),
-		).map((el) => (el.tagName === "INPUT" ? "file-input" : el.textContent));
-
-		const reminderIndex = texts.findIndex((t) => t?.startsWith("Rappel"));
-		const labelIndex = texts.findIndex((t) =>
-			t?.startsWith("Veuillez déposer"),
-		);
-		const deadlineIndex = texts.indexOf(
-			"Échéance pour transmettre le rapport de l'évaluation conjointe",
-		);
-		const fileInputIndex = texts.indexOf("file-input");
-		const afterReportIndex = texts.indexOf("Après élaboration du rapport");
-
-		expect(reminderIndex).toBeGreaterThanOrEqual(0);
-		expect(labelIndex).toBeGreaterThan(reminderIndex);
-		expect(deadlineIndex).toBeGreaterThan(labelIndex);
-		expect(fileInputIndex).toBeGreaterThan(deadlineIndex);
-		expect(afterReportIndex).toBeGreaterThan(fileInputIndex);
-	});
-
 	it("labels the deposit field with the shortened wording", () => {
 		render(<JointEvaluationForm {...defaultProps} />);
 
@@ -280,14 +256,32 @@ describe("JointEvaluationForm", () => {
 		).toBeInTheDocument();
 	});
 
-	it("links back to the compliance path choice page", () => {
+	it("orders the reminder, the instruction, the deadline, the drop zone and the follow-up as in the mock-up", () => {
 		render(<JointEvaluationForm {...defaultProps} />);
 
-		const backLink = screen.getByRole("link", { name: /précédent/i });
-		expect(backLink).toHaveAttribute(
-			"href",
-			"/declaration-remuneration/parcours-conformite",
-		);
+		const sequence = [
+			screen.getByRole("heading", { name: /Rappel : Ce que vous devez faire/ }),
+			screen.getByText(
+				/Veuillez déposer le rapport de l'évaluation conjointe\./,
+			),
+			screen.getByText(
+				"Échéance pour transmettre le rapport de l'évaluation conjointe",
+			),
+			screen.getByRole("button", { name: /Sélectionner un fichier/ }),
+			screen.getByRole("heading", { name: "Après élaboration du rapport" }),
+		];
+		const allNodes = Array.from(document.body.querySelectorAll("*"));
+		const positions = sequence.map((node) => allNodes.indexOf(node));
+		expect(positions.every((position) => position >= 0)).toBe(true);
+		expect(positions).toEqual([...positions].sort((a, b) => a - b));
+	});
+
+	it("renders no previous link back to the transmitted path choice", () => {
+		render(<JointEvaluationForm {...defaultProps} />);
+
+		expect(
+			screen.queryByRole("link", { name: /précédent/i }),
+		).not.toBeInTheDocument();
 	});
 
 	it("opens modal after selecting a file and submitting", () => {
@@ -319,6 +313,11 @@ describe("JointEvaluationForm", () => {
 			"dialog#joint-evaluation-submit-modal",
 		);
 		expect(dialog).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				"Vous allez transmettre aux services du ministère chargé du Travail le rapport préalable de l'évaluation conjointe.",
+			),
+		).toBeInTheDocument();
 		expect(screen.getByText(/je certifie/i)).toBeInTheDocument();
 	});
 

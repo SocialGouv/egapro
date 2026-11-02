@@ -59,7 +59,7 @@ test.describe("second declaration step 1 — DSFR overrides", () => {
 
 		const callout = page.locator(".fr-callout");
 		const calloutText = page.locator(".fr-callout__text");
-		const actions = page.getByRole("link", { name: "Précédent" }).locator("..");
+		const actions = page.getByRole("link", { name: "Suivant" }).locator("..");
 
 		for (const viewport of [DESKTOP, MOBILE]) {
 			await test.step(`viewport ${viewport.width}px`, async () => {
@@ -105,8 +105,12 @@ test.describe("second declaration step 1 — DSFR overrides", () => {
 // since jsdom resolves neither the flex gap nor DSFR's `!important` reset, and the vitest
 // tests assert the class string rather than what it renders to.
 const FLEX_HOSTS = [
-	{ name: "choix du parcours", path: COMPLIANCE_PATH },
-	{ name: "seconde déclaration — étape 3", path: complianceStepHref(3) },
+	{ name: "choix du parcours", path: COMPLIANCE_PATH, actionLabel: "Suivant" },
+	{
+		name: "seconde déclaration — étape 3",
+		path: complianceStepHref(3),
+		actionLabel: "Suivant",
+	},
 ];
 
 // The rendered gap, not the computed margin: 32px is what the maquette asks for and what
@@ -136,13 +140,14 @@ test.describe("form actions — 32px under a flex-gap parent", () => {
 			page,
 		}) => {
 			await page.goto(host.path);
-			// A redirected page still has a "Précédent" link to measure, so pin the URL:
+			// A redirected page still has form actions to measure, so pin the URL:
 			// without it a green run proves nothing about the screen named here.
 			await page.waitForURL(`**${host.path}`, { timeout: 15_000 });
 
 			const actions = page
-				.getByRole("link", { name: "Précédent" })
-				.locator("..");
+				.getByRole("link", { name: host.actionLabel })
+				.or(page.getByRole("button", { name: host.actionLabel }))
+				.locator("xpath=ancestor::div[1]");
 			await expect(actions).toBeVisible();
 
 			const gap = await actions.evaluate((element) => {

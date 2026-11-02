@@ -19,6 +19,9 @@ vi.mock("~/server/api/routers/declarationHelpers", () => ({
 
 vi.mock("~/trpc/server", () => ({
 	api: {
+		company: {
+			get: vi.fn(),
+		},
 		declaration: {
 			getOrCreate: vi.fn(),
 		},
@@ -34,6 +37,7 @@ import { ComplianceConfirmation } from "../ComplianceConfirmation";
 const DECLARATION_YEAR = 2025;
 const SIREN = "123456789";
 const DECLARATION_ID = "declaration-1";
+const COMPANY_NAME = "Société Démo";
 const TRANSMITTED_JOINT_EVALUATION = {
 	submission: { createdAt: new Date("2026-06-01T10:00:00Z"), round: 1 },
 	file: {
@@ -54,6 +58,9 @@ async function renderConfirmation({
 	vi.mocked(findTransmittedJointEvaluation).mockResolvedValue(
 		jointEvaluationTransmitted ? (TRANSMITTED_JOINT_EVALUATION as never) : null,
 	);
+	vi.mocked(api.company.get).mockResolvedValue({
+		name: COMPANY_NAME,
+	} as never);
 	vi.mocked(api.declaration.getOrCreate).mockResolvedValue({
 		declaration: { id: DECLARATION_ID, year: DECLARATION_YEAR, siren: SIREN },
 		jobCategories: [],
@@ -281,6 +288,15 @@ describe("ComplianceConfirmation", () => {
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole("link", { name: /Je donne mon avis/ }),
+		).toBeInTheDocument();
+	});
+
+	it("names the company fetched for the declaration's SIREN in the publication notice", async () => {
+		await renderConfirmation();
+
+		expect(api.company.get).toHaveBeenCalledWith({ siren: SIREN });
+		expect(
+			screen.getByText(new RegExp(`déclarés par ${COMPANY_NAME}`)),
 		).toBeInTheDocument();
 	});
 });

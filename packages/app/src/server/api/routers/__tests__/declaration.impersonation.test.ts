@@ -90,7 +90,10 @@ describe("declarationRouter", () => {
 			const caller = await createCaller(mockDb, null, impersonation);
 
 			await expect(
-				caller.saveCompliancePath({ path: "corrective_action" }),
+				caller.saveCompliancePath({
+					gapJustification: "partial",
+					path: "corrective_action",
+				}),
 			).rejects.toThrow("Mode mimoquage");
 		});
 

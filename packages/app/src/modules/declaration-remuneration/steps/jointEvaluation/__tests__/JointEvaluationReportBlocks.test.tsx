@@ -5,12 +5,10 @@ import { formatLongDate } from "~/modules/domain";
 import {
 	JointEvaluationAfterReport,
 	JointEvaluationDeadline,
-	JointEvaluationDepositInstructions,
 	JointEvaluationExistingReport,
-	JointEvaluationGuidance,
 	JointEvaluationHeading,
-	JointEvaluationReminder,
 	JointEvaluationReportUpload,
+	JointEvaluationTodo,
 } from "../JointEvaluationReportBlocks";
 
 const INPUT_ID = "report-upload";
@@ -50,21 +48,6 @@ describe("JointEvaluationHeading", () => {
 	});
 });
 
-describe("JointEvaluationDepositInstructions", () => {
-	it("asks for the report and points the agreement to TéléAccord", () => {
-		render(<JointEvaluationDepositInstructions />);
-
-		expect(
-			screen.getByText(
-				"déposer le rapport de l'évaluation conjointe, ci-dessous.",
-			).tagName,
-		).toBe("STRONG");
-		expect(
-			screen.getByText(/doit être déposé sur TéléAccord\./),
-		).toBeInTheDocument();
-	});
-});
-
 describe("JointEvaluationExistingReport", () => {
 	const file = {
 		id: "8f14e45f-ea4c-4f0b-9c1d-7a2b3c4d5e6f",
@@ -100,30 +83,23 @@ describe("JointEvaluationReportUpload", () => {
 		).toHaveClass("fr-hint-text");
 	});
 
-	it("renders no extra slot between the label and the file input by default", () => {
-		renderUpload();
+	it("renders the given block between the label and the drop zone", () => {
+		renderUpload({ beforeDropzone: <p>Échéance du rapport</p> });
 
-		expect(screen.queryByTestId("deadline-slot")).not.toBeInTheDocument();
-	});
-
-	it("renders the optional slot between the label and the file input", () => {
-		const { container } = renderUpload({
-			beforeUpload: <div data-testid="deadline-slot">Échéance</div>,
+		const label = screen.getByText(
+			/Veuillez déposer le rapport de l'évaluation conjointe\./,
+		);
+		const block = screen.getByText("Échéance du rapport");
+		const dropzone = screen.getByRole("button", {
+			name: /Sélectionner un fichier/,
 		});
-
-		const orderedNodes = Array.from(
-			container.querySelectorAll(
-				"label, [data-testid='deadline-slot'], input[type='file']",
-			),
-		);
-		const labelIndex = orderedNodes.findIndex((el) => el.tagName === "LABEL");
-		const slotIndex = orderedNodes.findIndex(
-			(el) => el.getAttribute("data-testid") === "deadline-slot",
-		);
-		const inputIndex = orderedNodes.findIndex((el) => el.tagName === "INPUT");
-
-		expect(slotIndex).toBeGreaterThan(labelIndex);
-		expect(inputIndex).toBeGreaterThan(slotIndex);
+		expect(
+			label.compareDocumentPosition(block) & Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+		expect(
+			block.compareDocumentPosition(dropzone) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
 	});
 
 	it("disables the file selection when asked", () => {
@@ -161,9 +137,9 @@ describe("JointEvaluationReportUpload", () => {
 	});
 });
 
-describe("JointEvaluationGuidance", () => {
-	it("titles the to-do box with the given title", () => {
-		render(<JointEvaluationGuidance todoTitle="Ce que vous devez faire" />);
+describe("JointEvaluationTodo", () => {
+	it("titles the to-do box with the given title and lists the two steps", () => {
+		render(<JointEvaluationTodo title="Ce que vous devez faire" />);
 
 		expect(
 			screen.getByRole("heading", {
@@ -171,19 +147,16 @@ describe("JointEvaluationGuidance", () => {
 				name: "Ce que vous devez faire",
 			}),
 		).toBeInTheDocument();
-		expect(screen.getByText("Élaboration du rapport")).toBeInTheDocument();
-	});
-
-	it("describes the steps after the deposit with the TéléAccord link", () => {
-		render(<JointEvaluationGuidance todoTitle="Ce que vous devez faire" />);
-
 		expect(
-			screen.getByRole("heading", { level: 3, name: "Après dépôt du rapport" }),
+			screen.getByText(
+				"Réaliser l'analyse conjointe et définir des actions correctrices",
+			),
 		).toBeInTheDocument();
-		expect(screen.getByRole("link", { name: /TéléAccord/ })).toHaveAttribute(
-			"href",
-			"https://accords-depot.travail.gouv.fr/accueil",
-		);
+		expect(
+			screen.getByText(
+				"Transmettre le rapport dans la zone de dépôt prévue sur cette page",
+			),
+		).toBeInTheDocument();
 	});
 });
 
@@ -205,29 +178,6 @@ describe("JointEvaluationDeadline", () => {
 	});
 });
 
-describe("JointEvaluationReminder", () => {
-	it("titles the reminder box and lists the two steps due within 2 months", () => {
-		render(<JointEvaluationReminder />);
-
-		expect(
-			screen.getByRole("heading", {
-				level: 3,
-				name: "Rappel : Ce que vous devez faire dans un délai de 2 mois",
-			}),
-		).toBeInTheDocument();
-		expect(
-			screen.getByText(
-				"Réaliser l'analyse conjointe et définir des actions correctrices",
-			),
-		).toBeInTheDocument();
-		expect(
-			screen.getByText(
-				"Transmettre le rapport dans la zone de dépôt prévue sur cette page",
-			),
-		).toBeInTheDocument();
-	});
-});
-
 describe("JointEvaluationAfterReport", () => {
 	it("titles the box, lists the two steps and links TéléAccords in a new tab", () => {
 		render(<JointEvaluationAfterReport />);
@@ -243,6 +193,11 @@ describe("JointEvaluationAfterReport", () => {
 		).toBeInTheDocument();
 		expect(
 			screen.getByText("À défaut, mettre en place un plan d'action"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				/L'accord collectif ou le plan d'action doit être déposé sur/,
+			),
 		).toBeInTheDocument();
 
 		const link = screen.getByRole("link", { name: /TéléAccords/ });

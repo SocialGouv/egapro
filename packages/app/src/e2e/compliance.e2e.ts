@@ -1,22 +1,30 @@
 import type { ChildProcess } from "node:child_process";
 import { expect, test } from "@playwright/test";
-import { urlGlob } from "~/e2e/helpers/routes";
+import { urlGlob, urlPattern } from "~/e2e/helpers/routes";
+import { NO_FILE_ALERT } from "~/modules/cseOpinion/contentTypeColumns";
 import {
 	API_TRANSMITTED_PDF,
+	COMPLIANCE_CONFIRMATION,
 	COMPLIANCE_JOINT_EVALUATION,
 	COMPLIANCE_PATH,
 	CSE_OPINION,
 	complianceStepHref,
 	cseOpinionStepHref,
+	OBSERVATORY_SEARCH,
 	remunerationStepHref,
 } from "~/modules/routes";
+import { SUBMIT_LABEL } from "~/modules/shared/submitLabels";
 import { buildGrid, pickCoordinate } from "./grille/coordinates";
 import { FICHE_SCENARIOS } from "./grille/scenarios";
 import {
+	answerGapJustification,
 	completeSecondDeclaration,
+	expectPathScreen,
+	expectResultsPublicationNotice,
 	fillCseStep1,
 	selectCompliancePath,
 	submitCseStep2,
+	uploadJointEvalPdf,
 } from "./helpers/compliance-flows";
 import {
 	countPathChoiceEventsRound1,
@@ -80,6 +88,7 @@ test.describe("[CAS-02] Path 1: no gap + hasCse → /avis-cse → full CSE flow"
 	test("no-gap declaration, then full CSE opinion flow", async ({ page }) => {
 		test.slow();
 		await FICHE_SCENARIOS["CAS-02"]({ page, coordinate });
+		await expectResultsPublicationNotice(page);
 	});
 });
 
@@ -95,6 +104,15 @@ test.describe("[CAS-01] Path 2: no gap + no hasCse → /confirmation", () => {
 		page,
 	}) => {
 		await FICHE_SCENARIOS["CAS-01"]({ page, coordinate });
+
+		await page.goto(COMPLIANCE_CONFIRMATION);
+		await expectResultsPublicationNotice(page);
+		await test.step("l'observatoire s'ouvre dans le même onglet", async () => {
+			await page
+				.getByRole("link", { name: "Consulter l'observatoire" })
+				.click();
+			await page.waitForURL(urlGlob(OBSERVATORY_SEARCH));
+		});
 	});
 });
 
@@ -129,6 +147,61 @@ test.describe("[CAS-06] Path 4: gap + hasCse → joint evaluation → /avis-cse"
 	}) => {
 		test.slow();
 		await FICHE_SCENARIOS["CAS-06"]({ page, coordinate });
+	});
+
+	test.describe("no justifiable gap → accuracy opinion only", () => {
+		test.beforeAll(async () => {
+			await resetDeclarationToDraft();
+			await setCompanyHasCse(coordinate.hasCse);
+			await setCompanyWorkforce(coordinate.workforce);
+		});
+
+		test("joint evaluation banner, then a single accuracy opinion to transmit", async ({
+			page,
+		}) => {
+			test.slow();
+			await completeDeclaration(page, { hasGap: true });
+			await selectCompliancePath(page, "path-joint", {
+				gapJustification: "none",
+			});
+			await uploadJointEvalPdf(page);
+			await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), {
+				timeout: 15_000,
+			});
+
+			await test.step("le bandeau d'évaluation conjointe encadre l'étape 1", async () => {
+				await expect(
+					page.getByRole("heading", {
+						level: 1,
+						name: "Parcours de mise en conformité pour l'indicateur par catégorie d'emplois",
+					}),
+				).toBeVisible();
+				await expect(
+					page.getByText(
+						"Votre évaluation conjointe des rémunérations a été transmise",
+					),
+				).toBeVisible();
+				await expect(
+					page.getByRole("heading", {
+						level: 2,
+						name: "Transmission du ou des avis du CSE",
+					}),
+				).toBeVisible();
+			});
+
+			await fillCseStep1(page);
+
+			await test.step("transmettre sans fichier affiche « Aucun avis déposé »", async () => {
+				await page
+					.getByRole("button", { exact: true, name: SUBMIT_LABEL })
+					.click();
+				await expect(
+					page.getByRole("heading", { name: NO_FILE_ALERT.title }),
+				).toBeVisible();
+			});
+
+			await submitCseStep2(page);
+		});
 	});
 });
 
@@ -176,6 +249,37 @@ test.describe("[ANX-01] Path change before downstream action — tâtonnement su
 	}) => {
 		await completeDeclaration(page, { hasGap: true });
 		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });
+
+		await test.step("l'écran 2/2 revient à la qualification sans rien enregistrer", async () => {
+			const title = page.getByRole("heading", { level: 1 });
+			await expect(page.getByRole("button", { name: "Précédent" })).toHaveCount(
+				0,
+			);
+			await answerGapJustification(page, "none");
+			await expectPathScreen(page, "none");
+			await expect(title).toBeFocused();
+			await expect(page).toHaveURL(
+				urlPattern(`${COMPLIANCE_PATH}?ecran=parcours`),
+			);
+
+			await page.getByRole("button", { name: "Précédent" }).click();
+			await expect(page.locator("#gap-justification-none")).toBeChecked();
+			await expect(title).toBeFocused();
+			await expect(page).toHaveURL(urlPattern(COMPLIANCE_PATH));
+			expect(await countPathChoiceEventsRound1()).toBe(0);
+		});
+
+		await test.step("le retour du navigateur depuis l'écran 2/2 revient à la qualification", async () => {
+			const title = page.getByRole("heading", { level: 1 });
+			await answerGapJustification(page, "partial");
+			await expectPathScreen(page, "partial");
+
+			await page.goBack();
+			await expect(page).toHaveURL(urlPattern(COMPLIANCE_PATH));
+			await expect(page.locator("#gap-justification-partial")).toBeChecked();
+			await expect(title).toBeFocused();
+			expect(await countPathChoiceEventsRound1()).toBe(0);
+		});
 
 		await selectCompliancePath(page, "path-corrective");
 		await page.waitForURL(urlGlob(complianceStepHref(1)), { timeout: 10_000 });
@@ -273,6 +377,48 @@ test.describe("[CAS-12] Path 10: second round + joint evaluation + hasCse → /a
 		test.slow();
 		await FICHE_SCENARIOS["CAS-12"]({ page, coordinate });
 	});
+
+	test.describe("second declaration with no justifiable gap → justification on the first only", () => {
+		test.beforeAll(async () => {
+			await resetDeclarationToDraft();
+			await setCompanyHasCse(coordinate.hasCse);
+			await setCompanyWorkforce(coordinate.workforce);
+		});
+
+		test("first declaration asks both opinions, the second only accuracy", async ({
+			page,
+		}) => {
+			test.slow();
+			await completeDeclaration(page, { hasGap: true });
+			await selectCompliancePath(page, "path-corrective");
+			await completeSecondDeclaration(page, { hasGap: true });
+			await selectCompliancePath(page, "path-joint", {
+				gapJustification: "none",
+			});
+			await uploadJointEvalPdf(page);
+			await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), {
+				timeout: 15_000,
+			});
+
+			for (const name of ["Première déclaration", "Seconde déclaration"]) {
+				await expect(
+					page.getByRole("heading", { level: 3, name, exact: true }),
+				).toBeVisible();
+			}
+			await fillCseStep1(page, {
+				hasSecondDeclaration: true,
+				firstDeclJustification: true,
+			});
+			await submitCseStep2(page, {
+				hasSecondDeclaration: true,
+				columns: [
+					{ declarationNumber: 1, type: "accuracy" },
+					{ declarationNumber: 1, type: "gap" },
+					{ declarationNumber: 2, type: "accuracy" },
+				],
+			});
+		});
+	});
 });
 
 test.describe("[CAS-11] Path 11: second round + joint evaluation + no hasCse → /confirmation", () => {
@@ -291,55 +437,60 @@ test.describe("[CAS-11] Path 11: second round + joint evaluation + no hasCse →
 	});
 });
 
-// === GROUP F.0: /avis-cse Précédent button routes via rule-engine state ===
+// === GROUP F.0: /avis-cse offers no Précédent back to a transmitted step ===
 
-test.describe("[ANX-03] Path 13.a: no gap → /avis-cse Précédent → /etape/6 (recap)", () => {
+test.describe("[ANX-03] Path 13.a: no gap → /avis-cse and /etape/6 without Précédent", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
 		await setCompanyWorkforce(200);
 	});
 
-	test("after no-gap submission, Précédent on /avis-cse goes to step 6", async ({
+	test("after no-gap submission, neither /avis-cse nor step 6 offers Précédent", async ({
 		page,
 	}) => {
 		test.slow();
 		await completeDeclaration(page, { hasGap: false });
 		await page.waitForURL(urlGlob(cseOpinionStepHref(1)), { timeout: 10_000 });
-		await page.getByRole("link", { name: /Précédent/ }).click();
+		await expect(page.getByRole("button", { name: "Suivant" })).toBeVisible();
+		await expect(page.getByRole("link", { name: /Précédent/ })).toHaveCount(0);
+
+		await page.goto(remunerationStepHref(6));
 		await page.waitForURL(urlGlob(remunerationStepHref(6)), {
 			timeout: 10_000,
 		});
+		await expect(page.getByRole("link", { name: "Suivant" })).toBeVisible();
+		await expect(page.getByRole("link", { name: /Précédent/ })).toHaveCount(0);
 	});
 });
 
-test.describe("[ANX-03] Path 13.b: justify round 1 → /avis-cse Précédent → /parcours-conformite", () => {
+test.describe("[ANX-03] Path 13.b: justify round 1 → /avis-cse without Précédent", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
 		await setCompanyWorkforce(200);
 	});
 
-	test("after justify choice, Précédent on /avis-cse goes back to compliance choice", async ({
+	test("after justify choice, /avis-cse offers no Précédent back to the compliance choice", async ({
 		page,
 	}) => {
 		test.slow();
 		await completeDeclaration(page, { hasGap: true });
 		await selectCompliancePath(page, "path-justify");
 		await page.waitForURL(urlGlob(cseOpinionStepHref(1)), { timeout: 10_000 });
-		await page.getByRole("link", { name: /Précédent/ }).click();
-		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });
+		await expect(page.getByRole("button", { name: "Suivant" })).toBeVisible();
+		await expect(page.getByRole("link", { name: /Précédent/ })).toHaveCount(0);
 	});
 });
 
-test.describe("[ANX-03] Path 13.c: corrective second decl resolved → /avis-cse Précédent → /etape/3", () => {
+test.describe("[ANX-03] Path 13.c: corrective second decl resolved → /avis-cse without Précédent", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
 		await setCompanyWorkforce(200);
 	});
 
-	test("after second-decl resolved, Précédent on /avis-cse goes to second-decl recap", async ({
+	test("after second-decl resolved, /avis-cse offers no Précédent back to the second-decl recap", async ({
 		page,
 	}) => {
 		test.slow();
@@ -347,8 +498,8 @@ test.describe("[ANX-03] Path 13.c: corrective second decl resolved → /avis-cse
 		await selectCompliancePath(page, "path-corrective");
 		await completeSecondDeclaration(page, { hasGap: false });
 		await page.waitForURL(urlGlob(cseOpinionStepHref(1)), { timeout: 10_000 });
-		await page.getByRole("link", { name: /Précédent/ }).click();
-		await page.waitForURL(urlGlob(complianceStepHref(3)), { timeout: 10_000 });
+		await expect(page.getByRole("button", { name: "Suivant" })).toBeVisible();
+		await expect(page.getByRole("link", { name: /Précédent/ })).toHaveCount(0);
 	});
 });
 
@@ -368,7 +519,7 @@ test.describe("[ANX-02] Path 12: compliance already completed → redirect", () 
 		// Complete declaration without gap → auto-redirect to CSE → complete CSE
 		await completeDeclaration(page, { hasGap: false });
 		await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), { timeout: 10_000 });
-		await fillCseStep1(page, { firstDeclGapCardHidden: true });
+		await fillCseStep1(page);
 		await submitCseStep2(page);
 
 		// demarcheCompletedAt is now set — navigating back should redirect

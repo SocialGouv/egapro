@@ -3,12 +3,13 @@ import { campaignYearDimension, FunnelStepTracker } from "~/modules/analytics";
 import {
 	CSE_FUNNEL,
 	computeContentTypeColumns,
+	computeJustificationRequirements,
+	getSubmissionBannerState,
 	mapOpinionsFromDb,
 	Step1Opinions,
 	Step2Upload,
 } from "~/modules/cseOpinion";
 import { computeGapHighFlags } from "~/modules/domain";
-import { getCseOpinionPreviousHref } from "~/modules/navigation";
 import { toCseOpinionStep } from "~/modules/routes";
 import { auth } from "~/server/auth";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
@@ -19,6 +20,21 @@ type StepPageProps = {
 };
 
 export const metadata = { title: "Déclaration d'un avis du CSE" };
+
+type DeclarationData = Awaited<ReturnType<typeof api.declaration.getOrCreate>>;
+
+function getJustificationRequirements({
+	declaration,
+	employeeCategories,
+}: DeclarationData) {
+	return computeJustificationRequirements({
+		firstDeclarationGapJustification:
+			declaration.firstDeclarationGapJustification,
+		secondDeclarationGapJustification:
+			declaration.secondDeclarationGapJustification,
+		...computeGapHighFlags(employeeCategories),
+	});
+}
 
 export default async function CseOpinionStepPage({ params }: StepPageProps) {
 	const { step: stepParam } = await params;
@@ -35,20 +51,15 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 			api.declaration.getOrCreate(),
 		]);
 		const initialData = mapOpinionsFromDb(opinions);
-		const hasSecondDeclaration = declarationData.hasSubmittedSecondDeclaration;
-		const { firstDeclGapHigh, secondDeclGapHigh } = computeGapHighFlags(
-			declarationData.employeeCategories,
-		);
+		const requirements = getJustificationRequirements(declarationData);
+		const banner = getSubmissionBannerState({
+			...declarationData.declaration,
+			hasSubmittedSecondDeclaration:
+				declarationData.hasSubmittedSecondDeclaration,
+		});
 		const campaignDeadlines = await getCampaignDeadlines(
 			declarationData.declaration.year,
 		);
-		const previousHref = getCseOpinionPreviousHref({
-			firstDeclarationPathChoice:
-				declarationData.declaration.firstDeclarationPathChoice,
-			secondDeclarationPathChoice:
-				declarationData.declaration.secondDeclarationPathChoice,
-			hasSubmittedSecondDeclaration: hasSecondDeclaration,
-		});
 		return (
 			<>
 				<FunnelStepTracker
@@ -57,19 +68,17 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 					step={step}
 				/>
 				<Step1Opinions
+					banner={banner}
 					cseDeadline={campaignDeadlines.decl2CseOpinionDeadline}
 					email={session?.user?.email ?? undefined}
-					firstDeclarationPathChoice={
-						declarationData.declaration.firstDeclarationPathChoice
+					firstDeclJustificationRequired={
+						requirements.firstDeclJustificationRequired
 					}
-					firstDeclGapHigh={firstDeclGapHigh}
-					hasSecondDeclaration={hasSecondDeclaration}
+					hasSecondDeclaration={declarationData.hasSubmittedSecondDeclaration}
 					initialData={initialData}
-					previousHref={previousHref}
-					secondDeclarationPathChoice={
-						declarationData.declaration.secondDeclarationPathChoice
+					secondDeclJustificationRequired={
+						requirements.secondDeclJustificationRequired
 					}
-					secondDeclGapHigh={secondDeclGapHigh}
 					siren={declarationData.declaration.siren}
 					year={declarationData.declaration.year}
 				/>
@@ -78,29 +87,14 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 	}
 
 	if (step === 2) {
-		const [declarationData, { files }, { opinions }, { associations }] =
-			await Promise.all([
-				api.declaration.getOrCreate(),
-				api.cseOpinion.getFiles(),
-				api.cseOpinion.get(),
-				api.cseOpinion.getFileContentTypes(),
-			]);
-		const hasSecondDeclaration = declarationData.hasSubmittedSecondDeclaration;
-		const firstGap = opinions.find(
-			(opinion) => opinion.declarationNumber === 1 && opinion.type === "gap",
-		);
-		const secondGap = opinions.find(
-			(opinion) => opinion.declarationNumber === 2 && opinion.type === "gap",
-		);
-		const { firstDeclGapHigh, secondDeclGapHigh } = computeGapHighFlags(
-			declarationData.employeeCategories,
-		);
+		const [declarationData, { files }, { associations }] = await Promise.all([
+			api.declaration.getOrCreate(),
+			api.cseOpinion.getFiles(),
+			api.cseOpinion.getFileContentTypes(),
+		]);
 		const columns = computeContentTypeColumns({
-			hasSecondDeclaration,
-			firstDeclGapConsulted: firstGap?.gapConsulted ?? null,
-			secondDeclGapConsulted: secondGap?.gapConsulted ?? null,
-			firstDeclGapHigh,
-			secondDeclGapHigh,
+			hasSecondDeclaration: declarationData.hasSubmittedSecondDeclaration,
+			...getJustificationRequirements(declarationData),
 		});
 		return (
 			<>

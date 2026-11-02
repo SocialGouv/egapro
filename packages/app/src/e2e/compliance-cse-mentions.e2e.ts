@@ -2,6 +2,11 @@ import { expect, test } from "@playwright/test";
 import { urlGlob } from "~/e2e/helpers/routes";
 import { COMPLIANCE_PATH } from "~/modules/routes";
 import {
+	answerGapJustification,
+	expectPathScreen,
+	GAP_JUSTIFICATION_TITLES,
+} from "./helpers/compliance-flows";
+import {
 	resetDeclarationToDraft,
 	setCompanyHasCse,
 	setCompanyWorkforce,
@@ -10,12 +15,13 @@ import {
 	completeDeclaration,
 	reachStep6ComplianceRecap,
 } from "./helpers/declaration-flows";
+import { expectRecapNextSteps } from "./helpers/next-steps";
 
 /**
  * [#3945] CSE opinion mentions gated by the declared CSE existence.
  *
  * A company >= 100 that declared it has no CSE (hasCse false or null) must no longer
- * be told to deposit a CSE opinion: the recap "Prochaines étapes" box and the
+ * be told to deposit a CSE opinion: the recap end-of-page box and the
  * compliance-choice options drop every CSE-opinion mention, while the gap actions
  * and the "Mettre à jour l'existence d'un CSE" escape hatch stay.
  *
@@ -33,7 +39,10 @@ const CSE_OPINION_RECAP_TEXT = /avis du CSE devra être transmis/;
 const CSE_JUSTIFY_PARENTHESIS =
 	/avis à transmettre lors de la dernière étape de la démarche/;
 const UPDATE_CSE_BUTTON = /Mettre à jour l.existence d.un CSE/;
-const CORRECTIVE_CSE_OPINION_BULLET = "Déposer le ou les avis du CSE";
+const JUSTIFY_CSE_OPINION_BULLET = "Transmettre l'avis du CSE";
+const CORRECTIVE_CSE_OPINION_BULLET = "Transmettre l'avis ou les avis du CSE";
+const NO_CSE_JUSTIFY_SENTENCE =
+	/En l.absence de CSE, aucun avis n.est à transmettre/;
 
 test.describe("[#3945] gap + workforce >= 100 + hasCse=false → no CSE opinion mention", () => {
 	test.describe.configure({ mode: "serial" });
@@ -50,25 +59,13 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=false → no CSE opinion 
 		test.slow();
 		await reachStep6ComplianceRecap(page);
 
-		await expect(
-			page.getByRole("heading", { name: "Prochaines étapes" }),
-		).toBeVisible();
-		await expect(
-			page.getByRole("heading", { name: "Informer et consulter le CSE" }),
-		).toHaveCount(0);
+		// The CSE block keeps only its button; the gap compliance block stays whole.
+		await expectRecapNextSteps(page, ["gap-compliance-process"]);
 		await expect(page.getByText(CSE_OPINION_RECAP_TEXT)).toHaveCount(0);
 		await expect(
 			page.getByRole("link", { name: /Voir les modèles d.avis CSE/ }),
 		).toHaveCount(0);
 		await expect(page.getByText(CSE_JUSTIFY_PARENTHESIS)).toHaveCount(0);
-
-		// Gap actions stay fully visible
-		await expect(
-			page.getByText("Écarts détectés", { exact: true }),
-		).toBeVisible();
-		await expect(
-			page.getByRole("heading", { name: "Actions à engager" }),
-		).toBeVisible();
 		// Escape hatch for a mis-declared CSE flag stays available
 		await expect(
 			page.getByRole("button", { name: UPDATE_CSE_BUTTON }),
@@ -83,13 +80,18 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=false → no CSE opinion 
 		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });
 
 		await expect(
-			page.getByText("Justifier les écarts de rémunération ≥ 5 %", {
-				exact: true,
-			}),
+			page.getByText(GAP_JUSTIFICATION_TITLES.all, { exact: true }),
 		).toBeVisible();
+		await expect(page.getByText(NO_CSE_JUSTIFY_SENTENCE)).toBeVisible();
 		await expect(
-			page.getByText("Transmettre l'avis du CSE", { exact: true }),
+			page.getByText(JUSTIFY_CSE_OPINION_BULLET, { exact: true }),
 		).toHaveCount(0);
+		await expect(
+			page.getByText(/Pour les écarts justifiables, vous devrez/),
+		).toHaveCount(0);
+
+		await answerGapJustification(page, "partial");
+		await expectPathScreen(page, "partial");
 		await expect(page.getByText(CORRECTIVE_CSE_OPINION_BULLET)).toHaveCount(0);
 	});
 });
@@ -107,19 +109,24 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=true → CSE opinion stil
 		test.slow();
 		await reachStep6ComplianceRecap(page);
 
-		await expect(
-			page.getByRole("heading", { name: "Informer et consulter le CSE" }),
-		).toBeVisible();
+		await expectRecapNextSteps(page, [
+			"cse-inform-and-consult",
+			"gap-compliance-process",
+		]);
 		await expect(page.getByText(CSE_OPINION_RECAP_TEXT)).toBeVisible();
-		await expect(page.getByText(CSE_JUSTIFY_PARENTHESIS)).toBeVisible();
-
-		// First declaration renders both alternative paths, each prefixed "Soit"
 		await expect(
-			page.getByText(/Soit mettre en place des actions correctives/),
+			page.getByText(/informer et consulter le CSE sur cette justification/),
 		).toBeVisible();
 		await expect(
 			page.getByText(
-				"Soit réaliser une évaluation conjointe des rémunérations",
+				"Effectuer des actions correctives et une seconde déclaration dans un délai de 6 mois",
+				{ exact: true },
+			),
+		).toBeVisible();
+		await expect(
+			page.getByText(
+				"Mettre en place une évaluation conjointe des rémunérations",
+				{ exact: true },
 			),
 		).toBeVisible();
 	});
@@ -131,9 +138,14 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=true → CSE opinion stil
 		await completeDeclaration(page, { hasGap: true });
 		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });
 
+		// Once in the "all" card, once for the justified share of the "partial" one.
 		await expect(
-			page.getByText("Transmettre l'avis du CSE", { exact: true }),
-		).toBeVisible();
+			page.getByText(JUSTIFY_CSE_OPINION_BULLET, { exact: true }),
+		).toHaveCount(2);
+		await expect(page.getByText(NO_CSE_JUSTIFY_SENTENCE)).toHaveCount(0);
+
+		await answerGapJustification(page, "partial");
+		await expectPathScreen(page, "partial");
 		await expect(
 			page.getByText(CORRECTIVE_CSE_OPINION_BULLET, { exact: true }),
 		).toBeVisible();

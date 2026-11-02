@@ -55,6 +55,7 @@ vi.mock("~/server/db/schema", () => ({
 }));
 
 const mockPruneStaleContentTypeAssociations = vi.fn();
+const mockGetJustificationRequirements = vi.fn();
 
 vi.mock(
 	"~/server/services/cseRequiredContentTypes",
@@ -63,10 +64,31 @@ vi.mock(
 			typeof import("~/server/services/cseRequiredContentTypes")
 		>()),
 		getRequiredContentTypes: vi.fn(),
+		getJustificationRequirements: (...args: unknown[]) =>
+			mockGetJustificationRequirements(...args),
 		pruneStaleContentTypeAssociations: (...args: unknown[]) =>
 			mockPruneStaleContentTypeAssociations(...args),
 	}),
 );
+
+const mockFindTransmittedCseOpinions = vi.fn();
+const mockFindTransmittedJointEvaluation = vi.fn();
+const mockAssembleCseOpinionRecap = vi.fn();
+
+vi.mock("~/server/api/routers/declarationHelpers", async (importOriginal) => ({
+	...(await importOriginal<
+		typeof import("~/server/api/routers/declarationHelpers")
+	>()),
+	findTransmittedCseOpinions: (...args: unknown[]) =>
+		mockFindTransmittedCseOpinions(...args),
+	findTransmittedJointEvaluation: (...args: unknown[]) =>
+		mockFindTransmittedJointEvaluation(...args),
+}));
+
+vi.mock("~/modules/declarationPdf/buildCseOpinionRecapData", () => ({
+	assembleCseOpinionRecap: (...args: unknown[]) =>
+		mockAssembleCseOpinionRecap(...args),
+}));
 
 const mockDeleteS3File = vi.fn();
 const mockGetFileSize = vi.fn();
@@ -227,76 +249,47 @@ describe("cseOpinionRouter", () => {
 	});
 
 	describe("getSubmittedView", () => {
-		it("refuses access before the CSE transmission event", async () => {
-			const caller = await createCaller(createMockDb([]));
+		const transmitted = { year: 2027, submittedAt: new Date() };
+		const recap = { year: 2027, transmittedAt: "10/02/2027", files: [] };
+
+		it("refuses access when no unmodified transmission exists", async () => {
+			mockFindTransmittedCseOpinions.mockResolvedValue(null);
+			const caller = await createCaller(createMockDb());
 
 			await expect(caller.getSubmittedView()).rejects.toMatchObject({
 				code: "NOT_FOUND",
 			});
-			// The procedure must stop before reading declarant, opinions or file data.
-			expect(mockSelect).toHaveBeenCalledTimes(2);
+			expect(mockFindTransmittedCseOpinions).toHaveBeenCalledWith(
+				expect.anything(),
+				"decl-1",
+			);
+			expect(mockAssembleCseOpinionRecap).not.toHaveBeenCalled();
 		});
 
-		it("hides mutable opinions while a revision is pending after transmission", async () => {
-			const caller = await createCaller(
-				createMockDb(
-					[],
-					[
-						[{ id: "decl-1" }],
-						[{ createdAt: new Date("2026-10-18T10:00:00Z") }],
-						[{ cseOpinionDraftUpdatedAt: new Date("2026-10-19T10:00:00Z") }],
-					],
-				),
-			);
-
-			await expect(caller.getSubmittedView()).rejects.toMatchObject({
-				code: "NOT_FOUND",
+		it("returns the shared recap with the joint evaluation flag", async () => {
+			mockFindTransmittedCseOpinions.mockResolvedValue(transmitted);
+			mockAssembleCseOpinionRecap.mockResolvedValue(recap);
+			mockFindTransmittedJointEvaluation.mockResolvedValue({
+				submission: {},
+				file: {},
 			});
-			expect(mockSelect).toHaveBeenCalledTimes(3);
-			expect(mockTransaction).toHaveBeenCalledWith(expect.any(Function), {
-				isolationLevel: "repeatable read",
-			});
-		});
-
-		it("does not offer a joint report without its transmission event", async () => {
-			const caller = await createCaller(
-				createMockDb(
-					[],
-					[
-						[{ id: "decl-1" }],
-						[{ createdAt: new Date("2026-10-18T10:00:00Z") }],
-						[
-							{
-								companyName: "Entreprise exemple",
-								siren: "339787277",
-								declarationYear: 2026,
-								declarantFirstName: "Camille",
-								declarantLastName: "Martin",
-								declarantEmail: "camille@example.test",
-								declarantPhone: null,
-								secondDeclReferencePeriodStart: null,
-								secondDeclReferencePeriodEnd: null,
-								cseOpinionDraftUpdatedAt: null,
-							},
-						],
-						[], // no joint_evaluation_submit
-						[{ declarationNumber: 1, type: "accuracy", opinion: "favorable" }],
-						[
-							{
-								fileId: "file-1",
-								fileName: "avis.pdf",
-								declarationNumber: 1,
-								type: "accuracy",
-							},
-						],
-						[], // no second declaration
-					],
-				),
-			);
+			const caller = await createCaller(createMockDb());
 
 			const result = await caller.getSubmittedView();
+
+			expect(mockAssembleCseOpinionRecap).toHaveBeenCalledWith(transmitted);
+			expect(result).toEqual({ ...recap, hasSubmittedJointEvaluation: true });
+		});
+
+		it("does not offer a joint report without a transmitted one", async () => {
+			mockFindTransmittedCseOpinions.mockResolvedValue(transmitted);
+			mockAssembleCseOpinionRecap.mockResolvedValue(recap);
+			mockFindTransmittedJointEvaluation.mockResolvedValue(null);
+			const caller = await createCaller(createMockDb());
+
+			const result = await caller.getSubmittedView();
+
 			expect(result.hasSubmittedJointEvaluation).toBe(false);
-			expect(result.associations).toHaveLength(1);
 		});
 	});
 
@@ -305,11 +298,109 @@ describe("cseOpinionRouter", () => {
 			firstDeclaration: {
 				accuracyOpinion: "favorable" as const,
 				accuracyDate: "2026-01-15",
-				gapConsulted: true,
 				gapOpinion: "unfavorable" as const,
 				gapDate: "2026-01-16",
 			},
 		};
+
+		function requireJustification(first: boolean, second = false) {
+			mockGetJustificationRequirements.mockResolvedValue({
+				firstDeclJustificationRequired: first,
+				secondDeclJustificationRequired: second,
+			});
+		}
+
+		beforeEach(() => {
+			requireJustification(true);
+		});
+
+		it("records the justification as consulted when the rule requires it, whatever the client sends", async () => {
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb);
+
+			await caller.saveOpinions({
+				firstDeclaration: {
+					...validInput.firstDeclaration,
+					gapConsulted: false,
+				},
+			} as never);
+
+			expect(mockGetJustificationRequirements).toHaveBeenCalledWith(
+				expect.anything(),
+				"decl-1",
+			);
+			expect(mockValues).toHaveBeenCalledWith(
+				expect.arrayContaining([
+					expect.objectContaining({
+						declarationNumber: 1,
+						type: "gap",
+						gapConsulted: true,
+						opinion: "unfavorable",
+						opinionDate: "2026-01-16",
+					}),
+				]),
+			);
+		});
+
+		it("clears a justification the rule does not require, whatever the client sends", async () => {
+			requireJustification(false);
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb);
+
+			await caller.saveOpinions({
+				firstDeclaration: {
+					...validInput.firstDeclaration,
+					gapConsulted: true,
+				},
+			} as never);
+
+			expect(mockValues).toHaveBeenCalledWith(
+				expect.arrayContaining([
+					expect.objectContaining({
+						declarationNumber: 1,
+						type: "gap",
+						gapConsulted: false,
+						opinion: null,
+						opinionDate: null,
+					}),
+				]),
+			);
+		});
+
+		it.each([
+			["opinion", { gapOpinion: null }],
+			["date", { gapDate: null }],
+		] as const)("refuses a required justification without its %s, writing nothing", async (_missing, patch) => {
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb);
+
+			await expect(
+				caller.saveOpinions({
+					firstDeclaration: { ...validInput.firstDeclaration, ...patch },
+				}),
+			).rejects.toMatchObject({ code: "BAD_REQUEST" });
+			expect(mockInsert).not.toHaveBeenCalled();
+			expect(mockDelete).not.toHaveBeenCalled();
+		});
+
+		it("refuses a required second-declaration justification left empty", async () => {
+			requireJustification(false, true);
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb);
+
+			await expect(
+				caller.saveOpinions({
+					...validInput,
+					secondDeclaration: {
+						accuracyOpinion: "favorable",
+						accuracyDate: "2026-02-01",
+						gapOpinion: null,
+						gapDate: null,
+					},
+				}),
+			).rejects.toMatchObject({ code: "BAD_REQUEST" });
+			expect(mockInsert).not.toHaveBeenCalled();
+		});
 
 		it("deletes existing opinions and inserts new ones in a transaction", async () => {
 			const mockDb = createMockDb();
@@ -341,6 +432,7 @@ describe("cseOpinionRouter", () => {
 		});
 
 		it("prunes content-type associations that are no longer required once the opinions are saved", async () => {
+			requireJustification(false);
 			const mockDb = createMockDb();
 			const caller = await createCaller(mockDb);
 
@@ -348,7 +440,6 @@ describe("cseOpinionRouter", () => {
 				firstDeclaration: {
 					accuracyOpinion: "favorable",
 					accuracyDate: "2026-01-15",
-					gapConsulted: false,
 					gapOpinion: null,
 					gapDate: null,
 				},
@@ -376,7 +467,6 @@ describe("cseOpinionRouter", () => {
 				secondDeclaration: {
 					accuracyOpinion: "unfavorable" as const,
 					accuracyDate: "2026-02-01",
-					gapConsulted: false,
 					gapOpinion: null,
 					gapDate: null,
 				},
