@@ -67,6 +67,30 @@ describe("MissingInfoModal", () => {
 		).toHaveTextContent("Informations manquantes");
 	});
 
+	it("titles the help section as a level-3 heading under the modal's h2, keeping its look", () => {
+		render(
+			<MissingInfoModal
+				cseApplicable={true}
+				hasCse={null}
+				siren="532847196"
+				userPhone={null}
+			/>,
+		);
+		expect(
+			screen.getByRole("heading", {
+				level: 2,
+				name: "Informations manquantes",
+				hidden: true,
+			}),
+		).toBeInTheDocument();
+		const helpHeading = screen.getByRole("heading", {
+			level: 3,
+			name: "Pour vous aider",
+			hidden: true,
+		});
+		expect(helpHeading).toHaveClass("fr-text--lg", "fr-text--bold", "fr-mb-0");
+	});
+
 	it("shows both phone and CSE description when both are missing", () => {
 		render(
 			<MissingInfoModal
