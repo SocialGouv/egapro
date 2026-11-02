@@ -5,6 +5,7 @@ import {
 	BarChart,
 	CartesianGrid,
 	Cell,
+	LabelList,
 	ResponsiveContainer,
 	Tooltip,
 	XAxis,
@@ -14,8 +15,11 @@ import {
 	DROPOFF_RATE_ALERT_THRESHOLD,
 	formatCount,
 	formatFixedPercentage,
+	isDropoffRateAboveThreshold,
 } from "~/modules/domain";
+import { DROPOFF_ALERT_MARK } from "./constants";
 import styles from "./StepDropoffChart.module.scss";
+import { StepDropoffLegend } from "./StepDropoffLegend";
 import type { StepDropoffRow } from "./types";
 
 type Props = {
@@ -42,11 +46,19 @@ const POST_SUBMIT_NORMAL_COLOR = "var(--background-action-low-blue-france)";
 const POST_SUBMIT_ALERT_COLOR = "var(--background-action-low-red-marianne)";
 
 function getBarColor(row: StepDropoffRow): string {
-	const isAlert = row.dropoffRate > DROPOFF_RATE_ALERT_THRESHOLD;
+	const isAlert = isDropoffRateAboveThreshold(row.dropoffRate);
 	if (row.phase === "wizard") {
 		return isAlert ? WIZARD_ALERT_COLOR : WIZARD_NORMAL_COLOR;
 	}
 	return isAlert ? POST_SUBMIT_ALERT_COLOR : POST_SUBMIT_NORMAL_COLOR;
+}
+
+function formatBarLabel(value: unknown): string {
+	if (typeof value !== "number") return "";
+	const rate = formatFixedPercentage(value, { withUnit: true });
+	return isDropoffRateAboveThreshold(value)
+		? `${DROPOFF_ALERT_MARK} ${rate}`
+		: rate;
 }
 
 function DropoffTooltip({ active, payload }: DropoffTooltipProps) {
@@ -103,7 +115,7 @@ export function StepDropoffChart({ rows }: Props) {
 					<BarChart
 						data={rows}
 						layout="vertical"
-						margin={{ top: 16, right: 32, bottom: 24, left: 8 }}
+						margin={{ top: 16, right: 80, bottom: 24, left: 8 }}
 					>
 						<CartesianGrid strokeDasharray="3 3" />
 						<XAxis
@@ -132,10 +144,18 @@ export function StepDropoffChart({ rows }: Props) {
 							{rows.map((row) => (
 								<Cell fill={getBarColor(row)} key={row.key} />
 							))}
+							<LabelList
+								dataKey="dropoffRate"
+								fill="var(--text-default-grey)"
+								fontSize={12}
+								formatter={formatBarLabel}
+								position="right"
+							/>
 						</Bar>
 					</BarChart>
 				</ResponsiveContainer>
 			</div>
+			<StepDropoffLegend />
 		</figure>
 	);
 }

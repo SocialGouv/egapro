@@ -181,6 +181,7 @@ export {
 	FUNNEL_REVISION_KEY_STEPS,
 	getDropoffPhaseLabel,
 	getStepLabel,
+	isDropoffRateAboveThreshold,
 	POST_SUBMIT_DROPOFF_PHASES,
 	POST_SUBMIT_MILESTONES,
 } from "./shared/declarationSteps";

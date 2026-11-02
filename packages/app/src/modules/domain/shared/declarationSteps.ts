@@ -66,6 +66,10 @@ export const DROPOFF_STAGNATION_DAYS_DEFAULT = 30;
 export const DROPOFF_STAGNATION_DAYS_MIN = 1;
 export const DROPOFF_STAGNATION_DAYS_MAX = 180;
 
+export function isDropoffRateAboveThreshold(dropoffRate: number): boolean {
+	return dropoffRate > DROPOFF_RATE_ALERT_THRESHOLD;
+}
+
 export const POST_SUBMIT_DROPOFF_PHASES = [
 	{
 		key: "awaiting_compliance_path_choice",

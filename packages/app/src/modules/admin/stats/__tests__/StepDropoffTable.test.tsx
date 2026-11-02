@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { DROPOFF_RATE_ALERT_THRESHOLD } from "~/modules/domain";
 import { StepDropoffTable } from "../StepDropoffTable";
 import type { StepDropoffRow } from "../types";
 
@@ -72,6 +73,7 @@ describe("StepDropoffTable", () => {
 			"Taux d'abandon (%)",
 			"Abandonnées",
 			"Total déclarations entrées dans la phase",
+			"Au-dessus du seuil de 15 %",
 		]);
 
 		const introRowheader = screen.getByRole("rowheader", {
@@ -203,5 +205,51 @@ describe("StepDropoffTable", () => {
 				text !== "Démarche post-transmission",
 		);
 		expect(dataRowheaders).toHaveLength(12);
+	});
+
+	it("flags in a dedicated column, without relying on colour, the phases above the alert threshold", () => {
+		render(
+			<StepDropoffTable
+				rows={[
+					buildWizardRow({
+						key: "0",
+						step: 0,
+						label: "Sous le seuil",
+						dropoffRate: DROPOFF_RATE_ALERT_THRESHOLD - 0.1,
+					}),
+					buildWizardRow({
+						key: "1",
+						step: 1,
+						label: "Au seuil",
+						dropoffRate: DROPOFF_RATE_ALERT_THRESHOLD,
+					}),
+					buildPostSubmitRow({
+						label: "Au-dessus du seuil",
+						dropoffRate: DROPOFF_RATE_ALERT_THRESHOLD + 0.1,
+					}),
+				]}
+			/>,
+		);
+
+		const lastCellOf = (label: string) =>
+			screen
+				.getByRole("rowheader", { name: label })
+				.closest("tr")
+				?.querySelector("td:last-child");
+
+		expect(lastCellOf("Sous le seuil")).toHaveTextContent(/^Non$/);
+		expect(lastCellOf("Au seuil")).toHaveTextContent(/^Non$/);
+		const alertCell = lastCellOf("Au-dessus du seuil");
+		expect(alertCell).toHaveTextContent("Oui");
+		expect(alertCell?.querySelector('[aria-hidden="true"]')).toHaveTextContent(
+			"▲",
+		);
+	});
+
+	it("spans the phase group headers across every column, threshold column included", () => {
+		render(<StepDropoffTable rows={[buildWizardRow()]} />);
+		expect(
+			screen.getByRole("rowheader", { name: "Parcours initial (wizard A–F)" }),
+		).toHaveAttribute("colspan", "5");
 	});
 });

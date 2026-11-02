@@ -1,4 +1,11 @@
-import { formatCount, formatFixedPercentage } from "~/modules/domain";
+import {
+	DROPOFF_RATE_ALERT_THRESHOLD,
+	formatCount,
+	formatFixedPercentage,
+	formatWholePercentage,
+	isDropoffRateAboveThreshold,
+} from "~/modules/domain";
+import { DROPOFF_ALERT_MARK } from "./constants";
 import type { StepDropoffRow } from "./types";
 
 type Props = {
@@ -10,6 +17,21 @@ const PHASE_HEADERS: Record<StepDropoffRow["phase"], string> = {
 	post_submit: "Démarche post-transmission",
 };
 
+type AboveThresholdCellProps = {
+	dropoffRate: number;
+};
+
+function AboveThresholdCell({ dropoffRate }: AboveThresholdCellProps) {
+	if (!isDropoffRateAboveThreshold(dropoffRate)) {
+		return <td>Non</td>;
+	}
+	return (
+		<td className="fr-text--bold">
+			<span aria-hidden="true">{DROPOFF_ALERT_MARK}</span> Oui
+		</td>
+	);
+}
+
 /**
  * Accessible alternative to `<StepDropoffChart>` — same K5 dataset rendered
  * as a DSFR table inside a `<details>` toggle. Required for RGAA because
@@ -20,6 +42,7 @@ export function StepDropoffTable({ rows }: Props) {
 		return null;
 	}
 
+	const thresholdHeader = `Au-dessus du seuil de ${formatWholePercentage(DROPOFF_RATE_ALERT_THRESHOLD)}`;
 	const wizardRows = rows.filter((row) => row.phase === "wizard");
 	const postSubmitRows = rows.filter((row) => row.phase === "post_submit");
 
@@ -36,7 +59,9 @@ export function StepDropoffTable({ rows }: Props) {
 								<caption className="fr-sr-only">
 									Taux d'abandon, nombre de déclarations abandonnées et nombre
 									total de déclarations entrées par phase du parcours déclaratif
-									: étapes du wizard A–F puis phases post-transmission.
+									: étapes du wizard A–F puis phases post-transmission. La
+									dernière colonne signale les phases dont le taux d'abandon
+									dépasse le seuil d'alerte.
 								</caption>
 								<thead>
 									<tr>
@@ -46,6 +71,7 @@ export function StepDropoffTable({ rows }: Props) {
 										<th scope="col">
 											Total déclarations entrées dans la phase
 										</th>
+										<th scope="col">{thresholdHeader}</th>
 									</tr>
 								</thead>
 								{wizardRows.length > 0 && (
@@ -53,7 +79,7 @@ export function StepDropoffTable({ rows }: Props) {
 										<tr>
 											<th
 												className="fr-text--bold fr-background-alt--blue-france"
-												colSpan={4}
+												colSpan={5}
 												scope="rowgroup"
 											>
 												{PHASE_HEADERS.wizard}
@@ -65,6 +91,7 @@ export function StepDropoffTable({ rows }: Props) {
 												<td>{formatFixedPercentage(row.dropoffRate)}</td>
 												<td>{formatCount(row.abandoned)}</td>
 												<td>{formatCount(row.total)}</td>
+												<AboveThresholdCell dropoffRate={row.dropoffRate} />
 											</tr>
 										))}
 									</tbody>
@@ -74,7 +101,7 @@ export function StepDropoffTable({ rows }: Props) {
 										<tr>
 											<th
 												className="fr-text--bold fr-background-alt--red-marianne"
-												colSpan={4}
+												colSpan={5}
 												scope="rowgroup"
 											>
 												{PHASE_HEADERS.post_submit}
@@ -86,6 +113,7 @@ export function StepDropoffTable({ rows }: Props) {
 												<td>{formatFixedPercentage(row.dropoffRate)}</td>
 												<td>{formatCount(row.abandoned)}</td>
 												<td>{formatCount(row.total)}</td>
+												<AboveThresholdCell dropoffRate={row.dropoffRate} />
 											</tr>
 										))}
 									</tbody>
