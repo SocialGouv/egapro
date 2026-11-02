@@ -62,6 +62,19 @@
 	gap: 0.25rem;
 }
 
+// DSFR bordered cells only draw their right and bottom edges.
+.fileTable {
+	border-top: 1px solid var(--border-contrast-grey);
+	border-left: 1px solid var(--border-contrast-grey);
+}
+
+.fileCell {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.25rem;
+}
+
 .actionsColumn {
 	width: 4rem;
 }

@@ -24,7 +24,11 @@ export function SelectedFilesTable({
 	onRemove,
 }: Props) {
 	return (
-		<DsfrTable caption={title} className="fr-mt-4w fr-mb-0">
+		<DsfrTable
+			caption={title}
+			className="fr-table--bordered fr-mt-4w fr-mb-0"
+			tableClassName={styles.fileTable}
+		>
 			<thead>
 				<tr>
 					<th scope="col">{title}</th>
@@ -37,7 +41,7 @@ export function SelectedFilesTable({
 				{files.map((file, index) => (
 					<tr key={file.name}>
 						<td>
-							<span className={styles.fileCardInfo}>
+							<span className={styles.fileCell}>
 								{objectUrls[index] ? (
 									<a
 										className="fr-link"
