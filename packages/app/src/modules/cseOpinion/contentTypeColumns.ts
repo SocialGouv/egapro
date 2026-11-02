@@ -69,14 +69,32 @@ export const UNASSOCIATED_FILE_ALERT = {
 		"Pour chaque fichier déposé, cochez le ou les types d'avis qu'il contient avant de transmettre.",
 } as const;
 
-export function getMissingOpinionMessage(
+function opinionSubject(
 	{ declarationNumber, type }: ContentTypeKey,
 	hasSecondDeclaration: boolean,
 ): string {
 	const declarationPart = hasSecondDeclaration
 		? ` de la ${DECLARATION_ORDINALS[declarationNumber]} déclaration`
 		: "";
-	return `Ajoutez l'avis ${TYPE_ERROR_PHRASES[type]}${declarationPart}, ou indiquez s'il est déjà inclus dans l'un des fichiers déposés.`;
+	return `l'avis ${TYPE_ERROR_PHRASES[type]}${declarationPart}`;
+}
+
+export function getMissingOpinionMessage(
+	key: ContentTypeKey,
+	hasSecondDeclaration: boolean,
+): string {
+	return `Ajoutez ${opinionSubject(key, hasSecondDeclaration)}, ou indiquez s'il est déjà inclus dans l'un des fichiers déposés.`;
+}
+
+export function getMissingOpinionFieldMessage(
+	key: ContentTypeKey,
+	field: "opinion" | "date",
+	hasSecondDeclaration: boolean,
+): string {
+	const subject = opinionSubject(key, hasSecondDeclaration);
+	return field === "opinion"
+		? `Indiquez si ${subject} est favorable ou défavorable.`
+		: `Renseignez la date de ${subject}.`;
 }
 
 export function computeJustificationRequirements({

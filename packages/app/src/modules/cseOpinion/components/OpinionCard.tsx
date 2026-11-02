@@ -1,3 +1,6 @@
+import type { FieldError } from "~/modules/declaration-remuneration/shared/formError/types";
+import { describedByForField } from "~/modules/declaration-remuneration/shared/formError/types";
+import { opinionDateId, opinionRadioId } from "../opinionFieldErrors";
 import type { OpinionType } from "../types";
 import styles from "./OpinionCard.module.scss";
 
@@ -9,6 +12,9 @@ type Props = {
 	onOpinionChange: (value: OpinionType) => void;
 	onDateChange: (value: string) => void;
 	readOnly?: boolean;
+	errorAlertId: string;
+	opinionError?: FieldError;
+	dateError?: FieldError;
 };
 
 export function OpinionCard({
@@ -19,9 +25,24 @@ export function OpinionCard({
 	onOpinionChange,
 	onDateChange,
 	readOnly = false,
+	errorAlertId,
+	opinionError,
+	dateError,
 }: Props) {
 	const legendId = `${id}-legend`;
-	const dateId = `${id}-date`;
+	const dateId = opinionDateId(id);
+	const favorableId = opinionRadioId(id, "favorable");
+	const unfavorableId = opinionRadioId(id, "unfavorable");
+	const opinionDescribedBy = describedByForField(errorAlertId, opinionError);
+	const opinionInvalid = opinionError ? true : undefined;
+	const dateInvalid = dateError ? true : undefined;
+	const fieldsetClass = opinionError
+		? "fr-fieldset fr-fieldset--error"
+		: "fr-fieldset";
+	const dateGroupClass = dateError
+		? "fr-input-group fr-input-group--error"
+		: "fr-input-group";
+	const dateInputClass = dateError ? "fr-input fr-input--error" : "fr-input";
 
 	return (
 		<div className={styles.card}>
@@ -29,7 +50,7 @@ export function OpinionCard({
 				{title}
 			</p>
 
-			<fieldset aria-labelledby={legendId} className="fr-fieldset">
+			<fieldset aria-labelledby={legendId} className={fieldsetClass}>
 				<legend
 					className="fr-fieldset__legend--regular fr-fieldset__legend"
 					id={`${id}-opinion-legend`}
@@ -39,16 +60,18 @@ export function OpinionCard({
 				<div className="fr-fieldset__element fr-fieldset__element--inline">
 					<div className="fr-radio-group fr-radio-rich">
 						<input
+							aria-describedby={opinionDescribedBy}
+							aria-invalid={opinionInvalid}
 							checked={opinion === "favorable"}
 							disabled={readOnly}
-							id={`${id}-favorable`}
+							id={favorableId}
 							name={`${id}-opinion`}
 							onChange={() => onOpinionChange("favorable")}
 							required
 							type="radio"
 							value="favorable"
 						/>
-						<label className="fr-label" htmlFor={`${id}-favorable`}>
+						<label className="fr-label" htmlFor={favorableId}>
 							Favorable
 						</label>
 					</div>
@@ -56,16 +79,18 @@ export function OpinionCard({
 				<div className="fr-fieldset__element fr-fieldset__element--inline">
 					<div className="fr-radio-group fr-radio-rich">
 						<input
+							aria-describedby={opinionDescribedBy}
+							aria-invalid={opinionInvalid}
 							checked={opinion === "unfavorable"}
 							disabled={readOnly}
-							id={`${id}-unfavorable`}
+							id={unfavorableId}
 							name={`${id}-opinion`}
 							onChange={() => onOpinionChange("unfavorable")}
 							required
 							type="radio"
 							value="unfavorable"
 						/>
-						<label className="fr-label" htmlFor={`${id}-unfavorable`}>
+						<label className="fr-label" htmlFor={unfavorableId}>
 							Défavorable
 						</label>
 					</div>
@@ -77,13 +102,15 @@ export function OpinionCard({
 				/>
 			</fieldset>
 
-			<div className="fr-input-group fr-mt-3w fr-col-12 fr-col-md-4">
+			<div className={`${dateGroupClass} fr-mt-3w fr-col-12 fr-col-md-4`}>
 				<label className="fr-label" htmlFor={dateId}>
 					Date de l'avis rendu par le CSE
 					<span className="fr-hint-text">Format attendu : JJ/MM/AAAA</span>
 				</label>
 				<input
-					className="fr-input"
+					aria-describedby={describedByForField(errorAlertId, dateError)}
+					aria-invalid={dateInvalid}
+					className={dateInputClass}
 					id={dateId}
 					onChange={(e) => onDateChange(e.target.value)}
 					placeholder="Sélectionner une date"
