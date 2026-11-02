@@ -47,7 +47,7 @@ import { loginWithProConnect } from "./helpers/login";
 const PANEL_ID = "declaration-process-panel";
 // Matches the year the panel renders and the year ensureCurrentYearDeclaration inserts.
 const CURRENT_YEAR = getCurrentYear();
-const STEP3_TITLE = "Dépôt du ou des avis du CSE";
+const STEP3_TITLE = "Transmission du ou des avis du CSE";
 
 function bannerSourceButton(page: Page) {
 	return page.getByRole("button", {

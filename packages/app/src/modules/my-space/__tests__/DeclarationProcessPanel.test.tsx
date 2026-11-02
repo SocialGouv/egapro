@@ -111,12 +111,12 @@ describe("DeclarationProcessPanel", () => {
 		it("renders step 1 details with bullet points", () => {
 			const { panel } = renderPanel("start");
 			expect(
-				panel.getByText(/Indicateurs pré-remplis à vérifier/),
+				panel.getByText(
+					/Indicateurs pour l'ensemble des salariés pré-remplis à vérifier/,
+				),
 			).toBeInTheDocument();
 			expect(
-				panel.getByText(
-					/Indicateur de rémunération par catégorie d'emplois à remplir/,
-				),
+				panel.getByText(/Indicateur par catégorie d'emplois à remplir/),
 			).toBeInTheDocument();
 			const lists = panel.getAllByRole("list", { hidden: true });
 			expect(lists).toHaveLength(1);
@@ -130,7 +130,9 @@ describe("DeclarationProcessPanel", () => {
 				panel.getByText("Indicateurs pour l'ensemble des salariés à remplir"),
 			).toBeInTheDocument();
 			expect(
-				panel.queryByText(/Indicateurs pré-remplis à vérifier/),
+				panel.queryByText(
+					/Indicateurs pour l'ensemble des salariés pré-remplis à vérifier/,
+				),
 			).not.toBeInTheDocument();
 		});
 
@@ -308,7 +310,7 @@ describe("DeclarationProcessPanel", () => {
 				displayContext: makeDisplayContextFromPaths("corrective_action"),
 			});
 			expect(
-				panel.getByText("Dépôt du ou des avis du CSE"),
+				panel.getByText("Transmission du ou des avis du CSE"),
 			).toBeInTheDocument();
 		});
 
