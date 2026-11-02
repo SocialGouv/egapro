@@ -2,14 +2,11 @@
 
 import { QUARTILE_NAMES } from "~/modules/declaration-remuneration/shared/constants";
 import type { QuartileData } from "~/modules/declaration-remuneration/types";
-import {
-	computePercentage,
-	displayDecimal,
-	padDecimalOnBlur,
-} from "~/modules/domain";
+import { displayDecimal, padDecimalOnBlur } from "~/modules/domain";
 import { TooltipButton } from "~/modules/shared/TooltipButton";
 import stepStyles from "../Step4QuartileDistribution.module.scss";
 import type { QuartileFieldErrors } from "./QuartileTable";
+import { quartileGenderPercentage } from "./quartileFormHelpers";
 
 type Field = "threshold" | "women" | "men";
 type TableType = "annual" | "hourly";
@@ -41,12 +38,6 @@ function womenAriaLabel(tableType: TableType, index: number) {
 
 function menAriaLabel(tableType: TableType, index: number) {
 	return `Nombre d'hommes ${index + 1}${ordinalSuffix(index)} quartile ${TYPE_LABEL[tableType]}`;
-}
-
-function pct(q: QuartileData, gender: "women" | "men") {
-	const total = (q.women ?? 0) + (q.men ?? 0);
-	if (total === 0) return "- %";
-	return computePercentage(q[gender] ?? 0, total);
 }
 
 function OrdinalLabel({ text }: { text: string }) {
@@ -235,13 +226,13 @@ export function QuartileTableRow({
 				className={stepStyles.numericCell}
 				data-mobile-label="Pourcentage de femmes"
 			>
-				<strong>{pct(quartile, "women")}</strong>
+				<strong>{quartileGenderPercentage(quartile, "women")}</strong>
 			</td>
 			<td
 				className={stepStyles.numericCell}
 				data-mobile-label="Pourcentage d'hommes"
 			>
-				<strong>{pct(quartile, "men")}</strong>
+				<strong>{quartileGenderPercentage(quartile, "men")}</strong>
 			</td>
 		</tr>
 	);

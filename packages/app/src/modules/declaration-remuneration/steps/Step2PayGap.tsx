@@ -25,7 +25,6 @@ import {
 	payGapFieldId,
 } from "../shared/formError/payGapErrors";
 import type { FieldError } from "../shared/formError/types";
-import { GapInterpretationCallout } from "../shared/GapInterpretationCallout";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
 import { gipToStep2 } from "../shared/gipToStepData";
 import {
@@ -36,8 +35,10 @@ import {
 import { useLockContext } from "../shared/lock/LockContext";
 import { PayGapTable } from "../shared/PayGapTable";
 import { PrefillSource } from "../shared/PrefillSource";
+import { payGapReadingNote } from "../shared/readingNotes";
 import { StepIndicator } from "../shared/StepIndicator";
 import { StepTitleRow } from "../shared/StepTitleRow";
+import { TableTitle } from "../shared/TableTitle";
 import type { PayGapField, Step2Data } from "../types";
 
 type Step2PayGapProps = {
@@ -215,7 +216,13 @@ export function Step2PayGap({
 				</div>
 
 				<div className={`${common.dataSection} ${common.tableGap}`}>
-					<div className={common.flexColumnGapHalf}>
+					<div className={common.flexColumnGap1}>
+						<TableTitle
+							level="h2"
+							readingNote={payGapReadingNote(rows)}
+							title="Rémunération"
+							tooltipId="tooltip-reading-note-step2"
+						/>
 						<PayGapTable
 							caption="Écart de rémunération"
 							columnHeader={
@@ -281,8 +288,6 @@ export function Step2PayGap({
 						</div>
 					</DefinitionAccordion>
 				</div>
-
-				<GapInterpretationCallout rows={rows} />
 
 				<FormErrors mutationError={mutation.error?.message} />
 

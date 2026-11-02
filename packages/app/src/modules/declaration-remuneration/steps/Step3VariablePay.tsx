@@ -33,7 +33,6 @@ import {
 } from "../shared/formError/payGapErrors";
 import type { FieldError } from "../shared/formError/types";
 import { describedByForField, findFieldError } from "../shared/formError/types";
-import { GapInterpretationCallout } from "../shared/GapInterpretationCallout";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
 import { gipToStep3 } from "../shared/gipToStepData";
 import {
@@ -45,8 +44,13 @@ import { useLockContext } from "../shared/lock/LockContext";
 import { numericInputClassName } from "../shared/numericInputClassName";
 import { PayGapTable } from "../shared/PayGapTable";
 import { PrefillSource } from "../shared/PrefillSource";
+import {
+	beneficiariesReadingNote,
+	variablePayGapReadingNote,
+} from "../shared/readingNotes";
 import { StepIndicator } from "../shared/StepIndicator";
 import { StepTitleRow } from "../shared/StepTitleRow";
+import { TableTitle } from "../shared/TableTitle";
 import type { PayGapField, Step3Data } from "../types";
 import stepStyles from "./Step3VariablePay.module.scss";
 
@@ -330,9 +334,12 @@ export function Step3VariablePay({
 
 				<div className={`${common.dataSection} ${common.tableGap}`}>
 					<div className={common.flexColumnGap1}>
-						<h2 className="fr-h6 fr-mb-0">
-							Rémunération variable ou complémentaire
-						</h2>
+						<TableTitle
+							level="h2"
+							readingNote={variablePayGapReadingNote(rows)}
+							title="Rémunération variable ou complémentaire"
+							tooltipId="tooltip-reading-note-step3-paygap"
+						/>
 						<PayGapTable
 							caption="Écart de rémunération variable ou complémentaire"
 							className={stepStyles.payGapTable}
@@ -363,9 +370,12 @@ export function Step3VariablePay({
 					</div>
 
 					<div className={common.flexColumnGap1}>
-						<h2 className="fr-h6 fr-mb-0">
-							Proportion de femmes et d&apos;hommes bénéficiaires
-						</h2>
+						<TableTitle
+							level="h2"
+							readingNote={beneficiariesReadingNote(beneficiaryWomen, maxWomen)}
+							title="Proportion de femmes et d'hommes bénéficiaires"
+							tooltipId="tooltip-reading-note-step3-beneficiaries"
+						/>
 						<div
 							className={`fr-table fr-table--bordered fr-table--no-caption fr-mt-0 fr-mb-0 ${stepStyles.payGapTable}`}
 						>
@@ -534,15 +544,6 @@ export function Step3VariablePay({
 						</div>
 					</DefinitionAccordion>
 				</div>
-
-				<GapInterpretationCallout
-					beneficiaryMen={beneficiaryMen}
-					beneficiaryWomen={beneficiaryWomen}
-					maxMen={maxMen}
-					maxWomen={maxWomen}
-					rows={rows}
-					variant="variablePay"
-				/>
 
 				<FormErrors mutationError={mutation.error?.message} />
 

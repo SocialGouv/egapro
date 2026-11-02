@@ -357,4 +357,59 @@ describe("Step2PayGap", () => {
 				Node.DOCUMENT_POSITION_FOLLOWING,
 		).toBeTruthy();
 	});
+
+	it("shows the table title without a reading-note button when no data is entered", () => {
+		render(
+			<Step2PayGap
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialData={emptyStep2Data()}
+			/>,
+		);
+		expect(
+			screen.getByRole("heading", { level: 2, name: "Rémunération" }),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole("button", {
+				name: "Note de lecture du tableau « Rémunération »",
+			}),
+		).not.toBeInTheDocument();
+	});
+
+	it("shows the reading-note button and its computed note once the row is filled", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step2PayGap
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialData={emptyStep2Data()}
+			/>,
+		);
+
+		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
+		const menInput = screen.getByLabelText("Annuelle brute moyenne — Hommes");
+		await user.clear(womenInput);
+		await user.type(womenInput, "95.40");
+		await user.clear(menInput);
+		await user.type(menInput, "100");
+
+		const button = screen.getByRole("button", {
+			name: "Note de lecture du tableau « Rémunération »",
+		});
+		expect(button).toHaveAttribute(
+			"aria-describedby",
+			"tooltip-reading-note-step2",
+		);
+		expect(
+			document.getElementById("tooltip-reading-note-step2"),
+		).toHaveTextContent(
+			"Note de lecture : L'écart de rémunération annuelle brute moyenne est de 4,60 % en faveur des hommes.",
+		);
+		expect(
+			screen.queryByText(/Interprétation des résultats/),
+		).not.toBeInTheDocument();
+		expect(screen.queryByText(/Écart en défaveur des/)).not.toBeInTheDocument();
+	});
 });

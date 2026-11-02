@@ -3,7 +3,11 @@ import type {
 	QuartileData,
 	QuartileTuple,
 } from "~/modules/declaration-remuneration";
-import { computeQuartileMin, displayDecimal } from "~/modules/domain";
+import {
+	computePercentage,
+	computeQuartileMin,
+	displayDecimal,
+} from "~/modules/domain";
 
 export function toQuartileData(c: {
 	womenValue?: string | null;
@@ -46,6 +50,16 @@ export function emptyQuartiles(): QuartileTuple {
 		{ threshold: "" },
 		{ threshold: "" },
 	];
+}
+
+/** Share of one sex within a quartile row: "- %" while the row carries nobody. */
+export function quartileGenderPercentage(
+	quartile: QuartileData,
+	gender: "women" | "men",
+): string {
+	const total = (quartile.women ?? 0) + (quartile.men ?? 0);
+	if (total === 0) return "- %";
+	return computePercentage(quartile[gender] ?? 0, total);
 }
 
 export function computeMinsForTable(
