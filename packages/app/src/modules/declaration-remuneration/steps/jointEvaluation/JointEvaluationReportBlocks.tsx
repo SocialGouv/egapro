@@ -144,6 +144,7 @@ export function JointEvaluationReportUpload({
 				allowedMimeTypes={["application/pdf"]}
 				disabled={disabled}
 				error={error}
+				fileList="table"
 				inputId={inputId}
 				onFilesChange={onFilesChange}
 				selectedFiles={selectedFiles}

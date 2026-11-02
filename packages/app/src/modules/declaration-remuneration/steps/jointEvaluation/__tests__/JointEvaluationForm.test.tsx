@@ -95,6 +95,32 @@ describe("JointEvaluationForm", () => {
 		).toBeInTheDocument();
 	});
 
+	it("shows the saved status next to the page title", () => {
+		render(<JointEvaluationForm {...defaultProps} />);
+
+		expect(screen.getByRole("status")).toHaveTextContent("Enregistré");
+	});
+
+	it("lists the selected report in a « Fichier déposé » table", () => {
+		const { container } = render(<JointEvaluationForm {...defaultProps} />);
+
+		const input = container.querySelector(
+			'input[type="file"]',
+		) as HTMLInputElement;
+		const file = new File(["pdf-content"], "rapport.pdf", {
+			type: "application/pdf",
+		});
+		fireEvent.change(input, { target: { files: [file] } });
+
+		const table = screen.getByRole("table", { name: "Fichier déposé" });
+		expect(
+			within(table).getByRole("link", { name: /rapport\.pdf/ }),
+		).toHaveAttribute("target", "_blank");
+		expect(
+			within(table).getByRole("button", { name: "Supprimer rapport.pdf" }),
+		).toBeInTheDocument();
+	});
+
 	it("names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)", () => {
 		render(<JointEvaluationForm {...defaultProps} />);
 

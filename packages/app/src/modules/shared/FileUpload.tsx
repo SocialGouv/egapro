@@ -4,16 +4,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import styles from "./FileUpload.module.scss";
 import { validateFileName } from "./fileNameValidation";
+import { getExtensionLabel, SelectedFilesTable } from "./SelectedFilesTable";
 import {
 	FILE_TOO_LARGE_ERROR,
 	formatFileMeta,
 	MAX_FILE_SIZE,
 } from "./uploadConfig";
-
-function getExtensionLabel(name: string): string {
-	const ext = name.split(".").pop()?.toUpperCase();
-	return ext ?? "Fichier";
-}
 
 type Props = {
 	inputId: string;
@@ -35,6 +31,7 @@ type Props = {
 	 * but the user cannot add files (e.g. during admin impersonation).
 	 */
 	disabled?: boolean;
+	fileList?: "cards" | "table";
 };
 
 export function FileUpload({
@@ -47,9 +44,12 @@ export function FileUpload({
 	acceptLabel,
 	maxFileCount = 1,
 	disabled = false,
+	fileList = "cards",
 }: Props) {
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const dropzoneRef = useRef<HTMLElement>(null);
+	const selectButtonRef = useRef<HTMLButtonElement>(null);
+	const [restoreFocus, setRestoreFocus] = useState(false);
 	const [isDragging, setIsDragging] = useState(false);
 	const [objectUrls, setObjectUrls] = useState<string[]>([]);
 
@@ -130,12 +130,19 @@ export function FileUpload({
 	}
 
 	function handleRemove(index: number) {
+		setRestoreFocus(true);
 		const updated = selectedFiles.filter((_, i) => i !== index);
 		onFilesChange(updated, null);
 	}
 
 	const messagesId = `${inputId}-messages`;
 	const canAddMore = !disabled && selectedFiles.length < maxFileCount;
+
+	useEffect(() => {
+		if (!restoreFocus || !canAddMore) return;
+		setRestoreFocus(false);
+		selectButtonRef.current?.focus();
+	}, [restoreFocus, canAddMore]);
 
 	return (
 		<div>
@@ -162,6 +169,7 @@ export function FileUpload({
 							className={styles.selectButton}
 							disabled={!canAddMore}
 							onClick={() => fileInputRef.current?.click()}
+							ref={selectButtonRef}
 							type="button"
 						>
 							{maxFileCount === 1
@@ -173,39 +181,50 @@ export function FileUpload({
 							/>
 						</button>
 					</span>
-					<p className="fr-text--sm fr-mb-0">
+					<p className="fr-mb-0">
 						{maxFileCount === 1 ? "ou glisser-le ici" : "ou glisser-les ici"}
 					</p>
 				</div>
 			</section>
 
-			{selectedFiles.map((file, index) => (
-				<div className={`${styles.fileCard} fr-mt-2w`} key={file.name}>
-					<div className={styles.fileCardFooter}>
-						<div className={styles.fileCardInfo}>
-							<a
-								aria-label={`Télécharger ${file.name}`}
-								className="fr-link fr-icon-download-line fr-link--icon-right"
-								download={file.name}
-								href={objectUrls[index] ?? "#"}
+			{fileList === "table" && selectedFiles.length > 0 && (
+				<SelectedFilesTable
+					disabled={disabled}
+					files={selectedFiles}
+					objectUrls={objectUrls}
+					onRemove={handleRemove}
+					title={maxFileCount === 1 ? "Fichier déposé" : "Fichiers déposés"}
+				/>
+			)}
+
+			{fileList === "cards" &&
+				selectedFiles.map((file, index) => (
+					<div className={`${styles.fileCard} fr-mt-2w`} key={file.name}>
+						<div className={styles.fileCardFooter}>
+							<div className={styles.fileCardInfo}>
+								<a
+									aria-label={`Télécharger ${file.name}`}
+									className="fr-link fr-icon-download-line fr-link--icon-right"
+									download={file.name}
+									href={objectUrls[index] ?? "#"}
+								>
+									{file.name}
+								</a>
+								<p className="fr-text--xs fr-text-mention--grey fr-mb-0">
+									{formatFileMeta(getExtensionLabel(file.name), file.size)}
+								</p>
+							</div>
+							<button
+								aria-label={`Supprimer ${file.name}`}
+								className="fr-btn fr-btn--tertiary fr-btn--sm fr-icon-delete-line"
+								onClick={() => handleRemove(index)}
+								type="button"
 							>
-								{file.name}
-							</a>
-							<p className="fr-text--xs fr-text-mention--grey fr-mb-0">
-								{formatFileMeta(getExtensionLabel(file.name), file.size)}
-							</p>
+								Supprimer
+							</button>
 						</div>
-						<button
-							aria-label={`Supprimer ${file.name}`}
-							className="fr-btn fr-btn--tertiary fr-btn--sm fr-icon-delete-line"
-							onClick={() => handleRemove(index)}
-							type="button"
-						>
-							Supprimer
-						</button>
 					</div>
-				</div>
-			))}
+				))}
 
 			<input
 				accept={accept}

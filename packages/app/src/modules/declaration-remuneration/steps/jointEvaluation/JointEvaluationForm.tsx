@@ -8,6 +8,7 @@ import common from "~/modules/declaration-remuneration/shared/common.module.scss
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { FormErrors } from "~/modules/declaration-remuneration/shared/FormErrors";
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
+import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { getPostComplianceDestination } from "~/modules/navigation";
 import { COMPLIANCE_PATH } from "~/modules/routes";
 import { SUBMIT_LABEL, useFileUploadForm } from "~/modules/shared";
@@ -101,6 +102,7 @@ export function JointEvaluationForm({
 							Parcours de mise en conformité pour l&apos;indicateur par
 							catégorie d&apos;emplois
 						</h1>
+						<SavedIndicator hasData={true} />
 					</div>
 
 					<JointEvaluationHeading title="Évaluation conjointe des rémunérations" />
