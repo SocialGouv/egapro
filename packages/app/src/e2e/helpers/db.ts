@@ -722,6 +722,42 @@ export async function seedSubmittedRepresentationDeclaration(
 	}
 }
 
+// A draft is read back from its `draft` payload, never from the columns a submission fills.
+export async function seedRepresentationDraft(referenceYear: number) {
+	const draft = {
+		currentStep: 5,
+		referencePeriodStart: `${referenceYear}-01-01`,
+		referencePeriodEnd: `${referenceYear}-12-31`,
+		executivesCount: "two_or_more",
+		executiveWomenPercent: 40,
+		executiveMenPercent: 60,
+		hasManagementBody: true,
+		memberWomenPercent: 20,
+		memberMenPercent: 80,
+		hasWebsite: true,
+		publishDate: `${referenceYear + 1}-02-15`,
+		publishUrl: "https://example.fr/representation-equilibree",
+	};
+	const sql = createConnection();
+	try {
+		await sql`
+			DELETE FROM app_representation_declaration
+			WHERE siren = ${TEST_SIREN} AND year = ${referenceYear}
+		`;
+		await sql`
+			INSERT INTO app_representation_declaration (
+				id, siren, year, status, current_step, draft, draft_updated_at,
+				created_at, updated_at
+			) VALUES (
+				${crypto.randomUUID()}, ${TEST_SIREN}, ${referenceYear}, 'draft', 5,
+				${sql.json(draft)}, NOW(), NOW(), NOW()
+			)
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
 /**
  * Seed the GIP workforce of the {@link REPRESENTATION_SUBJECTION_WINDOW_YEARS}
  * consecutive exercises the représentation pre-filter reads (#3898), ending on

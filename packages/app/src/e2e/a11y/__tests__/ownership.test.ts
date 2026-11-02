@@ -27,7 +27,12 @@ const declaredIds = sample.sample.pages.map((p) => p.id);
 
 // The specs that record what the sweep skips, read as text: importing them would declare
 // Playwright tests inside vitest.
-const specs = ["funnels.a11y.ts", "dynamic.a11y.ts", "anonymous.a11y.ts"]
+const specs = [
+	"funnels.a11y.ts",
+	"dynamic.a11y.ts",
+	"anonymous.a11y.ts",
+	"backoffice.a11y.ts",
+]
 	.map((f) => readFileSync(join(__dirname, "..", f), "utf8"))
 	.join("\n");
 
@@ -87,6 +92,18 @@ describe("the RGAA sample is fully owned", () => {
 		expect(
 			dead,
 			`excluded from the sweep but declared nowhere and recorded nowhere: ${dead.join(", ")}`,
+		).toEqual([]);
+	});
+
+	it("never lets the sweep record a page a spec already owns", () => {
+		// The sweep runs last: a declared page it also takes overwrites the spec's snapshot with
+		// a bare visit that knows nothing of the state the spec pinned.
+		const twice = declaredIds.filter(
+			(id) => recordedBySpec(id) && !SNAPSHOTTED_ELSEWHERE.has(id),
+		);
+		expect(
+			twice,
+			`declared, recorded by a spec, and still taken by the sweep: ${twice.join(", ")}`,
 		).toEqual([]);
 	});
 });
