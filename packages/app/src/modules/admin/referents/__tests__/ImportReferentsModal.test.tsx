@@ -11,12 +11,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const importMutate = vi.fn();
 const importReset = vi.fn();
+const countFetch = vi.fn();
 let mutationOnError: ((err: { message: string }) => void) | undefined;
 let mutationOnSuccess: (() => void) | undefined;
 let mutationPending = false;
 
 vi.mock("~/trpc/react", () => ({
 	api: {
+		useUtils: () => ({ adminReferents: { count: { fetch: countFetch } } }),
 		adminReferents: {
 			import: {
 				useMutation: (opts: {
@@ -64,6 +66,29 @@ function renderModal() {
 	};
 }
 
+const VALID_FILE = JSON.stringify([
+	{ region: "11", name: "Jean", type: "email", value: "jean@gouv.fr" },
+	{ region: "84", name: "Marie", type: "url", value: "https://example.fr" },
+	{ region: "93", name: "Paul", type: "email", value: "paul@gouv.fr" },
+]);
+
+function findConfirmButton() {
+	return screen.findByRole("button", {
+		name: "Confirmer l'import",
+		hidden: true,
+	});
+}
+
+async function reachConfirmStep() {
+	const view = renderModal();
+	selectFile("referents.json", VALID_FILE);
+	fireEvent.click(
+		screen.getByRole("button", { name: "Vérifier l'import", hidden: true }),
+	);
+	await findConfirmButton();
+	return view;
+}
+
 function selectFile(name: string, content: string) {
 	const input = screen.getByLabelText(/Fichier JSON/, {
 		selector: "input",
@@ -79,6 +104,7 @@ describe("ImportReferentsModal", () => {
 		mutationOnError = undefined;
 		mutationOnSuccess = undefined;
 		mutationPending = false;
+		countFetch.mockResolvedValue({ total: 12 });
 	});
 
 	it("renders warning and title", () => {
@@ -88,10 +114,10 @@ describe("ImportReferentsModal", () => {
 		).toBeInTheDocument();
 	});
 
-	it("disables Importer until a file is selected", () => {
+	it("disables the review button until a file is selected", () => {
 		renderModal();
 		const importBtn = screen.getByRole("button", {
-			name: "Importer",
+			name: "Vérifier l'import",
 			hidden: true,
 		});
 		expect(importBtn).toBeDisabled();
@@ -101,7 +127,7 @@ describe("ImportReferentsModal", () => {
 		renderModal();
 		selectFile("bad.json", "not-json");
 		fireEvent.click(
-			screen.getByRole("button", { name: "Importer", hidden: true }),
+			screen.getByRole("button", { name: "Vérifier l'import", hidden: true }),
 		);
 		await waitFor(() => {
 			expect(
@@ -115,7 +141,7 @@ describe("ImportReferentsModal", () => {
 		renderModal();
 		selectFile("wrong.json", JSON.stringify([{ region: "bad" }]));
 		fireEvent.click(
-			screen.getByRole("button", { name: "Importer", hidden: true }),
+			screen.getByRole("button", { name: "Vérifier l'import", hidden: true }),
 		);
 		await waitFor(() => {
 			expect(screen.getByText(/Format invalide/)).toBeInTheDocument();
@@ -133,7 +159,7 @@ describe("ImportReferentsModal", () => {
 			new File(["not-json"], "bad.json", { type: "application/json" }),
 		);
 		fireEvent.click(
-			screen.getByRole("button", { name: "Importer", hidden: true }),
+			screen.getByRole("button", { name: "Vérifier l'import", hidden: true }),
 		);
 		await screen.findByText("Le fichier n'est pas un JSON valide.");
 
@@ -149,7 +175,7 @@ describe("ImportReferentsModal", () => {
 			screen.queryByText("Le fichier n'est pas un JSON valide."),
 		).toBeNull();
 		expect(
-			screen.getByRole("button", { name: "Importer", hidden: true }),
+			screen.getByRole("button", { name: "Vérifier l'import", hidden: true }),
 		).toBeDisabled();
 	});
 
@@ -163,7 +189,7 @@ describe("ImportReferentsModal", () => {
 			new File(["not-json"], "bad.json", { type: "application/json" }),
 		);
 		fireEvent.click(
-			screen.getByRole("button", { name: "Importer", hidden: true }),
+			screen.getByRole("button", { name: "Vérifier l'import", hidden: true }),
 		);
 		await screen.findByText("Le fichier n'est pas un JSON valide.");
 
@@ -174,7 +200,7 @@ describe("ImportReferentsModal", () => {
 			screen.queryByText("Le fichier n'est pas un JSON valide."),
 		).toBeNull();
 		expect(
-			screen.getByRole("button", { name: "Importer", hidden: true }),
+			screen.getByRole("button", { name: "Vérifier l'import", hidden: true }),
 		).toBeDisabled();
 	});
 
@@ -187,8 +213,9 @@ describe("ImportReferentsModal", () => {
 			]),
 		);
 		fireEvent.click(
-			screen.getByRole("button", { name: "Importer", hidden: true }),
+			screen.getByRole("button", { name: "Vérifier l'import", hidden: true }),
 		);
+		fireEvent.click(await findConfirmButton());
 		await waitFor(() => expect(importMutate).toHaveBeenCalledOnce());
 
 		mutationPending = true;
@@ -196,7 +223,7 @@ describe("ImportReferentsModal", () => {
 		act(() => modalRef.current?.dispatchEvent(new Event("dsfr.conceal")));
 		expect(importReset).not.toHaveBeenCalled();
 		expect(
-			screen.getByRole("button", { name: "Importer", hidden: true }),
+			screen.getByRole("button", { name: "Vérifier l'import", hidden: true }),
 		).toBeDisabled();
 		expect(
 			screen.getByLabelText(/Fichier JSON/, { selector: "input" }),
@@ -207,7 +234,7 @@ describe("ImportReferentsModal", () => {
 		expect(onClose).not.toHaveBeenCalled();
 	});
 
-	it("calls the mutation when the payload is valid", async () => {
+	it("calls the mutation only once the replacement is confirmed", async () => {
 		renderModal();
 		const valid = [
 			{
@@ -223,27 +250,43 @@ describe("ImportReferentsModal", () => {
 		];
 		selectFile("valid.json", JSON.stringify(valid));
 		fireEvent.click(
-			screen.getByRole("button", { name: "Importer", hidden: true }),
+			screen.getByRole("button", { name: "Vérifier l'import", hidden: true }),
 		);
+		const confirm = await findConfirmButton();
+		expect(importMutate).not.toHaveBeenCalled();
+
+		fireEvent.click(confirm);
 		await waitFor(() => {
 			expect(importMutate).toHaveBeenCalledTimes(1);
 		});
+		expect(importMutate).toHaveBeenCalledWith([
+			expect.objectContaining({ name: "Jean", value: "jean@gouv.fr" }),
+		]);
 	});
 
-	it("starts only one import on rapid consecutive clicks", async () => {
+	it("checks the file only once on rapid consecutive clicks", async () => {
 		renderModal();
-		selectFile(
-			"valid.json",
-			JSON.stringify([
-				{ region: "11", name: "Jean", type: "email", value: "jean@gouv.fr" },
-			]),
-		);
-		const importButton = screen.getByRole("button", {
-			name: "Importer",
+		selectFile("valid.json", VALID_FILE);
+		const reviewButton = screen.getByRole("button", {
+			name: "Vérifier l'import",
 			hidden: true,
 		});
-		fireEvent.click(importButton);
-		fireEvent.click(importButton);
+		fireEvent.click(reviewButton);
+		fireEvent.click(reviewButton);
+
+		await findConfirmButton();
+		expect(countFetch).toHaveBeenCalledOnce();
+	});
+
+	it("starts only one import on rapid consecutive confirmations", async () => {
+		renderModal();
+		selectFile("valid.json", VALID_FILE);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Vérifier l'import", hidden: true }),
+		);
+		const confirm = await findConfirmButton();
+		fireEvent.click(confirm);
+		fireEvent.click(confirm);
 
 		await waitFor(() => expect(importMutate).toHaveBeenCalledOnce());
 	});
@@ -263,5 +306,144 @@ describe("ImportReferentsModal", () => {
 		});
 		expect(onClose).toHaveBeenCalled();
 		expect(onSuccess).toHaveBeenCalled();
+	});
+
+	it("announces how many referents are deleted and added before anything is imported", async () => {
+		await reachConfirmStep();
+
+		const heading = screen.getByRole("heading", {
+			name: "Confirmer le remplacement des référents",
+			hidden: true,
+		});
+		expect(heading).toHaveFocus();
+		const section = screen.getByRole("region", {
+			name: "Confirmer le remplacement des référents",
+			hidden: true,
+		});
+		expect(section).toHaveTextContent(
+			"Le fichier « referents.json » est valide",
+		);
+		expect(section).toHaveTextContent(
+			"12 référents existants seront supprimés",
+		);
+		expect(section).toHaveTextContent("3 référents seront ajoutés");
+		expect(section).toHaveTextContent("Cette suppression est définitive");
+		expect(countFetch).toHaveBeenCalledOnce();
+		expect(importMutate).not.toHaveBeenCalled();
+	});
+
+	it("uses the singular when one referent is deleted and one added", async () => {
+		countFetch.mockResolvedValue({ total: 1 });
+		renderModal();
+		selectFile(
+			"one.json",
+			JSON.stringify([
+				{ region: "11", name: "Jean", type: "email", value: "jean@gouv.fr" },
+			]),
+		);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Vérifier l'import", hidden: true }),
+		);
+		await findConfirmButton();
+		expect(
+			screen.getByText(/référent existant sera supprimé/),
+		).toHaveTextContent("1 référent existant sera supprimé");
+		expect(screen.getByText(/référent sera ajouté/)).toHaveTextContent(
+			"1 référent sera ajouté",
+		);
+	});
+
+	it("goes back to the file step without importing, keeping the file, and focuses the title", async () => {
+		await reachConfirmStep();
+
+		fireEvent.click(
+			screen.getByRole("button", {
+				name: "Revenir au choix du fichier",
+				hidden: true,
+			}),
+		);
+
+		expect(importMutate).not.toHaveBeenCalled();
+		expect(
+			screen.queryByRole("button", {
+				name: "Confirmer l'import",
+				hidden: true,
+			}),
+		).toBeNull();
+		expect(
+			screen.getByRole("heading", {
+				name: "Importer des référents",
+				hidden: true,
+			}),
+		).toHaveFocus();
+		expect(
+			screen.getByRole("button", { name: "Vérifier l'import", hidden: true }),
+		).toBeEnabled();
+	});
+
+	it("cancels from the confirmation step without importing and resets on conceal", async () => {
+		const { onClose, modalRef } = await reachConfirmStep();
+
+		fireEvent.click(
+			screen.getByRole("button", { name: "Annuler", hidden: true }),
+		);
+		act(() => modalRef.current?.dispatchEvent(new Event("dsfr.conceal")));
+
+		expect(onClose).toHaveBeenCalledOnce();
+		expect(importMutate).not.toHaveBeenCalled();
+		expect(
+			screen.queryByRole("button", {
+				name: "Confirmer l'import",
+				hidden: true,
+			}),
+		).toBeNull();
+		expect(
+			screen.getByRole("button", { name: "Vérifier l'import", hidden: true }),
+		).toBeDisabled();
+	});
+
+	it("refuses to go further when the existing referents cannot be counted", async () => {
+		countFetch.mockRejectedValue(new Error("network"));
+		renderModal();
+		selectFile("referents.json", VALID_FILE);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Vérifier l'import", hidden: true }),
+		);
+
+		expect(
+			await screen.findByText(
+				"Le nombre de référents existants n'a pas pu être vérifié. Veuillez réessayer.",
+			),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole("button", {
+				name: "Confirmer l'import",
+				hidden: true,
+			}),
+		).toBeNull();
+		expect(importMutate).not.toHaveBeenCalled();
+	});
+
+	it("keeps the confirmation step and shows the server error when the import fails", async () => {
+		await reachConfirmStep();
+		fireEvent.click(await findConfirmButton());
+		await waitFor(() => expect(importMutate).toHaveBeenCalledOnce());
+
+		act(() => mutationOnError?.({ message: "Import refusé" }));
+
+		expect(screen.getByRole("alert", { hidden: true })).toHaveTextContent(
+			"Import refusé",
+		);
+		expect(await findConfirmButton()).toBeInTheDocument();
+	});
+
+	it("does not show the count when the file is invalid", async () => {
+		renderModal();
+		selectFile("bad.json", "not-json");
+		fireEvent.click(
+			screen.getByRole("button", { name: "Vérifier l'import", hidden: true }),
+		);
+		await screen.findByText("Le fichier n'est pas un JSON valide.");
+		expect(countFetch).not.toHaveBeenCalled();
 	});
 });

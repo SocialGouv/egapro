@@ -76,6 +76,11 @@ export const adminReferentsRouter = createTRPCRouter({
 			};
 		}),
 
+	count: adminProcedure.query(async ({ ctx }) => {
+		const [result] = await ctx.db.select({ total: count() }).from(referents);
+		return { total: result?.total ?? 0 };
+	}),
+
 	create: adminProcedure
 		.input(createReferentSchema)
 		.mutation(async ({ ctx, input }) => {

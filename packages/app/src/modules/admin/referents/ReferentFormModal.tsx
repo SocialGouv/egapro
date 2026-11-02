@@ -1,10 +1,16 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import type { CountyCode, RegionCode } from "~/modules/domain";
 import { useDsfrModal, useZodForm } from "~/modules/shared";
 
 import { ReferentFormFields } from "./ReferentFormFields";
+import {
+	ReferentReviewActions,
+	ReferentReviewStep,
+} from "./ReferentReviewStep";
+import { listReferentChanges } from "./referentChanges";
 import type { ReferentFormValues } from "./schemas";
 import { referentFormSchema } from "./schemas";
 import type { ReferentSearchRow } from "./types";
@@ -42,6 +48,12 @@ export function ReferentFormModal({
 	onClose: () => void;
 }) {
 	const modalId = mode === "create" ? CREATE_MODAL_ID : EDIT_MODAL_ID;
+	const reviewHeadingId = `${modalId}-review-title`;
+	const titleRef = useRef<HTMLHeadingElement>(null);
+	const reviewHeadingRef = useRef<HTMLHeadingElement>(null);
+	const [pendingEdit, setPendingEdit] = useState<ReferentFormValues | null>(
+		null,
+	);
 
 	const {
 		register,
@@ -89,16 +101,46 @@ export function ReferentFormModal({
 		}
 	}, [mode, referent, reset]);
 
+	useEffect(() => {
+		const modal = modalRef.current;
+		if (!modal) return;
+		const handleConceal = () => setPendingEdit(null);
+		modal.addEventListener("dsfr.conceal", handleConceal);
+		return () => modal.removeEventListener("dsfr.conceal", handleConceal);
+	}, [modalRef]);
+
 	const doSubmit = useCallback(
 		(data: ReferentFormValues) => {
-			onSubmit(
-				mode === "edit" && referent ? { ...data, id: referent.id } : data,
-			);
+			if (mode === "edit") {
+				flushSync(() => setPendingEdit(data));
+				reviewHeadingRef.current?.focus();
+				return;
+			}
+			onSubmit(data);
 			onClose();
 			reset();
 		},
-		[mode, referent, onSubmit, onClose, reset],
+		[mode, onSubmit, onClose, reset],
 	);
+
+	const confirmEdit = useCallback(() => {
+		if (!pendingEdit || !referent) return;
+		onSubmit({ ...pendingEdit, id: referent.id });
+		setPendingEdit(null);
+		onClose();
+		reset();
+	}, [pendingEdit, referent, onSubmit, onClose, reset]);
+
+	const backToFields = useCallback(() => {
+		flushSync(() => setPendingEdit(null));
+		titleRef.current?.focus();
+	}, []);
+
+	const isReviewing = mode === "edit" && pendingEdit !== null;
+	const changes =
+		isReviewing && referent ? listReferentChanges(referent, pendingEdit) : [];
+	const submitLabel =
+		mode === "edit" ? "Vérifier les modifications" : "Sauvegarder";
 
 	return (
 		<dialog
@@ -124,13 +166,19 @@ export function ReferentFormModal({
 								</button>
 							</div>
 							<div className="fr-modal__content">
-								<h2 className="fr-modal__title" id={`${modalId}-title`}>
+								<h2
+									className="fr-modal__title"
+									id={`${modalId}-title`}
+									ref={titleRef}
+									tabIndex={-1}
+								>
 									{mode === "create"
 										? "Ajouter un référent"
 										: "Modifier le référent"}
 								</h2>
 								<form
 									autoComplete="off"
+									hidden={isReviewing}
 									id={`${modalId}-form`}
 									onSubmit={handleSubmit(doSubmit)}
 								>
@@ -141,29 +189,46 @@ export function ReferentFormModal({
 										watch={watch}
 									/>
 								</form>
+								{isReviewing && (
+									<ReferentReviewStep
+										changes={changes}
+										headingId={reviewHeadingId}
+										headingRef={reviewHeadingRef}
+									/>
+								)}
 							</div>
 							<div className="fr-modal__footer">
-								<ul className="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg">
-									<li>
-										<button
-											className="fr-btn fr-btn--primary"
-											disabled={!isValid}
-											form={`${modalId}-form`}
-											type="submit"
-										>
-											Sauvegarder
-										</button>
-									</li>
-									<li>
-										<button
-											className="fr-btn fr-btn--secondary"
-											onClick={onClose}
-											type="button"
-										>
-											Annuler
-										</button>
-									</li>
-								</ul>
+								{isReviewing && (
+									<ReferentReviewActions
+										canConfirm={changes.length > 0}
+										onBack={backToFields}
+										onCancel={onClose}
+										onConfirm={confirmEdit}
+									/>
+								)}
+								{!isReviewing && (
+									<ul className="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg">
+										<li>
+											<button
+												className="fr-btn fr-btn--primary"
+												disabled={!isValid}
+												form={`${modalId}-form`}
+												type="submit"
+											>
+												{submitLabel}
+											</button>
+										</li>
+										<li>
+											<button
+												className="fr-btn fr-btn--secondary"
+												onClick={onClose}
+												type="button"
+											>
+												Annuler
+											</button>
+										</li>
+									</ul>
+								)}
 							</div>
 						</div>
 					</div>
