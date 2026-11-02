@@ -58,6 +58,22 @@ export async function ensureCurrentYearDeclaration(year?: number) {
 	}
 }
 
+export async function getTestDeclarationId(
+	year: number,
+): Promise<string | null> {
+	const sql = createConnection();
+	try {
+		const rows = await sql<{ id: string }[]>`
+			SELECT id FROM app_declaration
+			WHERE siren = ${TEST_SIREN} AND year = ${year} AND cancelled_at IS NULL
+			LIMIT 1
+		`;
+		return rows[0]?.id ?? null;
+	} finally {
+		await sql.end();
+	}
+}
+
 export async function resetDeclarationToDraft() {
 	const sql = createConnection();
 	try {

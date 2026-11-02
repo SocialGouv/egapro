@@ -1,7 +1,7 @@
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { getReferenceYearFor } from "~/modules/domain";
 import {
-	ADMIN_DECLARATIONS,
+	adminDeclarationHref,
 	CGU,
 	mySpaceRepresentationHref,
 	referentHref,
@@ -10,6 +10,7 @@ import { TEST_SIREN } from "../constants";
 import {
 	ensureCurrentYearDeclaration,
 	getCurrentDbYear,
+	getTestDeclarationId,
 	resetRepresentationDeclaration,
 	seedSubmittedRepresentationDeclaration,
 } from "../helpers/db";
@@ -80,28 +81,38 @@ test.describe("RGAA — pages à segment dynamique", () => {
 	test("snapshot le détail d'une déclaration au backoffice", async ({
 		page,
 	}) => {
-		// On a fresh database nothing has declared yet when this spec runs: the list would be empty.
-		await ensureCurrentYearDeclaration(await getCurrentDbYear());
-		await page.goto(ADMIN_DECLARATIONS);
-		await page.waitForLoadState("networkidle");
-
-		// `count()` resolves immediately on an empty match, where `getAttribute()` would
-		// auto-wait for an element that never comes and burn the whole test timeout.
-		const links = page.locator('a[href^="/admin/declarations/"]');
+		// The test company's own declaration, never the first row listed: the observatory seeds
+		// carry ids that are not UUIDs, which the detail query rejects as « introuvable ».
+		const year = await getCurrentDbYear();
+		await ensureCurrentYearDeclaration(year);
+		const declarationId = await getTestDeclarationId(year);
 		test.skip(
-			(await links.count()) === 0,
-			"aucune déclaration listée au backoffice — rien à échantillonner",
+			declarationId === null,
+			"aucune déclaration de l'entreprise de test — rien à échantillonner",
 		);
 
-		const detailHref = await links.first().getAttribute("href");
-		await page.goto(detailHref as string);
+		const detailHref = adminDeclarationHref(declarationId as string);
+		// Client-rendered: « Chargement... » until the declaration arrives, then a second request
+		// for the recap. A snapshot before both audits a loading message, not the page.
+		const recapAnswered = page.waitForResponse((response) =>
+			response.url().includes("adminDeclarations.getRecap"),
+		);
+		await page.goto(detailHref);
+		await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+		await expect(page.getByText("Chargement...")).toHaveCount(0);
+		await recapAnswered;
+
 		await snapshotCurrentPage(page, {
-			path: detailHref as string,
+			path: detailHref,
 			id: "admin-declaration-detail",
 			name: "Backoffice — détail d'une déclaration",
-			sources: ["src/app/admin/declarations/[declarationId]/page.tsx"],
+			sources: [
+				"src/app/admin/declarations/[declarationId]/page.tsx",
+				"src/modules/admin/declarations/AdminDeclarationDetailPage.tsx",
+			],
 			auth: true,
-			notes: "Première déclaration listée au backoffice.",
+			notes:
+				"Déclaration de l'entreprise de test, capturée une fois la déclaration et son récapitulatif chargés.",
 		});
 	});
 

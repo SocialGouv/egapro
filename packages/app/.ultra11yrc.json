@@ -452,9 +452,12 @@
 				"id": "admin-declaration-detail",
 				"name": "Backoffice — détail d'une déclaration",
 				"url": "http://localhost:3000/admin/declarations/[declarationId]",
-				"sources": ["src/app/admin/declarations/[declarationId]/page.tsx"],
+				"sources": [
+					"src/app/admin/declarations/[declarationId]/page.tsx",
+					"src/modules/admin/declarations/AdminDeclarationDetailPage.tsx"
+				],
 				"auth": true,
-				"notes": "Requiert un compte listé dans ADMIN_EMAILS. Première déclaration listée au backoffice : son identifiant vient de la base, l'adresse déclarée n'est pas visitée."
+				"notes": "Requiert un compte listé dans ADMIN_EMAILS. Déclaration de l'entreprise de test, capturée une fois la déclaration et son récapitulatif chargés : son identifiant vient de la base, l'adresse déclarée n'est pas visitée."
 			}
 		],
 		"transverse": [
