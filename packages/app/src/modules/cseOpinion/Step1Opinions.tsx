@@ -9,12 +9,7 @@ import { useIsImpersonating, useReadOnlyGuard } from "~/modules/auth";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { getCurrentYear } from "~/modules/domain";
-import type { AppHref } from "~/modules/routes";
-import {
-	cseOpinionStepHref,
-	LAST_REMUNERATION_STEP,
-	remunerationStepHref,
-} from "~/modules/routes";
+import { cseOpinionStepHref } from "~/modules/routes";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { AccuracyOpinionCard } from "./components/AccuracyOpinionCard";
@@ -56,7 +51,6 @@ type Props = {
 	firstDeclGapHigh?: boolean;
 	firstDeclarationPathChoice?: string | null;
 	hasSecondDeclaration?: boolean;
-	previousHref?: AppHref;
 	secondDeclGapHigh?: boolean;
 	secondDeclarationPathChoice?: string | null;
 };
@@ -70,7 +64,6 @@ export function Step1Opinions({
 	firstDeclGapHigh = true,
 	firstDeclarationPathChoice,
 	hasSecondDeclaration = true,
-	previousHref = remunerationStepHref(LAST_REMUNERATION_STEP),
 	secondDeclGapHigh = true,
 	secondDeclarationPathChoice,
 }: Props) {
@@ -222,7 +215,7 @@ export function Step1Opinions({
 						<div className="fr-col">
 							<h1 className="fr-h4 fr-mb-0">
 								Parcours de mise en conformité pour l'indicateur par catégorie
-								de salariés
+								d'emplois
 							</h1>
 						</div>
 					</div>
@@ -336,7 +329,7 @@ export function Step1Opinions({
 								}}
 								opinion={secondDeclOpinion ?? null}
 								readOnly={isReadOnly}
-								title="Exactitude des données et des méthodes de calcul de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés"
+								title="Exactitude des données et des méthodes de calcul de la seconde déclaration de l'indicateur de rémunération par catégorie d'emplois"
 							/>
 
 							{showSecondDeclarationGap && (
@@ -392,12 +385,7 @@ export function Step1Opinions({
 				</div>
 
 				<div className={`fr-mt-4w ${formStyles.actions}`}>
-					<Link
-						className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
-						href={previousHref}
-					>
-						Précédent
-					</Link>
+					<span />
 					{isImpersonating && initialData ? (
 						<Link
 							className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"

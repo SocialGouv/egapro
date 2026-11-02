@@ -77,7 +77,7 @@ const SUBMIT_UNAVAILABLE_ERROR =
 	"La déclaration ne peut pas être transmise à cette étape de la démarche.";
 
 const INDICATOR_G_MISSING_ERROR =
-	"L'indicateur par catégorie de salariés doit être renseigné avant la transmission de la déclaration.";
+	"L'indicateur par catégorie d'emplois doit être renseigné avant la transmission de la déclaration.";
 
 const PATH_LOCKED_ERROR =
 	"Le choix du parcours ne peut plus être modifié : une action aval a déjà été enregistrée.";

@@ -136,10 +136,14 @@ export { hasRequiredDeclarationInfo } from "./shared/declarationPrerequisites";
 // Declaration process step deadline
 export { getDeclarationProcessStepDeadline } from "./shared/declarationProcessStep";
 // Declaration status
-export type { SubmissionLockTarget } from "./shared/declarationStatus";
+export type {
+	CompliancePathReadOnlyReason,
+	SubmissionLockTarget,
+} from "./shared/declarationStatus";
 export {
 	applyDeclarationClosure,
 	computeDeclarationStatus,
+	getCompliancePathReadOnlyReason,
 	getCurrentCompliancePath,
 	hasSavedSecondDeclarationData,
 	hasStartedSecondDeclaration,

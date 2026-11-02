@@ -291,55 +291,60 @@ test.describe("[CAS-11] Path 11: second round + joint evaluation + no hasCse →
 	});
 });
 
-// === GROUP F.0: /avis-cse Précédent button routes via rule-engine state ===
+// === GROUP F.0: /avis-cse offers no Précédent back to a transmitted step ===
 
-test.describe("[ANX-03] Path 13.a: no gap → /avis-cse Précédent → /etape/6 (recap)", () => {
+test.describe("[ANX-03] Path 13.a: no gap → /avis-cse and /etape/6 without Précédent", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
 		await setCompanyWorkforce(200);
 	});
 
-	test("after no-gap submission, Précédent on /avis-cse goes to step 6", async ({
+	test("after no-gap submission, neither /avis-cse nor step 6 offers Précédent", async ({
 		page,
 	}) => {
 		test.slow();
 		await completeDeclaration(page, { hasGap: false });
 		await page.waitForURL(urlGlob(cseOpinionStepHref(1)), { timeout: 10_000 });
-		await page.getByRole("link", { name: /Précédent/ }).click();
+		await expect(page.getByRole("button", { name: "Suivant" })).toBeVisible();
+		await expect(page.getByRole("link", { name: /Précédent/ })).toHaveCount(0);
+
+		await page.goto(remunerationStepHref(6));
 		await page.waitForURL(urlGlob(remunerationStepHref(6)), {
 			timeout: 10_000,
 		});
+		await expect(page.getByRole("link", { name: "Suivant" })).toBeVisible();
+		await expect(page.getByRole("link", { name: /Précédent/ })).toHaveCount(0);
 	});
 });
 
-test.describe("[ANX-03] Path 13.b: justify round 1 → /avis-cse Précédent → /parcours-conformite", () => {
+test.describe("[ANX-03] Path 13.b: justify round 1 → /avis-cse without Précédent", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
 		await setCompanyWorkforce(200);
 	});
 
-	test("after justify choice, Précédent on /avis-cse goes back to compliance choice", async ({
+	test("after justify choice, /avis-cse offers no Précédent back to the compliance choice", async ({
 		page,
 	}) => {
 		test.slow();
 		await completeDeclaration(page, { hasGap: true });
 		await selectCompliancePath(page, "path-justify");
 		await page.waitForURL(urlGlob(cseOpinionStepHref(1)), { timeout: 10_000 });
-		await page.getByRole("link", { name: /Précédent/ }).click();
-		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });
+		await expect(page.getByRole("button", { name: "Suivant" })).toBeVisible();
+		await expect(page.getByRole("link", { name: /Précédent/ })).toHaveCount(0);
 	});
 });
 
-test.describe("[ANX-03] Path 13.c: corrective second decl resolved → /avis-cse Précédent → /etape/3", () => {
+test.describe("[ANX-03] Path 13.c: corrective second decl resolved → /avis-cse without Précédent", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
 		await setCompanyWorkforce(200);
 	});
 
-	test("after second-decl resolved, Précédent on /avis-cse goes to second-decl recap", async ({
+	test("after second-decl resolved, /avis-cse offers no Précédent back to the second-decl recap", async ({
 		page,
 	}) => {
 		test.slow();
@@ -347,8 +352,8 @@ test.describe("[ANX-03] Path 13.c: corrective second decl resolved → /avis-cse
 		await selectCompliancePath(page, "path-corrective");
 		await completeSecondDeclaration(page, { hasGap: false });
 		await page.waitForURL(urlGlob(cseOpinionStepHref(1)), { timeout: 10_000 });
-		await page.getByRole("link", { name: /Précédent/ }).click();
-		await page.waitForURL(urlGlob(complianceStepHref(3)), { timeout: 10_000 });
+		await expect(page.getByRole("button", { name: "Suivant" })).toBeVisible();
+		await expect(page.getByRole("link", { name: /Précédent/ })).toHaveCount(0);
 	});
 });
 

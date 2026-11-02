@@ -23,12 +23,16 @@ import {
 	submittedDeclarationCondition,
 } from "~/server/db/declarationConditions";
 import {
+	companies,
+	cseOpinionFiles,
+	cseOpinions,
 	declarationStatusHistory,
 	declarations,
 	employeeCategories,
 	files,
 	gipMdsData,
 	jobCategories,
+	users,
 } from "~/server/db/schema";
 
 type DeclarationRow = typeof declarations.$inferSelect;
@@ -430,3 +434,113 @@ export async function findTransmittedJointEvaluation(
 	}
 	return { submission, file };
 }
+
+// One snapshot: an edit commits the revision marker and the opinion rows together.
+export async function findTransmittedCseOpinions(
+	executor: import("~/server/db").DB,
+	declarationId: string,
+) {
+	return executor.transaction(
+		async (tx) => {
+			const submission = await findLatestStatusEvent(
+				tx,
+				declarationId,
+				"cse_opinion_submit",
+			);
+			if (!submission) return null;
+
+			const [identity] = await tx
+				.select({
+					year: declarations.year,
+					secondDeclReferencePeriodStart:
+						declarations.secondDeclReferencePeriodStart,
+					secondDeclReferencePeriodEnd:
+						declarations.secondDeclReferencePeriodEnd,
+					cseOpinionDraftUpdatedAt: declarations.cseOpinionDraftUpdatedAt,
+					company: {
+						name: companies.name,
+						siren: companies.siren,
+						address: companies.address,
+						countryCode: companies.countryCode,
+						countryLabel: companies.countryLabel,
+						departmentLabel: companies.departmentLabel,
+						nafCode: companies.nafCode,
+						nafLabel: companies.nafLabel,
+						hasCse: companies.hasCse,
+					},
+					declarant: {
+						firstName: users.firstName,
+						lastName: users.lastName,
+						email: users.email,
+						phone: users.phone,
+					},
+				})
+				.from(declarations)
+				.innerJoin(companies, eq(declarations.siren, companies.siren))
+				.innerJoin(users, eq(declarations.declarantId, users.id))
+				.where(eq(declarations.id, declarationId))
+				.limit(1);
+			if (!identity || identity.cseOpinionDraftUpdatedAt) return null;
+
+			const [opinions, associations, secondSubmission, [gip]] =
+				await Promise.all([
+					tx
+						.select({
+							declarationNumber: cseOpinions.declarationNumber,
+							type: cseOpinions.type,
+							gapConsulted: cseOpinions.gapConsulted,
+							opinion: cseOpinions.opinion,
+							opinionDate: cseOpinions.opinionDate,
+						})
+						.from(cseOpinions)
+						.where(eq(cseOpinions.declarationId, declarationId)),
+					tx
+						.select({
+							declarationNumber: cseOpinionFiles.declarationNumber,
+							type: cseOpinionFiles.type,
+							fileId: files.id,
+							fileName: files.fileName,
+							filePath: files.filePath,
+							uploadedAt: files.uploadedAt,
+						})
+						.from(cseOpinionFiles)
+						.innerJoin(
+							files,
+							and(
+								eq(cseOpinionFiles.fileId, files.id),
+								eq(files.declarationId, declarationId),
+								eq(files.type, "cse_opinion"),
+							),
+						)
+						.where(eq(cseOpinionFiles.declarationId, declarationId)),
+					findLatestStatusEvent(tx, declarationId, "second_declaration_submit"),
+					tx
+						.select({ workforceEma: gipMdsData.workforceEma })
+						.from(gipMdsData)
+						.where(
+							and(
+								eq(gipMdsData.siren, identity.company.siren),
+								eq(gipMdsData.year, identity.year),
+							),
+						)
+						.limit(1),
+				]);
+
+			const { cseOpinionDraftUpdatedAt: _draftRevision, ...transmitted } =
+				identity;
+			return {
+				...transmitted,
+				submittedAt: submission.createdAt,
+				workforceEma: gip?.workforceEma ?? null,
+				hasSubmittedSecondDeclaration: secondSubmission !== null,
+				opinions,
+				associations,
+			};
+		},
+		{ isolationLevel: "repeatable read" },
+	);
+}
+
+export type TransmittedCseOpinions = NonNullable<
+	Awaited<ReturnType<typeof findTransmittedCseOpinions>>
+>;

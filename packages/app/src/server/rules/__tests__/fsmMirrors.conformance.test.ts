@@ -7,11 +7,7 @@ import {
 	computePanelVariant,
 } from "~/modules/my-space/declarationProcessState";
 import type { DeclarationItem } from "~/modules/my-space/types";
-import {
-	CSE_OPINION_PREVIOUS_HREF,
-	getCurrentStageHref,
-	resolveCseOpinionOrigin,
-} from "~/modules/navigation";
+import { getCurrentStageHref } from "~/modules/navigation";
 import {
 	COMPLIANCE_CONFIRMATION,
 	COMPLIANCE_JOINT_EVALUATION,
@@ -88,78 +84,6 @@ describe("engine conformance to the shared FSM vocabulary", () => {
 		for (const transition of rules.transitions) {
 			expect(ids.has(transition.to)).toBe(true);
 		}
-	});
-});
-
-// Provenance: every engine transition landing on `awaiting_cse_opinion` must have
-// a branch in the navigation table, so adding one without wiring "Précédent"
-// breaks here rather than sending the user to the wrong page.
-const CSE_OPINION_ORIGIN_CONTEXTS = [
-	{
-		firstDeclarationPathChoice: null,
-		secondDeclarationPathChoice: null,
-		hasSubmittedSecondDeclaration: false,
-	},
-	{
-		firstDeclarationPathChoice: "justify",
-		secondDeclarationPathChoice: null,
-		hasSubmittedSecondDeclaration: false,
-	},
-	{
-		firstDeclarationPathChoice: "joint_evaluation",
-		secondDeclarationPathChoice: null,
-		hasSubmittedSecondDeclaration: false,
-	},
-	{
-		firstDeclarationPathChoice: null,
-		secondDeclarationPathChoice: null,
-		hasSubmittedSecondDeclaration: true,
-	},
-	{
-		firstDeclarationPathChoice: null,
-		secondDeclarationPathChoice: "justify",
-		hasSubmittedSecondDeclaration: true,
-	},
-	{
-		firstDeclarationPathChoice: null,
-		secondDeclarationPathChoice: "joint_evaluation",
-		hasSubmittedSecondDeclaration: true,
-	},
-] as const;
-
-describe("provenance conformance — engine transitions into awaiting_cse_opinion", () => {
-	const incoming = rules.transitions.filter(
-		(transition) => transition.to === "awaiting_cse_opinion",
-	);
-
-	it("the engine has incoming transitions to check", () => {
-		expect(incoming.length).toBeGreaterThan(0);
-	});
-
-	it("the provenance table names exactly the engine transitions that land there", () => {
-		expect(Object.keys(CSE_OPINION_PREVIOUS_HREF).sort()).toEqual(
-			incoming.map((transition) => transition.id).sort(),
-		);
-	});
-
-	it.each(
-		incoming,
-	)("transition $id has a previous-page branch", (transition) => {
-		const href =
-			CSE_OPINION_PREVIOUS_HREF[
-				transition.id as keyof typeof CSE_OPINION_PREVIOUS_HREF
-			];
-		expect(href, `no provenance branch for ${transition.id}`).toBeDefined();
-		expect(href).not.toBe(CSE);
-	});
-
-	it("every engine transition is reachable from a stored démarche", () => {
-		const reached = CSE_OPINION_ORIGIN_CONTEXTS.map((context) =>
-			resolveCseOpinionOrigin(context),
-		);
-		expect([...new Set(reached)].sort()).toEqual(
-			incoming.map((transition) => transition.id).sort(),
-		);
 	});
 });
 

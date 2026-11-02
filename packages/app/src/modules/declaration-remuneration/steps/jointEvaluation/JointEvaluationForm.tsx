@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { useReadOnlyGuard } from "~/modules/auth";
@@ -10,7 +9,6 @@ import { FormErrors } from "~/modules/declaration-remuneration/shared/FormErrors
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { formatCivilLongDate } from "~/modules/domain";
 import { getPostComplianceDestination } from "~/modules/navigation";
-import { COMPLIANCE_PATH } from "~/modules/routes";
 import { SUBMIT_LABEL, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import {
@@ -101,7 +99,7 @@ export function JointEvaluationForm({
 					<div className={common.flexBetween}>
 						<h1 className="fr-h4 fr-mb-0">
 							Parcours de mise en conformité pour l&apos;indicateur par
-							catégorie de salariés
+							catégorie d&apos;emplois
 						</h1>
 					</div>
 
@@ -139,12 +137,7 @@ export function JointEvaluationForm({
 					/>
 
 					<div className={common.flexBetween}>
-						<Link
-							className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
-							href={COMPLIANCE_PATH}
-						>
-							Précédent
-						</Link>
+						<span />
 						<span>
 							<button
 								{...readOnlyGuard.buttonProps}

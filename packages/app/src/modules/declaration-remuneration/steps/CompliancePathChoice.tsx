@@ -11,6 +11,7 @@ import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/d
 import { useDraftAutoSave } from "~/modules/declaration-remuneration/shared/draft/useDraftAutoSave";
 import { useDraftHydration } from "~/modules/declaration-remuneration/shared/draft/useDraftHydration";
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
+import type { CompliancePathReadOnlyReason } from "~/modules/domain";
 import {
 	type CampaignDeadlines,
 	type CompliancePathValue,
@@ -18,10 +19,7 @@ import {
 	selectPathChoiceDeadline,
 } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
-import {
-	getCompliancePathHref,
-	getCompliancePathPreviousHref,
-} from "~/modules/navigation";
+import { getCompliancePathHref } from "~/modules/navigation";
 import { scrollToTop } from "~/modules/shared/scrollToTop";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
@@ -36,7 +34,6 @@ import {
 	SecondRoundOptions,
 } from "./compliancePath/CompliancePathOptions";
 import { CompliancePathReadOnlyAlert } from "./compliancePath/CompliancePathReadOnlyAlert";
-import type { CompliancePathReadOnlyReason } from "./compliancePath/constants";
 import { DeclarationSuccessBanner } from "./compliancePath/DeclarationSuccessBanner";
 
 type Props = {
@@ -179,8 +176,8 @@ export function CompliancePathChoice({
 				) : null}
 
 				<h2 className="fr-h4 fr-mb-0">
-					Parcours de mise en conformité pour l&apos;indicateur par catégorie
-					de&nbsp;salariés
+					Parcours de mise en conformité pour l&apos;indicateur par
+					catégorie&nbsp;d&apos;emplois
 				</h2>
 
 				<div className={common.flexColumnGap1}>
@@ -280,7 +277,6 @@ export function CompliancePathChoice({
 							: undefined
 					}
 					nextLabel="Suivant"
-					previousHref={getCompliancePathPreviousHref(isSecondRound)}
 				/>
 			</fieldset>
 		</form>

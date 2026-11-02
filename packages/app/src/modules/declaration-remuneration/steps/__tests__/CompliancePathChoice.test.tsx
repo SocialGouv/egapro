@@ -370,27 +370,26 @@ describe("CompliancePathChoice", () => {
 		expect(screen.queryByText("1ᵉʳ juillet 2026")).not.toBeInTheDocument();
 	});
 
-	it("renders previous link pointing to step 6", () => {
+	it("renders no previous link back to the transmitted declaration", () => {
 		render(compliancePathChoice());
-		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
-			"href",
-			"/declaration-remuneration/etape/6",
-		);
+		expect(
+			screen.queryByRole("link", { name: /précédent/i }),
+		).not.toBeInTheDocument();
 	});
 
 	it("neutralises the top margin of the form actions (issue #4141)", () => {
 		render(compliancePathChoice());
 		expect(
-			screen.getByRole("link", { name: /précédent/i }).parentElement,
+			screen.getByRole("button", { name: /suivant/i }).parentElement
+				?.parentElement,
 		).toHaveClass("fr-mt-0");
 	});
 
-	it("renders previous link pointing to the second-declaration recap in round 2", () => {
+	it("renders no previous link back to the transmitted second declaration in round 2", () => {
 		render(compliancePathChoice({ isSecondRound: true }));
-		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
-			"href",
-			"/declaration-remuneration/parcours-conformite/etape/3",
-		);
+		expect(
+			screen.queryByRole("link", { name: /précédent/i }),
+		).not.toBeInTheDocument();
 	});
 
 	it("renders the email in the success banner", () => {

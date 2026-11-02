@@ -230,7 +230,9 @@ export function Step6Review({
 							: undefined
 					}
 					nextLabel={isSubmitted ? "Suivant" : SUBMIT_LABEL}
-					previousHref={getPreviousStepHref(6, indicatorGRequired)}
+					previousHref={
+						isSubmitted ? undefined : getPreviousStepHref(6, indicatorGRequired)
+					}
 				/>
 
 				{showSubmitModal && (

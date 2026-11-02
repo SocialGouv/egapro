@@ -68,6 +68,25 @@ vi.mock(
 	}),
 );
 
+const mockFindTransmittedCseOpinions = vi.fn();
+const mockFindTransmittedJointEvaluation = vi.fn();
+const mockAssembleCseOpinionRecap = vi.fn();
+
+vi.mock("~/server/api/routers/declarationHelpers", async (importOriginal) => ({
+	...(await importOriginal<
+		typeof import("~/server/api/routers/declarationHelpers")
+	>()),
+	findTransmittedCseOpinions: (...args: unknown[]) =>
+		mockFindTransmittedCseOpinions(...args),
+	findTransmittedJointEvaluation: (...args: unknown[]) =>
+		mockFindTransmittedJointEvaluation(...args),
+}));
+
+vi.mock("~/modules/declarationPdf/buildCseOpinionRecapData", () => ({
+	assembleCseOpinionRecap: (...args: unknown[]) =>
+		mockAssembleCseOpinionRecap(...args),
+}));
+
 const mockDeleteS3File = vi.fn();
 const mockGetFileSize = vi.fn();
 
@@ -227,76 +246,47 @@ describe("cseOpinionRouter", () => {
 	});
 
 	describe("getSubmittedView", () => {
-		it("refuses access before the CSE transmission event", async () => {
-			const caller = await createCaller(createMockDb([]));
+		const transmitted = { year: 2027, submittedAt: new Date() };
+		const recap = { year: 2027, transmittedAt: "10/02/2027", files: [] };
+
+		it("refuses access when no unmodified transmission exists", async () => {
+			mockFindTransmittedCseOpinions.mockResolvedValue(null);
+			const caller = await createCaller(createMockDb());
 
 			await expect(caller.getSubmittedView()).rejects.toMatchObject({
 				code: "NOT_FOUND",
 			});
-			// The procedure must stop before reading declarant, opinions or file data.
-			expect(mockSelect).toHaveBeenCalledTimes(2);
+			expect(mockFindTransmittedCseOpinions).toHaveBeenCalledWith(
+				expect.anything(),
+				"decl-1",
+			);
+			expect(mockAssembleCseOpinionRecap).not.toHaveBeenCalled();
 		});
 
-		it("hides mutable opinions while a revision is pending after transmission", async () => {
-			const caller = await createCaller(
-				createMockDb(
-					[],
-					[
-						[{ id: "decl-1" }],
-						[{ createdAt: new Date("2026-10-18T10:00:00Z") }],
-						[{ cseOpinionDraftUpdatedAt: new Date("2026-10-19T10:00:00Z") }],
-					],
-				),
-			);
-
-			await expect(caller.getSubmittedView()).rejects.toMatchObject({
-				code: "NOT_FOUND",
+		it("returns the shared recap with the joint evaluation flag", async () => {
+			mockFindTransmittedCseOpinions.mockResolvedValue(transmitted);
+			mockAssembleCseOpinionRecap.mockResolvedValue(recap);
+			mockFindTransmittedJointEvaluation.mockResolvedValue({
+				submission: {},
+				file: {},
 			});
-			expect(mockSelect).toHaveBeenCalledTimes(3);
-			expect(mockTransaction).toHaveBeenCalledWith(expect.any(Function), {
-				isolationLevel: "repeatable read",
-			});
-		});
-
-		it("does not offer a joint report without its transmission event", async () => {
-			const caller = await createCaller(
-				createMockDb(
-					[],
-					[
-						[{ id: "decl-1" }],
-						[{ createdAt: new Date("2026-10-18T10:00:00Z") }],
-						[
-							{
-								companyName: "Entreprise exemple",
-								siren: "339787277",
-								declarationYear: 2026,
-								declarantFirstName: "Camille",
-								declarantLastName: "Martin",
-								declarantEmail: "camille@example.test",
-								declarantPhone: null,
-								secondDeclReferencePeriodStart: null,
-								secondDeclReferencePeriodEnd: null,
-								cseOpinionDraftUpdatedAt: null,
-							},
-						],
-						[], // no joint_evaluation_submit
-						[{ declarationNumber: 1, type: "accuracy", opinion: "favorable" }],
-						[
-							{
-								fileId: "file-1",
-								fileName: "avis.pdf",
-								declarationNumber: 1,
-								type: "accuracy",
-							},
-						],
-						[], // no second declaration
-					],
-				),
-			);
+			const caller = await createCaller(createMockDb());
 
 			const result = await caller.getSubmittedView();
+
+			expect(mockAssembleCseOpinionRecap).toHaveBeenCalledWith(transmitted);
+			expect(result).toEqual({ ...recap, hasSubmittedJointEvaluation: true });
+		});
+
+		it("does not offer a joint report without a transmitted one", async () => {
+			mockFindTransmittedCseOpinions.mockResolvedValue(transmitted);
+			mockAssembleCseOpinionRecap.mockResolvedValue(recap);
+			mockFindTransmittedJointEvaluation.mockResolvedValue(null);
+			const caller = await createCaller(createMockDb());
+
+			const result = await caller.getSubmittedView();
+
 			expect(result.hasSubmittedJointEvaluation).toBe(false);
-			expect(result.associations).toHaveLength(1);
 		});
 	});
 

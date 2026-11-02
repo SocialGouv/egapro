@@ -819,7 +819,7 @@ describe("declarationRouter", () => {
 
 	describe("submit — indicator G required by the same rule as the funnel's step 5 (#4757)", () => {
 		const INDICATOR_G_MISSING_ERROR =
-			"L'indicateur par catégorie de salariés doit être renseigné avant la transmission de la déclaration.";
+			"L'indicateur par catégorie d'emplois doit être renseigné avant la transmission de la déclaration.";
 
 		async function submitWith(options: {
 			gipWorkforceEma: string;
