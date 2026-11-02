@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { formatIsoDate } from "~/modules/domain";
+import { composeDescribedBy } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import {
 	computePeriodEnd,
@@ -11,6 +12,7 @@ import {
 } from "../schemas";
 import { useRepresentationDraftContext } from "../shared/draft/DraftContext";
 
+const REQUIRED_NOTE_ID = "reference-period-required-note";
 const REQUIRED_DATES_MESSAGE =
 	"Sélectionner une date de début ou une date de fin.";
 
@@ -95,7 +97,9 @@ export function Step1ReferencePeriod() {
 				Sélectionnez la période de l'exercice comptable utilisé pour le calcul
 				des écarts.
 			</p>
-			<p className="fr-text-title--grey">Tous les champs sont obligatoires.</p>
+			<p className="fr-text-title--grey" id={REQUIRED_NOTE_ID}>
+				Tous les champs sont obligatoires.
+			</p>
 
 			<fieldset className="fr-fieldset">
 				<legend className="fr-sr-only">Dates de la période de référence</legend>
@@ -116,7 +120,10 @@ export function Step1ReferencePeriod() {
 									</span>
 								</label>
 								<input
-									aria-describedby="reference-period-start-messages"
+									aria-describedby={composeDescribedBy(
+										REQUIRED_NOTE_ID,
+										"reference-period-start-messages",
+									)}
 									aria-invalid={errors.referencePeriodStart ? true : undefined}
 									className={
 										errors.referencePeriodStart
@@ -160,7 +167,10 @@ export function Step1ReferencePeriod() {
 									</span>
 								</label>
 								<input
-									aria-describedby="reference-period-end-messages"
+									aria-describedby={composeDescribedBy(
+										REQUIRED_NOTE_ID,
+										"reference-period-end-messages",
+									)}
 									aria-invalid={errors.referencePeriodEnd ? true : undefined}
 									className={
 										errors.referencePeriodEnd

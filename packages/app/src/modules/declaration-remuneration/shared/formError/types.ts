@@ -1,3 +1,5 @@
+import { composeDescribedBy } from "~/modules/shared";
+
 /**
  * One offending field of a declaration form. The category drives the alert
  * title, the message names the field in full — the input itself only carries
@@ -40,9 +42,15 @@ export function findFieldError(
 	return errors.find((error) => error.fieldId === fieldId);
 }
 
+export const REQUIRED_FIELDS_NOTE_ID = "remuneration-required-fields-note";
+
+// Only for fields of a form that renders the required-fields note under this id.
 export function describedByForField(
 	alertId: string,
 	error: FieldError | undefined,
 ): string | undefined {
-	return error ? fieldErrorAlertId(alertId, error.category) : undefined;
+	return composeDescribedBy(
+		REQUIRED_FIELDS_NOTE_ID,
+		error && fieldErrorAlertId(alertId, error.category),
+	);
 }

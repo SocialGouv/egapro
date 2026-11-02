@@ -11,6 +11,7 @@ describe("OpinionCard", () => {
 		date: "",
 		onOpinionChange: vi.fn(),
 		onDateChange: vi.fn(),
+		requiredNoteId: "test-required-note",
 	};
 
 	it("renders the title and radio options", () => {

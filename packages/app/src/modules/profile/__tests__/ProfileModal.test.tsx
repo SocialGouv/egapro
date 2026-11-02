@@ -193,7 +193,10 @@ describe("ProfileModal — identity fields", () => {
 		expect(input).toHaveAttribute("id", inputId);
 		expect(input).toHaveAttribute("type", "text");
 		expect(input).toHaveAttribute("aria-required", "true");
-		expect(input).toHaveAttribute("aria-describedby", `${inputId}-messages`);
+		expect(input).toHaveAttribute(
+			"aria-describedby",
+			`profile-modal-required-note ${inputId}-messages`,
+		);
 		expect(input).toHaveClass("fr-input");
 		expect(input).not.toHaveAttribute("readonly");
 		expect(input).not.toHaveAttribute("aria-invalid");

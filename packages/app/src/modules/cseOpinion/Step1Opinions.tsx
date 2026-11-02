@@ -58,6 +58,7 @@ const CARD_ID_PREFIXES: Record<DeclarationNumber, string> = {
 };
 
 const PAGE_TITLE = "Transmission du ou des avis du CSE";
+const REQUIRED_NOTE_ID = "cse-opinions-required-note";
 
 type Props = {
 	banner?: SubmissionBannerState;
@@ -202,6 +203,7 @@ export function Step1Opinions({
 						: declaration?.gapOpinion) ?? null
 				}
 				readOnly={isReadOnly}
+				requiredNoteId={REQUIRED_NOTE_ID}
 				title={getOpinionTitle(declarationNumber, type)}
 			/>
 		);
@@ -244,7 +246,7 @@ export function Step1Opinions({
 						Renseignez les informations relatives à l'avis ou aux avis émis par
 						votre CSE.
 					</p>
-					<p className="fr-mb-0 fr-text-title--grey">
+					<p className="fr-mb-0 fr-text-title--grey" id={REQUIRED_NOTE_ID}>
 						Tous les champs sont obligatoires.
 					</p>
 				</div>

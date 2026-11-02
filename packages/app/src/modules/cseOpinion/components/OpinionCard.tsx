@@ -9,6 +9,7 @@ type Props = {
 	onOpinionChange: (value: OpinionType) => void;
 	onDateChange: (value: string) => void;
 	readOnly?: boolean;
+	requiredNoteId: string;
 };
 
 export function OpinionCard({
@@ -19,6 +20,7 @@ export function OpinionCard({
 	onOpinionChange,
 	onDateChange,
 	readOnly = false,
+	requiredNoteId,
 }: Props) {
 	const legendId = `${id}-legend`;
 	const dateId = `${id}-date`;
@@ -39,6 +41,7 @@ export function OpinionCard({
 				<div className="fr-fieldset__element fr-fieldset__element--inline">
 					<div className="fr-radio-group fr-radio-rich">
 						<input
+							aria-describedby={requiredNoteId}
 							checked={opinion === "favorable"}
 							disabled={readOnly}
 							id={`${id}-favorable`}
@@ -56,6 +59,7 @@ export function OpinionCard({
 				<div className="fr-fieldset__element fr-fieldset__element--inline">
 					<div className="fr-radio-group fr-radio-rich">
 						<input
+							aria-describedby={requiredNoteId}
 							checked={opinion === "unfavorable"}
 							disabled={readOnly}
 							id={`${id}-unfavorable`}
@@ -83,6 +87,7 @@ export function OpinionCard({
 					<span className="fr-hint-text">Format attendu : JJ/MM/AAAA</span>
 				</label>
 				<input
+					aria-describedby={requiredNoteId}
 					className="fr-input"
 					id={dateId}
 					onChange={(e) => onDateChange(e.target.value)}

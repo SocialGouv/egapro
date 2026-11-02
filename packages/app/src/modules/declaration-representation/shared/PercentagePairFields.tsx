@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useId, useState } from "react";
 
 import { displayInputDecimal, parseNumber } from "~/modules/domain";
+import { composeDescribedBy } from "~/modules/shared";
 import styles from "./PercentagePairFields.module.scss";
 
 const PERCENTAGE_INPUT_PATTERN = /^\d{0,3}([.,]\d?)?$/;
@@ -22,6 +23,7 @@ type PercentagePairFieldsProps = {
 	menLabel?: string;
 	error?: string;
 	readOnly?: boolean;
+	requiredNoteId?: string;
 	trailingContent?: ReactNode;
 };
 
@@ -59,6 +61,7 @@ export function PercentagePairFields({
 	menLabel = "Hommes",
 	error,
 	readOnly = false,
+	requiredNoteId,
 	trailingContent,
 }: PercentagePairFieldsProps) {
 	const baseId = useId();
@@ -96,9 +99,11 @@ export function PercentagePairFields({
 		});
 	}
 
-	const describedBy = [hint ? hintId : null, error ? errorId : null]
-		.filter(Boolean)
-		.join(" ");
+	const describedBy = composeDescribedBy(
+		requiredNoteId,
+		hint && hintId,
+		error && errorId,
+	);
 
 	return (
 		<fieldset className={`fr-fieldset ${error ? "fr-fieldset--error" : ""}`}>
@@ -115,7 +120,7 @@ export function PercentagePairFields({
 							</label>
 							<div className={styles.inputWithUnit}>
 								<input
-									aria-describedby={describedBy || undefined}
+									aria-describedby={describedBy}
 									aria-invalid={error ? true : undefined}
 									aria-required="true"
 									className="fr-input"
@@ -140,7 +145,7 @@ export function PercentagePairFields({
 							</label>
 							<div className={styles.inputWithUnit}>
 								<input
-									aria-describedby={describedBy || undefined}
+									aria-describedby={describedBy}
 									aria-invalid={error ? true : undefined}
 									aria-required="true"
 									className="fr-input"
