@@ -1,9 +1,10 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { formatLongDate } from "~/modules/domain";
 import {
 	JointEvaluationAfterReport,
+	JointEvaluationDeadline,
 	JointEvaluationExistingReport,
 	JointEvaluationHeading,
 	JointEvaluationReportUpload,
@@ -159,8 +160,26 @@ describe("JointEvaluationTodo", () => {
 	});
 });
 
+describe("JointEvaluationDeadline", () => {
+	it("labels the deadline and shows its civil long date", () => {
+		render(
+			<JointEvaluationDeadline deadline={new Date("2027-08-01T12:00:00Z")} />,
+		);
+
+		expect(
+			screen.getByText(
+				"Échéance pour transmettre le rapport de l'évaluation conjointe",
+			),
+		).toBeInTheDocument();
+		expect(screen.getByText(/août 2027/)).toBeInTheDocument();
+		expect(
+			screen.queryByText(/Déclaration effectuée le/),
+		).not.toBeInTheDocument();
+	});
+});
+
 describe("JointEvaluationAfterReport", () => {
-	it("describes the steps after the report with the TéléAccords link", () => {
+	it("titles the box, lists the two steps and links TéléAccords in a new tab", () => {
 		render(<JointEvaluationAfterReport />);
 
 		expect(
@@ -180,9 +199,16 @@ describe("JointEvaluationAfterReport", () => {
 				/L'accord collectif ou le plan d'action doit être déposé sur/,
 			),
 		).toBeInTheDocument();
-		expect(screen.getByRole("link", { name: /TéléAccords/ })).toHaveAttribute(
+
+		const link = screen.getByRole("link", { name: /TéléAccords/ });
+		expect(link).toHaveAttribute(
 			"href",
-			"https://www.teleaccord.travail.gouv.fr",
+			"https://accords-depot.travail.gouv.fr/accueil",
 		);
+		expect(link).toHaveAttribute("target", "_blank");
+		expect(link).toHaveAttribute("rel", "noopener noreferrer");
+		expect(
+			within(link).getByText("(ouvre une nouvelle fenêtre)"),
+		).toBeInTheDocument();
 	});
 });

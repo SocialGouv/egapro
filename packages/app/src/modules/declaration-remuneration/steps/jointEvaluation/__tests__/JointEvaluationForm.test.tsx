@@ -95,6 +95,32 @@ describe("JointEvaluationForm", () => {
 		).toBeInTheDocument();
 	});
 
+	it("shows the saved status next to the page title", () => {
+		render(<JointEvaluationForm {...defaultProps} />);
+
+		expect(screen.getByRole("status")).toHaveTextContent("Enregistré");
+	});
+
+	it("lists the selected report in a « Fichier déposé » table", () => {
+		const { container } = render(<JointEvaluationForm {...defaultProps} />);
+
+		const input = container.querySelector(
+			'input[type="file"]',
+		) as HTMLInputElement;
+		const file = new File(["pdf-content"], "rapport.pdf", {
+			type: "application/pdf",
+		});
+		fireEvent.change(input, { target: { files: [file] } });
+
+		const table = screen.getByRole("table", { name: "Fichier déposé" });
+		expect(
+			within(table).getByRole("link", { name: /rapport\.pdf/ }),
+		).toHaveAttribute("target", "_blank");
+		expect(
+			within(table).getByRole("button", { name: "Supprimer rapport.pdf" }),
+		).toBeInTheDocument();
+	});
+
 	it("names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)", () => {
 		render(<JointEvaluationForm {...defaultProps} />);
 
@@ -108,12 +134,13 @@ describe("JointEvaluationForm", () => {
 	it("renders the deadline callout with the current year", () => {
 		render(<JointEvaluationForm {...defaultProps} />);
 
+		expect(screen.queryByText("Date limite")).not.toBeInTheDocument();
+
 		expect(
 			screen.getByText(
 				"Échéance pour transmettre le rapport de l'évaluation conjointe",
 			),
 		).toBeInTheDocument();
-		expect(screen.queryByText("Date limite")).not.toBeInTheDocument();
 		expect(screen.getByText(/août 2026/i)).toBeInTheDocument();
 		expect(
 			screen.queryByText(/Déclaration effectuée le/),
@@ -136,7 +163,7 @@ describe("JointEvaluationForm", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders the info boxes", () => {
+	it("renders the reminder box above the deposit label", () => {
 		render(<JointEvaluationForm {...defaultProps} />);
 
 		expect(
@@ -146,9 +173,85 @@ describe("JointEvaluationForm", () => {
 			}),
 		).toBeInTheDocument();
 		expect(
+			screen.getByText(
+				"Réaliser l'analyse conjointe et définir des actions correctrices",
+			),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				"Transmettre le rapport dans la zone de dépôt prévue sur cette page",
+			),
+		).toBeInTheDocument();
+	});
+
+	it("renders the after-report box below the deposit zone, with the TéléAccords link", () => {
+		render(<JointEvaluationForm {...defaultProps} />);
+
+		expect(
 			screen.getByRole("heading", {
 				level: 3,
 				name: "Après élaboration du rapport",
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText("Négocier un accord collectif"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText("À défaut, mettre en place un plan d'action"),
+		).toBeInTheDocument();
+		const link = screen.getByRole("link", { name: /TéléAccords/ });
+		expect(link).toHaveAttribute(
+			"href",
+			"https://accords-depot.travail.gouv.fr/accueil",
+		);
+		expect(link).toHaveAttribute("target", "_blank");
+	});
+
+	it("does not render the removed wording", () => {
+		render(<JointEvaluationForm {...defaultProps} />);
+
+		expect(
+			screen.queryByText(
+				"Dépôt du rapport de l'évaluation conjointe des rémunérations",
+			),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByText(
+				/Vous devez déposer le rapport de l'évaluation conjointe, ci-dessous\./,
+			),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByText(/Déclaration effectuée le/),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByText("Après dépôt du rapport"),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByText(/Veuillez importer\/déposer/),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByText(
+				(text) => text === "Ce que vous devez faire dans un délai de 2 mois",
+			),
+		).not.toBeInTheDocument();
+	});
+
+	it("labels the deposit field with the shortened wording", () => {
+		render(<JointEvaluationForm {...defaultProps} />);
+
+		expect(
+			screen.getByLabelText(
+				/Veuillez déposer le rapport de l'évaluation conjointe\./,
+			),
+		).toBeInTheDocument();
+	});
+
+	it("links the learn-more text with the corrected wording", () => {
+		render(<JointEvaluationForm {...defaultProps} />);
+
+		expect(
+			screen.getByRole("link", {
+				name: /En savoir plus sur l'évaluation conjointe des rémunérations/,
 			}),
 		).toBeInTheDocument();
 	});

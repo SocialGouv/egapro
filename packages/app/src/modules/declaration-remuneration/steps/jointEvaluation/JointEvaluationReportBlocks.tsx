@@ -1,11 +1,13 @@
 import type { ReactNode } from "react";
 import { TrackedLink } from "~/modules/analytics";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
-import { formatLongDate } from "~/modules/domain";
+import { formatCivilLongDate, formatLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { apiV1FileHref } from "~/modules/routes";
 import { FileUpload } from "~/modules/shared";
 import styles from "./JointEvaluationReportBlocks.module.scss";
+
+const TELEACCORDS_URL = "https://accords-depot.travail.gouv.fr/accueil";
 
 export type JointEvaluationExistingFile = {
 	id: string;
@@ -28,6 +30,19 @@ export function JointEvaluationHeading({ title }: { title: string }) {
 					En savoir plus sur l&apos;évaluation conjointe des rémunérations
 					<NewTabNotice />
 				</TrackedLink>
+			</p>
+		</div>
+	);
+}
+
+export function JointEvaluationDeadline({ deadline }: { deadline: Date }) {
+	return (
+		<div className="fr-highlight">
+			<p className="fr-mb-1w">
+				Échéance pour transmettre le rapport de l&apos;évaluation conjointe
+			</p>
+			<p className="fr-text--xl fr-text--bold fr-mb-0">
+				{formatCivilLongDate(deadline)}
 			</p>
 		</div>
 	);
@@ -98,6 +113,7 @@ export function JointEvaluationReportUpload({
 				allowedMimeTypes={["application/pdf"]}
 				disabled={disabled}
 				error={error}
+				fileList="table"
 				inputId={inputId}
 				onFilesChange={onFilesChange}
 				selectedFiles={selectedFiles}
@@ -149,7 +165,7 @@ export function JointEvaluationAfterReport() {
 				L&apos;accord collectif ou le plan d&apos;action doit être déposé sur{" "}
 				<a
 					className={`fr-link ${common.fontMedium}`}
-					href="https://www.teleaccord.travail.gouv.fr"
+					href={TELEACCORDS_URL}
 					rel="noopener noreferrer"
 					target="_blank"
 				>
