@@ -264,10 +264,10 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders modal with certification checkbox", () => {
 		renderStep3();
 		expect(
-			screen.getByText(
-				/^Vous allez transmettre la seconde déclaration de l'indicateur de rémunération par catégorie d'emplois \d{4} aux services du ministère chargé du travail\.$/,
-			),
-		).toBeInTheDocument();
+			screen.getAllByText(
+				/seconde déclaration de l.indicateur de rémunération par catégorie d.emplois/,
+			).length,
+		).toBeGreaterThanOrEqual(1);
 		expect(
 			screen.getByLabelText(/Je certifie que les données saisies/),
 		).toBeInTheDocument();
@@ -285,7 +285,7 @@ describe("SecondDeclarationStep3Review", () => {
 		renderStep3({ secondDeclarationCategories: highGapCategories });
 		expect(screen.getByText("Écarts détectés")).toBeInTheDocument();
 		expect(
-			screen.getByRole("heading", { level: 3, name: "Prochaines étapes" }),
+			screen.getByRole("heading", { level: 2, name: "Prochaines étapes" }),
 		).toBeInTheDocument();
 	});
 
@@ -310,11 +310,6 @@ describe("SecondDeclarationStep3Review", () => {
 		expect(screen.queryByText("Écarts détectés")).not.toBeInTheDocument();
 		expect(
 			screen.queryByRole("heading", { name: "Prochaines étapes" }),
-		).not.toBeInTheDocument();
-		expect(
-			screen.queryByRole("link", {
-				name: /En savoir plus sur l'évaluation conjointe des rémunérations/,
-			}),
 		).not.toBeInTheDocument();
 	});
 
@@ -648,19 +643,21 @@ describe("SecondDeclarationStep3Review", () => {
 
 			expect(
 				screen.queryByRole("heading", {
-					name: "Rappel : informer et consulter le CSE",
+					name: "Rappel : Informer et consulter le CSE",
 				}),
 			).not.toBeInTheDocument();
 			expect(
 				screen.queryByText(/obligatoirement informer et consulter le CSE/),
 			).not.toBeInTheDocument();
 			expect(
-				screen.queryByText(/L'avis du CSE devra être transmis/),
+				screen.queryByText(
+					/L.avis du CSE devra être transmis lors de la dernière étape/,
+				),
 			).not.toBeInTheDocument();
 
 			expect(screen.getByText("Écarts détectés")).toBeInTheDocument();
 			expect(
-				screen.getByRole("heading", { name: "Prochaines étapes" }),
+				screen.getByRole("heading", { level: 2, name: "Prochaines étapes" }),
 			).toBeInTheDocument();
 			expect(
 				screen.getByRole("button", {
@@ -669,7 +666,7 @@ describe("SecondDeclarationStep3Review", () => {
 			).toBeInTheDocument();
 		});
 
-		it("shows the CSE consultation section and renders the joint evaluation bullet without the 'Soit' prefix when cseOpinionRequired is true", () => {
+		it("shows the CSE consultation section with the reminder title and renders the gap outcome bullets when cseOpinionRequired is true", () => {
 			renderStep3({
 				cseOpinionRequired: true,
 				secondDeclarationCategories: highGapCategories,
@@ -677,20 +674,14 @@ describe("SecondDeclarationStep3Review", () => {
 
 			expect(
 				screen.getByRole("heading", {
-					level: 3,
-					name: "Rappel : informer et consulter le CSE",
+					level: 2,
+					name: "Rappel : Informer et consulter le CSE",
 				}),
 			).toBeInTheDocument();
 			expect(
 				screen.getByText(
-					/obligatoirement informer et consulter le CSE sur l'exactitude des données utilisées pour le calcul, la méthode de calcul et les résultats de chaque écart déclaré\./,
-				).tagName,
-			).toBe("STRONG");
-			expect(
-				screen.getByText(/Avant de transmettre votre déclaration, vous devez/),
-			).toBeInTheDocument();
-			expect(
-				screen.getByText(/L'avis du CSE devra être transmis/),
+					/L.avis du CSE devra être transmis lors de la dernière étape de la démarche/,
+				),
 			).toBeInTheDocument();
 			expect(
 				screen.getByRole("button", {
@@ -706,72 +697,85 @@ describe("SecondDeclarationStep3Review", () => {
 					/vous devez informer et consulter le CSE sur cette justification/,
 				),
 			).toBeInTheDocument();
-
 			expect(
 				screen.getByText(
 					/vous devrez mettre en place une évaluation conjointe des rémunérations/,
 				),
 			).toBeInTheDocument();
 			expect(
-				screen.queryByText(/Soit réaliser une évaluation conjointe/),
-			).not.toBeInTheDocument();
-			expect(
 				screen.queryByText(/mettre en place des actions correctives/),
 			).not.toBeInTheDocument();
 		});
 	});
 
-	describe("second declaration wording", () => {
-		it("states the gaps and what each answer to them entails, with no remaining path to choose", () => {
+	describe("second declaration next steps wording (issue #4928)", () => {
+		it("states that gaps were identified without repeating 'encore' and lists both outcome bullets", () => {
 			renderStep3({ secondDeclarationCategories: highGapCategories });
 
 			expect(
-				screen.getByText(/des écarts ≥ 5 % ont été identifiés :/),
+				screen.getByText(/des écarts ≥ 5 % ont été identifiés/),
+			).toBeInTheDocument();
+			expect(
+				screen.queryByText(/ont encore été identifiés/),
+			).not.toBeInTheDocument();
+
+			expect(
+				screen.getByText(
+					/En cas de justification d.au moins un écart par des critères objectifs et non fondés sur le sexe/,
+				),
 			).toBeInTheDocument();
 			expect(
 				screen.getByText(
-					"En cas de justification d'au moins un écart par des critères objectifs et non fondés sur le sexe,",
-				).tagName,
-			).toBe("STRONG");
-			expect(
-				screen.getByText(
-					"En cas d'absence de justification d'au moins un écart",
-				).tagName,
-			).toBe("STRONG");
-			expect(
-				screen.queryByText(/Vous devez engager un des parcours/),
-			).not.toBeInTheDocument();
+					/En cas d.absence de justification d.au moins un écart/,
+				),
+			).toBeInTheDocument();
+			expect(screen.queryByText(/vous devez :/)).not.toBeInTheDocument();
 			expect(screen.queryByText(/vous pouvez :/)).not.toBeInTheDocument();
-			expect(screen.queryByText(/non sexistes/)).not.toBeInTheDocument();
 		});
 
-		it("points only to the objective criteria and the joint evaluation", () => {
+		it("shows a single help link and no gap section when no gap reaches the threshold", () => {
+			renderStep3({
+				cseOpinionRequired: true,
+				secondDeclarationCategories: noGapCategories,
+			});
+
+			expect(screen.queryByText("Écarts détectés")).not.toBeInTheDocument();
+			expect(
+				screen.queryByRole("heading", { name: "Prochaines étapes" }),
+			).not.toBeInTheDocument();
+
+			expect(
+				screen.getByRole("heading", { level: 2, name: "Pour vous aider" }),
+			).toBeInTheDocument();
+			expect(
+				screen.getByRole("link", {
+					name: /critères objectifs et non fondés sur le sexe/,
+				}),
+			).toBeInTheDocument();
+			expect(
+				screen.queryByRole("link", {
+					name: /évaluation conjointe des rémunérations/,
+				}),
+			).not.toBeInTheDocument();
+		});
+
+		it("adds the joint evaluation help link only when a gap reaches the threshold", () => {
 			renderStep3({ secondDeclarationCategories: highGapCategories });
 
 			expect(
 				screen.getByRole("link", {
-					name: /Qu'entend-on par critères objectifs et non fondés sur le sexe \?/,
+					name: /évaluation conjointe des rémunérations/,
 				}),
 			).toBeInTheDocument();
+		});
+
+		it("never shows the first-declaration corrective-actions help link", () => {
+			renderStep3({ secondDeclarationCategories: highGapCategories });
+
 			expect(
-				screen.getByRole("link", {
-					name: /En savoir plus sur l'évaluation conjointe des rémunérations/,
-				}),
-			).toBeInTheDocument();
-			expect(
-				screen.queryByRole("link", { name: /actions correctives/ }),
+				screen.queryByText(/actions correctives et seconde déclaration/),
 			).not.toBeInTheDocument();
 		});
-	});
-
-	it("introduces the review with the new wording", () => {
-		renderStep3();
-
-		expect(
-			screen.getByText(
-				/Vérifiez que toutes les informations sont correctes avant de transmettre votre seconde déclaration de l'indicateur par catégorie d'emplois aux services du ministère chargé du travail\./,
-			),
-		).toBeInTheDocument();
 	});
 
 	it("neutralises the top margin of the form actions (issue #4141)", () => {

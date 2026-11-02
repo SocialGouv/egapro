@@ -25,7 +25,6 @@ import {
 } from "../shared/funnelConfig";
 import { getPreviousStepHref } from "../shared/funnelSteps";
 import type { PayGapReferences } from "../shared/indicatorRowMapping";
-import { NextStepsBox } from "../shared/NextStepsBox";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
 import { SubmitDeclarationModal } from "../shared/SubmitDeclarationModal";
@@ -39,6 +38,7 @@ import type {
 } from "../types";
 import stepStyles from "./Step6Review.module.scss";
 import { IndicatorSections } from "./step6/IndicatorSections";
+import { NextStepsSection } from "./step6/NextStepsSection";
 
 type Props = {
 	declaration: {
@@ -213,12 +213,14 @@ export function Step6Review({
 						withTooltips
 					/>
 
-					{complianceProcessRequired && declaration.siren && (
-						<NextStepsBox
+					{declaration.siren && (
+						<NextStepsSection
 							cseApplicable={cseApplicable}
 							cseOpinionRequired={cseOpinionRequired}
-							hasGapsAboveThreshold={complianceProcessRequired}
+							hasSignificantIndicatorGGap={hasSignificantIndicatorGGap}
+							indicatorGRequired={indicatorGRequired}
 							siren={declaration.siren}
+							workforce={companyWorkforce}
 						/>
 					)}
 				</div>

@@ -111,26 +111,4 @@ describe("NextStepsBox", () => {
 			}),
 		).toBeInTheDocument();
 	});
-
-	it("titles the second declaration sections at a single level, without a box heading", () => {
-		render(
-			<NextStepsBox
-				cseApplicable
-				cseOpinionRequired
-				hasGapsAboveThreshold
-				isSecondDeclaration
-				siren="123456789"
-			/>,
-		);
-
-		expect(
-			screen
-				.getAllByRole("heading")
-				.map((heading) => [heading.tagName, heading.textContent]),
-		).toEqual([
-			["H3", "Rappel : informer et consulter le CSE"],
-			["H3", "Prochaines étapes"],
-			["H3", "Pour vous aider"],
-		]);
-	});
 });

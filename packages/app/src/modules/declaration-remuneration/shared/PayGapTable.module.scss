@@ -23,6 +23,20 @@
 	table-layout: fixed;
 }
 
+.fixedTable :global(.fr-table__wrapper) {
+	// DSFR draws the table's outer frame as a single one-pixel background
+	// gradient line on `.fr-table__wrapper::after` (dsfr.css), not a native
+	// `border`. A hairline background positioned at a fractional device-pixel
+	// offset — which the table's own position from the page top can land on,
+	// since it shifts with the browser zoom level and with how much content
+	// above it wraps (company name, GIP prefill banner…) — can rasterize with
+	// a gap at the row where the offset falls (missing table border issue).
+	// Promoting the wrapper to its own compositing layer makes the browser
+	// paint that line as one pixel-snapped rectangle instead of
+	// re-rasterizing it per row; it has no visible effect at integer zoom.
+	transform: translateZ(0);
+}
+
 .fixedTable table thead th:nth-child(2),
 .fixedTable table thead th:nth-child(3) {
 	// Let "Rémunération des femmes/hommes" wrap instead of overflowing the cell,

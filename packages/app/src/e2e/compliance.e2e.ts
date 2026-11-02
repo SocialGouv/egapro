@@ -3,11 +3,13 @@ import { expect, test } from "@playwright/test";
 import { urlGlob, urlPattern } from "~/e2e/helpers/routes";
 import {
 	API_TRANSMITTED_PDF,
+	COMPLIANCE_CONFIRMATION,
 	COMPLIANCE_JOINT_EVALUATION,
 	COMPLIANCE_PATH,
 	CSE_OPINION,
 	complianceStepHref,
 	cseOpinionStepHref,
+	OBSERVATORY_SEARCH,
 	remunerationStepHref,
 } from "~/modules/routes";
 import { buildGrid, pickCoordinate } from "./grille/coordinates";
@@ -16,6 +18,7 @@ import {
 	answerGapJustification,
 	completeSecondDeclaration,
 	expectPathScreen,
+	expectResultsPublicationNotice,
 	fillCseStep1,
 	selectCompliancePath,
 	submitCseStep2,
@@ -82,6 +85,7 @@ test.describe("[CAS-02] Path 1: no gap + hasCse → /avis-cse → full CSE flow"
 	test("no-gap declaration, then full CSE opinion flow", async ({ page }) => {
 		test.slow();
 		await FICHE_SCENARIOS["CAS-02"]({ page, coordinate });
+		await expectResultsPublicationNotice(page);
 	});
 });
 
@@ -97,6 +101,15 @@ test.describe("[CAS-01] Path 2: no gap + no hasCse → /confirmation", () => {
 		page,
 	}) => {
 		await FICHE_SCENARIOS["CAS-01"]({ page, coordinate });
+
+		await page.goto(COMPLIANCE_CONFIRMATION);
+		await expectResultsPublicationNotice(page);
+		await test.step("l'observatoire s'ouvre dans le même onglet", async () => {
+			await page
+				.getByRole("link", { name: "Consulter l'observatoire" })
+				.click();
+			await page.waitForURL(urlGlob(OBSERVATORY_SEARCH));
+		});
 	});
 });
 
