@@ -142,9 +142,7 @@ function toFormValues(
 			},
 			preserveLegacyPay,
 		);
-		return sameWorkforceByPayBasis
-			? withSharedWorkforce(category)
-			: category;
+		return sameWorkforceByPayBasis ? withSharedWorkforce(category) : category;
 	});
 }
 
@@ -467,11 +465,7 @@ export function CategoryForm({
 
 	function addCategory() {
 		const empty = createEmptyCategory(nextId());
-		const formEntry = toFormValues(
-			[empty],
-			false,
-			sameWorkforceByPayBasis,
-		)[0];
+		const formEntry = toFormValues([empty], false, sameWorkforceByPayBasis)[0];
 		if (formEntry) {
 			pendingFocusIndex.current = fields.length;
 			append(formEntry);
@@ -545,7 +539,11 @@ export function CategoryForm({
 
 	const handleFormSubmit = form.handleSubmit(
 		(data) => {
-			const normalizedData = normalizeFormValues(data, false);
+			const normalizedData = normalizeFormValues(
+				data,
+				false,
+				sameWorkforceByPayBasis,
+			);
 			setValidationAttempt((attempt) => attempt + 1);
 			setCategoryErrors([]);
 
@@ -693,9 +691,7 @@ export function CategoryForm({
 						annual: { women: maxWomen, men: maxMen },
 						hourly: { women: hourlyMaxWomen, men: hourlyMaxMen },
 					});
-					replace(
-						toFormValues(devCats, false, sameWorkforceByPayBasis),
-					);
+					replace(toFormValues(devCats, false, sameWorkforceByPayBasis));
 					form.setValue("source", DEV_STEP5_SOURCE);
 					setCategoryErrors([]);
 					setHasData(false);
