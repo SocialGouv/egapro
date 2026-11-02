@@ -7,6 +7,8 @@ import { validateFileName } from "~/modules/shared/fileNameValidation";
 import {
 	ALLOWED_UPLOAD_MIME_TYPES,
 	type FlowType,
+	isUploadFlowType,
+	UPLOAD_FLOW_TYPES,
 } from "~/modules/shared/uploadConfig";
 import { logAction } from "~/server/audit/log";
 import { buildRequestContext } from "~/server/audit/requestContext";
@@ -29,11 +31,9 @@ import {
 const FLOW_TO_ACTION: Record<FlowType, AuditActionKey> = {
 	cse_opinion: AUDIT_ACTIONS.CSE_OPINION_UPLOAD_FILE,
 	joint_evaluation: AUDIT_ACTIONS.JOINT_EVALUATION_UPLOAD_FILE,
+	formal_notice_joint_evaluation:
+		AUDIT_ACTIONS.FORMAL_NOTICE_JOINT_EVALUATION_UPLOAD_FILE,
 };
-
-function isFlowType(value: string | null): value is FlowType {
-	return value !== null && value in FLOW_TO_ACTION;
-}
 
 /**
  * POST /api/upload
@@ -69,12 +69,11 @@ export async function POST(request: Request): Promise<Response> {
 	// 400 and no audit row — it is a malformed request, not an authenticated
 	// user action worth tracking.
 	const flowHeader = request.headers.get("x-flow-type");
-	const flowType = isFlowType(flowHeader) ? flowHeader : null;
+	const flowType = isUploadFlowType(flowHeader) ? flowHeader : null;
 	if (!flowType) {
 		return Response.json(
 			{
-				error:
-					"En-tête X-Flow-Type manquant ou invalide (cse_opinion | joint_evaluation)",
+				error: `En-tête X-Flow-Type manquant ou invalide (${UPLOAD_FLOW_TYPES.join(" | ")})`,
 			},
 			{ status: 400 },
 		);

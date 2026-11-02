@@ -38,6 +38,27 @@ describe("WorkforceSection", () => {
 		// 48 + 58 = 106
 		expect(screen.getByText("106")).toBeInTheDocument();
 
-		expect(screen.getByText("Nombre de salariés")).toBeInTheDocument();
+		expect(screen.getByText("Nombre de femmes")).toBeInTheDocument();
+		expect(screen.getByText("Nombre d'hommes")).toBeInTheDocument();
+		expect(screen.queryByText("Nombre de salariés")).toBeNull();
+	});
+});
+
+describe("WorkforceSection — missing headcounts", () => {
+	it("prints a dash for a missing count and for the total it prevents", () => {
+		render(
+			<WorkforceSection
+				data={{
+					totalWomen: null,
+					totalMen: 60,
+					hourlyWomen: 48,
+					hourlyMen: null,
+				}}
+			/>,
+		);
+		expect(screen.getAllByText("-")).toHaveLength(4);
+		expect(screen.getByText("60")).toBeInTheDocument();
+		expect(screen.getByText("48")).toBeInTheDocument();
+		expect(screen.queryByText(/null|NaN/)).not.toBeInTheDocument();
 	});
 });

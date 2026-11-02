@@ -21,6 +21,27 @@ describe("AdminKpiTile", () => {
 		expect(screen.getByText("4 213 / 5 738 entreprises")).toBeInTheDocument();
 	});
 
+	it("renders one paragraph per line when the subtitle is a list", () => {
+		render(
+			<AdminKpiTile
+				delta={null}
+				subtitle={[
+					"24 / 200 ont transmis leurs indicateurs",
+					"20 / 200 ont terminé leur démarche",
+				]}
+				title="Taux de déclaration 2026"
+				value="10,0 %"
+			/>,
+		);
+
+		expect(
+			screen.getByText("24 / 200 ont transmis leurs indicateurs").tagName,
+		).toBe("P");
+		expect(screen.getByText("20 / 200 ont terminé leur démarche").tagName).toBe(
+			"P",
+		);
+	});
+
 	it("renders no badge when delta is null", () => {
 		const { container } = render(
 			<AdminKpiTile

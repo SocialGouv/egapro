@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Step5EmployeeCategories } from "../Step5EmployeeCategories";
 
 vi.mock("~/env", () => ({
-	env: { NEXT_PUBLIC_EGAPRO_ENV: "dev" },
+	env: { NEXT_PUBLIC_EGAPRO_ENV: "dev", NEXT_PUBLIC_DEV_FILL_ENABLED: true },
 }));
 
 vi.mock("~/trpc/react", () => ({

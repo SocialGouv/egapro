@@ -16,29 +16,6 @@ export const errorSchema = {
 	},
 } as const;
 
-export const sirenParam = {
-	name: "siren",
-	in: "path",
-	required: true,
-	description: "SIREN de l'entreprise (9 chiffres).",
-	example: "319159877",
-	schema: { type: "string", pattern: "^\\d{9}$" },
-} as const;
-
-export const limitOnlyParam = {
-	name: "limit",
-	in: "query",
-	required: false,
-	description: "Nombre maximal de résultats. Entre 1 et 100.",
-	example: 10,
-	schema: { type: "integer", minimum: 1, maximum: 100 },
-} as const;
-
-export const corsAllowOriginHeader = {
-	schema: { type: "string" },
-	description: "Toujours `*` — accessible depuis n'importe quelle origine.",
-} as const;
-
 export function errorResponse(description: string) {
 	return {
 		description,

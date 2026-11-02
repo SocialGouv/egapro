@@ -1,27 +1,42 @@
 import { join } from "node:path";
 import { Image, Text, View } from "@react-pdf/renderer";
 
-import { styles } from "../recapPdfStyles";
+import { type PdfStyles, styles } from "../recapPdfStyles";
 
-const DOCUMENT_ICON = join(
-	process.cwd(),
-	"public",
-	"assets",
-	"declaration-remuneration",
-	"pdf",
-	"document-icon.png",
-);
+const PICTOGRAM_FILES = {
+	documentSignature: "document-icon.png",
+	document: "document-pictogram.png",
+} as const;
 
-export function EgaproBanner() {
+export type EgaproBannerPictogram = keyof typeof PICTOGRAM_FILES;
+
+function pictogramPath(pictogram: EgaproBannerPictogram): string {
+	return join(
+		process.cwd(),
+		"public",
+		"assets",
+		"declaration-remuneration",
+		"pdf",
+		PICTOGRAM_FILES[pictogram],
+	);
+}
+
+export function EgaproBanner({
+	pictogram = "documentSignature",
+	sheet = styles,
+}: {
+	pictogram?: EgaproBannerPictogram;
+	sheet?: PdfStyles;
+}) {
 	return (
-		<View style={styles.banner}>
+		<View style={sheet.banner}>
 			<View>
-				<Text style={styles.bannerTitle}>Egapro</Text>
-				<Text style={styles.bannerSubtitle}>
+				<Text style={sheet.bannerTitle}>Egapro</Text>
+				<Text style={sheet.bannerSubtitle}>
 					Indicateurs d&apos;égalité professionnelle femmes-hommes
 				</Text>
 			</View>
-			<Image src={DOCUMENT_ICON} style={styles.bannerIcon} />
+			<Image src={pictogramPath(pictogram)} style={sheet.bannerIcon} />
 		</View>
 	);
 }

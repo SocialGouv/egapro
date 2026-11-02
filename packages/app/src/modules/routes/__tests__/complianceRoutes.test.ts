@@ -9,6 +9,7 @@ import {
 	CSE_OPINION_STEP_NUMBERS,
 	complianceStepHref,
 	cseOpinionStepHref,
+	FORMAL_NOTICE_JOINT_EVALUATION,
 	toComplianceStep,
 	toCseOpinionStep,
 } from "../shared/complianceRoutes";
@@ -23,6 +24,9 @@ describe("parcours de mise en conformité", () => {
 		);
 		expect(COMPLIANCE_CONFIRMATION).toBe(
 			"/declaration-remuneration/parcours-conformite/confirmation",
+		);
+		expect(FORMAL_NOTICE_JOINT_EVALUATION).toBe(
+			"/declaration-remuneration/mise-en-demeure",
 		);
 	});
 

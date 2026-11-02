@@ -4,7 +4,7 @@ import { Breadcrumb } from "~/modules/layout/Breadcrumb";
 import { NON_DIFFUSIBLE_LABEL } from "~/modules/public-api";
 import type { AppHref } from "~/modules/routes";
 import styles from "./CompanyHeader.module.scss";
-import { companyLocation, formatNaf } from "./formatters";
+import { companyPageLocation, formatNaf } from "./formatters";
 
 type Props = {
 	name: string | null;
@@ -39,17 +39,13 @@ export function CompanyHeader({
 }: Props) {
 	const displayName = name ?? `Entreprise ${siren}`;
 	const identity: Fact[] = [{ label: "SIREN", value: siren }];
-	const location =
-		address && address !== NON_DIFFUSIBLE_LABEL
-			? { label: "Adresse", value: address }
-			: address === NON_DIFFUSIBLE_LABEL
-				? { label: "Adresse", value: NON_DIFFUSIBLE_LABEL }
-				: companyLocation({
-						countryCode,
-						countryLabel,
-						departmentLabel,
-						region,
-					});
+	const location = companyPageLocation({
+		address,
+		countryCode,
+		countryLabel,
+		departmentLabel,
+		region,
+	});
 	if (location) identity.push(location);
 
 	const activity: Fact[] = [];

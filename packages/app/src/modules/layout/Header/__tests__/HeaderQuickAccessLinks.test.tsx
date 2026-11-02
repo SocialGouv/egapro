@@ -39,7 +39,7 @@ describe("HeaderQuickAccessLinks", () => {
 			screen.queryByRole("link", { name: "Se connecter" }),
 		).not.toBeInTheDocument();
 		expect(
-			screen.getByRole("button", { name: "Mon espace" }),
+			screen.getByRole("button", { name: "Mon profil" }),
 		).toBeInTheDocument();
 	});
 
@@ -50,7 +50,7 @@ describe("HeaderQuickAccessLinks", () => {
 			/>,
 		);
 
-		fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+		fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 		fireEvent.click(screen.getByRole("menuitem", { name: "Administration" }));
 
 		// No date at all in the session is exactly the "missing" case the menu

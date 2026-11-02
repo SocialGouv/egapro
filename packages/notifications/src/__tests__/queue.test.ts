@@ -361,10 +361,13 @@ describe("validateJobData — confirmation variants", () => {
 		});
 	});
 
-	describe("representation_receipt", () => {
+	describe.each([
+		"representation_receipt",
+		"formal_notice_joint_evaluation_submitted",
+	] as const)("%s", (type) => {
 		it("accepts a company-scoped payload without any variant", () => {
 			const result = validateJobData(
-				buildConfirmation("representation_receipt", {
+				buildConfirmation(type, {
 					...BASE_SCOPE,
 					raisonSociale: "Société Démo",
 				}),
@@ -374,7 +377,7 @@ describe("validateJobData — confirmation variants", () => {
 
 		it("rejects an empty raisonSociale", () => {
 			const result = validateJobData(
-				buildConfirmation("representation_receipt", {
+				buildConfirmation(type, {
 					...BASE_SCOPE,
 					raisonSociale: "",
 				}),
@@ -385,7 +388,7 @@ describe("validateJobData — confirmation variants", () => {
 
 		it("rejects a payload missing siren/year", () => {
 			const result = validateJobData(
-				buildConfirmation("representation_receipt", {
+				buildConfirmation(type, {
 					raisonSociale: "Société Démo",
 				}),
 			);

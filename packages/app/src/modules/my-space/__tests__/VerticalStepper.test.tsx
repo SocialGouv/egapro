@@ -1,32 +1,53 @@
 import { render, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-
+import { OrdinalLongDate } from "~/modules/declaration-remuneration/shared/OrdinalLongDate";
 import type {
 	CampaignDeadlines,
 	DeclarationDisplayContext,
 	DeclarationFsmStatus,
 } from "~/modules/domain";
 import { getDefaultCampaignDeadlines } from "~/modules/domain";
+import { civilDate } from "~/modules/domain/shared/civilDate";
 import {
+	COMPLIANCE_PATH,
 	DECLARATION_REMUNERATION,
 	DECLARATION_REMUNERATION_RECAP,
 	DECLARATION_REMUNERATION_RECAP_CORRECTION,
+	MY_SPACE_CSE_OPINION_VIEW,
+	MY_SPACE_JOINT_EVALUATION_VIEW,
 } from "~/modules/routes";
 import type { PanelVariant } from "../DeclarationProcessPanel";
 import { DeclarationProcessPanel } from "../DeclarationProcessPanel";
+import { isPathChoiceModifiable } from "../VerticalStepper";
 
 const FUTURE_YEAR = 2099;
 const PAST_YEAR = 2020;
 
 const FUTURE_DEADLINE_LABELS = {
 	decl1ModificationDeadline: "1er juin 2099",
-	decl1JointEvaluationDeadline: "1er août 2099",
-	decl2ModificationDeadline: "1er décembre 2099",
+	decl1JointEvaluationDeadline: "1er septembre 2099",
+	decl2ModificationDeadline: "1er janvier 2100",
 	decl2JointEvaluationDeadline: "1er janvier 2100",
-	decl2CseOpinionDeadline: "1er février 2100",
+	decl2CseOpinionDeadline: "1er mars 2100",
 	pathChoiceDeadline: "1er janvier 2100",
 	pathChoiceRound1Deadline: "1er juillet 2099",
 } satisfies Partial<Record<keyof CampaignDeadlines, string>>;
+
+// decl2ModificationDeadline, pathChoiceDeadline and decl2JointEvaluationDeadline all default to January 1st N+1: override each to a distinct date so a case below cannot pass by reading the wrong key.
+function distinctDeadlines(year: number) {
+	return {
+		...getDefaultCampaignDeadlines(year),
+		decl2ModificationDeadline: civilDate(year + 1, 0, 2),
+		pathChoiceDeadline: civilDate(year + 1, 0, 3),
+		decl2JointEvaluationDeadline: civilDate(year + 1, 0, 4),
+	};
+}
+
+// `OrdinalLongDate` formats in UTC, so a hardcoded label would break on other timezones.
+function longDateText(date: Date): string {
+	const { container } = render(<OrdinalLongDate date={date} />);
+	return container.textContent ?? "";
+}
 
 type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
 
@@ -76,6 +97,9 @@ const BASE_PROPS = {
 	hasSubmittedSecondDeclaration: false,
 	hasSubmittedJointEvaluation: false,
 	hasSubmittedCseOpinion: false,
+	jointEvaluationViewAvailable: undefined as boolean | undefined,
+	cseOpinionViewAvailable: undefined as boolean | undefined,
+	formalNoticeAvailable: false,
 	siren: "532847196",
 	ctaHref: DECLARATION_REMUNERATION,
 	lockedByOther: false,
@@ -104,6 +128,48 @@ function renderPanel(variant: PanelVariant, overrides: PanelOverrides = {}) {
 }
 
 describe("VerticalStepper — bouton œil (viewHref)", () => {
+	it("shows the joint evaluation view only after its transmission", () => {
+		const context = makeDisplayContext("joint_evaluation");
+		const before = renderPanel("cse", { displayContext: context });
+		expect(
+			before.dialog.querySelector(
+				`a[href="${MY_SPACE_JOINT_EVALUATION_VIEW}"]`,
+			),
+		).not.toBeInTheDocument();
+		const after = renderPanel("cse", {
+			displayContext: context,
+			hasSubmittedJointEvaluation: true,
+		});
+		expect(
+			after.dialog.querySelector(`a[href="${MY_SPACE_JOINT_EVALUATION_VIEW}"]`),
+		).toHaveAttribute("title", "Voir le rapport de l'évaluation conjointe");
+	});
+
+	it("shows the CSE view in the current stage after an opinion was transmitted", () => {
+		const { dialog } = renderPanel("cse", {
+			hasSubmittedCseOpinion: true,
+		});
+		expect(
+			dialog.querySelector(`a[href="${MY_SPACE_CSE_OPINION_VIEW}"]`),
+		).toHaveAttribute("title", "Voir les avis du CSE");
+	});
+
+	it("hides submitted view links while their files or opinions are being revised", () => {
+		const { dialog } = renderPanel("cse", {
+			displayContext: makeDisplayContext("joint_evaluation"),
+			hasSubmittedJointEvaluation: true,
+			jointEvaluationViewAvailable: false,
+			hasSubmittedCseOpinion: true,
+			cseOpinionViewAvailable: false,
+		});
+		expect(
+			dialog.querySelector(`a[href="${MY_SPACE_JOINT_EVALUATION_VIEW}"]`),
+		).not.toBeInTheDocument();
+		expect(
+			dialog.querySelector(`a[href="${MY_SPACE_CSE_OPINION_VIEW}"]`),
+		).not.toBeInTheDocument();
+	});
+
 	describe("1ère déclaration — deadline future", () => {
 		it("renders the view link with correct href", () => {
 			const { dialog } = renderPanel("compliance");
@@ -206,7 +272,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		});
 
 		it("shows the round-2 path-choice deadline once the second declaration is submitted", () => {
-			const deadlines = getDefaultCampaignDeadlines(FUTURE_YEAR);
+			const deadlines = distinctDeadlines(FUTURE_YEAR);
 			const { panel } = renderPanel("compliance_choice", {
 				campaignDeadlines: deadlines,
 				displayContext: makeDisplayContext("corrective_action"),
@@ -215,7 +281,10 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 
 			const deadlineRow = panel.getByText(/^Échéance :/);
 			expect(deadlineRow).toHaveTextContent(
-				`Échéance : ${FUTURE_DEADLINE_LABELS.pathChoiceDeadline}`,
+				`Échéance : ${longDateText(deadlines.pathChoiceDeadline)}`,
+			);
+			expect(deadlineRow).not.toHaveTextContent(
+				longDateText(deadlines.decl2ModificationDeadline),
 			);
 		});
 	});
@@ -261,7 +330,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		});
 
 		it("names the pending path choice again after the second declaration", () => {
-			const deadlines = getDefaultCampaignDeadlines(FUTURE_YEAR);
+			const deadlines = distinctDeadlines(FUTURE_YEAR);
 			const { panel } = renderPanel("compliance_choice", {
 				campaignDeadlines: deadlines,
 				displayContext: makeDisplayContext("corrective_action"),
@@ -275,12 +344,12 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 				panel.getByText("Choix du parcours de mise en conformité"),
 			).toBeInTheDocument();
 			expect(panel.getByText(/^Échéance :/)).toHaveTextContent(
-				`Échéance : ${FUTURE_DEADLINE_LABELS.pathChoiceDeadline}`,
+				`Échéance : ${longDateText(deadlines.pathChoiceDeadline)}`,
 			);
 		});
 
 		it("names the chosen path and its deadline for corrective actions", () => {
-			const deadlines = getDefaultCampaignDeadlines(FUTURE_YEAR);
+			const deadlines = distinctDeadlines(FUTURE_YEAR);
 			const { panel } = renderPanel("compliance", {
 				campaignDeadlines: deadlines,
 				displayContext: makeDisplayContext("corrective_action"),
@@ -289,8 +358,12 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			expect(
 				panel.getByText("Actions correctives et seconde déclaration"),
 			).toBeInTheDocument();
-			expect(panel.getByText(/^Échéance :/)).toHaveTextContent(
-				`Échéance : ${FUTURE_DEADLINE_LABELS.decl2ModificationDeadline}`,
+			const deadlineRow = panel.getByText(/^Échéance :/);
+			expect(deadlineRow).toHaveTextContent(
+				`Échéance : ${longDateText(deadlines.decl2ModificationDeadline)}`,
+			);
+			expect(deadlineRow).not.toHaveTextContent(
+				longDateText(deadlines.pathChoiceDeadline),
 			);
 		});
 
@@ -345,7 +418,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			hasSubmittedSecondDeclaration,
 			deadlineKey,
 		}) => {
-			const deadlines = getDefaultCampaignDeadlines(FUTURE_YEAR);
+			const deadlines = distinctDeadlines(FUTURE_YEAR);
 			const { panel } = renderPanel("evaluation", {
 				campaignDeadlines: deadlines,
 				declarationFsmStatus,
@@ -356,8 +429,16 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			expect(
 				panel.getByText("Évaluation conjointe des rémunérations"),
 			).toBeInTheDocument();
-			expect(panel.getByText(/^Échéance :/)).toHaveTextContent(
-				`Échéance : ${FUTURE_DEADLINE_LABELS[deadlineKey]}`,
+			const deadlineRow = panel.getByText(/^Échéance :/);
+			expect(deadlineRow).toHaveTextContent(
+				`Échéance : ${longDateText(deadlines[deadlineKey])}`,
+			);
+			const otherKey =
+				deadlineKey === "decl1JointEvaluationDeadline"
+					? "decl2JointEvaluationDeadline"
+					: "decl1JointEvaluationDeadline";
+			expect(deadlineRow).not.toHaveTextContent(
+				longDateText(deadlines[otherKey]),
 			);
 		});
 	});
@@ -420,7 +501,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 	describe("puces de l'étape 1 selon indicatorGRequired (#4267)", () => {
 		const PREFILLED_BULLET = /Indicateurs pré-remplis à vérifier/;
 		const CATEGORY_BULLET =
-			/Indicateur de rémunération par catégories de salariés à remplir/;
+			/Indicateur de rémunération par catégorie d'emplois à remplir/;
 
 		it("renders both bullets on the start variant when indicator G applies", () => {
 			const { panel } = renderPanel("start", { indicatorGRequired: true });
@@ -492,9 +573,12 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 	describe("étape 3 — échéance de l'avis du CSE (#4217)", () => {
 		const DEADLINES = getDefaultCampaignDeadlines(FUTURE_YEAR);
 
-		it("closes the CSE opinion a month after the round-2 joint evaluation", () => {
+		it("closes the CSE opinion after the round-2 joint evaluation", () => {
 			expect(DEADLINES.decl2CseOpinionDeadline).not.toEqual(
 				DEADLINES.decl2JointEvaluationDeadline,
+			);
+			expect(DEADLINES.decl2CseOpinionDeadline.getTime()).toBeGreaterThan(
+				DEADLINES.decl2JointEvaluationDeadline.getTime(),
 			);
 		});
 
@@ -896,5 +980,115 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 				"Modifier",
 			);
 		});
+	});
+});
+
+describe("« Modifier » du choix de parcours, dernière étape transmise (#4898)", () => {
+	const PATH_CHOICE_MODIFY = `a[href="${COMPLIANCE_PATH}"]`;
+	const PATH_CHOICE_LABEL = "Votre choix de parcours a été transmis";
+
+	it.each<{
+		label: string;
+		variant: PanelVariant;
+		overrides: PanelOverrides;
+	}>([
+		{
+			label: "actions correctives choisies, seconde déclaration à venir",
+			variant: "compliance",
+			overrides: { displayContext: makeDisplayContext("corrective_action") },
+		},
+		{
+			label: "évaluation conjointe choisie, rapport à venir",
+			variant: "evaluation",
+			overrides: { displayContext: makeDisplayContext("joint_evaluation") },
+		},
+		{
+			label: "justification choisie, avis du CSE à venir",
+			variant: "cse",
+			overrides: { displayContext: makeDisplayContext("justify") },
+		},
+		{
+			label: "évaluation conjointe choisie au second tour",
+			variant: "evaluation",
+			overrides: {
+				declarationFsmStatus: "revised_joint_evaluation_chosen",
+				displayContext: makeDisplayContext(
+					"corrective_action",
+					"joint_evaluation",
+				),
+				hasSubmittedSecondDeclaration: true,
+			},
+		},
+	])("offers Modifier on the transmitted path choice: $label", ({
+		variant,
+		overrides,
+	}) => {
+		const { panel, dialog } = renderPanel(variant, overrides);
+		expect(panel.getByText(PATH_CHOICE_LABEL)).toBeInTheDocument();
+		expect(
+			panel.getAllByText("Modifiable jusqu'à votre prochaine transmission")
+				.length,
+		).toBeGreaterThan(0);
+		expect(dialog.querySelector(PATH_CHOICE_MODIFY)).toHaveTextContent(
+			"Modifier",
+		);
+	});
+
+	it.each<{
+		label: string;
+		variant: PanelVariant;
+		overrides: PanelOverrides;
+	}>([
+		{
+			label: "aucun parcours encore choisi",
+			variant: "compliance_choice",
+			overrides: {},
+		},
+		{
+			label: "seconde déclaration transmise après les actions correctives",
+			variant: "compliance_choice",
+			overrides: {
+				declarationFsmStatus: "awaiting_revision_choice",
+				displayContext: makeDisplayContext("corrective_action"),
+				hasSubmittedSecondDeclaration: true,
+			},
+		},
+		{
+			label: "rapport d'évaluation conjointe transmis",
+			variant: "cse",
+			overrides: {
+				displayContext: makeDisplayContext("joint_evaluation"),
+				hasSubmittedJointEvaluation: true,
+			},
+		},
+		{
+			label: "démarche close après l'avis du CSE",
+			variant: "closed",
+			overrides: {
+				displayContext: makeDisplayContext("justify"),
+				hasSubmittedCseOpinion: true,
+			},
+		},
+	])("withholds the path choice Modifier once something later was transmitted: $label", ({
+		variant,
+		overrides,
+	}) => {
+		const { panel, dialog } = renderPanel(variant, overrides);
+		expect(panel.queryByText(PATH_CHOICE_LABEL)).toBeNull();
+		expect(dialog.querySelector(PATH_CHOICE_MODIFY)).not.toBeInTheDocument();
+	});
+
+	it("treats a missing FSM status as not modifiable", () => {
+		expect(
+			isPathChoiceModifiable({
+				declarationFsmStatus: null,
+				displayContext: makeDisplayContext("justify"),
+				submitted: {
+					cseOpinion: false,
+					jointEvaluation: false,
+					secondDeclaration: false,
+				},
+			}),
+		).toBe(false);
 	});
 });

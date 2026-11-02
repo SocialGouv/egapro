@@ -1,11 +1,10 @@
 import "server-only";
 
-import { Agent } from "undici";
+import { Agent, fetch as undiciFetch } from "undici";
 
 import { env } from "~/env";
 
 const TIMEOUT_MS = 10_000;
-const REVALIDATE_SECONDS = 86_400;
 
 // Three-state memo: `undefined` = not resolved yet, `null` = no certificate
 // configured, `Agent` = certificate loaded. Avoids decoding the .p12 on every
@@ -22,6 +21,8 @@ function getDispatcher(): Agent | undefined {
 	}
 
 	dispatcher = new Agent({
+		// Undici 8 enables HTTP/2 by default; keep the existing SUIT transport.
+		allowH2: false,
 		connect: {
 			pfx: Buffer.from(p12, "base64"),
 			passphrase: env.EGAPRO_SUIT_CLIENT_CERT_PASSWORD,
@@ -37,6 +38,17 @@ function isSuitOrigin(url: string): boolean {
 	} catch {
 		return false;
 	}
+}
+
+function fetchSuit(url: string, init: RequestInit): Promise<Response> {
+	const agent = getDispatcher();
+	if (!agent) return fetch(url, init);
+
+	// Node's built-in fetch and Undici 8 use different dispatcher interfaces.
+	return undiciFetch(url, {
+		...init,
+		dispatcher: agent,
+	} as Parameters<typeof undiciFetch>[1]) as unknown as Promise<Response>;
 }
 
 /**
@@ -59,10 +71,9 @@ export function suitAwareFetch(
 ): Promise<Response> {
 	if (!isSuitOrigin(url)) return fetch(url, init);
 
-	return fetch(url, {
+	return fetchSuit(url, {
 		...init,
 		redirect: "error",
-		dispatcher: getDispatcher(),
 	});
 }
 
@@ -91,11 +102,9 @@ export function suitAwareFetch(
 export function suitFetch(path: string): Promise<Response> {
 	const baseUrl = env.EGAPRO_SUIT_API_URL.replace(/\/$/, "");
 
-	return fetch(`${baseUrl}${path}`, {
+	return fetchSuit(`${baseUrl}${path}`, {
 		headers: { Accept: "application/json" },
 		signal: AbortSignal.timeout(TIMEOUT_MS),
-		next: { revalidate: REVALIDATE_SECONDS },
 		redirect: "error",
-		dispatcher: getDispatcher(),
 	});
 }

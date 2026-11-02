@@ -4,12 +4,23 @@ import styles from "./HomePage.module.scss";
 import { HomePlaceholder } from "./HomePlaceholder";
 import { HomeSearch } from "./HomeSearch";
 
+type HomePageProps = {
+	remunerationDeadline: Date;
+	representationDeadline: Date;
+};
+
 /** Home page — visual content only, without tRPC provider. */
-export function HomePage() {
+export function HomePage({
+	remunerationDeadline,
+	representationDeadline,
+}: HomePageProps) {
 	return (
 		<main id="content" tabIndex={-1}>
 			<HomeNotice />
-			<HomeHero />
+			<HomeHero
+				remunerationDeadline={remunerationDeadline}
+				representationDeadline={representationDeadline}
+			/>
 			<section aria-label="Contenu en cours de conception">
 				<div className={`fr-container fr-py-14v ${styles.placeholderSection}`}>
 					<HomePlaceholder />

@@ -35,16 +35,18 @@ describe("buildTransmittedPdfData", () => {
 		opinions: unknown[] = [],
 		cseFiles: unknown[] = [],
 		jointFiles: unknown[] = [],
+		formalNoticeJointFiles: unknown[] = [],
 	) {
-		// 5 select calls:
+		// 6 select calls:
 		// 1) company, 2) declaration (parallel Promise.all)
-		// 3) opinions, 4) cseFiles, 5) jointFiles (parallel Promise.all)
+		// 3) opinions, 4) cseFiles, 5) jointFiles, 6) formalNoticeJointFiles (parallel Promise.all)
 		const results = [
 			company ? [company] : [],
 			declaration ? [declaration] : [],
 			opinions,
 			cseFiles,
 			jointFiles,
+			formalNoticeJointFiles,
 		];
 
 		mockLimit.mockImplementation(() => {
@@ -154,5 +156,33 @@ describe("buildTransmittedPdfData", () => {
 		expect(result.opinions).toEqual([]);
 		expect(result.cseFiles).toEqual([]);
 		expect(result.jointEvaluationFile).toBeNull();
+		expect(result.formalNoticeJointEvaluationFile).toBeNull();
+	});
+
+	it("returns the formal notice report when it is the only transmitted element", async () => {
+		const uploadedAt = new Date("2027-02-01");
+		setupMockDb(
+			{ name: "ACME", siren: "123456789" },
+			{ id: "decl-1", year: 2025 },
+			[],
+			[],
+			[],
+			[{ fileName: "mise-en-demeure.pdf", uploadedAt }],
+		);
+
+		const { buildTransmittedPdfData } = await import(
+			"../buildTransmittedPdfData"
+		);
+		const result = await buildTransmittedPdfData(
+			"123456789",
+			2025,
+			new Date("2027-03-15"),
+		);
+
+		expect(result.jointEvaluationFile).toBeNull();
+		expect(result.formalNoticeJointEvaluationFile).toEqual({
+			fileName: "mise-en-demeure.pdf",
+			uploadedAt,
+		});
 	});
 });

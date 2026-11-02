@@ -5,6 +5,7 @@ import {
 	clearFileAssociations,
 	computeContentTypeColumns,
 	getMissingColumns,
+	getSingleChoiceAssociation,
 	getUnassociatedFiles,
 	toAssociationPayload,
 } from "../contentTypeColumns";
@@ -326,5 +327,57 @@ describe("clearFileAssociations", () => {
 			"1:accuracy": "file-a",
 			"1:gap": null,
 		});
+	});
+});
+
+describe("getSingleChoiceAssociation", () => {
+	const singleDeclarationInput = {
+		hasSecondDeclaration: false,
+		firstDeclGapConsulted: false,
+		secondDeclGapConsulted: null,
+		firstDeclGapHigh: false,
+		secondDeclGapHigh: false,
+	};
+
+	it("pairs the only column with the only file when the parcours requires the first-declaration accuracy opinion alone", () => {
+		const columns = computeContentTypeColumns(singleDeclarationInput);
+
+		expect(getSingleChoiceAssociation(columns, [{ id: "file-a" }])).toEqual({
+			columnId: "1:accuracy",
+			fileId: "file-a",
+		});
+	});
+
+	it("returns null while no file has been uploaded", () => {
+		const columns = computeContentTypeColumns(singleDeclarationInput);
+
+		expect(getSingleChoiceAssociation(columns, [])).toBeNull();
+	});
+
+	it("returns null when a second declaration adds a column", () => {
+		const columns = computeContentTypeColumns({
+			...singleDeclarationInput,
+			hasSecondDeclaration: true,
+		});
+
+		expect(getSingleChoiceAssociation(columns, [{ id: "file-a" }])).toBeNull();
+	});
+
+	it("returns null when the first declaration also requires a gap justification", () => {
+		const columns = computeContentTypeColumns({
+			...singleDeclarationInput,
+			firstDeclGapHigh: true,
+			firstDeclGapConsulted: true,
+		});
+
+		expect(getSingleChoiceAssociation(columns, [{ id: "file-a" }])).toBeNull();
+	});
+
+	it("returns null when several files are present", () => {
+		const columns = computeContentTypeColumns(singleDeclarationInput);
+
+		expect(
+			getSingleChoiceAssociation(columns, [{ id: "file-a" }, { id: "file-b" }]),
+		).toBeNull();
 	});
 });

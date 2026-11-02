@@ -30,6 +30,10 @@ valkey:
   podDisruptionBudget:
     enabled: true
     maxUnavailable: 1
+  # ~75% of the 1Gi limit below; see valkeyConfig in .kontinuous/values.yaml.
+  valkeyConfig: |
+    maxmemory 768mb
+    maxmemory-policy volatile-lru
   resources:
     requests:
       cpu: 100m

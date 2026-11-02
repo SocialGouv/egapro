@@ -26,6 +26,48 @@ const CSE_OPINION_FILE_TYPE: (typeof fileTypeEnum.enumValues)[number] =
 	"cse_opinion";
 const JOINT_EVALUATION_FILE_TYPE: (typeof fileTypeEnum.enumValues)[number] =
 	"joint_evaluation";
+const FORMAL_NOTICE_JOINT_EVALUATION_FILE_TYPE: (typeof fileTypeEnum.enumValues)[number] =
+	"formal_notice_joint_evaluation";
+
+function singleReportFileSchema(input: {
+	type: (typeof fileTypeEnum.enumValues)[number];
+	typeDescription: string;
+	fileNameExample: string;
+	description: string;
+}) {
+	return {
+		oneOf: [
+			{
+				type: "object",
+				properties: {
+					Id: {
+						type: "string",
+						description: "Identifiant unique du fichier",
+					},
+					Type: {
+						type: "string",
+						enum: [input.type],
+						description: input.typeDescription,
+					},
+					Nom_fichier: {
+						type: "string",
+						description: "Nom d'origine du fichier déposé.",
+						example: input.fileNameExample,
+					},
+					Date_upload: { type: "string", format: "date-time" },
+					URL_telechargement: {
+						type: "string",
+						description:
+							"URL relative pour télécharger le fichier via GET /api/v1/files/{fileId}",
+						example: "/api/v1/files/abc-123",
+					},
+				},
+			},
+			{ type: "null" },
+		],
+		description: input.description,
+	} as const;
+}
 
 const JOB_CATEGORY_SOURCES = [
 	...CATEGORY_SOURCES.map((source) => source.value),
@@ -643,39 +685,20 @@ const declarationSchema = {
 			description:
 				"Fichiers d'avis CSE attachés à la déclaration. Absent si aucun fichier n'a été déposé.",
 		},
-		Fichier_evaluation_conjointe: {
-			oneOf: [
-				{
-					type: "object",
-					properties: {
-						Id: {
-							type: "string",
-							description: "Identifiant unique du fichier",
-						},
-						Type: {
-							type: "string",
-							enum: [JOINT_EVALUATION_FILE_TYPE],
-							description: "Type : évaluation conjointe",
-						},
-						Nom_fichier: {
-							type: "string",
-							description: "Nom d'origine du fichier déposé.",
-							example: "evaluation-conjointe-2026.pdf",
-						},
-						Date_upload: { type: "string", format: "date-time" },
-						URL_telechargement: {
-							type: "string",
-							description:
-								"URL relative pour télécharger le fichier via GET /api/v1/files/{fileId}",
-							example: "/api/v1/files/abc-123",
-						},
-					},
-				},
-				{ type: "null" },
-			],
+		Fichier_evaluation_conjointe: singleReportFileSchema({
+			type: JOINT_EVALUATION_FILE_TYPE,
+			typeDescription: "Type : évaluation conjointe",
+			fileNameExample: "evaluation-conjointe-2026.pdf",
 			description:
 				"Fichier d'évaluation conjointe attaché à la déclaration (cardinalité 1). Absent si aucun fichier n'a été déposé.",
-		},
+		}),
+		Fichier_evaluation_conjointe_mise_en_demeure: singleReportFileSchema({
+			type: FORMAL_NOTICE_JOINT_EVALUATION_FILE_TYPE,
+			typeDescription: "Type : évaluation conjointe suite à mise en demeure",
+			fileNameExample: "evaluation-conjointe-mise-en-demeure-2026.pdf",
+			description:
+				"Rapport d'évaluation conjointe déposé après la fin de la démarche, suite à une mise en demeure de la DREETS (cardinalité 1 : un nouveau dépôt remplace le précédent). Absent si aucun fichier n'a été déposé. La date du dépôt est portée par `Historique_statuts` (événement `formal_notice_joint_evaluation_submit`).",
+		}),
 	},
 } as const;
 
@@ -780,7 +803,7 @@ const fileMetadataSchema = {
 		type: {
 			type: "string",
 			enum: [...fileTypeEnum.enumValues],
-			description: `File type: CSE opinion or joint evaluation. Value reference: \`${VALUE_TABLES_DOC}\`.`,
+			description: `File type: CSE opinion, joint evaluation, or joint evaluation filed after a formal notice. Value reference: \`${VALUE_TABLES_DOC}\`.`,
 		},
 		fileName: {
 			type: "string",
@@ -798,7 +821,7 @@ const fileMetadataSchema = {
 			type: "array",
 			items: fileContentSchema,
 			description:
-				"CSE opinion contents covered by this file (type='cse_opinion' only). A file can cover several contents; empty array if none is registered yet. Not meaningful for type='joint_evaluation'.",
+				"CSE opinion contents covered by this file (type='cse_opinion' only). A file can cover several contents; empty array if none is registered yet. Not meaningful for type='joint_evaluation' or type='formal_notice_joint_evaluation'.",
 		},
 	},
 } as const;
@@ -1054,7 +1077,7 @@ export const openApiSpec = {
 				operationId: "getFiles",
 				summary: "Lister les fichiers CSE et évaluations conjointes",
 				description:
-					"Retourne les métadonnées des fichiers (avis CSE et évaluations conjointes) pour un SIREN et une année donnés. Résolution de la déclaration source, parmi les déclarations **transmises** uniquement (un brouillon en cours — redéclaration après annulation — est ignoré) : la déclaration active si elle existe, sinon la plus récente déclaration annulée (par date de création). `declarationId` et `cancelledAt` identifient dans la réponse la déclaration retenue (`cancelledAt` vaut `null` pour la déclaration active).",
+					"Retourne les métadonnées des fichiers (avis CSE, évaluations conjointes et évaluations conjointes déposées suite à mise en demeure) pour un SIREN et une année donnés. Résolution de la déclaration source, parmi les déclarations **transmises** uniquement (un brouillon en cours — redéclaration après annulation — est ignoré) : la déclaration active si elle existe, sinon la plus récente déclaration annulée (par date de création). `declarationId` et `cancelledAt` identifient dans la réponse la déclaration retenue (`cancelledAt` vaut `null` pour la déclaration active).",
 				parameters: [
 					{
 						name: "siren",
@@ -1126,7 +1149,7 @@ export const openApiSpec = {
 				operationId: "downloadFile",
 				summary: "Télécharger un fichier",
 				description:
-					"Télécharge le fichier PDF (avis CSE ou évaluation conjointe) correspondant à l'identifiant.",
+					"Télécharge le fichier PDF (avis CSE, évaluation conjointe ou évaluation conjointe suite à mise en demeure) correspondant à l'identifiant.",
 				parameters: [
 					{
 						name: "fileId",

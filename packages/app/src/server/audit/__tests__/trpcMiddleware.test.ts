@@ -508,6 +508,26 @@ describe("auditMiddleware", () => {
 		});
 	});
 
+	it.each([
+		["formalNotice.get", "query", "formal_notice.get"],
+		["formalNotice.submit", "mutation", "formal_notice.submit"],
+	] as const)("logs %s under its own action key", async (path, type, action) => {
+		await auditMiddleware({
+			ctx: buildCtx(),
+			type,
+			path,
+			getRawInput: buildGetRawInput(undefined),
+			next: vi.fn(async () => okResult({ success: true })),
+		});
+
+		expect(mockLogAction).toHaveBeenCalledTimes(1);
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			action,
+			status: "success",
+			siren: "123456789",
+		});
+	});
+
 	it("logs the declaration lock state read (declarationLock.getActiveLockForCurrentDeclaration)", async () => {
 		const next = vi.fn(async () =>
 			okResult({ lockedByOther: true, holder: {} }),
@@ -675,6 +695,32 @@ describe("auditMiddleware", () => {
 			status: "success",
 			siren: "123456789",
 			metadata: { year: 2026 },
+		});
+	});
+
+	it("logs the read of the representation declarant's contact as a sensitive query", async () => {
+		const next = vi.fn(async () =>
+			okResult({
+				firstName: "Jeanne",
+				lastName: "Dupont",
+				email: "email@example.fr",
+				phone: "0601020304",
+			}),
+		);
+		await auditMiddleware({
+			ctx: buildCtx(),
+			type: "query",
+			path: "representationDeclaration.getDeclarant",
+			getRawInput: buildGetRawInput({ year: 2025 }),
+			next,
+		});
+
+		expect(mockLogAction).toHaveBeenCalledTimes(1);
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			action: "representation_declaration.get_declarant",
+			status: "success",
+			siren: "123456789",
+			metadata: { year: 2025 },
 		});
 	});
 

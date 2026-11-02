@@ -3,6 +3,7 @@ export {
 	DeclarationProcessPanel,
 	type PanelVariant,
 } from "./DeclarationProcessPanel";
+export { formatNafForDisplay } from "./formatNafForDisplay";
 export { extractSiren, formatSiren } from "./formatSiren";
 export { MonEspacePage } from "./MonEspacePage";
 export {

@@ -492,12 +492,10 @@ Pour les analystes / journalistes / chercheurs :
 
 | URL | Format | Usage |
 |---|---|---|
-| `/api/public/declarations` | JSON | Recherche de déclarations, mêmes facettes que l'observatoire |
 | `/api/public/declarations/export` | CSV | Résultats de la recherche, en fichier |
-| `/api/public/representations/export` | CSV | Idem pour les indicateurs de représentation |
 | `/api/public/docs` | Swagger UI | Documentation interactive |
 
-Aucune authentification requise. Les téléchargements sont audités (catégorie `export`, rétention 365 jours).
+Aucune authentification requise. Les téléchargements sont audités (catégorie `export`, rétention 365 jours). Les jeux de données complets, dont la représentation équilibrée, sont publiés sur data.gouv.fr.
 
 ### 9.4 Annuaire des référents
 

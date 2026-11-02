@@ -131,6 +131,9 @@ describe("IndicatorSections", () => {
 
 		expect(screen.getByText("7,19 %")).toBeInTheDocument();
 		expect(screen.queryByText("0,00 %")).not.toBeInTheDocument();
+		expect(screen.getAllByText("en faveur des hommes").length).toBeGreaterThan(
+			0,
+		);
 	});
 
 	it("recomputes the reviewed gap once an operand no longer matches the GIP one", () => {
@@ -174,10 +177,10 @@ describe("IndicatorSections", () => {
 		);
 
 		expect(
-			screen.getByText("Indicateur par catégories de salariés"),
+			screen.getByText("Indicateur par catégorie d'emplois"),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText("Écart de rémunération par catégories de salariés"),
+			screen.getByText("Écart de rémunération par catégorie d'emplois"),
 		).toBeInTheDocument();
 	});
 
@@ -195,10 +198,10 @@ describe("IndicatorSections", () => {
 		);
 
 		expect(
-			screen.queryByText("Indicateur par catégories de salariés"),
+			screen.queryByText("Indicateur par catégorie d'emplois"),
 		).not.toBeInTheDocument();
 		expect(
-			screen.queryByText("Écart de rémunération par catégories de salariés"),
+			screen.queryByText("Écart de rémunération par catégorie d'emplois"),
 		).not.toBeInTheDocument();
 	});
 });

@@ -11,7 +11,7 @@ import {
 
 import { ADMIN_HOME_PATH, triggerAdminStepUp } from "~/modules/admin/access";
 import { isAdminMfaFresh } from "~/modules/domain";
-import { API_AUTH_LOGOUT, MY_SPACE } from "~/modules/routes";
+import { API_AUTH_LOGOUT } from "~/modules/routes";
 import { getDsfrModal } from "~/modules/shared";
 import styles from "./UserAccountMenu.module.scss";
 
@@ -144,7 +144,7 @@ export function UserAccountMenu({
 				ref={buttonRef}
 				type="button"
 			>
-				Mon espace
+				Mon profil
 			</button>
 
 			{isOpen && (
@@ -178,15 +178,6 @@ export function UserAccountMenu({
 									Administration
 								</Link>
 							)}
-							<Link
-								className={styles.menuLink}
-								href={MY_SPACE}
-								onClick={close}
-								role="menuitem"
-								tabIndex={-1}
-							>
-								Mes démarches
-							</Link>
 							<button
 								className={styles.menuLink}
 								onClick={openProfileModal}
@@ -194,7 +185,7 @@ export function UserAccountMenu({
 								tabIndex={-1}
 								type="button"
 							>
-								Voir mon profil
+								Modifier mon profil
 							</button>
 						</div>
 

@@ -157,6 +157,39 @@ describe("deleteReferentsSchema", () => {
 });
 
 describe("importReferentsSchema", () => {
+	it("accepts nullable optional fields from a JSON export", () => {
+		const result = importReferentsSchema.parse([
+			{
+				region: "11",
+				county: null,
+				name: "Jean DUPONT",
+				type: "email",
+				value: "jean@gouv.fr",
+				principal: true,
+				substituteName: null,
+				substituteEmail: null,
+			},
+		]);
+		expect(result[0]?.county).toBeUndefined();
+		expect(result[0]?.substituteName).toBeUndefined();
+		expect(result[0]?.substituteEmail).toBeUndefined();
+	});
+
+	it("still rejects invalid required fields in an export", () => {
+		expect(() =>
+			importReferentsSchema.parse([
+				{
+					region: "11",
+					county: null,
+					name: "",
+					type: "email",
+					value: "jean@gouv.fr",
+					principal: true,
+				},
+			]),
+		).toThrow();
+	});
+
 	it("validates an array of referents", () => {
 		const result = importReferentsSchema.parse([
 			{

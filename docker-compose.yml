@@ -1,7 +1,7 @@
 services:
   db:
     restart: always
-    image: postgres:14.17
+    image: postgres:17.11
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -18,7 +18,7 @@ services:
 
   db-notifications:
     restart: always
-    image: postgres:14.17
+    image: postgres:17.11
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres

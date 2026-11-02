@@ -1,5 +1,8 @@
 import type { Route } from "next";
-import type { mySpaceHistoryHref } from "./accountRoutes";
+import type {
+	mySpaceHistoryHref,
+	mySpaceRepresentationHref,
+} from "./accountRoutes";
 import type { adminDeclarationHref } from "./adminRoutes";
 import type { apiV1FileHref } from "./apiRoutes";
 import type {
@@ -10,7 +13,11 @@ import type {
 	RemunerationStepRoute,
 	RepresentationStepRoute,
 } from "./declarationRoutes";
-import type { observatoryCompanyHref, referentHref } from "./publicRoutes";
+import type {
+	observatoryCompanyHref,
+	referentHref,
+	termsOfUseVersionHref,
+} from "./publicRoutes";
 
 // What a link-rendering component takes instead of `string`, so a path naming no
 // route stops at the component boundary rather than being laundered through it.
@@ -25,6 +32,8 @@ export type AppHref =
 	| CseOpinionStepRoute
 	| ReturnType<typeof observatoryCompanyHref>
 	| ReturnType<typeof referentHref>
+	| ReturnType<typeof termsOfUseVersionHref>
 	| ReturnType<typeof adminDeclarationHref>
 	| ReturnType<typeof mySpaceHistoryHref>
+	| ReturnType<typeof mySpaceRepresentationHref>
 	| ReturnType<typeof apiV1FileHref>;

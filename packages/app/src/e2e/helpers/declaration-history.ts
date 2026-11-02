@@ -37,3 +37,18 @@ export async function insertHistoryEvents(
 		await sql.end();
 	}
 }
+
+export async function insertJointEvaluationSubmission(year: number) {
+	const sql = createConnection();
+	try {
+		await sql`
+			INSERT INTO app_declaration_status_history
+				(id, declaration_id, event_type, round, created_at)
+			SELECT gen_random_uuid(), id, 'joint_evaluation_submit', 1, NOW()
+			FROM app_declaration
+			WHERE siren = ${TEST_SIREN} AND year = ${year} AND cancelled_at IS NULL
+		`;
+	} finally {
+		await sql.end();
+	}
+}

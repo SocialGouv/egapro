@@ -92,6 +92,16 @@ export function formatCurrency(value?: string | null, unit = "€"): string {
 	return formatTotal(n, unit);
 }
 
+export function formatCurrencyFixedTwo(
+	value?: string | null,
+	unit = "€",
+): string {
+	if (!value) return "-";
+	const amount = Number.parseFloat(value);
+	if (Number.isNaN(amount)) return "-";
+	return `${amount.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${unit}`;
+}
+
 /**
  * Echo a percentage the user typed, at the one decimal its field accepts:
  * `35` → `"35 %"`, `12.5` → `"12,5 %"`. Returns `"—"` for nullish values.
@@ -220,6 +230,11 @@ export function formatIsoDate(value: string): string {
 /** Format an optional persisted ISO date string (`YYYY-MM-DD`) in short French format. Returns `"—"` for `undefined`. */
 export function formatOptionalIsoDate(value: string | undefined): string {
 	return value === undefined ? "—" : formatIsoDate(value);
+}
+
+/** Converts a civil date (UTC midnight) to its persisted `YYYY-MM-DD` string — the inverse of `civilDate()`. */
+export function toPersistedIsoDate(date: Date): string {
+	return date.toISOString().slice(0, 10);
 }
 
 /** Format a date with time in short French format: `new Date(…)` → `"10/03/2026 14:30"`. Returns `"—"` for nullish values. */

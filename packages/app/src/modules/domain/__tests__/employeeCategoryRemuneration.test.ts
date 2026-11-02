@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
 	isCategoryPayApplicable,
+	isCategoryPayBasisApplicable,
 	isSexRemunerationComplete,
 	MIN_HEADCOUNT_REQUIRING_PAY_DATA,
+	shouldRetainCategoryPayBasisValues,
 	shouldRetainCategoryPayValues,
 } from "../shared/employeeCategoryRemuneration";
 
@@ -91,7 +93,6 @@ describe("isCategoryPayApplicable (#3678)", () => {
 
 	it.each([
 		["one isolated hourly 0", { hourlyWomenCount: 0 }],
-		["two crossed 0s", { womenCount: 0, hourlyMenCount: 0 }],
 		["annual 0 and missing hourly count", { womenCount: 0 }],
 		[
 			"annual 0 and null hourly count",
@@ -107,6 +108,92 @@ describe("isCategoryPayApplicable (#3678)", () => {
 
 	it("applies when a headcount cell is NaN — unparsable is not zero", () => {
 		expect(isCategoryPayApplicable({ womenCount: Number.NaN })).toBe(true);
+	});
+});
+
+describe("isCategoryPayBasisApplicable (#4894)", () => {
+	it("disables only the annual basis when either annual headcount is zero", () => {
+		const headcounts = {
+			womenCount: 0,
+			menCount: 2,
+			hourlyWomenCount: 1,
+			hourlyMenCount: 2,
+		};
+
+		expect(isCategoryPayBasisApplicable(headcounts, "annual")).toBe(false);
+		expect(isCategoryPayBasisApplicable(headcounts, "hourly")).toBe(true);
+	});
+
+	it("disables only the hourly basis when either hourly headcount is zero", () => {
+		const headcounts = {
+			womenCount: 2,
+			menCount: 3,
+			hourlyWomenCount: 0,
+			hourlyMenCount: 3,
+		};
+
+		expect(isCategoryPayBasisApplicable(headcounts, "annual")).toBe(true);
+		expect(isCategoryPayBasisApplicable(headcounts, "hourly")).toBe(false);
+	});
+
+	it("keeps missing counts unknown rather than treating them as zero", () => {
+		expect(isCategoryPayBasisApplicable({}, "annual")).toBe(true);
+	});
+});
+
+describe("isCategoryPayApplicable derives from the pay bases", () => {
+	it("does not apply when crossed zeros disable both bases", () => {
+		expect(
+			isCategoryPayApplicable({
+				womenCount: 0,
+				menCount: 3,
+				hourlyWomenCount: 3,
+				hourlyMenCount: 0,
+			}),
+		).toBe(false);
+	});
+
+	it.each([
+		[
+			"annual",
+			{ womenCount: 2, menCount: 3, hourlyWomenCount: 0, hourlyMenCount: 3 },
+		],
+		[
+			"hourly",
+			{ womenCount: 0, menCount: 3, hourlyWomenCount: 1, hourlyMenCount: 2 },
+		],
+	] as const)("applies when only the %s basis is applicable", (_label, headcounts) => {
+		expect(isCategoryPayApplicable(headcounts)).toBe(true);
+	});
+
+	it("applies when both bases are applicable", () => {
+		expect(
+			isCategoryPayApplicable({
+				womenCount: 2,
+				menCount: 3,
+				hourlyWomenCount: 1,
+				hourlyMenCount: 2,
+			}),
+		).toBe(true);
+	});
+
+	it("matches the per-basis rule on every combination of zero and positive counts", () => {
+		const values = [0, 1] as const;
+		for (const womenCount of values)
+			for (const menCount of values)
+				for (const hourlyWomenCount of values)
+					for (const hourlyMenCount of values) {
+						const headcounts = {
+							womenCount,
+							menCount,
+							hourlyWomenCount,
+							hourlyMenCount,
+						};
+						expect(isCategoryPayApplicable(headcounts)).toBe(
+							isCategoryPayBasisApplicable(headcounts, "annual") ||
+								isCategoryPayBasisApplicable(headcounts, "hourly"),
+						);
+					}
 	});
 });
 
@@ -142,6 +229,26 @@ describe("shouldRetainCategoryPayValues (#3678)", () => {
 		).toBe(true);
 	});
 
+	it("drops values when crossed zeros disable both bases", () => {
+		expect(
+			shouldRetainCategoryPayValues(
+				{ womenCount: 0, menCount: 3, hourlyWomenCount: 3, hourlyMenCount: 0 },
+				{},
+				true,
+			),
+		).toBe(false);
+	});
+
+	it("retains historical values when crossed zeros disable both bases", () => {
+		expect(
+			shouldRetainCategoryPayValues(
+				{ womenCount: 0, menCount: 3, hourlyWomenCount: 3, hourlyMenCount: 0 },
+				{ hourlyBaseMen: "18" },
+				true,
+			),
+		).toBe(true);
+	});
+
 	it("does not treat whitespace-only values as historical pay", () => {
 		expect(
 			shouldRetainCategoryPayValues(
@@ -150,5 +257,24 @@ describe("shouldRetainCategoryPayValues (#3678)", () => {
 				true,
 			),
 		).toBe(false);
+	});
+});
+
+describe("shouldRetainCategoryPayBasisValues (#4894)", () => {
+	it("retains legacy pay only for the basis that has stored values", () => {
+		const headcounts = {
+			womenCount: 0,
+			menCount: 2,
+			hourlyWomenCount: 1,
+			hourlyMenCount: 2,
+		};
+		const payValues = { annualBaseWomen: "30000" };
+
+		expect(
+			shouldRetainCategoryPayBasisValues(headcounts, payValues, true, "annual"),
+		).toBe(true);
+		expect(
+			shouldRetainCategoryPayBasisValues(headcounts, payValues, true, "hourly"),
+		).toBe(true);
 	});
 });

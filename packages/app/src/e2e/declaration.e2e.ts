@@ -22,6 +22,7 @@ import {
 	setGipWorkforce,
 } from "./helpers/db";
 import {
+	categoryPayBasisCells,
 	categoryPayCells,
 	categoryPayInput,
 	categoryWorkforceInput,
@@ -454,10 +455,10 @@ test.describe("Step 4 — quartile totals must match the step 1 headcount (#4260
 		test.slow();
 
 		const annualNote = page.getByRole("alert").filter({
-			has: page.locator("#step4-coherence-annual-inconsistent"),
+			has: page.locator("#step4-coherence-annual-workforce"),
 		});
 		const hourlyNote = page.getByRole("alert").filter({
-			has: page.locator("#step4-coherence-hourly-inconsistent"),
+			has: page.locator("#step4-coherence-hourly-workforce"),
 		});
 		const annualWomenMismatchMessage = `Le nombre total de femmes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total annuel : ${STEP1_WORKFORCE.women}).`;
 		const next = page.getByRole("button", { name: "Suivant" });
@@ -473,6 +474,9 @@ test.describe("Step 4 — quartile totals must match the step 1 headcount (#4260
 				.fill("4");
 
 			await expect(annualNote).toContainText(annualWomenMismatchMessage);
+			await expect(
+				annualNote.getByRole("heading", { name: "Nombre de salariés" }),
+			).toBeVisible();
 			await expect(hourlyNote).toHaveCount(0);
 
 			// This journey has a GIP workforce row but no DSN prefill payload, so it has
@@ -564,7 +568,7 @@ test.describe("Step 5 — one physical headcount per pay basis (#4254)", () => {
 		page
 			.getByRole("row")
 			.filter({
-				has: page.getByRole("rowheader", { exact: true, name: rowLabel }),
+				has: page.getByRole("rowheader", { name: new RegExp(`^${rowLabel}`) }),
 			})
 			.getByRole("cell")
 			.last();
@@ -588,7 +592,10 @@ test.describe("Step 5 — one physical headcount per pay basis (#4254)", () => {
 		test.slow();
 
 		const next = page.getByRole("button", { name: "Suivant" });
-		const inconsistent = page.locator("#step5-categories-error-inconsistent");
+		const workforceMismatch = page.locator("#step5-categories-error-workforce");
+		const workforceAlert = page
+			.getByRole("alert")
+			.filter({ has: workforceMismatch });
 		const emptyFields = page.locator("#step5-categories-error-empty");
 		const count = (basis: "annual" | "hourly", sex: "women" | "men") =>
 			categoryWorkforceInput(page, { basis, sex });
@@ -637,9 +644,35 @@ test.describe("Step 5 — one physical headcount per pay basis (#4254)", () => {
 			await next.click();
 
 			await expect(page).toHaveURL(urlPattern(remunerationStepHref(5)));
-			await expect(inconsistent).toHaveText(
-				`Le total des effectifs femmes de la ligne « Rémunération horaire » (${STEP1_WORKFORCE.women - 1}) ne correspond pas à l'effectif déclaré à l'étape 1 (${STEP1_WORKFORCE.women}).`,
+			await expect(workforceMismatch).toHaveText(
+				`Le nombre total de femmes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total horaire : ${STEP1_WORKFORCE.women}).`,
 			);
+			await expect(
+				workforceAlert.getByRole("heading", { name: "Nombre de salariés" }),
+			).toBeVisible();
+			await expect(workforceAlert).toBeFocused();
+
+			const placement = await workforceAlert.evaluate(
+				(alert, [accordion, submit]) => ({
+					afterAccordion: Boolean(
+						accordion &&
+							accordion.compareDocumentPosition(alert) &
+								Node.DOCUMENT_POSITION_FOLLOWING,
+					),
+					beforeActions: Boolean(
+						submit &&
+							submit.compareDocumentPosition(alert) &
+								Node.DOCUMENT_POSITION_PRECEDING,
+					),
+				}),
+				[
+					await page
+						.getByRole("button", { name: "Définitions et méthode de calcul" })
+						.elementHandle(),
+					await next.elementHandle(),
+				],
+			);
+			expect(placement).toEqual({ afterAccordion: true, beforeActions: true });
 
 			// Same divergence on the other row: only the row at fault is named, so
 			// the two bases cannot be satisfied by one another.
@@ -647,8 +680,8 @@ test.describe("Step 5 — one physical headcount per pay basis (#4254)", () => {
 			await count("annual", "men").fill(String(STEP1_WORKFORCE.men - 1));
 			await next.click();
 
-			await expect(inconsistent).toHaveText(
-				`Le total des effectifs hommes de la ligne « Rémunération annuelle » (${STEP1_WORKFORCE.men - 1}) ne correspond pas à l'effectif déclaré à l'étape 1 (${STEP1_WORKFORCE.men}).`,
+			await expect(workforceMismatch).toHaveText(
+				`Le nombre total d'hommes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total annuel : ${STEP1_WORKFORCE.men}).`,
 			);
 		});
 
@@ -918,6 +951,20 @@ test.describe("Step 5 — a category at headcount 0 declares no remuneration (#3
 				await expect(status).toBeEmpty();
 			}
 		};
+		const expectPayBasis = async (
+			categoryIndex: number,
+			basis: "annual" | "hourly",
+			state: "enabled" | "disabled",
+		) => {
+			for (const cell of categoryPayBasisCells(page, categoryIndex, basis)) {
+				if (state === "enabled") {
+					await expect(cell).toBeEnabled();
+				} else {
+					await expect(cell).toBeDisabled();
+					await expect(cell).toHaveValue("");
+				}
+			}
+		};
 
 		await submitStepsThroughQuartiles(page);
 		await page.waitForURL("**/declaration-remuneration/etape/5");
@@ -939,7 +986,7 @@ test.describe("Step 5 — a category at headcount 0 declares no remuneration (#3
 			await fillCategoryPayAmounts(page, { men: "1000", women: "1000" });
 		});
 
-		await test.step("un 0 isolé ou deux 0 croisés laissent les rémunérations actives", async () => {
+		await test.step("un 0 désactive seulement le tableau de sa base", async () => {
 			await page.getByRole("button", { name: /Ajouter une catégorie/ }).click();
 			await page.locator("#cat-1-name").fill("Employés");
 			for (const basis of ["annual", "hourly"] as const) {
@@ -949,10 +996,12 @@ test.describe("Step 5 — a category at headcount 0 declares no remuneration (#3
 			await expectPayCells(2, "enabled");
 
 			await count(2, "hourly", "women").fill("0");
-			await expectPayCells(2, "enabled");
+			await expectPayBasis(2, "hourly", "disabled");
+			await expectPayBasis(2, "annual", "enabled");
 
 			await count(2, "annual", "men").fill("0");
-			await expectPayCells(2, "enabled");
+			await expectPayBasis(2, "annual", "disabled");
+			await expectPayBasis(2, "hourly", "disabled");
 
 			await count(2, "annual", "men").fill(String(SECOND_CATEGORY_MEN));
 			await count(2, "hourly", "women").fill("3");
@@ -971,8 +1020,9 @@ test.describe("Step 5 — a category at headcount 0 declares no remuneration (#3
 				women: "900",
 			});
 			await count(2, "annual", "women").fill("0");
-			await expectPayCells(2, "enabled");
-			for (const cell of categoryPayCells(page, 2)) {
+			await expectPayBasis(2, "annual", "disabled");
+			await expectPayBasis(2, "hourly", "enabled");
+			for (const cell of categoryPayBasisCells(page, 2, "hourly")) {
 				await expect(cell).toHaveValue("900,00");
 			}
 
@@ -980,7 +1030,9 @@ test.describe("Step 5 — a category at headcount 0 declares no remuneration (#3
 			await expectPayCells(2, "disabled");
 
 			await count(2, "annual", "women").fill("3");
-			await expectPayCells(2, "enabled");
+			await count(2, "hourly", "women").fill("3");
+			await expectPayBasis(2, "annual", "enabled");
+			await expectPayBasis(2, "hourly", "enabled");
 			for (const cell of categoryPayCells(page, 2)) {
 				await expect(cell).toHaveValue("");
 			}
@@ -1065,7 +1117,7 @@ test.describe("Workforce comes from the GIP file, not the company registry", () 
 			await expect(page.getByText("Étape 5 sur 6")).toBeVisible();
 			await expect(
 				page.getByRole("heading", {
-					name: /Écart de rémunération par catégories de salariés/,
+					name: /Écart de rémunération par catégorie d'emplois/,
 				}),
 			).toBeVisible();
 		});

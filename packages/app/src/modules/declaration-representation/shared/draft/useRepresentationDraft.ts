@@ -20,6 +20,9 @@ type UseRepresentationDraftResult = {
 	saveProgress: (currentStep: number) => Promise<void>;
 	isSaving: boolean;
 	isPendingSave: boolean;
+	saveError: string | null;
+	draftVersion: number;
+	flushPendingSave: () => Promise<void>;
 };
 
 export function useRepresentationDraft({
@@ -29,6 +32,7 @@ export function useRepresentationDraft({
 	enabled = true,
 }: UseRepresentationDraftOptions): UseRepresentationDraftResult {
 	const [draft, setDraft] = useState<RepresentationDraft>(initialDraft);
+	const [draftVersion, setDraftVersion] = useState(0);
 	const [isPendingSave, setIsPendingSave] = useState(false);
 
 	const mutation = api.representationDeclaration.saveDraft.useMutation();
@@ -36,13 +40,11 @@ export function useRepresentationDraft({
 	const contextRef = useRef({
 		year,
 		enabled,
-		mutate: mutation.mutate,
 		mutateAsync: mutation.mutateAsync,
 	});
 	contextRef.current = {
 		year,
 		enabled,
-		mutate: mutation.mutate,
 		mutateAsync: mutation.mutateAsync,
 	};
 
@@ -64,25 +66,46 @@ export function useRepresentationDraft({
 		}
 	}, []);
 
-	const flush = useCallback(() => {
+	const flush = useCallback(async () => {
 		cancelTimers();
 		setIsPendingSave(false);
 		const pending = pendingRef.current;
 		pendingRef.current = null;
 		if (pending === null || !contextRef.current.enabled) return;
-		contextRef.current.mutate({
-			year: contextRef.current.year,
-			draft: pending,
-			currentStep: pending.currentStep,
-		});
+		await contextRef.current
+			.mutateAsync({
+				year: contextRef.current.year,
+				draft: pending,
+				currentStep: pending.currentStep,
+			})
+			.catch(() => undefined);
 	}, [cancelTimers]);
 
 	const flushRef = useRef(flush);
 	flushRef.current = flush;
 
 	useEffect(() => {
+		if (enabled) return;
+		cancelTimers();
+		pendingRef.current = null;
+		setIsPendingSave(false);
+	}, [cancelTimers, enabled]);
+
+	const appliedInitialDraftRef = useRef(initialDraft);
+	useEffect(() => {
+		if (appliedInitialDraftRef.current === initialDraft) return;
+		appliedInitialDraftRef.current = initialDraft;
+		cancelTimers();
+		pendingRef.current = null;
+		setIsPendingSave(false);
+		draftRef.current = initialDraft;
+		setDraft(initialDraft);
+		setDraftVersion((version) => version + 1);
+	}, [cancelTimers, initialDraft]);
+
+	useEffect(() => {
 		return () => {
-			flushRef.current();
+			void flushRef.current();
 		};
 	}, []);
 
@@ -104,7 +127,7 @@ export function useRepresentationDraft({
 			}, VISUAL_DELAY_MS);
 			timerRef.current = setTimeout(() => {
 				timerRef.current = null;
-				flushRef.current();
+				void flushRef.current();
 			}, DEBOUNCE_MS);
 		},
 		[cancelTimers, step],
@@ -134,5 +157,12 @@ export function useRepresentationDraft({
 		saveProgress,
 		isSaving: mutation.isPending,
 		isPendingSave,
+		saveError: mutation.error
+			? mutation.error.data?.code === "CONFLICT"
+				? "Le verrou a été perdu avant l’enregistrement : votre dernière saisie n’a pas été enregistrée."
+				: "L’enregistrement de votre saisie a échoué. Veuillez réessayer."
+			: null,
+		draftVersion,
+		flushPendingSave: flush,
 	};
 }

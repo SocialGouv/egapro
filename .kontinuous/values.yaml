@@ -85,6 +85,11 @@ app:
     - secretRef:
         name: "gip-mds-import"
         optional: true
+    # Bearer token for /api/export/{generate,download}. Optional for the pod:
+    # the routes fail closed (401) until ops seals EGAPRO_EXPORT_API_TOKEN.
+    - secretRef:
+        name: "export-api"
+        optional: true
     - secretRef:
         name: "admin"
         optional: true
@@ -200,6 +205,18 @@ valkey:
     enabled: false
   auth:
     enabled: false
+  # Appended to valkey.conf by the chart's init script (ConfigMap mounted on
+  # every pod, primary and replicas). maxmemory sits at ~75% of the memory
+  # limit below so Valkey evicts before the pod is OOM-killed. volatile-lru
+  # only evicts keys with a TTL — every key the app writes has one (export
+  # cache 1 h, rate-limit counters 60 s, Next cache 24 h / tags 7 d) — least
+  # recently used first: cold export payloads go before the counters and tag
+  # keys read on every request. A key written without a TTL would never be
+  # evicted, and writes would fail once it filled the budget.
+  # Keep in sync with resources.limits.memory (prod overrides both).
+  valkeyConfig: |
+    maxmemory 384mb
+    maxmemory-policy volatile-lru
   resources:
     requests:
       cpu: 50m

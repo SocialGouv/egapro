@@ -56,8 +56,7 @@ export function categoryPayInput(
 
 /**
  * The eight remuneration cells of one indicator G category — the four measures
- * of both pay bases, for both sexes. Since #3678 both tables are enabled or
- * disabled as one block, so a spec asserts on the whole set rather than a basis.
+ * of both pay bases, for both sexes.
  */
 export function categoryPayCells(page: Page, categoryIndex = 1): Locator[] {
 	return CATEGORY_PAY_MEASURES.flatMap((measure) =>
@@ -65,6 +64,15 @@ export function categoryPayCells(page: Page, categoryIndex = 1): Locator[] {
 			categoryPayInput(page, { categoryIndex, measure, sex }),
 		),
 	);
+}
+
+export function categoryPayBasisCells(
+	page: Page,
+	categoryIndex: number,
+	basis: "annual" | "hourly",
+): Locator[] {
+	const cells = categoryPayCells(page, categoryIndex);
+	return basis === "annual" ? cells.slice(0, 4) : cells.slice(4);
 }
 
 /**

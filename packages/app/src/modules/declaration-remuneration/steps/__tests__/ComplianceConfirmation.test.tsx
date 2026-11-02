@@ -11,6 +11,12 @@ vi.mock("~/server/auth", () => ({
 	auth: vi.fn(async () => ({ user: { email: "declarant@example.fr" } })),
 }));
 
+vi.mock("~/server/db", () => ({ db: {} }));
+
+vi.mock("~/server/api/routers/declarationHelpers", () => ({
+	findTransmittedJointEvaluation: vi.fn(),
+}));
+
 vi.mock("~/trpc/server", () => ({
 	api: {
 		declaration: {
@@ -19,6 +25,7 @@ vi.mock("~/trpc/server", () => ({
 	},
 }));
 
+import { findTransmittedJointEvaluation } from "~/server/api/routers/declarationHelpers";
 import { auth } from "~/server/auth";
 import { resendReceiptMutate } from "~/test/resendReceiptApiMock";
 import { api } from "~/trpc/server";
@@ -26,14 +33,29 @@ import { ComplianceConfirmation } from "../ComplianceConfirmation";
 
 const DECLARATION_YEAR = 2025;
 const SIREN = "123456789";
+const DECLARATION_ID = "declaration-1";
+const TRANSMITTED_JOINT_EVALUATION = {
+	submission: { createdAt: new Date("2026-06-01T10:00:00Z"), round: 1 },
+	file: {
+		id: "file-1",
+		fileName: "rapport.pdf",
+		uploadedAt: new Date("2026-05-30T10:00:00Z"),
+	},
+};
+const JOINT_EVALUATION_RECAP =
+	"Télécharger le récapitulatif de l'évaluation conjointe des rémunérations";
 
 async function renderConfirmation({
 	hasSubmittedCseOpinion = false,
 	hasSubmittedJointEvaluation = false,
 	hasSubmittedSecondDeclaration = false,
+	jointEvaluationTransmitted = false,
 } = {}) {
+	vi.mocked(findTransmittedJointEvaluation).mockResolvedValue(
+		jointEvaluationTransmitted ? (TRANSMITTED_JOINT_EVALUATION as never) : null,
+	);
 	vi.mocked(api.declaration.getOrCreate).mockResolvedValue({
-		declaration: { year: DECLARATION_YEAR, siren: SIREN },
+		declaration: { id: DECLARATION_ID, year: DECLARATION_YEAR, siren: SIREN },
 		jobCategories: [],
 		employeeCategories: [],
 		gipPrefillData: null,
@@ -165,6 +187,34 @@ describe("ComplianceConfirmation", () => {
 			});
 
 			expect(transmittedCard()).not.toBeInTheDocument();
+		});
+	});
+
+	describe("joint evaluation recap card", () => {
+		function jointEvaluationCard() {
+			return screen.queryByRole("link", { name: JOINT_EVALUATION_RECAP });
+		}
+
+		it("offers it once the joint evaluation is transmitted", async () => {
+			await renderConfirmation({
+				hasSubmittedJointEvaluation: true,
+				jointEvaluationTransmitted: true,
+			});
+
+			expect(jointEvaluationCard()).toHaveAttribute(
+				"href",
+				`/api/joint-evaluation-pdf?year=${DECLARATION_YEAR}`,
+			);
+			expect(findTransmittedJointEvaluation).toHaveBeenCalledWith(
+				expect.anything(),
+				DECLARATION_ID,
+			);
+		});
+
+		it("omits it when the joint evaluation is not transmitted", async () => {
+			await renderConfirmation({ hasSubmittedJointEvaluation: true });
+
+			expect(jointEvaluationCard()).not.toBeInTheDocument();
 		});
 	});
 

@@ -15,15 +15,15 @@ import { DEFAULT_PAGE_SIZE } from "./schemas";
 import type { ReferentSearchRow } from "./types";
 
 function ExportButton() {
-	const { data, refetch, isFetching } = api.adminReferents.exportAll.useQuery(
+	const { refetch, isFetching } = api.adminReferents.exportAll.useQuery(
 		undefined,
 		{ enabled: false },
 	);
 
 	const handleExport = useCallback(
 		async (format: "json" | "csv") => {
-			const result = data ?? (await refetch()).data;
-			if (!result) return;
+			const { data: result, isSuccess } = await refetch();
+			if (!isSuccess || !result) return;
 
 			let content: string;
 			let mimeType: string;
@@ -63,7 +63,7 @@ function ExportButton() {
 			link.click();
 			URL.revokeObjectURL(url);
 		},
-		[data, refetch],
+		[refetch],
 	);
 
 	return (

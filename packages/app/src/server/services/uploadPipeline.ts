@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, count, eq } from "drizzle-orm";
+import { and, count, eq, sql } from "drizzle-orm";
 
 import { MAX_CSE_FILES } from "~/modules/cseOpinion/types";
 import {
@@ -14,6 +14,7 @@ import { declarations, files } from "~/server/db/schema";
 
 import { getRequiredContentTypes } from "./cseRequiredContentTypes";
 import { handleStreamingUpload, type UploadFailureReason } from "./fileUpload";
+import { isFormalNoticeAvailableFor } from "./formalNoticeExposure";
 import { deleteFile as deleteS3File } from "./s3";
 
 export type { FlowType };
@@ -22,6 +23,7 @@ export type PipelineFailureReason =
 	| UploadFailureReason
 	| "not_found"
 	| "max_files"
+	| "formal_notice_unavailable"
 	| "server_error";
 
 type SuccessResult = {
@@ -99,6 +101,18 @@ export async function runUploadPipeline(
 
 	// Pre-validate flow-specific constraints BEFORE streaming. Cheap DB read
 	// that saves bandwidth when the constraint is already violated.
+	if (
+		input.flowType === "formal_notice_joint_evaluation" &&
+		!(await isFormalNoticeAvailableFor(db, declaration.id))
+	) {
+		return {
+			ok: false,
+			reason: "formal_notice_unavailable",
+			error:
+				"Le dépôt du rapport de l'évaluation conjointe suite à une mise en demeure n'est pas ouvert pour cette démarche.",
+		};
+	}
+
 	if (input.flowType === "cse_opinion") {
 		const [existingCount, quota] = await Promise.all([
 			countFilesByType(declaration.id, "cse_opinion"),
@@ -255,6 +269,13 @@ async function commitFileRow(
 	input: CommitFileInput,
 ): Promise<CommitFileResult> {
 	return db.transaction(async (tx) => {
+		// Serialize CSE uploads with opinion edits and finalization, which use
+		// the same transaction-scoped declaration advisory lock.
+		if (input.flowType === "cse_opinion") {
+			await tx.execute(
+				sql`SELECT pg_advisory_xact_lock(hashtextextended(${input.declarationId}, 0))`,
+			);
+		}
 		// Lock the declaration row for the duration of the transaction. Any
 		// concurrent upload targeting the same declaration blocks here until
 		// this tx commits — closing the TOCTOU race where two parallel CSE
@@ -270,7 +291,7 @@ async function commitFileRow(
 
 		let replacedFilePath: string | null = null;
 
-		if (input.flowType === "joint_evaluation") {
+		if (input.flowType !== "cse_opinion") {
 			// Upsert: one file per declaration. Capture the previous path so the
 			// caller can best-effort delete it from S3 after the tx commits.
 			const existing = await tx
@@ -279,7 +300,7 @@ async function commitFileRow(
 				.where(
 					and(
 						eq(files.declarationId, input.declarationId),
-						eq(files.type, "joint_evaluation"),
+						eq(files.type, input.flowType),
 					),
 				)
 				.limit(1);
@@ -317,6 +338,12 @@ async function commitFileRow(
 			filePath: input.filePath,
 			type: input.flowType,
 		});
+		if (input.flowType === "cse_opinion") {
+			await tx
+				.update(declarations)
+				.set({ cseOpinionDraftUpdatedAt: new Date() })
+				.where(eq(declarations.id, input.declarationId));
+		}
 
 		return { fileId: input.fileId, replacedFilePath };
 	});

@@ -1,4 +1,6 @@
+import { GapBadge } from "~/modules/declaration-remuneration/shared/GapValueBadge";
 import type { PayGapReferences } from "~/modules/declaration-remuneration/shared/indicatorRowMapping";
+import { WorkforceTableHead } from "~/modules/declaration-remuneration/steps/step1/WorkforceTableHeaders";
 import type {
 	Step2Data,
 	Step3Data,
@@ -9,9 +11,7 @@ import {
 	computePercentage,
 	computeWorkforceTotal,
 	formatCurrency,
-	formatGap,
 	formatVariablePayProportion,
-	gapLevel,
 	resolveGap,
 	sumQuartileWorkforce,
 } from "~/modules/domain";
@@ -38,20 +38,6 @@ type GapRow = {
 	/** Gap as persisted on the declaration, shown instead of recomputing it. */
 	reference?: GipGapReference;
 };
-
-function HighGapBadge() {
-	return <span className={styles.highBadge}>élevé</span>;
-}
-
-function GapCell({ gap }: { gap: number | null }) {
-	const isHigh = gapLevel(gap) === "high";
-	return (
-		<span className={styles.gapCell}>
-			<strong>{formatGap(gap)}</strong>
-			{isHigh && <HighGapBadge />}
-		</span>
-	);
-}
 
 function AccessiblePlaceholder({ label }: { label: string }) {
 	return (
@@ -113,7 +99,7 @@ function GapTable({
 												{formatCurrency(row.men)}
 											</td>
 											<td className={styles.gapNumeric}>
-												<GapCell gap={gap} />
+												<GapBadge gap={gap} />
 											</td>
 										</tr>
 									);
@@ -150,14 +136,7 @@ function WorkforceTable({
 					<div className="fr-table__content">
 						<table>
 							<caption>Effectifs physiques pris en compte</caption>
-							<thead>
-								<tr>
-									<th scope="col">Nombre de salariés</th>
-									<th scope="col">Femmes</th>
-									<th scope="col">Hommes</th>
-									<th scope="col">Total</th>
-								</tr>
-							</thead>
+							<WorkforceTableHead />
 							<tbody>
 								{rows.map((row) => (
 									<tr key={row.label}>

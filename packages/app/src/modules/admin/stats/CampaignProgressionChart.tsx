@@ -111,7 +111,7 @@ function ProgressionTooltip({
 					const pct = Math.round(percentageOf(entry.value, total));
 					return (
 						<li className={styles.tooltipItem} key={entry.name}>
-							{year} : {formatCount(entry.value)} déclarations (
+							{year} : {formatCount(entry.value)} déclarations transmises (
 							{formatWholePercentage(pct)} du total)
 						</li>
 					);

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
 	ACCESSIBILITY,
+	CGU,
 	COOKIES,
 	LEGAL_NOTICE,
 	PRIVACY,
@@ -22,6 +23,11 @@ export function FooterBottom() {
 				<li className="fr-footer__bottom-item">
 					<Link className="fr-footer__bottom-link" href={LEGAL_NOTICE}>
 						Mentions légales
+					</Link>
+				</li>
+				<li className="fr-footer__bottom-item">
+					<Link className="fr-footer__bottom-link" href={CGU}>
+						Conditions générales d'utilisation
 					</Link>
 				</li>
 				<li className="fr-footer__bottom-item">

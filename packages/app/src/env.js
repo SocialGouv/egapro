@@ -38,6 +38,10 @@ const literalBooleanFlag = () =>
 		.default("false")
 		.transform((value) => value === "true");
 
+// Mirror V2_FIRST_CAMPAIGN_YEAR and MAX_CAMPAIGN_YEAR: next.config.js loads this file natively, so it cannot import the TS domain.
+const RECETTE_CAMPAIGN_YEAR_MIN = 2027;
+const RECETTE_CAMPAIGN_YEAR_MAX = 2100;
+
 export const env = createEnv({
 	/**
 	 * Specify your server-side environment variables schema here. This way you can ensure the app
@@ -98,6 +102,7 @@ export const env = createEnv({
 		NEXTAUTH_URL: z.string().url(),
 		EGAPRO_GIP_MDS_API_URL: z.string().url().optional(),
 		EGAPRO_GIP_MDS_API_TOKEN: z.string().optional(),
+		EGAPRO_EXPORT_API_TOKEN: z.string().trim().optional(),
 		// Matomo Reporting API — server-side token for the admin funnel widget.
 		// Optional: when absent the matomo service degrades to an empty funnel
 		// (the admin chart shows "no data") instead of throwing.
@@ -121,11 +126,30 @@ export const env = createEnv({
 		// fails the build if that ever changes — and the seam additionally demands
 		// a loopback host, a barrier no configuration can grant a deployed pod.
 		EGAPRO_E2E_ADMIN_MFA: literalBooleanFlag(),
+		// Pins the campaign year of a manual recette environment; refused at boot outside dev builds (guard below).
+		EGAPRO_RECETTE_CAMPAIGN_YEAR: z
+			.string()
+			.regex(/^\d{4}$/)
+			.transform(Number)
+			.pipe(
+				z
+					.number()
+					.int()
+					.min(RECETTE_CAMPAIGN_YEAR_MIN)
+					.max(RECETTE_CAMPAIGN_YEAR_MAX),
+			)
+			.optional(),
 		/**
 		 * Comma-separated list of emails that should be granted the admin role
 		 * on login. The flag is then persisted in the `app_user.is_admin` column.
 		 */
 		ADMIN_EMAILS: z.string().optional().default(""),
+		// Lifts the agent_public requirement on /admin; literal string, not z.coerce.boolean() ("false" would be truthy).
+		EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT: z
+			.enum(["true", "false"])
+			.optional()
+			.default("true")
+			.transform((value) => value === "true"),
 		// Audit log (issue #3174) — retention thresholds (CNIL: 6 months for
 		// access logs, 12 months for security logs). Consumed directly by the
 		// audit-cleanup CronJob (packages/app/scripts/audit-cleanup.ts, issue
@@ -161,6 +185,13 @@ export const env = createEnv({
 		// Optional comma-separated API tokens. Recognised tokens receive the
 		// documented higher public-API quota; anonymous access remains available.
 		EGAPRO_PUBLIC_API_TOKENS: z.string().optional().default(""),
+		// Server-side: read by the ArchivesSection Server Component at runtime, overridable per environment without a rebuild.
+		SUPPORT_JIRA_URL: z
+			.string()
+			.url()
+			.default(
+				"https://jira-mcas.atlassian.net/servicedesk/customer/portal/97",
+			),
 	},
 
 	/**
@@ -173,6 +204,8 @@ export const env = createEnv({
 			.enum(["dev", "preprod", "prod"])
 			.optional()
 			.default("dev"),
+		// Opt-in per build: review apps, perf-persist and local — never rgaa/recette.
+		NEXT_PUBLIC_DEV_FILL_ENABLED: literalBooleanFlag(),
 		NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
 		NEXT_PUBLIC_SENTRY_RELEASE: z.string().optional(),
 		// Release identifier shown in the footer (git tag in prod, branch name on
@@ -217,11 +250,15 @@ export const env = createEnv({
 		NEXTAUTH_URL: process.env.NEXTAUTH_URL,
 		EGAPRO_GIP_MDS_API_URL: process.env.EGAPRO_GIP_MDS_API_URL,
 		EGAPRO_GIP_MDS_API_TOKEN: process.env.EGAPRO_GIP_MDS_API_TOKEN,
+		EGAPRO_EXPORT_API_TOKEN: process.env.EGAPRO_EXPORT_API_TOKEN,
 		MATOMO_API_TOKEN: process.env.MATOMO_API_TOKEN,
 		MATOMO_API_URL: process.env.MATOMO_API_URL,
 		EGAPRO_E2E_CLOCK: process.env.EGAPRO_E2E_CLOCK,
 		EGAPRO_E2E_ADMIN_MFA: process.env.EGAPRO_E2E_ADMIN_MFA,
+		EGAPRO_RECETTE_CAMPAIGN_YEAR: process.env.EGAPRO_RECETTE_CAMPAIGN_YEAR,
 		ADMIN_EMAILS: process.env.ADMIN_EMAILS,
+		EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT:
+			process.env.EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT,
 		EGAPRO_AUDIT_RETENTION_SHORT_DAYS:
 			process.env.EGAPRO_AUDIT_RETENTION_SHORT_DAYS,
 		EGAPRO_AUDIT_RETENTION_LONG_DAYS:
@@ -230,7 +267,9 @@ export const env = createEnv({
 			process.env.EGAPRO_DECLARATION_RETENTION_YEARS,
 		VALKEY_URL: process.env.VALKEY_URL,
 		EGAPRO_PUBLIC_API_TOKENS: process.env.EGAPRO_PUBLIC_API_TOKENS,
+		SUPPORT_JIRA_URL: process.env.SUPPORT_JIRA_URL,
 		NEXT_PUBLIC_EGAPRO_ENV: process.env.NEXT_PUBLIC_EGAPRO_ENV,
+		NEXT_PUBLIC_DEV_FILL_ENABLED: process.env.NEXT_PUBLIC_DEV_FILL_ENABLED,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
 		NEXT_PUBLIC_SENTRY_RELEASE: process.env.NEXT_PUBLIC_SENTRY_RELEASE,
 		NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION,
@@ -285,4 +324,16 @@ if (
 				"Without it no user can sign in — refusing to start.",
 		);
 	}
+}
+
+if (
+	typeof window === "undefined" &&
+	!process.env.SKIP_ENV_VALIDATION &&
+	env.EGAPRO_RECETTE_CAMPAIGN_YEAR !== undefined &&
+	env.NEXT_PUBLIC_EGAPRO_ENV !== "dev"
+) {
+	throw new Error(
+		`EGAPRO_RECETTE_CAMPAIGN_YEAR is set on a "${env.NEXT_PUBLIC_EGAPRO_ENV}" build. ` +
+			"Pinning the campaign year is reserved to dev recette environments — refusing to start.",
+	);
 }

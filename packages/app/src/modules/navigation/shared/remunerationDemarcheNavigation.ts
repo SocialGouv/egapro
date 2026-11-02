@@ -10,11 +10,8 @@ import {
 	CSE_OPINION,
 	complianceStepHref,
 	DECLARATION_REMUNERATION,
-	LAST_REMUNERATION_STEP,
-	remunerationStepHref,
 } from "~/modules/routes";
 
-const FIRST_DECLARATION_RECAP = remunerationStepHref(LAST_REMUNERATION_STEP);
 const SECOND_DECLARATION_RECAP = complianceStepHref(3);
 const CORRECTIVE_ACTIONS_FIRST_STEP = complianceStepHref(1);
 
@@ -47,6 +44,17 @@ export function getDemarcheStageHref(
 		case "demarche_completed":
 			return terminalHref;
 	}
+}
+
+export function getDemarcheResumeHref(
+	status: DeclarationFsmStatus,
+	terminalHref: AppHref,
+	secondDeclarationSaved: boolean,
+): AppHref {
+	if (status === "corrective_actions_chosen" && secondDeclarationSaved) {
+		return SECOND_DECLARATION_RECAP;
+	}
+	return getDemarcheStageHref(status, terminalHref);
 }
 
 // Takes the decision, not its inputs: on `hasCse` alone this sent a company
@@ -91,67 +99,4 @@ export function getCompliancePathHref(
 		case "justify":
 			return getPostComplianceDestination(cseOpinionRequired);
 	}
-}
-
-/**
- * Provenance, keyed by the engine's own transition ids: that is what lets
- * `fsmMirrors.conformance.test.ts` derive the expected set from
- * `rules.transitions`, so a new incoming transition breaks the test rather than
- * sending "Précédent" to the wrong page.
- */
-export type CseOpinionOrigin =
-	| "choose_path_initial_justify_with_cse"
-	| "choose_path_revised_justify_with_cse"
-	| "submit_joint_evaluation_initial_with_cse"
-	| "submit_joint_evaluation_revised_with_cse"
-	| "submit_second_declaration_resolved_with_cse"
-	| "submit_to_cse_opinion_directly";
-
-export const CSE_OPINION_PREVIOUS_HREF: Record<CseOpinionOrigin, AppHref> = {
-	choose_path_initial_justify_with_cse: COMPLIANCE_PATH,
-	choose_path_revised_justify_with_cse: COMPLIANCE_PATH,
-	submit_joint_evaluation_initial_with_cse: COMPLIANCE_JOINT_EVALUATION,
-	submit_joint_evaluation_revised_with_cse: COMPLIANCE_JOINT_EVALUATION,
-	submit_second_declaration_resolved_with_cse: SECOND_DECLARATION_RECAP,
-	submit_to_cse_opinion_directly: FIRST_DECLARATION_RECAP,
-};
-
-export type CseOpinionOriginContext = {
-	firstDeclarationPathChoice: CompliancePathValue | null;
-	secondDeclarationPathChoice: CompliancePathValue | null;
-	hasSubmittedSecondDeclaration: boolean;
-};
-
-/** Which of the six incoming transitions the stored démarche corresponds to. */
-export function resolveCseOpinionOrigin({
-	firstDeclarationPathChoice,
-	secondDeclarationPathChoice,
-	hasSubmittedSecondDeclaration,
-}: CseOpinionOriginContext): CseOpinionOrigin {
-	if (hasSubmittedSecondDeclaration) {
-		if (secondDeclarationPathChoice === "joint_evaluation") {
-			return "submit_joint_evaluation_revised_with_cse";
-		}
-		if (secondDeclarationPathChoice === "justify") {
-			return "choose_path_revised_justify_with_cse";
-		}
-		return "submit_second_declaration_resolved_with_cse";
-	}
-	if (firstDeclarationPathChoice === "joint_evaluation") {
-		return "submit_joint_evaluation_initial_with_cse";
-	}
-	if (firstDeclarationPathChoice === "justify") {
-		return "choose_path_initial_justify_with_cse";
-	}
-	return "submit_to_cse_opinion_directly";
-}
-
-export function getCseOpinionPreviousHref(
-	context: CseOpinionOriginContext,
-): AppHref {
-	return CSE_OPINION_PREVIOUS_HREF[resolveCseOpinionOrigin(context)];
-}
-
-export function getCompliancePathPreviousHref(isSecondRound: boolean): AppHref {
-	return isSecondRound ? SECOND_DECLARATION_RECAP : FIRST_DECLARATION_RECAP;
 }

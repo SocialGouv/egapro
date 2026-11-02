@@ -84,6 +84,7 @@ describe("v2027.1.json — structural consistency", () => {
 			"cse_opinion_submit",
 			"cancel",
 			"demarche_complete",
+			"formal_notice_joint_evaluation_submit",
 		]);
 		for (const t of rules.transitions) {
 			for (const event of t.events) {

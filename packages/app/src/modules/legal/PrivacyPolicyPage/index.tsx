@@ -12,11 +12,11 @@ export function PrivacyPolicyPage() {
 				<Breadcrumb
 					items={[
 						{ label: "Accueil", href: "/" },
-						{ label: "Données personnelles" },
+						{ label: "Politique de confidentialité" },
 					]}
 				/>
 
-				<h1 className="fr-h1 fr-mt-4w">Données personnelles</h1>
+				<h1 className="fr-h1 fr-mt-4w">Politique de confidentialité</h1>
 
 				<PrivacyOverview />
 				<PrivacyRightsAndData />

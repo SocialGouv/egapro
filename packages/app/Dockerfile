@@ -1,10 +1,12 @@
 # syntax=docker/dockerfile:1.7
 
-ARG NODE_VERSION=24-alpine
 ARG PNPM_VERSION=10.8.1
 
 # Builder stage: install deps + build Next.js (standalone)
-FROM node:${NODE_VERSION} AS builder
+# Exact tag + digest, bumped by Dependabot (docker ecosystem). Never go below
+# 24.21.0: the global fetch() runs on the undici Node embeds, and 24.21.0 is the
+# first 24.x shipping undici >= 7.29.1.
+FROM node:24.22.1-alpine@sha256:06d7adf3e0ef61a13f1d28682726366f97a15aa1888c934d3ecec86c33918b53 AS builder
 
 WORKDIR /app
 
@@ -39,6 +41,8 @@ ENV SKIP_ENV_VALIDATION=1
 # Build-time args for NEXT_PUBLIC_* variables (inlined by Next.js at build time)
 ARG NEXT_PUBLIC_EGAPRO_ENV
 ENV NEXT_PUBLIC_EGAPRO_ENV=$NEXT_PUBLIC_EGAPRO_ENV
+ARG NEXT_PUBLIC_DEV_FILL_ENABLED
+ENV NEXT_PUBLIC_DEV_FILL_ENABLED=$NEXT_PUBLIC_DEV_FILL_ENABLED
 ARG NEXT_PUBLIC_SENTRY_DSN
 ENV NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN
 ARG NEXT_PUBLIC_MATOMO_URL
@@ -86,7 +90,7 @@ RUN pnpm --filter notifications deploy --prod --legacy /deploy/notifications
 ARG APP_VERSION
 ARG PR_NUMBER
 ARG SENTRY_RELEASE
-RUN --mount=type=cache,id=next-cache,target=/app/packages/app/.next/cache \
+RUN --mount=type=cache,id=next-cache-v2,sharing=locked,target=/app/packages/app/.next/cache \
     --mount=type=secret,id=sentry_auth_token \
     SENTRY_AUTH_TOKEN=$(cat /run/secrets/sentry_auth_token 2>/dev/null) \
     NEXT_PUBLIC_SENTRY_RELEASE=$(echo "$SENTRY_RELEASE" | tr '/' '-') \
@@ -96,7 +100,7 @@ RUN --mount=type=cache,id=next-cache,target=/app/packages/app/.next/cache \
 
 
 # Runner stage: minimal Node runtime, no pnpm/corepack
-FROM node:${NODE_VERSION} AS runner
+FROM node:24.22.1-alpine@sha256:06d7adf3e0ef61a13f1d28682726366f97a15aa1888c934d3ecec86c33918b53 AS runner
 
 RUN apk --update --no-cache add ca-certificates && apk upgrade
 

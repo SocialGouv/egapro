@@ -11,7 +11,7 @@
 //
 // Prints statuses only — never the certificate, the passphrase, or response
 // bodies, which may carry SIREN-level data.
-import { Agent } from "undici";
+import { Agent, fetch as undiciFetch } from "undici";
 
 const baseUrl = (process.env.EGAPRO_SUIT_API_URL ?? "").replace(/\/$/, "");
 const p12 = process.env.EGAPRO_SUIT_CLIENT_CERT_P12_BASE64;
@@ -38,6 +38,7 @@ if (!p12) {
 }
 
 const dispatcher = new Agent({
+	allowH2: false,
 	connect: { pfx: Buffer.from(p12, "base64"), passphrase },
 });
 
@@ -47,7 +48,7 @@ const target = `${baseUrl}/suit/api/externe/egapro/gipmds/latest/metadata`;
 
 let exitCode = 0;
 try {
-	const response = await fetch(target, {
+	const response = await undiciFetch(target, {
 		headers: { Accept: "application/json" },
 		signal: AbortSignal.timeout(30_000),
 		redirect: "error",

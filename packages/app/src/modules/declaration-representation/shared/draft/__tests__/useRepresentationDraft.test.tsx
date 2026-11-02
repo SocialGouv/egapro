@@ -1,10 +1,12 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mutate, mutateAsync, mutationState } = vi.hoisted(() => ({
-	mutate: vi.fn(),
+const { mutateAsync, mutationState } = vi.hoisted(() => ({
 	mutateAsync: vi.fn(),
-	mutationState: { isPending: false },
+	mutationState: {
+		isPending: false,
+		error: null as null | { data?: { code?: string } },
+	},
 }));
 
 vi.mock("~/trpc/react", () => ({
@@ -12,9 +14,9 @@ vi.mock("~/trpc/react", () => ({
 		representationDeclaration: {
 			saveDraft: {
 				useMutation: () => ({
-					mutate,
 					mutateAsync,
 					isPending: mutationState.isPending,
+					error: mutationState.error,
 				}),
 			},
 		},
@@ -33,16 +35,18 @@ function renderDraft({
 	initialDraft = { currentStep: 2 } as RepresentationDraft,
 	enabled = true,
 } = {}) {
-	return renderHook(() =>
-		useRepresentationDraft({ year: YEAR, step, initialDraft, enabled }),
+	return renderHook(
+		(props: { initialDraft: RepresentationDraft; enabled: boolean }) =>
+			useRepresentationDraft({ year: YEAR, step, ...props }),
+		{ initialProps: { initialDraft, enabled } },
 	);
 }
 
 beforeEach(() => {
 	vi.useFakeTimers();
-	mutate.mockReset();
 	mutateAsync.mockReset().mockResolvedValue(undefined);
 	mutationState.isPending = false;
+	mutationState.error = null;
 });
 
 afterEach(() => {
@@ -57,12 +61,12 @@ describe("useRepresentationDraft — autosave", () => {
 		act(() => result.current.setDraftValues({ executiveMenPercent: 40 }));
 		act(() => vi.advanceTimersByTime(DEBOUNCE_MS - 1));
 
-		expect(mutate).not.toHaveBeenCalled();
+		expect(mutateAsync).not.toHaveBeenCalled();
 
 		act(() => vi.advanceTimersByTime(1));
 
-		expect(mutate).toHaveBeenCalledTimes(1);
-		expect(mutate).toHaveBeenCalledWith({
+		expect(mutateAsync).toHaveBeenCalledTimes(1);
+		expect(mutateAsync).toHaveBeenCalledWith({
 			year: YEAR,
 			currentStep: 2,
 			draft: {
@@ -114,8 +118,8 @@ describe("useRepresentationDraft — autosave", () => {
 		act(() => result.current.setDraftValues({ executiveWomenPercent: 60 }));
 		act(() => unmount());
 
-		expect(mutate).toHaveBeenCalledTimes(1);
-		expect(mutate).toHaveBeenCalledWith(
+		expect(mutateAsync).toHaveBeenCalledTimes(1);
+		expect(mutateAsync).toHaveBeenCalledWith(
 			expect.objectContaining({
 				draft: { currentStep: 2, executiveWomenPercent: 60 },
 			}),
@@ -129,7 +133,7 @@ describe("useRepresentationDraft — autosave", () => {
 		act(() => vi.advanceTimersByTime(DEBOUNCE_MS));
 		act(() => unmount());
 
-		expect(mutate).toHaveBeenCalledTimes(1);
+		expect(mutateAsync).toHaveBeenCalledTimes(1);
 	});
 
 	it("exposes the mutation pending state as isSaving", () => {
@@ -147,12 +151,12 @@ describe("useRepresentationDraft — closed campaign (S23)", () => {
 		act(() => result.current.setDraftValues({ executiveWomenPercent: 60 }));
 		act(() => vi.advanceTimersByTime(DEBOUNCE_MS));
 
-		expect(mutate).not.toHaveBeenCalled();
+		expect(mutateAsync).not.toHaveBeenCalled();
 		expect(result.current.isPendingSave).toBe(false);
 		expect(result.current.draft.executiveWomenPercent).toBe(60);
 
 		act(() => unmount());
-		expect(mutate).not.toHaveBeenCalled();
+		expect(mutateAsync).not.toHaveBeenCalled();
 	});
 
 	it("does not persist progress when autosave is disabled", async () => {
@@ -193,7 +197,7 @@ describe("useRepresentationDraft — saveProgress", () => {
 		});
 		act(() => vi.advanceTimersByTime(DEBOUNCE_MS));
 
-		expect(mutate).not.toHaveBeenCalled();
+		expect(mutateAsync).toHaveBeenCalledTimes(1);
 		expect(result.current.isPendingSave).toBe(false);
 	});
 
@@ -202,5 +206,108 @@ describe("useRepresentationDraft — saveProgress", () => {
 		const { result } = renderDraft();
 
 		await expect(result.current.saveProgress(3)).rejects.toThrow("network");
+	});
+});
+
+describe("useRepresentationDraft — pending save handed to the lock", () => {
+	it("sends the pending input at once and resolves once the save settles", async () => {
+		let settle: () => void = () => undefined;
+		mutateAsync.mockReturnValueOnce(
+			new Promise<void>((resolve) => {
+				settle = resolve;
+			}),
+		);
+		const { result } = renderDraft();
+		act(() => result.current.setDraftValues({ executiveWomenPercent: 60 }));
+
+		let settled = false;
+		act(() => {
+			void result.current.flushPendingSave().then(() => {
+				settled = true;
+			});
+		});
+
+		expect(mutateAsync).toHaveBeenCalledWith(
+			expect.objectContaining({
+				draft: { currentStep: 2, executiveWomenPercent: 60 },
+			}),
+		);
+		await act(async () => {
+			await Promise.resolve();
+		});
+		expect(settled).toBe(false);
+
+		await act(async () => {
+			settle();
+			await Promise.resolve();
+		});
+		expect(settled).toBe(true);
+
+		act(() => vi.advanceTimersByTime(DEBOUNCE_MS));
+		expect(mutateAsync).toHaveBeenCalledTimes(1);
+	});
+
+	it("resolves without throwing when the pending save is rejected", async () => {
+		mutateAsync.mockRejectedValueOnce(new Error("conflict"));
+		const { result } = renderDraft();
+		act(() => result.current.setDraftValues({ executiveWomenPercent: 60 }));
+
+		await expect(result.current.flushPendingSave()).resolves.toBeUndefined();
+	});
+
+	it("has nothing to send when no input is pending", async () => {
+		const { result } = renderDraft();
+
+		await result.current.flushPendingSave();
+
+		expect(mutateAsync).not.toHaveBeenCalled();
+	});
+});
+
+describe("useRepresentationDraft — reloaded draft", () => {
+	it("keeps the draft version stable on mount", () => {
+		const { result } = renderDraft();
+
+		expect(result.current.draftVersion).toBe(0);
+	});
+
+	it("replaces the draft, drops the pending input and bumps the version when the server draft changes", () => {
+		const { result, rerender } = renderDraft({
+			initialDraft: { currentStep: 2, executiveWomenPercent: 10 },
+		});
+		act(() => result.current.setDraftValues({ executiveWomenPercent: 60 }));
+
+		rerender({
+			initialDraft: { currentStep: 3, executiveWomenPercent: 70 },
+			enabled: true,
+		});
+		act(() => vi.advanceTimersByTime(DEBOUNCE_MS));
+
+		expect(result.current.draft).toEqual({
+			currentStep: 3,
+			executiveWomenPercent: 70,
+		});
+		expect(result.current.draftVersion).toBe(1);
+		expect(mutateAsync).not.toHaveBeenCalled();
+	});
+});
+
+describe("useRepresentationDraft — save errors", () => {
+	it("explains that the input was not saved when the lock was lost", () => {
+		mutationState.error = { data: { code: "CONFLICT" } };
+		const { result } = renderDraft();
+
+		expect(result.current.saveError).toBe(
+			"Le verrou a été perdu avant l’enregistrement : votre dernière saisie n’a pas été enregistrée.",
+		);
+	});
+
+	it("invites to retry after any other failure", () => {
+		mutationState.error = { data: { code: "INTERNAL_SERVER_ERROR" } };
+		const { result } = renderDraft();
+
+		expect(result.current.saveError).toBe(
+			"L’enregistrement de votre saisie a échoué. Veuillez réessayer.",
+		);
 	});
 });

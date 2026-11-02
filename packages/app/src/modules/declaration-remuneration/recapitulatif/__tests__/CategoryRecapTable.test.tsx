@@ -214,8 +214,8 @@ describe("CategoryRecapTable", () => {
 		expect(screen.getAllByRole("table")).toHaveLength(2);
 	});
 
-	it("does not mark isolated or crossed zeroes as non-calculable", () => {
-		const { rerender } = render(
+	it("explains crossed zeroes that disable both pay bases", () => {
+		render(
 			<CategoryRecapTable
 				category={makeCategory({
 					womenCount: 0,
@@ -227,11 +227,12 @@ describe("CategoryRecapTable", () => {
 				index={0}
 			/>,
 		);
-		expect(
-			screen.queryByText("Aucun écart à calculer"),
-		).not.toBeInTheDocument();
 
-		rerender(
+		expect(screen.getByText("Aucun écart à calculer")).toBeInTheDocument();
+	});
+
+	it("does not mark an isolated zero as non-calculable", () => {
+		render(
 			<CategoryRecapTable
 				category={makeCategory({
 					womenCount: 0,
@@ -282,6 +283,33 @@ describe("CategoryRecapTable", () => {
 			/>,
 		);
 		expect(screen.getAllByText("élevé").length).toBeGreaterThanOrEqual(1);
+	});
+
+	it("shows the magnitude and favored sex for both category gap directions", () => {
+		render(
+			<CategoryRecapTable
+				category={makeCategory({
+					annualBaseWomen: "110",
+					annualBaseMen: "100",
+					annualVariableWomen: "90",
+					annualVariableMen: "100",
+				})}
+				declarationYear={2025}
+				index={0}
+			/>,
+		);
+
+		const base = screen.getAllByRole("rowheader", {
+			name: "Salaire de base",
+		})[0]?.parentElement as HTMLElement;
+		const variable = screen.getAllByRole("rowheader", {
+			name: /Composantes variables/,
+		})[0]?.parentElement as HTMLElement;
+		expect(base).toHaveTextContent("10,00 %");
+		expect(base).toHaveTextContent("en faveur des femmes");
+		expect(base).not.toHaveTextContent("-10,00 %");
+		expect(variable).toHaveTextContent("10,00 %");
+		expect(variable).toHaveTextContent("en faveur des hommes");
 	});
 
 	it("renders no 'élevé' badge when all gaps stay below the threshold", () => {

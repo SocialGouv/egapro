@@ -2,9 +2,11 @@ import { AUDIT_ACTIONS } from "~/modules/audit";
 import { parseSiren } from "~/modules/domain";
 import {
 	buildCseFilePayload,
+	buildFormalNoticeJointEvaluationFilePayload,
 	buildJointEvaluationFilePayload,
 	exportFilesQuerySchema,
 	fetchCseFilesByDeclaration,
+	fetchFormalNoticeJointEvaluationFilesByDeclaration,
 	fetchJointEvaluationFilesByDeclaration,
 } from "~/modules/export";
 import { auditQueryMetadata } from "~/server/audit/queryMetadata";
@@ -82,10 +84,12 @@ async function apiFilesHandler(request: Request): Promise<Response> {
 
 		const { id: declarationId, cancelledAt } = resolved;
 
-		const [cseFilesMap, jointFilesMap] = await Promise.all([
-			fetchCseFilesByDeclaration([declarationId]),
-			fetchJointEvaluationFilesByDeclaration([declarationId]),
-		]);
+		const [cseFilesMap, jointFilesMap, formalNoticeJointFilesMap] =
+			await Promise.all([
+				fetchCseFilesByDeclaration([declarationId]),
+				fetchJointEvaluationFilesByDeclaration([declarationId]),
+				fetchFormalNoticeJointEvaluationFilesByDeclaration([declarationId]),
+			]);
 
 		const cseFiles = (cseFilesMap.get(declarationId) ?? []).map(
 			buildCseFilePayload,
@@ -93,13 +97,16 @@ async function apiFilesHandler(request: Request): Promise<Response> {
 		const jointFiles = (jointFilesMap.get(declarationId) ?? []).map(
 			buildJointEvaluationFilePayload,
 		);
+		const formalNoticeJointFiles = (
+			formalNoticeJointFilesMap.get(declarationId) ?? []
+		).map(buildFormalNoticeJointEvaluationFilePayload);
 
 		return Response.json({
 			siren,
 			year,
 			declarationId,
 			cancelledAt: cancelledAt?.toISOString() ?? null,
-			files: [...cseFiles, ...jointFiles],
+			files: [...cseFiles, ...jointFiles, ...formalNoticeJointFiles],
 		});
 	} catch (error) {
 		console.error(

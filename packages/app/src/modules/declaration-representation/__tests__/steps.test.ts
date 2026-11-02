@@ -4,6 +4,7 @@ import {
 	getNextStep,
 	getNextStepHref,
 	getPreviousStepHref,
+	getReachedNextStepHref,
 	getStepDefinition,
 	isValidStep,
 	PUBLICATION_STEP_NUMBER,
@@ -178,5 +179,41 @@ describe("navigation hrefs — publication step skipped (S12)", () => {
 		expect(getNextStep(PUBLICATION_STEP_NUMBER, true)).toBe(
 			PUBLICATION_STEP_NUMBER + 1,
 		);
+	});
+});
+
+describe("getReachedNextStepHref", () => {
+	it("links to the next step once it was reached", () => {
+		expect(getReachedNextStepHref(1, false, 2)).toBe(
+			`${DECLARATION_REPRESENTATION}/etape/2`,
+		);
+		expect(getReachedNextStepHref(1, false, 3)).toBe(
+			`${DECLARATION_REPRESENTATION}/etape/2`,
+		);
+	});
+
+	it("offers no link while the next step was not reached", () => {
+		expect(getReachedNextStepHref(2, false, 2)).toBeUndefined();
+	});
+
+	it("offers no link on the last step", () => {
+		expect(
+			getReachedNextStepHref(
+				TOTAL_REPRESENTATION_STEPS,
+				false,
+				TOTAL_REPRESENTATION_STEPS,
+			),
+		).toBeUndefined();
+	});
+
+	it("measures the reached step past a skipped publication step", () => {
+		const beforePublication = PUBLICATION_STEP_NUMBER - 1;
+		const afterPublication = PUBLICATION_STEP_NUMBER + 1;
+		expect(
+			getReachedNextStepHref(beforePublication, true, afterPublication),
+		).toBe(`${DECLARATION_REPRESENTATION}/etape/${afterPublication}`);
+		expect(
+			getReachedNextStepHref(beforePublication, true, PUBLICATION_STEP_NUMBER),
+		).toBeUndefined();
 	});
 });

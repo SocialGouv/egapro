@@ -1,11 +1,17 @@
 import { Text, View } from "@react-pdf/renderer";
 
-import { styles } from "../recapPdfStyles";
+import { type PdfStyles, styles } from "../recapPdfStyles";
 
-export function SectionBanner({ title }: { title: string }) {
+export function SectionBanner({
+	title,
+	sheet = styles,
+}: {
+	title: string;
+	sheet?: PdfStyles;
+}) {
 	return (
-		<View style={styles.sectionBanner}>
-			<Text style={styles.sectionBannerText}>{title}</Text>
+		<View style={sheet.sectionBanner}>
+			<Text style={sheet.sectionBannerText}>{title}</Text>
 		</View>
 	);
 }

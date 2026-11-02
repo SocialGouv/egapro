@@ -23,7 +23,7 @@ function authorizationParamsFromCall(): AuthorizationParams {
 function parsedClaims() {
 	return JSON.parse(authorizationParamsFromCall().claims) as {
 		id_token: {
-			acr: { essential: boolean; value: string };
+			acr: { essential: boolean; values: string[] };
 			auth_time: { essential: boolean };
 		};
 	};
@@ -50,11 +50,19 @@ describe("triggerAdminStepUp", () => {
 		);
 	});
 
-	it("demands a second factor, not a higher eIDAS level", () => {
+	it("demands the full set of accepted levels, from the single source of truth", () => {
 		triggerAdminStepUp("/admin");
 
-		expect(ADMIN_MFA_ACR_VALUES[0]).toBe("eidas1-mfa");
-		expect(parsedClaims().id_token.acr.value).toBe(ADMIN_MFA_ACR_VALUES[0]);
+		expect(parsedClaims().id_token.acr.values).toEqual([
+			...ADMIN_MFA_ACR_VALUES,
+		]);
+	});
+
+	it("never falls back to a single value, which only one FI could satisfy", () => {
+		triggerAdminStepUp("/admin");
+
+		const acr = parsedClaims().id_token.acr as Record<string, unknown>;
+		expect(acr).not.toHaveProperty("value");
 	});
 
 	it("makes the level binding via an essential claim", () => {

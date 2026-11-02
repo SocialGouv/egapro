@@ -23,6 +23,7 @@ function makeData(overrides: Partial<DeclarationPdfData>): DeclarationPdfData {
 		year: 2026,
 		workforceYear: 2025,
 		isSecondDeclaration: false,
+		indicatorGRequired: true,
 		transmittedAt: "05/03/2026",
 		referencePeriod: "01/01/2025 - 31/12/2025",
 		declarant: { name: "Jean Martin", email: "email@example.fr", phone: "" },
@@ -142,6 +143,28 @@ describe("CategorySection", () => {
 		expect(screen.getByText("44 000 €")).toBeInTheDocument();
 	});
 
+	it("shows the magnitude and favored sex in both category pay tables", () => {
+		render(
+			<CategorySection
+				data={makeData({
+					categories: [
+						makeCategory({
+							name: "Cadres",
+							annualBaseWomen: "40000",
+							annualBaseMen: "50000",
+							hourlyBaseWomen: "30",
+							hourlyBaseMen: "20",
+						}),
+					],
+				})}
+			/>,
+		);
+		expect(screen.getByText("20,00 %")).toBeInTheDocument();
+		expect(screen.getByText("50,00 %")).toBeInTheDocument();
+		expect(screen.getByText("en faveur des hommes")).toBeInTheDocument();
+		expect(screen.getByText("en faveur des femmes")).toBeInTheDocument();
+	});
+
 	it("shows a dash for a missing hourly headcount, never an invented 0 (#4368)", () => {
 		render(
 			<CategorySection
@@ -202,6 +225,46 @@ describe("CategorySection", () => {
 		expect(
 			screen.getByText("Rémunération horaire brute moyenne"),
 		).toBeInTheDocument();
+	});
+
+	it("explains crossed zeros that disable both pay bases", () => {
+		render(
+			<CategorySection
+				data={makeData({
+					categories: [
+						makeCategory({
+							womenCount: 0,
+							menCount: 3,
+							hourlyWomenCount: 3,
+							hourlyMenCount: 0,
+						}),
+					],
+				})}
+			/>,
+		);
+
+		expect(screen.getByText("Aucun écart à calculer")).toBeInTheDocument();
+	});
+
+	it("does not mark a category non-calculable while one basis stays applicable", () => {
+		render(
+			<CategorySection
+				data={makeData({
+					categories: [
+						makeCategory({
+							womenCount: 0,
+							menCount: 3,
+							hourlyWomenCount: 3,
+							hourlyMenCount: 2,
+						}),
+					],
+				})}
+			/>,
+		);
+
+		expect(
+			screen.queryByText("Aucun écart à calculer"),
+		).not.toBeInTheDocument();
 	});
 
 	it("preserves legacy pay in the PDF without marking it non-calculable (#3678)", () => {

@@ -1,0 +1,25 @@
+:global(dl).definitionList {
+	display: grid;
+	grid-template-columns: 237px minmax(0, 1fr);
+	column-gap: 0.625rem;
+	row-gap: 0.5rem;
+	margin: 0;
+
+	@include respond-to(sm) {
+		grid-template-columns: minmax(0, 1fr);
+		row-gap: 0.25rem;
+	}
+}
+
+.definitionList dd {
+	margin: 0;
+	color: var(--text-title-grey);
+}
+
+.definitionList dd :global(.fr-link) {
+	color: var(--text-action-high-blue-france);
+}
+
+.definitionList dt {
+	color: var(--text-mention-grey);
+}

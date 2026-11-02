@@ -31,6 +31,8 @@ function renderItem(
 		category?: EmployeeCategory & { id: number };
 		errors?: FieldError[];
 		payApplicable?: boolean;
+		annualPayApplicable?: boolean;
+		hourlyPayApplicable?: boolean;
 	} = {},
 ) {
 	const { category: categoryOverride, ...rest } = overrides;
@@ -39,15 +41,20 @@ function renderItem(
 
 function TestItem({
 	category: categoryOverride,
+	annualPayApplicable,
+	hourlyPayApplicable,
 	...overrides
 }: {
 	nameError?: string;
 	category?: EmployeeCategory & { id: number };
 	errors?: FieldError[];
 	payApplicable?: boolean;
+	annualPayApplicable?: boolean;
+	hourlyPayApplicable?: boolean;
 }) {
 	return (
 		<CategoryAccordionItem
+			annualPayApplicable={annualPayApplicable}
 			baseId="cat-form"
 			category={categoryOverride ?? category}
 			collapseRef={vi.fn()}
@@ -56,6 +63,7 @@ function TestItem({
 			errors={[]}
 			fieldId="field-1"
 			headerRef={vi.fn()}
+			hourlyPayApplicable={hourlyPayApplicable}
 			index={0}
 			isExpanded
 			nameProps={{}}
@@ -206,6 +214,23 @@ describe("CategoryAccordionItem — name length cap (#3943)", () => {
 			"aria-describedby",
 			"cat-0-name-hint cat-0-name-limit category-alert-invalid",
 		);
+	});
+});
+
+describe("CategoryAccordionItem — favored-sex mention", () => {
+	it("shows the absolute gap, the high badge, and the women mention — never a signed minus", () => {
+		renderItem({
+			category: {
+				...category,
+				annualBaseWomen: "106",
+				annualBaseMen: "100",
+			},
+		});
+
+		expect(screen.getByText("6,00 %")).toBeInTheDocument();
+		expect(screen.queryByText("-6,00 %")).not.toBeInTheDocument();
+		expect(screen.getByText("élevé")).toBeInTheDocument();
+		expect(screen.getByText("en faveur des femmes")).toBeInTheDocument();
 	});
 });
 

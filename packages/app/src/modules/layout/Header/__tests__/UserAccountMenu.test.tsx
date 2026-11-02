@@ -21,16 +21,16 @@ describe("UserAccountMenu", () => {
 		mockSignIn.mockClear();
 	});
 
-	it("renders the toggle button with 'Mon espace' label", () => {
+	it("renders the toggle button with 'Mon profil' label", () => {
 		render(<UserAccountMenu {...defaultProps} />);
 		expect(
-			screen.getByRole("button", { name: "Mon espace" }),
+			screen.getByRole("button", { name: "Mon profil" }),
 		).toBeInTheDocument();
 	});
 
 	it("has aria-expanded=false by default", () => {
 		render(<UserAccountMenu {...defaultProps} />);
-		expect(screen.getByRole("button", { name: "Mon espace" })).toHaveAttribute(
+		expect(screen.getByRole("button", { name: "Mon profil" })).toHaveAttribute(
 			"aria-expanded",
 			"false",
 		);
@@ -44,21 +44,21 @@ describe("UserAccountMenu", () => {
 	describe("when opened", () => {
 		it("displays the dropdown menu on button click", () => {
 			render(<UserAccountMenu {...defaultProps} />);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			expect(screen.getByRole("menu")).toBeInTheDocument();
 		});
 
-		it("names the menu 'Mon espace'", () => {
+		it("names the menu 'Mon profil'", () => {
 			render(<UserAccountMenu {...defaultProps} />);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			expect(
-				screen.getByRole("menu", { name: "Mon espace" }),
+				screen.getByRole("menu", { name: "Mon profil" }),
 			).toBeInTheDocument();
 		});
 
 		it("keeps the user info block outside the menu element", () => {
 			render(<UserAccountMenu {...defaultProps} />);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			expect(screen.getByRole("menu")).not.toContainElement(
 				screen.getByText("Jean Dupont"),
 			);
@@ -66,7 +66,7 @@ describe("UserAccountMenu", () => {
 
 		it("removes menu items from the natural tab order (roving focus)", () => {
 			render(<UserAccountMenu {...defaultProps} />);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			for (const item of screen.getAllByRole("menuitem")) {
 				expect(item).toHaveAttribute("tabindex", "-1");
 			}
@@ -74,53 +74,51 @@ describe("UserAccountMenu", () => {
 
 		it("sets aria-expanded=true when open", () => {
 			render(<UserAccountMenu {...defaultProps} />);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			expect(
-				screen.getByRole("button", { name: "Mon espace" }),
+				screen.getByRole("button", { name: "Mon profil" }),
 			).toHaveAttribute("aria-expanded", "true");
 		});
 
 		it("displays the user name", () => {
 			render(<UserAccountMenu {...defaultProps} />);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			expect(screen.getByText("Jean Dupont")).toBeInTheDocument();
 		});
 
 		it("displays the user email", () => {
 			render(<UserAccountMenu {...defaultProps} />);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			expect(screen.getByText("jean.dupont@example.fr")).toBeInTheDocument();
 		});
 
-		it("displays 'Mes démarches' menu item linking to /mon-espace", () => {
+		it("does not display 'Mes démarches' in the profile menu", () => {
 			render(<UserAccountMenu {...defaultProps} />);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
-			const menuItem = screen.getByRole("menuitem", {
-				name: "Mes démarches",
-			});
-			expect(menuItem).toBeInTheDocument();
-			expect(menuItem).toHaveAttribute("href", "/mon-espace");
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
+			expect(
+				screen.queryByRole("menuitem", { name: "Mes démarches" }),
+			).not.toBeInTheDocument();
 		});
 
 		it("does not display a 'Mes entreprises' menu item", () => {
 			render(<UserAccountMenu {...defaultProps} />);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			expect(
 				screen.queryByRole("menuitem", { name: "Mes entreprises" }),
 			).not.toBeInTheDocument();
 		});
 
-		it("displays 'Voir mon profil' menu item", () => {
+		it("displays 'Modifier mon profil' menu item", () => {
 			render(<UserAccountMenu {...defaultProps} />);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			expect(
-				screen.getByRole("menuitem", { name: "Voir mon profil" }),
+				screen.getByRole("menuitem", { name: "Modifier mon profil" }),
 			).toBeInTheDocument();
 		});
 
 		it("displays 'Se déconnecter' menu item linking to signout", () => {
 			render(<UserAccountMenu {...defaultProps} />);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			const logoutLink = screen.getByRole("menuitem", {
 				name: "Se déconnecter",
 			});
@@ -132,7 +130,7 @@ describe("UserAccountMenu", () => {
 	describe("closing behavior", () => {
 		it("closes the menu when clicking the toggle button again", () => {
 			render(<UserAccountMenu {...defaultProps} />);
-			const button = screen.getByRole("button", { name: "Mon espace" });
+			const button = screen.getByRole("button", { name: "Mon profil" });
 			fireEvent.click(button);
 			expect(screen.getByRole("menu")).toBeInTheDocument();
 			fireEvent.click(button);
@@ -141,7 +139,7 @@ describe("UserAccountMenu", () => {
 
 		it("closes the menu on Escape key", () => {
 			render(<UserAccountMenu {...defaultProps} />);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			expect(screen.getByRole("menu")).toBeInTheDocument();
 			fireEvent.keyDown(document, { key: "Escape" });
 			expect(screen.queryByRole("menu")).not.toBeInTheDocument();
@@ -149,7 +147,7 @@ describe("UserAccountMenu", () => {
 
 		it("closes the menu on Tab and returns focus to the toggle button", () => {
 			render(<UserAccountMenu {...defaultProps} />);
-			const toggle = screen.getByRole("button", { name: "Mon espace" });
+			const toggle = screen.getByRole("button", { name: "Mon profil" });
 			fireEvent.click(toggle);
 			expect(screen.getByRole("menu")).toBeInTheDocument();
 			fireEvent.keyDown(document, { key: "Tab" });
@@ -164,7 +162,7 @@ describe("UserAccountMenu", () => {
 					<UserAccountMenu {...defaultProps} />
 				</div>,
 			);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			expect(screen.getByRole("menu")).toBeInTheDocument();
 			fireEvent.mouseDown(screen.getByTestId("outside"));
 			expect(screen.queryByRole("menu")).not.toBeInTheDocument();
@@ -172,14 +170,16 @@ describe("UserAccountMenu", () => {
 
 		it("closes the menu when clicking a menu item button", () => {
 			render(<UserAccountMenu {...defaultProps} />);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
-			fireEvent.click(screen.getByRole("menuitem", { name: "Mes démarches" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
+			fireEvent.click(
+				screen.getByRole("menuitem", { name: "Modifier mon profil" }),
+			);
 			expect(screen.queryByRole("menu")).not.toBeInTheDocument();
 		});
 	});
 
 	describe("profile modal integration", () => {
-		it("closes the dropdown and opens the profile modal on 'Voir mon profil' click", () => {
+		it("closes the dropdown and opens the profile modal on 'Modifier mon profil' click", () => {
 			const mockDisclose = vi.fn();
 			Object.defineProperty(window, "dsfr", {
 				value: () => ({ modal: { disclose: mockDisclose } }),
@@ -192,9 +192,9 @@ describe("UserAccountMenu", () => {
 			document.body.appendChild(modalElement);
 
 			render(<UserAccountMenu {...defaultProps} />);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			fireEvent.click(
-				screen.getByRole("menuitem", { name: "Voir mon profil" }),
+				screen.getByRole("menuitem", { name: "Modifier mon profil" }),
 			);
 
 			expect(screen.queryByRole("menu")).not.toBeInTheDocument();
@@ -207,7 +207,7 @@ describe("UserAccountMenu", () => {
 	describe("admin link", () => {
 		it("does not display 'Administration' when isAdmin is false", () => {
 			render(<UserAccountMenu {...defaultProps} />);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			expect(
 				screen.queryByRole("menuitem", { name: "Administration" }),
 			).not.toBeInTheDocument();
@@ -215,7 +215,7 @@ describe("UserAccountMenu", () => {
 
 		it("displays 'Administration' link when isAdmin is true", () => {
 			render(<UserAccountMenu {...defaultProps} isAdmin />);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			const adminLink = screen.getByRole("menuitem", {
 				name: "Administration",
 			});
@@ -227,7 +227,7 @@ describe("UserAccountMenu", () => {
 			render(
 				<UserAccountMenu {...defaultProps} adminMfaAt={nowSeconds()} isAdmin />,
 			);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			const event = fireEvent.click(
 				screen.getByRole("menuitem", { name: "Administration" }),
 			);
@@ -244,7 +244,7 @@ describe("UserAccountMenu", () => {
 					isAdmin
 				/>,
 			);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			const event = fireEvent.click(
 				screen.getByRole("menuitem", { name: "Administration" }),
 			);
@@ -259,7 +259,7 @@ describe("UserAccountMenu", () => {
 
 		it("triggers the admin step-up when the session carries no admin MFA date at all", () => {
 			render(<UserAccountMenu {...defaultProps} isAdmin />);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			fireEvent.click(screen.getByRole("menuitem", { name: "Administration" }));
 
 			expect(mockSignIn).toHaveBeenCalledWith(
@@ -273,7 +273,7 @@ describe("UserAccountMenu", () => {
 			render(
 				<UserAccountMenu {...defaultProps} adminMfaAt={nowSeconds()} isAdmin />,
 			);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			fireEvent.click(screen.getByRole("menuitem", { name: "Administration" }));
 
 			expect(screen.queryByRole("menu")).not.toBeInTheDocument();
@@ -283,13 +283,13 @@ describe("UserAccountMenu", () => {
 	describe("optional userPhone", () => {
 		it("does not display a phone number when userPhone is not provided", () => {
 			render(<UserAccountMenu {...defaultProps} />);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			expect(screen.queryByText(/\+?\d{2}/)).not.toBeInTheDocument();
 		});
 
 		it("displays the phone number when userPhone is provided", () => {
 			render(<UserAccountMenu {...defaultProps} userPhone="01 23 45 67 89" />);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			expect(screen.getByText("01 23 45 67 89")).toBeInTheDocument();
 		});
 	});
@@ -297,15 +297,15 @@ describe("UserAccountMenu", () => {
 	describe("focus management", () => {
 		it("moves focus to the first menu item when the dropdown opens", () => {
 			render(<UserAccountMenu {...defaultProps} />);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			expect(
-				screen.getByRole("menuitem", { name: "Mes démarches" }),
+				screen.getByRole("menuitem", { name: "Modifier mon profil" }),
 			).toHaveFocus();
 		});
 
 		it("returns focus to the toggle button when closing with Escape", () => {
 			render(<UserAccountMenu {...defaultProps} />);
-			const toggle = screen.getByRole("button", { name: "Mon espace" });
+			const toggle = screen.getByRole("button", { name: "Mon profil" });
 			fireEvent.click(toggle);
 			fireEvent.keyDown(document, { key: "Escape" });
 			expect(toggle).toHaveFocus();
@@ -315,37 +315,37 @@ describe("UserAccountMenu", () => {
 	describe("arrow key navigation", () => {
 		it("moves focus to the next item on ArrowDown", () => {
 			render(<UserAccountMenu {...defaultProps} />);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			fireEvent.keyDown(document, { key: "ArrowDown" });
 			expect(
-				screen.getByRole("menuitem", { name: "Voir mon profil" }),
+				screen.getByRole("menuitem", { name: "Se déconnecter" }),
 			).toHaveFocus();
 		});
 
 		it("wraps focus to the first item when pressing ArrowDown on the last item", () => {
 			render(<UserAccountMenu {...defaultProps} />);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			// Navigate to last item (Se déconnecter)
 			fireEvent.keyDown(document, { key: "End" });
 			fireEvent.keyDown(document, { key: "ArrowDown" });
 			expect(
-				screen.getByRole("menuitem", { name: "Mes démarches" }),
+				screen.getByRole("menuitem", { name: "Modifier mon profil" }),
 			).toHaveFocus();
 		});
 
 		it("moves focus to the previous item on ArrowUp", () => {
 			render(<UserAccountMenu {...defaultProps} />);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			fireEvent.keyDown(document, { key: "ArrowDown" });
 			fireEvent.keyDown(document, { key: "ArrowUp" });
 			expect(
-				screen.getByRole("menuitem", { name: "Mes démarches" }),
+				screen.getByRole("menuitem", { name: "Modifier mon profil" }),
 			).toHaveFocus();
 		});
 
 		it("wraps focus to the last item when pressing ArrowUp on the first item", () => {
 			render(<UserAccountMenu {...defaultProps} />);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			fireEvent.keyDown(document, { key: "ArrowUp" });
 			expect(
 				screen.getByRole("menuitem", { name: "Se déconnecter" }),
@@ -354,17 +354,17 @@ describe("UserAccountMenu", () => {
 
 		it("moves focus to the first item on Home", () => {
 			render(<UserAccountMenu {...defaultProps} />);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			fireEvent.keyDown(document, { key: "End" });
 			fireEvent.keyDown(document, { key: "Home" });
 			expect(
-				screen.getByRole("menuitem", { name: "Mes démarches" }),
+				screen.getByRole("menuitem", { name: "Modifier mon profil" }),
 			).toHaveFocus();
 		});
 
 		it("moves focus to the last item on End", () => {
 			render(<UserAccountMenu {...defaultProps} />);
-			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("button", { name: "Mon profil" }));
 			fireEvent.keyDown(document, { key: "End" });
 			expect(
 				screen.getByRole("menuitem", { name: "Se déconnecter" }),

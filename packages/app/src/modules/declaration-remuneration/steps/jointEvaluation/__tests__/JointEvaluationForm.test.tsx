@@ -143,14 +143,12 @@ describe("JointEvaluationForm", () => {
 		expect(screen.getByText(/après dépôt du rapport/i)).toBeInTheDocument();
 	});
 
-	it("links back to the compliance path choice page", () => {
+	it("renders no previous link back to the transmitted path choice", () => {
 		render(<JointEvaluationForm {...defaultProps} />);
 
-		const backLink = screen.getByRole("link", { name: /précédent/i });
-		expect(backLink).toHaveAttribute(
-			"href",
-			"/declaration-remuneration/parcours-conformite",
-		);
+		expect(
+			screen.queryByRole("link", { name: /précédent/i }),
+		).not.toBeInTheDocument();
 	});
 
 	it("opens modal after selecting a file and submitting", () => {

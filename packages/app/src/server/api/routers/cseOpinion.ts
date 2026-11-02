@@ -5,6 +5,7 @@ import {
 	saveOpinionsSchema,
 	setFileContentTypesSchema,
 } from "~/modules/cseOpinion/schemas";
+import { assembleCseOpinionRecap } from "~/modules/declarationPdf/buildCseOpinionRecapData";
 import { getCurrentYear } from "~/modules/domain";
 import {
 	createTRPCRouter,
@@ -26,16 +27,65 @@ import {
 } from "~/server/services/cseRequiredContentTypes";
 import { deleteFile as deleteS3File, getFileSize } from "~/server/services/s3";
 import {
+	findTransmittedCseOpinions,
+	findTransmittedJointEvaluation,
+} from "./declarationHelpers";
+import {
 	applyActionOrRefuse,
 	buildHistoryInserts,
 	computeProjectionUpdates,
 	lockAndReadDeclaration,
+	lockDeclaration,
 } from "./statusHistoryHelpers";
 
 const CSE_OPINION_UNAVAILABLE_ERROR =
 	"Les avis du CSE ne peuvent pas être transmis à cette étape de la démarche.";
 
+function assertRequiredContentTypesCovered(
+	requiredTypes: Awaited<ReturnType<typeof getRequiredContentTypes>>,
+	associations: Array<{ declarationNumber: number; type: string }>,
+) {
+	const coveredKeys = new Set(
+		associations.map((association) =>
+			contentTypeKey(association.declarationNumber, association.type),
+		),
+	);
+	for (const required of requiredTypes) {
+		const key = contentTypeKey(required.declarationNumber, required.type);
+		if (!coveredKeys.has(key)) {
+			const typeLabel =
+				required.type === "accuracy" ? "Exactitude" : "Justification";
+			const declLabel =
+				required.declarationNumber === 1
+					? "première déclaration"
+					: "deuxième déclaration";
+			throw new TRPCError({
+				code: "PRECONDITION_FAILED",
+				message: `Le type de contenu « ${typeLabel} » de la ${declLabel} doit être associé à un fichier avant validation.`,
+			});
+		}
+	}
+}
+
 export const cseOpinionRouter = createTRPCRouter({
+	getSubmittedView: declarationProcedure.query(async ({ ctx }) => {
+		const transmitted = await findTransmittedCseOpinions(
+			ctx.db,
+			ctx.declarationId,
+		);
+		if (!transmitted) {
+			throw new TRPCError({
+				code: "NOT_FOUND",
+				message: "Aucun avis du CSE transmis pour cette déclaration.",
+			});
+		}
+		const [recap, jointEvaluation] = await Promise.all([
+			assembleCseOpinionRecap(transmitted),
+			findTransmittedJointEvaluation(ctx.db, ctx.declarationId),
+		]);
+		return { ...recap, hasSubmittedJointEvaluation: jointEvaluation !== null };
+	}),
+
 	get: declarationProcedure.query(async ({ ctx }) => {
 		const rows = await ctx.db
 			.select({
@@ -55,6 +105,11 @@ export const cseOpinionRouter = createTRPCRouter({
 		.input(saveOpinionsSchema)
 		.mutation(async ({ ctx, input }) => {
 			await ctx.db.transaction(async (tx) => {
+				await lockDeclaration(tx, ctx.declarationId);
+				await tx
+					.update(declarations)
+					.set({ cseOpinionDraftUpdatedAt: new Date() })
+					.where(eq(declarations.id, ctx.declarationId));
 				await tx
 					.delete(cseOpinions)
 					.where(eq(cseOpinions.declarationId, ctx.declarationId));
@@ -185,6 +240,11 @@ export const cseOpinionRouter = createTRPCRouter({
 			}
 
 			await ctx.db.transaction(async (tx) => {
+				await lockDeclaration(tx, ctx.declarationId);
+				await tx
+					.update(declarations)
+					.set({ cseOpinionDraftUpdatedAt: new Date() })
+					.where(eq(declarations.id, ctx.declarationId));
 				await tx
 					.delete(cseOpinionFiles)
 					.where(eq(cseOpinionFiles.declarationId, ctx.declarationId));
@@ -205,85 +265,6 @@ export const cseOpinionRouter = createTRPCRouter({
 		}),
 
 	finalize: declarationWriteProcedure.mutation(async ({ ctx }) => {
-		const [opinionCount, fileRows, existingAssociations] = await Promise.all([
-			ctx.db
-				.select({ count: sql<number>`count(*)::int` })
-				.from(cseOpinions)
-				.where(eq(cseOpinions.declarationId, ctx.declarationId)),
-			ctx.db
-				.select({ id: files.id, fileName: files.fileName })
-				.from(files)
-				.where(
-					and(
-						eq(files.declarationId, ctx.declarationId),
-						eq(files.type, "cse_opinion"),
-					),
-				),
-			ctx.db
-				.select({
-					declarationNumber: cseOpinionFiles.declarationNumber,
-					type: cseOpinionFiles.type,
-					fileId: cseOpinionFiles.fileId,
-				})
-				.from(cseOpinionFiles)
-				.where(eq(cseOpinionFiles.declarationId, ctx.declarationId)),
-		]);
-
-		if ((opinionCount[0]?.count ?? 0) === 0) {
-			throw new TRPCError({
-				code: "PRECONDITION_FAILED",
-				message: "Les avis du CSE doivent être renseignés avant validation.",
-			});
-		}
-		if (fileRows.length === 0) {
-			throw new TRPCError({
-				code: "PRECONDITION_FAILED",
-				message: "Au moins un fichier d'avis CSE doit être transmis.",
-			});
-		}
-
-		const requiredTypes = await getRequiredContentTypes(
-			ctx.db,
-			ctx.declarationId,
-		);
-
-		const coveredKeys = new Set(
-			existingAssociations.map((a) =>
-				contentTypeKey(a.declarationNumber, a.type),
-			),
-		);
-
-		for (const required of requiredTypes) {
-			const key = contentTypeKey(required.declarationNumber, required.type);
-			if (!coveredKeys.has(key)) {
-				const typeLabel =
-					required.type === "accuracy" ? "Exactitude" : "Justification";
-				const declLabel =
-					required.declarationNumber === 1
-						? "première déclaration"
-						: "deuxième déclaration";
-				throw new TRPCError({
-					code: "PRECONDITION_FAILED",
-					message: `Le type de contenu « ${typeLabel} » de la ${declLabel} doit être associé à un fichier avant validation.`,
-				});
-			}
-		}
-
-		// Every uploaded file must carry at least one content type: a file row left
-		// with no checkbox checked is an orphan and blocks finalize. Checked after
-		// the required-type guard so a fully-empty matrix reports the missing type
-		// first.
-		const associatedFileIds = new Set(
-			existingAssociations.map((association) => association.fileId),
-		);
-		const orphanFile = fileRows.find((file) => !associatedFileIds.has(file.id));
-		if (orphanFile) {
-			throw new TRPCError({
-				code: "PRECONDITION_FAILED",
-				message: `Le fichier « ${orphanFile.fileName} » n'est associé à aucun type de contenu. Cochez au moins un type, ou supprimez le fichier.`,
-			});
-		}
-
 		await ctx.db.transaction(async (tx) => {
 			const declaration = await lockAndReadDeclaration(
 				tx,
@@ -291,6 +272,66 @@ export const cseOpinionRouter = createTRPCRouter({
 				ctx.siren,
 				getCurrentYear(),
 			);
+			const [opinionCount, fileRows, existingAssociations] = await Promise.all([
+				tx
+					.select({ count: sql<number>`count(*)::int` })
+					.from(cseOpinions)
+					.where(eq(cseOpinions.declarationId, ctx.declarationId)),
+				tx
+					.select({ id: files.id, fileName: files.fileName })
+					.from(files)
+					.where(
+						and(
+							eq(files.declarationId, ctx.declarationId),
+							eq(files.type, "cse_opinion"),
+						),
+					),
+				tx
+					.select({
+						declarationNumber: cseOpinionFiles.declarationNumber,
+						type: cseOpinionFiles.type,
+						fileId: cseOpinionFiles.fileId,
+					})
+					.from(cseOpinionFiles)
+					.where(eq(cseOpinionFiles.declarationId, ctx.declarationId)),
+			]);
+
+			if ((opinionCount[0]?.count ?? 0) === 0) {
+				throw new TRPCError({
+					code: "PRECONDITION_FAILED",
+					message: "Les avis du CSE doivent être renseignés avant validation.",
+				});
+			}
+			if (fileRows.length === 0) {
+				throw new TRPCError({
+					code: "PRECONDITION_FAILED",
+					message: "Au moins un fichier d'avis CSE doit être transmis.",
+				});
+			}
+
+			const requiredTypes = await getRequiredContentTypes(
+				tx,
+				ctx.declarationId,
+			);
+
+			assertRequiredContentTypesCovered(requiredTypes, existingAssociations);
+
+			// Every uploaded file must carry at least one content type: a file row left
+			// with no checkbox checked is an orphan and blocks finalize. Checked after
+			// the required-type guard so a fully-empty matrix reports the missing type
+			// first.
+			const associatedFileIds = new Set(
+				existingAssociations.map((association) => association.fileId),
+			);
+			const orphanFile = fileRows.find(
+				(file) => !associatedFileIds.has(file.id),
+			);
+			if (orphanFile) {
+				throw new TRPCError({
+					code: "PRECONDITION_FAILED",
+					message: `Le fichier « ${orphanFile.fileName} » n'est associé à aucun type de contenu. Cochez au moins un type, ou supprimez le fichier.`,
+				});
+			}
 
 			const { nextStatus, events } = applyActionOrRefuse(
 				{ currentState: declaration.status },
@@ -308,6 +349,7 @@ export const cseOpinionRouter = createTRPCRouter({
 				.update(declarations)
 				.set({
 					...computeProjectionUpdates(events, nextStatus),
+					cseOpinionDraftUpdatedAt: null,
 					updatedAt: new Date(),
 				})
 				.where(eq(declarations.id, ctx.declarationId));
@@ -365,15 +407,22 @@ export const cseOpinionRouter = createTRPCRouter({
 				});
 			}
 
-			await ctx.db
-				.delete(files)
-				.where(
-					and(
-						eq(files.id, input.fileId),
-						eq(files.declarationId, ctx.declarationId),
-						eq(files.type, "cse_opinion"),
-					),
-				);
+			await ctx.db.transaction(async (tx) => {
+				await lockDeclaration(tx, ctx.declarationId);
+				await tx
+					.update(declarations)
+					.set({ cseOpinionDraftUpdatedAt: new Date() })
+					.where(eq(declarations.id, ctx.declarationId));
+				await tx
+					.delete(files)
+					.where(
+						and(
+							eq(files.id, input.fileId),
+							eq(files.declarationId, ctx.declarationId),
+							eq(files.type, "cse_opinion"),
+						),
+					);
+			});
 
 			await deleteS3File(file.filePath);
 

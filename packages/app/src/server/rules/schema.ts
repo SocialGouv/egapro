@@ -52,6 +52,7 @@ export const EVENT_TYPES = [
 	"cse_opinion_submit",
 	"cancel",
 	"demarche_complete",
+	"formal_notice_joint_evaluation_submit",
 ] as const;
 
 export type EventType = (typeof EVENT_TYPES)[number];

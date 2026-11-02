@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("~/trpc/react", () => ({
 	api: {
@@ -41,6 +41,7 @@ const company: CompanyDetail = {
 	nafLabel: null,
 	countryCode: null,
 	countryLabel: "FRANCE",
+	departmentLabel: null,
 	gipWorkforce: null,
 	hasCse: null,
 };
@@ -63,10 +64,13 @@ function makeDeclaration(
 		firstDeclarationPathChoice: null,
 		secondDeclarationPathChoice: null,
 		hasSubmittedSecondDeclaration: false,
+		secondDeclarationStep: null,
 		hasSubmittedJointEvaluation: false,
 		hasSubmittedCseOpinion: false,
 		cseRequired: false,
 		hasJointEvaluationFile: false,
+		formalNoticeAvailable: false,
+		hasSubmittedFormalNoticeJointEvaluation: false,
 		hasPrefillData: false,
 		deadline: null,
 		notSubject: false,
@@ -89,6 +93,7 @@ const BASE_PROPS = {
 	campaignDeadlines,
 	company,
 	declarations,
+	isImpersonating: false,
 	lockedByOther: false,
 	lockHolder: null as LockHolder | null,
 	representationCampaign: getDefaultRepresentationCampaign(currentYear),
@@ -153,6 +158,42 @@ describe("CompanyDeclarationsPage", () => {
 		).not.toBeInTheDocument();
 	});
 
+	describe("process panel CTA on corrective actions with saved corrected data", () => {
+		const savedCorrectiveActions = [
+			makeDeclaration("remuneration", {
+				status: "in_progress",
+				fsmStatus: "corrective_actions_chosen",
+				secondDeclarationStep: 2,
+			}),
+			makeDeclaration("representation"),
+		];
+
+		function panelCtaHref() {
+			return document
+				.querySelector(
+					'a.fr-btn[aria-describedby="declaration-process-panel-title"]',
+				)
+				?.getAttribute("href");
+		}
+
+		it("resumes on the corrective recap while impersonating", () => {
+			renderPage({
+				declarations: savedCorrectiveActions,
+				isImpersonating: true,
+			});
+			expect(panelCtaHref()).toBe(
+				"/declaration-remuneration/parcours-conformite/etape/3",
+			);
+		});
+
+		it("keeps the first corrective step outside impersonation", () => {
+			renderPage({ declarations: savedCorrectiveActions });
+			expect(panelCtaHref()).toBe(
+				"/declaration-remuneration/parcours-conformite/etape/1",
+			);
+		});
+	});
+
 	describe("CAS-01 (#4291) — compliance-path step keyed off the declared trajectory, not company size alone", () => {
 		const cas01Company = { ...company, gipWorkforce: 250, hasCse: false };
 
@@ -212,16 +253,54 @@ describe("CompanyDeclarationsPage", () => {
 		});
 	});
 
-	it("hides the 'Archives' section while archives are unavailable", () => {
+	describe("formal notice joint evaluation action in the démarche panel", () => {
+		const FORMAL_NOTICE_LINK_TEXT =
+			"Dépôt du rapport de l’évaluation conjointe";
+
+		function closedDeclaration(formalNoticeAvailable: boolean) {
+			return makeDeclaration("remuneration", {
+				status: "done",
+				fsmStatus: "demarche_completed",
+				firstDeclarationPathChoice: "justify",
+				formalNoticeAvailable,
+			});
+		}
+
+		it("forwards the formal notice availability of the current declaration to the panel", () => {
+			renderPage({ declarations: [closedDeclaration(true)] });
+
+			expect(
+				screen.getByText(FORMAL_NOTICE_LINK_TEXT).closest("a"),
+			).toHaveAttribute("href", "/declaration-remuneration/mise-en-demeure");
+		});
+
+		it("hides the action when the current declaration is not exposed to a formal notice", () => {
+			renderPage({ declarations: [closedDeclaration(false)] });
+
+			expect(
+				screen.queryByText(FORMAL_NOTICE_LINK_TEXT),
+			).not.toBeInTheDocument();
+		});
+
+		it("hides the action when the company has no current declaration", () => {
+			renderPage({ declarations: [] });
+
+			expect(
+				screen.queryByText(FORMAL_NOTICE_LINK_TEXT),
+			).not.toBeInTheDocument();
+		});
+	});
+
+	it("renders the 'Archives' section unconditionally", () => {
 		renderPage();
 		expect(
-			screen.queryByRole("heading", { level: 2, name: "Archives" }),
-		).not.toBeInTheDocument();
+			screen.getByRole("heading", { level: 2, name: "Archives" }),
+		).toBeInTheDocument();
 		expect(
-			screen.queryByRole("button", {
-				name: "Demander une déclaration archivée",
+			screen.getByRole("link", {
+				name: /Demander une déclaration archivée.*nouvelle fenêtre/,
 			}),
-		).not.toBeInTheDocument();
+		).toBeInTheDocument();
 	});
 
 	it("renders the last action date of the current year remuneration declaration", () => {
@@ -286,38 +365,5 @@ describe("CompanyDeclarationsPage", () => {
 		expect(alert).toBeInTheDocument();
 		expect(alert).toHaveTextContent("Déclaration en cours de modification");
 		expect(alert).toHaveTextContent("Alice Martin");
-	});
-});
-
-describe("CompanyDeclarationsPage when archives are available", () => {
-	// `hasArchives` is a module-level const — re-import the page to flip it.
-	async function renderPageWithArchives() {
-		vi.resetModules();
-		vi.doMock("../archivesAvailability", () => ({ hasArchives: true }));
-		const { CompanyDeclarationsPage: PageWithArchives } = await import(
-			"../CompanyDeclarationsPage"
-		);
-		return render(<PageWithArchives {...BASE_PROPS} />);
-	}
-
-	afterEach(() => {
-		vi.doUnmock("../archivesAvailability");
-		vi.resetModules();
-	});
-
-	it("renders the 'Archives' section heading", async () => {
-		await renderPageWithArchives();
-		expect(
-			screen.getByRole("heading", { level: 2, name: "Archives" }),
-		).toBeInTheDocument();
-	});
-
-	it("renders the archived declaration request button", async () => {
-		await renderPageWithArchives();
-		expect(
-			screen.getByRole("button", {
-				name: "Demander une déclaration archivée",
-			}),
-		).toBeInTheDocument();
 	});
 });

@@ -32,6 +32,7 @@ describe("buildSitemap", () => {
 				"/aide/nous-contacter",
 				"/faq",
 				"/mentions-legales",
+				"/cgu",
 				"/donnees-personnelles",
 				"/gestion-des-cookies",
 				"/declaration-accessibilite",
@@ -39,6 +40,14 @@ describe("buildSitemap", () => {
 				"/referents",
 			]),
 		);
+	});
+
+	// Archives are never in `PUBLIC_PAGES`, so an archive URL here would be a regression.
+	it("never lists a CGU archive URL", () => {
+		const entries = buildSitemap(BASE_URL, true);
+		for (const entry of entries) {
+			expect(entry.url).not.toMatch(/\/cgu\/\d{4}-\d{2}-\d{2}$/);
+		}
 	});
 
 	it("excludes authenticated, internal and dynamic routes", () => {

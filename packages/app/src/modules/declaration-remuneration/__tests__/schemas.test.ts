@@ -6,6 +6,7 @@ import {
 	categoryCorrectionFormSchema,
 	categoryFormSchema,
 	updateEmployeeCategoriesSchema,
+	updateStep1Schema,
 	updateStep4Schema,
 } from "../schemas";
 import type { QuartileData, QuartileTuple } from "../types";
@@ -25,6 +26,49 @@ const validTable = makeTable(
 	{ threshold: "30000", women: 6, men: 7 },
 	{ women: 8, men: 9 },
 );
+
+describe("updateStep1Schema", () => {
+	it.each([
+		[
+			{ totalWomen: 0, totalMen: 0, hourlyWomen: 10, hourlyMen: 20 },
+			"totalWomen",
+		],
+		[
+			{ totalWomen: 10, totalMen: 20, hourlyWomen: 0, hourlyMen: 0 },
+			"hourlyWomen",
+		],
+		[{ totalWomen: 0, totalMen: 0, hourlyWomen: 0, hourlyMen: 0 }, "both rows"],
+	])("rejects a workforce row with no employees (%s)", (values, field) => {
+		const result = updateStep1Schema.safeParse(values);
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			if (field === "both rows") {
+				expect(result.error.issues).toEqual(
+					expect.arrayContaining([
+						expect.objectContaining({ path: ["totalWomen"] }),
+						expect.objectContaining({ path: ["hourlyWomen"] }),
+					]),
+				);
+			} else {
+				expect(result.error.issues).toEqual(
+					expect.arrayContaining([
+						expect.objectContaining({
+							path: [field],
+							message: expect.stringContaining("doit être supérieur à 0"),
+						}),
+					]),
+				);
+			}
+		}
+	});
+
+	it.each([
+		{ totalWomen: 0, totalMen: 20, hourlyWomen: 10, hourlyMen: 0 },
+		{ totalWomen: 10, totalMen: 0, hourlyWomen: 0, hourlyMen: 20 },
+	])("accepts zero for one sex in each row (%s)", (values) => {
+		expect(updateStep1Schema.safeParse(values).success).toBe(true);
+	});
+});
 
 describe("updateStep4Schema", () => {
 	it("accepts valid data with 3 strictly increasing thresholds and Q4 without threshold", () => {
@@ -208,7 +252,7 @@ const INCOMPLETE_REMUNERATION_MESSAGE =
 	"Veuillez renseigner toutes les données de rémunération avant de passer à l'étape suivante.";
 
 const INCONSISTENT_REMUNERATION_MESSAGE =
-	"Une catégorie d'emplois sans femmes ou sans hommes ne peut pas déclarer de rémunération.";
+	"Une base de rémunération sans femmes ou sans hommes ne peut pas être déclarée.";
 
 function parseCategory(data: Record<string, unknown>) {
 	return updateEmployeeCategoriesSchema.safeParse({
@@ -229,20 +273,18 @@ describe("updateEmployeeCategoriesSchema — remuneration completeness (#3948)",
 		expect(result.success).toBe(true);
 	});
 
-	it("accepts an isolated womenCount=0 when the required men pay fields are filled (#3678)", () => {
+	it("accepts a zero annual headcount without annual pay fields (#4894)", () => {
 		const result = parseCategory({
 			womenCount: 0,
 			menCount: 2,
-			...MEN_PAY_VALUES,
 		});
 		expect(result.success).toBe(true);
 	});
 
-	it("accepts an isolated menCount=0 when the required women pay fields are filled (#3678)", () => {
+	it("accepts a zero hourly headcount without hourly pay fields (#4894)", () => {
 		const result = parseCategory({
-			womenCount: 2,
-			menCount: 0,
-			...WOMEN_PAY_VALUES,
+			hourlyWomenCount: 2,
+			hourlyMenCount: 0,
 		});
 		expect(result.success).toBe(true);
 	});
@@ -310,7 +352,7 @@ describe("updateEmployeeCategoriesSchema — remuneration completeness (#3948)",
 		}
 	});
 
-	it("requires only the annual pay fields when the hourly headcounts are 0 (#4254)", () => {
+	it("requires no hourly pay fields when either hourly headcount is 0 (#4894)", () => {
 		const result = parseCategory({
 			womenCount: 2,
 			menCount: 2,
@@ -324,10 +366,10 @@ describe("updateEmployeeCategoriesSchema — remuneration completeness (#3948)",
 		expect(result.success).toBe(true);
 	});
 
-	it("requires only the hourly pay fields when the annual headcounts are 0 (#4254)", () => {
+	it("requires no annual pay fields when either annual headcount is 0 (#4894)", () => {
 		const result = parseCategory({
 			womenCount: 0,
-			menCount: 0,
+			menCount: 2,
 			hourlyWomenCount: 2,
 			hourlyMenCount: 2,
 			hourlyBaseWomen: "18.5",
@@ -401,28 +443,22 @@ describe("updateEmployeeCategoriesSchema — pay of a category at 0 (#3678)", ()
 		}
 	});
 
-	it("accepts an isolated 0 with the required pay for positive headcounts", () => {
+	it("does not require pay for the other sex when a basis has a zero", () => {
 		expect(
 			parseCategory({
 				womenCount: 3,
 				menCount: 0,
-				annualBaseWomen: "30000",
-				annualVariableWomen: "5000",
 			}).success,
 		).toBe(true);
 	});
 
-	it("accepts crossed 0s with the required pay for each positive headcount", () => {
+	it("accepts crossed zeros without pay fields for either inapplicable basis", () => {
 		expect(
 			parseCategory({
 				womenCount: 0,
 				menCount: 3,
 				hourlyWomenCount: 3,
 				hourlyMenCount: 0,
-				annualBaseMen: "32000",
-				annualVariableMen: "6000",
-				hourlyBaseWomen: "18",
-				hourlyVariableWomen: "3",
 			}).success,
 		).toBe(true);
 	});

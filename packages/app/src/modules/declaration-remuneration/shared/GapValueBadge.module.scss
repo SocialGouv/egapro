@@ -1,0 +1,10 @@
+.gapCellStack {
+	display: flex;
+	flex-direction: column;
+}
+
+.gapCell {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}

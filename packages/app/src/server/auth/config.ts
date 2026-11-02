@@ -6,7 +6,14 @@ import type { Provider } from "next-auth/providers/index";
 import { env } from "~/env";
 import { sirenSchema } from "~/modules/admin/schemas";
 import { AUDIT_ACTIONS } from "~/modules/audit";
-import { isAdminMfaAcr, isAdminMfaFresh, parseSiren } from "~/modules/domain";
+import type { AdminAccessRefusal } from "~/modules/domain";
+import {
+	isAdminMfaAcr,
+	isAdminMfaFresh,
+	PUBLIC_AGENT_ROLE,
+	parseSiren,
+	resolveAdminGrant,
+} from "~/modules/domain";
 import { devLoginSchema } from "~/modules/login/schemas";
 import { LOGIN } from "~/modules/routes";
 import { logAction } from "~/server/audit/log";
@@ -169,6 +176,7 @@ declare module "next-auth" {
 			isAdmin: boolean;
 			impersonation?: Impersonation | null;
 			adminMfaAt?: number | null;
+			adminAccessRefusal?: AdminAccessRefusal | null;
 		} & DefaultSession["user"];
 	}
 }
@@ -184,6 +192,8 @@ declare module "next-auth/jwt" {
 		// Seconds since the epoch. Absent when the level ProConnect returned
 		// proved no second factor.
 		adminMfaAt?: number;
+		// Only for a listed account that is not granted; recalculated on every sign-in.
+		adminAccessRefusal?: AdminAccessRefusal | null;
 	}
 }
 
@@ -352,6 +362,7 @@ function devAuthProvider(): Provider {
 		credentials: {
 			email: { label: "Adresse e-mail", type: "email" },
 			siret: { label: "SIRET", type: "text" },
+			isPublicAgent: { label: "Agent public", type: "checkbox" },
 		},
 		authorize(credentials, req) {
 			if (!isLoopbackRequest(req?.headers)) return null;
@@ -359,10 +370,12 @@ function devAuthProvider(): Provider {
 			const parsed = devLoginSchema.safeParse({
 				email: credentials?.email ?? "",
 				siret: credentials?.siret ?? "",
+				// A credentials provider only ever receives strings; absent reads as unchecked-by-default-true.
+				isPublicAgent: credentials?.isPublicAgent !== "false",
 			});
 			if (!parsed.success) return null;
 
-			const { email, siret } = parsed.data;
+			const { email, siret, isPublicAgent } = parsed.data;
 			const localPart = email.split("@")[0] ?? email;
 			return {
 				id: email,
@@ -371,9 +384,28 @@ function devAuthProvider(): Provider {
 				siret,
 				firstName: localPart,
 				lastName: null,
+				// Lets local /admin checks reproduce either outcome without a real ProConnect identity.
+				roles: isPublicAgent ? [PUBLIC_AGENT_ROLE] : [],
+				organizationLabel: "Société Démo",
 			};
 		},
 	});
+}
+
+/** Narrows a ProConnect userinfo field to a string, discarding any other shape. */
+function stringField(value: unknown): string | null {
+	return typeof value === "string" ? value : null;
+}
+
+// Non-array (including absent) is null; an array keeps only string elements, even if empty — distinct from null for the audit trail.
+function parseRoles(raw: unknown): string[] | null {
+	if (!Array.isArray(raw)) return null;
+	return raw.filter((role): role is string => typeof role === "string");
+}
+
+function isPublicAgentRequirementEnabled(): boolean {
+	const value: unknown = env.EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT;
+	return value !== false && value !== "false";
 }
 
 function getProviders(): Provider[] {
@@ -393,7 +425,9 @@ function getProviders(): Provider[] {
 			clientSecret: env.EGAPRO_PROCONNECT_CLIENT_SECRET,
 			authorization: {
 				params: {
-					scope: "openid email given_name usual_name siret",
+					scope: isPublicAgentRequirementEnabled()
+						? "openid email given_name usual_name siret roles organization_label"
+						: "openid email given_name usual_name siret organization_label",
 				},
 			},
 			idToken: true,
@@ -409,28 +443,30 @@ function getProviders(): Provider[] {
 					},
 				});
 				const body = await response.text();
-				let userinfo: Record<string, string>;
+				let userinfo: Record<string, unknown>;
 				if (body.startsWith("{")) {
-					userinfo = JSON.parse(body) as Record<string, string>;
+					userinfo = JSON.parse(body) as Record<string, unknown>;
 				} else {
 					const payload = body.split(".")[1];
 					if (!payload) throw new Error("Invalid JWT from userinfo");
 					userinfo = JSON.parse(
 						Buffer.from(payload, "base64url").toString("utf-8"),
-					) as Record<string, string>;
+					) as Record<string, unknown>;
 				}
 				return {
-					id: userinfo.sub ?? "",
+					id: stringField(userinfo.sub) ?? "",
 					name:
-						[userinfo.given_name, userinfo.usual_name]
+						[stringField(userinfo.given_name), stringField(userinfo.usual_name)]
 							.filter(Boolean)
 							.join(" ") ||
-						userinfo.email ||
+						stringField(userinfo.email) ||
 						"",
-					email: userinfo.email ?? "",
-					siret: userinfo.siret ?? null,
-					firstName: userinfo.given_name ?? null,
-					lastName: userinfo.usual_name ?? null,
+					email: stringField(userinfo.email) ?? "",
+					siret: stringField(userinfo.siret),
+					firstName: stringField(userinfo.given_name),
+					lastName: stringField(userinfo.usual_name),
+					roles: parseRoles(userinfo.roles),
+					organizationLabel: stringField(userinfo.organization_label),
 				};
 			},
 		});
@@ -527,6 +563,8 @@ export const authConfig = {
 					siret?: string | null;
 					firstName?: string | null;
 					lastName?: string | null;
+					roles?: string[] | null;
+					organizationLabel?: string | null;
 				};
 
 				// Find or create user by email (replaces DrizzleAdapter)
@@ -579,15 +617,21 @@ export const authConfig = {
 					...(await safeRequestContext()),
 				});
 
-				// Sync the admin flag with `ADMIN_EMAILS` on every login.
-				// Listing an email promotes the user; removing it demotes them.
-				const shouldBeAdmin = ADMIN_EMAILS.has(email.toLowerCase());
-				if (shouldBeAdmin !== dbUser.isAdmin) {
+				// isGranted (not merely isListed) is the one habilitation every downstream guard reads.
+				const isListed = ADMIN_EMAILS.has(email.toLowerCase());
+				const roles = profileData.roles ?? null;
+				const grant = resolveAdminGrant({
+					isListed,
+					roles,
+					requirePublicAgent: isPublicAgentRequirementEnabled(),
+				});
+				const isGranted = grant.granted;
+				if (isGranted !== dbUser.isAdmin) {
 					await db
 						.update(users)
-						.set({ isAdmin: shouldBeAdmin })
+						.set({ isAdmin: isGranted })
 						.where(eq(users.id, dbUser.id));
-					dbUser = { ...dbUser, isAdmin: shouldBeAdmin };
+					dbUser = { ...dbUser, isAdmin: isGranted };
 				}
 
 				token.id = dbUser.id;
@@ -598,7 +642,14 @@ export const authConfig = {
 				token.siret = profileData.siret ?? null;
 				token.phone = dbUser.phone ?? null;
 				token.id_token = account?.id_token ?? null;
-				token.isAdmin = shouldBeAdmin;
+				token.isAdmin = isGranted;
+				// Recalculated every sign-in so a regained grant never keeps a stale refusal.
+				token.adminAccessRefusal = grant.refusal
+					? {
+							roles: grant.refusal.roles,
+							organizationLabel: profileData.organizationLabel ?? null,
+						}
+					: undefined;
 
 				// A sign-in — a step-up included — mints the token from scratch,
 				// so the mimoquage disappears on its own. The open row in the
@@ -607,7 +658,7 @@ export const authConfig = {
 				// it. That journal is a compliance trail, not a by-product of the
 				// banner (issue #4466, S14).
 				//
-				// Unconditional, and not gated on `shouldBeAdmin`: an account
+				// Unconditional, and not gated on `isGranted`: an account
 				// dropped from `ADMIN_EMAILS` between two sign-ins would otherwise
 				// leave its last row open for good. The statement is keyed on
 				// `adminUserId`, so for the declarants — who never have a row — it
@@ -639,10 +690,8 @@ export const authConfig = {
 					token.adminMfaAt = undefined;
 				}
 
-				// Only admin-eligible accounts produce a row: a declarant signing
-				// in at a level we never demanded is not a refused MFA. Neither
-				// token nor raw claim is logged.
-				if (shouldBeAdmin) {
+				// Every listed account is audited, granted or not — tells a missing claim apart from a non-public one.
+				if (isListed) {
 					const requestContext = await safeRequestContext();
 					await logAction({
 						action: AUDIT_ACTIONS.AUTH_ADMIN_MFA,
@@ -652,6 +701,9 @@ export const authConfig = {
 						metadata: {
 							acr,
 							authTime: token.adminMfaAt ?? null,
+							roles,
+							granted: grant.granted,
+							publicAgentRequired: isPublicAgentRequirementEnabled(),
 							// Present only when the seam granted the passage, so a row
 							// never reads as a real second factor that did not happen.
 							...(testSeamGranted ? { testSeam: true } : {}),
@@ -692,6 +744,7 @@ export const authConfig = {
 				isAdmin: token.isAdmin ?? false,
 				impersonation: exposedImpersonation(token, new Date()),
 				adminMfaAt: token.adminMfaAt ?? null,
+				adminAccessRefusal: token.adminAccessRefusal ?? null,
 			},
 		}),
 	},

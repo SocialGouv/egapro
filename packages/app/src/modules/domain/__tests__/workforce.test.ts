@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
 	computeWorkforceTotal,
+	hasWorkforce,
 	sumCategoryWorkforce,
 	sumQuartileWorkforce,
 } from "../shared/workforce";
@@ -92,5 +93,16 @@ describe("computeWorkforceTotal", () => {
 
 	it("returns zero when both are zero", () => {
 		expect(computeWorkforceTotal(0, 0)).toBe(0);
+	});
+});
+
+describe("hasWorkforce", () => {
+	it("returns false when both counts are zero", () => {
+		expect(hasWorkforce(0, 0)).toBe(false);
+	});
+
+	it("returns true when either count is positive", () => {
+		expect(hasWorkforce(1, 0)).toBe(true);
+		expect(hasWorkforce(0, 1)).toBe(true);
 	});
 });

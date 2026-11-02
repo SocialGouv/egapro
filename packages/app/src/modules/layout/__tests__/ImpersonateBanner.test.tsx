@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const useSessionMock = vi.fn();
 const refreshMock = vi.fn();
+const pushMock = vi.fn();
 
 vi.mock("next-auth/react", () => ({
 	useSession: () => useSessionMock(),
@@ -13,19 +14,21 @@ vi.mock("next-auth/react", () => ({
 vi.mock("next/navigation", () => ({
 	useRouter: () => ({
 		refresh: refreshMock,
-		push: vi.fn(),
+		push: pushMock,
 		replace: vi.fn(),
 		back: vi.fn(),
 	}),
 	usePathname: vi.fn(),
 }));
 
+import { ADMIN_IMPERSONATE } from "~/modules/routes";
 import { ImpersonateBanner } from "../ImpersonateBanner";
 
 describe("ImpersonateBanner", () => {
 	beforeEach(() => {
 		useSessionMock.mockReset();
 		refreshMock.mockReset();
+		pushMock.mockReset();
 	});
 
 	it("renders nothing when not impersonating", () => {
@@ -82,5 +85,23 @@ describe("ImpersonateBanner", () => {
 		);
 		expect(updateMock).toHaveBeenCalledWith({ impersonation: null });
 		expect(refreshMock).toHaveBeenCalled();
+	});
+
+	it("sends the agent back to the admin impersonate page once impersonation has stopped", async () => {
+		const updateMock = vi.fn().mockResolvedValue(undefined);
+		useSessionMock.mockReturnValue({
+			data: {
+				user: { impersonation: { siren: "123456789", name: "ACME" } },
+			},
+			update: updateMock,
+		});
+		render(<ImpersonateBanner />);
+		await userEvent.click(
+			screen.getByRole("button", { name: /arrêter le mimoquage/i }),
+		);
+		expect(pushMock).toHaveBeenCalledWith(ADMIN_IMPERSONATE);
+		expect(updateMock.mock.invocationCallOrder[0]).toBeLessThan(
+			pushMock.mock.invocationCallOrder[0] ?? 0,
+		);
 	});
 });

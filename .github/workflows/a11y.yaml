@@ -17,27 +17,27 @@ name: "♿ Accessibilité (ultra11y RGAA)"
 #                           plus. Une panne, si ; un balayage amputé aussi.
 #   a11y-bundle  LIVRABLE — fusionne les parties en un seul artefact `ultra11y-rgaa`.
 #
-# Il n'y a plus de `a11y-report` hebdomadaire séparé, et plus de cron non plus : le déclenchement
-# manuel lance `a11y-pages`, qui produit le livrable AVEC le navigateur. Le job statique ne tourne
-# pas une seconde fois sur cet événement : l'Action du tier rendu réaudite déjà tout `src`, et le
-# doublon ne renforçait aucune porte.
+# Il n'y a plus de `a11y-report` hebdomadaire séparé : le cron hebdomadaire et le déclenchement
+# manuel lancent `a11y-pages`, qui produit le livrable AVEC le navigateur. Le job statique ne
+# tourne pas une seconde fois sur ces événements : l'Action du tier rendu réaudite déjà tout
+# `src`, et le doublon ne renforçait aucune porte.
 #
 # Le tier LIGHTHOUSE (score a11y 100 %) reste dans lighthouse.yaml.
 #
-# DEUX DÉCLENCHEMENTS, ET ILS NE PAIENT PAS LA MÊME CHOSE.
+# DEUX MOITIÉS, ET ELLES NE PAIENT PAS LA MÊME CHOSE.
 #
 #   pull_request       → `a11y-gate` SEUL. Statique, gratuit, quelques secondes, aucun modèle,
 #                        et BLOQUANT (`fail-on: blocking`).
-#   workflow_dispatch  → la chaîne complète. Balayage des pages, critères de rendu, rejeu du
-#                        registre puis adjudication IA du reliquat, livrable.
+#   schedule (hebdo)   → la chaîne complète, sur alpha. Balayage des pages, critères de rendu,
+#                        rejeu du registre puis adjudication IA du reliquat, livrable.
+#   workflow_dispatch  → la même chaîne, à la demande.
 #
 # La moitié chère ne peut pas tourner sur chaque PR : 40 à 90 minutes, une grille qui n'est pas
 # reproductible d'un run à l'autre, et une facture qui a MONTÉ. La moitié statique, elle, ne coûte
 # rien — c'est ce qui lui permet d'être la gate, et c'est le SEUL rouge de tout ce fichier qui
 # arrête un merge.
 #
-# POURQUOI PLUS DE CRON, alors qu'il y en a eu un (lundi 04:00 UTC), et qu'on avait pris soin de
-# le choisir plutôt qu'un `push: alpha` que `claude-code-action` aurait refusé.
+# POURQUOI UN CRON HEBDOMADAIRE, ET PAS UN RUN À CHAQUE MERGE SUR ALPHA.
 #
 # Parce que le prix d'un run a changé sous nos pieds. ultra11y 5.36 a rendu le contrat
 # d'automatisation EXHAUSTIF : un critère n'obtient un `C` par mesure que si son contrat démontre
@@ -48,12 +48,19 @@ name: "♿ Accessibilité (ultra11y RGAA)"
 #
 # Ce n'est pas une régression, c'est un durcissement, et il se défend : avant, un dépôt sans image
 # marquait 100 % sur « chaque image a-t-elle une alternative pertinente ? ». Mais un run qui adjuge
-# 84 critères n'est plus une dépense de fond qu'on laisse tourner toutes les semaines. Il est
-# lancé quand on en veut le résultat.
+# 84 critères ne se paie pas à chaque merge. Un `push: alpha` filtré par `paths` a été
+# envisagé (#4822) : techniquement possible depuis que `adjudicate-runner: cli` lance Claude
+# lui-même, sans le parseur d'événements de `claude-code-action`. Mais le filtre aurait laissé
+# passer 251 des 271 commits d'alpha entre août et octobre 2026 — un run payé par merge, à
+# peu de chose près. Une fois par semaine, sur l'état courant d'alpha, suffit à dater un
+# livrable et à rattraper une régression.
 #
-# CE QUE ÇA NE DONNE PAS, dit franchement : une régression RGAA de RENDU ne sera rattrapée par
-# personne tant que personne ne lance ce workflow. Ce qui la rattrape sur une PR est l'audit
-# statique, qui ne voit pas la page rendue. C'est l'arbitrage, et c'est celui du coût.
+# `schedule` s'exécute sur la branche par défaut du dépôt, qui EST `alpha` : le cron lit ce
+# fichier depuis alpha et audite le dernier commit d'alpha.
+#
+# CE QUE ÇA DONNE : une régression RGAA de RENDU est rattrapée au plus tard le lundi suivant.
+# Ce qui la rattrape sur une PR reste l'audit statique, qui ne voit pas la page rendue — et le
+# run hebdomadaire ne bloque rien, il mesure et publie.
 #
 # LES CRITÈRES DE JUGEMENT SONT ADJUGÉS, TOUS, À CHAQUE RUN. Ceux que le moteur ne peut pas
 # trancher — pertinence des alt, intitulé de lien dans son contexte, ordre de lecture — passent
@@ -153,29 +160,20 @@ on:
   # LA GATE. Statique, gratuite, aucun modèle : elle peut se permettre de tourner sur chaque PR,
   # et c'est le seul endroit du dispositif qui BLOQUE un merge.
   pull_request:
-  # LE RUN COMPLET, À LA DEMANDE ET UNIQUEMENT À LA DEMANDE.
-  #
-  # Il y avait ici un cron hebdomadaire (lundi 04:00 UTC). Il est retiré, et la raison est le
-  # prix : depuis ultra11y 5.36, 103 des 106 critères RGAA exigent une adjudication par le
-  # modèle pour obtenir un `C` — le silence d'une règle ne prouve plus la conformité si le
-  # contrat de test du critère ne démontre pas que CHAQUE test numéroté a un instrument
-  # décisif. Mesuré sur ce dépôt, la worklist est passée de 27 critères à 84 pour le même
-  # commit et les mêmes captures. Un run n'est plus une dépense de fond, c'est une décision.
-  #
-  # CE QUE ÇA COÛTE, ET IL FAUT LE DIRE : une régression RGAA de rendu ne sera plus rattrapée
-  # par personne tant que quelqu'un ne lance pas ce workflow. La gate statique reste bloquante
-  # sur chaque PR, mais elle ne voit pas la page rendue. C'est l'arbitrage, et il est assumé.
-  #
-  # À lancer avant une mise en production, après un changement d'UI significatif, ou quand on
-  # veut un livrable RGAA daté : `gh workflow run a11y.yaml --ref alpha`.
+  # LE RUN COMPLET, UNE FOIS PAR SEMAINE, sur alpha (branche par défaut) : lundi 04:00 UTC.
+  # Pourquoi l'horloge et pas le merge : voir l'en-tête.
+  schedule:
+    - cron: "0 4 * * 1"
+  # LE MÊME RUN, À LA DEMANDE : un livrable RGAA daté, un run sur une autre branche, ou un
+  # contrôle après un changement d'UI significatif : `gh workflow run a11y.yaml --ref alpha`.
   workflow_dispatch:
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
   # Une PR qui repousse annule son run précédent — il n'a plus rien à dire sur un code qui a
-  # changé. Un run complet (manuel) est un LIVRABLE, et il est PAYÉ : deux lancements coup sur
-  # coup ne doivent pas s'annuler l'un l'autre, le second n'ayant aucune raison d'être « plus à
-  # jour » — et un run annulé a dépensé sans rien produire.
+  # changé. Un run complet (cron ou manuel) est un LIVRABLE, et il est PAYÉ : deux lancements
+  # coup sur coup ne doivent pas s'annuler l'un l'autre, un run annulé ayant dépensé sans rien
+  # produire.
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
@@ -190,7 +188,7 @@ jobs:
   a11y-gate:
     name: "RGAA · audit statique du code"
     # Le run complet réaudite déjà tout `src` dans `a11y-pages`. Garder cette gate sur les PR
-    # seulement évite deux invocations identiques sur le dispatch.
+    # seulement évite deux invocations identiques sur le cron et le dispatch.
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
@@ -236,7 +234,7 @@ jobs:
           #
           # Le grief tombe exactement là où les deux jobs ne coexistent plus. Sur une PR,
           # `a11y-pages` ne tourne pas : un seul producteur, un seul commentaire et un seul
-          # rapport. Sur un dispatch, ce job est sauté et le livrable appartient exclusivement
+          # rapport. Hors PR, ce job est sauté et le livrable appartient exclusivement
           # à `a11y-pages`.
           #
           # `digest` et non `pages` : sans instantané, cette gate n'a pas de grille par page à
@@ -258,8 +256,8 @@ jobs:
     # reproductible d'un run à l'autre. Sur une PR, la gate statique fait le travail.
     if: github.event_name != 'pull_request'
     # Ce tier a besoin de la stack complète — base, S3, ProConnect — et donc des secrets du
-    # dépôt. Sur `workflow_dispatch` ils sont toujours exposés : la condition qui
-    # excluait les PR de fork n'a plus d'objet, ce job ne tournant plus jamais sur une PR.
+    # dépôt. Hors PR (`schedule`, `workflow_dispatch`) ils sont toujours exposés : la condition
+    # qui excluait les PR de fork n'a plus d'objet, ce job ne tournant plus jamais sur une PR.
     #
     # Les CONSTATS d'accessibilité ne font pas rougir (`fail-on: ""`) ; ce qui rougit, c'est une
     # balayage amputé (`require-sample`) ou un rendu réclamé mais absent (`require-rendered`) —
@@ -316,7 +314,8 @@ jobs:
       S3_BUCKET_NAME: egapro-dev-app
       CLAMAV_HOST: localhost
       CLAMAV_PORT: 3310
-      ADMIN_EMAILS: test@fia1.fr
+      ADMIN_EMAILS: test@fia1.fr,ultimate@test.proconnect.gouv.fr,marie.durand@test.proconnect.gouv.fr
+      EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT: "false"
       NOTIFICATIONS_DATABASE_URL: postgresql://postgres:postgres@localhost:5439/egapro_notifications
       MAIL_ENABLED: "true"
       SMTP_HOST: localhost
@@ -333,7 +332,7 @@ jobs:
           auth_secret=$(openssl rand -base64 32)
           echo "::add-mask::$auth_secret"
           echo "AUTH_SECRET=$auth_secret" >> "$GITHUB_ENV"
-      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
       - name: Set up Node
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -639,7 +638,8 @@ jobs:
           # survit pas à ce qu'elle excusait. Chacune est imprimée dans le log du job, donc
           # aucune ne s'oublie. C'est un renvoi nommé vers l'auditeur humain, pas un silence.
           undecidable-file: .ultra11y/undecidable.json
-          # PAS DE COMMENTAIRE : un `workflow_dispatch` n'a pas de PR où le poster.
+          # PAS DE COMMENTAIRE : hors PR (`schedule`, `workflow_dispatch`), il n'y a pas de PR
+          # où le poster.
           #
           # Le bilan page par page qu'il portait — une ligne par page avec sa base, ses C, ses NC
           # et ses sévérités, puis un bloc par page en échec — n'est pas perdu : c'est le rapport
@@ -651,7 +651,7 @@ jobs:
       # Le rapport Playwright est du DIAGNOSTIC, pas un livrable d'accessibilité : sans lui, un
       # échec de balayage est aussi un échec non diagnosticable — `e2e.yaml` remonte les mêmes.
       - name: Upload du rapport Playwright a11y
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
           name: ultra11y-part-playwright
@@ -698,7 +698,7 @@ jobs:
     steps:
       - name: Fusionner les parties en un seul artefact
         continue-on-error: true
-        uses: actions/upload-artifact/merge@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact/merge@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ultra11y-rgaa
           pattern: ultra11y-part-*

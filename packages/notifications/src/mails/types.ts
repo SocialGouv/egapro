@@ -1,10 +1,11 @@
 export const NOTIFICATION_TYPES = [
-	// Event-driven (5 — déclenchés par mutation tRPC / upload)
+	// Event-driven (6 — déclenchés par mutation tRPC / upload)
 	"declaration_confirmation",
 	"second_declaration_confirmation",
 	"cse_opinion_receipt",
 	"joint_evaluation_submitted",
 	"representation_receipt",
+	"formal_notice_joint_evaluation_submitted",
 	// Schedule-driven (7 — déclenchés par pg-boss cron)
 	"cycle_opening_info",
 	"declaration_deadline_reminder",
@@ -118,12 +119,18 @@ export type RepresentationReceiptPayload = CompanyScopedPayload & {
 	raisonSociale: string;
 };
 
+export type FormalNoticeJointEvaluationSubmittedPayload =
+	CompanyScopedPayload & {
+		raisonSociale: string;
+	};
+
 export type NotificationPayloadMap = {
 	declaration_confirmation: DeclarationConfirmationPayload;
 	second_declaration_confirmation: SecondDeclarationConfirmationPayload;
 	cse_opinion_receipt: CseOpinionReceiptPayload;
 	joint_evaluation_submitted: JointEvaluationSubmittedPayload;
 	representation_receipt: RepresentationReceiptPayload;
+	formal_notice_joint_evaluation_submitted: FormalNoticeJointEvaluationSubmittedPayload;
 	cycle_opening_info: DeadlinePayload;
 	declaration_deadline_reminder: DeclarationDeadlineReminderPayload;
 	compliance_path_choice_reminder: CompliancePathChoiceReminderPayload;

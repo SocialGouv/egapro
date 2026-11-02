@@ -1,5 +1,6 @@
 export { Confirmation } from "./Confirmation";
 export { DeclarationLayout } from "./DeclarationLayout";
+export { RepresentationConsultation } from "./RepresentationConsultation";
 export { RepresentationPlayground } from "./RepresentationPlayground";
 export { StepPageClient } from "./StepPageClient";
 export { Stepper } from "./Stepper";
@@ -9,6 +10,7 @@ export {
 	executivesCountSchema,
 	executivesSchema,
 	getRepresentationDeclarationSchema,
+	getRepresentationWorkforceHistorySchema,
 	membersSchema,
 	publicationSchema,
 	referencePeriodSchema,
@@ -42,6 +44,7 @@ export {
 	getNextStep,
 	getNextStepHref,
 	getPreviousStepHref,
+	getReachedNextStepHref,
 	getStepDefinition,
 	isValidStep,
 	PUBLICATION_STEP_NUMBER,

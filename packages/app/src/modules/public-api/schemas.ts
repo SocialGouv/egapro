@@ -36,7 +36,7 @@ const sharedSearchFields = {
 	offset: z.number().int().min(0).default(0),
 };
 
-export const PUBLIC_SEARCH_DEFAULT_LIMIT = 10;
+const PUBLIC_SEARCH_DEFAULT_LIMIT = 10;
 
 const publicSearchQueryParamsSchema = z.object({
 	...sharedSearchFields,
@@ -85,28 +85,8 @@ function readSearchFilters(searchParams: URLSearchParams) {
 	};
 }
 
-function readSearchPage(searchParams: URLSearchParams) {
-	return {
-		...readSearchFilters(searchParams),
-		limit: optionalNumberParam(searchParams, "limit"),
-		offset: optionalNumberParam(searchParams, "offset"),
-	};
-}
-
 export function parsePublicSearchInput(searchParams: URLSearchParams) {
 	return publicSearchInputSchema.safeParse(readSearchFilters(searchParams));
-}
-
-export function parsePublicSearchPage(searchParams: URLSearchParams) {
-	return publicSearchInputSchema.safeParse(readSearchPage(searchParams));
-}
-
-export function parsePublicRepresentationSearchPage(
-	searchParams: URLSearchParams,
-) {
-	return publicRepresentationSearchInputSchema.safeParse(
-		readSearchPage(searchParams),
-	);
 }
 
 export type PublicSearchInput = z.infer<typeof publicSearchInputSchema>;
@@ -167,15 +147,6 @@ export const publicSearchResultDTOSchema = z.object({
 
 export type PublicSearchResultDTO = z.infer<typeof publicSearchResultDTOSchema>;
 
-export const publicRepresentationSearchInputSchema = z.object({
-	...sharedSearchFields,
-	limit: z.number().int().min(1).max(100).default(10),
-});
-
-export type PublicRepresentationSearchInput = z.infer<
-	typeof publicRepresentationSearchInputSchema
->;
-
 export const publicRepresentationDTOSchema = z.object({
 	siren: z.string(),
 	year: z.number().int(),
@@ -203,13 +174,4 @@ export const publicRepresentationDTOSchema = z.object({
 
 export type PublicRepresentationDTO = z.infer<
 	typeof publicRepresentationDTOSchema
->;
-
-export const publicRepresentationSearchResultDTOSchema = z.object({
-	data: z.array(publicRepresentationDTOSchema),
-	count: z.number().int(),
-});
-
-export type PublicRepresentationSearchResultDTO = z.infer<
-	typeof publicRepresentationSearchResultDTOSchema
 >;

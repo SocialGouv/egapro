@@ -1,3 +1,4 @@
+export { AdminAccessDeniedPage } from "./AdminAccessDeniedPage";
 export { AdminAccessPage } from "./AdminAccessPage";
 export {
 	ADMIN_HOME_PATH,

@@ -43,6 +43,7 @@ export const declarationEventTypeEnum = pgEnum("declaration_event_type", [
 	"cancel",
 	"demarche_complete",
 	"step_change",
+	"formal_notice_joint_evaluation_submit",
 ]);
 
 export const users = createTable("user", (d) => ({
@@ -179,6 +180,8 @@ export const declarations = createTable(
 		secondDeclarationStep: d.integer(),
 		secondDeclReferencePeriodStart: d.varchar({ length: 10 }),
 		secondDeclReferencePeriodEnd: d.varchar({ length: 10 }),
+		// Set by CSE edits after the last transmission; cleared atomically on submit.
+		cseOpinionDraftUpdatedAt: d.timestamp({ withTimezone: true }),
 		cseRequired: d.boolean().notNull().default(false),
 		rulesVersion: d
 			.varchar("rules_version")
@@ -630,6 +633,7 @@ export const cseOpinionsRelations = relations(cseOpinions, ({ one }) => ({
 export const fileTypeEnum = pgEnum("file_type", [
 	"cse_opinion",
 	"joint_evaluation",
+	"formal_notice_joint_evaluation",
 ]);
 
 export const files = createTable(
@@ -822,17 +826,68 @@ export const representationDeclarationsRelations = relations(
 	}),
 );
 
+// ── Representation declaration edit lock ───────────────────────────
+
+export const representationDeclarationLocks = createTable(
+	"representation_declaration_lock",
+	(d) => ({
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		siren: d
+			.varchar({ length: 9 })
+			.notNull()
+			.references(() => companies.siren, { onDelete: "cascade" }),
+		year: d.integer().notNull(),
+		lockedByUserId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => users.id),
+		lockedAt: d
+			.timestamp({ withTimezone: true })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		lastHeartbeatAt: d
+			.timestamp({ withTimezone: true })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		expiresAt: d.timestamp({ withTimezone: true }).notNull(),
+	}),
+	(t) => [
+		uniqueIndex("representation_declaration_lock_siren_year_unique").on(
+			t.siren,
+			t.year,
+		),
+		index("representation_declaration_lock_expires_at_idx").on(t.expiresAt),
+	],
+);
+
+export const representationDeclarationLocksRelations = relations(
+	representationDeclarationLocks,
+	({ one }) => ({
+		company: one(companies, {
+			fields: [representationDeclarationLocks.siren],
+			references: [companies.siren],
+		}),
+		lockedBy: one(users, {
+			fields: [representationDeclarationLocks.lockedByUserId],
+			references: [users.id],
+		}),
+	}),
+);
+
 // ── Global settings (singleton) ────────────────────────────────────
 
 /**
  * Global platform settings. Single-row table (`id = 1`).
  *
- * Values here are free of retention constraints: they drive campaign
- * behaviour (active year) rather than recording user actions.
+ * Values here configure platform-wide behaviour rather than recording user
+ * actions.
  */
 export const globalSettings = createTable("global_setting", (d) => ({
 	id: d.integer().notNull().primaryKey().default(1),
-	activeCampaignYear: d.integer(),
 	declarationLockTimeoutMinutes: d.integer().notNull().default(30),
 	updatedAt: d
 		.timestamp({ withTimezone: true })

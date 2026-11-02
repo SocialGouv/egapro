@@ -89,3 +89,14 @@ export function getNextStepHref(step: number, skipPublicationStep = false) {
 	const next = getNextStep(step, skipPublicationStep);
 	return next === undefined ? undefined : representationStepHref(next);
 }
+
+export function getReachedNextStepHref(
+	step: number,
+	skipPublicationStep: boolean,
+	reachedStep: number,
+) {
+	const next = getNextStep(step, skipPublicationStep);
+	return next === undefined || next > reachedStep
+		? undefined
+		: representationStepHref(next);
+}

@@ -4,6 +4,7 @@ import {
 	cseOpinionStepHref,
 	remunerationStepHref,
 } from "~/modules/routes";
+import { TEST_SIREN } from "./constants";
 import {
 	ensureCurrentYearDeclaration,
 	resetDeclarationToDraft,
@@ -11,8 +12,6 @@ import {
 	setCompanyHasCse,
 } from "./helpers/db";
 import { startImpersonation, stopImpersonation } from "./helpers/impersonation";
-
-const TEST_SIREN = "130025265";
 
 test.describe("admin impersonation — read-only guards", () => {
 	test.beforeEach(async () => {

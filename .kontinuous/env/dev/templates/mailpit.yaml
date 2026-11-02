@@ -25,6 +25,28 @@ spec:
       containers:
         - name: mailpit
           image: axllent/mailpit:v1.31.0
+          # Mailpit désactive son authentification, sans erreur, si MP_UI_AUTH
+          # est vide, et accepte un utilisateur ou un mot de passe vide : le pod
+          # refuse de démarrer plutôt que d'ouvrir l'UI. MP_UI_AUTH est découpé
+          # sur les espaces, d'où leur refus.
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              for value in "$MAILPIT_USER" "$MAILPIT_PASSWORD"; do
+                case "$value" in
+                  "" | *[[:space:]]*)
+                    echo "mailpit-basic-auth : MAILPIT_USER et MAILPIT_PASSWORD doivent être non vides et sans espace" >&2
+                    exit 1
+                    ;;
+                esac
+              done
+              case "$MAILPIT_USER" in
+                *:*)
+                  echo "mailpit-basic-auth : MAILPIT_USER ne doit pas contenir « : »" >&2
+                  exit 1
+                  ;;
+              esac
+              exec /mailpit
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -39,6 +61,23 @@ spec:
             # transite par le sidecar smtp-demux (voir ci-dessous).
             - name: MP_SMTP_BIND_ADDR
               value: 127.0.0.1:1026
+            # Auth portée par Mailpit et non par l'Ingress : elle protège aussi
+            # le Service 8025 et le HTTP démultiplexé sur 1025 (docs/mails.md).
+            # `optional: false` : sans le secret, le pod ne démarre pas.
+            - name: MAILPIT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mailpit-basic-auth
+                  key: MAILPIT_USER
+                  optional: false
+            - name: MAILPIT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mailpit-basic-auth
+                  key: MAILPIT_PASSWORD
+                  optional: false
+            - name: MP_UI_AUTH
+              value: "$(MAILPIT_USER):$(MAILPIT_PASSWORD)"
           ports:
             - name: smtp-internal
               containerPort: 1026
@@ -66,7 +105,8 @@ spec:
         # impossible d'exclure le port 1025 côté produit). Chaque sonde HTTP
         # sur le port SMTP générait une réponse « 500 5.5.2 Syntax error »
         # que Mailpit diffuse en toast d'erreur dans l'UI web (#4547).
-        # Ici : trafic HTTP → UI Mailpit (réponse 200), tout le reste → smtpd.
+        # Ici : trafic HTTP → UI Mailpit (401 sans identifiants, sans toast),
+        # tout le reste → smtpd.
         - name: smtp-demux
           image: haproxy:3.2.23-alpine3.24
           securityContext:
@@ -154,6 +194,10 @@ spec:
       targetPort: smtp
       appProtocol: tcp
 ---
+# Pas d'annotation `auth-type: basic` ici : l'authentification est celle de
+# Mailpit (MP_UI_AUTH). ingress-nginx vide l'en-tête Authorization avant
+# de relayer une requête qu'il a authentifiée (`proxy_set_header Authorization
+# ""` dans son nginx.tmpl) : Mailpit répondrait 401 à chaque requête, en boucle.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:

@@ -8,7 +8,8 @@
  *   npx tsx scripts/generate-mock-gip-data.ts
  *
  * Reads real SIRENs from data/companies.json (fetched from API Recherche
- * d'Entreprises) and generates mock GIP-MDS indicator data for each.
+ * d'Entreprises) and data/dedicated-test-sirens.json, then generates mock
+ * GIP-MDS indicator data for companies with at least 50 employees.
  * Profile selection is deterministic based on bucket, not random.
  *
  * The generated CSV follows the exact GIP MDS format:
@@ -105,6 +106,11 @@ type InputCompany = {
 	bucket?: Bucket;
 };
 
+type DedicatedCompany = InputCompany & {
+	purpose: "rgaa" | "ui";
+	sizeRange: "<50" | "50-99" | "100-149" | "150-249" | "250-999" | "1000+";
+};
+
 const BUCKET_WORKFORCE_RANGES: Record<Bucket, [number, number]> = {
 	"medium-50": [50, 99],
 	"medium-100": [100, 149],
@@ -131,6 +137,18 @@ async function loadCompanies(): Promise<InputCompany[]> {
 	}
 
 	return JSON.parse(fs.readFileSync(filePath, "utf-8")) as InputCompany[];
+}
+
+async function loadDedicatedCompanies(): Promise<DedicatedCompany[]> {
+	const fs = await import("node:fs");
+	const path = await import("node:path");
+	const filePath = path.join(
+		import.meta.dirname,
+		"..",
+		"data",
+		"dedicated-test-sirens.json",
+	);
+	return JSON.parse(fs.readFileSync(filePath, "utf-8")) as DedicatedCompany[];
 }
 
 function toCompanyData(input: InputCompany, bucketIndex: number): CompanyData {
@@ -605,7 +623,12 @@ function generateCsv(companies: CompanyData[]): string {
 
 // ── Main ───────────────────────────────────────────────────────────
 
-const inputCompanies = await loadCompanies();
+const dedicatedCompanies = await loadDedicatedCompanies();
+const dedicatedSirens = new Set(dedicatedCompanies.map(({ siren }) => siren));
+const inputCompanies = [
+	...(await loadCompanies()).filter(({ siren }) => !dedicatedSirens.has(siren)),
+	...dedicatedCompanies.filter(({ sizeRange }) => sizeRange !== "<50"),
+];
 const bucketIndexes = new Map<Bucket, number>();
 const companies = inputCompanies.map((input) => {
 	const bucket: Bucket = input.bucket ?? "large-250";

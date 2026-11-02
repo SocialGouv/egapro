@@ -3,12 +3,16 @@ import { AUDIT_ACTIONS } from "~/modules/audit";
 import { parseSiren } from "~/modules/domain";
 import { logActionInTransaction } from "~/server/audit/log";
 import { db } from "~/server/db";
-import { toCompanyInsertValues } from "~/server/db/companyInsert";
+import {
+	toCompanyInsertValues,
+	toCompanyRefreshValues,
+} from "~/server/db/companyInsert";
 import { companies, userCompanies } from "~/server/db/schema";
 import {
 	type DbClient,
 	releaseLocksForUserOnSirens,
 } from "~/server/services/declarationLockService";
+import { releaseRepresentationLocksForUserOnSirens } from "~/server/services/representationDeclarationLockService";
 import { fetchCompanyBySiren } from "~/server/services/weez";
 
 export type CompanyLinkAuditContext = {
@@ -67,6 +71,7 @@ async function revokeLinks(
 		userId,
 		revokedSirens,
 	);
+	await releaseRepresentationLocksForUserOnSirens(tx, userId, revokedSirens);
 
 	const reason: RevocationReason = keptSiren
 		? "siret_changed"
@@ -142,7 +147,10 @@ export async function syncUserCompanyLink(
 			.values(companyValues)
 			.onConflictDoUpdate({
 				target: companies.siren,
-				set: { ...companyValues, updatedAt: new Date() },
+				set: {
+					...toCompanyRefreshValues(companyValues),
+					updatedAt: new Date(),
+				},
 			});
 		await tx
 			.insert(userCompanies)

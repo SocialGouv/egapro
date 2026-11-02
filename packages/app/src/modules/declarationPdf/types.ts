@@ -16,6 +16,9 @@ export type DeclarationPdfCompany = {
 	name: string;
 	siren: string;
 	address: string;
+	countryCode?: string | null;
+	countryLabel?: string | null;
+	departmentLabel?: string | null;
 	nafCode: string | null;
 	nafLabel: string | null;
 	workforceDisplay: string;
@@ -25,6 +28,7 @@ export type DeclarationPdfData = {
 	year: number;
 	workforceYear: number;
 	isSecondDeclaration: boolean;
+	indicatorGRequired: boolean;
 	transmittedAt: string;
 	referencePeriod: string;
 	declarant: DeclarationPdfDeclarant;

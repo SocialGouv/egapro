@@ -19,6 +19,7 @@ export type CompanyDetail = {
 	nafLabel: string | null;
 	countryCode: string | null;
 	countryLabel: string | null;
+	departmentLabel: string | null;
 	gipWorkforce: number | null;
 	hasCse: boolean | null;
 };
@@ -42,10 +43,15 @@ export type DeclarationItem = {
 	firstDeclarationPathChoice: CompliancePath | null;
 	secondDeclarationPathChoice: CompliancePath | null;
 	hasSubmittedSecondDeclaration: boolean;
+	secondDeclarationStep: number | null;
 	hasSubmittedJointEvaluation: boolean;
 	hasSubmittedCseOpinion: boolean;
+	cseOpinionViewAvailable?: boolean;
+	jointEvaluationViewAvailable?: boolean;
 	cseRequired: boolean;
 	hasJointEvaluationFile: boolean;
+	formalNoticeAvailable: boolean;
+	hasSubmittedFormalNoticeJointEvaluation: boolean;
 	hasPrefillData: boolean;
 	deadline: Date | null;
 	notSubject: boolean;

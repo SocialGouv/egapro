@@ -152,6 +152,29 @@ describe("ContentTypeMatrix", () => {
 		).toBeDisabled();
 	});
 
+	it("keeps a locked column checked but not editable, leaving the other columns free (#4731)", () => {
+		const accuracyColumnId = buildColumnId(1, "accuracy");
+		const associations = emptyMap();
+		associations[accuracyColumnId] = "file-1";
+
+		renderMatrix({
+			files: [SINGLE_FILE],
+			associations,
+			lockedColumnIds: new Set([accuracyColumnId]),
+		});
+
+		const locked = screen.getByRole("checkbox", {
+			name: "Exactitude — 1re déclaration — avis-1.pdf",
+		});
+		expect(locked).toBeChecked();
+		expect(locked).toBeDisabled();
+		expect(
+			screen.getByRole("checkbox", {
+				name: "Justification — 1re déclaration — avis-1.pdf",
+			}),
+		).toBeEnabled();
+	});
+
 	it("calls onToggle with the column id, file id and the new checked state", async () => {
 		const user = userEvent.setup();
 		const { props } = renderMatrix();

@@ -10,16 +10,17 @@ export function computeRate(submitted: number, obligated: number): number {
 }
 
 type CampaignRateData = {
-	totalSubmitted: number;
+	totalIndicatorsSubmitted: number;
+	totalDemarcheCompleted: number;
 	totalObligated: number;
-	submissionRate: number;
+	completionRate: number;
 	previousYearRate: number | null;
 };
 
 export type CampaignRateTileProps = {
 	title: string;
 	value: string;
-	subtitle: string;
+	subtitle: string[];
 	delta: { points: number; comparisonLabel: string } | null;
 };
 
@@ -30,14 +31,17 @@ export function buildCampaignRateTileProps(
 ): CampaignRateTileProps {
 	return {
 		title: `Taux de déclaration ${year}`,
-		value: `${formatFixedPercentage(data.submissionRate)}${NARROW_NBSP}%`,
-		subtitle: `${formatCount(data.totalSubmitted)} / ${formatCount(data.totalObligated)} entreprises`,
+		value: `${formatFixedPercentage(data.completionRate)}${NARROW_NBSP}%`,
+		subtitle: [
+			`${formatCount(data.totalIndicatorsSubmitted)} / ${formatCount(data.totalObligated)} ont transmis leurs indicateurs`,
+			`${formatCount(data.totalDemarcheCompleted)} / ${formatCount(data.totalObligated)} ont terminé leur démarche`,
+		],
 		delta:
 			data.previousYearRate === null
 				? null
 				: {
 						points: roundOneDecimal(
-							data.submissionRate - data.previousYearRate,
+							data.completionRate - data.previousYearRate,
 						),
 						comparisonLabel: `vs ${comparisonYear}`,
 					},

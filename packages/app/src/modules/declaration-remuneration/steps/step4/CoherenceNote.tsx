@@ -1,6 +1,7 @@
+import { coherenceErrorLabel } from "../../shared/coherenceErrorLabel";
 import { FieldErrorAlert } from "../../shared/formError/FieldErrorAlert";
 import type { FieldError } from "../../shared/formError/types";
-import { type CoherenceError, coherenceErrorLabel } from "./quartileCoherence";
+import type { CoherenceError } from "./quartileCoherence";
 import type { TableType } from "./quartileErrors";
 
 type Props = {
@@ -20,7 +21,7 @@ export function CoherenceNote({
 		.filter((error) => error.table === tableType)
 		.map((error) => ({
 			fieldId: `step4-${tableType}-${error.field}-coherence`,
-			category: "inconsistent",
+			category: "workforce",
 			message: coherenceErrorLabel(error),
 		}));
 	return (

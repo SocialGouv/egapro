@@ -5,6 +5,7 @@
  * Usage: pnpm db:seed-dev
  */
 import postgres from "postgres";
+import { getDefaultCampaignDeadlineColumns } from "~/modules/domain";
 
 const TEST_SIREN = "130025265";
 const TEST_COMPANY_NAME = "Direction du Numérique (DEV)";
@@ -46,7 +47,8 @@ async function main() {
 	`;
 	console.log(`Linked user → company`);
 
-	// 4. Upsert campaign deadline for current year
+	// 4. Insert campaign deadline for current year (never touches a row an admin already configured)
+	const deadlines = getDefaultCampaignDeadlineColumns(CURRENT_YEAR);
 	await sql`
 		INSERT INTO app_campaign_deadline (
 			year,
@@ -55,18 +57,19 @@ async function main() {
 			decl1_joint_evaluation_deadline,
 			decl2_modification_deadline,
 			decl2_justification_deadline,
-			decl2_joint_evaluation_deadline
+			decl2_joint_evaluation_deadline,
+			decl2_cse_opinion_deadline
 		) VALUES (
 			${CURRENT_YEAR},
-			${new Date(`${CURRENT_YEAR}-03-01`)},
-			${new Date(`${CURRENT_YEAR}-03-01`)},
-			${new Date(`${CURRENT_YEAR}-05-01`)},
-			${new Date(`${CURRENT_YEAR}-09-01`)},
-			${new Date(`${CURRENT_YEAR}-09-01`)},
-			${new Date(`${CURRENT_YEAR}-11-01`)}
+			${deadlines.decl1ModificationDeadline},
+			${deadlines.decl1JustificationDeadline},
+			${deadlines.decl1JointEvaluationDeadline},
+			${deadlines.decl2ModificationDeadline},
+			${deadlines.decl2JustificationDeadline},
+			${deadlines.decl2JointEvaluationDeadline},
+			${deadlines.decl2CseOpinionDeadline}
 		)
-		ON CONFLICT (year) DO UPDATE SET
-			decl1_modification_deadline = EXCLUDED.decl1_modification_deadline
+		ON CONFLICT (year) DO NOTHING
 	`;
 	console.log(`Campaign deadline for ${CURRENT_YEAR}`);
 

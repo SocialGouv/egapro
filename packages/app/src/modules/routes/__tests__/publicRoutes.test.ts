@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { LOGIN } from "../shared/accountRoutes";
 import {
 	ACCESSIBILITY,
+	CGU,
 	CONTACT,
 	COOKIES,
 	CRAWLER_DISALLOWED_PREFIXES,
@@ -18,6 +19,7 @@ import {
 	REFERENTS,
 	referentHref,
 	SITE_MAP,
+	termsOfUseVersionHref,
 } from "../shared/publicRoutes";
 
 describe("dynamic public hrefs", () => {
@@ -29,6 +31,10 @@ describe("dynamic public hrefs", () => {
 
 	it("builds a referent detail page", () => {
 		expect(referentHref("r-1")).toBe("/referents/r-1");
+	});
+
+	it("builds a terms of use archive page", () => {
+		expect(termsOfUseVersionHref("2026-10-12")).toBe("/cgu/2026-10-12");
 	});
 });
 
@@ -52,6 +58,7 @@ describe("PUBLIC_PAGES", () => {
 			OBSERVATORY_SEARCH,
 			LOGIN,
 			LEGAL_NOTICE,
+			CGU,
 			PRIVACY,
 			COOKIES,
 			ACCESSIBILITY,

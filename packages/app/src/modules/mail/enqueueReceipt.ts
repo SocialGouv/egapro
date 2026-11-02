@@ -19,6 +19,7 @@ import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { companies, declarations } from "~/server/db/schema";
 import {
 	buildDeclarationAttachments,
+	buildJointEvaluationAttachments,
 	buildSecondDeclarationAttachments,
 } from "./buildReceiptAttachments";
 import {
@@ -33,7 +34,8 @@ export type ReceiptKind =
 	| "secondDeclaration"
 	| "cseOpinion"
 	| "jointEvaluation"
-	| "representation";
+	| "representation"
+	| "formalNoticeJointEvaluation";
 
 export type EnqueueReceiptInput = {
 	kind: ReceiptKind;
@@ -50,6 +52,7 @@ const KIND_TO_TYPE = {
 	cseOpinion: "cse_opinion_receipt",
 	jointEvaluation: "joint_evaluation_submitted",
 	representation: "representation_receipt",
+	formalNoticeJointEvaluation: "formal_notice_joint_evaluation_submitted",
 } as const satisfies Record<ReceiptKind, NotificationType>;
 
 type ConfirmationType = (typeof KIND_TO_TYPE)[ReceiptKind];
@@ -161,7 +164,8 @@ async function buildConfirmationPayload(
 				}),
 			};
 		}
-		case "representation_receipt": {
+		case "representation_receipt":
+		case "formal_notice_joint_evaluation_submitted": {
 			return base;
 		}
 	}
@@ -176,6 +180,9 @@ async function buildAttachments(
 	if (kind === "secondDeclaration") {
 		return buildSecondDeclarationAttachments(siren, year);
 	}
+	if (kind === "jointEvaluation") {
+		return buildJointEvaluationAttachments(siren, year);
+	}
 	return [];
 }
 
@@ -183,7 +190,9 @@ async function buildAttachments(
  * Raises a receipt failure to Sentry and the server console, then returns the
  * human-readable reason. It writes no audit row itself — the caller is the one
  * that owns a row, and carries the returned reason into it so the failure stays
- * queryable per SIREN in `audit.action_log`.
+ * queryable per SIREN in `audit.action_log`. The context deliberately carries no
+ * SIREN: Sentry only ever receives scrubbed data, so per-SIREN triage goes
+ * through the audit row.
  *
  * A non-Error throw (a rejected string, a plain object) reaches Sentry as
  * "Non-Error exception captured" and groups unrelated failures together, so it
@@ -209,14 +218,7 @@ type AttachmentsOutcome = {
 	droppedReason: string | null;
 };
 
-/**
- * Only the declaration receipts carry a PDF, and that PDF is rendered on the
- * fly. A rendering failure used to sink the whole e-mail, which is exactly the
- * symptom reported in issue 3914 — the acknowledgement never arrives. Losing
- * the attachment is bad; losing the acknowledgement is worse, so the send goes
- * on without it and the reason travels back to the caller, which records it on
- * the audit row rather than letting the degradation pass for a clean send.
- */
+// Losing the PDF is bad, losing the receipt is worse: send without it and report why.
 async function buildAttachmentsOrDrop(
 	kind: ReceiptKind,
 	siren: string,
@@ -233,7 +235,6 @@ async function buildAttachmentsOrDrop(
 			droppedReason: reportReceiptFailure(error, {
 				stage: "attachments",
 				kind,
-				siren,
 				year,
 			}),
 		};
@@ -300,7 +301,7 @@ export async function enqueueReceipt(
 			},
 		});
 	} catch (error) {
-		reportReceiptFailure(error, { stage: "enqueue", kind, siren, year });
+		reportReceiptFailure(error, { stage: "enqueue", kind, year });
 		void logAction({
 			action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
 			status: "failure",

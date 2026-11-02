@@ -5,7 +5,7 @@ export type AdminKpiTileDelta = KpiBadgeDelta;
 type Props = {
 	title: string;
 	value: string;
-	subtitle: string;
+	subtitle: string | string[];
 	delta: AdminKpiTileDelta | null;
 	// true when the underlying KPI is "lower is better" (e.g. share above gap threshold).
 	inverted?: boolean;
@@ -25,9 +25,18 @@ export function AdminKpiTile({
 					<h3 className="fr-tile__title">{title}</h3>
 					<p className="fr-display--xs fr-mb-1w">{value}</p>
 					<KpiBadge delta={delta} inverted={inverted} />
-					<p className="fr-text--sm fr-text-mention--grey fr-mb-0 fr-mt-1w">
-						{subtitle}
-					</p>
+					<div className="fr-mt-1w">
+						{(typeof subtitle === "string" ? [subtitle] : subtitle).map(
+							(line) => (
+								<p
+									className="fr-text--sm fr-text-mention--grey fr-mb-0"
+									key={line}
+								>
+									{line}
+								</p>
+							),
+						)}
+					</div>
 				</div>
 			</div>
 		</div>

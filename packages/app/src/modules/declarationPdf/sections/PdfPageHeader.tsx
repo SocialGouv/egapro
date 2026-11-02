@@ -1,7 +1,7 @@
 import { join } from "node:path";
 import { Image, Text, View } from "@react-pdf/renderer";
 
-import { styles } from "../recapPdfStyles";
+import { type PdfStyles, styles } from "../recapPdfStyles";
 
 const MINISTERE_LOGO = join(
 	process.cwd(),
@@ -12,11 +12,11 @@ const MINISTERE_LOGO = join(
 	"ministere-travail.png",
 );
 
-export function PdfPageHeader() {
+export function PdfPageHeader({ sheet = styles }: { sheet?: PdfStyles }) {
 	return (
-		<View fixed style={styles.header}>
-			<Image src={MINISTERE_LOGO} style={styles.headerLogo} />
-			<Text style={styles.headerText}>Direction Générale{"\n"}du Travail</Text>
+		<View fixed style={sheet.header}>
+			<Image src={MINISTERE_LOGO} style={sheet.headerLogo} />
+			<Text style={sheet.headerText}>Direction Générale{"\n"}du Travail</Text>
 		</View>
 	);
 }

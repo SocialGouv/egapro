@@ -47,7 +47,7 @@ flowchart LR
     subgraph "Externes"
       PC[ProConnect]
       GIP[GIP-MDS]
-      SI[INSEE Sirene]
+      SI[Weez / INSEE Sirene]
       ST[SUIT]
     end
 
@@ -85,7 +85,7 @@ Trois grandes catégories de surface technique :
 | Styling | SCSS Modules + DSFR | sass | Mixins DSFR auto-injectés |
 | API interne | tRPC | ^11 | RPC typé bout-en-bout |
 | ORM | Drizzle | ^0.45 | SQL typé, migrations versionnées |
-| BDD | PostgreSQL | 14.17 | Local : Docker ; prod : managed |
+| BDD | PostgreSQL | 17.11 dans `docker-compose.yml` (cible locale provisoire) | Deux conteneurs locaux ; version cible du cluster V2 à valider (voir §7) |
 | Auth | NextAuth | 4.x | Wrap ProConnect (OAuth/OIDC) |
 | Validation | Zod | ^4 | Schemas partagés front + back |
 | Lint / Format | Biome | ^2 | Remplace ESLint + Prettier |
@@ -292,10 +292,11 @@ sequenceDiagram
 
 Le callback `jwt` (NextAuth) :
 
-1. À la connexion : upsert dans `users` (email, prénom, nom), récupère `id` et `isAdmin`.
+1. À la connexion : upsert dans `users` (email, prénom, nom), récupère `id`.
 2. À la connexion : réaligne `app_user_company` sur le SIRET ProConnect (`syncUserCompanyLink`, `src/server/auth/companyLink.ts`). Une transaction, sérialisée par utilisateur, crée le lien courant et supprime les autres ; un SIRET absent ou invalide supprime tous les liens. Les verrous d'édition détenus sur un SIREN révoqué sont libérés. Chaque révocation (`auth.company_link_revoked`, motif `siret_changed` / `siret_missing`) et chaque verrou libéré (`declaration.lock_released`) est journalisé **dans la même transaction**. Base indisponible : la connexion échoue.
-3. Injecte `userId`, `email`, `isAdmin`, `siret` dans le token.
-4. Si l'utilisateur est admin et qu'une **impersonation** est active (via `session.update({ siren })`), injecte `impersonation: { siren, startedAt }`.
+3. Calcule `isAdmin` : l'email doit figurer dans `ADMIN_EMAILS` **et** le claim ProConnect `roles` doit contenir `agent_public` — sauf si `EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT` vaut `false`, qui lève seulement cette seconde condition. Un compte « listé » (dans `ADMIN_EMAILS`) mais pas « accordé » (sans le rôle, flag à `true`) a `isAdmin = false`. La colonne `users.is_admin` suit la même valeur.
+4. Injecte `userId`, `email`, `isAdmin`, `siret` dans le token.
+5. Si l'utilisateur est admin et qu'une **impersonation** est active (via `session.update({ siren })`), injecte `impersonation: { siren, startedAt }`.
 
 Le `siret` du token est une **déclaration**, pas une autorisation : un JWT ouvert sur un autre appareil le garde après une révocation. Toute surface qui agit pour une entreprise vérifie donc le lien en base à chaque requête : `canAccessCompany` / `resolveAuthorizedSiren` (`src/server/auth/companyAccess.ts`), utilisés par `companyProcedure`, les procédures qui reçoivent un `siren` en entrée, `getSessionSiren` (route handlers) et les pages. Seule exception, l'impersonation admin effective (fenêtre MFA ouverte), qui ne demande pas de lien sur le SIREN incarné. La requête porte sur la clé primaire `(user_id, siren)`.
 
@@ -312,11 +313,11 @@ Deux responsabilités, deux scopes URL :
 
 ### 5.5 Double authentification admin (step-up ProConnect)
 
-`isAdmin === true` ouvre la navigation dans `/admin/*`, mais pas les actions sensibles : celles-ci exigent en plus un second facteur récent (`adminMfaAt`, fenêtre de 8h — `ADMIN_MFA_WINDOW_SECONDS`, `src/modules/domain/shared/adminMfa.ts`). Le niveau attendu de ProConnect est `eidas1-mfa` (`ADMIN_MFA_ACR_VALUES`) : eIDAS 1 plus un second facteur, orthogonal à `eidas2`/`eidas3` qui qualifient le niveau de vérification d'identité à l'enrôlement, pas la présence d'un second facteur à cette connexion.
+`isAdmin === true` ouvre la navigation dans `/admin/*`, mais pas les actions sensibles : celles-ci exigent en plus un second facteur récent (`adminMfaAt`, fenêtre de 8h — `ADMIN_MFA_WINDOW_SECONDS`, `src/modules/domain/shared/adminMfa.ts`). Les niveaux acceptés sont `eidas1-mfa`, `eidas2` et `eidas3` (`ADMIN_MFA_ACR_VALUES`) : ProConnect rapporte le niveau du pilier le plus faible, donc `eidas2`/`eidas3` ne sont jamais émis sans second facteur, au même titre que `eidas1-mfa`. Restent refusés `eidas0`, `eidas0-mfa` (identité ou rattachement déclaratif, insuffisant quel que soit le facteur), `eidas1` et `certification-dirigeant`. Bien que la documentation ProConnect recommande `eidas0-mfa` parmi les valeurs de double authentification, cette politique l'exclut : si le fournisseur d'identité d'un admin ne délivre que ce niveau, ProConnect refuse la demande de step-up et l'admin ne peut pas effectuer les actions sensibles.
 
 Un seul point d'entrée déclenche cette connexion renforcée, `triggerAdminStepUp()` (`src/modules/admin/access/adminStepUp.ts`), appelé par le bouton ProConnect du `/login` quand la destination cible le backoffice, par l'écran de reprise `/acces-backoffice`, et par le menu admin. Il attache deux paramètres à la requête d'autorisation OIDC :
 
-- `claims` avec `id_token.acr` et `auth_time` marqués `essential: true` — un `claims` essentiel est contraignant côté fournisseur, contrairement à `acr_values` qui n'est qu'une préférence qu'un fournisseur peut ignorer silencieusement ;
+- `claims` avec `id_token.acr` (sous forme `values`, l'ensemble complet de `ADMIN_MFA_ACR_VALUES`) et `auth_time` marqués `essential: true` — un `claims` essentiel est contraignant côté fournisseur, contrairement à `acr_values` qui n'est qu'une préférence qu'un fournisseur peut ignorer silencieusement ;
 - `max_age` borné à la fenêtre de fraîcheur (8h), pour qu'un fournisseur qui rejoue une session déjà ouverte renvoie un `auth_time` que la règle de fraîcheur refuse plutôt que de rouvrir une fenêtre sur une authentification ancienne.
 
 Le niveau réellement obtenu n'est jamais présumé côté client : `resolveAdminAccess` (le tableau de décision partagé par le middleware Edge, `src/app/admin/layout.tsx` et l'écran de reprise) ne date `adminMfaAt` qu'à partir de l'`id_token` que `openid-client` a déjà vérifié côté serveur (signature, émetteur, audience, nonce) au retour du callback ProConnect — jamais d'un paramètre de requête, d'un header, ni d'une mise à jour de session côté client.
@@ -342,9 +343,15 @@ sequenceDiagram
 
 L'écriture est bloquée à **deux niveaux** : front (`useReadOnlyGuard`) et back (`companyWriteProcedure` rejette si impersonation). Tracé dans `adminImpersonationEvents` + audit log. Le verrou collaboratif est également désactivé en mode impersonation.
 
-### 5.7 Provenance de `ADMIN_EMAILS`
+### 5.7 Provenance de `ADMIN_EMAILS` et condition d'agent public
 
-`ADMIN_EMAILS` (liste d'emails séparés par des virgules, `src/env.js`) décide qui reçoit le rôle admin : synchronisation bidirectionnelle à chaque connexion, l'ajout promeut et le retrait rétrograde. Deux listes distinctes, chacune scellée avec le certificat de son propre cluster :
+`ADMIN_EMAILS` (liste d'emails séparés par des virgules, `src/env.js`) ne suffit plus seule : depuis #4560, `isAdmin` exige en plus que ProConnect reconnaisse le compte comme **agent public** (claim `roles` contenant `agent_public`, scope demandé par le provider ProConnect). Un compte « listé » (dans `ADMIN_EMAILS`) mais pas « accordé » (sans le rôle) n'est pas admin. Synchronisation bidirectionnelle à chaque connexion sur cette double condition : l'un ou l'autre côté qui change (liste, ou rôle ProConnect) promeut ou rétrograde dès la connexion suivante.
+
+Le flag `EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT` (`src/env.js`, `"true"`/`"false"`, défaut `"true"`) lève **seulement** l'exigence `agent_public` — jamais `ADMIN_EMAILS`, ni la double authentification (§5.5). Il vaut `"false"` sur les review apps et en preprod (`.kontinuous/env/{dev,preprod}/values.yaml`, sous `app.vars`), pour garder l'accès aux prestataires de l'équipe dont l'organisation ProConnect n'est pas publique. Rien en production, où le défaut s'applique.
+
+La ligne d'audit `auth.admin_mfa` (`AUDIT_ACTIONS.AUTH_ADMIN_MFA`) est écrite pour tout compte **listé**, accordé ou non, et porte `roles` (`string[]`, ou `null` si le claim n'est pas arrivé) ainsi que `publicAgentRequired` (la valeur du flag à cette connexion) — ce qui permet de distinguer un claim non activé côté ProConnect d'un compte simplement non public.
+
+Deux listes distinctes pour `ADMIN_EMAILS`, chacune scellée avec le certificat de son propre cluster :
 
 | Environnements | Manifeste(s) | Scope sealed-secret |
 |---|---|---|
@@ -436,6 +443,8 @@ Un middleware tRPC global lit la map `PROCEDURE_TO_ACTION` (dans `src/server/aud
 
 ## 7. Base de données (Drizzle + PostgreSQL)
 
+La stack locale utilise provisoirement PostgreSQL 17.11 pour l’application et les notifications ; ce choix ne fixe pas la cible du cluster V2. Le 15 octobre 2026, le cluster `pg` de développement (`ovh-dev/egapro-alpha`) exécutait PostgreSQL 14.18 avec l’image CloudNativePG/PostGIS 14. La V2 n’est pas encore en production ; les namespaces `egapro-preprod` et `egapro` observés correspondent à la V1. L’inventaire, la cible, les contrôles et les conditions de bascule V2 sont suivis dans la [procédure de montée de version V2](postgresql-v2-upgrade.md) et la [Feature #4824](https://github.com/SocialGouv/egapro/issues/4824).
+
 ### 7.1 Schéma
 
 Définition dans `src/server/db/`. Tables principales :
@@ -444,7 +453,7 @@ Définition dans `src/server/db/`. Tables principales :
 |---|---|
 | `users` | Utilisateurs (email ProConnect, firstName, lastName, isAdmin) |
 | `userCompanies` | N-N user × siren (rattachement) |
-| `companies` | Entreprises (siren, name, nafCode, workforce, hasCse) |
+| `companies` | Entreprises (siren, name, nafCode, workforce, hasCse, region/department/country) |
 | `declarations` | Déclarations index (id, siren, year, status, currentStep, …) |
 | `declarationLocks` | Verrou collaboratif d'édition (un seul par déclaration) |
 | `jobCategories` | Catégories d'emploi (déclaration, optionnel) |
@@ -461,7 +470,7 @@ Définition dans `src/server/db/`. Tables principales :
 | `representationDeclarations` (`representation_declaration`) | Déclaration de représentation équilibrée : une ligne par `(siren, year)` (index unique), pourcentages F/H cadres dirigeants et instances dirigeantes, motifs de non-calculabilité, infos de publication, `draft`/`status`/`currentStep`. `status` ∈ `draft` / `submitted` / `not_subject` (enum Postgres `representation_declaration_status`) |
 | `audit.action_log` | Log d'audit (schéma Postgres dédié `audit`) |
 
-**Audit — actions représentation équilibrée** : `REPRESENTATION_GET`/`REPRESENTATION_SAVE_DRAFT`/`REPRESENTATION_SUBMIT`/`REPRESENTATION_DECLARE_NOT_SUBJECT`, `ADMIN_SETTINGS_GET_REPRESENTATION_CAMPAIGN`/`ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN`, `PDF_REPRESENTATION_DOWNLOAD`, `EXPORT_API_REPRESENTATIONS`, `PUBLIC_REPRESENTATIONS_SEARCH`/`BY_SIREN`/`BY_SIREN_YEAR`/`EXPORT` (`~/modules/audit/shared/actionKeys.ts`). La projection de `audit.action_log.metadata` est fermée par défaut et autorise uniquement les champs validés pour chaque action. Les actions `representationDeclaration.*` ne conservent que l'année ; les pourcentages et le texte libre du brouillon sont écartés.
+**Audit — actions représentation équilibrée** : `REPRESENTATION_GET`/`REPRESENTATION_SAVE_DRAFT`/`REPRESENTATION_SUBMIT`/`REPRESENTATION_DECLARE_NOT_SUBJECT`, `ADMIN_SETTINGS_GET_REPRESENTATION_CAMPAIGN`/`ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN`, `PDF_REPRESENTATION_DOWNLOAD`, `EXPORT_API_REPRESENTATIONS` (`~/modules/audit/shared/actionKeys.ts`). La projection de `audit.action_log.metadata` est fermée par défaut et autorise uniquement les champs validés pour chaque action. Les actions `representationDeclaration.*` ne conservent que l'année ; les pourcentages et le texte libre du brouillon sont écartés.
 
 **SUIT — export représentation** : `GET /api/v1/export/representations` (route `suit-export-representations` dans `.kontinuous/templates/apisix-suit.configmap.yaml`, même `plugin_config_id: suit-api` — `key-auth` + `X-Gateway-Forwarded` — que l'export `declarations` existant, voir §10.1). Contrairement aux canaux publics, cet export **ne filtre pas** la non-diffusion : SUIT est une autorité de contrôle, les champs d'identité/localisation sont renvoyés en clair même pour les entreprises non diffusibles.
 
@@ -618,6 +627,8 @@ Définies dans `src/modules/audit/shared/constants.ts` :
 | `system` | 365 j | Import GIP, crons de purge (audit + déclarations) |
 
 `AUDIT_RETENTION_DAYS_SHORT = 180`, `AUDIT_RETENTION_DAYS_LONG = 365`. Surchargeables via les variables d'environnement `EGAPRO_AUDIT_RETENTION_SHORT_DAYS` / `EGAPRO_AUDIT_RETENTION_LONG_DAYS`. La rétention **des déclarations** (distincte de celle du log d'audit) est pilotée par `EGAPRO_DECLARATION_RETENTION_YEARS` (défaut **6 ans**, voir §9.6).
+
+Vue d'ensemble de tous les journaux produits par l'application (pas seulement celui-ci) et de leur durée de conservation, y compris celles non définies dans le dépôt : [`journaux-et-conservation.md`](journaux-et-conservation.md).
 
 ### 9.4 Wire-up obligatoire
 
@@ -806,6 +817,8 @@ Trois entrées Sentry, une par runtime :
 
 `src/app/global-error.tsx` capture les erreurs non gérées de l'arbre React et les remonte à Sentry.
 
+Les trois initialisations étalent les options du module `src/modules/observability`, qui anonymise ce qui part vers Sentry : collecte minimale côté SDK, filtrage des e-mails et SIREN/SIRET dans les erreurs, traces et breadcrumbs, et Session Replay entièrement masqué.
+
 ---
 
 ## 13. Tests
@@ -814,7 +827,7 @@ Trois entrées Sentry, une par runtime :
 |---|---|---|---|
 | Unit | Vitest | `src/modules/**/__tests__/` | ≥ 75% global, **100%** sur `domain/` |
 | E2E | Playwright | `packages/app/src/e2e/` | Au moins une E2E par `page.tsx` |
-| RGAA / a11y | ultra11y (Action) | `.github/workflows/a11y.yaml` · `pnpm --filter app test:a11y` | Gate statique **bloquante** (`fail-on: blocking`) sur PR ; balayage page par page au cron hebdo, non bloquant |
+| RGAA / a11y | ultra11y (Action) | `.github/workflows/a11y.yaml` · `pnpm --filter app test:a11y` | Gate statique **bloquante** (`fail-on: blocking`) sur PR ; balayage page par page au cron hebdo ou en manuel, non bloquant |
 | Intégration BDD | Vitest + Docker | `*.integration.test.ts` | Obligatoire pour code touchant `audit.action_log` ou les scripts de purge (audit, déclarations) |
 
 ### 13.1 Mocks centralisés
@@ -873,14 +886,17 @@ Trois environnements gérés : **dev** (review apps), **preprod** (branche `beta
 
 **CronJobs** : les traitements planifiés (§9.6) sont déployés comme `kind: CronJob` sous `.kontinuous/templates/*-cron.yaml`. La purge de déclarations lit un override optionnel de la fenêtre de rétention via la ConfigMap `declaration-retention` (`optional: true` — non déployée = repli sur le défaut 6 ans).
 
+**Job post-déploiement** : `company-location-backfill` (`.kontinuous/templates/company-location-backfill-job.yaml`) est un `kind: Job` — pas un CronJob — câblé sur les hooks Helm `post-install,post-upgrade`, supprimé après succès (`hook-delete-policy`), et activé via le flag `global.companyLocationBackfillEnabled`. Il rejoue `scripts/backfill-company-region-department.ts` pour réparer en masse la ville, la région, le département et le pays des entreprises dont la géographie est incomplète — voir [`features.md` §13.9](features.md#139-résolution-du-pays-de-lentreprise-registre-weez).
+
 ### 14.3 Stack locale
 
 `docker-compose.yml` à la racine lance les services nécessaires au dev :
 
 | Service | Image | Rôle |
 |---|---|---|
-| `db` | `postgres:14.17` | Base de données principale |
-| `migrate` | `node:22-slim` | Applique les migrations Drizzle au démarrage |
+| `db` | `postgres:17.11` | Base applicative locale (cible provisoire) |
+| `db-notifications` | `postgres:17.11` | Base locale dédiée au worker de notifications (cible provisoire) |
+| `migrate` | `node:22-slim` | Synchronise le schéma local avec `db:push` au démarrage |
 | `minio` | `minio/minio` | Stockage S3-compatible |
 | `mailpit` | `axllent/mailpit` | Capteur de mails dev (web UI sur :1080, SMTP :1025) |
 | `clamavd` | — | Antivirus pour l'upload de PDF |
@@ -899,7 +915,7 @@ pnpm dev:app           # lance Next.js sur :3000
 |---|---|---|
 | **ProConnect** | SSO d'État (auth utilisateurs) | Oui (pas de fallback en prod) |
 | **GIP-MDS** | Calcul des indicateurs A–F (CSV importé chaque mars) | Non (déclaration possible sans pré-remplissage) |
-| **INSEE Sirene** | Identification des entreprises (raison sociale, NAF, effectif) | Lecture (cache) |
+| **Weez** (API exposant le registre INSEE Sirene) | Identification des entreprises (raison sociale, NAF, effectif, localisation, pays) — `EGAPRO_WEEZ_API_URL`, `~/server/services/weez.ts` | Lecture (cache 24h) |
 | **SUIT / Delphes** | Inspection du travail (consomme `/api/v1/*`) | Non (intégration sortante) |
 | **D@ccords** | Dépôt des accords collectifs | Non (lien externe) |
 | **AWS S3** (ou MinIO) | Stockage des PDF (upload + purge RGPD) | Oui pour l'upload CSE |

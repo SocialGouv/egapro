@@ -163,7 +163,7 @@ export async function findJointEvaluationPendingFirstRound(
 	`;
 }
 
-// 5b. Joint evaluation reminder — round 2 (J-30 / J-15 before 1er mars N+1):
+// 5b. Joint evaluation reminder — round 2 (J-30 / J-15 before 1er janvier N+1):
 // the joint-evaluation path was chosen at the second declaration (after a
 // persistent gap), without an uploaded joint_evaluation file. The round-2
 // choice takes precedence over the round-1 one.

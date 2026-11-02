@@ -47,6 +47,7 @@ Tu **ne touches pas** :
 - `docs/SUIT-API.md` (spec d'intégration externe rédigée à la main)
 - `docs/SUIT-API-valeurs.md` (page **entièrement générée** depuis le code par `pnpm --filter app docs:suit-values` — toute édition à la main est écrasée)
 - `docs/accessibilite-ultra11y.md` (câblage et décisions ultra11y, rédigé à la main — voir `.claude/rules/rgaa.md`)
+- `docs/journaux-et-conservation.md` (inventaire des journaux et durées de conservation, rédigé à la main — voir `.claude/rules/audit-logging.md`). En régénérant `architecture.md` §9.3 et `features.md` §13.2, conserve dans chacun la phrase de renvoi vers cette page : elle n'est pas de ton cru et une régénération from-scratch qui l'omet casse le seul lien que `docs/journaux-et-conservation.md` reçoit depuis la doc technique.
 - Toute autre `.md` sous `.kontinuous/`, `.github/`, `scripts/`
 
 ## Workflow

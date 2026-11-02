@@ -57,6 +57,11 @@ const PAYLOADS: NotificationPayloadMap = {
 		year: YEAR,
 		raisonSociale: RAISON_SOCIALE,
 	},
+	formal_notice_joint_evaluation_submitted: {
+		siren: SIREN,
+		year: YEAR,
+		raisonSociale: RAISON_SOCIALE,
+	},
 	cycle_opening_info: { siren: SIREN, year: YEAR, deadline: DEADLINE },
 	declaration_deadline_reminder: {
 		siren: SIREN,
@@ -332,6 +337,57 @@ describe("per-type rendering details", () => {
 
 	it("representation_receipt escapes the raisonSociale", async () => {
 		const mail = await buildMail("representation_receipt", {
+			siren: SIREN,
+			year: YEAR,
+			raisonSociale: "<script>alert(1)</script>",
+		});
+
+		expect(mail.html).not.toContain("<script>alert(1)</script>");
+	});
+
+	it("formal_notice_joint_evaluation_submitted acknowledges the report filed after the formal notice", async () => {
+		const mail = await buildMail("formal_notice_joint_evaluation_submitted", {
+			siren: SIREN,
+			year: YEAR,
+			raisonSociale: RAISON_SOCIALE,
+		});
+		const text = mail.text.replace(/\s+/g, " ");
+
+		expect(mail.subject).toBe(
+			"Egapro - Dépôt rapport de l'évaluation conjointe des rémunérations suite à mise en demeure",
+		);
+		expect(mail.html).toContain(
+			"Vous avez transmis aux services du ministre chargé du Travail le rapport de l&#x27;évaluation conjointe des rémunérations.",
+		);
+		expect(text).toContain("Bonjour,");
+		expect(text).toContain(
+			`le rapport de l'évaluation conjointe des rémunérations pour ${YEAR}, établi à la suite de la mise en demeure notifiée par la DREETS, concernant l'entreprise`,
+		);
+		expect(mail.html).toContain(`<strong>${RAISON_SOCIALE}</strong>`);
+		expect(text).toContain(`(SIREN : ${SIREN})`);
+		expect(text).toContain(
+			"Cet accusé de réception ne vaut pas contrôle de conformité de votre dépôt.",
+		);
+		expect(text).toContain(
+			"Vous pouvez à tout moment consulter et télécharger les documents relatifs à cette démarche depuis votre espace.",
+		);
+	});
+
+	it("formal_notice_joint_evaluation_submitted points to the user space without any CSE follow-up", async () => {
+		const mail = await buildMail("formal_notice_joint_evaluation_submitted", {
+			siren: SIREN,
+			year: YEAR,
+			raisonSociale: RAISON_SOCIALE,
+		});
+
+		expect(mail.html).toContain("Mon espace");
+		expect(mail.html).toContain(getMySpaceUrl());
+		expect(mail.html).not.toContain("/avis-cse");
+		expect(mail.html).not.toContain("fin de démarche");
+	});
+
+	it("formal_notice_joint_evaluation_submitted escapes the raisonSociale", async () => {
+		const mail = await buildMail("formal_notice_joint_evaluation_submitted", {
 			siren: SIREN,
 			year: YEAR,
 			raisonSociale: "<script>alert(1)</script>",

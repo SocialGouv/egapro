@@ -138,7 +138,7 @@ describe("Step5EmployeeCategories", () => {
 			/>,
 		);
 		const heading = screen.getByRole("heading", {
-			name: /Écart de rémunération par catégories de salariés/,
+			name: /Écart de rémunération par catégorie d'emplois/,
 		});
 		expect(heading).toBeInTheDocument();
 		expect(heading.textContent).not.toMatch(/salaire de base et primes/i);
@@ -233,13 +233,13 @@ describe("Step5EmployeeCategories", () => {
 			screen.getAllByRole("columnheader", { name: "Donnée" }),
 		).toHaveLength(2);
 		expect(
-			screen.getByRole("columnheader", { name: "Nombre de salariés" }),
+			screen.getByRole("columnheader", { name: "Base de rémunération" }),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole("rowheader", { name: "Rémunération annuelle" }),
+			screen.getByRole("rowheader", { name: /^Rémunération annuelle/ }),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole("rowheader", { name: "Rémunération horaire" }),
+			screen.getByRole("rowheader", { name: /^Rémunération horaire/ }),
 		).toBeInTheDocument();
 		expect(
 			screen.getAllByRole("rowheader", { name: "Salaire de base" }),
@@ -256,10 +256,10 @@ describe("Step5EmployeeCategories", () => {
 			/>,
 		);
 		expect(
-			screen.getByRole("columnheader", { name: "Femmes" }),
+			screen.getByRole("columnheader", { name: "Nombre de femmes" }),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole("columnheader", { name: "Hommes" }),
+			screen.getByRole("columnheader", { name: "Nombre d'hommes" }),
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole("columnheader", { name: "Total" }),
@@ -270,6 +270,30 @@ describe("Step5EmployeeCategories", () => {
 		expect(
 			screen.getAllByText("Seuil réglementaire : 5%").length,
 		).toBeGreaterThanOrEqual(1);
+	});
+
+	it("explains on each headcount row that the counts are the women and men taken into account", () => {
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+			/>,
+		);
+		expect(
+			screen.getByRole("button", {
+				name: "Information sur l'effectif de la rémunération annuelle",
+			}),
+		).toHaveAccessibleDescription(
+			"Nombre de femmes et d'hommes pris en compte pour le calcul de la rémunération annuelle.",
+		);
+		expect(
+			screen.getByRole("button", {
+				name: "Information sur l'effectif de la rémunération horaire",
+			}),
+		).toHaveAccessibleDescription(
+			"Nombre de femmes et d'hommes pris en compte pour le calcul de la rémunération horaire.",
+		);
 	});
 
 	it("keeps each category table in a reflowable frame", () => {
@@ -659,7 +683,12 @@ describe("Step5EmployeeCategories", () => {
 			.closest("section");
 		expect(definitions).not.toBeNull();
 		expect(
-			alert.compareDocumentPosition(definitions as HTMLElement) &
+			(definitions as HTMLElement).compareDocumentPosition(alert) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+		const nextButton = screen.getByRole("button", { name: /suivant/i });
+		expect(
+			alert.compareDocumentPosition(nextButton) &
 				Node.DOCUMENT_POSITION_FOLLOWING,
 		).toBeTruthy();
 		expect(mockMutate).not.toHaveBeenCalled();
@@ -725,17 +754,17 @@ describe("Step5EmployeeCategories", () => {
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 
 		expect(
-			screen.getAllByText(/ne correspond pas à l'effectif déclaré/),
+			screen.getAllByText(/ne correspond pas au nombre indiqué/),
 		).not.toHaveLength(0);
 		const alert = screen.getByRole("alert");
-		expect(alert).toHaveTextContent("Données incohérentes");
+		expect(alert).toHaveTextContent("Nombre de salariés");
 		// Two simultaneous mismatches (women + men) render as two list items,
-		// each naming its own sex and totals, rather than one merged paragraph.
+		// each naming its own sex, rather than one merged paragraph.
 		const items = within(alert).getAllByRole("listitem");
 		expect(items).toHaveLength(2);
 		expect(items.map((item) => item.textContent)).toEqual([
-			"Le total des effectifs femmes de la ligne « Rémunération annuelle » (5) ne correspond pas à l'effectif déclaré à l'étape 1 (10).",
-			"Le total des effectifs hommes de la ligne « Rémunération annuelle » (15) ne correspond pas à l'effectif déclaré à l'étape 1 (20).",
+			"Le nombre total de femmes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total annuel : 10).",
+			"Le nombre total d'hommes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total annuel : 20).",
 		]);
 		expect(mockMutate).not.toHaveBeenCalled();
 	});
@@ -1000,7 +1029,9 @@ describe("Step5EmployeeCategories", () => {
 
 describe("Step5EmployeeCategories — headcount per pay basis (#4254)", () => {
 	function workforceRow(label: string) {
-		const rowHeader = screen.getByRole("rowheader", { name: label });
+		const rowHeader = screen.getByRole("rowheader", {
+			name: new RegExp(`^${label}`),
+		});
 		const row = rowHeader.closest("tr");
 		if (!row) throw new Error(`No row for ${label}`);
 		return within(row as HTMLElement);
@@ -1167,9 +1198,9 @@ describe("Step5EmployeeCategories — headcount per pay basis (#4254)", () => {
 
 		const alert = screen.getByRole("alert");
 		expect(alert).toHaveTextContent(
-			"Le total des effectifs femmes de la ligne « Rémunération horaire » (4) ne correspond pas à l'effectif déclaré à l'étape 1 (5).",
+			"Le nombre total de femmes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total horaire : 5).",
 		);
-		expect(alert).not.toHaveTextContent("« Rémunération annuelle »");
+		expect(alert).not.toHaveTextContent("nombre total annuel");
 		// A single inconsistency stays a plain paragraph, not a list.
 		expect(within(alert).queryAllByRole("listitem")).toHaveLength(0);
 		expect(alert.querySelector("p")).not.toBeNull();
@@ -1247,7 +1278,8 @@ describe("Step5EmployeeCategories — headcount per pay basis (#4254)", () => {
 		const hourlyBaseWomen = screen.getByLabelText(
 			"Salaire de base horaire femmes, catégorie 1",
 		);
-		expect(hourlyBaseWomen).not.toBeDisabled();
+		expect(hourlyBaseWomen).toBeDisabled();
+		expect(hourlyBaseWomen).toHaveValue("");
 		expect(hourlyBaseWomen).not.toHaveAttribute("aria-invalid");
 		expect(
 			screen.queryByText("Aucun écart à calculer"),
@@ -1296,7 +1328,7 @@ describe("Step5EmployeeCategories — headcount per pay basis (#4254)", () => {
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 
 		const alert = screen.getByRole("alert");
-		expect(alert).toHaveTextContent("Données incohérentes");
+		expect(alert).toHaveTextContent("Nombre de salariés");
 		const items = within(alert).getAllByRole("listitem");
 		expect(items).toHaveLength(4);
 
@@ -1304,37 +1336,29 @@ describe("Step5EmployeeCategories — headcount per pay basis (#4254)", () => {
 		expect(
 			texts.some(
 				(text) =>
-					text.includes("Rémunération annuelle") &&
-					text.includes("femmes") &&
-					text.includes("(5)") &&
-					text.includes("(10)"),
+					text.includes("de femmes") &&
+					text.includes("nombre total annuel : 10"),
 			),
 		).toBe(true);
 		expect(
 			texts.some(
 				(text) =>
-					text.includes("Rémunération annuelle") &&
-					text.includes("hommes") &&
-					text.includes("(15)") &&
-					text.includes("(20)"),
+					text.includes("d'hommes") &&
+					text.includes("nombre total annuel : 20"),
 			),
 		).toBe(true);
 		expect(
 			texts.some(
 				(text) =>
-					text.includes("Rémunération horaire") &&
-					text.includes("femmes") &&
-					text.includes("(4)") &&
-					text.includes("(7)"),
+					text.includes("de femmes") &&
+					text.includes("nombre total horaire : 7"),
 			),
 		).toBe(true);
 		expect(
 			texts.some(
 				(text) =>
-					text.includes("Rémunération horaire") &&
-					text.includes("hommes") &&
-					text.includes("(6)") &&
-					text.includes("(9)"),
+					text.includes("d'hommes") &&
+					text.includes("nombre total horaire : 9"),
 			),
 		).toBe(true);
 		expect(mockMutate).not.toHaveBeenCalled();
@@ -1374,28 +1398,26 @@ describe("Step5EmployeeCategories — headcount per pay basis (#4254)", () => {
 		await fillAllPayCells(user);
 
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
-		expect(screen.getByRole("alert")).toHaveTextContent("Données incohérentes");
+		expect(screen.getByRole("alert")).toHaveTextContent("Nombre de salariés");
 
 		await user.click(
 			screen.getByRole("button", { name: "Masquer le message" }),
 		);
 		expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 
-		const hidden = document.getElementById(
-			"step5-categories-error-inconsistent",
-		);
+		const hidden = document.getElementById("step5-categories-error-workforce");
 		expect(hidden).not.toBeNull();
 		expect(hidden).toHaveTextContent(
-			"Le total des effectifs femmes de la ligne « Rémunération annuelle » (5) ne correspond pas à l'effectif déclaré à l'étape 1 (10).",
+			"Le nombre total de femmes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total annuel : 10).",
 		);
 		expect(hidden).toHaveTextContent(
-			"Le total des effectifs hommes de la ligne « Rémunération annuelle » (15) ne correspond pas à l'effectif déclaré à l'étape 1 (20).",
+			"Le nombre total d'hommes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total annuel : 20).",
 		);
 		expect(hidden).toHaveTextContent(
-			"Le total des effectifs femmes de la ligne « Rémunération horaire » (4) ne correspond pas à l'effectif déclaré à l'étape 1 (7).",
+			"Le nombre total de femmes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total horaire : 7).",
 		);
 		expect(hidden).toHaveTextContent(
-			"Le total des effectifs hommes de la ligne « Rémunération horaire » (6) ne correspond pas à l'effectif déclaré à l'étape 1 (9).",
+			"Le nombre total d'hommes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total horaire : 9).",
 		);
 		expect(mockMutate).not.toHaveBeenCalled();
 	});
@@ -1505,13 +1527,27 @@ describe("Step5EmployeeCategories — non-calculable category at 0 (#3678)", () 
 		["annuelle", "hommes"],
 		["horaire", "femmes"],
 		["horaire", "hommes"],
-	] as const)("keeps pay fields enabled for one isolated 0 on %s / %s", async (basis, sex) => {
+	] as const)("disables only the %s pay table for a 0 in %s", async (basis, sex) => {
 		const user = userEvent.setup();
 		renderStep();
 
 		await setCount(user, basis, sex, "0");
 
-		expectPayTablesEnabled();
+		const disabledLabels =
+			basis === "annuelle"
+				? PAY_CELL_LABELS.slice(0, 4)
+				: PAY_CELL_LABELS.slice(4);
+		const enabledLabels =
+			basis === "annuelle"
+				? PAY_CELL_LABELS.slice(4)
+				: PAY_CELL_LABELS.slice(0, 4);
+		for (const label of disabledLabels) {
+			expect(screen.getByLabelText(label)).toBeDisabled();
+			expect(screen.getByLabelText(label)).toHaveValue("");
+		}
+		for (const label of enabledLabels) {
+			expect(screen.getByLabelText(label)).not.toBeDisabled();
+		}
 	});
 
 	it("keeps pay fields enabled for crossed 0s", async () => {
@@ -1521,10 +1557,10 @@ describe("Step5EmployeeCategories — non-calculable category at 0 (#3678)", () 
 		await setCount(user, "annuelle", "femmes", "0");
 		await setCount(user, "horaire", "hommes", "0");
 
-		expectPayTablesEnabled();
+		for (const cell of payCells()) expect(cell).toBeDisabled();
 	});
 
-	it("keeps both tables visible, clears their values and disables them for same-column 0s", async () => {
+	it("clears and disables only the table whose row has a zero", async () => {
 		const user = userEvent.setup();
 		renderStep();
 
@@ -1532,8 +1568,14 @@ describe("Step5EmployeeCategories — non-calculable category at 0 (#3678)", () 
 		for (const cell of payCells()) expect(cell).not.toHaveValue("");
 
 		await setCount(user, "annuelle", "femmes", "0");
-		expectPayTablesEnabled();
-		for (const cell of payCells()) expect(cell).not.toHaveValue("");
+		for (const cell of payCells().slice(0, 4)) {
+			expect(cell).toBeDisabled();
+			expect(cell).toHaveValue("");
+		}
+		for (const cell of payCells().slice(4)) {
+			expect(cell).not.toBeDisabled();
+			expect(cell).toHaveValue("100,00");
+		}
 
 		await setCount(user, "horaire", "femmes", "0");
 		await user.tab();
@@ -1552,9 +1594,12 @@ describe("Step5EmployeeCategories — non-calculable category at 0 (#3678)", () 
 		await user.tab();
 		expectPayTablesDisabledAndEmpty();
 
-		await setCount(user, "horaire", "femmes", "1");
-		expectPayTablesEnabled();
-		for (const cell of payCells()) expect(cell).toHaveValue("");
+		await setCount(user, "annuelle", "femmes", "1");
+		for (const cell of payCells().slice(0, 4)) {
+			expect(cell).not.toBeDisabled();
+			expect(cell).toHaveValue("");
+		}
+		for (const cell of payCells().slice(4)) expect(cell).toBeDisabled();
 
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 
@@ -1573,11 +1618,17 @@ describe("Step5EmployeeCategories — non-calculable category at 0 (#3678)", () 
 		const annualWomen = screen.getByLabelText(countLabel("annuelle", "femmes"));
 
 		fireEvent.change(annualWomen, { target: { value: "0" } });
-		expectPayTablesDisabledAndEmpty();
+		for (const cell of payCells()) {
+			expect(cell).toBeDisabled();
+			expect(cell).toHaveValue("");
+		}
 
 		fireEvent.change(annualWomen, { target: { value: "20" } });
-		expectPayTablesEnabled();
-		for (const cell of payCells()) expect(cell).toHaveValue("100,00");
+		for (const cell of payCells().slice(0, 4)) {
+			expect(cell).not.toBeDisabled();
+			expect(cell).toHaveValue("100,00");
+		}
+		for (const cell of payCells().slice(4)) expect(cell).toBeDisabled();
 	});
 
 	it("submits same-column 0s without requiring or persisting pay", async () => {

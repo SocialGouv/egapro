@@ -24,12 +24,22 @@ const guardedRouter = createTRPCRouter({
 	}),
 });
 
-function createCaller(isAdmin: boolean | null, adminMfaAt?: number | null) {
+function createCaller(
+	isAdmin: boolean | null,
+	adminMfaAt?: number | null,
+	adminAccessRefusal?: { roles: string[]; organizationLabel: string | null },
+) {
 	const session =
 		isAdmin === null
 			? null
 			: {
-					user: { id: "user-1", email: "u@example.com", isAdmin, adminMfaAt },
+					user: {
+						id: "user-1",
+						email: "u@example.com",
+						isAdmin,
+						adminMfaAt,
+						adminAccessRefusal,
+					},
 					expires: "",
 				};
 	return guardedRouter.createCaller({
@@ -52,6 +62,18 @@ describe("adminProcedure", () => {
 			code: "FORBIDDEN",
 			message: "Accès réservé aux administrateurs.",
 		});
+	});
+
+	it("refuses a read and a write when a non-admin session carries an access refusal", async () => {
+		const caller = createCaller(false, null, {
+			roles: [],
+			organizationLabel: "Société Démo",
+		});
+		dbWriteSpy.mockClear();
+
+		await expect(caller.ping()).rejects.toMatchObject({ code: "FORBIDDEN" });
+		await expect(caller.write()).rejects.toMatchObject({ code: "FORBIDDEN" });
+		expect(dbWriteSpy).not.toHaveBeenCalled();
 	});
 
 	it("does not mark the non-admin refusal with the MFA-required cause", async () => {

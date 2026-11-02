@@ -5,10 +5,12 @@ import {
 	V2_FIRST_CAMPAIGN_YEAR,
 } from "./constants";
 
+export function getObligationWorkforceMin(year: number): number {
+	return alignCampaignYear(year) >= V2_FIRST_CAMPAIGN_YEAR
+		? COMPANY_SIZE_VOLUNTARY_MAX
+		: COMPANY_SIZE_ANNUAL_MIN;
+}
+
 export function isObligatedForYear(workforce: number, year: number): boolean {
-	if (workforce < COMPANY_SIZE_VOLUNTARY_MAX) return false;
-	// 50-99: annual obligation since the V2 scheme (2026-07 arbitrage). Pre-V2 years keep the historical behavior.
-	if (workforce < COMPANY_SIZE_ANNUAL_MIN)
-		return alignCampaignYear(year) >= V2_FIRST_CAMPAIGN_YEAR;
-	return true;
+	return workforce >= getObligationWorkforceMin(year);
 }

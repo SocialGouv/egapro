@@ -1,13 +1,17 @@
 import {
+	type CompanySize,
+	classifyCompanySize,
+	companyLocationRow,
+	formatInseeTitleCase,
 	formatWorkforceForUser,
 	getObligationWorkforce,
 	getWorkforceYear,
 	isCseRequired,
 } from "~/modules/domain";
+import { TooltipButton } from "~/modules/shared/TooltipButton";
 
 import { MODAL_ID as COMPANY_EDIT_MODAL_ID } from "./CompanyEditModal";
 import styles from "./CompanyInfoBanner.module.scss";
-import { formatInseeTitleCase } from "./formatInseeTitleCase";
 import { formatNafForDisplay } from "./formatNafForDisplay";
 import { formatSiren } from "./formatSiren";
 import { StatusBadge } from "./StatusBadge";
@@ -17,23 +21,14 @@ type Props = {
 	company: CompanyDetail;
 };
 
-type CountryDisplay =
-	| { kind: "foreign"; label: string }
-	| { kind: "unknown" }
-	| { kind: "domestic" };
+const INFO_SOURCE_TOOLTIP_ID = "company-info-source-tooltip";
+const INFO_SOURCE_LABEL = "Information sur la source des données";
 
-// countryCode alone can't tell France from unresolved (it's null for both) — countryLabel decides.
-function resolveCountryDisplay(
-	company: Pick<CompanyDetail, "countryCode" | "countryLabel">,
-): CountryDisplay {
-	if (company.countryCode !== null && company.countryLabel !== null) {
-		return { kind: "foreign", label: company.countryLabel };
-	}
-	if (company.countryLabel === null) {
-		return { kind: "unknown" };
-	}
-	return { kind: "domestic" };
-}
+const INFO_SOURCE_TEXT_BY_SIZE: Partial<Record<CompanySize, string>> = {
+	voluntary: "Source : INSEE.",
+	mandatory:
+		"Source : INSEE et DSN (Déclarations Sociales Nominatives) pour l'effectif annuel moyen.",
+};
 
 export function CompanyInfoBanner({ company }: Props) {
 	const workforceYear = getWorkforceYear();
@@ -41,36 +36,32 @@ export function CompanyInfoBanner({ company }: Props) {
 	// The CSE field is the only editable datapoint and it starts at 100, so below
 	// that threshold the modal has nothing to offer and the entry point is hidden.
 	const cseApplicable = isCseRequired(obligationWorkforce);
-	const countryDisplay = resolveCountryDisplay(company);
-	const locationRow =
-		countryDisplay.kind === "domestic" ? (
-			company.address && (
-				<div className={styles.datapoint}>
-					<dt>Adresse :</dt>
-					<dd>
-						<strong>{formatInseeTitleCase(company.address)}</strong>
-					</dd>
-				</div>
-			)
-		) : (
-			<div className={styles.datapoint}>
-				<dt>Pays :</dt>
-				<dd>
-					<strong>
-						{countryDisplay.kind === "foreign"
-							? formatInseeTitleCase(countryDisplay.label)
-							: "non renseigné"}
-					</strong>
-				</dd>
-			</div>
-		);
+	const companySize = classifyCompanySize(obligationWorkforce);
+	const infoSourceText = INFO_SOURCE_TEXT_BY_SIZE[companySize];
+	const location = companyLocationRow({
+		countryCode: company.countryCode,
+		countryLabel: company.countryLabel,
+		departmentLabel: company.departmentLabel,
+		domesticAddress: company.address
+			? formatInseeTitleCase(company.address)
+			: null,
+	});
 
 	return (
 		<div className={`fr-pt-3w fr-pb-4w ${styles.banner}`}>
 			<div className="fr-container">
 				<div className="fr-grid-row fr-grid-row--middle fr-mb-1w">
-					<div className="fr-col">
-						<h1 className="fr-h4 fr-mb-0">{company.name}</h1>
+					<div className={`fr-col ${styles.titleRow}`}>
+						<h1 className={`fr-h4 fr-mb-0 ${styles.title}`}>{company.name}</h1>
+						{infoSourceText && (
+							<span className={styles.tooltipWrapper}>
+								<TooltipButton
+									id={INFO_SOURCE_TOOLTIP_ID}
+									label={INFO_SOURCE_LABEL}
+									text={infoSourceText}
+								/>
+							</span>
+						)}
 					</div>
 					{cseApplicable && (
 						<div className="fr-col-auto">
@@ -93,7 +84,14 @@ export function CompanyInfoBanner({ company }: Props) {
 							<strong>{formatSiren(company.siren)}</strong>
 						</dd>
 					</div>
-					{locationRow}
+					{location && (
+						<div className={styles.datapoint}>
+							<dt>{location.label} :</dt>
+							<dd>
+								<strong>{location.value}</strong>
+							</dd>
+						</div>
+					)}
 				</dl>
 
 				<dl className={styles.infoRow}>

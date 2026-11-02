@@ -86,11 +86,13 @@ async function ensureCompany(tx: TransactionSql, company: MappedCompany) {
 	await tx`
 		INSERT INTO app_company (
 			siren, name, address, naf_code, region, region_code,
-			department_code, department_label, statut_diffusion, created_at, updated_at
+			department_code, department_label, country_code, country_label,
+			statut_diffusion, created_at, updated_at
 		) VALUES (
 			${company.siren}, ${company.name}, ${company.address}, ${company.nafCode},
 			${company.region}, ${company.regionCode}, ${company.departmentCode},
-			${company.departmentLabel}, ${company.statutDiffusion}, NOW(), NOW()
+			${company.departmentLabel}, ${company.countryCode}, ${company.countryLabel},
+			${company.statutDiffusion}, NOW(), NOW()
 		)
 		ON CONFLICT (siren) DO NOTHING
 	`;

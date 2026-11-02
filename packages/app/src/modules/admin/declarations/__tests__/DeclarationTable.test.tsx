@@ -61,7 +61,7 @@ describe("DeclarationTable", () => {
 		expect(screen.getByText("123456789")).toBeInTheDocument();
 		expect(screen.getByText("2024")).toBeInTheDocument();
 		expect(screen.getByText("99")).toBeInTheDocument();
-		expect(screen.getByText("Transmise")).toBeInTheDocument();
+		expect(screen.getByText("Choix parcours conformité")).toBeInTheDocument();
 		expect(screen.getByText("alice@example.com")).toBeInTheDocument();
 		expect(screen.getByText("15/06/2024")).toBeInTheDocument();
 	});
@@ -85,7 +85,7 @@ describe("DeclarationTable", () => {
 		const cells = screen.getAllByRole("cell").map((cell) => cell.textContent);
 		expect(cells[2]).toBe("2024");
 		expect(cells[3]).toBe("99");
-		expect(cells[4]).toBe("Transmise");
+		expect(cells[4]).toBe("Choix parcours conformité");
 	});
 
 	it("shows a dash when the GIP headcount is unknown", () => {
@@ -163,13 +163,15 @@ describe("DeclarationTable", () => {
 		render(<DeclarationTable {...defaultProps} rows={[cancelledRow]} />);
 
 		expect(screen.getByText("Annulée")).toBeInTheDocument();
-		expect(screen.queryByText("Transmise")).not.toBeInTheDocument();
+		expect(
+			screen.queryByText("Choix parcours conformité"),
+		).not.toBeInTheDocument();
 	});
 
 	it("shows status label when cancelledAt is null", () => {
 		render(<DeclarationTable {...defaultProps} />);
 
-		expect(screen.getByText("Transmise")).toBeInTheDocument();
+		expect(screen.getByText("Choix parcours conformité")).toBeInTheDocument();
 		expect(screen.queryByText("Annulée")).not.toBeInTheDocument();
 	});
 

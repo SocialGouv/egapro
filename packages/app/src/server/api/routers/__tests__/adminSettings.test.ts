@@ -175,7 +175,7 @@ describe("adminSettingsRouter — getDeadlinesByYear", () => {
 		expect(result.publicDataReleaseDate).toBeNull();
 		expect(result.decl1ModificationDeadline).toMatch(/^2027-06-01$/);
 		expect(result.decl2JointEvaluationDeadline).toBe("2028-01-01");
-		expect(result.decl2CseOpinionDeadline).toBe("2028-02-01");
+		expect(result.decl2CseOpinionDeadline).toBe("2028-03-01");
 		expect(result.pathChoiceRound1Deadline).toBe("2027-07-01");
 		expect(result.pathChoiceDeadline).toBe("2028-01-01");
 	});
@@ -355,18 +355,25 @@ describe("adminSettingsRouter — lock timeout", () => {
 	});
 
 	it("writes the new timeout and stamps the acting admin", async () => {
-		const where = vi.fn().mockResolvedValue(undefined);
-		const set = vi.fn().mockReturnValue({ where });
-		const db = buildDb({ update: vi.fn().mockReturnValue({ set }) });
+		const db = buildDb();
 		const caller = await buildCaller(db);
 
 		const result = await caller.updateLockTimeout({ timeoutMinutes: 60 });
 
 		expect(result).toEqual({ success: true });
-		expect(set).toHaveBeenCalledWith(
+		expect(db.__insert.values).toHaveBeenCalledWith(
 			expect.objectContaining({
+				id: 1,
 				declarationLockTimeoutMinutes: 60,
 				updatedBy: "admin-1",
+			}),
+		);
+		expect(db.__onConflict).toHaveBeenCalledWith(
+			expect.objectContaining({
+				set: expect.objectContaining({
+					declarationLockTimeoutMinutes: 60,
+					updatedBy: "admin-1",
+				}),
 			}),
 		);
 	});
@@ -374,13 +381,13 @@ describe("adminSettingsRouter — lock timeout", () => {
 	it.each([
 		0, 1441, 12.5,
 	])("rejects an out-of-range timeout (%s)", async (v) => {
-		const update = vi.fn();
-		const caller = await buildCaller(buildDb({ update }));
+		const db = buildDb();
+		const caller = await buildCaller(db);
 
 		await expect(
 			caller.updateLockTimeout({ timeoutMinutes: v }),
 		).rejects.toThrow();
-		expect(update).not.toHaveBeenCalled();
+		expect(db.insert).not.toHaveBeenCalled();
 	});
 });
 
@@ -421,7 +428,7 @@ describe("adminSettingsRouter — getRepresentationCampaignByYear", () => {
 			isDefault: true,
 			campaignStartDate: "2027-01-01",
 			campaignEndDate: "2027-12-31",
-			declarationDeadline: "2027-03-01",
+			declarationDeadline: "2027-06-01",
 		});
 	});
 

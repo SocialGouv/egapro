@@ -1,6 +1,6 @@
 import type { CseOpinionStep1Data, OpinionType } from "./types";
 
-type DbOpinionRow = {
+export type DbOpinionRow = {
 	declarationNumber: number;
 	type: string;
 	opinion: string | null;

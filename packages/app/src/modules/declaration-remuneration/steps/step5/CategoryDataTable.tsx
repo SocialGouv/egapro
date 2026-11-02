@@ -16,9 +16,13 @@ import {
 	displayDecimal,
 	formatTotal,
 } from "~/modules/domain";
+import { GapBadge } from "../../shared/GapValueBadge";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
+import {
+	WorkforceRowHeader,
+	WorkforceTableHead,
+} from "../step1/WorkforceTableHeaders";
 import { workforceFieldLabel } from "../step1/workforceRows";
-import { GapBadge } from "../step6/GapBadge";
 import type { EmployeeCategory } from "./categorySerializer";
 import type { CategoryWorkforceRowDefinition } from "./categoryWorkforceRows";
 import { CATEGORY_WORKFORCE_ROWS } from "./categoryWorkforceRows";
@@ -38,6 +42,8 @@ type Props = {
 	disabled?: boolean;
 	/** Whether this category can declare remuneration (#3678). */
 	payApplicable?: boolean;
+	annualPayApplicable?: boolean;
+	hourlyPayApplicable?: boolean;
 	readOnly?: boolean;
 	errorAlertId: string;
 	errors: readonly FieldError[];
@@ -274,13 +280,12 @@ function RemunerationTable({
 							readOnly={readOnly}
 							value={valueFor(fields.baseMen)}
 						/>
-						<td className={stepStyles.gapCell}>
+						<td>
 							<GapBadge
 								gap={computeGap(
 									valueFor(fields.baseWomen),
 									valueFor(fields.baseMen),
 								)}
-								layout="cell"
 							/>
 						</td>
 					</tr>
@@ -312,13 +317,12 @@ function RemunerationTable({
 							readOnly={readOnly}
 							value={valueFor(fields.variableMen)}
 						/>
-						<td className={stepStyles.gapCell}>
+						<td>
 							<GapBadge
 								gap={computeGap(
 									valueFor(fields.variableWomen),
 									valueFor(fields.variableMen),
 								)}
-								layout="cell"
 							/>
 						</td>
 					</tr>
@@ -330,7 +334,7 @@ function RemunerationTable({
 						<td className={stepStyles.totalCell}>
 							{formatTotal(totalMen, "€")}
 						</td>
-						<td className={stepStyles.gapCell}>
+						<td>
 							<span className="fr-sr-only">Non applicable</span>
 						</td>
 					</tr>
@@ -390,7 +394,10 @@ function CategoryWorkforceRow({
 
 	return (
 		<tr className={stepStyles.dataRow}>
-			<th scope="row">{row.workforceRow.label}</th>
+			<WorkforceRowHeader
+				row={row.workforceRow}
+				tooltipId={`tooltip-cat-${catIndex}-${row.workforceRow.basis}`}
+			/>
 			{countCell(row.womenField, "women")}
 			{countCell(row.menField, "men")}
 			<td className={stepStyles.totalCell}>
@@ -408,6 +415,8 @@ export function CategoryDataTable({
 	onDecimalBlur: blur,
 	disabled = false,
 	payApplicable = true,
+	annualPayApplicable = true,
+	hourlyPayApplicable = true,
 	readOnly = false,
 	errorAlertId,
 	errors,
@@ -428,9 +437,12 @@ export function CategoryDataTable({
 				nextTarget instanceof HTMLElement &&
 				nextTarget.dataset.categoryPayInput === idPrefix;
 			const shouldRecoverFocus =
-				!payApplicable &&
+				(!annualPayApplicable || !hourlyPayApplicable) &&
 				tabbedHeadcountRef.current &&
-				(nextIsCategoryPayInput || nextTarget === null);
+				(nextTarget === null ||
+					(nextTarget instanceof HTMLInputElement &&
+						nextTarget.disabled &&
+						nextIsCategoryPayInput));
 
 			tabbedHeadcountRef.current = false;
 			const payWasCleared = onBlur(event) === true;
@@ -466,14 +478,7 @@ export function CategoryDataTable({
 						<col className={stepStyles.colData} />
 						<col className={stepStyles.colData} />
 					</colgroup>
-					<thead>
-						<tr>
-							<th scope="col">Nombre de salariés</th>
-							<th scope="col">Femmes</th>
-							<th scope="col">Hommes</th>
-							<th scope="col">Total</th>
-						</tr>
-					</thead>
+					<WorkforceTableHead />
 					<tbody>
 						{CATEGORY_WORKFORCE_ROWS.map((row) => (
 							<CategoryWorkforceRow
@@ -505,8 +510,8 @@ export function CategoryDataTable({
 				blur={blur}
 				cat={cat}
 				catIndex={catIndex}
-				disabled={disabled || !payApplicable}
-				emptyValues={!payApplicable}
+				disabled={disabled || !annualPayApplicable}
+				emptyValues={!annualPayApplicable}
 				errorAlertId={errorAlertId}
 				errors={errors}
 				fields={ANNUAL_FIELDS}
@@ -521,8 +526,8 @@ export function CategoryDataTable({
 				blur={blur}
 				cat={cat}
 				catIndex={catIndex}
-				disabled={disabled || !payApplicable}
-				emptyValues={!payApplicable}
+				disabled={disabled || !hourlyPayApplicable}
+				emptyValues={!hourlyPayApplicable}
 				errorAlertId={errorAlertId}
 				errors={errors}
 				fields={HOURLY_FIELDS}

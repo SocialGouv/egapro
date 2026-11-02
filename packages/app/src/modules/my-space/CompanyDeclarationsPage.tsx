@@ -14,7 +14,6 @@ import {
 } from "~/modules/domain";
 
 import { ArchivesSection } from "./ArchivesSection";
-import { hasArchives } from "./archivesAvailability";
 import { CompanyEditModal } from "./CompanyEditModal";
 import { CompanyInfoBanner } from "./CompanyInfoBanner";
 import { DeclarationProcessPanel } from "./DeclarationProcessPanel";
@@ -32,8 +31,11 @@ type Props = {
 	campaignDeadlines: CampaignDeadlines;
 	company: CompanyDetail;
 	declarations: DeclarationItem[];
+	isImpersonating: boolean;
 	lockedByOther: boolean;
 	lockHolder: LockHolderDisplay | null;
+	representationLockedByOther?: boolean;
+	representationLockHolder?: LockHolderDisplay | null;
 	representationCampaign: RepresentationCampaign;
 	userPhone: string | null;
 };
@@ -54,8 +56,11 @@ export function CompanyDeclarationsPage({
 	campaignDeadlines,
 	company,
 	declarations,
+	isImpersonating,
 	lockedByOther,
 	lockHolder,
+	representationLockedByOther = false,
+	representationLockHolder = null,
 	representationCampaign,
 	userPhone,
 }: Props) {
@@ -85,7 +90,7 @@ export function CompanyDeclarationsPage({
 				currentDeclaration?.secondDeclarationPathChoice ?? null,
 		});
 	const panelVariant = computePanelVariant(currentDeclaration);
-	const ctaHref = computeCtaHref(currentDeclaration);
+	const ctaHref = computeCtaHref(currentDeclaration, isImpersonating);
 	const displayContext = getDeclarationDisplayContext({
 		firstDeclarationPathChoice:
 			currentDeclaration?.firstDeclarationPathChoice ?? null,
@@ -103,9 +108,11 @@ export function CompanyDeclarationsPage({
 				declarations={declarations}
 				hasCse={company.hasCse}
 				representationCampaign={representationCampaign}
+				representationLockedByOther={representationLockedByOther}
+				representationLockHolder={representationLockHolder}
 				userPhone={userPhone}
 			/>
-			{hasArchives && <ArchivesSection />}
+			<ArchivesSection />
 			<CompanyEditModal company={company} />
 			<MissingInfoModal
 				cseApplicable={cseApplicable}
@@ -117,9 +124,13 @@ export function CompanyDeclarationsPage({
 				campaignDeadlines={campaignDeadlines}
 				compliancePathApplicable={compliancePathApplicable}
 				cseOpinionRequired={cseOpinionRequired}
+				cseOpinionViewAvailable={currentDeclaration?.cseOpinionViewAvailable}
 				ctaHref={ctaHref}
 				declarationFsmStatus={currentDeclaration?.fsmStatus ?? null}
 				displayContext={displayContext}
+				formalNoticeAvailable={
+					currentDeclaration?.formalNoticeAvailable ?? false
+				}
 				hasPrefillData={currentDeclaration?.hasPrefillData ?? false}
 				hasSubmittedCseOpinion={
 					currentDeclaration?.hasSubmittedCseOpinion ?? false
@@ -131,6 +142,9 @@ export function CompanyDeclarationsPage({
 					currentDeclaration?.hasSubmittedSecondDeclaration ?? false
 				}
 				indicatorGRequired={indicatorGRequired}
+				jointEvaluationViewAvailable={
+					currentDeclaration?.jointEvaluationViewAvailable
+				}
 				lastActionDate={lastActionDate}
 				lockedByOther={lockedByOther}
 				lockHolder={lockHolder}

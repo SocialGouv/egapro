@@ -1,4 +1,7 @@
-import type { DeclarationFsmStatus } from "~/modules/domain";
+import type {
+	CompliancePathValue,
+	DeclarationFsmStatus,
+} from "~/modules/domain";
 import type { Rules } from "~/server/rules/engine";
 import {
 	listNextTransitions,
@@ -136,6 +139,8 @@ export function buildNextStepsPayload(input: {
 	status: DeclarationFsmStatus;
 	rulesVersion: string | null;
 	cseRequired: boolean;
+	firstDeclarationPathChoice: CompliancePathValue | null;
+	secondDeclarationPathChoice: CompliancePathValue | null;
 	cancelled: boolean;
 }): NextStepPayload[] {
 	if (input.cancelled) return [];
@@ -143,6 +148,8 @@ export function buildNextStepsPayload(input: {
 	const rules = loadRulesWithFallback(input.rulesVersion);
 	const transitions = listNextTransitions(rules, input.status, {
 		cseRequired: input.cseRequired,
+		firstDeclarationPathChoice: input.firstDeclarationPathChoice,
+		secondDeclarationPathChoice: input.secondDeclarationPathChoice,
 	});
 
 	return transitions

@@ -19,3 +19,9 @@ export function parseSiren(siret: string | null | undefined): string | null {
 	const siren = siret.slice(0, 9);
 	return SIREN_REGEX.test(siren) ? siren : null;
 }
+
+export function parseStrictSiren(
+	value: string | null | undefined,
+): string | null {
+	return value && SIREN_REGEX.test(value) ? value : null;
+}

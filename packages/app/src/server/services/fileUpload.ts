@@ -138,7 +138,11 @@ export async function handleStreamingUpload(
 			};
 		}
 		if (err instanceof ClamdScanError) {
-			console.error("[fileUpload] clamd sendChunk failed", err.cause);
+			console.error("[antivirus] scan unavailable", {
+				reason: "antivirus_unavailable",
+				stage: "send_chunk",
+				cause: err.cause,
+			});
 			return {
 				ok: false,
 				reason: "scan_unavailable",
@@ -162,7 +166,6 @@ export async function handleStreamingUpload(
 	try {
 		scanResult = await clamd.finish();
 	} catch (err) {
-		console.error("[fileUpload] clamd scan failed", err);
 		clamd.destroy();
 		await s3Upload.abort().catch(() => {});
 		if (signal?.aborted) {
@@ -172,6 +175,11 @@ export async function handleStreamingUpload(
 				error: "L'upload a été interrompu.",
 			};
 		}
+		console.error("[antivirus] scan unavailable", {
+			reason: "antivirus_unavailable",
+			stage: "finish",
+			cause: err,
+		});
 		return {
 			ok: false,
 			reason: "scan_unavailable",
@@ -181,7 +189,8 @@ export async function handleStreamingUpload(
 	}
 
 	if (!scanResult.clean) {
-		await s3Upload.abort();
+		console.warn("[antivirus] file rejected", { reason: "virus_detected" });
+		await s3Upload.abort().catch(() => {});
 		return {
 			ok: false,
 			reason: "virus",

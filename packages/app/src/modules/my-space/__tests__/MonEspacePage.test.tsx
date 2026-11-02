@@ -67,6 +67,7 @@ vi.mock("~/trpc/server", () => ({
 					nafCode: "6201Z",
 					countryCode: null,
 					countryLabel: "FRANCE",
+					departmentLabel: null,
 					workforce: 150,
 					hasCse: true,
 				},
@@ -87,6 +88,8 @@ vi.mock("~/trpc/server", () => ({
 						hasSubmittedCseOpinion: false,
 						cseRequired: false,
 						hasJointEvaluationFile: false,
+						formalNoticeAvailable: false,
+						hasSubmittedFormalNoticeJointEvaluation: false,
 						hasPrefillData: false,
 					},
 				],
@@ -109,7 +112,11 @@ describe("MonEspacePage", () => {
 	});
 
 	it("renders MissingSiret without redirecting when siret is null", async () => {
-		const page = await MonEspacePage({ siret: null, userPhone: null });
+		const page = await MonEspacePage({
+			isImpersonating: false,
+			siret: null,
+			userPhone: null,
+		});
 		const { container } = render(page);
 		expect(
 			screen.getByRole("heading", { level: 1, name: "SIRET manquant" }),
@@ -118,7 +125,11 @@ describe("MonEspacePage", () => {
 	});
 
 	it("renders MissingSiret without redirecting when siret is too short", async () => {
-		const page = await MonEspacePage({ siret: "1234", userPhone: null });
+		const page = await MonEspacePage({
+			isImpersonating: false,
+			siret: "1234",
+			userPhone: null,
+		});
 		const { container } = render(page);
 		expect(
 			screen.getByRole("heading", { level: 1, name: "SIRET manquant" }),
@@ -128,6 +139,7 @@ describe("MonEspacePage", () => {
 
 	it("renders company declarations for valid siret", async () => {
 		const page = await MonEspacePage({
+			isImpersonating: false,
 			siret: "12345678901234",
 			userPhone: "0612345678",
 		});
@@ -140,6 +152,7 @@ describe("MonEspacePage", () => {
 
 	it("passes userPhone to CompanyDeclarationsPage", async () => {
 		const page = await MonEspacePage({
+			isImpersonating: false,
 			siret: "12345678901234",
 			userPhone: null,
 		});
@@ -149,6 +162,7 @@ describe("MonEspacePage", () => {
 
 	it("does not render the lock alert when the declaration is unlocked", async () => {
 		const page = await MonEspacePage({
+			isImpersonating: false,
 			siret: "12345678901234",
 			userPhone: "0612345678",
 		});
@@ -166,6 +180,7 @@ describe("MonEspacePage", () => {
 			},
 		});
 		const page = await MonEspacePage({
+			isImpersonating: false,
 			siret: "12345678901234",
 			userPhone: "0612345678",
 		});

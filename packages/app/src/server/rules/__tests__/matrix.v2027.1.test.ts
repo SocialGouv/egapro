@@ -3,6 +3,7 @@ import type { Facts } from "../engine";
 import {
 	_resetCacheForTests,
 	applyAction,
+	canApplyAction,
 	loadRules,
 	NoMatchingTransitionError,
 } from "../engine";
@@ -529,5 +530,181 @@ describe("events shape", () => {
 		});
 		const result = applyAction(facts, "choose_compliance_path", rules);
 		expect(result.events[0]).toMatchObject({ round: 2 });
+	});
+});
+
+describe("submit_formal_notice_joint_evaluation — joint evaluation after a formal notice", () => {
+	const ACTION = "submit_formal_notice_joint_evaluation";
+
+	function closed(overrides: Partial<Facts>): Facts {
+		return base("demarche_completed", {
+			cseRequired: true,
+			firstDeclarationPathChoice: null,
+			secondDeclarationPathChoice: null,
+			firstDeclarationGapCseOpinion: null,
+			secondDeclarationGapCseOpinion: null,
+			...overrides,
+		});
+	}
+
+	const JUSTIFIED_WITH_UNFAVORABLE_GAP_OPINION: Partial<Facts> = {
+		firstDeclarationPathChoice: "justify",
+		firstDeclarationGapCseOpinion: "unfavorable",
+	};
+
+	const EXPOSED: Array<[string, Partial<Facts>]> = [
+		[
+			"justify round 1 with an unfavorable gap opinion",
+			JUSTIFIED_WITH_UNFAVORABLE_GAP_OPINION,
+		],
+		[
+			"justify round 1 without CSE",
+			{ cseRequired: false, firstDeclarationPathChoice: "justify" },
+		],
+		[
+			"corrective round 1 then justify round 2 with an unfavorable round 2 gap opinion",
+			{
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: "justify",
+				secondDeclarationGapCseOpinion: "unfavorable",
+			},
+		],
+		[
+			"corrective round 1 then justify round 2 without CSE",
+			{
+				cseRequired: false,
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: "justify",
+			},
+		],
+	];
+
+	const NOT_EXPOSED: Array<[string, Partial<Facts>]> = [
+		[
+			"justify round 1 with a favorable gap opinion",
+			{
+				firstDeclarationPathChoice: "justify",
+				firstDeclarationGapCseOpinion: "favorable",
+			},
+		],
+		[
+			"justify round 1 with no gap opinion (only the accuracy opinion is unfavorable)",
+			{ firstDeclarationPathChoice: "justify" },
+		],
+		[
+			"justify round 2 with an unfavorable round 1 gap opinion but a favorable round 2 one",
+			{
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: "justify",
+				firstDeclarationGapCseOpinion: "unfavorable",
+				secondDeclarationGapCseOpinion: "favorable",
+			},
+		],
+		[
+			"corrective action round 1, no revision yet, without CSE",
+			{ cseRequired: false, firstDeclarationPathChoice: "corrective_action" },
+		],
+		[
+			"joint evaluation round 1 without CSE",
+			{ cseRequired: false, firstDeclarationPathChoice: "joint_evaluation" },
+		],
+		[
+			"revised joint evaluation round 2 without CSE",
+			{
+				cseRequired: false,
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: "joint_evaluation",
+			},
+		],
+		[
+			"revised joint evaluation round 2 with an unfavorable round 2 gap opinion",
+			{
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: "joint_evaluation",
+				secondDeclarationGapCseOpinion: "unfavorable",
+			},
+		],
+	];
+
+	it.each(
+		EXPOSED,
+	)("accepts %s and keeps the démarche closed with a single event", (_label, overrides) => {
+		const result = applyAction(closed(overrides), ACTION, rules);
+
+		expect(result).toEqual({
+			nextStatus: "demarche_completed",
+			events: [{ type: "formal_notice_joint_evaluation_submit" }],
+		});
+		expect(canApplyAction(closed(overrides), ACTION, rules)).toBe(true);
+	});
+
+	it.each(NOT_EXPOSED)("refuses %s", (_label, overrides) => {
+		expect(() => applyAction(closed(overrides), ACTION, rules)).toThrow(
+			NoMatchingTransitionError,
+		);
+		expect(canApplyAction(closed(overrides), ACTION, rules)).toBe(false);
+	});
+
+	it.each(
+		rules.states
+			.map((state) => state.id)
+			.filter((state) => state !== "demarche_completed"),
+	)("refuses an otherwise exposed démarche still in %s", (state) => {
+		const facts = {
+			...closed(JUSTIFIED_WITH_UNFAVORABLE_GAP_OPINION),
+			currentState: state,
+		};
+
+		expect(() => applyAction(facts, ACTION, rules)).toThrow(
+			NoMatchingTransitionError,
+		);
+		expect(canApplyAction(facts, ACTION, rules)).toBe(false);
+	});
+});
+
+describe("canApplyAction — same verdict as applyAction, without throwing", () => {
+	const actions = [
+		...new Set(rules.transitions.map((transition) => transition.action)),
+	];
+	const states = rules.states.map((state) => state.id);
+	const cases = states.flatMap((state) =>
+		actions.flatMap((action) =>
+			[true, false].map((cseRequired) => [state, action, cseRequired] as const),
+		),
+	);
+
+	it.each(
+		cases,
+	)("agrees with applyAction from %s on %s (cseRequired: %s)", (state, action, cseRequired) => {
+		const facts = base(state, {
+			cseRequired,
+			firstDeclarationPathChoice: "justify",
+			secondDeclarationPathChoice: null,
+			firstDeclarationGapCseOpinion: "unfavorable",
+			action: { path: "justify", stillHasGap: false },
+		});
+		let applies = true;
+		try {
+			applyAction(facts, action, rules);
+		} catch (error) {
+			expect(error).toBeInstanceOf(NoMatchingTransitionError);
+			applies = false;
+		}
+
+		expect(canApplyAction(facts, action, rules)).toBe(applies);
+	});
+
+	it("returns false for an unknown action instead of throwing", () => {
+		expect(canApplyAction(base("draft"), "unknown_action", rules)).toBe(false);
+	});
+
+	it("returns true when a transition matches", () => {
+		expect(
+			canApplyAction(
+				base("draft", { workforce: 60, gap: 2, hasCse: false }),
+				"submit",
+				rules,
+			),
+		).toBe(true);
 	});
 });

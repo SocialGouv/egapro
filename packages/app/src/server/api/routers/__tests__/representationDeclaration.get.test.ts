@@ -1,14 +1,17 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { REPRESENTATION_YEAR as YEAR } from "~/modules/declaration-representation/__tests__/fixtures";
+import { writeCampaignYearOverride } from "~/modules/domain";
 import {
 	buildSession,
 	CAMPAIGN_YEAR,
 	CLOSED_CAMPAIGN,
+	CLOSED_CAMPAIGN_YEAR,
 	createCaller,
 	createMockDb,
 	FRESH_ADMIN_MFA,
 	installRouterTestEnv,
+	OPEN_CAMPAIGN,
 	SIREN,
 	whereParams,
 } from "./representationDeclarationHarness";
@@ -36,7 +39,22 @@ describe("representationDeclarationRouter.get", () => {
 
 		const result = await createCaller(mock.db).get({ year: YEAR });
 
-		expect(result).toEqual({ declaration: row, campaignOpen: true });
+		expect(result).toEqual({
+			declaration: row,
+			campaignOpen: true,
+			declarationDeadline: OPEN_CAMPAIGN.declarationDeadline,
+		});
+	});
+
+	it("exposes the campaign's declaration deadline alongside the declaration", async () => {
+		mockGetRepresentationCampaign.mockResolvedValue(CLOSED_CAMPAIGN);
+		const mock = createMockDb([]);
+
+		const result = await createCaller(mock.db).get({ year: YEAR });
+
+		expect(result.declarationDeadline).toEqual(
+			CLOSED_CAMPAIGN.declarationDeadline,
+		);
 	});
 
 	it("returns no declaration when the company has not started one", async () => {
@@ -54,6 +72,16 @@ describe("representationDeclarationRouter.get", () => {
 		const result = await createCaller(mock.db).get({ year: YEAR });
 
 		expect(result.campaignOpen).toBe(false);
+	});
+
+	it("evaluates the campaign window under the pinned campaign year", async () => {
+		writeCampaignYearOverride(CLOSED_CAMPAIGN_YEAR);
+		mockGetRepresentationCampaign.mockResolvedValue(CLOSED_CAMPAIGN);
+		const mock = createMockDb([]);
+
+		const result = await createCaller(mock.db).get({ year: YEAR });
+
+		expect(result.campaignOpen).toBe(true);
 	});
 
 	it("resolves the campaign of the year following the declared year", async () => {

@@ -13,6 +13,7 @@ import {
 	getObligationWorkforce,
 	getReferenceYearFor,
 	isCseRequired,
+	isJointEvaluationFileTransmitted,
 	isPresumedSubjectToRepresentation,
 	isRepresentationNotSubject,
 	parseGipWorkforce,
@@ -43,6 +44,10 @@ import {
 	representationDeclarations,
 } from "~/server/db/schema";
 import { syncCseRequirement } from "~/server/services/cseRequirementSync";
+import {
+	isFormalNoticeAvailable,
+	loadGapCseOpinions,
+} from "~/server/services/formalNoticeExposure";
 import { fetchCseBySiren } from "~/server/services/suit";
 import { fetchCompanyBySiren } from "~/server/services/weez";
 
@@ -61,6 +66,7 @@ async function findUserCompany(db: DB, session: Session, siren: string) {
 			nafLabel: companies.nafLabel,
 			countryCode: companies.countryCode,
 			countryLabel: companies.countryLabel,
+			departmentLabel: companies.departmentLabel,
 			workforceEma: gipMdsData.workforceEma,
 			hasCse: companies.hasCse,
 		})
@@ -157,7 +163,10 @@ export const companyRouter = createTRPCRouter({
 						firstDeclarationPathChoice: declarations.firstDeclarationPathChoice,
 						secondDeclarationPathChoice:
 							declarations.secondDeclarationPathChoice,
+						secondDeclarationStep: declarations.secondDeclarationStep,
+						cseOpinionDraftUpdatedAt: declarations.cseOpinionDraftUpdatedAt,
 						cseRequired: declarations.cseRequired,
+						rulesVersion: declarations.rulesVersion,
 					})
 					.from(declarations)
 					.where(
@@ -168,7 +177,11 @@ export const companyRouter = createTRPCRouter({
 					)
 					.orderBy(desc(declarations.year)),
 				ctx.db
-					.select({ year: declarations.year })
+					.select({
+						declarationId: declarations.id,
+						year: declarations.year,
+						uploadedAt: files.uploadedAt,
+					})
 					.from(files)
 					.innerJoin(declarations, eq(files.declarationId, declarations.id))
 					.where(
@@ -186,6 +199,8 @@ export const companyRouter = createTRPCRouter({
 						declarationId: declarationStatusHistory.declarationId,
 						eventType: declarationStatusHistory.eventType,
 						round: declarationStatusHistory.round,
+						createdAt: declarationStatusHistory.createdAt,
+						value: declarationStatusHistory.value,
 					})
 					.from(declarationStatusHistory)
 					.innerJoin(
@@ -216,6 +231,10 @@ export const companyRouter = createTRPCRouter({
 					.limit(1),
 			]);
 
+			const gapOpinionsByDeclarationId = await loadGapCseOpinions(
+				ctx.db,
+				declarationRows.map((d) => d.id),
+			);
 			const yearsWithJointEval = new Set(jointEvalRows.map((r) => r.year));
 			const yearsWithPrefill = new Set(prefillRows.map((r) => r.year));
 			const eventsByDeclarationId = new Map<string, typeof eventRows>();
@@ -271,9 +290,35 @@ export const companyRouter = createTRPCRouter({
 					// Same clock as `currentYear`, so the deadline check agrees with the year guard.
 					now: getCurrentDate(),
 				});
-				const submissions = deriveSubsequentSubmissions(
-					eventsByDeclarationId.get(d.id) ?? [],
+				const declarationEvents = eventsByDeclarationId.get(d.id) ?? [];
+				const submissions = deriveSubsequentSubmissions(declarationEvents);
+				const latestJointSubmit = declarationEvents
+					.filter((event) => event.eventType === "joint_evaluation_submit")
+					.reduce<Date | null>(
+						(latest, event) =>
+							!latest || event.createdAt > latest ? event.createdAt : latest,
+						null,
+					);
+				const latestJointDeparture = declarationEvents
+					.filter(
+						(event) =>
+							event.eventType === "second_declaration_submit" ||
+							(event.eventType === "path_choice" &&
+								event.value !== "joint_evaluation"),
+					)
+					.reduce<Date | null>(
+						(latest, event) =>
+							!latest || event.createdAt > latest ? event.createdAt : latest,
+						null,
+					);
+				const activeJointFile = jointEvalRows.find(
+					(file) => file.declarationId === d.id,
 				);
+				const jointEvaluationViewAvailable = isJointEvaluationFileTransmitted({
+					fileUploadedAt: activeJointFile?.uploadedAt ?? null,
+					latestSubmitAt: latestJointSubmit,
+					latestDepartureAt: latestJointDeparture,
+				});
 				return {
 					type: "remuneration" as const,
 					year: d.year,
@@ -285,10 +330,25 @@ export const companyRouter = createTRPCRouter({
 					secondDeclarationPathChoice: d.secondDeclarationPathChoice,
 					hasSubmittedSecondDeclaration:
 						submissions.hasSubmittedSecondDeclaration,
+					secondDeclarationStep: d.secondDeclarationStep,
 					hasSubmittedJointEvaluation: submissions.hasSubmittedJointEvaluation,
 					hasSubmittedCseOpinion: submissions.hasSubmittedCseOpinion,
+					cseOpinionViewAvailable:
+						submissions.hasSubmittedCseOpinion && !d.cseOpinionDraftUpdatedAt,
+					jointEvaluationViewAvailable,
 					cseRequired: d.cseRequired,
 					hasJointEvaluationFile: yearsWithJointEval.has(d.year),
+					formalNoticeAvailable: isFormalNoticeAvailable(
+						d,
+						gapOpinionsByDeclarationId.get(d.id) ?? {
+							first: null,
+							second: null,
+						},
+					),
+					hasSubmittedFormalNoticeJointEvaluation: declarationEvents.some(
+						(event) =>
+							event.eventType === "formal_notice_joint_evaluation_submit",
+					),
 					hasPrefillData: yearsWithPrefill.has(d.year),
 					deadline: getDeclarationProcessStepDeadline(d.status, deadlines),
 					notSubject: false,
@@ -310,10 +370,13 @@ export const companyRouter = createTRPCRouter({
 					firstDeclarationPathChoice: null,
 					secondDeclarationPathChoice: null,
 					hasSubmittedSecondDeclaration: false,
+					secondDeclarationStep: null,
 					hasSubmittedJointEvaluation: false,
 					hasSubmittedCseOpinion: false,
 					cseRequired: false,
 					hasJointEvaluationFile: false,
+					formalNoticeAvailable: false,
+					hasSubmittedFormalNoticeJointEvaluation: false,
 					hasPrefillData: false,
 					// Representation deadlines come from `representationCampaign`.
 					deadline: null,

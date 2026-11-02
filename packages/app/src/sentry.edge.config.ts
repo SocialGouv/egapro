@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/nextjs";
+import { sentryPrivacyOptions } from "~/modules/observability";
 
 Sentry.init({
 	dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
@@ -10,4 +11,6 @@ Sentry.init({
 
 	// Enable Sentry whenever a DSN is configured (dev + prod)
 	enabled: !!process.env.NEXT_PUBLIC_SENTRY_DSN,
+
+	...sentryPrivacyOptions,
 });

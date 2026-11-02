@@ -5,10 +5,6 @@ import {
 	ADMIN_MFA_WINDOW_SECONDS,
 } from "~/modules/domain";
 
-// Orthogonal to the eIDAS scale — `eidas1-mfa` is eIDAS 1 *plus* a second
-// factor — so demanding it never raises the declarant journey's identity level.
-const ADMIN_STEP_UP_ACR = ADMIN_MFA_ACR_VALUES[0];
-
 // Single entry point for every admin step-up sign-in (menu, resume screen,
 // login button) — one path rather than three copies of the same params.
 // Attaching them client-side is not a security control: the server gates
@@ -22,7 +18,7 @@ export function triggerAdminStepUp(returnPath: string): void {
 			// `claims`, not `acr_values`: an essential claim is binding, a voluntary preference is not.
 			claims: JSON.stringify({
 				id_token: {
-					acr: { essential: true, value: ADMIN_STEP_UP_ACR },
+					acr: { essential: true, values: [...ADMIN_MFA_ACR_VALUES] },
 					auth_time: { essential: true },
 				},
 			}),

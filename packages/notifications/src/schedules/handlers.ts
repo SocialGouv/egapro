@@ -174,7 +174,7 @@ export async function handleDailyDeadlineReminders(
 			variantFor: () => "second",
 		});
 
-		// Rappel 3 — second declaration (J-30 / J-15 before 1er décembre).
+		// Rappel 3 — second declaration (J-30 / J-15 before 1er janvier N+1).
 		await runDeadlineReminder(totals, {
 			sql,
 			today,
@@ -210,7 +210,7 @@ export async function handleDailyDeadlineReminders(
 			variantFor: (offset) => `first-d${offset}`,
 		});
 
-		// Rappel 6 — joint evaluation round 2 (J-30 / J-15 before 1er mars N+1).
+		// Rappel 6 — joint evaluation round 2 (J-30 / J-15 before 1er janvier N+1).
 		await runDeadlineReminder(totals, {
 			sql,
 			today,

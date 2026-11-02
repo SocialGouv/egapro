@@ -15,10 +15,13 @@ const EMPTY_DECLARATION = {
 	firstDeclarationPathChoice: null,
 	secondDeclarationPathChoice: null,
 	hasSubmittedSecondDeclaration: false,
+	secondDeclarationStep: null,
 	hasSubmittedJointEvaluation: false,
 	hasSubmittedCseOpinion: false,
 	cseRequired: false,
 	hasJointEvaluationFile: false,
+	formalNoticeAvailable: false,
+	hasSubmittedFormalNoticeJointEvaluation: false,
 	hasPrefillData: false,
 	// `demarche_completed` (makeDbDeclaration's default fsmStatus) closes with no deadline.
 	deadline: null,

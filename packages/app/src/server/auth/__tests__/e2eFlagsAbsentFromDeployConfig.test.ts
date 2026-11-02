@@ -18,7 +18,11 @@ import { describe, expect, it } from "vitest";
 
 const KONTINUOUS_DIR = join(process.cwd(), "..", "..", ".kontinuous");
 
-const TEST_ONLY_FLAGS = ["EGAPRO_E2E_CLOCK", "EGAPRO_E2E_ADMIN_MFA"] as const;
+const TEST_ONLY_FLAGS = [
+	"EGAPRO_E2E_CLOCK",
+	"EGAPRO_E2E_ADMIN_MFA",
+	"EGAPRO_RECETTE_CAMPAIGN_YEAR",
+] as const;
 
 function collectFiles(dir: string): string[] {
 	return readdirSync(dir).flatMap((entry) => {

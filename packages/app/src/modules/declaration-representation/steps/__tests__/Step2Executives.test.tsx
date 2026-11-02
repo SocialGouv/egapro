@@ -81,6 +81,7 @@ function Harness({
 				setDraftValues,
 				step: STEP,
 				year,
+				declarationDeadline: new Date(2026, 2, 1),
 			}}
 		>
 			<Step2Executives />

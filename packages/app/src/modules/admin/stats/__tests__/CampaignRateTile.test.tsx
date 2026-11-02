@@ -54,12 +54,13 @@ describe("CampaignRateTile", () => {
 		).toHaveClass("fr-alert--error");
 	});
 
-	it("renders the tile with rate, subtitle and a positive badge against year-1", () => {
+	it("renders the tile with rate, both counts and a positive badge against year-1", () => {
 		mockQuery({
 			data: {
 				totalObligated: 5738,
-				totalSubmitted: 4213,
-				submissionRate: 73.4,
+				totalIndicatorsSubmitted: 4800,
+				totalDemarcheCompleted: 4213,
+				completionRate: 73.4,
 				previousYearRate: 71.3,
 			},
 		});
@@ -73,7 +74,14 @@ describe("CampaignRateTile", () => {
 		expect(screen.getByText(/73,4/)).toBeInTheDocument();
 		expect(
 			screen.getByText((content) =>
-				/4\s?213\s*\/\s*5\s?738\s+entreprises/.test(
+				/^4\s?800\s*\/\s*5\s?738 ont transmis leurs indicateurs$/.test(
+					content.replace(/\s/g, " "),
+				),
+			),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText((content) =>
+				/^4\s?213\s*\/\s*5\s?738 ont terminé leur démarche$/.test(
 					content.replace(/\s/g, " "),
 				),
 			),
@@ -88,8 +96,9 @@ describe("CampaignRateTile", () => {
 		mockQuery({
 			data: {
 				totalObligated: 100,
-				totalSubmitted: 50,
-				submissionRate: 50,
+				totalIndicatorsSubmitted: 50,
+				totalDemarcheCompleted: 50,
+				completionRate: 50,
 				previousYearRate: null,
 			},
 		});
@@ -104,8 +113,9 @@ describe("CampaignRateTile", () => {
 		mockQuery({
 			data: {
 				totalObligated: 0,
-				totalSubmitted: 0,
-				submissionRate: 0,
+				totalIndicatorsSubmitted: 0,
+				totalDemarcheCompleted: 0,
+				completionRate: 0,
 				previousYearRate: null,
 			},
 		});
@@ -114,7 +124,9 @@ describe("CampaignRateTile", () => {
 		expect(screen.getByText(/0,0/)).toBeInTheDocument();
 		expect(
 			screen.getByText((content) =>
-				/0\s*\/\s*0\s+entreprises/.test(content.replace(/\s/g, " ")),
+				/^0\s*\/\s*0 ont terminé leur démarche$/.test(
+					content.replace(/\s/g, " "),
+				),
 			),
 		).toBeInTheDocument();
 	});
@@ -131,8 +143,9 @@ describe("CampaignRateTile", () => {
 		mockQuery({
 			data: {
 				totalObligated: 10,
-				totalSubmitted: 5,
-				submissionRate: 50,
+				totalIndicatorsSubmitted: 5,
+				totalDemarcheCompleted: 5,
+				completionRate: 50,
 				previousYearRate: null,
 			},
 		});
@@ -149,8 +162,9 @@ describe("CampaignRateTile", () => {
 		mockQuery({
 			data: {
 				totalObligated: 10,
-				totalSubmitted: 5,
-				submissionRate: 50,
+				totalIndicatorsSubmitted: 5,
+				totalDemarcheCompleted: 5,
+				completionRate: 50,
 				previousYearRate: null,
 			},
 		});

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import {
+	AdminAccessDeniedPage,
 	AdminAccessPage,
 	sanitizeAdminReturnPath,
 } from "~/modules/admin/access";
@@ -34,6 +35,17 @@ export default async function Page({ searchParams }: PageProps) {
 		);
 	}
 	if (decision.type === "monEspace") redirect(MY_SPACE);
+	if (decision.type === "notPublicAgent") {
+		return (
+			<AdminAccessDeniedPage
+				organizationLabel={
+					session?.user.adminAccessRefusal?.organizationLabel ?? null
+				}
+				roles={session?.user.adminAccessRefusal?.roles ?? []}
+				siret={session?.user.siret ?? null}
+			/>
+		);
+	}
 	// Nothing left to resume: the agent goes straight where they were headed.
 	if (decision.type === "allow") redirect(runtimeRoute(returnPath));
 

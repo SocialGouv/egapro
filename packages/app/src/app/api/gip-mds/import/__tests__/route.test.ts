@@ -53,7 +53,9 @@ describe("POST /api/gip-mds/import", () => {
 
 		expect(response.status).toBe(401);
 		expect(mocks.fetchGipCsv).not.toHaveBeenCalled();
-		expect(errorSpy).toHaveBeenCalled();
+		expect(errorSpy).toHaveBeenCalledWith(
+			expect.stringContaining("EGAPRO_GIP_MDS_API_TOKEN"),
+		);
 	});
 
 	it("rejects a wrong bearer token", async () => {
@@ -65,6 +67,44 @@ describe("POST /api/gip-mds/import", () => {
 		const response = await POST(post({ authorization: "Bearer wrong" }));
 
 		expect(response.status).toBe(401);
+		expect(mocks.fetchGipCsv).not.toHaveBeenCalled();
+	});
+
+	it("refuses an empty configured token, even against an empty bearer", async () => {
+		const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+		const POST = await loadRoute({
+			EGAPRO_GIP_MDS_API_TOKEN: "",
+			EGAPRO_GIP_MDS_API_URL: "https://suit.example.com/gipmds/latest",
+		});
+
+		const response = await POST(post({ authorization: "Bearer " }));
+
+		expect(response.status).toBe(401);
+		expect(mocks.fetchGipCsv).not.toHaveBeenCalled();
+		expect(errorSpy).toHaveBeenCalledWith(
+			expect.stringContaining("EGAPRO_GIP_MDS_API_TOKEN"),
+		);
+		errorSpy.mockRestore();
+	});
+
+	it.each([
+		["an anonymous call", undefined],
+		["an empty bearer", "Bearer "],
+		["the raw token without scheme", "expected-token"],
+		["another scheme", "Basic expected-token"],
+		["a lowercase scheme", "bearer expected-token"],
+	])("rejects %s", async (_label, authorization) => {
+		const POST = await loadRoute({
+			EGAPRO_GIP_MDS_API_TOKEN: "expected-token",
+			EGAPRO_GIP_MDS_API_URL: "https://suit.example.com/gipmds/latest",
+		});
+
+		const response = await POST(
+			post(authorization === undefined ? {} : { authorization }),
+		);
+
+		expect(response.status).toBe(401);
+		await expect(response.json()).resolves.toEqual({ error: "Unauthorized" });
 		expect(mocks.fetchGipCsv).not.toHaveBeenCalled();
 	});
 

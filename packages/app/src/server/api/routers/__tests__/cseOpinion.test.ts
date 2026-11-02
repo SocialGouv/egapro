@@ -9,7 +9,25 @@ vi.mock("~/server/db", () => ({
 }));
 
 vi.mock("~/server/db/schema", () => ({
-	declarations: { id: "id", siren: "siren", year: "year" },
+	declarations: {
+		id: "id",
+		siren: "siren",
+		year: "year",
+		declarantId: "declarantId",
+	},
+	companies: { siren: "siren", name: "name" },
+	users: {
+		id: "id",
+		firstName: "firstName",
+		lastName: "lastName",
+		email: "email",
+		phone: "phone",
+	},
+	declarationStatusHistory: {
+		declarationId: "declarationId",
+		eventType: "eventType",
+		createdAt: "createdAt",
+	},
 	cseOpinions: {
 		id: "id",
 		declarationId: "declarationId",
@@ -50,6 +68,25 @@ vi.mock(
 	}),
 );
 
+const mockFindTransmittedCseOpinions = vi.fn();
+const mockFindTransmittedJointEvaluation = vi.fn();
+const mockAssembleCseOpinionRecap = vi.fn();
+
+vi.mock("~/server/api/routers/declarationHelpers", async (importOriginal) => ({
+	...(await importOriginal<
+		typeof import("~/server/api/routers/declarationHelpers")
+	>()),
+	findTransmittedCseOpinions: (...args: unknown[]) =>
+		mockFindTransmittedCseOpinions(...args),
+	findTransmittedJointEvaluation: (...args: unknown[]) =>
+		mockFindTransmittedJointEvaluation(...args),
+}));
+
+vi.mock("~/modules/declarationPdf/buildCseOpinionRecapData", () => ({
+	assembleCseOpinionRecap: (...args: unknown[]) =>
+		mockAssembleCseOpinionRecap(...args),
+}));
+
 const mockDeleteS3File = vi.fn();
 const mockGetFileSize = vi.fn();
 
@@ -66,27 +103,40 @@ const mockDeleteWhere = vi.fn();
 const mockInsert = vi.fn();
 const mockValues = vi.fn();
 const mockLimit = vi.fn();
+const mockOrderBy = vi.fn();
+const mockInnerJoin = vi.fn();
+const mockUpdate = vi.fn();
+const mockSet = vi.fn();
+const mockUpdateWhere = vi.fn();
 const mockTransaction = vi.fn();
 
 // Track select call order: 1st = declaration lookup, 2nd+ = procedure queries
 let selectCallCount = 0;
 
-function createMockDb(rows: unknown[] = []) {
+function createMockDb(rows: unknown[] = [], rowsBySelect?: unknown[][]) {
 	selectCallCount = 0;
 
 	// Declaration lookup: always returns a valid declaration
 	const declarationResult = [{ id: "decl-1" }];
 
+	const currentRows = () =>
+		rowsBySelect?.[selectCallCount - 1] ??
+		(selectCallCount <= 1 ? declarationResult : rows);
 	mockLimit.mockImplementation(() => {
 		// If this is the declaration lookup (first select chain), return declaration
 		// Otherwise return the test-specific rows
-		return Promise.resolve(selectCallCount <= 1 ? declarationResult : rows);
+		return Promise.resolve(currentRows());
 	});
 	mockWhere.mockImplementation(() => {
-		const result = selectCallCount <= 1 ? declarationResult : rows;
-		return Object.assign(Promise.resolve(result), { limit: mockLimit });
+		const result = currentRows();
+		return Object.assign(Promise.resolve(result), {
+			limit: mockLimit,
+			orderBy: mockOrderBy,
+		});
 	});
-	mockFrom.mockReturnValue({ where: mockWhere });
+	mockOrderBy.mockReturnValue({ limit: mockLimit });
+	mockInnerJoin.mockReturnValue({ innerJoin: mockInnerJoin, where: mockWhere });
+	mockFrom.mockReturnValue({ where: mockWhere, innerJoin: mockInnerJoin });
 	mockSelect.mockImplementation(() => {
 		selectCallCount++;
 		return { from: mockFrom };
@@ -94,15 +144,20 @@ function createMockDb(rows: unknown[] = []) {
 
 	mockDeleteWhere.mockResolvedValue(undefined);
 	mockDelete.mockReturnValue({ where: mockDeleteWhere });
+	mockUpdateWhere.mockResolvedValue(undefined);
+	mockSet.mockReturnValue({ where: mockUpdateWhere });
+	mockUpdate.mockReturnValue({ set: mockSet });
 
 	mockValues.mockResolvedValue(undefined);
 	mockInsert.mockReturnValue({ values: mockValues });
 
 	mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
 		fn({
+			execute: vi.fn().mockResolvedValue(undefined),
 			select: mockSelect,
 			delete: mockDelete,
 			insert: mockInsert,
+			update: mockUpdate,
 		}),
 	);
 
@@ -110,6 +165,7 @@ function createMockDb(rows: unknown[] = []) {
 		select: mockSelect,
 		delete: mockDelete,
 		insert: mockInsert,
+		update: mockUpdate,
 		transaction: mockTransaction,
 	} as unknown;
 }
@@ -186,6 +242,51 @@ describe("cseOpinionRouter", () => {
 			await expect(caller.get()).rejects.toThrow(
 				"SIRET manquant ou invalide dans la session",
 			);
+		});
+	});
+
+	describe("getSubmittedView", () => {
+		const transmitted = { year: 2027, submittedAt: new Date() };
+		const recap = { year: 2027, transmittedAt: "10/02/2027", files: [] };
+
+		it("refuses access when no unmodified transmission exists", async () => {
+			mockFindTransmittedCseOpinions.mockResolvedValue(null);
+			const caller = await createCaller(createMockDb());
+
+			await expect(caller.getSubmittedView()).rejects.toMatchObject({
+				code: "NOT_FOUND",
+			});
+			expect(mockFindTransmittedCseOpinions).toHaveBeenCalledWith(
+				expect.anything(),
+				"decl-1",
+			);
+			expect(mockAssembleCseOpinionRecap).not.toHaveBeenCalled();
+		});
+
+		it("returns the shared recap with the joint evaluation flag", async () => {
+			mockFindTransmittedCseOpinions.mockResolvedValue(transmitted);
+			mockAssembleCseOpinionRecap.mockResolvedValue(recap);
+			mockFindTransmittedJointEvaluation.mockResolvedValue({
+				submission: {},
+				file: {},
+			});
+			const caller = await createCaller(createMockDb());
+
+			const result = await caller.getSubmittedView();
+
+			expect(mockAssembleCseOpinionRecap).toHaveBeenCalledWith(transmitted);
+			expect(result).toEqual({ ...recap, hasSubmittedJointEvaluation: true });
+		});
+
+		it("does not offer a joint report without a transmitted one", async () => {
+			mockFindTransmittedCseOpinions.mockResolvedValue(transmitted);
+			mockAssembleCseOpinionRecap.mockResolvedValue(recap);
+			mockFindTransmittedJointEvaluation.mockResolvedValue(null);
+			const caller = await createCaller(createMockDb());
+
+			const result = await caller.getSubmittedView();
+
+			expect(result.hasSubmittedJointEvaluation).toBe(false);
 		});
 	});
 

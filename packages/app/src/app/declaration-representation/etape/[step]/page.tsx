@@ -47,9 +47,8 @@ export default async function RepresentationStepPage({
 	const campaignYear = getCurrentYear();
 	const year = getReferenceYearFor(campaignYear);
 
-	const { declaration, campaignOpen } = await api.representationDeclaration.get(
-		{ year },
-	);
+	const { declaration, campaignOpen, declarationDeadline } =
+		await api.representationDeclaration.get({ year });
 
 	if (!campaignOpen) {
 		if (step !== LAST_REPRESENTATION_STEP) {
@@ -68,6 +67,7 @@ export default async function RepresentationStepPage({
 		<StepPageClient
 			campaignOpen={campaignOpen}
 			campaignYear={campaignYear}
+			declarationDeadline={declarationDeadline}
 			initialDraft={representationDraftFromDeclaration(declaration, step)}
 			isSubmitted={declaration?.status === "submitted"}
 			step={step}

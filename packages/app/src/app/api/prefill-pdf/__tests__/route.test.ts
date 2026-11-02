@@ -29,7 +29,14 @@ vi.mock("~/server/db", () => ({
 }));
 
 vi.mock("~/server/db/schema", () => ({
-	companies: { siren: "siren", name: "name" },
+	companies: {
+		siren: "siren",
+		name: "name",
+		address: "address",
+		nafCode: "nafCode",
+		nafLabel: "nafLabel",
+		hasCse: "hasCse",
+	},
 	gipMdsData: { siren: "siren", year: "year" },
 }));
 
@@ -107,6 +114,34 @@ describe("GET /api/prefill-pdf", () => {
 
 		expect(mocks.PrefillPdfDocument).toHaveBeenCalledWith({
 			data: expect.objectContaining({ companyName: `Entreprise ${SIREN}` }),
+		});
+	});
+
+	it("projects the GIP row and the company details into the document", async () => {
+		mocks.limit
+			.mockResolvedValueOnce([
+				{ ...GIP_ROW, workforceEma: "250.00", womenCountAnnualGlobal: "120" },
+			])
+			.mockResolvedValueOnce([
+				{
+					name: "Société Démo",
+					address: "1 rue de la Démo, 75001 Paris",
+					nafCode: "62.02A",
+					nafLabel: "Conseil informatique",
+					hasCse: true,
+				},
+			]);
+
+		await GET(request());
+
+		expect(mocks.PrefillPdfDocument).toHaveBeenCalledWith({
+			data: expect.objectContaining({
+				address: "1 rue de la Démo, 75001 Paris",
+				naf: "62.02A - Conseil informatique",
+				cseDisplay: "Oui",
+				referencePeriod: "01/01/2025 - 31/12/2025",
+				totalWomen: 120,
+			}),
 		});
 	});
 

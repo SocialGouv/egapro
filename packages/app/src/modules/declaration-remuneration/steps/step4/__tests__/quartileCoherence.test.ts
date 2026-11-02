@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { QuartileTuple } from "~/modules/declaration-remuneration";
+import { coherenceErrorLabel } from "~/modules/declaration-remuneration/shared/coherenceErrorLabel";
 import {
 	type CoherenceError,
-	coherenceErrorLabel,
 	deriveCoherenceErrors,
 	type QuartileReferences,
 } from "../quartileCoherence";

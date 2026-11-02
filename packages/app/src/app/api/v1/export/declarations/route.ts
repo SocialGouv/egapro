@@ -4,6 +4,7 @@ import {
 	exportDeclarationsQuerySchema,
 	fetchCseFilesByDeclaration,
 	fetchCseOpinionsByDeclaration,
+	fetchFormalNoticeJointEvaluationFilesByDeclaration,
 	fetchIndicatorGByDeclaration,
 	fetchJointEvaluationFilesByDeclaration,
 	fetchSubmittedDeclarations,
@@ -79,13 +80,19 @@ async function apiExportDeclarationsHandler(
 
 		const declarationIds = rows.map((r) => r.declarationId);
 
-		const [indicatorGMap, cseMap, cseFilesMap, jointEvalFilesMap] =
-			await Promise.all([
-				fetchIndicatorGByDeclaration(declarationIds),
-				fetchCseOpinionsByDeclaration(declarationIds),
-				fetchCseFilesByDeclaration(declarationIds),
-				fetchJointEvaluationFilesByDeclaration(declarationIds),
-			]);
+		const [
+			indicatorGMap,
+			cseMap,
+			cseFilesMap,
+			jointEvalFilesMap,
+			formalNoticeJointEvalFilesMap,
+		] = await Promise.all([
+			fetchIndicatorGByDeclaration(declarationIds),
+			fetchCseOpinionsByDeclaration(declarationIds),
+			fetchCseFilesByDeclaration(declarationIds),
+			fetchJointEvaluationFilesByDeclaration(declarationIds),
+			fetchFormalNoticeJointEvaluationFilesByDeclaration(declarationIds),
+		]);
 
 		const data = rows.map((row) =>
 			assembleDeclaration(
@@ -94,6 +101,7 @@ async function apiExportDeclarationsHandler(
 				cseMap.get(row.declarationId) ?? [],
 				cseFilesMap.get(row.declarationId) ?? [],
 				jointEvalFilesMap.get(row.declarationId) ?? [],
+				formalNoticeJointEvalFilesMap.get(row.declarationId) ?? [],
 			),
 		);
 

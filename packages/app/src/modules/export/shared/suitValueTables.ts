@@ -355,6 +355,15 @@ export function buildSuitValueTablesPage(): SuitValueTablesPage {
 				types: ["joint_evaluation"],
 			}),
 			buildFileTypeTable({
+				field: "Fichier_evaluation_conjointe_mise_en_demeure.Type",
+				endpoint: DECLARATIONS_ENDPOINT,
+				description:
+					"Type du fichier d'évaluation conjointe déposé suite à mise en demeure.",
+				presence:
+					"Le bloc `Fichier_evaluation_conjointe_mise_en_demeure` est absent si aucun rapport n'a été déposé suite à mise en demeure.",
+				types: ["formal_notice_joint_evaluation"],
+			}),
+			buildFileTypeTable({
 				field: "files[].type",
 				endpoint: FILES_ENDPOINT,
 				description:

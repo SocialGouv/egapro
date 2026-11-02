@@ -79,6 +79,46 @@ describe("RecapitulatifPage", () => {
 		expect(screen.getByText("marie@acme.fr")).toBeInTheDocument();
 	});
 
+	it("shows the transmission date and the declaration's phone number", () => {
+		render(
+			<RecapitulatifPage
+				{...defaultProps()}
+				declarantPhone="01 02 03 04 05"
+				transmittedAt="10/01/2027"
+			/>,
+		);
+		expect(
+			screen.getByText("La déclaration a été transmise le 10/01/2027"),
+		).toBeInTheDocument();
+		expect(screen.getByText("Numéro de téléphone")).toBeInTheDocument();
+		expect(screen.getByText("01 02 03 04 05")).toBeInTheDocument();
+	});
+
+	it("shows NAF label and CSE only at the applicable workforce", () => {
+		const company = {
+			...defaultCompany(),
+			nafLabel: "Programmation informatique",
+			hasCse: false,
+		};
+		const { rerender } = render(
+			<RecapitulatifPage {...defaultProps()} company={company} />,
+		);
+		expect(
+			screen.getByText("6201Z — Programmation informatique"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText("Existence d’un CSE").parentElement,
+		).toHaveTextContent("Non");
+
+		rerender(
+			<RecapitulatifPage
+				{...defaultProps()}
+				company={{ ...company, gipWorkforce: 99 }}
+			/>,
+		);
+		expect(screen.queryByText("Existence d’un CSE")).not.toBeInTheDocument();
+	});
+
 	it("renders company info with all fields including workforce", () => {
 		render(<RecapitulatifPage {...defaultProps()} />);
 		expect(
@@ -139,7 +179,9 @@ describe("RecapitulatifPage", () => {
 				name: /Effectifs physiques pris en compte/,
 			}),
 		).toBeInTheDocument();
-		expect(screen.getByText("Nombre de salariés")).toBeInTheDocument();
+		expect(
+			screen.getByRole("columnheader", { name: "Base de rémunération" }),
+		).toBeInTheDocument();
 		// Workforce: 120 women + 130 men = 250 total. The same "250" also
 		// appears in the company info row, hence getAllByText.
 		expect(screen.getAllByText("250").length).toBeGreaterThanOrEqual(1);
@@ -187,7 +229,7 @@ describe("RecapitulatifPage", () => {
 		);
 
 		const categoryHeading = screen.queryByRole("heading", {
-			name: "Indicateur par catégories de salariés",
+			name: "Indicateur par catégorie d'emplois",
 		});
 		const categorySource = screen.queryByText(
 			/Source utilisée pour déterminer les catégories d.*emplois/,
@@ -218,7 +260,7 @@ describe("RecapitulatifPage", () => {
 
 		expect(
 			screen.queryByRole("heading", {
-				name: "Indicateur par catégories de salariés",
+				name: "Indicateur par catégorie d'emplois",
 			}),
 		).not.toBeInTheDocument();
 		expect(screen.queryByText(/Cadres/)).not.toBeInTheDocument();
@@ -257,6 +299,37 @@ describe("RecapitulatifPage", () => {
 		).toBeGreaterThanOrEqual(1);
 	});
 
+	it("shows absolute gaps with the favored sex in the transmitted recap", () => {
+		render(
+			<RecapitulatifPage
+				{...defaultProps()}
+				step2Data={{
+					...emptyStep2Data(),
+					indicatorAAnnualWomen: "110",
+					indicatorAAnnualMen: "100",
+					indicatorAHourlyWomen: "90",
+					indicatorAHourlyMen: "100",
+					indicatorCAnnualWomen: "100",
+					indicatorCAnnualMen: "100",
+				}}
+			/>,
+		);
+
+		const annual = screen.getAllByRole("rowheader", {
+			name: "Annuelle brute moyenne",
+		})[0]?.parentElement as HTMLElement;
+		const hourly = screen.getAllByRole("rowheader", {
+			name: "Horaire brute moyenne",
+		})[0]?.parentElement as HTMLElement;
+		expect(annual).toHaveTextContent("10,00 %");
+		expect(annual).toHaveTextContent("en faveur des femmes");
+		expect(annual).not.toHaveTextContent("-10,00 %");
+		expect(hourly).toHaveTextContent("10,00 %");
+		expect(hourly).toHaveTextContent("en faveur des hommes");
+		expect(screen.getByText("0,00 %")).toBeInTheDocument();
+		expect(screen.getAllByText("en faveur des femmes")).toHaveLength(1);
+	});
+
 	// The recap is a read-only surface: it must print the gap that was recorded
 	// and published, not a fresh recomputation that can drift from it.
 	it("shows the recorded GIP gap rather than recomputing it from the operands", () => {
@@ -277,6 +350,7 @@ describe("RecapitulatifPage", () => {
 		);
 
 		expect(screen.getByText("7,19 %")).toBeInTheDocument();
+		expect(screen.getByText("en faveur des hommes")).toBeInTheDocument();
 		expect(screen.queryByText("0,00 %")).not.toBeInTheDocument();
 	});
 
@@ -516,6 +590,24 @@ describe("RecapitulatifPage", () => {
 			/>,
 		);
 		expect(screen.queryByText("Code NAF")).not.toBeInTheDocument();
+	});
+
+	it("shows the foreign country instead of a raw street", () => {
+		render(
+			<RecapitulatifPage
+				{...defaultProps()}
+				company={{
+					...defaultCompany(),
+					countryCode: "99131",
+					countryLabel: "BELGIQUE",
+				}}
+			/>,
+		);
+		expect(screen.getByText("Pays")).toBeInTheDocument();
+		expect(screen.getByText("Belgique")).toBeInTheDocument();
+		expect(
+			screen.queryByText("1 rue de Paris, 75001 Paris"),
+		).not.toBeInTheDocument();
 	});
 
 	it("hides address when not available", () => {

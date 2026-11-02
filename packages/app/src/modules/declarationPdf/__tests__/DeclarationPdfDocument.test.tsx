@@ -91,9 +91,12 @@ vi.mock("../sections/CategorySection", async () => {
 	};
 });
 
-vi.mock("../sections/PayGapTable", async () => {
+vi.mock("../sections/PayGapTable", async (importOriginal) => {
 	const React = await import("react");
+	const actual =
+		await importOriginal<typeof import("../sections/PayGapTable")>();
 	return {
+		step2PayGapRows: actual.step2PayGapRows,
 		PayGapTable: () => {
 			mocks.payGapTable();
 			return React.createElement("div", { "data-testid": "pay-gap-table" });
@@ -111,6 +114,7 @@ function makeData(
 		year: 2026,
 		workforceYear: 2025,
 		isSecondDeclaration: false,
+		indicatorGRequired: true,
 		transmittedAt: "05/03/2026",
 		referencePeriod: "01/01/2025 - 31/12/2025",
 		declarant: {
@@ -194,7 +198,7 @@ describe("DeclarationPdfDocument", () => {
 		);
 		expect(
 			screen.getByText(
-				"Récapitulatif de la seconde déclaration des écarts de rémunération par catégories de salariés 2026",
+				"Récapitulatif de la seconde déclaration des écarts de rémunération par catégorie d'emplois 2026",
 			),
 		).toBeInTheDocument();
 
@@ -202,8 +206,22 @@ describe("DeclarationPdfDocument", () => {
 		expect(mocks.variablePaySection).not.toHaveBeenCalled();
 		expect(mocks.quartileSection).not.toHaveBeenCalled();
 		expect(mocks.payGapTable).not.toHaveBeenCalled();
-		// Categories are always rendered, in both variants.
 		expect(mocks.categorySection).toHaveBeenCalledTimes(1);
+	});
+
+	it.each([
+		{ variant: "initial", isSecondDeclaration: false },
+		{ variant: "correction", isSecondDeclaration: true },
+	])("omits the category section when indicator G is not required ($variant declaration)", ({
+		isSecondDeclaration,
+	}) => {
+		render(
+			<DeclarationPdfDocument
+				data={makeData({ isSecondDeclaration, indicatorGRequired: false })}
+			/>,
+		);
+		expect(mocks.categorySection).not.toHaveBeenCalled();
+		expect(screen.queryByTestId("category-section")).not.toBeInTheDocument();
 	});
 
 	it("renders a dash for the NAF cell when neither code nor label is present", () => {

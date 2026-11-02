@@ -72,6 +72,7 @@ const transmittedPdfData: TransmittedPdfData = {
 		fileName: "evaluation-conjointe.pdf",
 		uploadedAt: new Date(2026, 2, 1),
 	},
+	formalNoticeJointEvaluationFile: null,
 };
 
 describe("TransmittedPdfDocument", () => {
@@ -117,6 +118,38 @@ describe("TransmittedPdfDocument", () => {
 		expect(screen.getByText("evaluation-conjointe.pdf")).toBeInTheDocument();
 	});
 
+	it("omits the formal notice section when no such report was filed", () => {
+		render(<TransmittedPdfDocument data={transmittedPdfData} />);
+
+		expect(
+			screen.queryByText("Évaluation conjointe - mise en demeure"),
+		).not.toBeInTheDocument();
+	});
+
+	it("renders the formal notice report with its file name and deposit date", () => {
+		render(
+			<TransmittedPdfDocument
+				data={{
+					...transmittedPdfData,
+					opinions: [],
+					cseFiles: [],
+					jointEvaluationFile: null,
+					formalNoticeJointEvaluationFile: {
+						fileName: "mise-en-demeure.pdf",
+						uploadedAt: new Date(2027, 1, 12),
+					},
+				}}
+			/>,
+		);
+
+		expect(
+			screen.getByText("Évaluation conjointe - mise en demeure"),
+		).toBeInTheDocument();
+		expect(screen.getByText("mise-en-demeure.pdf")).toBeInTheDocument();
+		expect(screen.getByText("Déposé le 12 février 2027")).toBeInTheDocument();
+		expect(screen.getByText("Évaluation conjointe")).toBeInTheDocument();
+	});
+
 	it("renders the footer with generation date", () => {
 		render(<TransmittedPdfDocument data={transmittedPdfData} />);
 
@@ -135,6 +168,7 @@ describe("TransmittedPdfDocument", () => {
 			opinions: [],
 			cseFiles: [],
 			jointEvaluationFile: null,
+			formalNoticeJointEvaluationFile: null,
 		};
 
 		render(<TransmittedPdfDocument data={emptyData} />);

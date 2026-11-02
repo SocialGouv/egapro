@@ -22,12 +22,20 @@ spec:
               image: curlimages/curl:8.12.1
               securityContext:
                 runAsUser: 100
+              env:
+                - name: EGAPRO_EXPORT_API_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: export-api
+                      key: EGAPRO_EXPORT_API_TOKEN
               command:
                 - /bin/sh
                 - -c
                 - |
                   YEAR=$(date -u +%Y)
+                  printf 'Authorization: Bearer %s\n' "${EGAPRO_EXPORT_API_TOKEN}" | \
                   curl -X POST "http://app:3000/api/export/generate?year=${YEAR}" \
+                    -H @- \
                     --connect-timeout 10 \
                     --max-time 300 \
                     --fail \

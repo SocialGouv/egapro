@@ -5,12 +5,15 @@ import {
 	screen,
 	waitFor,
 } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { createRef } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const importMutate = vi.fn();
+const importReset = vi.fn();
 let mutationOnError: ((err: { message: string }) => void) | undefined;
 let mutationOnSuccess: (() => void) | undefined;
+let mutationPending = false;
 
 vi.mock("~/trpc/react", () => ({
 	api: {
@@ -22,7 +25,11 @@ vi.mock("~/trpc/react", () => ({
 				}) => {
 					mutationOnSuccess = opts?.onSuccess;
 					mutationOnError = opts?.onError;
-					return { mutate: importMutate, isPending: false };
+					return {
+						mutate: importMutate,
+						reset: importReset,
+						isPending: mutationPending,
+					};
 				},
 			},
 		},
@@ -35,14 +42,26 @@ function renderModal() {
 	const onClose = vi.fn();
 	const onSuccess = vi.fn();
 	const modalRef = createRef<HTMLDialogElement>();
-	render(
+	const view = render(
 		<ImportReferentsModal
 			modalRef={modalRef}
 			onClose={onClose}
 			onSuccess={onSuccess}
 		/>,
 	);
-	return { onClose, onSuccess };
+	return {
+		onClose,
+		onSuccess,
+		modalRef,
+		rerender: () =>
+			view.rerender(
+				<ImportReferentsModal
+					modalRef={modalRef}
+					onClose={onClose}
+					onSuccess={onSuccess}
+				/>,
+			),
+	};
 }
 
 function selectFile(name: string, content: string) {
@@ -59,6 +78,7 @@ describe("ImportReferentsModal", () => {
 		vi.clearAllMocks();
 		mutationOnError = undefined;
 		mutationOnSuccess = undefined;
+		mutationPending = false;
 	});
 
 	it("renders warning and title", () => {
@@ -103,6 +123,90 @@ describe("ImportReferentsModal", () => {
 		expect(importMutate).not.toHaveBeenCalled();
 	});
 
+	it("clears the selected file and error when cancelled", async () => {
+		const { onClose, modalRef } = renderModal();
+		const input = screen.getByLabelText(/Fichier JSON/, {
+			selector: "input",
+		}) as HTMLInputElement;
+		await userEvent.upload(
+			input,
+			new File(["not-json"], "bad.json", { type: "application/json" }),
+		);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Importer", hidden: true }),
+		);
+		await screen.findByText("Le fichier n'est pas un JSON valide.");
+
+		fireEvent.click(
+			screen.getByRole("button", { name: "Annuler", hidden: true }),
+		);
+		act(() => modalRef.current?.dispatchEvent(new Event("dsfr.conceal")));
+
+		expect(onClose).toHaveBeenCalledOnce();
+		expect(importReset).toHaveBeenCalledOnce();
+		expect(input.files).toHaveLength(0);
+		expect(
+			screen.queryByText("Le fichier n'est pas un JSON valide."),
+		).toBeNull();
+		expect(
+			screen.getByRole("button", { name: "Importer", hidden: true }),
+		).toBeDisabled();
+	});
+
+	it("clears the file and error after a DSFR conceal and reopen", async () => {
+		const { modalRef } = renderModal();
+		const input = screen.getByLabelText(/Fichier JSON/, {
+			selector: "input",
+		}) as HTMLInputElement;
+		await userEvent.upload(
+			input,
+			new File(["not-json"], "bad.json", { type: "application/json" }),
+		);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Importer", hidden: true }),
+		);
+		await screen.findByText("Le fichier n'est pas un JSON valide.");
+
+		act(() => modalRef.current?.dispatchEvent(new Event("dsfr.conceal")));
+
+		expect(input.files).toHaveLength(0);
+		expect(
+			screen.queryByText("Le fichier n'est pas un JSON valide."),
+		).toBeNull();
+		expect(
+			screen.getByRole("button", { name: "Importer", hidden: true }),
+		).toBeDisabled();
+	});
+
+	it("keeps an active import guarded after conceal and reopen", async () => {
+		const { modalRef, onClose, onSuccess, rerender } = renderModal();
+		selectFile(
+			"valid.json",
+			JSON.stringify([
+				{ region: "11", name: "Jean", type: "email", value: "jean@gouv.fr" },
+			]),
+		);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Importer", hidden: true }),
+		);
+		await waitFor(() => expect(importMutate).toHaveBeenCalledOnce());
+
+		mutationPending = true;
+		rerender();
+		act(() => modalRef.current?.dispatchEvent(new Event("dsfr.conceal")));
+		expect(importReset).not.toHaveBeenCalled();
+		expect(
+			screen.getByRole("button", { name: "Importer", hidden: true }),
+		).toBeDisabled();
+		expect(
+			screen.getByLabelText(/Fichier JSON/, { selector: "input" }),
+		).toBeDisabled();
+
+		act(() => mutationOnSuccess?.());
+		expect(onSuccess).toHaveBeenCalledOnce();
+		expect(onClose).not.toHaveBeenCalled();
+	});
+
 	it("calls the mutation when the payload is valid", async () => {
 		renderModal();
 		const valid = [
@@ -124,6 +228,24 @@ describe("ImportReferentsModal", () => {
 		await waitFor(() => {
 			expect(importMutate).toHaveBeenCalledTimes(1);
 		});
+	});
+
+	it("starts only one import on rapid consecutive clicks", async () => {
+		renderModal();
+		selectFile(
+			"valid.json",
+			JSON.stringify([
+				{ region: "11", name: "Jean", type: "email", value: "jean@gouv.fr" },
+			]),
+		);
+		const importButton = screen.getByRole("button", {
+			name: "Importer",
+			hidden: true,
+		});
+		fireEvent.click(importButton);
+		fireEvent.click(importButton);
+
+		await waitFor(() => expect(importMutate).toHaveBeenCalledOnce());
 	});
 
 	it("surfaces a server error through the mutation onError hook", () => {

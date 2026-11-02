@@ -206,42 +206,16 @@ describe("getPublicDeclarationsBySiren", () => {
 			workforceEma: null,
 		});
 	});
-});
 
-describe("getPublicDeclarationBySirenYear", () => {
-	it("returns the projected DTO for a released declaration", async () => {
-		setRows([makeRawRow({ year: 2024 })]);
-		const { getPublicDeclarationBySirenYear } = await importService();
+	it("drops the years whose public release date is not set", async () => {
+		setRows([
+			makeRawRow({ year: 2024 }),
+			makeRawRow({ year: 2023, publicDataReleaseDate: null }),
+		]);
+		const { getPublicDeclarationsBySiren } = await importService();
 
-		const result = await getPublicDeclarationBySirenYear("123456789", 2024);
+		const result = await getPublicDeclarationsBySiren("123456789");
 
-		expect(result).toMatchObject({ siren: "123456789", year: 2024 });
-	});
-
-	it("returns null when the declaration does not exist", async () => {
-		setRows([]);
-		const { getPublicDeclarationBySirenYear } = await importService();
-
-		const result = await getPublicDeclarationBySirenYear("123456789", 2024);
-
-		expect(result).toBeNull();
-	});
-
-	it("returns null when the declaration exists but is not yet released", async () => {
-		setRows([makeRawRow({ year: 2025, publicDataReleaseDate: FUTURE_DATE })]);
-		const { getPublicDeclarationBySirenYear } = await importService();
-
-		const result = await getPublicDeclarationBySirenYear("123456789", 2025);
-
-		expect(result).toBeNull();
-	});
-
-	it("returns null when the year has no release date set", async () => {
-		setRows([makeRawRow({ year: 2023, publicDataReleaseDate: null })]);
-		const { getPublicDeclarationBySirenYear } = await importService();
-
-		const result = await getPublicDeclarationBySirenYear("123456789", 2023);
-
-		expect(result).toBeNull();
+		expect(result.map((d) => d.year)).toEqual([2024]);
 	});
 });

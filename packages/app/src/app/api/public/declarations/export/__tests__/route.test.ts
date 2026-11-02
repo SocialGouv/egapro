@@ -1,3 +1,5 @@
+import { Readable } from "node:stream";
+import ExcelJS from "exceljs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	MAX_CONCURRENT_PUBLIC_EXPORTS,
@@ -5,13 +7,19 @@ import {
 	MAX_XLSX_EXPORT_ROWS,
 	PUBLIC_EXPORT_BUSY_MESSAGE,
 } from "~/modules/public-api";
+import { campaignDeadlines } from "~/server/db/schema";
 import { createFakeValkey } from "~/test/fakeValkey";
+
+const RELEASE_GATE_SENTINEL = "RELEASE_GATE_SENTINEL";
 
 const mocks = vi.hoisted(() => ({
 	dbSelect: vi.fn(),
 	logAction: vi.fn(),
+	publiclyReleasedCampaignCondition: vi.fn(() => "RELEASE_GATE_SENTINEL"),
+	innerJoinCalls: [] as unknown[][],
 	getValkey: vi.fn(),
 	queryLimit: vi.fn(),
+	queryWhere: vi.fn(),
 }));
 
 vi.mock("~/server/services/valkey", async () =>
@@ -20,6 +28,11 @@ vi.mock("~/server/services/valkey", async () =>
 
 vi.mock("~/server/db", () => ({
 	db: { select: mocks.dbSelect },
+}));
+
+vi.mock("~/server/db/publicReleaseConditions", () => ({
+	publiclyReleasedCampaignCondition: mocks.publiclyReleasedCampaignCondition,
+	releasedRepresentationCampaignJoin: vi.fn(),
 }));
 
 vi.mock("~/server/db/schema", () => ({
@@ -58,6 +71,7 @@ vi.mock("drizzle-orm", () => ({
 	inArray: (a: unknown, b: unknown) => ({ inArray: [a, b] }),
 	or: (...args: unknown[]) => ({ or: args }),
 	sql: (strings: TemplateStringsArray) => ({ sql: strings.join("") }),
+	ilike: (a: unknown, b: unknown) => ({ ilike: [a, b] }),
 }));
 
 vi.mock("~/server/audit/log", () => ({
@@ -65,6 +79,7 @@ vi.mock("~/server/audit/log", () => ({
 }));
 
 function setRows(rows: unknown[]) {
+	mocks.innerJoinCalls.length = 0;
 	const ordered = Object.assign(Promise.resolve(rows), {
 		limit: (count: number) => {
 			mocks.queryLimit(count);
@@ -74,9 +89,15 @@ function setRows(rows: unknown[]) {
 	const chain = {
 		from: () => chain,
 		$dynamic: () => chain,
-		innerJoin: () => chain,
+		innerJoin: (...args: unknown[]) => {
+			mocks.innerJoinCalls.push(args);
+			return chain;
+		},
 		leftJoin: () => chain,
-		where: () => chain,
+		where: (condition: unknown) => {
+			mocks.queryWhere(condition);
+			return chain;
+		},
 		orderBy: () => ordered,
 	};
 	mocks.dbSelect.mockReturnValue(chain);
@@ -229,7 +250,7 @@ describe("GET /api/public/declarations/export", () => {
 		const line = csv.split("\n")[1] ?? "";
 
 		const header = csv.split("\n")[0]?.split(";") ?? [];
-		const workforceIndex = header.indexOf('"workforceEma"');
+		const workforceIndex = header.indexOf('"Effectif_RCD"');
 		expect(line.split(";")[workforceIndex]).toBe('""');
 	});
 
@@ -241,7 +262,9 @@ describe("GET /api/public/declarations/export", () => {
 		const header = csv.split("\n")[0]?.split(";") ?? [];
 		const line = csv.split("\n")[1]?.split(";") ?? [];
 
-		expect(line[header.indexOf('"globalAnnualMeanGap"')]).toBe('"-0.0242"');
+		expect(line[header.indexOf('"Rem_globale_annuelle_moyenne_ecart"')]).toBe(
+			'"-0.0242"',
+		);
 	});
 
 	it("exposes no score, /100 index or indicator-G key in the JSON payload (S6)", async () => {
@@ -276,12 +299,140 @@ describe("GET /api/public/declarations/export", () => {
 
 		const csv = await response.text();
 		const lines = csv.split("\n");
-		expect(lines[0]).toContain('"city";"regionCode";"region"');
-		expect(lines[0]).toContain('"countryCode";"countryLabel"');
-		expect(lines[0]).toContain('"globalAnnualMeanGap"');
+		expect(lines[0]).toContain('"Adresse";"Region"');
+		expect(lines[0]).toContain('"Libelle_NAF";"Pays"');
+		expect(lines[0]).toContain('"Rem_globale_annuelle_moyenne_ecart"');
 		expect(lines).toHaveLength(2);
 		expect(lines[1]).toContain('"111222333"');
 		expect(lines[1]).toContain('"Alpha & Co"');
+	});
+
+	it("uses the annual filename and filters the requested declaration year", async () => {
+		setRows([buildRow({ year: 2027 })]);
+
+		const response = await callGet("?format=csv&year=2027");
+
+		expect(response.headers.get("Content-Disposition")).toBe(
+			'attachment; filename="Indicateurs_remuneration_2027.csv"',
+		);
+		expect(JSON.stringify(mocks.queryWhere.mock.calls)).toContain(
+			'"eq":["year",2027]',
+		);
+		expect((await response.text()).split("\n")[1]).toContain('"2027"');
+	});
+
+	it("keeps the generic filename for the multi-year CSV", async () => {
+		setRows([buildRow({ year: 2026 }), buildRow({ year: 2027 })]);
+
+		const response = await callGet("?format=csv");
+
+		expect(response.headers.get("Content-Disposition")).toBe(
+			'attachment; filename="index-egapro-remunerations.csv"',
+		);
+		const lines = (await response.text()).split("\n");
+		expect(lines).toHaveLength(3);
+		expect(lines[1]).toContain('"2026"');
+		expect(lines[2]).toContain('"2027"');
+	});
+
+	it("emits the complete ordered DGT CSV contract with aligned values", async () => {
+		const indicatorValues = Object.fromEntries(
+			NUMERIC_DECLARATION_FIELDS.map((field, index) => [
+				field,
+				String(index + 1),
+			]),
+		);
+		setRows([
+			buildRow({
+				...indicatorValues,
+				countryLabel: "Belgique",
+				totalWomen: 41,
+				totalMen: 42,
+			}),
+		]);
+
+		const response = await callGet("?format=csv");
+		const [headerLine, rowLine] = (await response.text()).split("\n");
+		const headers = headerLine?.split(";") ?? [];
+		const values = rowLine?.split(";") ?? [];
+
+		expect(headers).toEqual(
+			[
+				"Annee_declaration",
+				"SIREN",
+				"Raison_sociale",
+				"Adresse",
+				"Region",
+				"Code_departement",
+				"Departement",
+				"Code_NAF",
+				"Libelle_NAF",
+				"Pays",
+				"Effectif_RCD",
+				"Effectif_F_rem_annuelle_globale",
+				"Effectif_H_rem_annuelle_globale",
+				"Rem_globale_annuelle_moyenne_ecart",
+				"Rem_globale_annuelle_mediane_ecart",
+				"Taux_horaire_global_moyen_ecart",
+				"Taux_horaire_global_median_ecart",
+				"Rem_variable_annuelle_moyenne_ecart",
+				"Rem_variable_annuelle_mediane_ecart",
+				"Taux_horaire_variable_moyen_ecart",
+				"Taux_horaire_variable_median_ecart",
+				"Proportion_variable_F",
+				"Proportion_variable_H",
+				...Array.from(
+					{ length: 4 },
+					(_, index) =>
+						`Quartile${index + 1}_Rem_globale_annuelle_proportion_F`,
+				),
+				...Array.from(
+					{ length: 4 },
+					(_, index) =>
+						`Quartile${index + 1}_Rem_globale_annuelle_proportion_H`,
+				),
+				...Array.from(
+					{ length: 4 },
+					(_, index) => `Quartile${index + 1}_Taux_horaire_global_proportion_F`,
+				),
+				...Array.from(
+					{ length: 4 },
+					(_, index) => `Quartile${index + 1}_Taux_horaire_global_proportion_H`,
+				),
+			].map((header) => `"${header}"`),
+		);
+		expect(headers).toHaveLength(39);
+		expect(values).toHaveLength(headers.length);
+		expect(values[headers.indexOf('"Pays"')]).toBe('"Belgique"');
+		expect(values[headers.indexOf('"Effectif_F_rem_annuelle_globale"')]).toBe(
+			'"41"',
+		);
+		expect(values[headers.indexOf('"Effectif_H_rem_annuelle_globale"')]).toBe(
+			'"42"',
+		);
+		expect(values.slice(13)).toEqual(
+			NUMERIC_DECLARATION_FIELDS.map((_, index) => `"${index + 1}"`),
+		);
+	});
+
+	it("keeps masked identities distinct from an unknown country in the CSV", async () => {
+		setRows([
+			buildRow({
+				siren: "987654321",
+				statutDiffusion: "N",
+				countryLabel: "Belgique",
+			}),
+			buildRow({ siren: "123456789", countryLabel: null }),
+		]);
+
+		const response = await callGet("?format=csv");
+		const [headerLine, maskedLine, unknownLine] = (await response.text()).split(
+			"\n",
+		);
+		const countryIndex = headerLine?.split(";").indexOf('"Pays"') ?? -1;
+
+		expect(maskedLine?.split(";")[countryIndex]).toBe('"Non-diffusible"');
+		expect(unknownLine?.split(";")[countryIndex]).toBe('""');
 	});
 
 	it("accepts repeated facets and workforce brackets on filtered exports", async () => {
@@ -306,6 +457,27 @@ describe("GET /api/public/declarations/export", () => {
 			"index-egapro-remunerations.xlsx",
 		);
 		expect((await response.arrayBuffer()).byteLength).toBeGreaterThan(100);
+	});
+
+	it("keeps the existing technical headers in Excel", async () => {
+		setRows([buildRow({ countryCode: "BE", countryLabel: "Belgique" })]);
+
+		const response = await callGet("?format=xlsx&year=2027");
+		const workbook = new ExcelJS.Workbook();
+		await workbook.xlsx.read(
+			Readable.from([Buffer.from(await response.arrayBuffer())]),
+		);
+		const sheet = workbook.worksheets[0];
+
+		expect(response.headers.get("Content-Disposition")).toContain(
+			"index-egapro-remunerations.xlsx",
+		);
+		expect(sheet?.columnCount).toBe(42);
+		expect(sheet?.getRow(1).getCell(1).value).toBe("year");
+		expect(sheet?.getRow(1).getCell(5).value).toBe("city");
+		expect(sheet?.getRow(1).getCell(10).value).toBe("countryCode");
+		expect(sheet?.getRow(1).getCell(11).value).toBe("countryLabel");
+		expect(sheet?.getRow(1).getCell(17).value).toBe("globalAnnualMeanGap");
 	});
 
 	it("escapes double quotes in CSV fields and emits empty quotes for null values", async () => {
@@ -420,6 +592,26 @@ describe("GET /api/public/declarations/export", () => {
 		const response = await callGet(search);
 
 		expect(response.status).toBe(200);
+	});
+
+	it.each([
+		["no filter", ""],
+		[
+			"with filters",
+			"?format=csv&year=2023&q=alpha&region=11&naf=C&workforceRanges=1000%2B",
+		],
+	])("gates the campaign-deadline join on the public release condition (%s)", async (_label, search) => {
+		setRows([buildRow()]);
+
+		const response = await callGet(search);
+		expect(response.status).toBe(200);
+
+		const campaignJoinCall = mocks.innerJoinCalls.find(
+			([table]) => table === campaignDeadlines,
+		);
+		expect(campaignJoinCall).toBeDefined();
+		const joinCondition = campaignJoinCall?.[1] as { and: unknown[] };
+		expect(joinCondition.and).toContain(RELEASE_GATE_SENTINEL);
 	});
 
 	it.each([

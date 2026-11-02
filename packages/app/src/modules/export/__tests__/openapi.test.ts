@@ -579,9 +579,37 @@ describe("openApiSpec", () => {
 					"properties" in jointEvaluation &&
 					jointEvaluation.properties.Type.enum,
 			).toEqual(["joint_evaluation"]);
+			const formalNoticeJointEvaluation =
+				declarationSchema.properties.Fichier_evaluation_conjointe_mise_en_demeure.oneOf.find(
+					(v) => v.type === "object",
+				);
+			expect(
+				formalNoticeJointEvaluation &&
+					"properties" in formalNoticeJointEvaluation &&
+					formalNoticeJointEvaluation.properties.Type.enum,
+			).toEqual(["formal_notice_joint_evaluation"]);
 		});
 
-		it("lists both file types on the files endpoint", () => {
+		it("keeps the formal notice file block nullable and without Contenus", () => {
+			const variants =
+				declarationSchema.properties
+					.Fichier_evaluation_conjointe_mise_en_demeure.oneOf;
+			const objectVariant = variants.find((v) => v.type === "object");
+			expect(variants.find((v) => v.type === "null")).toBeDefined();
+			expect(
+				objectVariant &&
+					"properties" in objectVariant &&
+					Object.keys(objectVariant.properties),
+			).toEqual([
+				"Id",
+				"Type",
+				"Nom_fichier",
+				"Date_upload",
+				"URL_telechargement",
+			]);
+		});
+
+		it("lists every file type on the files endpoint", () => {
 			const filesSchema =
 				openApiSpec.paths["/api/v1/files"].get.responses["200"].content[
 					"application/json"
@@ -589,6 +617,7 @@ describe("openApiSpec", () => {
 			expect(filesSchema.properties.files.items.properties.type.enum).toEqual([
 				"cse_opinion",
 				"joint_evaluation",
+				"formal_notice_joint_evaluation",
 			]);
 		});
 	});

@@ -217,7 +217,25 @@ describe("listNextTransitions — scénarios normatifs du ruleset 2027.1", () =>
 				to: "demarche_completed",
 				residualGuard: null,
 			},
+			{
+				id: "submit_formal_notice_joint_evaluation",
+				action: "submit_formal_notice_joint_evaluation",
+				to: "demarche_completed",
+				residualGuard: { compute: "formalNoticeExposure" },
+			},
 		]);
+	});
+
+	it("demarche_completed : le dépôt suite à mise en demeure disparaît dès que les faits l'excluent", () => {
+		expect(
+			listNextTransitions(bundled, "demarche_completed", {
+				cseRequired: true,
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: "joint_evaluation",
+				firstDeclarationGapCseOpinion: null,
+				secondDeclarationGapCseOpinion: null,
+			}).map((transition) => transition.id),
+		).toEqual(["submit_cse_opinion"]);
 	});
 
 	it.each(

@@ -32,6 +32,7 @@ export default async function Page() {
 	return (
 		<HydrateClient>
 			<MonEspacePage
+				isImpersonating={Boolean(session.user.impersonation)}
 				siret={effectiveSiret}
 				userPhone={profile?.phone ?? null}
 			/>

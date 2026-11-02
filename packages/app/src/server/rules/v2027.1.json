@@ -91,6 +91,49 @@
 					]
 				}
 			]
+		},
+		"formalNoticeExposure": {
+			"any": [
+				{
+					"all": [
+						{
+							"fact": "firstDeclarationPathChoice",
+							"op": "==",
+							"value": "justify"
+						},
+						{ "fact": "secondDeclarationPathChoice", "op": "isNull" },
+						{
+							"any": [
+								{ "fact": "cseRequired", "op": "==", "value": false },
+								{
+									"fact": "firstDeclarationGapCseOpinion",
+									"op": "==",
+									"value": "unfavorable"
+								}
+							]
+						}
+					]
+				},
+				{
+					"all": [
+						{
+							"fact": "secondDeclarationPathChoice",
+							"op": "==",
+							"value": "justify"
+						},
+						{
+							"any": [
+								{ "fact": "cseRequired", "op": "==", "value": false },
+								{
+									"fact": "secondDeclarationGapCseOpinion",
+									"op": "==",
+									"value": "unfavorable"
+								}
+							]
+						}
+					]
+				}
+			]
 		}
 	},
 
@@ -291,6 +334,15 @@
 				{ "type": "cse_opinion_submit" },
 				{ "type": "demarche_complete" }
 			]
+		},
+
+		{
+			"id": "submit_formal_notice_joint_evaluation",
+			"from": ["demarche_completed"],
+			"action": "submit_formal_notice_joint_evaluation",
+			"guard": { "compute": "formalNoticeExposure" },
+			"to": "demarche_completed",
+			"events": [{ "type": "formal_notice_joint_evaluation_submit" }]
 		},
 
 		{

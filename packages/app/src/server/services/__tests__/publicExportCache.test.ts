@@ -65,24 +65,18 @@ describe("servePublicExport — unfiltered exports", () => {
 		expect(stored?.length).toBeLessThan(body.length / 10);
 	});
 
-	it("keeps the three unfiltered exports apart", async () => {
+	it("keeps the two unfiltered exports apart", async () => {
 		const valkey = createFakeValkey();
 		mocks.exportCacheClient.mockResolvedValue(valkey);
 		const { servePublicExport } = await import("../publicExportCache");
 
 		await servePublicExport("declarations:csv", inputOf(""), async () => "a");
 		await servePublicExport("declarations:json", inputOf(""), async () => "b");
-		await servePublicExport(
-			"representations:csv",
-			inputOf(""),
-			async () => "c",
-		);
 
 		expect([...valkey.store.keys()].sort((a, b) => a.localeCompare(b))).toEqual(
 			[
 				"public-export:v2:declarations:csv",
 				"public-export:v2:declarations:json",
-				"public-export:v2:representations:csv",
 			],
 		);
 	});

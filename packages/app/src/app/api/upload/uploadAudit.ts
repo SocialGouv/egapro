@@ -1,6 +1,9 @@
 import { z } from "zod";
 import type { AuditActionKey } from "~/modules/audit";
-import type { FlowType } from "~/modules/shared/uploadConfig";
+import {
+	type FlowType,
+	UPLOAD_FLOW_TYPES,
+} from "~/modules/shared/uploadConfig";
 import { logAction } from "~/server/audit/log";
 import type { RequestContext } from "~/server/audit/requestContext";
 import type { PipelineFailureReason } from "~/server/services/uploadPipeline";
@@ -14,6 +17,11 @@ export function mapFailureToHttp(reason: PipelineFailureReason): {
 			return { status: 403, errorMessage: "HTTP 403 declaration_not_found" };
 		case "max_files":
 			return { status: 400, errorMessage: "HTTP 400 max_files" };
+		case "formal_notice_unavailable":
+			return {
+				status: 403,
+				errorMessage: "HTTP 403 formal_notice_unavailable",
+			};
 		case "too_large":
 			return { status: 400, errorMessage: "HTTP 400 too_large" };
 		case "wrong_type":
@@ -52,7 +60,7 @@ function sanitizeUserText(value: string): string {
 const sanitizedUserString = z.string().transform(sanitizeUserText);
 
 export const uploadAuditMetadataSchema = z.object({
-	flowType: z.enum(["cse_opinion", "joint_evaluation"]),
+	flowType: z.enum(UPLOAD_FLOW_TYPES),
 	fileId: z.string().optional(),
 	fileName: sanitizedUserString.optional(),
 	virusName: sanitizedUserString.optional(),

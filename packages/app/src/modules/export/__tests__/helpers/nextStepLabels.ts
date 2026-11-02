@@ -11,3 +11,11 @@ export const STAGE_LABELS = {
 
 export const GAP_PERSISTS_CONDITION = "si l'écart persiste (≥ 5 %)";
 export const GAP_RESOLVED_CONDITION = "si l'écart est résorbé (< 5 %)";
+
+export const FORMAL_NOTICE_JOINT_EVALUATION_STEP = {
+	Identifiant_transition: "submit_formal_notice_joint_evaluation",
+	Action: "submit_formal_notice_joint_evaluation",
+	Etat_cible: "demarche_completed",
+	Libelle: STAGE_LABELS.completion,
+	Condition: "si formalNoticeExposure",
+} as const;

@@ -24,10 +24,15 @@ export type DbDeclaration = {
 	firstDeclarationPathChoice: CompliancePath | null;
 	secondDeclarationPathChoice: CompliancePath | null;
 	hasSubmittedSecondDeclaration: boolean;
+	secondDeclarationStep: number | null;
 	hasSubmittedJointEvaluation: boolean;
 	hasSubmittedCseOpinion: boolean;
+	cseOpinionViewAvailable?: boolean;
+	jointEvaluationViewAvailable?: boolean;
 	cseRequired: boolean;
 	hasJointEvaluationFile: boolean;
+	formalNoticeAvailable: boolean;
+	hasSubmittedFormalNoticeJointEvaluation: boolean;
 	hasPrefillData: boolean;
 	deadline: Date | null;
 	notSubject: boolean;
@@ -62,10 +67,16 @@ export function buildDeclarationList(
 				firstDeclarationPathChoice: existing.firstDeclarationPathChoice,
 				secondDeclarationPathChoice: existing.secondDeclarationPathChoice,
 				hasSubmittedSecondDeclaration: existing.hasSubmittedSecondDeclaration,
+				secondDeclarationStep: existing.secondDeclarationStep,
 				hasSubmittedJointEvaluation: existing.hasSubmittedJointEvaluation,
 				hasSubmittedCseOpinion: existing.hasSubmittedCseOpinion,
+				cseOpinionViewAvailable: existing.cseOpinionViewAvailable,
+				jointEvaluationViewAvailable: existing.jointEvaluationViewAvailable,
 				cseRequired: existing.cseRequired,
 				hasJointEvaluationFile: existing.hasJointEvaluationFile,
+				formalNoticeAvailable: existing.formalNoticeAvailable,
+				hasSubmittedFormalNoticeJointEvaluation:
+					existing.hasSubmittedFormalNoticeJointEvaluation,
 				hasPrefillData: existing.hasPrefillData,
 				deadline: existing.deadline,
 				notSubject: existing.notSubject,
@@ -82,10 +93,13 @@ export function buildDeclarationList(
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				hasSubmittedSecondDeclaration: false,
+				secondDeclarationStep: null,
 				hasSubmittedJointEvaluation: false,
 				hasSubmittedCseOpinion: false,
 				cseRequired: false,
 				hasJointEvaluationFile: false,
+				formalNoticeAvailable: false,
+				hasSubmittedFormalNoticeJointEvaluation: false,
 				hasPrefillData:
 					type === "remuneration" && yearsWithPrefill.has(currentYear),
 				deadline:
@@ -113,10 +127,16 @@ export function buildDeclarationList(
 			firstDeclarationPathChoice: d.firstDeclarationPathChoice,
 			secondDeclarationPathChoice: d.secondDeclarationPathChoice,
 			hasSubmittedSecondDeclaration: d.hasSubmittedSecondDeclaration,
+			secondDeclarationStep: d.secondDeclarationStep,
 			hasSubmittedJointEvaluation: d.hasSubmittedJointEvaluation,
 			hasSubmittedCseOpinion: d.hasSubmittedCseOpinion,
+			cseOpinionViewAvailable: d.cseOpinionViewAvailable,
+			jointEvaluationViewAvailable: d.jointEvaluationViewAvailable,
 			cseRequired: d.cseRequired,
 			hasJointEvaluationFile: d.hasJointEvaluationFile,
+			formalNoticeAvailable: d.formalNoticeAvailable,
+			hasSubmittedFormalNoticeJointEvaluation:
+				d.hasSubmittedFormalNoticeJointEvaluation,
 			hasPrefillData: d.hasPrefillData,
 			deadline: d.deadline,
 			notSubject: d.notSubject,

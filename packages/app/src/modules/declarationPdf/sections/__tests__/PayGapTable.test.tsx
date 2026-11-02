@@ -12,7 +12,9 @@ vi.mock("@react-pdf/renderer", async () => {
 	};
 });
 
-import { PayGapTable } from "../PayGapTable";
+import { emptyStep2Data } from "~/modules/declaration-remuneration/recapitulatif/__tests__/fixtures";
+import { noPayGapReferences } from "~/test/gipGapFixtures";
+import { PayGapTable, step2PayGapRows } from "../PayGapTable";
 
 describe("PayGapTable", () => {
 	it("renders the empty-state message when every row is blank", () => {
@@ -41,6 +43,25 @@ describe("PayGapTable", () => {
 		expect(screen.getByText("Seuil réglementaire : 5%")).toBeInTheDocument();
 		// (50000 - 45000) / 50000 * 100 = 10 %
 		expect(screen.getByText("10,00 %")).toBeInTheDocument();
+		expect(screen.getByText("en faveur des hommes")).toBeInTheDocument();
+	});
+
+	it("keeps the signed GIP reference when displayed amounts are equal", () => {
+		render(
+			<PayGapTable
+				rows={[
+					{
+						label: "Horaire brute moyenne",
+						women: "0.10",
+						men: "0.10",
+						reference: { women: "0.10", men: "0.10", gap: "-0.0719" },
+					},
+				]}
+			/>,
+		);
+		expect(screen.getByText("7,19 %")).toBeInTheDocument();
+		expect(screen.getByText("en faveur des femmes")).toBeInTheDocument();
+		expect(screen.getByText("ÉLEVÉ")).toBeInTheDocument();
 	});
 
 	it("badges a row whose gap reaches the threshold", () => {
@@ -51,5 +72,45 @@ describe("PayGapTable", () => {
 		);
 		// (24 - 22) / 24 * 100 = 8,3 %
 		expect(screen.getByText("ÉLEVÉ")).toBeInTheDocument();
+	});
+
+	it("renders the favored sex under an unsigned gap with the favoredSex variant", () => {
+		render(
+			<PayGapTable
+				gapVariant="favoredSex"
+				rows={[{ label: "Horaire brute moyenne", women: "24", men: "22" }]}
+			/>,
+		);
+		expect(screen.getByText("9,09 %")).toBeInTheDocument();
+		expect(screen.getByText("en faveur des femmes")).toBeInTheDocument();
+	});
+});
+
+describe("step2PayGapRows", () => {
+	it("lays out the four mean and median rows with their references", () => {
+		const step2Gaps = noPayGapReferences();
+		const rows = step2PayGapRows({
+			step2Data: {
+				...emptyStep2Data(),
+				indicatorAAnnualWomen: "1",
+				indicatorAHourlyMen: "2",
+				indicatorCAnnualWomen: "3",
+				indicatorCHourlyMen: "4",
+			},
+			step2Gaps,
+		});
+		expect(rows.map((row) => row.label)).toEqual([
+			"Annuelle brute moyenne",
+			"Horaire brute moyenne",
+			"Annuelle brute médiane",
+			"Horaire brute médiane",
+		]);
+		expect(rows.map((row) => [row.women, row.men])).toEqual([
+			["1", ""],
+			["", "2"],
+			["3", ""],
+			["", "4"],
+		]);
+		expect(rows.map((row) => row.reference)).toEqual(step2Gaps);
 	});
 });

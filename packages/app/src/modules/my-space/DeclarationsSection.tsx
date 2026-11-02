@@ -17,7 +17,11 @@ import {
 } from "./DocumentsPanel";
 import { RepresentationProcessPanel } from "./RepresentationProcessPanel";
 import { StatusBadge } from "./StatusBadge";
-import type { DeclarationItem, DeclarationType } from "./types";
+import type {
+	DeclarationItem,
+	DeclarationType,
+	LockHolderDisplay,
+} from "./types";
 
 const TYPE_LABELS: Record<DeclarationType, string> = {
 	remuneration: "Rémunération",
@@ -30,6 +34,8 @@ type Props = {
 	hasCse: boolean | null;
 	cseApplicable: boolean;
 	representationCampaign: RepresentationCampaign;
+	representationLockedByOther?: boolean;
+	representationLockHolder?: LockHolderDisplay | null;
 };
 
 function getDeadlineCell(
@@ -53,6 +59,8 @@ export function DeclarationsSection({
 	hasCse,
 	cseApplicable,
 	representationCampaign,
+	representationLockedByOther = false,
+	representationLockHolder = null,
 }: Props) {
 	const currentYear = getCurrentYear();
 	const currentYearDeclarations = declarations.filter(
@@ -155,6 +163,8 @@ export function DeclarationsSection({
 				campaign={representationCampaign}
 				campaignYear={currentYear}
 				declaration={currentRepresentationDeclaration}
+				lockedByOther={representationLockedByOther}
+				lockHolder={representationLockHolder}
 			/>
 		</div>
 	);

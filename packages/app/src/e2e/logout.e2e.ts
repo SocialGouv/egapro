@@ -7,7 +7,7 @@ test.describe("Logout flow", () => {
 		test.setTimeout(60_000);
 		await loginWithProConnect(page);
 
-		await page.getByRole("button", { name: "Mon espace" }).click();
+		await page.getByRole("button", { name: "Mon profil" }).click();
 		await page.getByRole("menuitem", { name: "Se déconnecter" }).click();
 
 		await page.waitForURL(/session\/end|oauth\/logout/, { timeout: 10_000 });

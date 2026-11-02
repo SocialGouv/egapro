@@ -148,6 +148,21 @@ describe("logAction", () => {
 		});
 	});
 
+	it("keeps the representation lock resource with its year and drops a composite id", async () => {
+		await logAction({
+			action: AUDIT_ACTIONS.DECLARATION_LOCK_ACQUIRED,
+			status: "success",
+			resourceType: "representation_declaration",
+			resourceId: "123456789:2025",
+			metadata: { year: 2025, siren: "123456789" },
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]).toMatchObject({
+			resourceType: "representation_declaration",
+			resourceId: null,
+			metadata: { year: 2025 },
+		});
+	});
+
 	it("rejects free text in attribution fields", async () => {
 		await logAction({
 			action: AUDIT_ACTIONS.AUTH_LOGIN,
@@ -191,14 +206,62 @@ describe("logAction", () => {
 		});
 	});
 
-	it("keeps the validated XLSX export format", async () => {
+	it("keeps the public export format in stdout without persisting it", async () => {
 		await logAction({
-			action: AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_EXPORT,
+			action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_EXPORT,
 			status: "success",
 			metadata: { format: "xlsx", search: "private@example.com" },
 		});
-		expect(mockInsertValues.mock.calls[0]?.[0]?.metadata).toEqual({
-			format: "xlsx",
+		expect(mockEmitActivityLog).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_EXPORT,
+				rawInput: { format: "xlsx", search: "private@example.com" },
+			}),
+		);
+		expect(mockInsertValues).not.toHaveBeenCalled();
+	});
+
+	it.each([
+		AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH,
+		AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW,
+		AUDIT_ACTIONS.PUBLIC_DECLARATIONS_EXPORT,
+	])("emits only stdout for public action %s on success and failure", async (action) => {
+		for (const status of ["success", "failure"] as const) {
+			await logAction({
+				action,
+				status,
+				ipAddress: "203.0.113.45",
+			});
+		}
+
+		expect(mockEmitActivityLog).toHaveBeenCalledTimes(2);
+		expect(mockEmitActivityLog.mock.calls.map(([entry]) => entry)).toEqual([
+			expect.objectContaining({
+				action,
+				status: "success",
+				ip: "203.0.113.45",
+			}),
+			expect.objectContaining({
+				action,
+				status: "failure",
+				ip: "203.0.113.45",
+			}),
+		]);
+		expect(mockInsertValues).not.toHaveBeenCalled();
+	});
+
+	it("keeps database auditing for a protected export", async () => {
+		await logAction({
+			action: AUDIT_ACTIONS.EXPORT_API_DECLARATIONS,
+			status: "success",
+			ipAddress: "203.0.113.45",
+		});
+
+		expect(mockEmitActivityLog).toHaveBeenCalledOnce();
+		expect(mockInsertValues).toHaveBeenCalledOnce();
+		expect(mockInsertValues.mock.calls[0]?.[0]).toMatchObject({
+			action: AUDIT_ACTIONS.EXPORT_API_DECLARATIONS,
+			ipAddress: "203.0.0.0",
 		});
 	});
 
@@ -207,11 +270,18 @@ describe("logAction", () => {
 			action: AUDIT_ACTIONS.CSE_OPINION_UPLOAD_FILE,
 			status: "failure",
 			errorMessage: "HTTP 422 virus_detected",
-			metadata: { s3Cleanup: "failed", virusName: "private" },
+			metadata: {
+				s3Cleanup: "failed",
+				virusName: "Win.Test.EICAR_HDB-1",
+				fileName: "avis-cse-societe-demo.pdf",
+			},
 		});
 		expect(mockInsertValues.mock.calls[0]?.[0]).toMatchObject({
 			errorMessage: "HTTP_422_virus_detected",
-			metadata: { s3Cleanup: "failed" },
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]?.metadata).toEqual({
+			s3Cleanup: "failed",
+			virusName: "Win.Test.EICAR_HDB-1",
 		});
 
 		await logAction({
@@ -223,6 +293,74 @@ describe("logAction", () => {
 		expect(mockInsertValues.mock.calls[1]?.[0]).toMatchObject({
 			errorMessage: "HTTP_403_impersonation_read_only",
 			metadata: null,
+		});
+	});
+
+	it("keeps the formal notice upload flow type and rejects an unknown one", async () => {
+		const fileId = "0c7f9d1e-6a4b-4d2e-9f3a-1b2c3d4e5f60";
+		await logAction({
+			action: AUDIT_ACTIONS.FORMAL_NOTICE_JOINT_EVALUATION_UPLOAD_FILE,
+			status: "success",
+			metadata: {
+				fileId,
+				flowType: "formal_notice_joint_evaluation",
+				fileName: "private.pdf",
+			},
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]).toMatchObject({
+			action: "formal_notice_joint_evaluation.upload_file",
+			category: "mutation",
+			metadata: { fileId, flowType: "formal_notice_joint_evaluation" },
+		});
+
+		await logAction({
+			action: AUDIT_ACTIONS.FORMAL_NOTICE_JOINT_EVALUATION_UPLOAD_FILE,
+			status: "failure",
+			metadata: { flowType: "formal_notice" },
+		});
+		expect(mockInsertValues.mock.calls[1]?.[0]?.metadata).toBeNull();
+	});
+
+	it("keeps the formal notice receipt type and kind of an enqueued notification", async () => {
+		await logAction({
+			action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
+			status: "success",
+			metadata: {
+				type: "formal_notice_joint_evaluation_submitted",
+				kind: "formalNoticeJointEvaluation",
+				year: 2027,
+				isResend: false,
+			},
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]?.metadata).toEqual({
+			type: "formal_notice_joint_evaluation_submitted",
+			kind: "formalNoticeJointEvaluation",
+			year: 2027,
+			isResend: false,
+		});
+
+		await logAction({
+			action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
+			status: "success",
+			metadata: { type: "formal_notice_submitted", kind: "formalNotice" },
+		});
+		expect(mockInsertValues.mock.calls[1]?.[0]?.metadata).toBeNull();
+	});
+
+	it.each([
+		["a free-text value", "Fichier de Société Démo"],
+		["an injected payload", "Eicar<script>"],
+		["an oversized value", `A${"x".repeat(255)}`],
+		["a non-string value", 42],
+	])("drops a virus signature that is %s", async (_label, virusName) => {
+		await logAction({
+			action: AUDIT_ACTIONS.JOINT_EVALUATION_UPLOAD_FILE,
+			status: "failure",
+			errorMessage: "HTTP 422 virus_detected",
+			metadata: { flowType: "joint_evaluation", virusName },
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]?.metadata).toEqual({
+			flowType: "joint_evaluation",
 		});
 	});
 
@@ -316,11 +454,13 @@ describe("logAction", () => {
 			status: "failure",
 			metadata: {
 				roles: ["private_role", "agent_public"],
+				granted: false,
 				publicAgentRequired: true,
 			},
 		});
 		expect(mockInsertValues.mock.calls[0]?.[0]?.metadata).toEqual({
 			roles: ["agent_public"],
+			granted: false,
 			publicAgentRequired: true,
 		});
 	});

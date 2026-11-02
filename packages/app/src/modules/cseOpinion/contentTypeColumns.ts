@@ -11,11 +11,11 @@ import type {
 
 const ACCURACY_DESCRIPTIONS: Record<DeclarationNumber, string> = {
 	1: "Exactitude des données et des méthodes de calcul de la déclaration de l'ensemble des indicateurs",
-	2: "Exactitude des données et des méthodes de calcul de la seconde déclaration de l'indicateur de rémunération par catégories de salariés",
+	2: "Exactitude des données et des méthodes de calcul de la seconde déclaration de l'indicateur de rémunération par catégorie d'emplois",
 };
 
 const GAP_DESCRIPTION =
-	"Justification des écarts ≥ 5 % par des critères objectifs et non sexistes de l'indicateur de rémunération par catégories de salariés";
+	"Justification des écarts ≥ 5 % par des critères objectifs et non sexistes de l'indicateur de rémunération par catégorie d'emplois";
 
 const TYPE_LABELS: Record<ContentType, string> = {
 	accuracy: "Exactitude",
@@ -41,15 +41,33 @@ export function buildColumnId(declarationNumber: number, type: string): string {
 	return `${declarationNumber}:${type}`;
 }
 
+export function getContentTypeDescription(
+	declarationNumber: DeclarationNumber,
+	type: ContentType,
+): string {
+	return type === "accuracy"
+		? ACCURACY_DESCRIPTIONS[declarationNumber]
+		: GAP_DESCRIPTION;
+}
+
+export function getContentTypeHeader(
+	declarationNumber: DeclarationNumber,
+	type: ContentType,
+	hasSecondDeclaration: boolean,
+): Pick<ContentTypeColumn, "label" | "declarationLabel"> {
+	return {
+		label: TYPE_LABELS[type],
+		declarationLabel: hasSecondDeclaration
+			? DECLARATION_LABELS[declarationNumber]
+			: null,
+	};
+}
+
 function buildColumn(
 	declarationNumber: DeclarationNumber,
 	type: ContentType,
 	hasSecondDeclaration: boolean,
 ): ContentTypeColumn {
-	const description =
-		type === "accuracy"
-			? ACCURACY_DESCRIPTIONS[declarationNumber]
-			: GAP_DESCRIPTION;
 	const declarationPart = hasSecondDeclaration
 		? ` de la ${DECLARATION_ORDINALS[declarationNumber]} déclaration`
 		: "";
@@ -58,11 +76,8 @@ function buildColumn(
 		id: buildColumnId(declarationNumber, type),
 		declarationNumber,
 		type,
-		label: TYPE_LABELS[type],
-		declarationLabel: hasSecondDeclaration
-			? DECLARATION_LABELS[declarationNumber]
-			: null,
-		description,
+		...getContentTypeHeader(declarationNumber, type, hasSecondDeclaration),
+		description: getContentTypeDescription(declarationNumber, type),
 		missingMessage: `Ajoutez l'avis ${TYPE_ERROR_PHRASES[type]}${declarationPart}, ou indiquez s'il est déjà inclus dans l'un des fichiers déposés.`,
 	};
 }
@@ -155,6 +170,19 @@ export function getUnassociatedFiles<T extends { id: string }>(
 		Object.values(map).filter((fileId): fileId is string => fileId !== null),
 	);
 	return files.filter((file) => !associatedFileIds.has(file.id));
+}
+
+// One required column caps the upload at one file, so the pairing is not a choice.
+export function getSingleChoiceAssociation(
+	columns: ContentTypeColumn[],
+	files: { id: string }[],
+): { columnId: string; fileId: string } | null {
+	const [column] = columns;
+	const [file] = files;
+	if (columns.length !== 1 || files.length !== 1 || !column || !file) {
+		return null;
+	}
+	return { columnId: column.id, fileId: file.id };
 }
 
 export function clearFileAssociations(

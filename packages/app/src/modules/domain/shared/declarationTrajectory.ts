@@ -5,7 +5,8 @@ export type DeclarationEventType =
 	| "joint_evaluation_submit"
 	| "cse_opinion_submit"
 	| "cancel"
-	| "demarche_complete";
+	| "demarche_complete"
+	| "formal_notice_joint_evaluation_submit";
 
 export type DeclarationStatusEvent = {
 	eventType: DeclarationEventType;
@@ -92,6 +93,23 @@ export function getJointEvaluationSubmittedAt(
 		events,
 		(e) => e.eventType === "joint_evaluation_submit",
 	);
+}
+
+export type JointEvaluationTransmissionFacts = {
+	fileUploadedAt: Date | null;
+	latestSubmitAt: Date | null;
+	latestDepartureAt?: Date | null;
+};
+
+// A later round can replace the single report row before sending it again.
+export function isJointEvaluationFileTransmitted({
+	fileUploadedAt,
+	latestSubmitAt,
+	latestDepartureAt = null,
+}: JointEvaluationTransmissionFacts): boolean {
+	if (fileUploadedAt === null || latestSubmitAt === null) return false;
+	if (fileUploadedAt > latestSubmitAt) return false;
+	return latestDepartureAt === null || fileUploadedAt > latestDepartureAt;
 }
 
 export function getCseOpinionCompletedAt(

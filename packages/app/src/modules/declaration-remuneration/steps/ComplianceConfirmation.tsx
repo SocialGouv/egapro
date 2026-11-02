@@ -4,7 +4,9 @@ import {
 	buildRemunerationDocuments,
 	offersTransmittedElements,
 } from "~/modules/shared/demarcheDocuments";
+import { findTransmittedJointEvaluation } from "~/server/api/routers/declarationHelpers";
 import { auth } from "~/server/auth";
+import { db } from "~/server/db";
 import { api } from "~/trpc/server";
 
 export async function ComplianceConfirmation() {
@@ -13,6 +15,10 @@ export async function ComplianceConfirmation() {
 		api.declaration.getOrCreate(),
 	]);
 	const currentYear = data.declaration.year;
+	const transmittedJointEvaluation = await findTransmittedJointEvaluation(
+		db,
+		data.declaration.id,
+	);
 
 	return (
 		<DemarcheConfirmation
@@ -20,6 +26,7 @@ export async function ComplianceConfirmation() {
 				dataYear: getReferenceYearFor(currentYear),
 				hasSecondDeclaration: data.hasSubmittedSecondDeclaration,
 				hasTransmittedElements: offersTransmittedElements(data),
+				hasTransmittedJointEvaluation: transmittedJointEvaluation !== null,
 				year: currentYear,
 			})}
 			email={session?.user?.email ?? "adresse@exemple.fr"}

@@ -6,8 +6,6 @@ import { resolveAdminAccess } from "~/modules/domain";
 import {
 	ADMIN,
 	ADMIN_MFA_RESUME,
-	API_PUBLIC_DECLARATIONS,
-	API_SEARCH,
 	API_V1_FILES,
 	API_V1_PREFIX,
 	CSE_OPINION,
@@ -91,10 +89,6 @@ export async function middleware(request: NextRequest) {
 function route(request: NextRequest, forward: Forward) {
 	const { pathname } = request.nextUrl;
 
-	if (pathname === API_SEARCH) {
-		return searchRedirect(request);
-	}
-
 	if (pathname.startsWith(API_V1_PREFIX)) {
 		return gatewayMiddleware(request, forward);
 	}
@@ -112,14 +106,6 @@ function route(request: NextRequest, forward: Forward) {
 
 function isWithin(pathname: string, section: string) {
 	return pathname === section || pathname.startsWith(`${section}/`);
-}
-
-function searchRedirect(request: NextRequest) {
-	const target = new URL(API_PUBLIC_DECLARATIONS, request.url);
-	for (const [key, value] of request.nextUrl.searchParams.entries()) {
-		target.searchParams.append(key === "section_naf" ? "naf" : key, value);
-	}
-	return NextResponse.redirect(target, 308);
 }
 
 function redirectToLogin(request: NextRequest) {
@@ -153,6 +139,9 @@ async function adminMiddleware(request: NextRequest, forward: Forward) {
 			);
 			return NextResponse.redirect(resumeUrl);
 		}
+		// No deep link to carry back: a step-up would not change the roles ProConnect returned.
+		case "notPublicAgent":
+			return NextResponse.redirect(new URL(ADMIN_MFA_RESUME, request.url));
 		case "allow":
 			return noStore(forward());
 		default:

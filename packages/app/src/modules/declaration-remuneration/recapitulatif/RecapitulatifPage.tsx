@@ -1,8 +1,12 @@
 import Link from "next/link";
 import {
+	companyLocationRow,
 	formatWorkforceForUser,
+	getObligationWorkforce,
+	isCseRequired,
 	isIndicatorGRequiredForGip,
 } from "~/modules/domain";
+import { formatNafForDisplay } from "~/modules/my-space/formatNafForDisplay";
 import { MY_SPACE } from "~/modules/routes";
 import { FileFormatDetail } from "~/modules/shared";
 import common from "../shared/common.module.scss";
@@ -22,7 +26,12 @@ type CompanyInfo = {
 	name: string;
 	siren: string;
 	nafCode: string | null;
+	nafLabel?: string | null;
+	hasCse?: boolean | null;
 	address: string | null;
+	countryCode: string | null;
+	countryLabel: string | null;
+	departmentLabel: string | null;
 	gipWorkforce: number | null;
 };
 
@@ -32,6 +41,8 @@ type Props = {
 	referencePeriod: string;
 	declarantName: string;
 	declarantEmail: string;
+	declarantPhone?: string | null;
+	transmittedAt?: string | null;
 	isCorrection: boolean;
 	totalWomen: number | null;
 	totalMen: number | null;
@@ -81,6 +92,8 @@ export function RecapitulatifPage({
 	referencePeriod,
 	declarantName,
 	declarantEmail,
+	declarantPhone,
+	transmittedAt,
 	isCorrection,
 	totalWomen,
 	totalMen,
@@ -100,21 +113,45 @@ export function RecapitulatifPage({
 		declarantItems.push({ label: "Nom Prénom", value: declarantName });
 	}
 	declarantItems.push({ label: "Adresse email", value: declarantEmail });
+	declarantItems.push({
+		label: "Numéro de téléphone",
+		value: declarantPhone || "Non renseigné",
+	});
 
 	const companyItems: InfoItem[] = [
 		{ label: "Raison sociale", value: company.name },
 		{ label: "SIREN", value: company.siren },
 	];
-	if (company.address) {
-		companyItems.push({ label: "Adresse", value: company.address });
-	}
+	const location = companyLocationRow({
+		countryCode: company.countryCode ?? null,
+		countryLabel: company.countryLabel ?? null,
+		departmentLabel: company.departmentLabel ?? null,
+		domesticAddress: company.address,
+	});
+	if (location) companyItems.push(location);
 	if (company.nafCode) {
-		companyItems.push({ label: "Code NAF", value: company.nafCode });
+		companyItems.push({
+			label: "Code NAF",
+			value:
+				formatNafForDisplay(company.nafCode, company.nafLabel ?? null) ??
+				company.nafCode,
+		});
 	}
 	companyItems.push({
 		label: `Effectif annuel moyen en ${declarationYear}`,
 		value: formatWorkforceForUser(company.gipWorkforce),
 	});
+	if (isCseRequired(getObligationWorkforce(company.gipWorkforce))) {
+		companyItems.push({
+			label: "Existence d’un CSE",
+			value:
+				company.hasCse === null || company.hasCse === undefined
+					? "Non renseigné"
+					: company.hasCse
+						? "Oui"
+						: "Non",
+		});
+	}
 
 	const sourceLabel = step5Source ? formatCategorySource(step5Source) : null;
 
@@ -135,9 +172,14 @@ export function RecapitulatifPage({
 				<div className="fr-col">
 					<TitleTag className="fr-h4 fr-mb-0">
 						{isCorrection
-							? `Seconde déclaration des écarts de rémunération par catégories de salariés ${declarationYear}`
+							? `Seconde déclaration des écarts de rémunération par catégorie d'emplois ${declarationYear}`
 							: `Déclaration des indicateurs de rémunération ${declarationYear}`}
 					</TitleTag>
+					{transmittedAt && (
+						<p className="fr-text--sm fr-mb-0">
+							La déclaration a été transmise le {transmittedAt}
+						</p>
+					)}
 				</div>
 				<div className="fr-col-auto">
 					<a
@@ -188,7 +230,7 @@ export function RecapitulatifPage({
 			{indicatorGRequired && (
 				<section>
 					<h2 className={`fr-h6 fr-mb-3w ${styles.sectionHeading}`}>
-						Indicateur par catégories de salariés
+						Indicateur par catégorie d&apos;emplois
 					</h2>
 					{sourceLabel && (
 						<p className={`fr-mb-3w ${styles.sourceLine}`}>

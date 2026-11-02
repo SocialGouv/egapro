@@ -39,7 +39,7 @@ describe("getRepresentationCampaign", () => {
 		);
 		expect(campaign.campaignEndDate).toEqual(new Date("2027-12-31T00:00:00Z"));
 		expect(campaign.declarationDeadline).toEqual(
-			new Date("2027-03-01T00:00:00Z"),
+			new Date("2027-06-01T00:00:00Z"),
 		);
 	});
 

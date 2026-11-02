@@ -4,11 +4,9 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { env } from "~/env.js";
 import type { RepresentationDeclarationStatus } from "~/modules/domain";
 import {
-	getPublicRepresentationBySirenYear,
 	getPublicRepresentationsBySiren,
 	NON_DIFFUSIBLE_LABEL,
 	publicRepresentationDTOSchema,
-	searchPublicRepresentations,
 } from "~/modules/public-api";
 import { db } from "~/server/db";
 import {
@@ -175,10 +173,7 @@ describe("public representation services (real Postgres)", () => {
 				declarationRow({ siren: SIREN_DIFFUSIBLE, year: YEAR_RELEASED }),
 			]);
 
-		const dto = await getPublicRepresentationBySirenYear(
-			SIREN_DIFFUSIBLE,
-			YEAR_RELEASED,
-		);
+		const [dto] = await getPublicRepresentationsBySiren(SIREN_DIFFUSIBLE);
 
 		expect(() => publicRepresentationDTOSchema.parse(dto)).not.toThrow();
 		expect(dto).toMatchObject({
@@ -202,7 +197,7 @@ describe("public representation services (real Postgres)", () => {
 	it.each([
 		"draft",
 		"not_subject",
-	] as const)("excludes a %s declaration from all three read surfaces", async (status) => {
+	] as const)("excludes a %s declaration from the company history", async (status) => {
 		await db.insert(representationDeclarations).values([
 			declarationRow({
 				siren: SIREN_DIFFUSIBLE,
@@ -212,14 +207,10 @@ describe("public representation services (real Postgres)", () => {
 			declarationRow({ siren: SIREN_OTHER, year: YEAR_RELEASED }),
 		]);
 
-		const search = await searchPublicRepresentations({ limit: 10, offset: 0 });
-		expect(search.count).toBe(1);
-		expect(search.data.map((d) => d.siren)).toEqual([SIREN_OTHER]);
-
 		expect(await getPublicRepresentationsBySiren(SIREN_DIFFUSIBLE)).toEqual([]);
 		expect(
-			await getPublicRepresentationBySirenYear(SIREN_DIFFUSIBLE, YEAR_RELEASED),
-		).toBeNull();
+			(await getPublicRepresentationsBySiren(SIREN_OTHER)).map((d) => d.siren),
+		).toEqual([SIREN_OTHER]);
 	});
 
 	it("masks identity and location for a non-diffusible company but keeps the gaps (S27)", async () => {
@@ -227,10 +218,7 @@ describe("public representation services (real Postgres)", () => {
 			.insert(representationDeclarations)
 			.values([declarationRow({ siren: SIREN_HIDDEN, year: YEAR_RELEASED })]);
 
-		const dto = await getPublicRepresentationBySirenYear(
-			SIREN_HIDDEN,
-			YEAR_RELEASED,
-		);
+		const [dto] = await getPublicRepresentationsBySiren(SIREN_HIDDEN);
 
 		expect(dto).toMatchObject({
 			siren: SIREN_HIDDEN,
@@ -245,18 +233,6 @@ describe("public representation services (real Postgres)", () => {
 			executiveWomenPercent: 35.5,
 			memberWomenPercent: 42,
 		});
-	});
-
-	it("returns null for a year that carries no submitted declaration", async () => {
-		await db
-			.insert(representationDeclarations)
-			.values([
-				declarationRow({ siren: SIREN_DIFFUSIBLE, year: YEAR_RELEASED }),
-			]);
-
-		expect(
-			await getPublicRepresentationBySirenYear(SIREN_DIFFUSIBLE, YEAR_MIDDLE),
-		).toBeNull();
 	});
 
 	it("lists a siren's submitted declarations by descending year and honours the limit", async () => {
@@ -290,10 +266,7 @@ describe("public representation services (real Postgres)", () => {
 			}),
 		]);
 
-		const dto = await getPublicRepresentationBySirenYear(
-			SIREN_DIFFUSIBLE,
-			YEAR_RELEASED,
-		);
+		const [dto] = await getPublicRepresentationsBySiren(SIREN_DIFFUSIBLE);
 
 		expect(() => publicRepresentationDTOSchema.parse(dto)).not.toThrow();
 		expect(dto).toMatchObject({
@@ -305,99 +278,6 @@ describe("public representation services (real Postgres)", () => {
 		});
 	});
 
-	it("matches the q term against the company name and the siren", async () => {
-		await db
-			.insert(representationDeclarations)
-			.values([
-				declarationRow({ siren: SIREN_DIFFUSIBLE, year: YEAR_RELEASED }),
-				declarationRow({ siren: SIREN_OTHER, year: YEAR_RELEASED }),
-			]);
-
-		const byName = await searchPublicRepresentations({
-			q: "alpha",
-			limit: 10,
-			offset: 0,
-		});
-		expect(byName.data.map((d) => d.siren)).toEqual([SIREN_DIFFUSIBLE]);
-
-		const bySiren = await searchPublicRepresentations({
-			q: SIREN_OTHER,
-			limit: 10,
-			offset: 0,
-		});
-		expect(bySiren.data.map((d) => d.siren)).toEqual([SIREN_OTHER]);
-		expect(bySiren.data[0]?.name).toBe(NON_DIFFUSIBLE_LABEL);
-
-		const hiddenByName = await searchPublicRepresentations({
-			q: "beta",
-			limit: 10,
-			offset: 0,
-		});
-		expect(hiddenByName.data).toEqual([]);
-	});
-
-	it("filters the search by region, department, naf and year", async () => {
-		await db
-			.insert(representationDeclarations)
-			.values([
-				declarationRow({ siren: SIREN_DIFFUSIBLE, year: YEAR_RELEASED }),
-				declarationRow({ siren: SIREN_HIDDEN, year: YEAR_RELEASED }),
-				declarationRow({ siren: SIREN_OTHER, year: YEAR_MIDDLE }),
-			]);
-
-		const byRegion = await searchPublicRepresentations({
-			region: ["11"],
-			limit: 10,
-			offset: 0,
-		});
-		expect(byRegion.data.map((d) => d.siren)).toEqual([SIREN_DIFFUSIBLE]);
-
-		const byDepartement = await searchPublicRepresentations({
-			departement: ["69"],
-			limit: 10,
-			offset: 0,
-		});
-		expect(byDepartement.data).toEqual([]);
-
-		const byNaf = await searchPublicRepresentations({
-			naf: ["70.10Z"],
-			limit: 10,
-			offset: 0,
-		});
-		expect(byNaf.data).toEqual([]);
-
-		const byYear = await searchPublicRepresentations({
-			year: YEAR_MIDDLE,
-			limit: 10,
-			offset: 0,
-		});
-		expect(byYear.count).toBe(1);
-		expect(byYear.data.map((d) => d.siren)).toEqual([SIREN_OTHER]);
-	});
-
-	it("paginates with limit and offset while keeping the full count", async () => {
-		await db
-			.insert(representationDeclarations)
-			.values([
-				declarationRow({ siren: SIREN_DIFFUSIBLE, year: YEAR_RELEASED }),
-				declarationRow({ siren: SIREN_HIDDEN, year: YEAR_RELEASED }),
-				declarationRow({ siren: SIREN_OTHER, year: YEAR_RELEASED }),
-			]);
-
-		const firstPage = await searchPublicRepresentations({
-			limit: 2,
-			offset: 0,
-		});
-		expect(firstPage.count).toBe(3);
-		expect(firstPage.data).toHaveLength(2);
-
-		const secondPage = await searchPublicRepresentations({
-			limit: 2,
-			offset: 2,
-		});
-		expect(secondPage.count).toBe(3);
-		expect(secondPage.data).toHaveLength(1);
-	});
 	it("serves only the reference years whose campaign release date is reached", async () => {
 		await db
 			.insert(representationDeclarations)
@@ -409,16 +289,14 @@ describe("public representation services (real Postgres)", () => {
 				declarationRow({ siren: SIREN_DIFFUSIBLE, year: YEAR_NO_CAMPAIGN }),
 			]);
 
-		const search = await searchPublicRepresentations({ limit: 10, offset: 0 });
-
-		expect(search.count).toBe(2);
-		expect(search.data.map((d) => d.year)).toEqual([
-			YEAR_RELEASED_TODAY,
-			YEAR_RELEASED,
-		]);
+		expect(
+			(await getPublicRepresentationsBySiren(SIREN_DIFFUSIBLE)).map(
+				(d) => d.year,
+			),
+		).toEqual([YEAR_RELEASED_TODAY, YEAR_RELEASED]);
 	});
 
-	it("keeps the unreleased year out of the count and out of every page", async () => {
+	it("keeps the unreleased year out of a limited history", async () => {
 		await db
 			.insert(representationDeclarations)
 			.values([
@@ -428,14 +306,11 @@ describe("public representation services (real Postgres)", () => {
 				declarationRow({ siren: SIREN_DIFFUSIBLE, year: YEAR_FUTURE }),
 			]);
 
-		const years: number[] = [];
-		for (const offset of [0, 1, 2, 3]) {
-			const page = await searchPublicRepresentations({ limit: 1, offset });
-			expect(page.count).toBe(3);
-			years.push(...page.data.map((d) => d.year));
-		}
-
-		expect(years).toEqual([YEAR_RELEASED, YEAR_MIDDLE, YEAR_OLDEST]);
+		expect(
+			(await getPublicRepresentationsBySiren(SIREN_DIFFUSIBLE, 4)).map(
+				(d) => d.year,
+			),
+		).toEqual([YEAR_RELEASED, YEAR_MIDDLE, YEAR_OLDEST]);
 	});
 
 	it("limits the history to released years instead of returning nothing", async () => {
@@ -463,14 +338,12 @@ describe("public representation services (real Postgres)", () => {
 		["future", YEAR_FUTURE],
 		["null", YEAR_NULL_DATE],
 		["missing", YEAR_NO_CAMPAIGN],
-	] as const)("hides the detail of a submitted year whose campaign release date is %s", async (_label, year) => {
+	] as const)("hides a submitted year whose campaign release date is %s", async (_label, year) => {
 		await db
 			.insert(representationDeclarations)
 			.values([declarationRow({ siren: SIREN_DIFFUSIBLE, year })]);
 
-		expect(
-			await getPublicRepresentationBySirenYear(SIREN_DIFFUSIBLE, year),
-		).toBeNull();
+		expect(await getPublicRepresentationsBySiren(SIREN_DIFFUSIBLE)).toEqual([]);
 	});
 
 	it("reads the campaign of the reference year + 1, not the campaign of the reference year", async () => {
@@ -487,11 +360,6 @@ describe("public representation services (real Postgres)", () => {
 			}),
 		]);
 
-		expect(
-			await getPublicRepresentationBySirenYear(
-				SIREN_DIFFUSIBLE,
-				YEAR_JOIN_OFFSET_GUARD,
-			),
-		).toBeNull();
+		expect(await getPublicRepresentationsBySiren(SIREN_DIFFUSIBLE)).toEqual([]);
 	});
 });

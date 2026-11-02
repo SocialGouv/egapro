@@ -68,6 +68,29 @@ describe("MobileMenu", () => {
 		).toBeInTheDocument();
 	});
 
+	it("keeps help and user actions on mon espace without the main navigation", async () => {
+		vi.mocked(usePathname).mockReturnValue("/mon-espace");
+		mocks.auth.mockResolvedValue({
+			user: {
+				email: "jean.dupont@example.fr",
+				name: "Jean Dupont",
+				phone: null,
+			},
+		});
+
+		render(await MobileMenu());
+
+		expect(
+			screen.queryByRole("navigation", { name: "Menu principal" }),
+		).not.toBeInTheDocument();
+		expect(screen.getByRole("link", { name: "Aide" })).toBeInTheDocument();
+		expect(screen.getByText("Jean Dupont")).toBeInTheDocument();
+		expect(screen.getByText("jean.dupont@example.fr")).toBeInTheDocument();
+		expect(
+			screen.getByRole("link", { name: "Se déconnecter" }),
+		).toBeInTheDocument();
+	});
+
 	it("renders the fresh phone from the profile table, ignoring the stale JWT", async () => {
 		mocks.auth.mockResolvedValue({
 			user: {

@@ -278,11 +278,11 @@ function resolveChoiceRevision(
 	return revision?.reopens ?? storedState;
 }
 
-export function applyAction(
+function findMatchingTransition(
 	facts: Facts,
 	action: string,
 	rules: Rules,
-): { nextStatus: DeclarationFsmStatus; events: RuleEvent[] } {
+): Rules["transitions"][number] | undefined {
 	const computations = (rules.computations ?? {}) as Record<
 		string,
 		ComputationNode
@@ -295,25 +295,36 @@ export function applyAction(
 		computations,
 	);
 
-	for (const transition of rules.transitions) {
-		if (transition.action !== action) continue;
-		// `from` is DeclarationFsmStatus[]; `.some(===)` compares the wider `string` currentState without a cast.
-		if (currentState && !transition.from.some((from) => from === currentState))
-			continue;
+	return rules.transitions.find(
+		(transition) =>
+			transition.action === action &&
+			// `from` is DeclarationFsmStatus[]; `.some(===)` compares the wider `string` currentState without a cast.
+			(!currentState ||
+				transition.from.some((from) => from === currentState)) &&
+			matchesPayload(transition.matchPayload, facts) &&
+			(!transition.guard ||
+				evaluatePredicate(transition.guard, facts, computations, thresholds)),
+	);
+}
 
-		if (!matchesPayload(transition.matchPayload, facts)) continue;
-
-		if (
-			transition.guard &&
-			!evaluatePredicate(transition.guard, facts, computations, thresholds)
-		) {
-			continue;
-		}
-
-		return { nextStatus: transition.to, events: transition.events };
+export function applyAction(
+	facts: Facts,
+	action: string,
+	rules: Rules,
+): { nextStatus: DeclarationFsmStatus; events: RuleEvent[] } {
+	const transition = findMatchingTransition(facts, action, rules);
+	if (!transition) {
+		throw new NoMatchingTransitionError(readCurrentState(facts), action, facts);
 	}
+	return { nextStatus: transition.to, events: transition.events };
+}
 
-	throw new NoMatchingTransitionError(readCurrentState(facts), action, facts);
+export function canApplyAction(
+	facts: Facts,
+	action: string,
+	rules: Rules,
+): boolean {
+	return findMatchingTransition(facts, action, rules) !== undefined;
 }
 
 /** Evaluates a named computation of a ruleset against a facts object (parity locks between the versioned ruleset and the domain functions). */
