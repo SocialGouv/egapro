@@ -130,7 +130,7 @@ async function fillQuartileRow(
 	if (row.threshold !== undefined && row.ordinal !== "4e") {
 		await page
 			.getByRole("textbox", {
-				name: `Seuil maximum ${row.ordinal} quartile ${tableSuffix}`,
+				name: `Montants des tranches, maximum du ${row.ordinal} quartile ${tableSuffix}`,
 			})
 			.fill(row.threshold);
 	}
