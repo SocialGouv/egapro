@@ -7,6 +7,7 @@ import {
 	sumQuartileWorkforce,
 } from "~/modules/domain";
 import { type PdfStyles, styles } from "../recapPdfStyles";
+import { pdfTag } from "../tagging/pdfStructure";
 import { SectionBanner, SubTitle } from "./headings";
 import { Cell, Row, Table } from "./tableParts";
 import { QUARTILE_TABLE } from "./tableWidths";
@@ -45,7 +46,7 @@ function QuartileRow({
 	);
 	return (
 		<Row>
-			<Cell bold sheet={sheet} text={label} width={QUARTILE_TABLE.label} />
+			<Cell rowHeader sheet={sheet} text={label} width={QUARTILE_TABLE.label} />
 			<Cell
 				align="right"
 				sheet={sheet}
@@ -113,6 +114,7 @@ function QuartileTable({
 			<Row>
 				<Cell header sheet={sheet} width={QUARTILE_TABLE.label} />
 				<Cell
+					columnSpan={2}
 					header
 					sheet={sheet}
 					text={`Montants des tranches de rémunération ${trancheLabel}`}
@@ -155,7 +157,8 @@ function QuartileTable({
 			))}
 			<Row>
 				<Cell
-					bold
+					columnSpan={3}
+					rowHeader
 					sheet={sheet}
 					text="Tous les salariés"
 					width={QUARTILE_TABLE.span}
@@ -211,7 +214,7 @@ export function QuartileSection({
 	formatAmount?: typeof formatCurrency;
 }) {
 	return (
-		<View>
+		<View {...pdfTag("Sect")}>
 			<View wrap={false}>
 				<SectionBanner
 					sheet={sheet}

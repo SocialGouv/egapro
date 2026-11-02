@@ -15,6 +15,8 @@ import { PdfPageHeader } from "./sections/PdfPageHeader";
 import { QuartileSection } from "./sections/QuartileSection";
 import { VariablePaySection } from "./sections/VariablePaySection";
 import { WorkforceSection } from "./sections/WorkforceSection";
+import { pdfDocumentMetadata } from "./tagging/pdfDocumentMetadata";
+import { pdfHeading, pdfTag } from "./tagging/pdfStructure";
 import type { DeclarationPdfData } from "./types";
 
 type Props = {
@@ -37,7 +39,14 @@ export function DeclarationPdfDocument({ data }: Props) {
 	});
 
 	return (
-		<Document>
+		<Document
+			{...pdfDocumentMetadata({
+				title: buildTitle(data),
+				subject:
+					"Déclaration des indicateurs d'égalité professionnelle femmes-hommes",
+				siren: data.company.siren,
+			})}
+		>
 			<Page size="A4" style={styles.page} wrap>
 				<PdfPageHeader />
 				<PdfPageFooter
@@ -48,7 +57,9 @@ export function DeclarationPdfDocument({ data }: Props) {
 
 				<View style={styles.content}>
 					<View style={styles.titleBlock}>
-						<Text style={styles.title}>{buildTitle(data)}</Text>
+						<Text {...pdfHeading(1)} style={styles.title}>
+							{buildTitle(data)}
+						</Text>
 						<Text style={styles.titleDate}>
 							La déclaration a été transmise le {data.transmittedAt}
 						</Text>
@@ -88,7 +99,7 @@ export function DeclarationPdfDocument({ data }: Props) {
 					{!data.isSecondDeclaration && (
 						<>
 							<WorkforceSection data={data} />
-							<View wrap={false}>
+							<View {...pdfTag("Sect")} wrap={false}>
 								<SectionBanner title="Écart de rémunération" />
 								<PayGapTable rows={step2PayGapRows(data)} />
 							</View>

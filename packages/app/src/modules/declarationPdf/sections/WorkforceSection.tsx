@@ -5,6 +5,7 @@ import {
 } from "~/modules/declaration-remuneration/steps/step1/workforceRows";
 import { computeWorkforceTotal } from "~/modules/domain";
 import { type PdfStyles, styles } from "../recapPdfStyles";
+import { pdfTag } from "../tagging/pdfStructure";
 import { SectionBanner } from "./headings";
 import { Cell, Row, Table } from "./tableParts";
 import { PAY_TABLE } from "./tableWidths";
@@ -49,7 +50,7 @@ export function WorkforceSection({
 	];
 
 	return (
-		<View wrap={false}>
+		<View {...pdfTag("Sect")} wrap={false}>
 			<SectionBanner
 				sheet={sheet}
 				title="Effectifs physiques pris en compte pour le calcul des indicateurs"
@@ -73,7 +74,12 @@ export function WorkforceSection({
 				</Row>
 				{rows.map((row) => (
 					<Row key={row.label}>
-						<Cell bold sheet={sheet} text={row.label} width={PAY_TABLE.label} />
+						<Cell
+							rowHeader
+							sheet={sheet}
+							text={row.label}
+							width={PAY_TABLE.label}
+						/>
 						<Cell
 							align="right"
 							sheet={sheet}

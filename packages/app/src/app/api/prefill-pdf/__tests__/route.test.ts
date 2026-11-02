@@ -4,7 +4,7 @@ const mocks = vi.hoisted(() => ({
 	auth: vi.fn(),
 	logAction: vi.fn().mockResolvedValue(undefined),
 	limit: vi.fn(),
-	renderToBuffer: vi.fn(),
+	renderTaggedPdf: vi.fn(),
 	PrefillPdfDocument: vi.fn(),
 }));
 
@@ -12,8 +12,8 @@ vi.mock("~/server/auth", () => ({ auth: mocks.auth }));
 
 vi.mock("~/server/audit/log", () => ({ logAction: mocks.logAction }));
 
-vi.mock("@react-pdf/renderer", () => ({
-	renderToBuffer: mocks.renderToBuffer,
+vi.mock("~/modules/declarationPdf/tagging/renderTaggedPdf", () => ({
+	renderTaggedPdf: mocks.renderTaggedPdf,
 }));
 
 vi.mock("~/modules/declarationPdf/PrefillPdfDocument", () => ({
@@ -75,7 +75,7 @@ function prefilledCompany() {
 describe("GET /api/prefill-pdf", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		mocks.renderToBuffer.mockResolvedValue(PDF_BYTES);
+		mocks.renderTaggedPdf.mockResolvedValue(PDF_BYTES);
 		mocks.PrefillPdfDocument.mockReturnValue(DOCUMENT);
 		signedIn({ id: "user-1", email: "declarant@exemple.fr", siret: SIRET });
 	});
@@ -268,13 +268,13 @@ describe("GET /api/prefill-pdf", () => {
 		const response = await GET(request());
 
 		expect(response.status).toBe(404);
-		expect(mocks.renderToBuffer).not.toHaveBeenCalled();
+		expect(mocks.renderTaggedPdf).not.toHaveBeenCalled();
 	});
 
 	it("answers 500 when the document cannot be rendered", async () => {
 		vi.spyOn(console, "error").mockImplementation(() => undefined);
 		prefilledCompany();
-		mocks.renderToBuffer.mockRejectedValue(new Error("pdf worker died"));
+		mocks.renderTaggedPdf.mockRejectedValue(new Error("pdf worker died"));
 
 		const response = await GET(request());
 

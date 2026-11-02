@@ -4,7 +4,7 @@ const mocks = vi.hoisted(() => ({
 	auth: vi.fn(),
 	logAction: vi.fn().mockResolvedValue(undefined),
 	buildJointEvaluationRecapData: vi.fn(),
-	renderToBuffer: vi.fn(),
+	renderTaggedPdf: vi.fn(),
 	JointEvaluationPdfDocument: vi.fn(),
 }));
 
@@ -14,8 +14,8 @@ vi.mock("~/server/audit/log", () => ({ logAction: mocks.logAction }));
 
 vi.mock("~/server/db", () => ({ db: {} }));
 
-vi.mock("@react-pdf/renderer", () => ({
-	renderToBuffer: mocks.renderToBuffer,
+vi.mock("~/modules/declarationPdf/tagging/renderTaggedPdf", () => ({
+	renderTaggedPdf: mocks.renderTaggedPdf,
 }));
 
 vi.mock("~/modules/declarationPdf/JointEvaluationPdfDocument", () => ({
@@ -54,7 +54,7 @@ function auditRow(): Record<string, unknown> {
 describe("/api/joint-evaluation-pdf", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		mocks.renderToBuffer.mockResolvedValue(PDF_BYTES);
+		mocks.renderTaggedPdf.mockResolvedValue(PDF_BYTES);
 		mocks.JointEvaluationPdfDocument.mockReturnValue(DOCUMENT);
 		mocks.buildJointEvaluationRecapData.mockImplementation(
 			async (_siren: string, year: number) => ({ year, marker: "recap" }),
@@ -79,7 +79,7 @@ describe("/api/joint-evaluation-pdf", () => {
 				SIREN,
 				YEAR,
 			);
-			expect(mocks.renderToBuffer).toHaveBeenCalledWith(DOCUMENT);
+			expect(mocks.renderTaggedPdf).toHaveBeenCalledWith(DOCUMENT);
 		});
 
 		it("falls back on the current year when none is requested", async () => {
@@ -108,7 +108,7 @@ describe("/api/joint-evaluation-pdf", () => {
 			const response = await GET(request());
 
 			expect(response.status).toBe(404);
-			expect(mocks.renderToBuffer).not.toHaveBeenCalled();
+			expect(mocks.renderTaggedPdf).not.toHaveBeenCalled();
 		});
 
 		it("answers 401 without a siren in session", async () => {
@@ -166,14 +166,14 @@ describe("/api/joint-evaluation-pdf", () => {
 
 		it("reuses the size cached by a previous download", async () => {
 			await GET(request(`?year=${YEAR + 2}`));
-			mocks.renderToBuffer.mockClear();
+			mocks.renderTaggedPdf.mockClear();
 
 			const response = await HEAD(request(`?year=${YEAR + 2}`, "HEAD"));
 
 			expect(response.headers.get("Content-Length")).toBe(
 				String(PDF_BYTES.byteLength),
 			);
-			expect(mocks.renderToBuffer).not.toHaveBeenCalled();
+			expect(mocks.renderTaggedPdf).not.toHaveBeenCalled();
 		});
 
 		it("mirrors the GET status without a body when the recap is unavailable", async () => {
@@ -189,7 +189,7 @@ describe("/api/joint-evaluation-pdf", () => {
 
 		it("answers 500 without a body when the probe fails", async () => {
 			vi.spyOn(console, "error").mockImplementation(() => undefined);
-			mocks.renderToBuffer.mockRejectedValue(new Error("pdf worker died"));
+			mocks.renderTaggedPdf.mockRejectedValue(new Error("pdf worker died"));
 
 			const response = await HEAD(request(`?year=${YEAR + 3}`, "HEAD"));
 

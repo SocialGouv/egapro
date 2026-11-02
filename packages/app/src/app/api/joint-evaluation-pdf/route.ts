@@ -1,4 +1,3 @@
-import { renderToBuffer } from "@react-pdf/renderer";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import {
 	buildJointEvaluationRecapData,
@@ -7,6 +6,7 @@ import {
 } from "~/modules/declarationPdf/buildJointEvaluationRecapData";
 import { JointEvaluationPdfDocument } from "~/modules/declarationPdf/JointEvaluationPdfDocument";
 import { jointEvaluationPdfFilename } from "~/modules/declarationPdf/jointEvaluationPdfFilename";
+import { renderTaggedPdf } from "~/modules/declarationPdf/tagging/renderTaggedPdf";
 import { getCurrentYear } from "~/modules/domain";
 import { auditQueryMetadata } from "~/server/audit/queryMetadata";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
@@ -66,7 +66,7 @@ async function resolveJointEvaluationPdf(
 }
 
 const renderDocument = (data: JointEvaluationRecapData) => () =>
-	renderToBuffer(JointEvaluationPdfDocument({ data }));
+	renderTaggedPdf(JointEvaluationPdfDocument({ data }));
 
 export const GET = withAuditedRoute(
 	{
