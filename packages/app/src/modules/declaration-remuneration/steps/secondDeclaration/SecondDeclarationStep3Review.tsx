@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
-import { NextStepsBox } from "~/modules/declaration-remuneration/shared/NextStepsBox";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { SubmitDeclarationModal } from "~/modules/declaration-remuneration/shared/SubmitDeclarationModal";
 import { getSubmissionErrorMessage } from "~/modules/declaration-remuneration/shared/submissionErrorMessage";
@@ -27,6 +26,7 @@ import { GapBadge } from "../../shared/GapValueBadge";
 import stepStyles from "../Step6Review.module.scss";
 import { CardTitle } from "../step6/CardTitle";
 import { parseEmployeeCategories } from "../step6/parseStep5Categories";
+import { SecondDeclarationNextSteps } from "./SecondDeclarationNextSteps";
 import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator";
 
 type Props = {
@@ -136,9 +136,9 @@ export function SecondDeclarationStep3Review({
 			<SecondDeclarationStepIndicator currentStep={3} />
 
 			<p className={`fr-mb-0 ${stepStyles.intro}`}>
-				Vérifiez que toutes les informations ont été complétées avant de
-				transmettre votre seconde déclaration des écarts de rémunération par
-				catégorie d&apos;emplois aux services du ministère chargé du travail.
+				Vérifiez que toutes les informations sont correctes avant de transmettre
+				votre seconde déclaration de l&apos;indicateur par catégorie
+				d&apos;emplois aux services du ministère chargé du travail.
 			</p>
 
 			<h2 className="fr-h5 fr-mb-0">Indicateur par catégorie d&apos;emplois</h2>
@@ -191,11 +191,10 @@ export function SecondDeclarationStep3Review({
 				)}
 			</div>
 
-			<NextStepsBox
+			<SecondDeclarationNextSteps
 				cseApplicable={cseApplicable}
 				cseOpinionRequired={cseOpinionRequired}
 				hasGapsAboveThreshold={gapsExist}
-				isSecondDeclaration
 				siren={siren}
 			/>
 
