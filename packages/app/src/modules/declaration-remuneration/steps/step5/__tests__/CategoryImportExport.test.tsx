@@ -69,7 +69,10 @@ function category(id: number, name: string): EmployeeCategory {
 
 const trigger = () =>
 	screen.getByRole("button", { name: "Importer les données" });
-const fileInput = () => screen.getByLabelText("Sélectionner des fichiers");
+const fileInput = () =>
+	screen.getByLabelText("Importer vos données depuis un fichier", {
+		selector: "input",
+	});
 const importButton = () =>
 	screen.getByRole("button", { name: "Importer", hidden: true });
 const templateCard = () =>
