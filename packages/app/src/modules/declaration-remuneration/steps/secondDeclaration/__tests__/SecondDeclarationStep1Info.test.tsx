@@ -9,7 +9,6 @@ const SCOPED_FONT_MEDIUM_CLASS = "fontMedium";
 function renderStep1() {
 	render(
 		<SecondDeclarationStep1Info
-			declarationDate="01/06/2027"
 			declarationSiren="123456789"
 			declarationYear={2027}
 			modificationDeadline={new Date("2027-12-01T00:00:00Z")}
@@ -43,12 +42,12 @@ describe("SecondDeclarationStep1Info", () => {
 		expect(screen.getByText(/1ᵉʳ décembre 2027/)).toBeInTheDocument();
 	});
 
-	it("displays the declaration date", () => {
+	it("no longer recalls the date of the first declaration", () => {
 		renderStep1();
 
 		expect(
-			screen.getByText(/Déclaration effectuée le 01\/06\/2027/),
-		).toBeInTheDocument();
+			screen.queryByText(/Déclaration effectuée le/),
+		).not.toBeInTheDocument();
 	});
 
 	it("renders the obligations callout", () => {
@@ -62,12 +61,18 @@ describe("SecondDeclarationStep1Info", () => {
 		).toBeInTheDocument();
 	});
 
-	it("lists the CSE opinion deposit item in the obligations callout", () => {
+	it("lists the three obligations in the order of the mock-up, the CSE opinion being transmitted at the last step", () => {
 		renderStep1();
 
+		const items = screen.getAllByRole("listitem").map((li) => li.textContent);
+		expect(items).toEqual([
+			"Mettre en place des actions correctives par accord ou plan d'action",
+			"Informer et consulter votre CSE sur l'exactitude des données et éventuellement sur la justification en cas d'écarts ≥ 5 % (l'avis devra être transmis à la dernière étape de la démarche)",
+			"Redéclarer l'indicateur dans un délai de 6 mois après votre première déclaration",
+		]);
 		expect(
-			screen.getByText("Déposer le ou les avis du CSE"),
-		).toBeInTheDocument();
+			screen.queryByText("Déposer le ou les avis du CSE"),
+		).not.toBeInTheDocument();
 	});
 
 	it("renders next to step 2 without a previous link back to the transmitted path choice", () => {
@@ -85,7 +90,9 @@ describe("SecondDeclarationStep1Info", () => {
 	it("renders the deadline block as a DSFR highlight", () => {
 		renderStep1();
 
-		const deadlineBlock = screen.getByText("Échéance").parentElement;
+		const deadlineBlock = screen.getByText(
+			"Échéance pour transmettre la seconde déclaration",
+		).parentElement;
 		expect(deadlineBlock).toHaveClass("fr-highlight");
 		expect(deadlineBlock).not.toHaveClass("fr-pl-3w");
 	});
@@ -93,15 +100,13 @@ describe("SecondDeclarationStep1Info", () => {
 	it("renders the deadline lines with the expected DSFR typography", () => {
 		renderStep1();
 
-		expect(screen.getByText("Échéance")).not.toHaveClass("fr-text--sm");
+		expect(
+			screen.getByText("Échéance pour transmettre la seconde déclaration"),
+		).not.toHaveClass("fr-text--sm");
 
 		const deadlineDate = screen.getByText(/1ᵉʳ décembre 2027/);
 		expect(deadlineDate).toHaveClass("fr-text--lead", "fr-text--bold");
 		expect(deadlineDate).not.toHaveClass("fr-h5");
-
-		const declarationLine = screen.getByText(/Déclaration effectuée le/);
-		expect(declarationLine).toHaveClass("fr-text-mention--grey");
-		expect(declarationLine).not.toHaveClass("fr-text--sm");
 	});
 
 	it("renders the obligations callout with the scoped styling", () => {
@@ -115,18 +120,15 @@ describe("SecondDeclarationStep1Info", () => {
 		expect(title.parentElement).toHaveClass("fr-callout", SCOPED_CALLOUT_CLASS);
 	});
 
-	it("renders the intro paragraph in medium weight while keeping its emphasis", () => {
+	it("renders the intro paragraph in uniform medium weight", () => {
 		renderStep1();
 
-		expect(screen.getByText(/Vous devez mettre en œuvre des/)).toHaveClass(
-			SCOPED_FONT_MEDIUM_CLASS,
+		const intro = screen.getByText(/Vous devez mettre en œuvre des/);
+		expect(intro).toHaveClass(SCOPED_FONT_MEDIUM_CLASS);
+		expect(intro).toHaveTextContent(
+			"Vous devez mettre en œuvre des actions correctives et effectuer une seconde déclaration de l'indicateur par catégorie d'emplois.",
 		);
-		expect(screen.getByText("actions correctives").tagName).toBe("STRONG");
-		expect(
-			screen.getByText(
-				/^seconde déclaration de l.indicateur par catégorie d'emplois$/,
-			).tagName,
-		).toBe("STRONG");
+		expect(intro.querySelector("strong")).toBeNull();
 	});
 
 	it("neutralises the top margin of the form actions", () => {

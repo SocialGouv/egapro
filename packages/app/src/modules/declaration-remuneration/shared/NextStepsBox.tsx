@@ -78,8 +78,8 @@ export function NextStepsBox({
 						<ul>
 							<li>
 								<strong>
-									Justifier les écarts par des critères objectifs et non
-									sexistes.
+									Justifier les écarts par des critères objectifs et non fondés
+									sur le sexe.
 								</strong>{" "}
 								Si vous choisissez ce parcours, vous devez informer et consulter
 								le CSE sur cette justification
@@ -90,7 +90,7 @@ export function NextStepsBox({
 						</ul>
 						<p className="fr-mb-0">
 							Si la justification n&apos;est pas possible par des critères
-							objectifs et non sexistes, vous pouvez&nbsp;:
+							objectifs et non fondés sur le sexe, vous pouvez&nbsp;:
 						</p>
 						<ul>
 							<li>
@@ -115,7 +115,8 @@ export function NextStepsBox({
 					<ul className="fr-raw-list fr-links-group">
 						<li>
 							<HelpLink trackingId="objective_criteria">
-								Qu&apos;entend-on par critères objectifs et non sexistes ?
+								Qu&apos;entend-on par critères objectifs et non fondés sur le
+								sexe ?
 							</HelpLink>
 						</li>
 						<li>
@@ -125,7 +126,7 @@ export function NextStepsBox({
 						</li>
 						<li>
 							<HelpLink trackingId="joint_evaluation">
-								En savoir plus sur évaluation conjointe des rémunérations
+								En savoir plus sur l&apos;évaluation conjointe des rémunérations
 							</HelpLink>
 						</li>
 					</ul>

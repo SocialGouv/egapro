@@ -426,15 +426,17 @@ test.describe("Path-choice deadline is informational, never a gate", () => {
 				await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 15_000 });
 
 				await expect(page.getByText(READ_ONLY_TAIL)).toHaveCount(0);
-				await expect(page.locator("#path-corrective")).toBeEnabled();
-				await expect(page.locator("#path-justify")).toBeEnabled();
-				await expect(page.locator("#path-joint")).toBeEnabled();
+				for (const answer of ["all", "partial", "none"]) {
+					await expect(
+						page.locator(`#gap-justification-${answer}`),
+					).toBeEnabled();
+				}
 
 				// The milestone outlives the gate it used to drive: still rendered, still
 				// the round the company is in, now purely to nudge.
 				await expect(
 					page.getByText(
-						"Échéance pour choisir un parcours de mise en conformité",
+						"Date limite pour choisir l'un des parcours ci-dessous.",
 					),
 				).toBeVisible();
 				await expect(page.getByText(STALE_ROUND1_DEADLINE)).toBeVisible();

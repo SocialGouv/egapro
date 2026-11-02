@@ -3,11 +3,11 @@ import { describe, expect, it, vi } from "vitest";
 
 import { formatLongDate } from "~/modules/domain";
 import {
-	JointEvaluationDepositInstructions,
+	JointEvaluationAfterReport,
 	JointEvaluationExistingReport,
-	JointEvaluationGuidance,
 	JointEvaluationHeading,
 	JointEvaluationReportUpload,
+	JointEvaluationTodo,
 } from "../JointEvaluationReportBlocks";
 
 const INPUT_ID = "report-upload";
@@ -36,7 +36,7 @@ describe("JointEvaluationHeading", () => {
 			screen.getByRole("heading", { level: 2, name: "Évaluation conjointe" }),
 		).toBeInTheDocument();
 		const link = screen.getByRole("link", {
-			name: /En savoir plus sur évaluation conjointe des rémunérations/,
+			name: /En savoir plus sur l'évaluation conjointe des rémunérations/,
 		});
 		expect(link).toHaveAttribute(
 			"href",
@@ -44,21 +44,6 @@ describe("JointEvaluationHeading", () => {
 		);
 		expect(link).toHaveAttribute("target", "_blank");
 		expect(link).toHaveAttribute("rel", "noopener noreferrer");
-	});
-});
-
-describe("JointEvaluationDepositInstructions", () => {
-	it("asks for the report and points the agreement to TéléAccord", () => {
-		render(<JointEvaluationDepositInstructions />);
-
-		expect(
-			screen.getByText(
-				"déposer le rapport de l'évaluation conjointe, ci-dessous.",
-			).tagName,
-		).toBe("STRONG");
-		expect(
-			screen.getByText(/doit être déposé sur TéléAccord\./),
-		).toBeInTheDocument();
 	});
 });
 
@@ -88,13 +73,32 @@ describe("JointEvaluationReportUpload", () => {
 		renderUpload();
 
 		const input = screen.getByLabelText(
-			/Veuillez importer\/déposer le rapport de l'évaluation conjointe\./,
+			/Veuillez déposer le rapport de l'évaluation conjointe\./,
 		);
 		expect(input).toHaveAttribute("id", INPUT_ID);
 		expect(input).toHaveAttribute("accept", ".pdf");
 		expect(
 			screen.getByText("Taille maximale : 10 Mo. Format supporté : pdf."),
 		).toHaveClass("fr-hint-text");
+	});
+
+	it("renders the given block between the label and the drop zone", () => {
+		renderUpload({ beforeDropzone: <p>Échéance du rapport</p> });
+
+		const label = screen.getByText(
+			/Veuillez déposer le rapport de l'évaluation conjointe\./,
+		);
+		const block = screen.getByText("Échéance du rapport");
+		const dropzone = screen.getByRole("button", {
+			name: /Sélectionner un fichier/,
+		});
+		expect(
+			label.compareDocumentPosition(block) & Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+		expect(
+			block.compareDocumentPosition(dropzone) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
 	});
 
 	it("disables the file selection when asked", () => {
@@ -132,9 +136,9 @@ describe("JointEvaluationReportUpload", () => {
 	});
 });
 
-describe("JointEvaluationGuidance", () => {
-	it("titles the to-do box with the given title", () => {
-		render(<JointEvaluationGuidance todoTitle="Ce que vous devez faire" />);
+describe("JointEvaluationTodo", () => {
+	it("titles the to-do box with the given title and lists the two steps", () => {
+		render(<JointEvaluationTodo title="Ce que vous devez faire" />);
 
 		expect(
 			screen.getByRole("heading", {
@@ -142,16 +146,41 @@ describe("JointEvaluationGuidance", () => {
 				name: "Ce que vous devez faire",
 			}),
 		).toBeInTheDocument();
-		expect(screen.getByText("Élaboration du rapport")).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				"Réaliser l'analyse conjointe et définir des actions correctrices",
+			),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				"Transmettre le rapport dans la zone de dépôt prévue sur cette page",
+			),
+		).toBeInTheDocument();
 	});
+});
 
-	it("describes the steps after the deposit with the TéléAccord link", () => {
-		render(<JointEvaluationGuidance todoTitle="Ce que vous devez faire" />);
+describe("JointEvaluationAfterReport", () => {
+	it("describes the steps after the report with the TéléAccords link", () => {
+		render(<JointEvaluationAfterReport />);
 
 		expect(
-			screen.getByRole("heading", { level: 3, name: "Après dépôt du rapport" }),
+			screen.getByRole("heading", {
+				level: 3,
+				name: "Après élaboration du rapport",
+			}),
 		).toBeInTheDocument();
-		expect(screen.getByRole("link", { name: /TéléAccord/ })).toHaveAttribute(
+		expect(
+			screen.getByText("Négocier un accord collectif"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText("À défaut, mettre en place un plan d'action"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				/L'accord collectif ou le plan d'action doit être déposé sur/,
+			),
+		).toBeInTheDocument();
+		expect(screen.getByRole("link", { name: /TéléAccords/ })).toHaveAttribute(
 			"href",
 			"https://www.teleaccord.travail.gouv.fr",
 		);

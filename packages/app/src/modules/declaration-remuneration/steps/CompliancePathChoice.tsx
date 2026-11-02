@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Controller } from "react-hook-form";
 import { TrackedLink } from "~/modules/analytics";
 import { useIsImpersonating } from "~/modules/auth";
-import { saveCompliancePathSchema } from "~/modules/declaration-remuneration/schemas";
+import { compliancePathFormSchema } from "~/modules/declaration-remuneration/schemas";
 import { DraftLoadingState } from "~/modules/declaration-remuneration/shared/draft/DraftLoadingState";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { useDraftAutoSave } from "~/modules/declaration-remuneration/shared/draft/useDraftAutoSave";
@@ -15,7 +15,11 @@ import type { CompliancePathReadOnlyReason } from "~/modules/domain";
 import {
 	type CampaignDeadlines,
 	type CompliancePathValue,
+	type ComplianceRound,
+	compliancePathsForGapJustification,
 	formatCivilLongDate,
+	type GapJustification,
+	gapJustificationFromPath,
 	selectPathChoiceDeadline,
 } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
@@ -30,11 +34,13 @@ import { FormErrors } from "../shared/FormErrors";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import styles from "./CompliancePathChoice.module.scss";
 import {
-	FirstRoundOptions,
-	SecondRoundOptions,
+	CompliancePathOptions,
+	GAP_JUSTIFICATION_TITLES,
+	GapJustificationOptions,
 } from "./compliancePath/CompliancePathOptions";
 import { CompliancePathReadOnlyAlert } from "./compliancePath/CompliancePathReadOnlyAlert";
 import { DeclarationSuccessBanner } from "./compliancePath/DeclarationSuccessBanner";
+import { useCompliancePathScreen } from "./compliancePath/useCompliancePathScreen";
 
 type Props = {
 	campaignDeadlines: CampaignDeadlines;
@@ -49,6 +55,13 @@ type Props = {
 	pdfDownloadHref?: string;
 	readOnlyReason?: CompliancePathReadOnlyReason;
 };
+
+const COMPLIANCE_TITLE = (
+	<>
+		Parcours de mise en conformité pour l&apos;indicateur par
+		catégorie&nbsp;d&apos;emplois
+	</>
+);
 
 export function CompliancePathChoice({
 	campaignDeadlines,
@@ -66,11 +79,17 @@ export function CompliancePathChoice({
 	const router = useRouter();
 	const consumedTransmissionSuccess = useRef(false);
 	const [showTransmissionSuccess, setShowTransmissionSuccess] = useState(false);
+	const titleRef = useRef<HTMLHeadingElement>(null);
 	const isImpersonating = useIsImpersonating();
 	const { isReadOnly: isLockReadOnly } = useLockContext();
 	const isReadOnly = isLockReadOnly || readOnlyReason !== undefined;
+	const round: ComplianceRound = isSecondRound ? 2 : 1;
+	const initialJustification = gapJustificationFromPath(initialPath);
 
-	const dbValues = useMemo(() => ({ path: initialPath }), [initialPath]);
+	const dbValues = useMemo(
+		() => ({ gapJustification: initialJustification, path: initialPath }),
+		[initialJustification, initialPath],
+	);
 
 	const {
 		draft,
@@ -88,23 +107,42 @@ export function CompliancePathChoice({
 		dbValues,
 	});
 
-	const form = useZodForm(saveCompliancePathSchema, {
-		defaultValues: { path: initialPath },
+	const form = useZodForm(compliancePathFormSchema, {
+		defaultValues: {
+			gapJustification: initialJustification,
+			path: initialPath,
+		},
 	});
 
 	const draftHydrated = useDraftHydration(isLoadingDraft, draft, (d) => {
+		if (d.gapJustification !== undefined) {
+			form.setValue("gapJustification", d.gapJustification as GapJustification);
+		}
 		if (d.path !== undefined) {
 			form.setValue("path", d.path as CompliancePathValue);
 		}
 	});
 
 	useDraftAutoSave(form, draftHydrated && !isReadOnly, (values) =>
-		setField(values as { path: CompliancePathValue | undefined }),
+		setField({ gapJustification: values.gapJustification, path: values.path }),
 	);
 
+	const selectedJustification = form.watch("gapJustification");
 	const selectedPath = form.watch("path");
 	const hasInitialData = !!initialPath;
 	const hasData = hasInitialData || hasDraft;
+	const offeredPaths = compliancePathsForGapJustification(
+		selectedJustification ?? initialJustification ?? "none",
+		round,
+	);
+	const { screen, openPathScreen, backToJustificationScreen } =
+		useCompliancePathScreen({
+			draftHydrated,
+			isPathScreenAvailable:
+				(selectedJustification !== undefined || isReadOnly) &&
+				offeredPaths.length > 1,
+			titleRef,
+		});
 
 	// RouteScrollReset is silent on first render, so a reload still needs this: the browser restores scroll on the short placeholder before the form grows.
 	useEffect(() => {
@@ -128,17 +166,29 @@ export function CompliancePathChoice({
 
 	if (!draftHydrated) return <DraftLoadingState />;
 
-	const pathChoiceDeadline = selectPathChoiceDeadline(
-		campaignDeadlines,
-		isSecondRound,
-	);
-	const gapNoticeText = isSecondRound
-		? "Des écarts ≥ 5 % ont de nouveau été détectés, vous devez engager l'un des parcours suivants."
-		: "Des écarts ≥ 5 % ont été constatés, vous devez engager l'un des parcours suivants.";
+	const savedPathHref = initialPath
+		? getCompliancePathHref(initialPath, cseOpinionRequired)
+		: undefined;
+	const readOnlyGoesThroughPathScreen =
+		screen === "justification" &&
+		initialPath !== undefined &&
+		compliancePathsForGapJustification(initialJustification ?? "none", round)
+			.length > 1;
+	const disabled = isImpersonating || isReadOnly;
 
 	const onSubmit = form.handleSubmit((data) => {
-		if (isReadOnly || !data.path) return;
-		mutation.mutate({ path: data.path });
+		if (isReadOnly) return;
+		const paths = compliancePathsForGapJustification(
+			data.gapJustification,
+			round,
+		);
+		if (screen === "justification" && paths.length > 1) {
+			openPathScreen();
+			return;
+		}
+		const path = paths.length === 1 ? paths[0] : data.path;
+		if (!path || !paths.includes(path)) return;
+		mutation.mutate({ path });
 	});
 
 	return (
@@ -151,8 +201,12 @@ export function CompliancePathChoice({
 			<fieldset className={`${common.readOnlyFieldset} ${styles.screen}`}>
 				<legend className="fr-sr-only">Choix du parcours de conformité</legend>
 				<div className={common.flexBetween}>
-					<h1 className="fr-h4 fr-mb-0">
-						Déclaration des indicateurs de rémunération {currentYear}
+					<h1 className="fr-h4 fr-mb-0" ref={titleRef} tabIndex={-1}>
+						{screen === "justification" && !isSecondRound ? (
+							<>Déclaration des indicateurs de rémunération {currentYear}</>
+						) : (
+							COMPLIANCE_TITLE
+						)}
 					</h1>
 					<SavedIndicator
 						hasData={hasData}
@@ -161,7 +215,7 @@ export function CompliancePathChoice({
 					/>
 				</div>
 
-				{showTransmissionSuccess && (
+				{screen === "justification" && showTransmissionSuccess && (
 					<DeclarationSuccessBanner
 						declarationModifiable={declarationModifiable}
 						email={email}
@@ -175,109 +229,150 @@ export function CompliancePathChoice({
 					<CompliancePathReadOnlyAlert reason={readOnlyReason} />
 				) : null}
 
-				<h2 className="fr-h4 fr-mb-0">
-					Parcours de mise en conformité pour l&apos;indicateur par
-					catégorie&nbsp;d&apos;emplois
-				</h2>
+				{screen === "justification" ? (
+					<>
+						{!isSecondRound && (
+							<h2 className="fr-h6 fr-mb-0">{COMPLIANCE_TITLE}</h2>
+						)}
 
-				<div className={common.flexColumnGap1}>
-					<p className={`fr-mb-0 ${styles.instructions}`}>{gapNoticeText}</p>
+						<div className={common.flexColumnGap1}>
+							<p className={`fr-mb-0 ${styles.instructions}`}>
+								{isSecondRound
+									? "Des écarts ≥ 5 % ont de nouveau été constatés, indiquez si ces écarts peuvent être justifiés par des critères objectifs et non fondés sur le sexe."
+									: "Des écarts ≥ 5 % ont été constatés, indiquez si ces écarts peuvent être justifiés par des critères objectifs et non fondés sur le sexe."}
+							</p>
 
-					<div className="fr-highlight fr-mb-0">
-						<p className="fr-mb-1w">
-							Échéance pour choisir un parcours de mise en conformité
-						</p>
-						<p className="fr-text--xl fr-text--bold fr-mb-0">
-							{formatCivilLongDate(pathChoiceDeadline)}
-						</p>
-					</div>
-				</div>
+							<div className="fr-highlight fr-mb-0">
+								<p className="fr-mb-1w">
+									Date limite pour choisir l&apos;un des parcours ci-dessous.
+								</p>
+								<p className="fr-text--xl fr-text--bold fr-mb-0">
+									{formatCivilLongDate(
+										selectPathChoiceDeadline(campaignDeadlines, isSecondRound),
+									)}
+								</p>
+							</div>
+						</div>
 
-				<div className={common.dataSection}>
-					<div className={common.flexColumnGapHalf}>
-						<h3 className="fr-h6 fr-mb-0">
-							La justification est possible par des critères objectifs et non
-							sexistes
-						</h3>
-						<p className="fr-mb-0">
-							<TrackedLink
-								className="fr-link"
-								href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
-								rel="noopener noreferrer"
-								target="_blank"
-								trackingId="objective_criteria"
-							>
-								Qu&apos;entend-on par critères objectifs et non sexistes ?
-								<NewTabNotice />
-							</TrackedLink>
-						</p>
-					</div>
+						<div className={common.dataSection}>
+							<p className="fr-mb-0">
+								<TrackedLink
+									className="fr-link"
+									href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
+									rel="noopener noreferrer"
+									target="_blank"
+									trackingId="objective_criteria"
+								>
+									Qu&apos;entend-on par critères objectifs et non fondés sur le
+									sexe ?
+									<NewTabNotice />
+								</TrackedLink>
+							</p>
 
-					<Controller
-						control={form.control}
-						name="path"
-						render={({ field }) => (
-							<fieldset
-								aria-labelledby="compliance-path-legend"
-								className={`fr-fieldset ${styles.pathFieldset}`}
-							>
-								<legend className="fr-sr-only" id="compliance-path-legend">
-									Choix du parcours de mise en conformité
-								</legend>
+							<Controller
+								control={form.control}
+								name="gapJustification"
+								render={({ field }) => (
+									<fieldset
+										aria-labelledby="gap-justification-legend"
+										className={`fr-fieldset ${styles.pathFieldset}`}
+									>
+										<legend
+											className="fr-sr-only"
+											id="gap-justification-legend"
+										>
+											Justification des écarts de rémunération ≥ 5 %
+										</legend>
+										<GapJustificationOptions
+											cseOpinionRequired={cseOpinionRequired}
+											disabled={disabled}
+											jointEvaluationDeadline={
+												campaignDeadlines.decl2JointEvaluationDeadline
+											}
+											onSelect={field.onChange}
+											round={round}
+											selected={field.value}
+										/>
+									</fieldset>
+								)}
+							/>
+						</div>
+					</>
+				) : (
+					<div className={common.dataSection}>
+						{selectedJustification && (
+							<h2 className="fr-h6 fr-mb-0">
+								{GAP_JUSTIFICATION_TITLES[selectedJustification]}
+							</h2>
+						)}
 
-								{isSecondRound ? (
-									<SecondRoundOptions
-										cseOpinionRequired={cseOpinionRequired}
-										disabled={isImpersonating || isReadOnly}
-										jointEvaluationDeadline={
-											campaignDeadlines.decl2JointEvaluationDeadline
-										}
-										justificationDeadline={
-											campaignDeadlines.decl2JustificationDeadline
-										}
-										selectedPath={field.value}
-										setSelectedPath={field.onChange}
-									/>
-								) : (
-									<FirstRoundOptions
+						<Controller
+							control={form.control}
+							name="path"
+							render={({ field }) => (
+								<fieldset
+									aria-labelledby="compliance-path-legend"
+									className={`fr-fieldset ${styles.pathFieldset}`}
+								>
+									<legend className="fr-sr-only" id="compliance-path-legend">
+										Choix du parcours de mise en conformité
+									</legend>
+									<CompliancePathOptions
 										correctiveActionDeadline={
 											campaignDeadlines.decl2ModificationDeadline
 										}
 										cseOpinionRequired={cseOpinionRequired}
-										disabled={isImpersonating || isReadOnly}
+										disabled={disabled}
 										jointEvaluationDeadline={
 											campaignDeadlines.decl1JointEvaluationDeadline
 										}
-										justificationDeadline={
-											campaignDeadlines.decl1JustificationDeadline
-										}
+										onSelect={field.onChange}
+										paths={offeredPaths}
 										selectedPath={field.value}
-										setSelectedPath={field.onChange}
 									/>
-								)}
-							</fieldset>
-						)}
-					/>
-				</div>
+								</fieldset>
+							)}
+						/>
+					</div>
+				)}
 
 				<FormErrors mutationError={mutation.error?.message} />
 
-				<FormActions
-					className="fr-mt-0"
-					isSubmitting={mutation.isPending}
-					mimoquageNextHref={
-						initialPath
-							? getCompliancePathHref(initialPath, cseOpinionRequired)
-							: undefined
-					}
-					nextDisabled={!selectedPath || isReadOnly}
-					nextHref={
-						isReadOnly && initialPath
-							? getCompliancePathHref(initialPath, cseOpinionRequired)
-							: undefined
-					}
-					nextLabel="Suivant"
-				/>
+				{screen === "justification" ? (
+					<FormActions
+						className="fr-mt-0"
+						isSubmitting={mutation.isPending}
+						mimoquageNextHref={
+							readOnlyGoesThroughPathScreen ? undefined : savedPathHref
+						}
+						nextDisabled={!selectedJustification || isReadOnly}
+						nextHref={
+							isReadOnly && !readOnlyGoesThroughPathScreen
+								? savedPathHref
+								: undefined
+						}
+						nextLabel="Suivant"
+						onNext={
+							isReadOnly && readOnlyGoesThroughPathScreen
+								? openPathScreen
+								: undefined
+						}
+					/>
+				) : (
+					<FormActions
+						className="fr-mt-0"
+						isSubmitting={mutation.isPending}
+						mimoquageNextHref={savedPathHref}
+						nextDisabled={
+							!selectedPath ||
+							!offeredPaths.includes(selectedPath) ||
+							isReadOnly
+						}
+						nextHref={isReadOnly ? savedPathHref : undefined}
+						nextLabel="Suivant"
+						onPrevious={backToJustificationScreen}
+					/>
+				)}
 			</fieldset>
 		</form>
 	);

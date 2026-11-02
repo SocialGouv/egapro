@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { useSession } from "next-auth/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { remunerationStepHref } from "~/modules/routes";
@@ -54,6 +54,49 @@ describe("FormActions", () => {
 		render(<FormActions nextLabel="Valider" />);
 
 		expect(screen.getByRole("button", { name: "Valider" })).toBeInTheDocument();
+	});
+
+	it("renders a client-side previous button when only onPrevious is provided", () => {
+		const onPrevious = vi.fn();
+		render(<FormActions onPrevious={onPrevious} />);
+
+		const button = screen.getByRole("button", { name: /précédent/i });
+		expect(button).toHaveAttribute("type", "button");
+		expect(
+			screen.queryByRole("link", { name: /précédent/i }),
+		).not.toBeInTheDocument();
+		fireEvent.click(button);
+		expect(onPrevious).toHaveBeenCalledOnce();
+	});
+
+	it("prefers the previous link over onPrevious", () => {
+		render(<FormActions onPrevious={vi.fn()} previousHref={PREVIOUS_HREF} />);
+
+		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
+			"href",
+			PREVIOUS_HREF,
+		);
+		expect(
+			screen.queryByRole("button", { name: /précédent/i }),
+		).not.toBeInTheDocument();
+	});
+
+	it("renders an enabled client-side next button when onNext is provided, even read-only", () => {
+		const onNext = vi.fn();
+		render(
+			<LockProvider isReadOnly>
+				<FormActions nextHref={NEXT_HREF} onNext={onNext} />
+			</LockProvider>,
+		);
+
+		const button = screen.getByRole("button", { name: /suivant/i });
+		expect(button).toHaveAttribute("type", "button");
+		expect(button).toBeEnabled();
+		expect(
+			screen.queryByRole("link", { name: /suivant/i }),
+		).not.toBeInTheDocument();
+		fireEvent.click(button);
+		expect(onNext).toHaveBeenCalledOnce();
 	});
 
 	describe("admin impersonation", () => {

@@ -6,6 +6,6 @@ export const SECOND_DECLARATION_TOTAL_STEPS = 3;
 export const SECOND_DECLARATION_STEP_TITLES = [
 	"",
 	"Actions correctives et seconde déclaration",
-	"Seconde déclaration des écarts de rémunération par catégorie d'emplois",
-	"Récapitulatif de votre déclaration",
+	"Seconde déclaration de l'indicateur par catégorie d'emplois",
+	"Récapitulatif de la déclaration",
 ] as const;
