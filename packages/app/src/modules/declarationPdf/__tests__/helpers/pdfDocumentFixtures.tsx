@@ -264,6 +264,14 @@ export function pdfDocumentSamples(): PdfDocumentSample[] {
 			element: DeclarationPdfDocument({ data: DECLARATION_DATA }),
 		},
 		{
+			name: "second-declaration",
+			title:
+				"Récapitulatif de la seconde déclaration des écarts de rémunération par catégorie d'emplois 2026",
+			element: DeclarationPdfDocument({
+				data: { ...DECLARATION_DATA, isSecondDeclaration: true },
+			}),
+		},
+		{
 			name: "transmitted",
 			title: "Récapitulatif des éléments transmis 2026",
 			element: TransmittedPdfDocument({ data: TRANSMITTED_DATA }),
