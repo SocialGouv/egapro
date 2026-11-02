@@ -397,7 +397,7 @@ pnpm --filter app add -D ultra11y@<version>   # version EXACTE, pas de ^
 ./scripts/a11y/check-ultra11y-version.sh      # refuse une demi-montée, y compris SHA ≠ version npm
 ```
 
-La devDependency et les deux usages de l'Action sont alignés sur **5.42.1**, et ce n'est plus une
+La devDependency et les deux usages de l'Action sont alignés sur **5.55.0**, et ce n'est plus une
 consigne : `scripts/a11y/check-ultra11y-version.sh` tourne dans `ci.yaml` sur chaque push et
 refuse un désalignement. Ce n'est pas de l'hygiène — la suite Playwright ÉCRIT les instantanés
 avec la devDependency et l'Action les RÉINGÈRE avec son moteur embarqué ; deux versions, deux
