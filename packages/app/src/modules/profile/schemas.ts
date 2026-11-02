@@ -20,3 +20,5 @@ export const updateProfileSchema = z.object({
 	lastName: nameSchema,
 	phone: phoneSchema,
 });
+
+export type ProfileUpdate = z.output<typeof updateProfileSchema>;
