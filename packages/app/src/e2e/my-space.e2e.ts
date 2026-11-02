@@ -112,6 +112,9 @@ test.describe("Declaration process panel", () => {
 			await expect(
 				panel.getByTitle("Voir le récapitulatif de la déclaration"),
 			).toBeVisible();
+			await expect(
+				panel.getByRole("link", { name: "Voir la déclaration" }),
+			).toHaveCount(0);
 		});
 
 		// #4113 — the panel and the funnel read one shared state table, and this
@@ -280,9 +283,9 @@ test.describe("Declaration process panel", () => {
 					panel.getByTitle("Voir le récapitulatif de la déclaration"),
 				).toBeVisible();
 
-				const cta = panel.getByRole("link", { name: "Voir la déclaration" });
-				await expect(cta).toBeVisible();
-				await expect(cta).not.toHaveAttribute("href", /avis-cse/);
+				await expect(
+					panel.getByRole("link", { name: "Voir la déclaration" }),
+				).toHaveCount(0);
 			});
 		});
 	});
@@ -375,9 +378,9 @@ test.describe("Declaration process panel", () => {
 				).toHaveCount(0);
 				await expect(panel.getByText(STEP3_TITLE)).toHaveCount(0);
 
-				const cta = panel.getByRole("link", { name: "Voir la déclaration" });
-				await expect(cta).toBeVisible();
-				await expect(cta).not.toHaveAttribute("href", /avis-cse/);
+				await expect(
+					panel.getByRole("link", { name: "Voir la déclaration" }),
+				).toHaveCount(0);
 			});
 		});
 	});
