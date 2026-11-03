@@ -85,11 +85,16 @@ verte. Le mode lite comble ce trou au prix d'un runner, pas d'un modèle :
 1. **`affected`** — l'Action diffe la PR contre sa merge-base et suit, pour chaque page de
    `sample.pages`, ses `sources`, leurs imports (alias `~/`, `import()`, feuilles de style) et
    chaque `layout` au-dessus d'elle. Résultat : la liste des pages que le diff peut changer.
-   Aucune ? Le job s'arrête là, en une à deux minutes.
+   Aucune ? Le job s'arrête là, en une vingtaine de secondes.
 2. **capture** — la préparation d'`a11y-pages` (action locale `.github/actions/a11y-stack`,
    partagée par les deux jobs), puis `test:e2e:a11y` limité à ces pages par `ULTRA11Y_PAGES`.
 3. **`audit`** — le moteur seul sur ces instantanés : pas d'audit du code, pas d'adjudication,
    pas de rapport. Rouge sur un constat `bloquant` **nouveau** par rapport à la baseline.
+
+**Ce que ça coûte**, mesuré sur la PR #5084 qui touchait des fichiers `global`, donc
+l'échantillon entier : **8 min 55** de runner pour 53 pages (stack 2 min 50, capture 5 min 20,
+audit 10 s), aucun modèle. Une PR qui ne touche qu'une poignée de pages paie la même stack et une
+capture plus courte.
 
 **Ce qu'il couvre.**
 

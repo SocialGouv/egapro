@@ -42,10 +42,11 @@ jobs:
   a11y-lite:
     name: "RGAA · rendu des pages touchées"
     runs-on: ubuntu-22.04
-    # ~20 min d'infrastructure (build, base, navigateur) quand une page est touchée, plus la
-    # capture : quelques minutes pour une poignée de pages, jusqu'à 25 pour l'échantillon
-    # entier (push d'alpha, ou fichier `sample.global` touché).
-    timeout-minutes: 75
+    # Mesuré sur la PR #5084, échantillon entier (53 pages, fichiers `sample.global` touchés) :
+    # 8 min 55 — stack 2 min 50 (cache pnpm chaud), capture 5 min 20, audit 10 s. Une PR qui ne
+    # touche aucune page s'arrête après `affected`, en une vingtaine de secondes. Large exprès :
+    # un job coupé sur timeout ne dit rien de l'accessibilité.
+    timeout-minutes: 45
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
