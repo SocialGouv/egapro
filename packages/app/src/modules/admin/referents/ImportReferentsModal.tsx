@@ -6,13 +6,12 @@ import { flushSync } from "react-dom";
 import { useDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
 
+import { BUTTONS_GROUP_CLASS, ConfirmStepActions } from "./ConfirmStepActions";
 import { ImportReferentsConfirmStep } from "./ImportReferentsConfirmStep";
 import { type ImportReferentsInput, importReferentsSchema } from "./schemas";
 
 const MODAL_ID = "admin-import-referents-modal";
 const CONFIRM_HEADING_ID = `${MODAL_ID}-confirm-title`;
-const BUTTONS_GROUP_CLASS =
-	"fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg";
 
 type PendingImport = {
 	referents: ImportReferentsInput;
@@ -114,7 +113,9 @@ export function ImportReferentsModal({ modalRef, onClose, onSuccess }: Props) {
 		}
 
 		try {
-			const { total } = await utils.adminReferents.count.fetch();
+			const { total } = await utils.adminReferents.count.fetch(undefined, {
+				staleTime: 0,
+			});
 			submitInProgressRef.current = false;
 			if (isStale()) return;
 			flushSync(() =>
@@ -240,7 +241,9 @@ export function ImportReferentsModal({ modalRef, onClose, onSuccess }: Props) {
 							</div>
 							<div className="fr-modal__footer">
 								{isConfirming && (
-									<ConfirmActions
+									<ConfirmStepActions
+										backLabel="Revenir au choix du fichier"
+										confirmLabel="Confirmer l'import"
 										isPending={importMutation.isPending}
 										onBack={handleBack}
 										onCancel={onClose}
@@ -276,53 +279,5 @@ export function ImportReferentsModal({ modalRef, onClose, onSuccess }: Props) {
 				</div>
 			</div>
 		</dialog>
-	);
-}
-
-type ConfirmActionsProps = {
-	isPending: boolean;
-	onBack: () => void;
-	onCancel: () => void;
-	onConfirm: () => void;
-};
-
-function ConfirmActions({
-	isPending,
-	onBack,
-	onCancel,
-	onConfirm,
-}: ConfirmActionsProps) {
-	return (
-		<ul className={BUTTONS_GROUP_CLASS}>
-			<li>
-				<button
-					aria-disabled={isPending || undefined}
-					className="fr-btn fr-btn--primary"
-					onClick={onConfirm}
-					type="button"
-				>
-					Confirmer l'import
-				</button>
-			</li>
-			<li>
-				<button
-					aria-disabled={isPending || undefined}
-					className="fr-btn fr-btn--secondary"
-					onClick={onBack}
-					type="button"
-				>
-					Revenir au choix du fichier
-				</button>
-			</li>
-			<li>
-				<button
-					className="fr-btn fr-btn--tertiary"
-					onClick={onCancel}
-					type="button"
-				>
-					Annuler
-				</button>
-			</li>
-		</ul>
 	);
 }

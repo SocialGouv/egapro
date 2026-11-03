@@ -12,7 +12,7 @@ export function ReferentReviewStep({ changes, headingId, headingRef }: Props) {
 	const hasChanges = changes.length > 0;
 
 	return (
-		<section aria-labelledby={headingId}>
+		<div>
 			<h3
 				className="fr-h6 fr-mb-2w"
 				id={headingId}
@@ -35,7 +35,7 @@ export function ReferentReviewStep({ changes, headingId, headingRef }: Props) {
 					Vous n'avez modifié aucune information : il n'y a rien à enregistrer.
 				</p>
 			)}
-		</section>
+		</div>
 	);
 }
 
@@ -74,53 +74,5 @@ function ReferentChangesTable({ changes }: ReferentChangesTableProps) {
 				</div>
 			</div>
 		</div>
-	);
-}
-
-type ReviewActionsProps = {
-	canConfirm: boolean;
-	onBack: () => void;
-	onCancel: () => void;
-	onConfirm: () => void;
-};
-
-export function ReferentReviewActions({
-	canConfirm,
-	onBack,
-	onCancel,
-	onConfirm,
-}: ReviewActionsProps) {
-	return (
-		<ul className="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg">
-			{canConfirm && (
-				<li>
-					<button
-						className="fr-btn fr-btn--primary"
-						onClick={onConfirm}
-						type="button"
-					>
-						Confirmer et enregistrer
-					</button>
-				</li>
-			)}
-			<li>
-				<button
-					className="fr-btn fr-btn--secondary"
-					onClick={onBack}
-					type="button"
-				>
-					Revenir aux champs
-				</button>
-			</li>
-			<li>
-				<button
-					className="fr-btn fr-btn--tertiary"
-					onClick={onCancel}
-					type="button"
-				>
-					Annuler
-				</button>
-			</li>
-		</ul>
 	);
 }

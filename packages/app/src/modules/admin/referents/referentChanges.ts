@@ -1,11 +1,6 @@
-import {
-	COUNTIES,
-	type CountyCode,
-	REGIONS,
-	type RegionCode,
-} from "~/modules/domain";
-
 import type { ReferentFormValues } from "./schemas";
+import { REFERENT_FIELD_LABELS } from "./shared/fieldLabels";
+import { formatCountyLabel, formatRegionLabel } from "./shared/locationLabels";
 import type { ReferentSearchRow } from "./types";
 
 type ReferentField = keyof ReferentFormValues;
@@ -31,17 +26,6 @@ type StoredReferent = Pick<
 
 const EMPTY_VALUE = "—";
 
-const FIELD_LABELS: Record<ReferentField, string> = {
-	principal: "Principal",
-	name: "Nom",
-	region: "Région",
-	county: "Département",
-	type: "Type de la valeur",
-	value: "Valeur",
-	substituteName: "Nom du suppléant",
-	substituteEmail: "Email du suppléant",
-};
-
 const FIELD_ORDER: readonly ReferentField[] = [
 	"principal",
 	"name",
@@ -57,21 +41,11 @@ function optionalText(value: string | null | undefined): string {
 	return value?.trim() ?? "";
 }
 
-function regionLabel(code: string): string {
-	if (!code) return EMPTY_VALUE;
-	return `${REGIONS[code as RegionCode] ?? code} (${code})`;
-}
-
-function countyLabel(code: string): string {
-	if (!code) return EMPTY_VALUE;
-	return `${COUNTIES[code as CountyCode] ?? code} (${code})`;
-}
-
 function displayValue(field: ReferentField, raw: string): string {
 	if (field === "principal") return raw === "true" ? "Oui" : "Non";
 	if (field === "type") return raw === "url" ? "URL" : "Email";
-	if (field === "region") return regionLabel(raw);
-	if (field === "county") return countyLabel(raw);
+	if (field === "region") return formatRegionLabel(raw);
+	if (field === "county") return formatCountyLabel(raw);
 	return raw === "" ? EMPTY_VALUE : raw;
 }
 
@@ -100,7 +74,7 @@ export function listReferentChanges(
 	return FIELD_ORDER.filter((field) => before[field] !== after[field]).map(
 		(field) => ({
 			field,
-			label: FIELD_LABELS[field],
+			label: REFERENT_FIELD_LABELS[field],
 			previous: displayValue(field, before[field]),
 			next: displayValue(field, after[field]),
 		}),

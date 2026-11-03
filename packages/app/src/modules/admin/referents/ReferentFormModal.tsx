@@ -5,11 +5,9 @@ import { flushSync } from "react-dom";
 import type { CountyCode, RegionCode } from "~/modules/domain";
 import { useDsfrModal, useZodForm } from "~/modules/shared";
 
+import { BUTTONS_GROUP_CLASS, ConfirmStepActions } from "./ConfirmStepActions";
 import { ReferentFormFields } from "./ReferentFormFields";
-import {
-	ReferentReviewActions,
-	ReferentReviewStep,
-} from "./ReferentReviewStep";
+import { ReferentReviewStep } from "./ReferentReviewStep";
 import { listReferentChanges } from "./referentChanges";
 import type { ReferentFormValues } from "./schemas";
 import { referentFormSchema } from "./schemas";
@@ -199,15 +197,17 @@ export function ReferentFormModal({
 							</div>
 							<div className="fr-modal__footer">
 								{isReviewing && (
-									<ReferentReviewActions
+									<ConfirmStepActions
+										backLabel="Revenir aux champs"
 										canConfirm={changes.length > 0}
+										confirmLabel="Confirmer et enregistrer"
 										onBack={backToFields}
 										onCancel={onClose}
 										onConfirm={confirmEdit}
 									/>
 								)}
 								{!isReviewing && (
-									<ul className="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg">
+									<ul className={BUTTONS_GROUP_CLASS}>
 										<li>
 											<button
 												className="fr-btn fr-btn--primary"

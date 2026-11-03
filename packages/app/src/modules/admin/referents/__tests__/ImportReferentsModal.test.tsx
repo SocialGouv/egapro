@@ -316,10 +316,10 @@ describe("ImportReferentsModal", () => {
 			hidden: true,
 		});
 		expect(heading).toHaveFocus();
-		const section = screen.getByRole("region", {
-			name: "Confirmer le remplacement des référents",
-			hidden: true,
-		});
+		const section = heading.parentElement as HTMLElement;
+		expect(
+			screen.queryByRole("region", { hidden: true }),
+		).not.toBeInTheDocument();
 		expect(section).toHaveTextContent(
 			"Le fichier « referents.json » est valide",
 		);
@@ -330,6 +330,36 @@ describe("ImportReferentsModal", () => {
 		expect(section).toHaveTextContent("Cette suppression est définitive");
 		expect(countFetch).toHaveBeenCalledOnce();
 		expect(importMutate).not.toHaveBeenCalled();
+	});
+
+	it("never serves a cached count of the existing referents", async () => {
+		await reachConfirmStep();
+
+		expect(countFetch).toHaveBeenCalledWith(undefined, { staleTime: 0 });
+	});
+
+	it("asks for a fresh count each time the file is reviewed again", async () => {
+		await reachConfirmStep();
+		countFetch.mockResolvedValue({ total: 4 });
+		await userEvent.click(
+			screen.getByRole("button", {
+				name: "Revenir au choix du fichier",
+				hidden: true,
+			}),
+		);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Vérifier l'import", hidden: true }),
+		);
+
+		await findConfirmButton();
+		expect(countFetch).toHaveBeenCalledTimes(2);
+		expect(countFetch).toHaveBeenLastCalledWith(undefined, { staleTime: 0 });
+		expect(
+			screen.getByRole("heading", {
+				name: "Confirmer le remplacement des référents",
+				hidden: true,
+			}).parentElement,
+		).toHaveTextContent("4 référents existants seront supprimés");
 	});
 
 	it("uses the singular when one referent is deleted and one added", async () => {

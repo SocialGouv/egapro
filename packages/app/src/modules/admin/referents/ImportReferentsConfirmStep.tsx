@@ -25,7 +25,7 @@ export function ImportReferentsConfirmStep({
 		importedCount > 1 ? "référents seront ajoutés" : "référent sera ajouté";
 
 	return (
-		<section aria-labelledby={headingId}>
+		<div>
 			<h3
 				className="fr-h6 fr-mb-2w"
 				id={headingId}
@@ -51,6 +51,6 @@ export function ImportReferentsConfirmStep({
 				exportez la liste actuelle avant de confirmer. Rien n'est modifié tant
 				que vous n'avez pas confirmé l'import.
 			</p>
-		</section>
+		</div>
 	);
 }
