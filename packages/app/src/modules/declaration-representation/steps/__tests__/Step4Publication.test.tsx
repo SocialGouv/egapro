@@ -349,6 +349,69 @@ describe("Step4Publication — step validator", () => {
 	});
 });
 
+describe("Step4Publication — required-fields mention", () => {
+	const REQUIRED_MENTION = "Tous les champs sont obligatoires.";
+	const describedByMention = expect.stringContaining(REQUIRED_MENTION);
+
+	it("describes the date and both website answers with the form-level mention", () => {
+		renderStep();
+
+		expect(dateField()).toHaveAccessibleDescription(describedByMention);
+		expect(screen.getByLabelText("Oui")).toHaveAccessibleDescription(
+			REQUIRED_MENTION,
+		);
+		expect(screen.getByLabelText("Non")).toHaveAccessibleDescription(
+			REQUIRED_MENTION,
+		);
+	});
+
+	it("describes the revealed page address with the mention", () => {
+		renderStep({ draft: { hasWebsite: true } });
+
+		expect(urlField()).toHaveAccessibleDescription(describedByMention);
+	});
+
+	it("describes the revealed communication modalities with the mention", () => {
+		renderStep({ draft: { hasWebsite: false } });
+
+		expect(modalitiesField()).toHaveAccessibleDescription(describedByMention);
+	});
+
+	it("keeps the mention and the error message on a flagged date", async () => {
+		renderStep();
+
+		expect(await runStepValidator()).toBe(false);
+		expect(dateField()).toHaveAccessibleDescription(
+			`${REQUIRED_MENTION} ${VALIDATION_MESSAGES.publishDateRequired}`,
+		);
+	});
+
+	it("keeps the mention and the error message on a flagged page address", async () => {
+		renderStep({
+			draft: { publishDate: WEBSITE_PUBLICATION.publishDate, hasWebsite: true },
+		});
+
+		expect(await runStepValidator()).toBe(false);
+		expect(urlField()).toHaveAccessibleDescription(
+			`${REQUIRED_MENTION} ${VALIDATION_MESSAGES.urlRequired}`,
+		);
+	});
+
+	it("keeps the mention and the error message on flagged modalities", async () => {
+		renderStep({
+			draft: {
+				publishDate: OFFLINE_PUBLICATION.publishDate,
+				hasWebsite: false,
+			},
+		});
+
+		expect(await runStepValidator()).toBe(false);
+		expect(modalitiesField()).toHaveAccessibleDescription(
+			`${REQUIRED_MENTION} ${VALIDATION_MESSAGES.modalitiesRequired}`,
+		);
+	});
+});
+
 describe("Step4Publication — publication date after the reference period (S11)", () => {
 	it("blocks a publication date equal to the end of the reference period", async () => {
 		renderStep({

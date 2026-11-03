@@ -79,13 +79,6 @@ export function normalizeSubmittedOpinions(
 	};
 }
 
-export function isJustificationOpinionIncomplete(
-	declaration: DeclarationOpinionInput | undefined,
-	required: boolean,
-) {
-	return required && (!declaration?.gapOpinion || !declaration.gapDate);
-}
-
 type DeclarationDraft = {
 	accuracyOpinion?: OpinionType;
 	accuracyDate?: string;

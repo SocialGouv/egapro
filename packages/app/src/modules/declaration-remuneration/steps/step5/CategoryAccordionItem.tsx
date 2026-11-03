@@ -6,10 +6,12 @@ import {
 } from "~/modules/declaration-remuneration/schemas";
 import type { FieldError } from "~/modules/declaration-remuneration/shared/formError/types";
 import {
-	describedByForField,
+	fieldErrorAlertId,
 	findFieldError,
+	REQUIRED_FIELDS_NOTE_ID,
 } from "~/modules/declaration-remuneration/shared/formError/types";
 import stepStyles from "~/modules/declaration-remuneration/steps/Step5EmployeeCategories.module.scss";
+import { composeDescribedBy } from "~/modules/shared";
 
 import { CategoryDataTable } from "./CategoryDataTable";
 import type { EmployeeCategory } from "./categorySerializer";
@@ -102,7 +104,9 @@ export function CategoryAccordionItem({
 	const nameId = `cat-${index}-name`;
 	const summaryNameError = findFieldError(errors, nameId);
 	const hasNameError = Boolean(nameError || summaryNameError);
-	const nameDescriptionId = describedByForField(errorAlertId, summaryNameError);
+	const nameAlertId =
+		summaryNameError &&
+		fieldErrorAlertId(errorAlertId, summaryNameError.category);
 
 	return (
 		<section aria-labelledby={headingId} className="fr-accordion">
@@ -140,13 +144,12 @@ export function CategoryAccordionItem({
 								</span>
 							</label>
 							<input
-								aria-describedby={[
+								aria-describedby={composeDescribedBy(
+									REQUIRED_FIELDS_NOTE_ID,
 									`cat-${index}-name-hint`,
 									`cat-${index}-name-limit`,
-									nameDescriptionId,
-								]
-									.filter(Boolean)
-									.join(" ")}
+									nameAlertId,
+								)}
 								aria-invalid={hasNameError ? true : undefined}
 								className={
 									hasNameError ? "fr-input fr-input--error" : "fr-input"

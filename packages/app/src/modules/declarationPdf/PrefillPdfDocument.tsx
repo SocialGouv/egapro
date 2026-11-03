@@ -14,6 +14,8 @@ import { PdfPageHeader } from "./sections/PdfPageHeader";
 import { QuartileSection } from "./sections/QuartileSection";
 import { VariablePaySection } from "./sections/VariablePaySection";
 import { WorkforceSection } from "./sections/WorkforceSection";
+import { pdfDocumentMetadata } from "./tagging/pdfDocumentMetadata";
+import { pdfHeading, pdfTag } from "./tagging/pdfStructure";
 
 function buildTitle(year: number): string {
 	return `Données préremplies : Déclaration des indicateurs de rémunération ${year}`;
@@ -40,7 +42,13 @@ export function PrefillPdfDocument({ data }: { data: PrefillPdfData }) {
 	const title = buildTitle(data.year);
 
 	return (
-		<Document>
+		<Document
+			{...pdfDocumentMetadata({
+				title,
+				subject: "Données préremplies issues de la DSN",
+				siren: data.siren,
+			})}
+		>
 			<Page size="A4" style={styles.page} wrap>
 				<PdfPageHeader sheet={styles} />
 				<PdfPageFooter label={`${title} - SIREN ${formatSiren(data.siren)}`} />
@@ -49,7 +57,9 @@ export function PrefillPdfDocument({ data }: { data: PrefillPdfData }) {
 
 				<View style={styles.content}>
 					<View style={styles.titleBlock}>
-						<Text style={styles.title}>{title}</Text>
+						<Text {...pdfHeading(1)} style={styles.title}>
+							{title}
+						</Text>
 						<Text style={styles.titleDate}>
 							Source : DSN (Déclarations Sociales Nominatives)
 						</Text>
@@ -79,7 +89,7 @@ export function PrefillPdfDocument({ data }: { data: PrefillPdfData }) {
 
 					<WorkforceSection data={data} sheet={styles} />
 					<View style={prefillLayout.sectionGap} />
-					<View wrap={false}>
+					<View {...pdfTag("Sect")} wrap={false}>
 						<SectionBanner sheet={styles} title="Écart de rémunération" />
 						<PayGapTable
 							formatAmount={formatCurrencyFixedTwo}

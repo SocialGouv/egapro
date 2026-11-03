@@ -1,6 +1,4 @@
-import { renderToBuffer } from "@react-pdf/renderer";
 import { and, eq } from "drizzle-orm";
-
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import { mapGipToFormData } from "~/modules/declaration-remuneration";
 import {
@@ -8,6 +6,7 @@ import {
 	type PrefillPdfData,
 } from "~/modules/declarationPdf/buildPrefillPdfData";
 import { PrefillPdfDocument } from "~/modules/declarationPdf/PrefillPdfDocument";
+import { renderTaggedPdf } from "~/modules/declarationPdf/tagging/renderTaggedPdf";
 import { getCurrentYear } from "~/modules/domain";
 import { auditQueryMetadata } from "~/server/audit/queryMetadata";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
@@ -100,7 +99,7 @@ export const GET = withAuditedRoute(
 			if (resolved.error) return resolved.error;
 
 			const body = await renderPdfAndCacheSize(ROUTE, resolved.data, () =>
-				renderToBuffer(PrefillPdfDocument({ data: resolved.data })),
+				renderTaggedPdf(PrefillPdfDocument({ data: resolved.data })),
 			);
 
 			return new Response(body, {
@@ -126,7 +125,7 @@ export const HEAD = withAuditedRoute(
 			}
 
 			const size = await resolvePdfSize(ROUTE, resolved.data, () =>
-				renderToBuffer(PrefillPdfDocument({ data: resolved.data })),
+				renderTaggedPdf(PrefillPdfDocument({ data: resolved.data })),
 			);
 
 			return new Response(null, {

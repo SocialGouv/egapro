@@ -64,8 +64,8 @@ describe("InfoSection", () => {
 			/>,
 		);
 
-		const detail = screen.getByText(/déposé le 1ᵉʳ avril 2027/);
-		expect(detail.textContent).toBe("\nPDF · déposé le 1ᵉʳ avril 2027");
+		const detail = screen.getByText(/déposé le 1er avril 2027/);
+		expect(detail.textContent).toBe("\nPDF · déposé le 1er avril 2027");
 		expect(detail).toHaveAttribute(
 			"data-style",
 			JSON.stringify(styles.infoDetail),

@@ -24,7 +24,10 @@ import {
 	derivePayGapErrors,
 	payGapFieldId,
 } from "../shared/formError/payGapErrors";
-import type { FieldError } from "../shared/formError/types";
+import {
+	type FieldError,
+	REQUIRED_FIELDS_NOTE_ID,
+} from "../shared/formError/types";
 import { GapInterpretationCallout } from "../shared/GapInterpretationCallout";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
 import { gipToStep2 } from "../shared/gipToStepData";
@@ -211,7 +214,9 @@ export function Step2PayGap({
 						)}
 					</p>
 
-					<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
+					<p className="fr-mb-0" id={REQUIRED_FIELDS_NOTE_ID}>
+						Tous les champs sont obligatoires.
+					</p>
 				</div>
 
 				<div className={`${common.dataSection} ${common.tableGap}`}>

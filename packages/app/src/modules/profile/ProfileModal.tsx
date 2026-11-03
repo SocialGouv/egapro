@@ -4,7 +4,7 @@ import { type FormEvent, useCallback, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import type { UseFormRegisterReturn } from "react-hook-form";
 
-import { getDsfrModal } from "~/modules/shared";
+import { composeDescribedBy, getDsfrModal } from "~/modules/shared";
 import { PhoneField } from "~/modules/shared/PhoneField";
 import { useDsfrDialogOpen } from "~/modules/shared/useDsfrDialogOpen";
 import { useZodForm } from "~/modules/shared/useZodForm";
@@ -17,6 +17,7 @@ import { type ProfileUpdate, updateProfileSchema } from "./schemas";
 
 const MODAL_ID = "profile-modal";
 const MODAL_TITLE_ID = "profile-modal-title";
+const REQUIRED_NOTE_ID = "profile-modal-required-note";
 
 /** DSFR modal displaying the declarant profile with editable identity fields. */
 export function ProfileModal() {
@@ -167,7 +168,10 @@ export function ProfileModal() {
 										compte ProConnect et compléter les informations manquantes
 										si nécessaire.
 									</p>
-									<p className="fr-text--regular fr-text-title--grey fr-mb-4w">
+									<p
+										className="fr-text--regular fr-text-title--grey fr-mb-4w"
+										id={REQUIRED_NOTE_ID}
+									>
 										Tous les champs sont obligatoires.
 									</p>
 									{profileQuery.isError && !isProfileLoading && (
@@ -190,6 +194,7 @@ export function ProfileModal() {
 													inputId="profile-last-name"
 													label="Nom"
 													registration={form.register("lastName")}
+													requiredNoteId={REQUIRED_NOTE_ID}
 												/>
 											</div>
 											<div className="fr-col-12 fr-col-md-6">
@@ -199,6 +204,7 @@ export function ProfileModal() {
 													inputId="profile-first-name"
 													label="Prénom"
 													registration={form.register("firstName")}
+													requiredNoteId={REQUIRED_NOTE_ID}
 												/>
 											</div>
 										</div>
@@ -213,6 +219,7 @@ export function ProfileModal() {
 											error={errors.phone?.message ?? null}
 											inputId="profile-phone"
 											registration={form.register("phone")}
+											requiredNoteId={REQUIRED_NOTE_ID}
 										/>
 									</form>
 								</div>
@@ -252,6 +259,7 @@ type IdentityFieldProps = {
 	inputId: string;
 	label: string;
 	registration: UseFormRegisterReturn;
+	requiredNoteId: string;
 };
 
 function IdentityField({
@@ -260,6 +268,7 @@ function IdentityField({
 	inputId,
 	label,
 	registration,
+	requiredNoteId,
 }: IdentityFieldProps) {
 	const messagesId = `${inputId}-messages`;
 	return (
@@ -272,7 +281,7 @@ function IdentityField({
 				{label}
 			</label>
 			<input
-				aria-describedby={messagesId}
+				aria-describedby={composeDescribedBy(requiredNoteId, messagesId)}
 				aria-invalid={error ? "true" : undefined}
 				aria-required="true"
 				autoComplete={autoComplete}

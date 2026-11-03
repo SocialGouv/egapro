@@ -4,7 +4,7 @@ const mocks = vi.hoisted(() => ({
 	auth: vi.fn(),
 	logAction: vi.fn().mockResolvedValue(undefined),
 	buildPdfData: vi.fn(),
-	renderToBuffer: vi.fn(),
+	renderTaggedPdf: vi.fn(),
 	DeclarationPdfDocument: vi.fn(),
 }));
 
@@ -14,8 +14,8 @@ vi.mock("~/server/audit/log", () => ({ logAction: mocks.logAction }));
 
 vi.mock("~/server/db", () => ({ db: {} }));
 
-vi.mock("@react-pdf/renderer", () => ({
-	renderToBuffer: mocks.renderToBuffer,
+vi.mock("~/modules/declarationPdf/tagging/renderTaggedPdf", () => ({
+	renderTaggedPdf: mocks.renderTaggedPdf,
 }));
 
 vi.mock("~/modules/declarationPdf/DeclarationPdfDocument", () => ({
@@ -54,7 +54,7 @@ function auditRow(): Record<string, unknown> {
 describe("GET /api/declaration-pdf", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		mocks.renderToBuffer.mockResolvedValue(PDF_BYTES);
+		mocks.renderTaggedPdf.mockResolvedValue(PDF_BYTES);
 		mocks.DeclarationPdfDocument.mockReturnValue(DOCUMENT);
 		mocks.buildPdfData.mockResolvedValue({ marker: "data" });
 		signedIn({ id: "user-1", email: "declarant@exemple.fr", siret: SIRET });
@@ -163,7 +163,7 @@ describe("GET /api/declaration-pdf", () => {
 
 	it("answers 400 when the declaration cannot be rendered", async () => {
 		vi.spyOn(console, "error").mockImplementation(() => undefined);
-		mocks.renderToBuffer.mockRejectedValue(new Error("pdf worker died"));
+		mocks.renderTaggedPdf.mockRejectedValue(new Error("pdf worker died"));
 
 		const response = await GET(request());
 

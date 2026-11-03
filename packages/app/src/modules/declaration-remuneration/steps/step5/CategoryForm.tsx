@@ -23,6 +23,7 @@ import type { FieldError } from "~/modules/declaration-remuneration/shared/formE
 import {
 	describedByForField,
 	findFieldError,
+	REQUIRED_FIELDS_NOTE_ID,
 } from "~/modules/declaration-remuneration/shared/formError/types";
 import { StepTitleRow } from "~/modules/declaration-remuneration/shared/StepTitleRow";
 import {
@@ -719,7 +720,9 @@ export function CategoryForm({
 						</span>
 					</p>
 				)}
-				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
+				<p className="fr-mb-0" id={REQUIRED_FIELDS_NOTE_ID}>
+					Tous les champs sont obligatoires.
+				</p>
 
 				{referencePeriodPicker ?? (
 					<div className={stepStyles.categoryHeader}>
@@ -750,6 +753,7 @@ export function CategoryForm({
 							aria-describedby={describedByForField(
 								CATEGORY_ALERT_ID,
 								sourceSummaryError,
+								REQUIRED_FIELDS_NOTE_ID,
 							)}
 							aria-invalid={sourceSummaryError ? true : undefined}
 							className="fr-select"
