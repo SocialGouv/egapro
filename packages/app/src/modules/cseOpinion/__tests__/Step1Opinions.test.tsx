@@ -463,6 +463,37 @@ describe("Step1Opinions", () => {
 			}
 		});
 
+		it("still reports an error when the schema rejects values that no empty field explains", async () => {
+			mockUseDeclarationDraft.mockReturnValue({
+				draft: {
+					firstDeclaration: {
+						accuracyOpinion: "unknown",
+						accuracyDate: "2026-03-01",
+					},
+				},
+				setField: mockSetField,
+				clearDraft: mockClearDraft,
+				hasDraft: true,
+				isLoadingDraft: false,
+				isSaving: false,
+				isPendingSave: false,
+			});
+			const user = userEvent.setup();
+			renderStep1();
+
+			await user.click(screen.getByRole("button", { name: /Suivant/ }));
+
+			const alert = await screen.findByRole("alert");
+			expect(within(alert).getByText("Valeur invalide")).toBeInTheDocument();
+			expect(within(alert).queryByRole("link")).toBeNull();
+			expect(
+				within(alert).getByText(
+					/Certaines informations saisies sont invalides/,
+				),
+			).toBeInTheDocument();
+			expect(mockMutate).not.toHaveBeenCalled();
+		});
+
 		it("clears a field's error state as soon as it is answered", async () => {
 			const user = userEvent.setup();
 			renderStep1();
@@ -561,10 +592,10 @@ describe("Step1Opinions", () => {
 				"second",
 				{ hasSecondDeclaration: true, secondDeclJustificationRequired: true },
 			],
-		] as const)("blocks an incomplete required %s-declaration justification", async (_which, props) => {
+		] as const)("blocks an incomplete required %s-declaration justification", async (which, props) => {
 			const user = userEvent.setup();
 			renderStep1({ ...props, initialData: SAVED_OPINIONS });
-			const prefix = _which === "first" ? "first-decl" : "second-decl";
+			const prefix = which === "first" ? "first-decl" : "second-decl";
 			const dateInput = document.getElementById(
 				`${prefix}-gap-date`,
 			) as HTMLInputElement;
@@ -575,7 +606,7 @@ describe("Step1Opinions", () => {
 			const alert = await screen.findByRole("alert");
 			expect(
 				within(alert).getByRole("link", {
-					name: `Renseignez la date de l'avis justifiant les écarts ≥ 5 %${_which === "first" ? "" : " de la seconde déclaration"}.`,
+					name: `Renseignez la date de l'avis justifiant les écarts ≥ 5 %${which === "first" ? "" : " de la seconde déclaration"}.`,
 				}),
 			).toHaveAttribute("href", `#${prefix}-gap-date`);
 			expect(dateInput).toHaveAttribute("aria-invalid", "true");

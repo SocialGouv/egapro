@@ -70,6 +70,13 @@ const PAGE_TITLE = "Transmission du ou des avis du CSE";
 
 const OPINIONS_ALERT_ID = "cse-opinions-errors";
 
+const UNIDENTIFIED_FIELD_ERROR: FieldError = {
+	fieldId: OPINIONS_ALERT_ID,
+	category: "invalid",
+	message:
+		"Certaines informations saisies sont invalides. Vérifiez les avis et les dates renseignés.",
+};
+
 function opinionCardId(
 	declarationNumber: DeclarationNumber,
 	type: ContentType,
@@ -202,7 +209,8 @@ export function Step1Opinions({
 			mutation.mutate(normalizeSubmittedOpinions(data, requirements));
 		},
 		() => {
-			reportMissingFields();
+			if (reportMissingFields().length > 0) return;
+			setFieldErrors([UNIDENTIFIED_FIELD_ERROR]);
 		},
 	);
 
