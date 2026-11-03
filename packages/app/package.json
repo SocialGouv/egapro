@@ -24,6 +24,7 @@
 		"db:push": "drizzle-kit push",
 		"db:seed-dev": "tsx scripts/seed-dev.ts",
 		"db:seed-observatory": "tsx scripts/seed-demo-observatory.ts",
+		"db:seed-rgaa-history": "tsx scripts/seed-rgaa-observatory-history.ts",
 		"db:seed-stats": "tsx scripts/seed-demo-stats.ts",
 		"db:studio": "drizzle-kit studio",
 		"docs:suit-values": "vitest run src/modules/export/shared/__tests__/suitValueTables.test.ts --update",
