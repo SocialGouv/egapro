@@ -32,12 +32,7 @@ export function AdminSettingsSections({
 		<>
 			<div className="fr-select-group fr-mt-4w">
 				<label className="fr-label" htmlFor="campaign-year-selector">
-					Année de campagne
-					<span className="fr-hint-text">
-						Les blocs annuels ci-dessous — calendrier commun, échéances
-						Rémunération, campagne Représentation — portent sur l'année
-						sélectionnée.
-					</span>
+					Année de la campagne
 				</label>
 				<select
 					className="fr-select"
@@ -63,6 +58,12 @@ export function AdminSettingsSections({
 					</h3>
 					<CommonCalendarForm key={year} year={year} />
 				</section>
+				<section aria-labelledby="lock-timeout-heading" className="fr-mt-4w">
+					<h3 className="fr-h5" id="lock-timeout-heading">
+						Verrou de connexion
+					</h3>
+					<LockTimeoutForm initialTimeoutMinutes={lockTimeoutMinutes} />
+				</section>
 			</section>
 
 			<section
@@ -78,12 +79,6 @@ export function AdminSettingsSections({
 					</h3>
 					<RemunerationDeadlinesForm key={year} year={year} />
 				</section>
-				<section aria-labelledby="lock-timeout-heading" className="fr-mt-4w">
-					<h3 className="fr-h5" id="lock-timeout-heading">
-						Verrou de déclaration
-					</h3>
-					<LockTimeoutForm initialTimeoutMinutes={lockTimeoutMinutes} />
-				</section>
 			</section>
 
 			<section
@@ -95,7 +90,7 @@ export function AdminSettingsSections({
 				</h2>
 				<section aria-labelledby="representation-campaign-heading">
 					<h3 className="fr-h5" id="representation-campaign-heading">
-						Campagne {year}
+						Échéances de la campagne {year}
 					</h3>
 					<RepresentationCampaignForm key={year} year={year} />
 				</section>

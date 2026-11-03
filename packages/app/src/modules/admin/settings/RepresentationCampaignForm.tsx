@@ -19,20 +19,6 @@ type Props = {
 	year: number;
 };
 
-type DateFieldKey = Exclude<keyof RepresentationCampaignFormInput, "year">;
-
-const DATE_FIELDS: readonly DateFieldKey[] = [
-	"campaignStartDate",
-	"campaignEndDate",
-	"declarationDeadline",
-];
-
-const FIELD_LABELS: Record<DateFieldKey, string> = {
-	campaignStartDate: "Date de démarrage de la campagne",
-	campaignEndDate: "Date de clôture de la campagne",
-	declarationDeadline: "Échéance de déclaration",
-};
-
 export function RepresentationCampaignForm({ year }: Props) {
 	const [status, setStatus] = useState<SettingsFormStatus>("idle");
 	const [serverError, setServerError] = useState<string | null>(null);
@@ -53,8 +39,6 @@ export function RepresentationCampaignForm({ year }: Props) {
 		if (!campaignQuery.data) return;
 		form.reset({
 			year: campaignQuery.data.year,
-			campaignStartDate: campaignQuery.data.campaignStartDate,
-			campaignEndDate: campaignQuery.data.campaignEndDate,
 			declarationDeadline: campaignQuery.data.declarationDeadline,
 		});
 	}, [campaignQuery.data, form]);
@@ -105,21 +89,19 @@ export function RepresentationCampaignForm({ year }: Props) {
 
 				<fieldset className="fr-fieldset">
 					<legend className="fr-fieldset__legend">
-						Campagne représentation équilibrée
+						Déclaration des indicateurs
 					</legend>
 					<div className="fr-fieldset__content fr-grid-row fr-grid-row--gutters fr-grid-row--bottom">
-						{DATE_FIELDS.map((key) => (
-							<div className="fr-col-12 fr-col-md-4" key={key}>
-								<SettingsDateField
-									error={form.formState.errors[key]?.message}
-									id={`representation-settings-${key}`}
-									label={FIELD_LABELS[key]}
-									registration={form.register(key)}
-									required
-									requiredNoteId={requiredNoteId}
-								/>
-							</div>
-						))}
+						<div className="fr-col-12 fr-col-md-4">
+							<SettingsDateField
+								error={form.formState.errors.declarationDeadline?.message}
+								id="representation-settings-declarationDeadline"
+								label="Échéance de la déclaration"
+								registration={form.register("declarationDeadline")}
+								required
+								requiredNoteId={requiredNoteId}
+							/>
+						</div>
 					</div>
 				</fieldset>
 			</div>
@@ -138,8 +120,6 @@ export function RepresentationCampaignForm({ year }: Props) {
 function buildDefaults(year: number): RepresentationCampaignFormInput {
 	return {
 		year,
-		campaignStartDate: "",
-		campaignEndDate: "",
 		declarationDeadline: "",
 	};
 }

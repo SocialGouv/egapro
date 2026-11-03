@@ -149,10 +149,16 @@ export const adminSettingsRouter = createTRPCRouter({
 		.input(remunerationDeadlinesFormSchema)
 		.mutation(async ({ ctx, input }) => {
 			const { year, ...deadlines } = input;
+			const defaults = getDefaultCampaignDeadlineColumns(year);
 
 			await ctx.db
 				.insert(campaignDeadlines)
-				.values({ year, ...deadlines })
+				.values({
+					year,
+					decl1JustificationDeadline: defaults.decl1JustificationDeadline,
+					decl2JustificationDeadline: defaults.decl2JustificationDeadline,
+					...deadlines,
+				})
 				.onConflictDoUpdate({
 					target: campaignDeadlines.year,
 					set: deadlines,
@@ -215,19 +221,19 @@ export const adminSettingsRouter = createTRPCRouter({
 	upsertRepresentationCampaign: adminProcedure
 		.input(representationCampaignFormSchema)
 		.mutation(async ({ ctx, input }) => {
-			const values = {
-				year: input.year,
-				campaignStartDate: input.campaignStartDate,
-				campaignEndDate: input.campaignEndDate,
-				declarationDeadline: input.declarationDeadline,
-			};
+			const defaults = getDefaultRepresentationCampaign(input.year);
 
 			await ctx.db
 				.insert(representationCampaigns)
-				.values(values)
+				.values({
+					year: input.year,
+					campaignStartDate: toPersistedIsoDate(defaults.campaignStartDate),
+					campaignEndDate: toPersistedIsoDate(defaults.campaignEndDate),
+					declarationDeadline: input.declarationDeadline,
+				})
 				.onConflictDoUpdate({
 					target: representationCampaigns.year,
-					set: values,
+					set: { declarationDeadline: input.declarationDeadline },
 				});
 
 			return { success: true as const };

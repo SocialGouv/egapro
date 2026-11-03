@@ -23,6 +23,37 @@ describe("SettingsReadOnlyField", () => {
 			"2027-02-02",
 		);
 	});
+
+	it("includes its hint in the accessible name when given one", () => {
+		render(
+			<SettingsReadOnlyField
+				hint="Calculée"
+				id="readonly-field"
+				label="Échéance calculée"
+				type="date"
+				value="2027-01-01"
+			/>,
+		);
+		expect(screen.getByLabelText(/échéance calculée/i)).toHaveAccessibleName(
+			/^Échéance calculée\s*Calculée$/,
+		);
+	});
+
+	it("renders without any hint when none is given", () => {
+		const { container } = render(
+			<SettingsReadOnlyField
+				id="readonly-field"
+				label="Échéance calculée"
+				type="text"
+				value="02/03/2027"
+			/>,
+		);
+		const input = screen.getByLabelText("Échéance calculée");
+		expect(input).toHaveAccessibleName("Échéance calculée");
+		expect(input).toHaveAttribute("readonly");
+		expect(input).toHaveValue("02/03/2027");
+		expect(container.querySelector(".fr-hint-text")).toBeNull();
+	});
 });
 
 describe("SettingsDateField", () => {
