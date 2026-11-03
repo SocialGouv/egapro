@@ -1,4 +1,3 @@
-import { renderToBuffer } from "@react-pdf/renderer";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import {
 	buildCseOpinionRecapData,
@@ -7,6 +6,7 @@ import {
 	cseOpinionPdfFilename,
 } from "~/modules/declarationPdf/buildCseOpinionRecapData";
 import { CseOpinionPdfDocument } from "~/modules/declarationPdf/CseOpinionPdfDocument";
+import { renderTaggedPdf } from "~/modules/declarationPdf/tagging/renderTaggedPdf";
 import { getCurrentYear } from "~/modules/domain";
 import { auditQueryMetadata } from "~/server/audit/queryMetadata";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
@@ -66,7 +66,7 @@ async function resolveCseOpinionPdf(
 }
 
 const renderDocument = (data: CseOpinionRecapData) => () =>
-	renderToBuffer(CseOpinionPdfDocument({ data }));
+	renderTaggedPdf(CseOpinionPdfDocument({ data }));
 
 export const GET = withAuditedRoute(
 	{

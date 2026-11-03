@@ -13,6 +13,7 @@ type Props = {
 	onDateChange: (value: string) => void;
 	readOnly?: boolean;
 	errorAlertId: string;
+	requiredNoteId: string;
 	opinionError?: FieldError;
 	dateError?: FieldError;
 };
@@ -26,6 +27,7 @@ export function OpinionCard({
 	onDateChange,
 	readOnly = false,
 	errorAlertId,
+	requiredNoteId,
 	opinionError,
 	dateError,
 }: Props) {
@@ -33,7 +35,11 @@ export function OpinionCard({
 	const dateId = opinionDateId(id);
 	const favorableId = opinionRadioId(id, "favorable");
 	const unfavorableId = opinionRadioId(id, "unfavorable");
-	const opinionDescribedBy = describedByForField(errorAlertId, opinionError);
+	const opinionDescribedBy = describedByForField(
+		errorAlertId,
+		opinionError,
+		requiredNoteId,
+	);
 	const opinionInvalid = opinionError ? true : undefined;
 	const dateInvalid = dateError ? true : undefined;
 	const fieldsetClass = opinionError
@@ -108,7 +114,11 @@ export function OpinionCard({
 					<span className="fr-hint-text">Format attendu : JJ/MM/AAAA</span>
 				</label>
 				<input
-					aria-describedby={describedByForField(errorAlertId, dateError)}
+					aria-describedby={describedByForField(
+						errorAlertId,
+						dateError,
+						requiredNoteId,
+					)}
 					aria-invalid={dateInvalid}
 					className={dateInputClass}
 					id={dateId}

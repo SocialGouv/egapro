@@ -395,6 +395,32 @@ describe("Step1Opinions", () => {
 		}
 	});
 
+	it("describes every opinion field of every card with the form-level mention", () => {
+		renderStep1({
+			firstDeclJustificationRequired: true,
+			hasSecondDeclaration: true,
+			secondDeclJustificationRequired: true,
+		});
+
+		for (const id of [
+			"first-decl-accuracy",
+			"first-decl-gap",
+			"second-decl-accuracy",
+			"second-decl-gap",
+		]) {
+			const card = cardOf(id);
+			for (const field of [
+				within(card).getByLabelText("Favorable"),
+				within(card).getByLabelText("Défavorable"),
+				within(card).getByLabelText(/Date de l'avis rendu par le CSE/),
+			]) {
+				expect(field).toHaveAccessibleDescription(
+					"Tous les champs sont obligatoires.",
+				);
+			}
+		}
+	});
+
 	it("offers a lone next button, without a link back to a transmitted step", () => {
 		renderStep1();
 
@@ -458,7 +484,7 @@ describe("Step1Opinions", () => {
 			]) {
 				expect(field).toHaveAttribute("aria-invalid", "true");
 				expect(field).toHaveAccessibleDescription(
-					`${ACCURACY_OPINION_ERROR} ${ACCURACY_DATE_ERROR}`,
+					`Tous les champs sont obligatoires. ${ACCURACY_OPINION_ERROR} ${ACCURACY_DATE_ERROR}`,
 				);
 			}
 		});

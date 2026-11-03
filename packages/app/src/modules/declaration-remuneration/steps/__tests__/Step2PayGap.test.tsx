@@ -358,3 +358,44 @@ describe("Step2PayGap", () => {
 		).toBeTruthy();
 	});
 });
+
+describe("Step2PayGap — required-fields mention", () => {
+	const REQUIRED_MENTION = "Tous les champs sont obligatoires.";
+
+	function renderEmptyStep() {
+		render(
+			<Step2PayGap
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialData={emptyStep2Data()}
+			/>,
+		);
+		return screen.getAllByRole("textbox");
+	}
+
+	it("describes every amount with the form-level mention", () => {
+		const inputs = renderEmptyStep();
+
+		expect(inputs).toHaveLength(8);
+		for (const input of inputs) {
+			expect(input).toHaveAccessibleDescription(REQUIRED_MENTION);
+		}
+	});
+
+	it("keeps the mention next to the error message once an amount is flagged", async () => {
+		const user = userEvent.setup();
+		const inputs = renderEmptyStep();
+
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		for (const input of inputs) {
+			expect(input).toHaveAttribute("aria-invalid", "true");
+			expect(input).toHaveAccessibleDescription(
+				expect.stringMatching(
+					/^Tous les champs sont obligatoires\. .*Renseignez le montant Annuelle brute moyenne pour les femmes\./,
+				),
+			);
+		}
+	});
+});

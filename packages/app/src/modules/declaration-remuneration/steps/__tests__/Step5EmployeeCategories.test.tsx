@@ -675,7 +675,7 @@ describe("Step5EmployeeCategories", () => {
 		expect(sourceSelect).toHaveAttribute("aria-invalid", "true");
 		expect(sourceSelect).toHaveAttribute(
 			"aria-describedby",
-			"step5-categories-error-empty",
+			"remuneration-required-fields-note step5-categories-error-empty",
 		);
 		expect(document.querySelector(".fr-error-text")).toBeNull();
 		const definitions = screen
@@ -807,7 +807,7 @@ describe("Step5EmployeeCategories", () => {
 		expect(missingPayInput).toHaveAttribute("aria-invalid", "true");
 		expect(missingPayInput).toHaveAttribute(
 			"aria-describedby",
-			"step5-categories-error-empty",
+			"remuneration-required-fields-note step5-categories-error-empty",
 		);
 		expect(mockMutate).not.toHaveBeenCalled();
 	});

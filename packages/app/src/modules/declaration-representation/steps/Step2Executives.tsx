@@ -29,6 +29,7 @@ const EXECUTIVES_COUNT_GROUP_NAME = "executives-count";
 const LEGEND_ID = `${EXECUTIVES_COUNT_GROUP_NAME}-legend`;
 const MESSAGES_ID = `${EXECUTIVES_COUNT_GROUP_NAME}-messages`;
 const ACCORDION_ID = `${EXECUTIVES_COUNT_GROUP_NAME}-definitions`;
+const REQUIRED_NOTE_ID = `${EXECUTIVES_COUNT_GROUP_NAME}-required-note`;
 const SELECTION_REQUIRED_MESSAGE =
 	"Veuillez sélectionner une option pour continuer.";
 
@@ -101,6 +102,7 @@ function ExecutiveCountOption({
 		<div className="fr-fieldset__element">
 			<div className="fr-radio-group fr-radio-rich">
 				<input
+					aria-describedby={REQUIRED_NOTE_ID}
 					checked={checked}
 					disabled={disabled}
 					id={id}
@@ -184,7 +186,9 @@ export function Step2Executives() {
 					Indiquez le nombre de cadres dirigeants dans votre entreprise pour
 					déterminer si l'écart de représentation est calculable.
 				</legend>
-				<p className="fr-mb-2w">Tous les champs sont obligatoires.</p>
+				<p className="fr-mb-2w" id={REQUIRED_NOTE_ID}>
+					Tous les champs sont obligatoires.
+				</p>
 				<div
 					className={`${styles.radioZone} ${showSelectionError ? styles.radioZoneError : ""}`}
 				>
@@ -226,6 +230,7 @@ export function Step2Executives() {
 						legend="Indiquez le pourcentage de représentation des femmes et des hommes parmi les cadres dirigeants."
 						onChange={handlePercentChange}
 						readOnly={isReadOnly}
+						requiredNoteId={REQUIRED_NOTE_ID}
 						trailingContent={
 							knownVerdict ? (
 								<ComplianceBadge verdict={knownVerdict} />

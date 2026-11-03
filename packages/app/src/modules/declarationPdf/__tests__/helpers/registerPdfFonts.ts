@@ -22,6 +22,11 @@ export function registerPdfFonts({ hyphenation = false } = {}): void {
 				src: resolve("@gouvfr/dsfr/dist/fonts/Marianne-Bold.woff"),
 				fontWeight: 700,
 			},
+			{
+				src: resolve("@gouvfr/dsfr/dist/fonts/Marianne-Regular_Italic.woff"),
+				fontStyle: "italic",
+				fontWeight: 400,
+			},
 		],
 	});
 

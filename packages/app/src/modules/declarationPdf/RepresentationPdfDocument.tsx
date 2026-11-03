@@ -10,6 +10,9 @@ import type {
 } from "./buildRepresentationPdfData";
 import { ensurePdfFontsRegistered } from "./pdfFonts";
 import { styles } from "./pdfStyles";
+import { normalizePdfText } from "./sections/tableParts";
+import { pdfDocumentMetadata } from "./tagging/pdfDocumentMetadata";
+import { pdfHeading, pdfTag } from "./tagging/pdfStructure";
 
 type Props = {
 	data: RepresentationPdfData;
@@ -31,17 +34,19 @@ function IndicatorCard({
 	indicator: RepresentationPdfIndicator;
 }) {
 	return (
-		<View style={styles.card}>
-			<Text style={styles.cardTitle}>{indicator.title}</Text>
+		<View {...pdfTag("Sect")} style={styles.card}>
+			<Text {...pdfHeading(2)} style={styles.cardTitle}>
+				{indicator.title}
+			</Text>
 			{indicator.notComputableReason === null ? (
 				<View style={styles.proportionRow}>
-					<View style={styles.proportionItem}>
+					<View {...pdfTag("P")} style={styles.proportionItem}>
 						<Text style={styles.proportionLabel}>Femmes</Text>
 						<Text style={styles.proportionValue}>
 							{formatPercentage(indicator.womenPercent)}
 						</Text>
 					</View>
-					<View style={styles.proportionItem}>
+					<View {...pdfTag("P")} style={styles.proportionItem}>
 						<Text style={styles.proportionLabel}>Hommes</Text>
 						<Text style={styles.proportionValue}>
 							{formatPercentage(indicator.menPercent)}
@@ -62,10 +67,16 @@ export function RepresentationPdfDocument({ data }: Props) {
 	ensurePdfFontsRegistered();
 
 	return (
-		<Document>
+		<Document
+			{...pdfDocumentMetadata({
+				title: `Démarche des indicateurs de représentation ${data.campaignYear}`,
+				subject: "Indicateurs de représentation femmes-hommes",
+				siren: data.siren,
+			})}
+		>
 			<Page size="A4" style={styles.page}>
 				<View style={styles.header}>
-					<Text style={styles.title}>
+					<Text {...pdfHeading(1)} style={styles.title}>
 						Démarche des indicateurs de représentation {data.campaignYear}
 					</Text>
 					<Text style={styles.subtitle}>Au titre des données {data.year}</Text>
@@ -74,15 +85,17 @@ export function RepresentationPdfDocument({ data }: Props) {
 					</Text>
 				</View>
 
-				<View style={styles.card}>
-					<Text style={styles.cardTitle}>Période de référence</Text>
-					<View style={styles.tableRow}>
+				<View {...pdfTag("Sect")} style={styles.card}>
+					<Text {...pdfHeading(2)} style={styles.cardTitle}>
+						Période de référence
+					</Text>
+					<View {...pdfTag("P")} style={styles.tableRow}>
 						<Text style={styles.tableCellLabel}>Début de la période</Text>
 						<Text style={styles.tableCellValue}>
 							{formatOptionalDate(data.referencePeriodStart)}
 						</Text>
 					</View>
-					<View style={styles.tableRowLast}>
+					<View {...pdfTag("P")} style={styles.tableRowLast}>
 						<Text style={styles.tableCellLabel}>Fin de la période</Text>
 						<Text style={styles.tableCellValue}>
 							{formatOptionalDate(data.referencePeriodEnd)}
@@ -94,18 +107,20 @@ export function RepresentationPdfDocument({ data }: Props) {
 					<IndicatorCard indicator={indicator} key={indicator.title} />
 				))}
 
-				<View style={styles.card}>
-					<Text style={styles.cardTitle}>Publication</Text>
+				<View {...pdfTag("Sect")} style={styles.card}>
+					<Text {...pdfHeading(2)} style={styles.cardTitle}>
+						Publication
+					</Text>
 					{data.publicationApplicable ? (
 						<>
-							<View style={styles.tableRow}>
+							<View {...pdfTag("P")} style={styles.tableRow}>
 								<Text style={styles.tableCellLabel}>Date de publication</Text>
 								<Text style={styles.tableCellValue}>
 									{formatOptionalDate(data.publishDate)}
 								</Text>
 							</View>
 							{data.hasWebsite ? (
-								<View style={styles.tableRowLast}>
+								<View {...pdfTag("P")} style={styles.tableRowLast}>
 									<Text style={styles.tableCellLabel}>
 										Adresse de la page (URL)
 									</Text>
@@ -114,7 +129,7 @@ export function RepresentationPdfDocument({ data }: Props) {
 									</Text>
 								</View>
 							) : (
-								<View style={styles.tableRowLast}>
+								<View {...pdfTag("P")} style={styles.tableRowLast}>
 									<Text style={styles.tableCellLabel}>
 										Modalités de communication
 									</Text>
@@ -133,9 +148,10 @@ export function RepresentationPdfDocument({ data }: Props) {
 
 				<Text style={styles.footer}>
 					{data.submittedAt
-						? `Déclaration transmise le ${formatLongDate(data.submittedAt)} — `
+						? `Déclaration transmise le ${normalizePdfText(formatLongDate(data.submittedAt))} — `
 						: ""}
-					Document généré le {formatLongDate(data.generatedAt)}
+					Document généré le{" "}
+					{normalizePdfText(formatLongDate(data.generatedAt))}
 				</Text>
 			</Page>
 		</Document>

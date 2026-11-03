@@ -347,10 +347,13 @@ describe("Step3VariablePay", () => {
 		expect(womenInput).toHaveAttribute("aria-invalid", "true");
 		expect(womenInput).toHaveAttribute(
 			"aria-describedby",
-			"step3-beneficiaries-error-invalid",
+			"remuneration-required-fields-note step3-beneficiaries-error-invalid",
 		);
 		expect(menInput).not.toHaveAttribute("aria-invalid");
-		expect(menInput).not.toHaveAttribute("aria-describedby");
+		expect(menInput).toHaveAttribute(
+			"aria-describedby",
+			"remuneration-required-fields-note",
+		);
 		expect(screen.getByText(/ne peut pas dépasser/i)).toHaveAttribute(
 			"id",
 			"step3-beneficiaries-error-invalid",
@@ -379,10 +382,13 @@ describe("Step3VariablePay", () => {
 		expect(menInput).toHaveAttribute("aria-invalid", "true");
 		expect(menInput).toHaveAttribute(
 			"aria-describedby",
-			"step3-beneficiaries-error-invalid",
+			"remuneration-required-fields-note step3-beneficiaries-error-invalid",
 		);
 		expect(womenInput).not.toHaveAttribute("aria-invalid");
-		expect(womenInput).not.toHaveAttribute("aria-describedby");
+		expect(womenInput).toHaveAttribute(
+			"aria-describedby",
+			"remuneration-required-fields-note",
+		);
 		expect(screen.getByText(/ne peut pas dépasser/i)).toHaveAttribute(
 			"id",
 			"step3-beneficiaries-error-invalid",
@@ -411,7 +417,10 @@ describe("Step3VariablePay", () => {
 		await user.clear(womenInput);
 		await user.type(womenInput, "10");
 		expect(womenInput).not.toHaveAttribute("aria-invalid");
-		expect(womenInput).not.toHaveAttribute("aria-describedby");
+		expect(womenInput).toHaveAttribute(
+			"aria-describedby",
+			"remuneration-required-fields-note",
+		);
 		expect(screen.queryByText(/ne peut pas dépasser/i)).not.toBeInTheDocument();
 	});
 

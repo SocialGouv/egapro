@@ -7,6 +7,9 @@ import type {
 } from "./buildTransmittedPdfData";
 import { ensurePdfFontsRegistered } from "./pdfFonts";
 import { styles } from "./pdfStyles";
+import { normalizePdfText } from "./sections/tableParts";
+import { pdfDocumentMetadata } from "./tagging/pdfDocumentMetadata";
+import { pdfHeading, pdfTag } from "./tagging/pdfStructure";
 
 type Props = {
 	data: TransmittedPdfData;
@@ -55,12 +58,13 @@ function OpinionSection({
 	opinions: TransmittedPdfOpinion[];
 }) {
 	return (
-		<View style={styles.categoryBlock}>
-			<Text style={styles.sectionLabel}>
+		<View {...pdfTag("Sect")} style={styles.categoryBlock}>
+			<Text {...pdfHeading(3)} style={styles.sectionLabel}>
 				{formatDeclarationLabel(declarationNumber)}
 			</Text>
 			{opinions.map((opinion) => (
 				<View
+					{...pdfTag("P")}
 					key={`opinion-${declarationNumber}-${opinion.type}`}
 					style={styles.tableRow}
 				>
@@ -86,14 +90,14 @@ function FormalNoticeJointEvaluationSection({
 	file: TransmittedPdfFile;
 }) {
 	return (
-		<View style={styles.card}>
-			<Text style={styles.cardTitle}>
+		<View {...pdfTag("Sect")} style={styles.card}>
+			<Text {...pdfHeading(2)} style={styles.cardTitle}>
 				Évaluation conjointe - mise en demeure
 			</Text>
-			<View style={styles.tableRow}>
+			<View {...pdfTag("P")} style={styles.tableRow}>
 				<Text style={styles.tableCellLabel}>{file.fileName}</Text>
 				<Text style={styles.tableCellValue}>
-					Déposé le {formatLongDate(file.uploadedAt)}
+					Déposé le {normalizePdfText(formatLongDate(file.uploadedAt))}
 				</Text>
 			</View>
 		</View>
@@ -107,10 +111,16 @@ export function TransmittedPdfDocument({ data }: Props) {
 	const declarationNumbers = [...groupedOpinions.keys()].sort((a, b) => a - b);
 
 	return (
-		<Document>
+		<Document
+			{...pdfDocumentMetadata({
+				title: `Récapitulatif des éléments transmis ${data.year + 1}`,
+				subject: "Éléments transmis : avis du CSE et évaluation conjointe",
+				siren: data.siren,
+			})}
+		>
 			<Page size="A4" style={styles.page}>
 				<View style={styles.header}>
-					<Text style={styles.title}>
+					<Text {...pdfHeading(1)} style={styles.title}>
 						Récapitulatif des éléments transmis {data.year + 1}
 					</Text>
 					<Text style={styles.subtitle}>
@@ -122,8 +132,10 @@ export function TransmittedPdfDocument({ data }: Props) {
 				</View>
 
 				{/* CSE Opinions */}
-				<View style={styles.card}>
-					<Text style={styles.cardTitle}>Avis du CSE</Text>
+				<View {...pdfTag("Sect")} style={styles.card}>
+					<Text {...pdfHeading(2)} style={styles.cardTitle}>
+						Avis du CSE
+					</Text>
 					{data.opinions.length === 0 ? (
 						<Text style={styles.noData}>Aucun avis enregistré</Text>
 					) : (
@@ -142,16 +154,22 @@ export function TransmittedPdfDocument({ data }: Props) {
 				</View>
 
 				{/* CSE Opinion Files */}
-				<View style={styles.card}>
-					<Text style={styles.cardTitle}>Fichiers avis CSE</Text>
+				<View {...pdfTag("Sect")} style={styles.card}>
+					<Text {...pdfHeading(2)} style={styles.cardTitle}>
+						Fichiers avis CSE
+					</Text>
 					{data.cseFiles.length === 0 ? (
 						<Text style={styles.noData}>Aucun fichier déposé</Text>
 					) : (
 						data.cseFiles.map((file) => (
-							<View key={file.fileName} style={styles.tableRow}>
+							<View
+								{...pdfTag("P")}
+								key={file.fileName}
+								style={styles.tableRow}
+							>
 								<Text style={styles.tableCellLabel}>{file.fileName}</Text>
 								<Text style={styles.tableCellValue}>
-									Déposé le {formatLongDate(file.uploadedAt)}
+									Déposé le {normalizePdfText(formatLongDate(file.uploadedAt))}
 								</Text>
 							</View>
 						))
@@ -159,15 +177,20 @@ export function TransmittedPdfDocument({ data }: Props) {
 				</View>
 
 				{/* Joint Evaluation File */}
-				<View style={styles.card}>
-					<Text style={styles.cardTitle}>Évaluation conjointe</Text>
+				<View {...pdfTag("Sect")} style={styles.card}>
+					<Text {...pdfHeading(2)} style={styles.cardTitle}>
+						Évaluation conjointe
+					</Text>
 					{data.jointEvaluationFile ? (
-						<View style={styles.tableRow}>
+						<View {...pdfTag("P")} style={styles.tableRow}>
 							<Text style={styles.tableCellLabel}>
 								{data.jointEvaluationFile.fileName}
 							</Text>
 							<Text style={styles.tableCellValue}>
-								Déposé le {formatLongDate(data.jointEvaluationFile.uploadedAt)}
+								Déposé le{" "}
+								{normalizePdfText(
+									formatLongDate(data.jointEvaluationFile.uploadedAt),
+								)}
 							</Text>
 						</View>
 					) : (
@@ -181,7 +204,9 @@ export function TransmittedPdfDocument({ data }: Props) {
 					/>
 				)}
 
-				<Text style={styles.footer}>Document généré le {data.generatedAt}</Text>
+				<Text style={styles.footer}>
+					Document généré le {normalizePdfText(data.generatedAt)}
+				</Text>
 			</Page>
 		</Document>
 	);

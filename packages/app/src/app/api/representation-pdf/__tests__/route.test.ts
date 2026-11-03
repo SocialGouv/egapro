@@ -4,7 +4,7 @@ const mocks = vi.hoisted(() => ({
 	auth: vi.fn(),
 	logAction: vi.fn().mockResolvedValue(undefined),
 	buildRepresentationPdfData: vi.fn(),
-	renderToBuffer: vi.fn(),
+	renderTaggedPdf: vi.fn(),
 	RepresentationPdfDocument: vi.fn(),
 }));
 
@@ -14,8 +14,8 @@ vi.mock("~/server/audit/log", () => ({ logAction: mocks.logAction }));
 
 vi.mock("~/server/db", () => ({ db: {} }));
 
-vi.mock("@react-pdf/renderer", () => ({
-	renderToBuffer: mocks.renderToBuffer,
+vi.mock("~/modules/declarationPdf/tagging/renderTaggedPdf", () => ({
+	renderTaggedPdf: mocks.renderTaggedPdf,
 }));
 
 vi.mock("~/modules/declarationPdf/RepresentationPdfDocument", () => ({
@@ -74,7 +74,7 @@ describe("GET /api/representation-pdf", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		clearPdfSizeCache();
-		mocks.renderToBuffer.mockResolvedValue(PDF_BYTES);
+		mocks.renderTaggedPdf.mockResolvedValue(PDF_BYTES);
 		mocks.RepresentationPdfDocument.mockReturnValue(DOCUMENT);
 		mocks.buildRepresentationPdfData.mockResolvedValue({
 			campaignYear: YEAR + 1,
@@ -107,7 +107,7 @@ describe("GET /api/representation-pdf", () => {
 		expect(mocks.RepresentationPdfDocument).toHaveBeenCalledWith({
 			data: { campaignYear: YEAR + 1 },
 		});
-		expect(mocks.renderToBuffer).toHaveBeenCalledWith(DOCUMENT);
+		expect(mocks.renderTaggedPdf).toHaveBeenCalledWith(DOCUMENT);
 	});
 
 	it("falls back on the current reference year when none is requested", async () => {
@@ -182,12 +182,12 @@ describe("GET /api/representation-pdf", () => {
 		const response = await GET(request());
 
 		expect(response.status).toBe(404);
-		expect(mocks.renderToBuffer).not.toHaveBeenCalled();
+		expect(mocks.renderTaggedPdf).not.toHaveBeenCalled();
 	});
 
 	it("answers 400 when the recap cannot be rendered", async () => {
 		vi.spyOn(console, "error").mockImplementation(() => undefined);
-		mocks.renderToBuffer.mockRejectedValue(new Error("pdf worker died"));
+		mocks.renderTaggedPdf.mockRejectedValue(new Error("pdf worker died"));
 
 		const response = await GET(request());
 
@@ -256,7 +256,7 @@ describe("HEAD /api/representation-pdf", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		clearPdfSizeCache();
-		mocks.renderToBuffer.mockResolvedValue(PDF_BYTES);
+		mocks.renderTaggedPdf.mockResolvedValue(PDF_BYTES);
 		mocks.RepresentationPdfDocument.mockReturnValue(DOCUMENT);
 		generationTick = 0;
 		// The real builder stamps a fresh Date on every call, and two calls in the
@@ -292,21 +292,21 @@ describe("HEAD /api/representation-pdf", () => {
 
 	it("serves the size a preceding download already paid for", async () => {
 		await GET(request());
-		expect(mocks.renderToBuffer).toHaveBeenCalledTimes(1);
+		expect(mocks.renderTaggedPdf).toHaveBeenCalledTimes(1);
 
 		const response = await HEAD(request());
 
 		expect(response.headers.get("Content-Length")).toBe(
 			String(PDF_BYTES.byteLength),
 		);
-		expect(mocks.renderToBuffer).toHaveBeenCalledTimes(1);
+		expect(mocks.renderTaggedPdf).toHaveBeenCalledTimes(1);
 	});
 
 	it("renders once for repeated probes on the same data", async () => {
 		await HEAD(request());
 		await HEAD(request());
 
-		expect(mocks.renderToBuffer).toHaveBeenCalledTimes(1);
+		expect(mocks.renderTaggedPdf).toHaveBeenCalledTimes(1);
 	});
 
 	it("renders again once the underlying data changed", async () => {
@@ -321,7 +321,7 @@ describe("HEAD /api/representation-pdf", () => {
 		);
 		await HEAD(request());
 
-		expect(mocks.renderToBuffer).toHaveBeenCalledTimes(2);
+		expect(mocks.renderTaggedPdf).toHaveBeenCalledTimes(2);
 	});
 
 	it.each([

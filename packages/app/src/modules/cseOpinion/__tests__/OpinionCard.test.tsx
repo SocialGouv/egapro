@@ -12,6 +12,7 @@ describe("OpinionCard", () => {
 		onOpinionChange: vi.fn(),
 		onDateChange: vi.fn(),
 		errorAlertId: "opinions-errors",
+		requiredNoteId: "test-required-note",
 	};
 
 	it("renders the title and radio options", () => {
@@ -72,7 +73,7 @@ describe("OpinionCard", () => {
 		expect(dateInput).toHaveValue("2026-01-15");
 	});
 
-	it("leaves the fields valid and undescribed when there is no error", () => {
+	it("leaves the fields valid and described by the required note only when there is no error", () => {
 		render(<OpinionCard {...defaultProps} />);
 
 		for (const field of [
@@ -81,7 +82,7 @@ describe("OpinionCard", () => {
 			screen.getByLabelText(/Date de l'avis rendu par le CSE/),
 		]) {
 			expect(field).not.toHaveAttribute("aria-invalid");
-			expect(field).not.toHaveAttribute("aria-describedby");
+			expect(field).toHaveAttribute("aria-describedby", "test-required-note");
 		}
 	});
 
@@ -104,7 +105,7 @@ describe("OpinionCard", () => {
 			expect(radio).toHaveAttribute("aria-invalid", "true");
 			expect(radio).toHaveAttribute(
 				"aria-describedby",
-				"opinions-errors-empty",
+				"test-required-note opinions-errors-empty",
 			);
 		}
 		expect(
@@ -131,7 +132,7 @@ describe("OpinionCard", () => {
 		expect(dateInput).toHaveAttribute("aria-invalid", "true");
 		expect(dateInput).toHaveAttribute(
 			"aria-describedby",
-			"opinions-errors-empty",
+			"test-required-note opinions-errors-empty",
 		);
 		expect(dateInput).toHaveClass("fr-input--error");
 		expect(screen.getByLabelText("Favorable")).not.toHaveAttribute(

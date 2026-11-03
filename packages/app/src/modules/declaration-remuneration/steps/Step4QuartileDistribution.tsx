@@ -19,7 +19,10 @@ import { useDraftHydration } from "../shared/draft/useDraftHydration";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
 import { FieldErrorAlert } from "../shared/formError/FieldErrorAlert";
-import type { FieldError } from "../shared/formError/types";
+import {
+	type FieldError,
+	REQUIRED_FIELDS_NOTE_ID,
+} from "../shared/formError/types";
 import { getNextStepHref } from "../shared/funnelSteps";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
 import { useLockContext } from "../shared/lock/LockContext";
@@ -380,7 +383,9 @@ export function Step4QuartileDistribution({
 						</p>
 					)}
 
-					<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
+					<p className="fr-mb-0" id={REQUIRED_FIELDS_NOTE_ID}>
+						Tous les champs sont obligatoires.
+					</p>
 				</div>
 
 				<div className={stepStyles.dataContainer}>
