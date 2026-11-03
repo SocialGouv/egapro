@@ -164,6 +164,7 @@ export function CategoryImportExport({ onImport, disabled = false }: Props) {
 												disabled={isImporting}
 												error={fileError}
 												inputId={uploadId}
+												labelId={importTitleId}
 												maxFileCount={1}
 												onFilesChange={(files, error) => {
 													setSelectedFiles(files);

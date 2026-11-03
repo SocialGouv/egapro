@@ -876,11 +876,13 @@ test.describe("Step 5 — one physical headcount per pay basis (#4254)", () => {
 			// the parser are asserted against each other, not against a copy.
 			const csv = `\uFEFF${templateHeaders}\n${Object.values(importedValues).join(";")}`;
 
-			await panel.getByLabel("Sélectionner des fichiers").setInputFiles({
-				buffer: Buffer.from(csv, "utf8"),
-				mimeType: "text/csv",
-				name: "categories.csv",
-			});
+			await panel
+				.getByLabel("Importer vos données depuis un fichier")
+				.setInputFiles({
+					buffer: Buffer.from(csv, "utf8"),
+					mimeType: "text/csv",
+					name: "categories.csv",
+				});
 			await panel
 				.getByRole("button", { exact: true, name: "Importer" })
 				.click();
