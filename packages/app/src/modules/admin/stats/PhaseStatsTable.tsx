@@ -1,17 +1,17 @@
-import { useId } from "react";
-
-type Phase = "wizard" | "post_submit";
+import { type ReactNode, useId } from "react";
+import { PHASE_LABELS } from "./constants";
+import type { StatsPhase } from "./types";
 
 type PhaseRow = {
 	key: string;
-	phase: Phase;
+	phase: StatsPhase;
 	label: string;
 };
 
 export type PhaseStatsColumn<Row extends PhaseRow> = {
 	key: string;
 	label: string;
-	render: (row: Row) => string;
+	render: (row: Row) => ReactNode;
 };
 
 type Props<Row extends PhaseRow> = {
@@ -21,14 +21,9 @@ type Props<Row extends PhaseRow> = {
 	rows: Row[];
 };
 
-const PHASES: Phase[] = ["wizard", "post_submit"];
+const PHASES: StatsPhase[] = ["wizard", "post_submit"];
 
-const PHASE_HEADERS: Record<Phase, string> = {
-	wizard: "Parcours initial (wizard A–F)",
-	post_submit: "Démarche post-transmission",
-};
-
-const PHASE_HEADER_CLASSES: Record<Phase, string> = {
+const PHASE_HEADER_CLASSES: Record<StatsPhase, string> = {
 	wizard: "fr-text--bold fr-background-alt--blue-france",
 	post_submit: "fr-text--bold fr-background-alt--red-marianne",
 };
@@ -65,7 +60,7 @@ function PhaseDataRow<Row extends PhaseRow>({
 }
 
 type PhaseRowGroupProps<Row extends PhaseRow> = {
-	phase: Phase;
+	phase: StatsPhase;
 	rows: Row[];
 	tableId: string;
 	columns: PhaseStatsColumn<Row>[];
@@ -91,7 +86,7 @@ function PhaseRowGroup<Row extends PhaseRow>({
 					colSpan={columns.length + 1}
 					id={phaseId}
 				>
-					{PHASE_HEADERS[phase]}
+					{PHASE_LABELS[phase]}
 				</th>
 			</tr>
 			{rows.map((row) => (

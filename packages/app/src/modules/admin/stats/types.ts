@@ -1,3 +1,5 @@
+export type StatsPhase = "wizard" | "post_submit";
+
 /**
  * One point on the campaign progression curve.
  * `day` is an ISO date (YYYY-MM-DD) — the calendar day the cumulative count
@@ -41,7 +43,7 @@ export type CampaignStats = {
  */
 export type StepDurationRow = {
 	key: string;
-	phase: "wizard" | "post_submit";
+	phase: StatsPhase;
 	step: number | null;
 	label: string;
 	sampleSize: number;
@@ -72,7 +74,7 @@ export type StepDurationRow = {
  */
 export type StepDropoffRow = {
 	key: string;
-	phase: "wizard" | "post_submit";
+	phase: StatsPhase;
 	step: number | null;
 	label: string;
 	total: number;
