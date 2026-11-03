@@ -1,5 +1,8 @@
 import { render, screen } from "@testing-library/react";
+import { userEvent } from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+
+const { mockPush } = vi.hoisted(() => ({ mockPush: vi.fn() }));
 
 vi.mock("next/navigation", async () => {
 	const actual =
@@ -7,7 +10,7 @@ vi.mock("next/navigation", async () => {
 	return {
 		...actual,
 		useRouter: () => ({
-			push: vi.fn(),
+			push: mockPush,
 			replace: vi.fn(),
 			back: vi.fn(),
 			refresh: vi.fn(),
@@ -156,6 +159,32 @@ describe("DeclarationTable", () => {
 		expect(
 			screen.getByRole("navigation", { name: "Pagination" }),
 		).toBeInTheDocument();
+	});
+
+	it("keeps keyboard focus on « Première page » once the first page is shown", async () => {
+		const user = userEvent.setup();
+		const scrollTo = vi
+			.spyOn(window, "scrollTo")
+			.mockImplementation(() => undefined);
+		mockPush.mockClear();
+		const { rerender } = render(
+			<DeclarationTable {...defaultProps} page={2} totalPages={3} />,
+		);
+		const first = screen.getByRole("button", { name: "Première page" });
+		first.focus();
+
+		await user.keyboard("{Enter}");
+		expect(mockPush).toHaveBeenCalledWith(expect.stringContaining("page=1"));
+
+		rerender(<DeclarationTable {...defaultProps} page={1} totalPages={3} />);
+		expect(first).toHaveAttribute("aria-disabled", "true");
+		expect(first).toBeEnabled();
+		expect(first).toHaveFocus();
+
+		mockPush.mockClear();
+		await user.keyboard("{Enter}");
+		expect(mockPush).not.toHaveBeenCalled();
+		scrollTo.mockRestore();
 	});
 
 	it("shows cancelled badge when cancelledAt is set", () => {

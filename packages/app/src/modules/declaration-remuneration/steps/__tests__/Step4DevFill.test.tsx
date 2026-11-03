@@ -51,7 +51,9 @@ describe("Step4QuartileDistribution dev fill", () => {
 		await user.click(screen.getByRole("button", { name: "[DEV] Remplir" }));
 
 		// 3 threshold inputs per table → 6 total
-		const seuilInputs = screen.getAllByLabelText(/Seuil maximum/);
+		const seuilInputs = screen.getAllByLabelText(
+			/Montants des tranches, maximum/,
+		);
 		expect(seuilInputs.length).toBe(6);
 		const firstSeuil = seuilInputs[0] as HTMLInputElement;
 		expect(firstSeuil.value.replace(/\s/g, " ")).toBe("22 000,00");

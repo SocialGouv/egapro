@@ -168,6 +168,15 @@ describe("Step1Workforce", () => {
 		);
 	});
 
+	it("lets each pay basis label wrap with its help button instead of the DSFR nowrap (RGAA 10.12)", () => {
+		renderStep1();
+		for (const name of [/^Rémunération annuelle/, /^Rémunération horaire/]) {
+			const rowHeader = screen.getByRole("rowheader", { name });
+			expect(rowHeader).toHaveClass("fr-cell--multiline");
+			expect(within(rowHeader).getByRole("button")).toBeInTheDocument();
+		}
+	});
+
 	it("renders reference period and mandatory fields notice", () => {
 		renderStep1();
 		expect(

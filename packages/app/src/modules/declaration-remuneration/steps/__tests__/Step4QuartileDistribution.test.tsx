@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import {
@@ -188,11 +188,41 @@ describe("Step4QuartileDistribution", () => {
 			/>,
 		);
 		// 3 threshold inputs per table × 2 tables = 6
-		expect(screen.getAllByLabelText(/Seuil maximum/i).length).toBe(6);
+		expect(
+			screen.getAllByLabelText(/Montants des tranches, maximum/i).length,
+		).toBe(6);
 		// Q4 max is readonly (not an input)
 		expect(
-			screen.queryByLabelText(/Seuil maximum 4e quartile/i),
+			screen.queryByLabelText(/Montants des tranches, maximum du 4e quartile/i),
 		).not.toBeInTheDocument();
+	});
+
+	it("starts each threshold field name with its visible column header, then the quartile (RGAA 11.2)", () => {
+		render(
+			<Step4QuartileDistribution
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialData={emptyStep4Data()}
+			/>,
+		);
+		for (const [tableName, period] of [
+			["Rémunération annuelle brute moyenne", "annuel"],
+			["Rémunération horaire brute moyenne", "horaire"],
+		] as const) {
+			const table = screen.getByRole("table", { name: tableName });
+			const visibleHeader = within(table).getByRole("columnheader", {
+				name: /^Montants des tranches/,
+			}).firstChild?.textContent;
+			expect(visibleHeader).toBe("Montants des tranches");
+			for (const ordinal of ["1er", "2e", "3e"]) {
+				expect(
+					within(table).getByRole("textbox", {
+						name: `${visibleHeader}, maximum du ${ordinal} quartile ${period}`,
+					}),
+				).toBeInTheDocument();
+			}
+		}
 	});
 
 	it("renders 4 women and 4 men count inputs per table", () => {
@@ -219,7 +249,7 @@ describe("Step4QuartileDistribution", () => {
 			/>,
 		);
 		const seuil1 = screen.getAllByLabelText(
-			/Seuil maximum 1er quartile annuel/i,
+			/Montants des tranches, maximum du 1er quartile annuel/i,
 		)[0] as HTMLInputElement;
 		await user.clear(seuil1);
 		await user.type(seuil1, "20000");
@@ -240,7 +270,7 @@ describe("Step4QuartileDistribution", () => {
 			/>,
 		);
 		const seuil1 = screen.getAllByLabelText(
-			/Seuil maximum 1er quartile annuel/i,
+			/Montants des tranches, maximum du 1er quartile annuel/i,
 		)[0] as HTMLInputElement;
 		await user.clear(seuil1);
 		await user.type(seuil1, "-50");
@@ -360,7 +390,9 @@ describe("Step4QuartileDistribution", () => {
 				initialData={emptyStep4Data()}
 			/>,
 		);
-		const seuilInputs = screen.getAllByLabelText(/Seuil maximum/);
+		const seuilInputs = screen.getAllByLabelText(
+			/Montants des tranches, maximum/,
+		);
 		expect(seuilInputs[0]).toHaveValue("25 000,00");
 		const womenCountInputs = screen.getAllByLabelText(/Nombre de femmes/);
 		expect(womenCountInputs[0]).toHaveValue("30");
@@ -391,7 +423,9 @@ describe("Step4QuartileDistribution", () => {
 				initialData={emptyStep4Data()}
 			/>,
 		);
-		const seuilInputs = screen.getAllByLabelText(/Seuil maximum/);
+		const seuilInputs = screen.getAllByLabelText(
+			/Montants des tranches, maximum/,
+		);
 		for (const input of seuilInputs) {
 			expect(input).toHaveValue("");
 		}

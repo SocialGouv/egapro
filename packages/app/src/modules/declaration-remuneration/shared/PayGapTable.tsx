@@ -109,9 +109,9 @@ export function PayGapTable({
 									const menError = findFieldError(errors, menId);
 									return (
 										<tr key={row.label}>
-											<td>
-												<strong>{row.label}</strong>
-											</td>
+											<th className={styles.rowHeader} scope="row">
+												{row.label}
+											</th>
 											<td>
 												<span className={styles.inputWithUnit}>
 													<input

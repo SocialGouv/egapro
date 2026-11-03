@@ -37,8 +37,8 @@ export function CopyEmailButton({ email }: Props) {
 
 	const ariaLabelMap: Record<CopyState, string> = {
 		idle: `Copier l'adresse ${email}`,
-		copied: "Adresse copiée dans le presse-papier",
-		error: "La copie a échoué, copiez l'adresse manuellement",
+		copied: "Copié ! L'adresse est dans le presse-papier",
+		error: "Échec de la copie, copiez l'adresse manuellement",
 	};
 
 	return (

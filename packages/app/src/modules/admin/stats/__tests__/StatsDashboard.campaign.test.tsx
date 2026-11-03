@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const progressionUseQueryMock = vi.fn();
@@ -327,5 +327,74 @@ describe("StatsDashboard — query options", () => {
 			| { placeholderData: (prev: unknown) => unknown }
 			| undefined;
 		expect(options?.placeholderData("prev-value")).toBe("prev-value");
+	});
+});
+
+describe("StatsDashboard — chart data tables follow their figure (RGAA 1.6)", () => {
+	beforeEach(() => {
+		progressionUseQueryMock.mockReset();
+		matomoCategoryModelUseQueryMock.mockReset();
+		defaultMocks();
+	});
+
+	it("renders the progression table right after the chart, in the same card", () => {
+		progressionUseQueryMock.mockReturnValue({
+			data: [{ year: 2026, points: [{ day: "2026-01-01", cumulative: 5 }] }],
+			isLoading: false,
+			isError: false,
+		});
+		render(
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
+		);
+
+		const chart = screen.getByTestId("progression-chart");
+		expect(chart.nextElementSibling).toBe(
+			screen.getByTestId("progression-table"),
+		);
+		expect(
+			screen.queryByRole("region", { name: "Progression dans le temps" }),
+		).not.toBeInTheDocument();
+		expect(
+			screen.getByText(/^Cumul des déclarations dont les indicateurs/)
+				.parentElement,
+		).toBe(chart.parentElement);
+	});
+
+	it("renders the model usage table right after its figure, before the import duration", () => {
+		matomoCategoryModelUseQueryMock.mockReturnValue({
+			data: {
+				rows: [{ key: "import_success", label: "Imports réussis", count: 12 }],
+				avgImportDurationSeconds: 42,
+			},
+			isLoading: false,
+			isError: false,
+		});
+		render(
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
+		);
+
+		const figure = screen
+			.getByRole("img", {
+				name: "Usage du modèle de l'indicateur par catégorie",
+			})
+			.closest("figure");
+		const details = figure?.nextElementSibling;
+		expect(details?.tagName).toBe("DETAILS");
+		expect(
+			within(details as HTMLElement).getByRole("table", {
+				name: "Usage du modèle de l'indicateur par catégorie",
+			}),
+		).toBeInTheDocument();
+		expect(details?.nextElementSibling).toBe(
+			screen.getByText(/^Durée moyenne de remplissage avant import/),
+		);
 	});
 });

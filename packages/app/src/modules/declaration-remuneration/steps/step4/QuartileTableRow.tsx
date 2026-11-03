@@ -19,6 +19,8 @@ const TYPE_LABEL: Record<TableType, string> = {
 	hourly: "horaire",
 };
 
+export const TRANCHE_AMOUNTS_HEADER = "Montants des tranches";
+
 function ordinalSuffix(index: number) {
 	return index === 0 ? "er" : "e";
 }
@@ -32,7 +34,7 @@ function fieldId(
 }
 
 function thresholdAriaLabel(tableType: TableType, index: number) {
-	return `Seuil maximum ${index + 1}${ordinalSuffix(index)} quartile ${TYPE_LABEL[tableType]}`;
+	return `${TRANCHE_AMOUNTS_HEADER}, maximum du ${index + 1}${ordinalSuffix(index)} quartile ${TYPE_LABEL[tableType]}`;
 }
 
 function womenAriaLabel(tableType: TableType, index: number) {

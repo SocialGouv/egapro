@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
@@ -40,6 +40,7 @@ function selectDeadlines(data: CampaignDeadlinesByYear) {
 export function RemunerationDeadlinesForm({ year }: Props) {
 	const [status, setStatus] = useState<SettingsFormStatus>("idle");
 	const [serverError, setServerError] = useState<string | null>(null);
+	const requiredNoteId = useId();
 
 	const utils = api.useUtils();
 	const deadlinesQuery = api.adminSettings.getDeadlinesByYear.useQuery(
@@ -108,6 +109,10 @@ export function RemunerationDeadlinesForm({ year }: Props) {
 					</p>
 				)}
 
+				<p className="fr-text--sm fr-mb-2w" id={requiredNoteId}>
+					Toutes les échéances modifiables sont obligatoires.
+				</p>
+
 				{DEADLINE_GROUPS.map((group) => (
 					<DeadlineFieldset
 						errors={form.formState.errors}
@@ -117,6 +122,7 @@ export function RemunerationDeadlinesForm({ year }: Props) {
 							group.pathChoiceKey ? (data?.[group.pathChoiceKey] ?? "") : ""
 						}
 						register={form.register}
+						requiredNoteId={requiredNoteId}
 					/>
 				))}
 			</div>

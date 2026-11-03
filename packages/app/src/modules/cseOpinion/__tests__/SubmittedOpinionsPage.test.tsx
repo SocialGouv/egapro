@@ -92,6 +92,14 @@ describe("SubmittedOpinionsPage", () => {
 		expect(screen.getByRole("main")).toHaveAttribute("id", "content");
 	});
 
+	it("names Mon espace as the destination of the back link, visible text first", () => {
+		renderPage();
+
+		const backLink = screen.getByRole("link", { name: "Retour à Mon espace" });
+		expect(backLink).toHaveTextContent(/^Retour$/);
+		expect(backLink).toHaveAttribute("href", "/mon-espace");
+	});
+
 	it("leads back to the company's démarche through the breadcrumb", () => {
 		renderPage();
 

@@ -109,9 +109,9 @@ export function CookiesPage() {
 					navigateur.
 				</p>
 				<p>
-					Par ailleurs, si votre navigateur émet le signal «&nbsp;Do Not
-					Track&nbsp;» (Ne pas me pister), il est automatiquement respecté et
-					aucune mesure d'audience n'est effectuée.
+					Par ailleurs, si votre navigateur émet le signal «&nbsp;
+					<span lang="en">Do Not Track</span>&nbsp;» (Ne pas me pister), il est
+					automatiquement respecté et aucune mesure d'audience n'est effectuée.
 				</p>
 				<MatomoOptOut />
 
