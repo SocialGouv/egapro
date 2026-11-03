@@ -89,7 +89,9 @@ function IndicatorColumn({
 				</Table>
 			) : (
 				<>
-					<Text style={styles.noData}>{indicator.notComputableReason}</Text>
+					<Text style={styles.repNotComputableReason}>
+						{indicator.notComputableReason}
+					</Text>
 					<VerdictBadge verdict={indicator.verdict} />
 				</>
 			)}
@@ -156,40 +158,46 @@ export function RepresentationPdfDocument({ data }: Props) {
 					<SectionBanner title="Informations" />
 
 					{data.declarantRows.length > 0 ? (
-						<InfoSection
-							rows={data.declarantRows}
-							title="Déclarant"
-							tone="category"
-						/>
+						<View style={styles.repCategoryBannerGroup}>
+							<InfoSection
+								rows={data.declarantRows}
+								title="Déclarant"
+								tone="category"
+							/>
+						</View>
 					) : (
-						<View wrap={false}>
+						<View style={styles.repCategoryBannerGroup} wrap={false}>
 							<CategoryBanner title="Déclarant" />
 							<Text style={styles.declarantEmptyText}>Non renseigné</Text>
 						</View>
 					)}
 
-					<InfoSection
-						rows={[
-							{ label: "Raison sociale", value: data.company.name },
-							{ label: "SIREN", value: data.company.siren },
-							...(data.company.location ? [data.company.location] : []),
-							{ label: "Code NAF", value: data.company.naf },
-							{
-								label: data.company.workforceLabel,
-								value: data.company.workforceDisplay,
-							},
-						]}
-						title="Entreprise"
-						tone="category"
-					/>
+					<View style={styles.repCategoryBannerGroup}>
+						<InfoSection
+							rows={[
+								{ label: "Raison sociale", value: data.company.name },
+								{ label: "SIREN", value: data.company.siren },
+								...(data.company.location ? [data.company.location] : []),
+								{ label: "Code NAF", value: data.company.naf },
+								{
+									label: data.company.workforceLabel,
+									value: data.company.workforceDisplay,
+								},
+							]}
+							title="Entreprise"
+							tone="category"
+						/>
+					</View>
 
-					<InfoSection
-						rows={[
-							{ label: "Période de référence", value: data.referencePeriod },
-						]}
-						title="Calcul"
-						tone="category"
-					/>
+					<View style={styles.repCategoryBannerGroup}>
+						<InfoSection
+							rows={[
+								{ label: "Période de référence", value: data.referencePeriod },
+							]}
+							title="Calcul"
+							tone="category"
+						/>
+					</View>
 
 					<SectionBanner title="Écarts de représentation" />
 					<View style={styles.repGapColumnsRow}>
@@ -199,11 +207,13 @@ export function RepresentationPdfDocument({ data }: Props) {
 					</View>
 
 					{data.publicationApplicable ? (
-						<InfoSection
-							rows={publicationRows(data)}
-							title="Publication"
-							tone="category"
-						/>
+						<View style={styles.repCategoryBannerGroup}>
+							<InfoSection
+								rows={publicationRows(data)}
+								title="Publication"
+								tone="category"
+							/>
+						</View>
 					) : null}
 				</View>
 			</Page>

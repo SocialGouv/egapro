@@ -329,6 +329,19 @@ export const styles = StyleSheet.create({
 		paddingHorizontal: 8,
 		marginBottom: 6,
 	},
+	// `categoryBanner` has no marginTop (its other callers sit right under a
+	// `sectionBanner`, which already carries one) — the maquette's uniform
+	// 10pt gap needs it added back when a category block itself opens a block.
+	repCategoryBannerGroup: {
+		marginTop: 4,
+	},
+	// Figma specifies `not-italic` for the not-computable motive — unlike
+	// `noData`'s italic, used elsewhere for an "n/a" style note.
+	repNotComputableReason: {
+		fontSize: 9,
+		color: TEXT_TITLE_GREY,
+		marginTop: 4,
+	},
 });
 
 export type PdfStyles = Record<keyof typeof styles, Styles[string]>;
