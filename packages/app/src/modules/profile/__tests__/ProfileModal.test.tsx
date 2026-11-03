@@ -20,6 +20,8 @@ const { mockMutate, mockRefetch, trpcState } = vi.hoisted(() => ({
 	mockRefetch: vi.fn(),
 	trpcState: {
 		profile: null as ProfileData | null,
+		isFetching: false,
+		isError: false,
 		saveOutcome: "success" as "success" | "error" | "pending",
 		settlePendingSave: null as (() => void) | null,
 	},
@@ -31,7 +33,12 @@ vi.mock("~/trpc/react", async () => {
 		api: {
 			profile: {
 				get: {
-					useQuery: () => ({ data: trpcState.profile, refetch: mockRefetch }),
+					useQuery: () => ({
+						data: trpcState.profile,
+						isFetching: trpcState.isFetching,
+						isError: trpcState.isError,
+						refetch: mockRefetch,
+					}),
 				},
 				updateProfile: {
 					useMutation: ({ onSuccess }: { onSuccess?: () => void }) => {
@@ -136,6 +143,8 @@ function mockDsfrModal() {
 
 beforeEach(() => {
 	trpcState.profile = { ...PROFILE };
+	trpcState.isFetching = false;
+	trpcState.isError = false;
 	trpcState.saveOutcome = "success";
 	trpcState.settlePendingSave = null;
 	mockMutate.mockClear();
@@ -497,6 +506,40 @@ describe("ProfileModal — review step", () => {
 		expect(mockMutate).not.toHaveBeenCalled();
 	});
 
+	it("refuses to open the review while the stored profile is not loaded", async () => {
+		trpcState.profile = null;
+		trpcState.isError = true;
+		await renderOpenModal();
+
+		fireEvent.change(getElement("profile-last-name"), {
+			target: { value: "Durand" },
+		});
+		fireEvent.submit(getElement("profile-form"));
+
+		expect(queryReviewHeading()).not.toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "Vérifier mes modifications" }),
+		).toHaveAttribute("aria-disabled", "true");
+		expect(screen.getByRole("alert")).toHaveTextContent(
+			"Vos informations de profil n’ont pas pu être chargées.",
+		);
+	});
+
+	it("refuses to open the review while the profile is being refetched", async () => {
+		trpcState.isFetching = true;
+		await renderOpenModal();
+
+		fireEvent.change(getElement("profile-last-name"), {
+			target: { value: "Durand" },
+		});
+		fireEvent.submit(getElement("profile-form"));
+
+		expect(queryReviewHeading()).not.toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "Vérifier mes modifications" }),
+		).toHaveAttribute("aria-disabled", "true");
+	});
+
 	it("saves nothing when the review is cancelled, and reopens on the stored values", async () => {
 		await renderOpenModal();
 		await reviewEdits({ "profile-last-name": "Durand" });
@@ -559,6 +602,9 @@ describe("ProfileModal — confirmation", () => {
 		fireEvent.click(screen.getByRole("button", { name: "Revenir aux champs" }));
 
 		expect(pendingButton).toHaveAttribute("aria-disabled", "true");
+		expect(
+			document.querySelector("#profile-modal .fr-modal__footer [aria-live]"),
+		).toBeNull();
 		expect(mockMutate).toHaveBeenCalledTimes(1);
 		expect(await findReviewHeading()).toBeInTheDocument();
 	});

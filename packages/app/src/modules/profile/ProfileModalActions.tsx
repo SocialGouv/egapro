@@ -1,17 +1,23 @@
-export const SAVING_LABEL = "Enregistrement en cours…";
+const SAVING_LABEL = "Enregistrement en cours…";
 
 const BUTTONS_GROUP_CLASS =
 	"fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg";
 
 type EditActionsProps = {
+	canReview: boolean;
 	modalId: string;
 };
 
-export function EditActions({ modalId }: EditActionsProps) {
+export function EditActions({ canReview, modalId }: EditActionsProps) {
 	return (
 		<ul className={BUTTONS_GROUP_CLASS}>
 			<li>
-				<button className="fr-btn" form="profile-form" type="submit">
+				<button
+					aria-disabled={!canReview || undefined}
+					className="fr-btn"
+					form="profile-form"
+					type="submit"
+				>
 					Vérifier mes modifications
 				</button>
 			</li>

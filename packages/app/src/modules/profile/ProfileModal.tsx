@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { type FormEvent, useCallback, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import type { UseFormRegisterReturn } from "react-hook-form";
 
@@ -10,11 +10,7 @@ import { useDsfrDialogOpen } from "~/modules/shared/useDsfrDialogOpen";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import styles from "./ProfileModal.module.scss";
-import {
-	EditActions,
-	ReviewActions,
-	SAVING_LABEL,
-} from "./ProfileModalActions";
+import { EditActions, ReviewActions } from "./ProfileModalActions";
 import { ProfileReviewStep } from "./ProfileReviewStep";
 import { listProfileChanges } from "./profileChanges";
 import { type ProfileUpdate, updateProfileSchema } from "./schemas";
@@ -81,15 +77,26 @@ export function ProfileModal() {
 	useDsfrDialogOpen(dialogRef, handleDialogOpen);
 
 	const isSaving = updateProfileMutation.isPending;
+	const isProfileLoading = profileQuery.isFetching;
+	const isProfileReady =
+		Boolean(profileQuery.data) && !isProfileLoading && !profileQuery.isError;
 	const isReviewing = pendingUpdate !== null;
 	const changes = pendingUpdate
 		? listProfileChanges(profileQuery.data, pendingUpdate)
 		: [];
 
-	const onSubmit = form.handleSubmit((data) => {
+	const submitForReview = form.handleSubmit((data) => {
 		flushSync(() => setPendingUpdate(data));
 		reviewHeadingRef.current?.focus();
 	});
+
+	const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+		if (!isProfileReady) {
+			event.preventDefault();
+			return;
+		}
+		return submitForReview(event);
+	};
 
 	const backToFields = () => {
 		if (isSaving) return;
@@ -164,6 +171,17 @@ export function ProfileModal() {
 									<p className="fr-text--regular fr-text-title--grey fr-mb-4w">
 										Tous les champs sont obligatoires.
 									</p>
+									{profileQuery.isError && !isProfileLoading && (
+										<div
+											className="fr-alert fr-alert--error fr-alert--sm fr-mb-2w"
+											role="alert"
+										>
+											<p>
+												Vos informations de profil n’ont pas pu être chargées.
+												Fermez cette fenêtre puis rouvrez-la pour réessayer.
+											</p>
+										</div>
+									)}
 									<form id="profile-form" onSubmit={onSubmit}>
 										<div className="fr-grid-row fr-grid-row--gutters fr-mb-4w">
 											<div className="fr-col-12 fr-col-md-6">
@@ -217,10 +235,9 @@ export function ProfileModal() {
 										onConfirm={confirmUpdate}
 									/>
 								)}
-								{!isReviewing && <EditActions modalId={MODAL_ID} />}
-								<p aria-live="polite" className="fr-sr-only">
-									{isSaving ? SAVING_LABEL : ""}
-								</p>
+								{!isReviewing && (
+									<EditActions canReview={isProfileReady} modalId={MODAL_ID} />
+								)}
 							</div>
 						</div>
 					</div>
