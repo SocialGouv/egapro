@@ -5,9 +5,11 @@ type SettingsDateFieldProps = {
 	label: string;
 	hint?: string;
 	error: string | undefined;
-	required: boolean;
 	registration: UseFormRegisterReturn;
-};
+} & (
+	| { required: true; requiredNoteId: string }
+	| { required: false; requiredNoteId?: never }
+);
 
 export function SettingsDateField({
 	id,
@@ -15,8 +17,14 @@ export function SettingsDateField({
 	hint,
 	error,
 	required,
+	requiredNoteId,
 	registration,
 }: SettingsDateFieldProps) {
+	const errorId = `${id}-error`;
+	const describedBy =
+		[requiredNoteId, error ? errorId : undefined].filter(Boolean).join(" ") ||
+		undefined;
+
 	return (
 		<div
 			className={
@@ -28,7 +36,7 @@ export function SettingsDateField({
 				{hint && <span className="fr-hint-text">{hint}</span>}
 			</label>
 			<input
-				aria-describedby={error ? `${id}-error` : undefined}
+				aria-describedby={describedBy}
 				aria-invalid={Boolean(error)}
 				className="fr-input"
 				id={id}
@@ -37,7 +45,7 @@ export function SettingsDateField({
 				{...registration}
 			/>
 			{error && (
-				<p className="fr-error-text" id={`${id}-error`}>
+				<p className="fr-error-text" id={errorId}>
 					{error}
 				</p>
 			)}
