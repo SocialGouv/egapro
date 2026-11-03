@@ -2,6 +2,12 @@ const MAILPIT_URL = process.env.MAILPIT_URL ?? "http://localhost:1080";
 
 export type MailpitAddress = { address: string; name?: string };
 
+export type MailpitAttachment = {
+	partId: string;
+	fileName: string;
+	contentType: string;
+};
+
 export type MailpitEmail = {
 	id: string;
 	to: MailpitAddress[];
@@ -9,6 +15,7 @@ export type MailpitEmail = {
 	html: string;
 	text?: string;
 	date?: string;
+	attachments: MailpitAttachment[];
 };
 
 type MailpitApiAddress = { Address: string; Name?: string };
@@ -24,6 +31,12 @@ type MailpitMessagesResponse = {
 	messages?: MailpitMessageSummary[];
 };
 
+type MailpitApiAttachment = {
+	PartID: string;
+	FileName: string;
+	ContentType: string;
+};
+
 type MailpitMessageDetail = {
 	ID: string;
 	To?: MailpitApiAddress[];
@@ -32,6 +45,7 @@ type MailpitMessageDetail = {
 	Text?: string;
 	Date?: string;
 	Created?: string;
+	Attachments?: MailpitApiAttachment[];
 };
 
 function mapAddress(entry: MailpitApiAddress): MailpitAddress {
@@ -46,7 +60,25 @@ function toEmail(raw: MailpitMessageDetail): MailpitEmail {
 		html: raw.HTML ?? "",
 		text: raw.Text,
 		date: raw.Date ?? raw.Created,
+		attachments: (raw.Attachments ?? []).map((entry) => ({
+			partId: entry.PartID,
+			fileName: entry.FileName,
+			contentType: entry.ContentType,
+		})),
 	};
+}
+
+export async function fetchAttachment(
+	messageId: string,
+	partId: string,
+): Promise<Buffer> {
+	const res = await fetch(
+		`${MAILPIT_URL}/api/v1/message/${messageId}/part/${partId}`,
+	);
+	if (!res.ok) {
+		throw new Error(`Mailpit attachment ${partId} unavailable (${res.status})`);
+	}
+	return Buffer.from(await res.arrayBuffer());
 }
 
 export async function mailpitReachable(): Promise<boolean> {
