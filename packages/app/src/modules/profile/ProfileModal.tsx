@@ -48,8 +48,7 @@ export function ProfileModal() {
 		if (!dialog?.open) return;
 		const modal = getDsfrModal(dialog);
 		modal?.conceal();
-		// A programmatic conceal does not hand focus back; DSFR's own Escape
-		// handler follows it with focus() to return to the opening control.
+		// A programmatic conceal does not return focus to the opening control.
 		modal?.focus();
 	}, []);
 

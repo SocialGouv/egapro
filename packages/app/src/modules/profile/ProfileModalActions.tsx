@@ -1,5 +1,3 @@
-const SAVING_LABEL = "Enregistrement en cours…";
-
 const BUTTONS_GROUP_CLASS =
 	"fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg";
 
@@ -43,7 +41,9 @@ export function ReviewActions({
 	onBack,
 	onConfirm,
 }: ReviewActionsProps) {
-	const confirmLabel = isSaving ? SAVING_LABEL : "Confirmer et enregistrer";
+	const confirmLabel = isSaving
+		? "Enregistrement en cours…"
+		: "Confirmer et enregistrer";
 
 	return (
 		<ul className={BUTTONS_GROUP_CLASS}>
