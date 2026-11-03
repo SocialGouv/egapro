@@ -1,14 +1,13 @@
 "use client";
 
 import { useCallback } from "react";
-import type { CountyCode, RegionCode } from "~/modules/domain";
-import { COUNTIES, REGIONS } from "~/modules/domain";
 import { ADMIN_REFERENTS } from "~/modules/routes";
 import { DsfrTable } from "~/modules/shared/DsfrTable";
 import { useSortableTable } from "~/modules/shared/useSortableTable";
 import type { SortColumn } from "./schemas";
 import { SORT_COLUMNS } from "./schemas";
 import { COLUMN_LABELS } from "./shared/constants";
+import { formatCountyLabel, formatRegionLabel } from "./shared/locationLabels";
 import type { ReferentSearchRow } from "./types";
 
 type Props = {
@@ -106,14 +105,8 @@ export function ReferentTable({
 									</label>
 								</div>
 							</th>
-							<td>
-								{REGIONS[row.region as RegionCode] ?? row.region} ({row.region})
-							</td>
-							<td>
-								{row.county
-									? `${COUNTIES[row.county as CountyCode] ?? row.county} (${row.county})`
-									: "—"}
-							</td>
+							<td>{formatRegionLabel(row.region)}</td>
+							<td>{formatCountyLabel(row.county)}</td>
 							<td>
 								{row.name}
 								{row.substituteName && (

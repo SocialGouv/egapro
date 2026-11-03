@@ -1,13 +1,22 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 
 import { useDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
 
-import { importReferentsSchema } from "./schemas";
+import { BUTTONS_GROUP_CLASS, ConfirmStepActions } from "./ConfirmStepActions";
+import { ImportReferentsConfirmStep } from "./ImportReferentsConfirmStep";
+import { type ImportReferentsInput, importReferentsSchema } from "./schemas";
 
 const MODAL_ID = "admin-import-referents-modal";
+const CONFIRM_HEADING_ID = `${MODAL_ID}-confirm-title`;
+
+type PendingImport = {
+	referents: ImportReferentsInput;
+	existingCount: number;
+};
 
 export function useImportModal() {
 	return useDsfrModal();
@@ -22,15 +31,22 @@ type Props = {
 export function ImportReferentsModal({ modalRef, onClose, onSuccess }: Props) {
 	const [file, setFile] = useState<File | null>(null);
 	const [error, setError] = useState("");
+	const [pendingImport, setPendingImport] = useState<PendingImport | null>(
+		null,
+	);
 	const fileInputRef = useRef<HTMLInputElement>(null);
+	const titleRef = useRef<HTMLHeadingElement>(null);
+	const confirmHeadingRef = useRef<HTMLHeadingElement>(null);
 	const modalEpochRef = useRef(0);
 	const requestEpochRef = useRef(0);
 	const submitInProgressRef = useRef(false);
 	const resetForm = useCallback(() => {
 		setFile(null);
 		setError("");
+		setPendingImport(null);
 		if (fileInputRef.current) fileInputRef.current.value = "";
 	}, []);
+	const utils = api.useUtils();
 	const importMutation = api.adminReferents.import.useMutation({
 		onSuccess: () => {
 			submitInProgressRef.current = false;
@@ -67,39 +83,77 @@ export function ImportReferentsModal({ modalRef, onClose, onSuccess }: Props) {
 		[],
 	);
 
-	const handleImport = useCallback(async () => {
+	const handleReview = useCallback(async () => {
 		if (!file || importMutation.isPending || submitInProgressRef.current)
 			return;
 		submitInProgressRef.current = true;
 		const submitEpoch = modalEpochRef.current;
+		const isStale = () => submitEpoch !== modalEpochRef.current;
 		setError("");
 
+		let parsed: ReturnType<typeof importReferentsSchema.safeParse>;
 		try {
 			const text = await file.text();
-			const json: unknown = JSON.parse(text);
-			const parsed = importReferentsSchema.safeParse(json);
-			if (submitEpoch !== modalEpochRef.current) {
-				submitInProgressRef.current = false;
-				return;
-			}
-
-			if (!parsed.success) {
-				submitInProgressRef.current = false;
-				setError(
-					`Format invalide : ${parsed.error.issues.map((i) => i.message).join(", ")}`,
-				);
-				return;
-			}
-
-			requestEpochRef.current = submitEpoch;
-			importMutation.mutate(parsed.data);
+			parsed = importReferentsSchema.safeParse(JSON.parse(text));
 		} catch {
 			submitInProgressRef.current = false;
-			if (submitEpoch === modalEpochRef.current) {
-				setError("Le fichier n'est pas un JSON valide.");
+			if (!isStale()) setError("Le fichier n'est pas un JSON valide.");
+			return;
+		}
+		if (isStale()) {
+			submitInProgressRef.current = false;
+			return;
+		}
+		if (!parsed.success) {
+			submitInProgressRef.current = false;
+			setError(
+				`Format invalide : ${parsed.error.issues.map((i) => i.message).join(", ")}`,
+			);
+			return;
+		}
+
+		try {
+			const { total } = await utils.adminReferents.count.fetch(undefined, {
+				staleTime: 0,
+			});
+			submitInProgressRef.current = false;
+			if (isStale()) return;
+			flushSync(() =>
+				setPendingImport({ referents: parsed.data, existingCount: total }),
+			);
+			confirmHeadingRef.current?.focus();
+		} catch {
+			submitInProgressRef.current = false;
+			if (!isStale()) {
+				setError(
+					"Le nombre de référents existants n'a pas pu être vérifié. Veuillez réessayer.",
+				);
 			}
 		}
-	}, [file, importMutation]);
+	}, [file, importMutation, utils]);
+
+	const handleConfirm = useCallback(() => {
+		if (
+			!pendingImport ||
+			importMutation.isPending ||
+			submitInProgressRef.current
+		)
+			return;
+		submitInProgressRef.current = true;
+		requestEpochRef.current = modalEpochRef.current;
+		setError("");
+		importMutation.mutate(pendingImport.referents);
+	}, [pendingImport, importMutation]);
+
+	const handleBack = useCallback(() => {
+		if (importMutation.isPending) return;
+		importMutation.reset();
+		setError("");
+		flushSync(() => setPendingImport(null));
+		titleRef.current?.focus();
+	}, [importMutation]);
+
+	const isConfirming = pendingImport !== null;
 
 	return (
 		<dialog
@@ -125,33 +179,49 @@ export function ImportReferentsModal({ modalRef, onClose, onSuccess }: Props) {
 								</button>
 							</div>
 							<div className="fr-modal__content">
-								<h2 className="fr-modal__title" id={`${MODAL_ID}-title`}>
+								<h2
+									className="fr-modal__title"
+									id={`${MODAL_ID}-title`}
+									ref={titleRef}
+									tabIndex={-1}
+								>
 									Importer des référents
 								</h2>
-								<p>Importer depuis un fichier JSON une liste de référents.</p>
-								<div
-									aria-live="polite"
-									className="fr-alert fr-alert--warning fr-mb-3w"
-								>
-									<p>
-										Attention, cette opération remplacera toutes les données
-										existantes !
-									</p>
+								<div hidden={isConfirming}>
+									<p>Importer depuis un fichier JSON une liste de référents.</p>
+									<div
+										aria-live="polite"
+										className="fr-alert fr-alert--warning fr-mb-3w"
+									>
+										<p>
+											Attention, cette opération remplacera toutes les données
+											existantes !
+										</p>
+									</div>
+									<div className="fr-upload-group">
+										<label className="fr-label" htmlFor={`${MODAL_ID}-file`}>
+											Fichier JSON
+										</label>
+										<input
+											accept=".json"
+											className="fr-upload"
+											disabled={importMutation.isPending}
+											id={`${MODAL_ID}-file`}
+											onChange={handleFileChange}
+											ref={fileInputRef}
+											type="file"
+										/>
+									</div>
 								</div>
-								<div className="fr-upload-group">
-									<label className="fr-label" htmlFor={`${MODAL_ID}-file`}>
-										Fichier JSON
-									</label>
-									<input
-										accept=".json"
-										className="fr-upload"
-										disabled={importMutation.isPending}
-										id={`${MODAL_ID}-file`}
-										onChange={handleFileChange}
-										ref={fileInputRef}
-										type="file"
+								{pendingImport && file && (
+									<ImportReferentsConfirmStep
+										existingCount={pendingImport.existingCount}
+										fileName={file.name}
+										headingId={CONFIRM_HEADING_ID}
+										headingRef={confirmHeadingRef}
+										importedCount={pendingImport.referents.length}
 									/>
-								</div>
+								)}
 								{error && (
 									<div
 										className="fr-alert fr-alert--error fr-alert--sm fr-mt-2w"
@@ -170,27 +240,39 @@ export function ImportReferentsModal({ modalRef, onClose, onSuccess }: Props) {
 								)}
 							</div>
 							<div className="fr-modal__footer">
-								<ul className="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg">
-									<li>
-										<button
-											className="fr-btn fr-btn--primary"
-											disabled={!file || importMutation.isPending}
-											onClick={handleImport}
-											type="button"
-										>
-											Importer
-										</button>
-									</li>
-									<li>
-										<button
-											className="fr-btn fr-btn--secondary"
-											onClick={onClose}
-											type="button"
-										>
-											Annuler
-										</button>
-									</li>
-								</ul>
+								{isConfirming && (
+									<ConfirmStepActions
+										backLabel="Revenir au choix du fichier"
+										confirmLabel="Confirmer l'import"
+										isPending={importMutation.isPending}
+										onBack={handleBack}
+										onCancel={onClose}
+										onConfirm={handleConfirm}
+									/>
+								)}
+								{!isConfirming && (
+									<ul className={BUTTONS_GROUP_CLASS}>
+										<li>
+											<button
+												className="fr-btn fr-btn--primary"
+												disabled={!file || importMutation.isPending}
+												onClick={handleReview}
+												type="button"
+											>
+												Vérifier l'import
+											</button>
+										</li>
+										<li>
+											<button
+												className="fr-btn fr-btn--secondary"
+												onClick={onClose}
+												type="button"
+											>
+												Annuler
+											</button>
+										</li>
+									</ul>
+								)}
 							</div>
 						</div>
 					</div>
