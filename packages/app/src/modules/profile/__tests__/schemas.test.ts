@@ -88,7 +88,8 @@ describe("updateProfileSchema", () => {
 		expect(result.success).toBe(false);
 		expect(result.error?.issues[0]).toMatchObject({
 			path: ["phone"],
-			message: "Veuillez renseigner votre numéro de téléphone",
+			message:
+				"Le numéro de téléphone n'est pas valide. Saisissez-le au format 01 22 33 44 55 ou +33 1 22 33 44 55",
 		});
 	});
 });
