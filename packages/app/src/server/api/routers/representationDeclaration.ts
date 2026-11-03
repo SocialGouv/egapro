@@ -106,6 +106,7 @@ export const representationDeclarationRouter = createTRPCRouter({
 							lastName: holder.lastName,
 							email: holder.email,
 							expiresAt: holder.expiresAt,
+							lockTimeoutMinutes: holder.lockTimeoutMinutes,
 						}
 					: null,
 			};

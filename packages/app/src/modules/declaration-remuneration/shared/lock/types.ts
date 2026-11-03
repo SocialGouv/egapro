@@ -10,14 +10,35 @@ export type LockHolder = NonNullable<
 
 export type LockHolderDisplay = Pick<
 	LockHolder,
-	"firstName" | "lastName" | "email"
+	"firstName" | "lastName" | "email" | "lockTimeoutMinutes"
 >;
 
+export type LockAlertFollowUp =
+	| "watchThenRetake"
+	| "watchThenAutoEdit"
+	| "openToWatch"
+	| "refreshToCheck";
+
 export type ReadOnlyReason = "impersonation" | "modification_closed" | "lock";
+
+export type RetakeStatus =
+	| "idle"
+	| "pending"
+	| "outpaced"
+	| "failed"
+	| "succeeded";
+
+export type LockRetake = {
+	isAvailable: boolean;
+	status: RetakeStatus;
+	retake: () => void;
+};
 
 export type DeclarationLockState = {
 	isReadOnly: boolean;
 	reason: ReadOnlyReason | null;
 	holder: LockHolder | null;
 	isLoading: boolean;
+	retake: LockRetake;
+	editSessionKey: number;
 };

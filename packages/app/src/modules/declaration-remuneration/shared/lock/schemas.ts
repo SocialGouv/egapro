@@ -1,17 +1,15 @@
 import { z } from "zod";
 
-export const acquireLockSchema = z.object({
+const declarationIdInputSchema = z.object({
 	declarationId: z.string(),
 });
 
-export const heartbeatSchema = z.object({
-	declarationId: z.string(),
-});
+export const acquireLockSchema = declarationIdInputSchema;
 
-export const releaseLockSchema = z.object({
-	declarationId: z.string(),
-});
+export const heartbeatSchema = declarationIdInputSchema;
 
-export const getLockStateSchema = z.object({
-	declarationId: z.string(),
-});
+export const releaseLockSchema = declarationIdInputSchema;
+
+export const getLockStateSchema = declarationIdInputSchema;
+
+export const getLockAvailabilitySchema = declarationIdInputSchema;

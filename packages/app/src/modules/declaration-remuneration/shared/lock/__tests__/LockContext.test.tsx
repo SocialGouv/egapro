@@ -9,6 +9,8 @@ const dynamicState: DeclarationLockState = {
 	reason: "lock",
 	holder: null,
 	isLoading: false,
+	retake: { isAvailable: false, status: "idle", retake: () => {} },
+	editSessionKey: 0,
 };
 
 vi.mock("../useDeclarationLock", () => ({
@@ -40,6 +42,7 @@ const holder: LockHolderDisplay = {
 	firstName: "Camille",
 	lastName: "Martin",
 	email: "camille.martin@example.fr",
+	lockTimeoutMinutes: 30,
 };
 
 function mockImpersonating() {

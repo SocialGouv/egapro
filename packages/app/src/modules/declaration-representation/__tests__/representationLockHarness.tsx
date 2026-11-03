@@ -22,6 +22,7 @@ export const LOCKED_BY_OTHER: RepresentationLockState = {
 		firstName: "Camille",
 		lastName: "Martin",
 		email: "camille.martin@example.fr",
+		lockTimeoutMinutes: 30,
 	},
 	registerPendingSave: ignorePendingSave,
 };

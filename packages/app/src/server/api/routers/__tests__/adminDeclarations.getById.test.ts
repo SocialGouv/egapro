@@ -55,6 +55,7 @@ type LockRow = {
 	firstName: string | null;
 	lastName: string | null;
 	expiresAt: Date;
+	lastHeartbeatAt: Date;
 };
 
 function buildDb(options: {
@@ -199,6 +200,7 @@ describe("adminDeclarationsRouter — getById", () => {
 				firstName: "Bob",
 				lastName: "Martin",
 				expiresAt,
+				lastHeartbeatAt: new Date("2026-03-20T09:30:00Z"),
 			},
 		});
 		const { adminDeclarationsRouter } = await import("../adminDeclarations");

@@ -10,13 +10,21 @@ export type LockHolderOverrides = {
 	expiresAt?: Date;
 };
 
+export const LOCK_TIMEOUT_MINUTES = 30;
+
 export function buildLockHolder(overrides: LockHolderOverrides = {}) {
+	const expiresAt =
+		overrides.expiresAt ?? new Date(Date.now() + LOCK_TIMEOUT_MINUTES * 60_000);
 	return {
 		userId: overrides.userId ?? LOCK_HOLDER_USER_ID,
 		email: "user-1@example.fr",
 		firstName: "Alice",
 		lastName: "Martin",
-		expiresAt: overrides.expiresAt ?? new Date(Date.now() + 30 * 60_000),
+		expiresAt,
+		lastHeartbeatAt: new Date(
+			expiresAt.getTime() - LOCK_TIMEOUT_MINUTES * 60_000,
+		),
+		lockTimeoutMinutes: LOCK_TIMEOUT_MINUTES,
 	};
 }
 

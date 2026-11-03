@@ -2,7 +2,10 @@ import "server-only";
 
 import { and, eq, gt, inArray, lte, or } from "drizzle-orm";
 
-import { REPRESENTATION_LOCK_CONFLICT_MESSAGE } from "~/modules/domain";
+import {
+	computeLockTimeoutMinutes,
+	REPRESENTATION_LOCK_CONFLICT_MESSAGE,
+} from "~/modules/domain";
 import type { DB } from "~/server/db";
 import { representationDeclarationLocks, users } from "~/server/db/schema";
 
@@ -15,6 +18,7 @@ export type RepresentationLockHolder = {
 	firstName: string | null;
 	lastName: string | null;
 	expiresAt: Date;
+	lockTimeoutMinutes: number;
 };
 
 const MS_PER_MINUTE = 60_000;
@@ -35,13 +39,14 @@ export async function getActiveRepresentationLock(
 	siren: string,
 	year: number,
 ): Promise<RepresentationLockHolder | null> {
-	const rows = await db
+	const [row] = await db
 		.select({
 			userId: representationDeclarationLocks.lockedByUserId,
 			email: users.email,
 			firstName: users.firstName,
 			lastName: users.lastName,
 			expiresAt: representationDeclarationLocks.expiresAt,
+			lastHeartbeatAt: representationDeclarationLocks.lastHeartbeatAt,
 		})
 		.from(representationDeclarationLocks)
 		.innerJoin(
@@ -56,7 +61,15 @@ export async function getActiveRepresentationLock(
 			),
 		)
 		.limit(1);
-	return rows[0] ?? null;
+	if (!row) return null;
+	const { lastHeartbeatAt, ...holder } = row;
+	return {
+		...holder,
+		lockTimeoutMinutes: computeLockTimeoutMinutes(
+			lastHeartbeatAt,
+			holder.expiresAt,
+		),
+	};
 }
 
 export async function acquireOrRefreshRepresentationLock(

@@ -87,6 +87,7 @@ type LockHolder = {
 	firstName: string | null;
 	lastName: string | null;
 	email: string | null;
+	lockTimeoutMinutes: number;
 };
 
 const BASE_PROPS = {
@@ -359,6 +360,7 @@ describe("CompanyDeclarationsPage", () => {
 				firstName: "Alice",
 				lastName: "Martin",
 				email: "alice.martin@example.fr",
+				lockTimeoutMinutes: 30,
 			},
 		});
 		const alert = container.querySelector('[role="alert"]');

@@ -16,6 +16,7 @@ import {
 	formatGapCompact,
 	formatIsoDate,
 	formatLongDate,
+	formatMinutes,
 	formatMonthDay,
 	formatOptionalIsoDate,
 	formatPercentage,
@@ -555,6 +556,23 @@ describe("formatGap and truncateGapRatio agree on the same gap", () => {
 		expect(formatGap(percent)).toBe(expected);
 		expect(formatGap(gapRatioToPercent(truncateGapRatio(ratio)))).toBe(
 			expected,
+		);
+	});
+});
+
+describe("formatMinutes", () => {
+	it("uses the singular for one minute", () => {
+		expect(formatMinutes(1)).toBe("1 minute");
+	});
+
+	it("uses the plural above one minute", () => {
+		expect(formatMinutes(2)).toBe("2 minutes");
+		expect(formatMinutes(30)).toBe("30 minutes");
+	});
+
+	it("groups thousands", () => {
+		expect(formatMinutes(1440)).toBe(
+			`${(1440).toLocaleString("fr-FR")} minutes`,
 		);
 	});
 });

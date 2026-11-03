@@ -106,7 +106,10 @@ export function RepresentationProcessPanel({
 							lastActionDate={lastActionDate}
 						/>
 						{lockedByOther && lockHolder ? (
-							<DeclarationLockAlert holder={lockHolder} />
+							<DeclarationLockAlert
+								followUp="openToWatch"
+								holder={lockHolder}
+							/>
 						) : null}
 						{variant !== "not_subject" && <RixainAlert />}
 						<div className={`${styles.stepper} fr-mb-4w`}>
