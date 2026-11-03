@@ -65,7 +65,7 @@ export type RepresentationPdfData = {
 	hasWebsite: boolean;
 	publishUrl: string | null;
 	publishModalities: string | null;
-	// Not shown (absent from the maquette) — kept only for `pdfSizeCache`'s per-call fingerprint.
+	// Not rendered: the maquette has no generation date.
 	generatedAt: Date;
 };
 

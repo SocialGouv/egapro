@@ -269,7 +269,6 @@ export const styles = StyleSheet.create({
 		marginTop: 4,
 	},
 
-	// Representation recap: two side-by-side indicator columns.
 	repGapColumnsRow: {
 		flexDirection: "row",
 		gap: 6,

@@ -252,6 +252,13 @@ describe("RepresentationPdfDocument", () => {
 		expect(screen.getByText("—")).toBeInTheDocument();
 	});
 
+	it("dashes out a missing publication date", () => {
+		renderDocument({ publishDate: null });
+
+		expect(screen.getByText("Date de publication")).toBeInTheDocument();
+		expect(screen.getByText("—")).toBeInTheDocument();
+	});
+
 	it("omits the publication section entirely when no gap is computable", () => {
 		renderDocument({ publicationApplicable: false });
 

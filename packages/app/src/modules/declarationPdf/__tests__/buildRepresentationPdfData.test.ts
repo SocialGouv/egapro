@@ -77,7 +77,6 @@ function stubDb(
 	company: Record<string, unknown> | null = COMPANY,
 	declarant: Record<string, unknown> | null = DECLARANT,
 ) {
-	// Company and declaration run in one Promise.all, then the declarant select.
 	mocks.rows = [
 		company ? [company] : [],
 		declaration ? [declaration] : [],
