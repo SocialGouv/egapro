@@ -132,7 +132,7 @@ export function DevLoginForm({ callbackUrl }: Props) {
 			</div>
 
 			{serverError && (
-				<div className="fr-alert fr-alert--error fr-mb-2w">
+				<div className="fr-alert fr-alert--error fr-mb-2w" role="alert">
 					<p>{serverError}</p>
 				</div>
 			)}
