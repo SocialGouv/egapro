@@ -290,7 +290,6 @@ export const styles = StyleSheet.create({
 		backgroundColor: BACKGROUND_CONTRAST_INFO,
 		borderRadius: 2,
 		paddingHorizontal: 3,
-		paddingVertical: 1,
 		alignSelf: "flex-start",
 	},
 	complianceBadgeCompliantText: {
@@ -302,7 +301,6 @@ export const styles = StyleSheet.create({
 		backgroundColor: BACKGROUND_CONTRAST_WARNING,
 		borderRadius: 2,
 		paddingHorizontal: 3,
-		paddingVertical: 1,
 		alignSelf: "flex-start",
 	},
 	complianceBadgeNonCompliantText: {
@@ -314,7 +312,6 @@ export const styles = StyleSheet.create({
 		backgroundColor: BACKGROUND_ALT_GREY,
 		borderRadius: 2,
 		paddingHorizontal: 3,
-		paddingVertical: 1,
 		alignSelf: "flex-start",
 	},
 	complianceBadgeNotApplicableText: {
