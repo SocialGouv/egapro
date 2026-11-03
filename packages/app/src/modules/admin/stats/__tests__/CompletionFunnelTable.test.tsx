@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { buildEchartsOption } from "../CompletionFunnelChart";
 import { CompletionFunnelTable } from "../CompletionFunnelTable";
 import type { FunnelRow } from "../types";
 
@@ -58,5 +59,20 @@ describe("CompletionFunnelTable (S-K19-T1..T4)", () => {
 			<CompletionFunnelTable caption="Funnel cycle de révision" rows={ROWS} />,
 		);
 		expect(screen.getByText("Funnel cycle de révision")).toBeInTheDocument();
+	});
+
+	it("lists every jalon of the chart legend, in order, with all its values", () => {
+		render(<CompletionFunnelTable caption="Funnel principal" rows={ROWS} />);
+		const legend = (
+			buildEchartsOption(ROWS, 30) as { legend: { data: string[] } }
+		).legend;
+
+		const rowheaders = screen
+			.getAllByRole("rowheader")
+			.map((header) => header.textContent);
+		expect(rowheaders).toEqual(legend.data);
+		for (const header of screen.getAllByRole("rowheader")) {
+			expect(header.closest("tr")?.querySelectorAll("td")).toHaveLength(3);
+		}
 	});
 });
