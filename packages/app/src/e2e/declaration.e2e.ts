@@ -67,14 +67,19 @@ async function checkPayGapAtZoom(page: Page, caption: string) {
 	const measurements = await table.evaluate((element) =>
 		Array.from(
 			element.querySelectorAll(
-				"thead th:last-child strong, thead th:last-child span, tbody tr td:first-child strong",
+				'thead th:last-child strong, thead th:last-child span, tbody th[scope="row"]',
 			),
 		).map((label) => {
 			const cell = label.closest("th, td");
+			// A row header holds its label as bare text: measure the text itself,
+			// which overflows the cell when it no longer fits.
+			const text = document.createRange();
+			text.selectNodeContents(label);
+			const box = text.getBoundingClientRect();
 			return {
 				text: label.textContent?.trim(),
-				left: label.getBoundingClientRect().left,
-				right: label.getBoundingClientRect().right,
+				left: box.left,
+				right: box.right,
 				cellLeft: cell?.getBoundingClientRect().left ?? 0,
 				cellRight: cell?.getBoundingClientRect().right ?? 0,
 			};
