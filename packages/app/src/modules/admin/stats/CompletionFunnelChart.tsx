@@ -179,6 +179,8 @@ export function buildEchartsOption(
 		},
 		legend: {
 			show: true,
+			// A clickable legend would hide funnel steps with the mouse only (RGAA 4.12).
+			selectedMode: false,
 			orient: "horizontal",
 			bottom: 0,
 			data: rows.map((row) => row.label),

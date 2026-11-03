@@ -7,12 +7,13 @@ import common from "~/modules/declaration-remuneration/shared/common.module.scss
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { FormErrors } from "~/modules/declaration-remuneration/shared/FormErrors";
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
-import { formatCivilLongDate } from "~/modules/domain";
+import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { getPostComplianceDestination } from "~/modules/navigation";
 import { SUBMIT_LABEL, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import {
 	JointEvaluationAfterReport,
+	JointEvaluationDeadline,
 	type JointEvaluationExistingFile,
 	JointEvaluationExistingReport,
 	JointEvaluationHeading,
@@ -99,6 +100,7 @@ export function JointEvaluationForm({
 							Parcours de mise en conformité pour l&apos;indicateur par
 							catégorie d&apos;emplois
 						</h1>
+						<SavedIndicator hasData={true} />
 					</div>
 
 					<JointEvaluationHeading title="Évaluation conjointe des rémunérations" />
@@ -111,15 +113,7 @@ export function JointEvaluationForm({
 
 					<JointEvaluationReportUpload
 						beforeDropzone={
-							<div className="fr-highlight">
-								<p className="fr-mb-2v fr-text--md">
-									Échéance pour transmettre le rapport de l&apos;évaluation
-									conjointe
-								</p>
-								<p className="fr-text--xl fr-text--bold fr-mb-0">
-									{formatCivilLongDate(jointEvaluationDeadline)}
-								</p>
-							</div>
+							<JointEvaluationDeadline deadline={jointEvaluationDeadline} />
 						}
 						disabled={isReadOnly}
 						error={uploadError}

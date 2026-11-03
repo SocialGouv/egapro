@@ -383,7 +383,7 @@ describe("ProfileModal — validation", () => {
 		expect(mockMutate).not.toHaveBeenCalled();
 	});
 
-	it("keeps the phone format hint and shows the generic error when invalid", async () => {
+	it("keeps the phone format hint and shows the format error when invalid", async () => {
 		await renderOpenModal();
 		fireEvent.change(getElement("profile-phone"), {
 			target: { value: "012233" },
@@ -393,7 +393,9 @@ describe("ProfileModal — validation", () => {
 		await waitFor(() => {
 			expect(
 				document.querySelector("#profile-phone-messages .fr-message--error"),
-			).toHaveTextContent("Veuillez renseigner votre numéro de téléphone");
+			).toHaveTextContent(
+				"Le numéro de téléphone n'est pas valide. Saisissez-le au format 01 22 33 44 55 ou +33 1 22 33 44 55",
+			);
 		});
 		expect(
 			screen.getByText("Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55"),

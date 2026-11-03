@@ -1,3 +1,5 @@
+import styles from "./Pagination.module.scss";
+
 type PaginationProps = {
 	currentPage: number;
 	totalPages: number;
@@ -10,33 +12,27 @@ export function Pagination({
 	onPageChange,
 }: PaginationProps) {
 	const pages = buildPageNumbers(currentPage, totalPages);
+	const isFirstPage = currentPage === 1;
+	const isLastPage = currentPage === totalPages;
 
 	return (
 		<nav aria-label="Pagination" className="fr-pagination fr-mt-2w">
 			<ul className="fr-pagination__list">
 				<li>
-					<button
-						aria-disabled={currentPage === 1}
-						className="fr-pagination__link fr-pagination__link--first"
-						disabled={currentPage === 1}
-						onClick={() => onPageChange(1)}
-						title="Première page"
-						type="button"
-					>
-						Première page
-					</button>
+					<StepButton
+						className="fr-pagination__link--first"
+						inactive={isFirstPage}
+						label="Première page"
+						onActivate={() => onPageChange(1)}
+					/>
 				</li>
 				<li>
-					<button
-						aria-disabled={currentPage === 1}
-						className="fr-pagination__link fr-pagination__link--prev fr-pagination__link--lg-label"
-						disabled={currentPage === 1}
-						onClick={() => onPageChange(currentPage - 1)}
-						title="Page précédente"
-						type="button"
-					>
-						Page précédente
-					</button>
+					<StepButton
+						className="fr-pagination__link--prev fr-pagination__link--lg-label"
+						inactive={isFirstPage}
+						label="Page précédente"
+						onActivate={() => onPageChange(currentPage - 1)}
+					/>
 				</li>
 				{pages.map((item) =>
 					item === "ellipsis-start" || item === "ellipsis-end" ? (
@@ -60,31 +56,56 @@ export function Pagination({
 					),
 				)}
 				<li>
-					<button
-						aria-disabled={currentPage === totalPages}
-						className="fr-pagination__link fr-pagination__link--next fr-pagination__link--lg-label"
-						disabled={currentPage === totalPages}
-						onClick={() => onPageChange(currentPage + 1)}
-						title="Page suivante"
-						type="button"
-					>
-						Page suivante
-					</button>
+					<StepButton
+						className="fr-pagination__link--next fr-pagination__link--lg-label"
+						inactive={isLastPage}
+						label="Page suivante"
+						onActivate={() => onPageChange(currentPage + 1)}
+					/>
 				</li>
 				<li>
-					<button
-						aria-disabled={currentPage === totalPages}
-						className="fr-pagination__link fr-pagination__link--last"
-						disabled={currentPage === totalPages}
-						onClick={() => onPageChange(totalPages)}
-						title="Dernière page"
-						type="button"
-					>
-						Dernière page
-					</button>
+					<StepButton
+						className="fr-pagination__link--last"
+						inactive={isLastPage}
+						label="Dernière page"
+						onActivate={() => onPageChange(totalPages)}
+					/>
 				</li>
 			</ul>
 		</nav>
+	);
+}
+
+type StepButtonProps = {
+	className: string;
+	inactive: boolean;
+	label: string;
+	onActivate: () => void;
+};
+
+/**
+ * First / previous / next / last button. When it cannot act it is marked
+ * `aria-disabled` and ignores activation, but is never `disabled`: a button
+ * that turns `disabled` while focused — « Première page » once page 1 is
+ * reached — drops keyboard focus to `<body>` (RGAA 7.3).
+ */
+function StepButton({
+	className,
+	inactive,
+	label,
+	onActivate,
+}: StepButtonProps) {
+	const inactiveClassName = inactive ? styles.inactive : "";
+	return (
+		<button
+			aria-disabled={inactive || undefined}
+			className={`fr-pagination__link ${className} ${inactiveClassName}`}
+			onClick={inactive ? undefined : onActivate}
+			title={label}
+			type="button"
+		>
+			{label}
+		</button>
 	);
 }
 

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -49,6 +49,25 @@ describe("PayGapTable", () => {
 		expect(scrollRegion).toContainElement(
 			screen.getByRole("table", { name: "Écarts de rémunération" }),
 		);
+	});
+
+	it("declares each row label as a row header that labels the row's cells", () => {
+		renderTable(DEFAULT_PAY_GAP_ROWS);
+
+		const rowHeaders = screen.getAllByRole("rowheader");
+		expect(rowHeaders.map((header) => header.textContent)).toEqual(
+			DEFAULT_PAY_GAP_ROWS.map((row) => row.label),
+		);
+		for (const header of rowHeaders) {
+			expect(header.tagName).toBe("TH");
+			expect(header).toHaveAttribute("scope", "row");
+			const row = header.closest("tr");
+			if (!row) throw new Error("row header outside a table row");
+			// The header opens its row, so assistive tech pairs every value and
+			// gap cell that follows it with the row label.
+			expect(row.firstElementChild).toBe(header);
+			expect(within(row).getAllByRole("cell")).toHaveLength(3);
+		}
 	});
 
 	it("shows the GIP gap while both operands are untouched", () => {

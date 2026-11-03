@@ -6,9 +6,14 @@ import { SecondDeclarationStep1Info } from "../SecondDeclarationStep1Info";
 const SCOPED_CALLOUT_CLASS = "obligationsCallout";
 const SCOPED_FONT_MEDIUM_CLASS = "fontMedium";
 
-function renderStep1() {
+function renderStep1({
+	cseOpinionRequired = true,
+}: {
+	cseOpinionRequired?: boolean;
+} = {}) {
 	render(
 		<SecondDeclarationStep1Info
+			cseOpinionRequired={cseOpinionRequired}
 			declarationSiren="123456789"
 			declarationYear={2027}
 			modificationDeadline={new Date("2027-12-01T00:00:00Z")}
@@ -36,15 +41,13 @@ describe("SecondDeclarationStep1Info", () => {
 		).toBeInTheDocument();
 	});
 
-	it("displays the deadline", () => {
+	it("displays the deadline with its label and no declaration date mention", () => {
 		renderStep1();
 
+		expect(
+			screen.getByText("Échéance pour transmettre la seconde déclaration"),
+		).toBeInTheDocument();
 		expect(screen.getByText(/1ᵉʳ décembre 2027/)).toBeInTheDocument();
-	});
-
-	it("no longer recalls the date of the first declaration", () => {
-		renderStep1();
-
 		expect(
 			screen.queryByText(/Déclaration effectuée le/),
 		).not.toBeInTheDocument();
@@ -61,8 +64,8 @@ describe("SecondDeclarationStep1Info", () => {
 		).toBeInTheDocument();
 	});
 
-	it("lists the three obligations in the order of the mock-up, the CSE opinion being transmitted at the last step", () => {
-		renderStep1();
+	it("lists the actions correctives then the CSE bullet then the redéclaration bullet when the CSE opinion is required", () => {
+		renderStep1({ cseOpinionRequired: true });
 
 		const items = screen.getAllByRole("listitem").map((li) => li.textContent);
 		expect(items).toEqual([
@@ -70,6 +73,23 @@ describe("SecondDeclarationStep1Info", () => {
 			"Informer et consulter votre CSE sur l'exactitude des données et éventuellement sur la justification en cas d'écarts ≥ 5 % (l'avis devra être transmis à la dernière étape de la démarche)",
 			"Redéclarer l'indicateur dans un délai de 6 mois après votre première déclaration",
 		]);
+		expect(
+			screen.queryByText("Déposer le ou les avis du CSE"),
+		).not.toBeInTheDocument();
+	});
+
+	it("lists only the actions correctives and redéclaration bullets when the CSE opinion is not required", () => {
+		renderStep1({ cseOpinionRequired: false });
+
+		const items = screen.getAllByRole("listitem");
+		expect(items).toHaveLength(2);
+		expect(items[0]).toHaveTextContent(
+			/Mettre en place des actions correctives/,
+		);
+		expect(items[1]).toHaveTextContent(/Redéclarer l.indicateur/);
+		expect(
+			screen.queryByText(/Informer et consulter votre CSE/),
+		).not.toBeInTheDocument();
 		expect(
 			screen.queryByText("Déposer le ou les avis du CSE"),
 		).not.toBeInTheDocument();
@@ -120,7 +140,7 @@ describe("SecondDeclarationStep1Info", () => {
 		expect(title.parentElement).toHaveClass("fr-callout", SCOPED_CALLOUT_CLASS);
 	});
 
-	it("renders the intro paragraph in uniform medium weight", () => {
+	it("renders the intro paragraph in uniform medium weight without emphasis", () => {
 		renderStep1();
 
 		const intro = screen.getByText(/Vous devez mettre en œuvre des/);
@@ -129,6 +149,16 @@ describe("SecondDeclarationStep1Info", () => {
 			"Vous devez mettre en œuvre des actions correctives et effectuer une seconde déclaration de l'indicateur par catégorie d'emplois.",
 		);
 		expect(intro.querySelector("strong")).toBeNull();
+	});
+
+	it("announces the next step in the stepper details", () => {
+		renderStep1();
+
+		expect(
+			screen.getByText(
+				"Seconde déclaration de l'indicateur par catégorie d'emplois",
+			),
+		).toBeInTheDocument();
 	});
 
 	it("neutralises the top margin of the form actions", () => {

@@ -15,6 +15,26 @@ import {
 } from "./fixtures";
 
 describe("RecapitulatifPage", () => {
+	it("identifies itself, next to the download, as the accessible version of the PDF (RGAA 13.3)", () => {
+		render(<RecapitulatifPage {...defaultProps()} />);
+		const download = screen.getByRole("link", {
+			name: /Télécharger la déclaration .*\(PDF\)/,
+		});
+		expect(download.parentElement).toHaveTextContent(
+			"Version accessible : cette page reprend l'intégralité du document.",
+		);
+	});
+
+	it("labels the workforce with the reference year (N-1), as the PDF does", () => {
+		render(<RecapitulatifPage {...defaultProps()} />);
+		expect(
+			screen.getByText("Effectif annuel moyen en 2024"),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText("Effectif annuel moyen en 2025"),
+		).not.toBeInTheDocument();
+	});
+
 	it("renders h1 with year", () => {
 		render(<RecapitulatifPage {...defaultProps()} />);
 		expect(
@@ -135,12 +155,12 @@ describe("RecapitulatifPage", () => {
 		expect(screen.getByText("1 rue de Paris, 75001 Paris")).toBeInTheDocument();
 		expect(screen.getByText("Code NAF")).toBeInTheDocument();
 		expect(screen.getByText("6201Z")).toBeInTheDocument();
-		const workforceLabel = screen.getByText("Effectif annuel moyen en 2025");
+		const workforceLabel = screen.getByText("Effectif annuel moyen en 2024");
 		expect(workforceLabel).toBeInTheDocument();
 		// "250" also appears as the 120 + 130 total of the workforce table, so the
 		// company value is read from the row that carries the label.
 		expect(workforceLabel.parentElement).toHaveTextContent(
-			"Effectif annuel moyen en 2025250",
+			"Effectif annuel moyen en 2024250",
 		);
 	});
 
@@ -421,10 +441,16 @@ describe("RecapitulatifPage", () => {
 			/>,
 		);
 		expect(
-			screen.getByText("Rémunération annuelle brute moyenne"),
+			screen.getByRole("heading", {
+				level: 4,
+				name: "Rémunération annuelle brute moyenne",
+			}),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText("Rémunération horaire brute moyenne"),
+			screen.getByRole("heading", {
+				level: 4,
+				name: "Rémunération horaire brute moyenne",
+			}),
 		).toBeInTheDocument();
 		expect(screen.getAllByText("1er quartile").length).toBeGreaterThanOrEqual(
 			1,
@@ -533,10 +559,16 @@ describe("RecapitulatifPage", () => {
 			/>,
 		);
 		expect(
-			screen.getByText("Catégorie d'emplois n°1 : Ouvriers / Employés"),
+			screen.getByRole("heading", {
+				level: 3,
+				name: "Catégorie d'emplois n°1 : Ouvriers / Employés",
+			}),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText("Catégorie d'emplois n°2 : Techniciens"),
+			screen.getByRole("heading", {
+				level: 3,
+				name: "Catégorie d'emplois n°2 : Techniciens",
+			}),
 		).toBeInTheDocument();
 		// One headcount table per category, each with an annual and hourly row
 		// (#4368) — plus the company-wide "Indicateurs pour l'ensemble de vos
@@ -656,7 +688,7 @@ describe("RecapitulatifPage", () => {
 			/>,
 		);
 		expect(
-			screen.getByText("Effectif annuel moyen en 2025"),
+			screen.getByText("Effectif annuel moyen en 2024"),
 		).toBeInTheDocument();
 		expect(
 			screen.getByText(GIP_WORKFORCE_VOLUNTARY_DISPLAY),
@@ -686,7 +718,7 @@ describe("RecapitulatifPage", () => {
 			/>,
 		);
 		expect(
-			screen.getByText("Effectif annuel moyen en 2025"),
+			screen.getByText("Effectif annuel moyen en 2024"),
 		).toBeInTheDocument();
 		expect(screen.getByText("99")).toBeInTheDocument();
 	});

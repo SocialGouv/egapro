@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
@@ -36,6 +36,7 @@ const FIELD_LABELS: Record<DateFieldKey, string> = {
 export function RepresentationCampaignForm({ year }: Props) {
 	const [status, setStatus] = useState<SettingsFormStatus>("idle");
 	const [serverError, setServerError] = useState<string | null>(null);
+	const requiredNoteId = useId();
 
 	const utils = api.useUtils();
 	const campaignQuery =
@@ -98,6 +99,10 @@ export function RepresentationCampaignForm({ year }: Props) {
 					</p>
 				)}
 
+				<p className="fr-text--sm fr-mb-2w" id={requiredNoteId}>
+					Tous les champs sont obligatoires.
+				</p>
+
 				<fieldset className="fr-fieldset">
 					<legend className="fr-fieldset__legend">
 						Campagne représentation équilibrée
@@ -111,6 +116,7 @@ export function RepresentationCampaignForm({ year }: Props) {
 									label={FIELD_LABELS[key]}
 									registration={form.register(key)}
 									required
+									requiredNoteId={requiredNoteId}
 								/>
 							</div>
 						))}
