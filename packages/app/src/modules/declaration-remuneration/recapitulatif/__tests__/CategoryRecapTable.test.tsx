@@ -101,7 +101,10 @@ describe("CategoryRecapTable", () => {
 			/>,
 		);
 		expect(
-			screen.getByText("Catégorie d'emplois n°2 : Ouvriers / Employés"),
+			screen.getByRole("heading", {
+				level: 3,
+				name: "Catégorie d'emplois n°2 : Ouvriers / Employés",
+			}),
 		).toBeInTheDocument();
 	});
 
@@ -113,7 +116,12 @@ describe("CategoryRecapTable", () => {
 				index={0}
 			/>,
 		);
-		expect(screen.getByText("Catégorie d'emplois n°1")).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", {
+				level: 3,
+				name: "Catégorie d'emplois n°1",
+			}),
+		).toBeInTheDocument();
 	});
 
 	it("describes the pay table and associates each value with its section, row and column across categories", () => {

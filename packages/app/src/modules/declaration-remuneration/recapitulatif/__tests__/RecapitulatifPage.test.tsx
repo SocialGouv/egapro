@@ -441,10 +441,16 @@ describe("RecapitulatifPage", () => {
 			/>,
 		);
 		expect(
-			screen.getByText("Rémunération annuelle brute moyenne"),
+			screen.getByRole("heading", {
+				level: 4,
+				name: "Rémunération annuelle brute moyenne",
+			}),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText("Rémunération horaire brute moyenne"),
+			screen.getByRole("heading", {
+				level: 4,
+				name: "Rémunération horaire brute moyenne",
+			}),
 		).toBeInTheDocument();
 		expect(screen.getAllByText("1er quartile").length).toBeGreaterThanOrEqual(
 			1,
@@ -553,10 +559,16 @@ describe("RecapitulatifPage", () => {
 			/>,
 		);
 		expect(
-			screen.getByText("Catégorie d'emplois n°1 : Ouvriers / Employés"),
+			screen.getByRole("heading", {
+				level: 3,
+				name: "Catégorie d'emplois n°1 : Ouvriers / Employés",
+			}),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText("Catégorie d'emplois n°2 : Techniciens"),
+			screen.getByRole("heading", {
+				level: 3,
+				name: "Catégorie d'emplois n°2 : Techniciens",
+			}),
 		).toBeInTheDocument();
 		// One headcount table per category, each with an annual and hourly row
 		// (#4368) — plus the company-wide "Indicateurs pour l'ensemble de vos
