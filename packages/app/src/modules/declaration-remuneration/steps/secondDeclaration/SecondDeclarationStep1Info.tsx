@@ -13,12 +13,14 @@ import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator
 const EMPTY_DB_VALUES = {} as Record<string, never>;
 
 type Props = {
+	cseOpinionRequired: boolean;
 	declarationSiren: string;
 	declarationYear: number;
 	modificationDeadline: Date;
 };
 
 export function SecondDeclarationStep1Info({
+	cseOpinionRequired,
 	declarationSiren,
 	declarationYear,
 	modificationDeadline,
@@ -54,7 +56,7 @@ export function SecondDeclarationStep1Info({
 
 			<DeadlineBlock deadline={modificationDeadline} />
 
-			<ObligationsCallout />
+			<ObligationsCallout cseOpinionRequired={cseOpinionRequired} />
 
 			<FormActions
 				className="fr-mt-0"
@@ -78,7 +80,11 @@ function DeadlineBlock({ deadline }: { deadline: Date }) {
 	);
 }
 
-function ObligationsCallout() {
+function ObligationsCallout({
+	cseOpinionRequired,
+}: {
+	cseOpinionRequired: boolean;
+}) {
 	return (
 		<div className={`fr-callout ${styles.obligationsCallout}`}>
 			<h3 className="fr-callout__title fr-h6">
@@ -90,11 +96,14 @@ function ObligationsCallout() {
 						Mettre en place des actions correctives par accord ou plan
 						d&apos;action
 					</li>
-					<li>
-						Informer et consulter votre CSE sur l&apos;exactitude des données et
-						éventuellement sur la justification en cas d&apos;écarts ≥ 5 %
-						(l&apos;avis devra être transmis à la dernière étape de la démarche)
-					</li>
+					{cseOpinionRequired && (
+						<li>
+							Informer et consulter votre CSE sur l&apos;exactitude des données
+							et éventuellement sur la justification en cas d&apos;écarts ≥ 5 %
+							(l&apos;avis devra être transmis à la dernière étape de la
+							démarche)
+						</li>
+					)}
 					<li>
 						Redéclarer l&apos;indicateur dans un délai de 6 mois après votre
 						première déclaration

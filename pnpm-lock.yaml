@@ -8,6 +8,11 @@ overrides:
   '@react-pdf/textkit': ^6.3.0
   next-auth>nodemailer: '-'
 
+patchedDependencies:
+  recharts@3.10.1:
+    hash: 05889f1405bd008d107dc036fe56e994d05b584d13fac01e6e25146a70c5ca62
+    path: patches/recharts@3.10.1.patch
+
 importers:
 
   .:
@@ -104,7 +109,7 @@ importers:
         version: 7.89.0(@types/react@19.2.14)(react@19.2.8)
       recharts:
         specifier: ^3.10.1
-        version: 3.10.1(@types/react@19.2.14)(react-dom@19.2.8(react@19.2.8))(react-is@17.0.2)(react@19.2.8)(redux@5.0.1)
+        version: 3.10.1(patch_hash=05889f1405bd008d107dc036fe56e994d05b584d13fac01e6e25146a70c5ca62)(@types/react@19.2.14)(react-dom@19.2.8(react@19.2.8))(react-is@17.0.2)(react@19.2.8)(redux@5.0.1)
       redis:
         specifier: ^5.11.0
         version: 5.11.0
@@ -182,8 +187,8 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
       ultra11y:
-        specifier: 5.42.1
-        version: 5.42.1(playwright-core@1.62.1)
+        specifier: 5.55.0
+        version: 5.55.0(playwright-core@1.62.1)
       vite-tsconfig-paths:
         specifier: ^6.1.1
         version: 6.1.1(typescript@6.0.2)(vite@7.3.1(@types/node@26.4.0)(sass@1.105.1)(terser@5.51.2)(tsx@4.23.12)(yaml@2.8.3))
@@ -6487,8 +6492,8 @@ packages:
     engines: {node: '>=0.8.0'}
     hasBin: true
 
-  ultra11y@5.42.1:
-    resolution: {integrity: sha512-2ZQfJIOjlFDfldBlerWi106RuWW3EvkhHZOz8gIOGTZrmro2ozJh7zjHZRuPv+VQzzgOAnu102ShbSSfoonuBA==}
+  ultra11y@5.55.0:
+    resolution: {integrity: sha512-/SMydkemj9FagD4dyRhcbENnT+ZYVsKWJJNWA0P/ngmA3t/zxhD/9cxAWEbIBmbMPUy2WAcGYfvjbQ8Ea6jrmA==}
     engines: {node: '>=22.18.0'}
     hasBin: true
 
@@ -12560,7 +12565,7 @@ snapshots:
 
   readdirp@5.1.1: {}
 
-  recharts@3.10.1(@types/react@19.2.14)(react-dom@19.2.8(react@19.2.8))(react-is@17.0.2)(react@19.2.8)(redux@5.0.1):
+  recharts@3.10.1(patch_hash=05889f1405bd008d107dc036fe56e994d05b584d13fac01e6e25146a70c5ca62)(@types/react@19.2.14)(react-dom@19.2.8(react@19.2.8))(react-is@17.0.2)(react@19.2.8)(redux@5.0.1):
     dependencies:
       '@reduxjs/toolkit': 2.12.0(react-redux@9.3.0(@types/react@19.2.14)(react@19.2.8)(redux@5.0.1))(react@19.2.8)
       clsx: 2.1.1
@@ -13332,7 +13337,7 @@ snapshots:
   uglify-js@3.19.3:
     optional: true
 
-  ultra11y@5.42.1(playwright-core@1.62.1):
+  ultra11y@5.55.0(playwright-core@1.62.1):
     dependencies:
       '@axe-core/playwright': 4.13.0(playwright-core@1.62.1)
       '@babel/parser': 8.0.4

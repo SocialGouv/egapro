@@ -30,7 +30,7 @@
 	align-items: center;
 	gap: 0.5rem;
 	padding: 0;
-	font-size: 0.875rem;
+	font-size: 1rem;
 	color: var(--text-action-high-blue-france);
 	text-decoration: underline;
 	cursor: pointer;
@@ -60,6 +60,23 @@
 	display: flex;
 	flex-direction: column;
 	gap: 0.25rem;
+}
+
+// DSFR bordered cells only draw their right and bottom edges.
+.fileTable {
+	border-top: 1px solid var(--border-contrast-grey);
+	border-left: 1px solid var(--border-contrast-grey);
+}
+
+.fileCell {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.25rem;
+}
+
+.actionsColumn {
+	width: 4rem;
 }
 
 .dropzoneActions {

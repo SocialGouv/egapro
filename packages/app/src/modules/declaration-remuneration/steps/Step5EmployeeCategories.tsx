@@ -29,6 +29,7 @@ type Props = {
 	maxMen?: number;
 	hourlyMaxWomen?: number;
 	hourlyMaxMen?: number;
+	sameWorkforceByPayBasis?: boolean;
 };
 
 export function Step5EmployeeCategories({
@@ -41,6 +42,7 @@ export function Step5EmployeeCategories({
 	maxMen,
 	hourlyMaxWomen,
 	hourlyMaxMen,
+	sameWorkforceByPayBasis = false,
 }: Props) {
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
@@ -132,6 +134,7 @@ export function Step5EmployeeCategories({
 			readOnly={isLocked}
 			referenceYear={getReferenceYearFor(declarationYear)}
 			reminderText={STEP5_WORKFORCE_REMINDER}
+			sameWorkforceByPayBasis={sameWorkforceByPayBasis}
 			stepper={
 				<StepIndicator
 					currentStep={5}

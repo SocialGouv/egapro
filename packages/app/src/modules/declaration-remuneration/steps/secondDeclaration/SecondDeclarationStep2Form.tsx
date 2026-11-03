@@ -27,6 +27,7 @@ type Props = {
 	initialSource?: string;
 	initialStartDate?: string;
 	initialEndDate?: string;
+	sameWorkforceByPayBasis?: boolean;
 	status: DeclarationFsmStatus | null;
 };
 
@@ -38,6 +39,7 @@ export function SecondDeclarationStep2Form({
 	initialSource,
 	initialStartDate = "",
 	initialEndDate = "",
+	sameWorkforceByPayBasis = false,
 	status,
 }: Props) {
 	const router = useRouter();
@@ -138,6 +140,7 @@ export function SecondDeclarationStep2Form({
 				/>
 			}
 			referenceYear={getReferenceYearFor(declarationYear)}
+			sameWorkforceByPayBasis={sameWorkforceByPayBasis}
 			stepper={<SecondDeclarationStepIndicator currentStep={2} />}
 			submitError={periodError || mutation.error?.message}
 			title={

@@ -2,7 +2,6 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { RepresentationSubmitVariant } from "~/modules/declaration-representation/shared/reviewSummary";
 import { SubmitModal } from "../SubmitModal";
 import { REPRESENTATION_CAMPAIGN_YEAR } from "./fixtures";
 import { certifyModal, modalButton, modalLiveRegion } from "./modalQueries";
@@ -10,13 +9,7 @@ import { certifyModal, modalButton, modalLiveRegion } from "./modalQueries";
 const onClose = vi.fn();
 const onSubmit = vi.fn();
 
-function renderModal({
-	isPending = false,
-	variant = "compliant",
-}: {
-	isPending?: boolean;
-	variant?: RepresentationSubmitVariant;
-} = {}) {
+function renderModal({ isPending = false }: { isPending?: boolean } = {}) {
 	return render(
 		<SubmitModal
 			campaignYear={REPRESENTATION_CAMPAIGN_YEAR}
@@ -24,7 +17,6 @@ function renderModal({
 			modalRef={{ current: null }}
 			onClose={onClose}
 			onSubmit={onSubmit}
-			variant={variant}
 		/>,
 	);
 }
@@ -34,35 +26,13 @@ beforeEach(() => {
 	onSubmit.mockReset();
 });
 
-describe("SubmitModal — variants", () => {
-	it.each([
-		[
-			"two_gaps",
-			"Des écarts de représentation sont non conformes au seuil réglementaire actuel. Vous devez définir des mesures correctives par accord collectif ou par décision unilatérale de l'employeur, et les déposer sur TéléAccords.",
-		],
-		[
-			"one_gap",
-			"Un écart de représentation est non conforme au seuil réglementaire. Vous devez définir des mesures correctives par accord collectif ou par décision unilatérale de l'employeur, et les déposer sur TéléAccords.",
-		],
-		[
-			"compliant",
-			"Vos écarts de représentation sont conformes au seuil réglementaire actuel.",
-		],
-		["not_computable", "Vos écarts de représentation ne sont pas calculables."],
-	] as const)("states the %s outcome", (variant, message) => {
-		renderModal({ variant });
-
-		expect(screen.getByText(message)).toBeInTheDocument();
-	});
-
-	it("announces the campaign the declaration is filed for", () => {
+describe("SubmitModal — description", () => {
+	it("states the same introduction sentence for every outcome, with nothing after it", () => {
 		renderModal();
 
 		expect(
 			screen.getByText(
-				new RegExp(
-					`Vous allez transmettre la déclaration des indicateurs de représentation ${REPRESENTATION_CAMPAIGN_YEAR}`,
-				),
+				`Vous allez transmettre la déclaration des indicateurs de représentation ${REPRESENTATION_CAMPAIGN_YEAR} aux services du ministère chargé du travail.`,
 			),
 		).toBeInTheDocument();
 	});

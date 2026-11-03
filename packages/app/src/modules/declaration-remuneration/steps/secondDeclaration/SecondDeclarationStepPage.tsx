@@ -58,6 +58,11 @@ export async function SecondDeclarationStepPage({ step: rawStep }: Props) {
 
 	const initialSource = data.jobCategories[0]?.source;
 
+	const cseOpinionRequired = isCseOpinionRequired({
+		workforce: getObligationWorkforce(company.gipWorkforce),
+		hasCse: company.hasCse,
+	});
+
 	const stepTracker = (
 		<FunnelStepTracker
 			config={COMPLIANCE_FUNNEL}
@@ -71,6 +76,7 @@ export async function SecondDeclarationStepPage({ step: rawStep }: Props) {
 			<>
 				{stepTracker}
 				<SecondDeclarationStep1Info
+					cseOpinionRequired={cseOpinionRequired}
 					declarationSiren={data.declaration.siren}
 					declarationYear={currentYear}
 					modificationDeadline={campaignDeadlines.decl2ModificationDeadline}
@@ -98,6 +104,14 @@ export async function SecondDeclarationStepPage({ step: rawStep }: Props) {
 						initialStartDate={
 							data.declaration.secondDeclReferencePeriodStart ?? undefined
 						}
+						sameWorkforceByPayBasis={
+							data.declaration.totalWomen !== null &&
+							data.declaration.hourlyWomen !== null &&
+							data.declaration.totalWomen === data.declaration.hourlyWomen &&
+							data.declaration.totalMen !== null &&
+							data.declaration.hourlyMen !== null &&
+							data.declaration.totalMen === data.declaration.hourlyMen
+						}
 						status={data.declaration.status}
 					/>
 				</HydrateClient>
@@ -117,10 +131,7 @@ export async function SecondDeclarationStepPage({ step: rawStep }: Props) {
 					cseApplicable={isCseRequired(
 						getObligationWorkforce(company.gipWorkforce),
 					)}
-					cseOpinionRequired={isCseOpinionRequired({
-						workforce: getObligationWorkforce(company.gipWorkforce),
-						hasCse: company.hasCse,
-					})}
+					cseOpinionRequired={cseOpinionRequired}
 					declarationYear={currentYear}
 					secondDeclarationCategories={reviewCategories}
 					secondDeclarationSubmissionCount={

@@ -172,7 +172,6 @@ export function Step5Review() {
 					modalRef={modalRef}
 					onClose={close}
 					onSubmit={handleConfirm}
-					variant={summary.submitVariant}
 				/>
 			)}
 		</div>

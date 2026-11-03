@@ -402,20 +402,18 @@ export async function completeSecondDeclaration(
 			mandatoryBox?.y ?? Number.NEGATIVE_INFINITY,
 		);
 
-		// #4254 — the shared category table carries a headcount row per pay basis here
-		// too, but this parcours answers to no step 1: it gets neither the reminder
-		// sentence nor the coherence caps that go with it.
+		// #4254 — the shared category table carries the headcount here too, but this
+		// parcours answers to no step 1: it gets neither the reminder sentence nor the
+		// coherence caps that go with it.
 		await expect(
 			categoryBlock.getByRole("heading", {
 				name: "Nombre de salariés en effectif physique",
 			}),
 		).toBeVisible();
-		for (const basis of ["annual", "hourly"] as const) {
-			for (const sex of ["women", "men"] as const) {
-				await expect(
-					categoryWorkforceInput(page, { basis, sex }),
-				).toBeVisible();
-			}
+		for (const sex of ["women", "men"] as const) {
+			await expect(
+				categoryWorkforceInput(page, { basis: "shared", sex }),
+			).toBeVisible();
 		}
 		await expect(page.getByText(STEP5_WORKFORCE_REMINDER)).toHaveCount(0);
 

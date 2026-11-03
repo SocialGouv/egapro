@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -10,6 +10,7 @@ const PDF_MIME = "application/pdf";
 
 const baseProps = {
 	inputId: "test-upload",
+	labelId: "test-upload-label",
 	accept: ".pdf",
 	acceptLabel: "pdf",
 	allowedMimeTypes: [PDF_MIME],
@@ -30,11 +31,13 @@ function ControlledFileUpload({
 	allowedMimeTypes = [PDF_MIME, "image/png"],
 	maxFileCount,
 	disabled,
+	fileList,
 }: {
 	onChange?: (files: File[], error: string | null) => void;
 	allowedMimeTypes?: string[];
 	maxFileCount?: number;
 	disabled?: boolean;
+	fileList?: "cards" | "table";
 }) {
 	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 	const [error, setError] = useState<string | null>(null);
@@ -46,7 +49,9 @@ function ControlledFileUpload({
 			allowedMimeTypes={allowedMimeTypes}
 			disabled={disabled}
 			error={error}
+			fileList={fileList}
 			inputId="test-upload"
+			labelId="test-upload-label"
 			maxFileCount={maxFileCount}
 			onFilesChange={(files, nextError) => {
 				setSelectedFiles(files);
@@ -57,6 +62,48 @@ function ControlledFileUpload({
 		/>
 	);
 }
+
+describe("FileUpload — accessible name (RGAA 11.2)", () => {
+	function renderWithLabel() {
+		return render(
+			<>
+				<label
+					className="fr-label"
+					htmlFor="test-upload"
+					id="test-upload-label"
+				>
+					Veuillez déposer le rapport de l&apos;évaluation conjointe.
+					<span className="fr-hint-text">Taille maximale : 10 Mo.</span>
+				</label>
+				<FileUpload
+					{...baseProps}
+					error={null}
+					onFilesChange={vi.fn()}
+					selectedFiles={[]}
+				/>
+			</>,
+		);
+	}
+
+	it("names the file input with the visible label instead of a generic text", () => {
+		renderWithLabel();
+		const input = getInput();
+		expect(input).not.toHaveAttribute("aria-label");
+		expect(input).toHaveAccessibleName(
+			/Veuillez déposer le rapport de l.évaluation conjointe\./,
+		);
+	});
+
+	it("keeps the select button's visible name and describes it with the requested document", () => {
+		renderWithLabel();
+		const button = screen.getByRole("button", {
+			name: /Sélectionner un fichier/,
+		});
+		expect(button).toHaveAccessibleDescription(
+			/Veuillez déposer le rapport de l.évaluation conjointe\./,
+		);
+	});
+});
 
 describe("FileUpload", () => {
 	beforeEach(() => {
@@ -140,6 +187,106 @@ describe("FileUpload", () => {
 		expect(link).toHaveTextContent("avis.pdf");
 		expect(link).not.toHaveTextContent("PDF – 2 Ko");
 		expect(screen.getByText("PDF – 2 Ko")).toHaveClass("fr-text-mention--grey");
+	});
+
+	describe("table file list", () => {
+		it("lists the selected file in a « Fichier déposé » table with a new-tab link", () => {
+			render(
+				<FileUpload
+					{...baseProps}
+					error={null}
+					fileList="table"
+					onFilesChange={vi.fn()}
+					selectedFiles={[makePdf("avis.pdf", 2048)]}
+				/>,
+			);
+
+			const table = screen.getByRole("table", { name: "Fichier déposé" });
+			expect(
+				within(table).getByRole("columnheader", { name: "Fichier déposé" }),
+			).toBeInTheDocument();
+			const link = within(table).getByRole("link", { name: /avis\.pdf/ });
+			expect(link).toHaveAttribute("href", "blob:mock/avis.pdf");
+			expect(link).toHaveAttribute("target", "_blank");
+			expect(link).toHaveTextContent("(ouvre une nouvelle fenêtre)");
+			expect(link).not.toHaveAttribute("download");
+			expect(within(table).getByText("PDF – 2 Ko")).toHaveClass(
+				"fr-text-mention--grey",
+			);
+			expect(
+				screen.queryByRole("link", { name: /Télécharger avis\.pdf/ }),
+			).not.toBeInTheDocument();
+		});
+
+		it("removes the file via an icon-only delete button", async () => {
+			const user = userEvent.setup();
+			const onFilesChange = vi.fn();
+			render(
+				<FileUpload
+					{...baseProps}
+					error={null}
+					fileList="table"
+					onFilesChange={onFilesChange}
+					selectedFiles={[makePdf("avis.pdf")]}
+				/>,
+			);
+
+			const button = screen.getByRole("button", { name: "Supprimer avis.pdf" });
+			expect(button).toHaveAttribute("title", "Supprimer avis.pdf");
+			expect(button).toHaveClass("fr-btn--secondary", "fr-icon-delete-line");
+
+			await user.click(button);
+
+			expect(onFilesChange).toHaveBeenCalledWith([], null);
+		});
+
+		it("moves focus back to the file selection button after deleting the file", async () => {
+			const user = userEvent.setup();
+			render(<ControlledFileUpload fileList="table" />);
+
+			fireEvent.change(getInput(), {
+				target: { files: [makePdf("avis.pdf")] },
+			});
+			await user.click(
+				screen.getByRole("button", { name: "Supprimer avis.pdf" }),
+			);
+
+			expect(screen.queryByRole("table")).not.toBeInTheDocument();
+			expect(
+				screen.getByRole("button", { name: /Sélectionner un fichier/ }),
+			).toHaveFocus();
+		});
+
+		it("disables the delete button when the upload is disabled", () => {
+			render(
+				<FileUpload
+					{...baseProps}
+					disabled
+					error={null}
+					fileList="table"
+					onFilesChange={vi.fn()}
+					selectedFiles={[makePdf("avis.pdf")]}
+				/>,
+			);
+
+			expect(
+				screen.getByRole("button", { name: "Supprimer avis.pdf" }),
+			).toBeDisabled();
+		});
+
+		it("renders no table while no file is selected", () => {
+			render(
+				<FileUpload
+					{...baseProps}
+					error={null}
+					fileList="table"
+					onFilesChange={vi.fn()}
+					selectedFiles={[]}
+				/>,
+			);
+
+			expect(screen.queryByRole("table")).not.toBeInTheDocument();
+		});
 	});
 
 	it("creates an object URL per file and revokes it on unmount", () => {

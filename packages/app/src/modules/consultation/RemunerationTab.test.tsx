@@ -44,6 +44,34 @@ describe("RemunerationTab", () => {
 		expect(screen.getAllByText(THRESHOLD)).toHaveLength(2);
 	});
 
+	it("names each period switch after the gap block it drives", () => {
+		renderTab();
+
+		const globalSwitch = screen.getByRole("group", {
+			name: "Écart de rémunération : base de calcul des écarts",
+		});
+		const variableSwitch = screen.getByRole("group", {
+			name: "Écart de rémunération variable et complémentaire : base de calcul des écarts",
+		});
+
+		expect(globalSwitch).not.toBe(variableSwitch);
+		for (const periodSwitch of [globalSwitch, variableSwitch]) {
+			expect(
+				within(periodSwitch).getByRole("radio", {
+					name: "Rémunération horaire",
+				}),
+			).toBeChecked();
+			expect(
+				within(periodSwitch).getByRole("radio", {
+					name: "Rémunération annuelle",
+				}),
+			).not.toBeChecked();
+		}
+		expect(
+			screen.queryByRole("group", { name: "Base de calcul des écarts" }),
+		).not.toBeInTheDocument();
+	});
+
 	it("gives the workforce split as a total, a legend and a table", async () => {
 		const user = userEvent.setup();
 		renderTab();

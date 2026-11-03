@@ -28,3 +28,19 @@ export const CATEGORY_WORKFORCE_ROWS: readonly CategoryWorkforceRowDefinition[] 
 			menField: payBase.menCountField,
 		};
 	});
+
+const ANNUAL_WORKFORCE_ROW = CATEGORY_WORKFORCE_ROWS.find(
+	(row) => row.workforceRow.basis === "annual",
+);
+
+if (!ANNUAL_WORKFORCE_ROW) {
+	throw new Error("Missing annual workforce row");
+}
+
+export const SHARED_WORKFORCE_ROW: CategoryWorkforceRowDefinition = {
+	...ANNUAL_WORKFORCE_ROW,
+	workforceRow: {
+		...ANNUAL_WORKFORCE_ROW.workforceRow,
+		label: "Rémunération annuelle et horaire",
+	},
+};

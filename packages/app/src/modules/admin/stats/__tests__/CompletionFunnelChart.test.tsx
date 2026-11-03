@@ -253,15 +253,38 @@ describe("buildEchartsOption", () => {
 		expect(series?.data[2]?.row).toEqual(THIRD_ROW);
 	});
 
-	it("exposes a clickable legend with one entry per jalon", () => {
+	it("exposes a read-only legend with one entry per jalon", () => {
 		const option = buildEchartsOption(POPULATED_ROWS, 30);
 		const legend = (
 			option as {
-				legend: { show: boolean; data: string[] };
+				legend: { show: boolean; data: string[]; selectedMode: boolean };
 			}
 		).legend;
 		expect(legend.show).toBe(true);
 		expect(legend.data).toEqual(POPULATED_ROWS.map((row) => row.label));
+	});
+
+	it("disables legend toggling so no funnel step can be hidden with the mouse only", () => {
+		const option = buildEchartsOption(POPULATED_ROWS, 30) as {
+			legend: { selectedMode: boolean };
+		};
+		expect(option.legend.selectedMode).toBe(false);
+	});
+
+	it("passes the read-only legend to the rendered chart", () => {
+		const { container } = render(
+			<CompletionFunnelChart
+				caption="Funnel principal"
+				dropThreshold={30}
+				rows={POPULATED_ROWS}
+			/>,
+		);
+		const raw = container
+			.querySelector('[data-testid="echarts-mock"]')
+			?.getAttribute("data-option");
+		if (!raw) throw new Error("data-option missing");
+		const parsed = JSON.parse(raw) as { legend: { selectedMode: boolean } };
+		expect(parsed.legend.selectedMode).toBe(false);
 	});
 });
 
