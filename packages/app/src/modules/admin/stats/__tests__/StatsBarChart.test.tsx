@@ -52,6 +52,28 @@ const POPULATED_ROWS: LabeledRow[] = [
 ];
 
 describe("StatsBarChart", () => {
+	it("groups chart and caption in a figure named exactly like its figcaption (RGAA 1.9.1)", () => {
+		render(
+			<StatsBarChart
+				caption="Clics sur les liens d'aide"
+				data={POPULATED_ROWS}
+				series={SINGLE_SERIES}
+				valueAxisLabel="Clics"
+			/>,
+		);
+		const figure = screen.getByRole("figure");
+		const caption = figure.querySelector("figcaption");
+		expect(caption).not.toBeNull();
+		expect(figure).toHaveAttribute("role", "figure");
+		expect(figure.getAttribute("aria-label")).toBe(caption?.textContent);
+		expect(figure).toHaveAccessibleName(
+			"Clics sur les liens d'aide. Les données équivalentes sont disponibles dans le tableau ci-dessous.",
+		);
+		expect(
+			screen.getByRole("img", { name: "Clics sur les liens d'aide" }),
+		).toBeInTheDocument();
+	});
+
 	it("renders the empty-state message when every series value is 0", () => {
 		render(
 			<StatsBarChart

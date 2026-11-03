@@ -58,6 +58,19 @@
 					}
 				}
 			}
+		},
+		{
+			// RGAA 1.9.1 exige `role="figure"` (ou `group`) explicite sur un `<figure>` légendé : la
+			// note technique du critère le justifie par le support encore incomplet de `<figure>`
+			// par les technologies d'assistance. « Redondant » pour Biome, requis par le référentiel.
+			"includes": ["src/modules/admin/stats/StatsBarChart.tsx"],
+			"linter": {
+				"rules": {
+					"a11y": {
+						"noRedundantRoles": "off"
+					}
+				}
+			}
 		}
 	],
 	"html": {

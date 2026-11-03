@@ -32,7 +32,7 @@ type Props<Row extends { label: string }> = {
  * Generic horizontal bar chart for the Matomo behavioural-usage widgets. One
  * `<Bar>` per series (single series for model usage / help links, three for the
  * device split). Mirrors the accessibility contract of the other stats charts:
- * `<figure>` + sr-only `<figcaption>` + `role="img"` wrapper, with the
+ * `<figure role="figure" aria-label>` + identical sr-only `<figcaption>` + `role="img"` wrapper, with the
  * equivalent data exposed in a sibling `<StatsBarTable>`.
  */
 export function StatsBarChart<Row extends { label: string }>({
@@ -53,12 +53,17 @@ export function StatsBarChart<Row extends { label: string }>({
 		);
 	}
 
+	// RGAA 1.9.1: the figure carries an explicit role and an aria-label identical to its
+	// figcaption, built once so the two can never drift.
+	const figureCaption = `${caption}. Les données équivalentes sont disponibles dans le tableau ci-dessous.`;
+
 	return (
-		<figure className={styles.chartWrapper}>
-			<figcaption className="fr-sr-only">
-				{caption}. Les données équivalentes sont disponibles dans le tableau
-				ci-dessous.
-			</figcaption>
+		<figure
+			aria-label={figureCaption}
+			className={styles.chartWrapper}
+			role="figure"
+		>
+			<figcaption className="fr-sr-only">{figureCaption}</figcaption>
 			<div aria-label={caption} className={styles.chartContainer} role="img">
 				<ResponsiveContainer>
 					<BarChart
