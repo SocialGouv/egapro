@@ -56,9 +56,9 @@ type DedicatedTestSiren = {
 	bucket: string;
 };
 
-const SEED_USER_ID = "00000000-9979-4979-8979-000000009979";
+export const SEED_USER_ID = "00000000-9979-4979-8979-000000009979";
 const SEED_USER_EMAIL = "seed-rgaa-history@example.fr";
-const DECLARATION_ID_PREFIX = "seed-rgaa-history-";
+export const DECLARATION_ID_PREFIX = "seed-rgaa-history-";
 const REPRESENTATION_ID_PREFIX = "seed-rgaa-history-representation-";
 // A real GIP import always stamps `imported_at` at NOW(); any fixed sentinel
 // in the past tells our own rows apart from theirs.
@@ -100,7 +100,6 @@ function workforceForYear(baseWorkforce: number, yearsAgo: number): number {
 	return Math.max(1, Math.round(baseWorkforce * (1 - yearsAgo * 0.01)));
 }
 
-/** Covers a threshold crossing, a negative gap, an exact zero and a year without variable-pay gap; deeper `--years` fall back to a flat profile. */
 function smallCompanyGapProfile(
 	companyIndex: number,
 	yearsAgo: number,

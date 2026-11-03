@@ -2,11 +2,17 @@
 import postgres from "postgres";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import {
+	DEMO_PUBLIC_RELEASE_DATE,
+	DEMO_SEED_USER_ID,
+} from "#scripts/observatorySeedShared";
+import {
 	cleanRgaaObservatoryHistory,
+	DECLARATION_ID_PREFIX,
 	isValidHistoryDepth,
 	MAX_HISTORY_YEARS,
 	type RgaaHistoryTarget,
 	resolveTargets,
+	SEED_USER_ID,
 	seedRgaaObservatoryHistory,
 } from "#scripts/seed-rgaa-observatory-history";
 import { env } from "~/env.js";
@@ -29,9 +35,8 @@ const DECLARATION_YEARS = [
 ];
 const REPRESENTATION_YEARS = [CAMPAIGN_YEAR - 3, CAMPAIGN_YEAR - 2];
 
-const DEMO_FIXTURE_USER_ID = "00000000-9989-4989-8989-000000009989";
 const FOREIGN_DECLARANT_ID = "rgaa-history-test-foreign-declarant";
-const FILLER_DEADLINE = "2000-01-01";
+const FILLER_DEADLINE = "2001-01-01";
 
 function sortedYears(rows: { year: number }[]): number[] {
 	return rows.map((row) => row.year).sort((a, b) => a - b);
@@ -49,7 +54,7 @@ describe("seedRgaaObservatoryHistory / cleanRgaaObservatoryHistory (real Postgre
 		await sql`DELETE FROM app_declaration WHERE siren = ANY(${SIRENS})`;
 		await sql`DELETE FROM app_gip_mds_data WHERE siren = ANY(${SIRENS})`;
 		await sql`DELETE FROM app_company WHERE siren = ANY(${SIRENS})`;
-		await sql`DELETE FROM app_user WHERE id = ANY(${[DEMO_FIXTURE_USER_ID, FOREIGN_DECLARANT_ID]})`;
+		await sql`DELETE FROM app_user WHERE id = ANY(${[DEMO_SEED_USER_ID, SEED_USER_ID, FOREIGN_DECLARANT_ID]})`;
 		await sql`
 			DELETE FROM app_campaign_deadline
 			WHERE year BETWEEN ${CAMPAIGN_YEAR - MAX_HISTORY_YEARS} AND ${CAMPAIGN_YEAR + 1}
@@ -59,7 +64,7 @@ describe("seedRgaaObservatoryHistory / cleanRgaaObservatoryHistory (real Postgre
 	async function seedDemoFixtureUser() {
 		await sql`
 			INSERT INTO app_user (id, email, first_name, last_name, is_admin)
-			VALUES (${DEMO_FIXTURE_USER_ID}, 'seed-observatory@example.fr', 'Seed', 'Observatoire', false)
+			VALUES (${DEMO_SEED_USER_ID}, 'seed-observatory@example.fr', 'Seed', 'Observatoire', false)
 			ON CONFLICT (id) DO NOTHING
 		`;
 	}
@@ -331,7 +336,7 @@ describe("seedRgaaObservatoryHistory / cleanRgaaObservatoryHistory (real Postgre
 					decl1_modification_deadline::text AS "decl1ModificationDeadline"
 				FROM app_campaign_deadline WHERE year = ${nullReleaseYear}
 			`;
-			expect(row?.publicDataReleaseDate).toBe("2000-01-01");
+			expect(row?.publicDataReleaseDate).toBe(DEMO_PUBLIC_RELEASE_DATE);
 			// Only the release date is touched: the admin/filler deadline stays put.
 			expect(row?.decl1ModificationDeadline).toBe(FILLER_DEADLINE);
 
@@ -421,7 +426,7 @@ describe("seedRgaaObservatoryHistory / cleanRgaaObservatoryHistory (real Postgre
 
 			const ownedDeclarations = await sql`
 				SELECT 1 FROM app_declaration
-				WHERE siren = ANY(${SIRENS}) AND id LIKE 'seed-rgaa-history-%'
+				WHERE siren = ANY(${SIRENS}) AND id LIKE ${`${DECLARATION_ID_PREFIX}%`}
 			`;
 			expect(ownedDeclarations).toHaveLength(0);
 
@@ -436,7 +441,7 @@ describe("seedRgaaObservatoryHistory / cleanRgaaObservatoryHistory (real Postgre
 			expect(ownedGip).toHaveLength(0);
 
 			const seedUser = await sql`
-				SELECT 1 FROM app_user WHERE id = '00000000-9979-4979-8979-000000009979'
+				SELECT 1 FROM app_user WHERE id = ${SEED_USER_ID}
 			`;
 			expect(seedUser).toHaveLength(0);
 
