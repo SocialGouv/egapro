@@ -1,13 +1,16 @@
 import { render, screen } from "@testing-library/react";
+import { userEvent } from "@testing-library/user-event";
 import { useSearchParams } from "next/navigation";
 import { describe, expect, it, vi } from "vitest";
+
+const { mockPush } = vi.hoisted(() => ({ mockPush: vi.fn() }));
 
 vi.mock("next/navigation", async () => {
 	const actual =
 		await vi.importActual<typeof import("next/navigation")>("next/navigation");
 	return {
 		...actual,
-		useRouter: () => ({ push: vi.fn() }),
+		useRouter: () => ({ push: mockPush }),
 		useSearchParams: vi.fn().mockReturnValue(new URLSearchParams()),
 		usePathname: () => "/referents",
 	};
@@ -181,6 +184,41 @@ describe("PublicReferentsPage", () => {
 		expect(
 			screen.getByRole("navigation", { name: /pagination/i }),
 		).toBeInTheDocument();
+	});
+
+	it("keeps keyboard focus on « Dernière page » once the last page is shown", async () => {
+		const user = userEvent.setup();
+		vi.mocked(useSearchParams).mockReturnValue(
+			new URLSearchParams({ region: "11" }) as ReturnType<
+				typeof useSearchParams
+			>,
+		);
+		const pageData = (page: number) => ({
+			data: { rows: [], total: 50, page, pageSize: 20, totalPages: 3 },
+			isLoading: false,
+			isError: false,
+		});
+		useQueryMock.mockReturnValue(pageData(2));
+		mockPush.mockClear();
+		const { rerender } = render(<PublicReferentsPage />);
+		const last = screen.getByRole("button", { name: "Dernière page" });
+		last.focus();
+
+		await user.keyboard("{Enter}");
+		expect(mockPush).toHaveBeenCalledWith(expect.stringContaining("page=3"));
+
+		useQueryMock.mockReturnValue(pageData(3));
+		rerender(<PublicReferentsPage />);
+		expect(last).toHaveAttribute("aria-disabled", "true");
+		expect(last).toBeEnabled();
+		expect(last).toHaveFocus();
+
+		mockPush.mockClear();
+		await user.keyboard("{Enter}");
+		expect(mockPush).not.toHaveBeenCalled();
+		vi.mocked(useSearchParams).mockReturnValue(
+			new URLSearchParams() as ReturnType<typeof useSearchParams>,
+		);
 	});
 
 	it("does not render pagination when there is only one page", () => {

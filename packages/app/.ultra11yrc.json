@@ -194,6 +194,270 @@
 				"sources": ["src/app/admin/stats/page.tsx"],
 				"auth": true,
 				"notes": "Requiert un compte listé dans ADMIN_EMAILS."
+			},
+			{
+				"id": "cgu",
+				"name": "Conditions générales d'utilisation",
+				"url": "http://localhost:3000/cgu",
+				"sources": [
+					"src/app/cgu/page.tsx",
+					"src/modules/legal/TermsOfUsePage/index.tsx"
+				]
+			},
+			{
+				"id": "maintenance",
+				"name": "Service indisponible",
+				"url": "http://localhost:3000/maintenance",
+				"sources": [
+					"src/app/maintenance/page.tsx",
+					"src/modules/error/MaintenancePage.tsx"
+				],
+				"notes": "Page de maintenance (503) rendue à son adresse dédiée."
+			},
+			{
+				"id": "referent-detail",
+				"name": "Fiche d'un référent",
+				"url": "http://localhost:3000/referents/44444444-4444-4444-8444-444444444444",
+				"sources": [
+					"src/app/referents/[id]/page.tsx",
+					"src/modules/referents/PublicReferentDetail.tsx"
+				],
+				"notes": "Référent publié avec un contact principal par e-mail et un suppléant, semé par dynamic.a11y.ts sous cet identifiant."
+			},
+			{
+				"id": "declaration-etape-1",
+				"name": "Déclaration — étape 1 sur 6",
+				"url": "http://localhost:3000/declaration-remuneration/etape/1",
+				"sources": [
+					"src/app/declaration-remuneration/(with-banner)/etape/[step]/page.tsx"
+				],
+				"auth": true,
+				"notes": "Déclaration en brouillon, entreprise assujettie à l'indicateur G (effectif ≥ 250)."
+			},
+			{
+				"id": "declaration-etape-3",
+				"name": "Déclaration — étape 3 sur 6",
+				"url": "http://localhost:3000/declaration-remuneration/etape/3",
+				"sources": [
+					"src/app/declaration-remuneration/(with-banner)/etape/[step]/page.tsx"
+				],
+				"auth": true,
+				"notes": "Déclaration en brouillon, entreprise assujettie à l'indicateur G (effectif ≥ 250)."
+			},
+			{
+				"id": "declaration-etape-4",
+				"name": "Déclaration — étape 4 sur 6",
+				"url": "http://localhost:3000/declaration-remuneration/etape/4",
+				"sources": [
+					"src/app/declaration-remuneration/(with-banner)/etape/[step]/page.tsx"
+				],
+				"auth": true,
+				"notes": "Déclaration en brouillon, entreprise assujettie à l'indicateur G (effectif ≥ 250)."
+			},
+			{
+				"id": "declaration-etape-5",
+				"name": "Déclaration — étape 5 sur 6",
+				"url": "http://localhost:3000/declaration-remuneration/etape/5",
+				"sources": [
+					"src/app/declaration-remuneration/(with-banner)/etape/[step]/page.tsx"
+				],
+				"auth": true,
+				"notes": "Déclaration en brouillon, entreprise assujettie à l'indicateur G (effectif ≥ 250)."
+			},
+			{
+				"id": "declaration-etape-6",
+				"name": "Déclaration — étape 6 sur 6",
+				"url": "http://localhost:3000/declaration-remuneration/etape/6",
+				"sources": [
+					"src/app/declaration-remuneration/(with-banner)/etape/[step]/page.tsx"
+				],
+				"auth": true,
+				"notes": "Déclaration en brouillon, entreprise assujettie à l'indicateur G (effectif ≥ 250)."
+			},
+			{
+				"id": "parcours-conformite-confirmation",
+				"name": "Parcours de conformité — confirmation",
+				"url": "http://localhost:3000/declaration-remuneration/parcours-conformite/confirmation",
+				"sources": [
+					"src/app/declaration-remuneration/(with-banner)/parcours-conformite/confirmation/page.tsx"
+				],
+				"auth": true
+			},
+			{
+				"id": "parcours-conformite-etape-1",
+				"name": "Seconde déclaration — étape 1 sur 3",
+				"url": "http://localhost:3000/declaration-remuneration/parcours-conformite/etape/1",
+				"sources": [
+					"src/app/declaration-remuneration/(with-banner)/parcours-conformite/etape/[step]/page.tsx"
+				],
+				"auth": true,
+				"notes": "Parcours « actions correctives » choisi."
+			},
+			{
+				"id": "parcours-conformite-etape-2",
+				"name": "Seconde déclaration — étape 2 sur 3",
+				"url": "http://localhost:3000/declaration-remuneration/parcours-conformite/etape/2",
+				"sources": [
+					"src/app/declaration-remuneration/(with-banner)/parcours-conformite/etape/[step]/page.tsx"
+				],
+				"auth": true,
+				"notes": "Parcours « actions correctives » choisi."
+			},
+			{
+				"id": "parcours-conformite-etape-3",
+				"name": "Seconde déclaration — étape 3 sur 3",
+				"url": "http://localhost:3000/declaration-remuneration/parcours-conformite/etape/3",
+				"sources": [
+					"src/app/declaration-remuneration/(with-banner)/parcours-conformite/etape/[step]/page.tsx"
+				],
+				"auth": true,
+				"notes": "Parcours « actions correctives » choisi."
+			},
+			{
+				"id": "evaluation-conjointe",
+				"name": "Parcours de conformité — évaluation conjointe",
+				"url": "http://localhost:3000/declaration-remuneration/parcours-conformite/evaluation-conjointe",
+				"sources": [
+					"src/app/declaration-remuneration/(with-banner)/parcours-conformite/evaluation-conjointe/page.tsx"
+				],
+				"auth": true,
+				"notes": "Parcours « évaluation conjointe » choisi."
+			},
+			{
+				"id": "mise-en-demeure",
+				"name": "Évaluation conjointe — mise en demeure",
+				"url": "http://localhost:3000/declaration-remuneration/mise-en-demeure",
+				"sources": [
+					"src/app/declaration-remuneration/mise-en-demeure/page.tsx"
+				],
+				"auth": true,
+				"notes": "Démarche close sur une justification que le CSE a jugée défavorablement, aucun rapport encore déposé."
+			},
+			{
+				"id": "avis-cse-etape-2",
+				"name": "Avis du CSE — étape 2 sur 2",
+				"url": "http://localhost:3000/avis-cse/etape/2",
+				"sources": ["src/app/avis-cse/etape/[step]/page.tsx"],
+				"auth": true,
+				"notes": "Entreprise ayant déclaré un CSE."
+			},
+			{
+				"id": "avis-cse-confirmation",
+				"name": "Avis du CSE — confirmation",
+				"url": "http://localhost:3000/avis-cse/confirmation",
+				"sources": ["src/app/avis-cse/confirmation/page.tsx"],
+				"auth": true
+			},
+			{
+				"id": "declaration-representation",
+				"name": "Représentation équilibrée — assujettissement",
+				"url": "http://localhost:3000/declaration-representation",
+				"sources": [
+					"src/app/declaration-representation/page.tsx",
+					"src/modules/declaration-representation/SubjectionScreen.tsx"
+				],
+				"auth": true,
+				"notes": "Aucune déclaration de représentation entamée : seul cet état ouvre l'écran, une déclaration commencée renvoie à son étape."
+			},
+			{
+				"id": "declaration-representation-etape-1",
+				"name": "Représentation équilibrée — étape 1 sur 5",
+				"url": "http://localhost:3000/declaration-representation/etape/1",
+				"sources": ["src/app/declaration-representation/etape/[step]/page.tsx"],
+				"auth": true,
+				"notes": "Brouillon rempli jusqu'au récapitulatif, campagne de représentation ouverte."
+			},
+			{
+				"id": "declaration-representation-etape-2",
+				"name": "Représentation équilibrée — étape 2 sur 5",
+				"url": "http://localhost:3000/declaration-representation/etape/2",
+				"sources": ["src/app/declaration-representation/etape/[step]/page.tsx"],
+				"auth": true,
+				"notes": "Brouillon rempli jusqu'au récapitulatif, campagne de représentation ouverte."
+			},
+			{
+				"id": "declaration-representation-etape-3",
+				"name": "Représentation équilibrée — étape 3 sur 5",
+				"url": "http://localhost:3000/declaration-representation/etape/3",
+				"sources": ["src/app/declaration-representation/etape/[step]/page.tsx"],
+				"auth": true,
+				"notes": "Brouillon rempli jusqu'au récapitulatif, campagne de représentation ouverte."
+			},
+			{
+				"id": "declaration-representation-etape-4",
+				"name": "Représentation équilibrée — étape 4 sur 5",
+				"url": "http://localhost:3000/declaration-representation/etape/4",
+				"sources": ["src/app/declaration-representation/etape/[step]/page.tsx"],
+				"auth": true,
+				"notes": "Brouillon rempli jusqu'au récapitulatif, campagne de représentation ouverte."
+			},
+			{
+				"id": "declaration-representation-etape-5",
+				"name": "Représentation équilibrée — étape 5 sur 5",
+				"url": "http://localhost:3000/declaration-representation/etape/5",
+				"sources": ["src/app/declaration-representation/etape/[step]/page.tsx"],
+				"auth": true,
+				"notes": "Brouillon rempli jusqu'au récapitulatif, campagne de représentation ouverte."
+			},
+			{
+				"id": "declaration-representation-confirmation",
+				"name": "Représentation équilibrée — confirmation",
+				"url": "http://localhost:3000/declaration-representation/confirmation",
+				"sources": ["src/app/declaration-representation/confirmation/page.tsx"],
+				"auth": true,
+				"notes": "Déclaration de représentation transmise — la confirmation renvoie à l'étape 5 sur une déclaration non transmise."
+			},
+			{
+				"id": "historique-declaration",
+				"name": "Historique d'une déclaration",
+				"url": "http://localhost:3000/mon-espace/historique/130025265/[year]",
+				"sources": ["src/app/mon-espace/historique/[siren]/[year]/page.tsx"],
+				"auth": true,
+				"notes": "Déclaration de l'entreprise de test pour l'année de campagne en cours : l'année vient de la base, l'adresse déclarée n'est pas visitée."
+			},
+			{
+				"id": "representation-consultation",
+				"name": "Consultation d'une déclaration de représentation",
+				"url": "http://localhost:3000/mon-espace/representation/[year]",
+				"sources": [
+					"src/app/mon-espace/representation/[year]/page.tsx",
+					"src/modules/declaration-representation/RepresentationConsultation.tsx"
+				],
+				"auth": true,
+				"notes": "Déclaration de représentation transmise par l'entreprise de test pour la campagne en cours : l'année vient de la base, l'adresse déclarée n'est pas visitée."
+			},
+			{
+				"id": "mon-espace-avis-cse",
+				"name": "Mon espace — avis du CSE transmis",
+				"url": "http://localhost:3000/mon-espace/avis-cse",
+				"sources": [
+					"src/app/mon-espace/avis-cse/page.tsx",
+					"src/modules/cseOpinion/SubmittedOpinionsPage.tsx"
+				],
+				"auth": true,
+				"notes": "Démarche close par une évaluation conjointe, avis du CSE et son fichier transmis."
+			},
+			{
+				"id": "mon-espace-evaluation-conjointe",
+				"name": "Mon espace — rapport de l'évaluation conjointe",
+				"url": "http://localhost:3000/mon-espace/evaluation-conjointe",
+				"sources": [
+					"src/app/mon-espace/evaluation-conjointe/page.tsx",
+					"src/modules/joint-evaluation-view/JointEvaluationView.tsx"
+				],
+				"auth": true,
+				"notes": "Démarche close par une évaluation conjointe dont le rapport a été transmis."
+			},
+			{
+				"id": "admin-declaration-detail",
+				"name": "Backoffice — détail d'une déclaration",
+				"url": "http://localhost:3000/admin/declarations/[declarationId]",
+				"sources": [
+					"src/app/admin/declarations/[declarationId]/page.tsx",
+					"src/modules/admin/declarations/AdminDeclarationDetailPage.tsx"
+				],
+				"auth": true,
+				"notes": "Requiert un compte listé dans ADMIN_EMAILS. Déclaration de l'entreprise de test, capturée une fois la déclaration et son récapitulatif chargés : son identifiant vient de la base, l'adresse déclarée n'est pas visitée."
 			}
 		],
 		"transverse": [

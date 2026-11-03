@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { render, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { OrdinalLongDate } from "~/modules/declaration-remuneration/shared/OrdinalLongDate";
@@ -126,6 +128,41 @@ function renderPanel(variant: PanelVariant, overrides: PanelOverrides = {}) {
 		);
 	return { panel: within(dialog), dialog, container };
 }
+
+function circleRule(source: string, className: string): string {
+	return (
+		source.match(new RegExp(`\\.${className}\\s*\\{([^}]*)\\}`))?.[1] ?? ""
+	);
+}
+
+describe("VerticalStepper — étape en cours (RGAA 3.1)", () => {
+	it("gives each step status its own circle and keeps its screen-reader status", () => {
+		const { panel } = renderPanel("compliance_choice");
+		expect(panel.getByText("Étape terminée").parentElement).toHaveClass(
+			"stepCircleComplete",
+		);
+		expect(panel.getByText("Étape en cours").parentElement).toHaveClass(
+			"stepCircleCurrent",
+		);
+		expect(panel.getByText("Étape à venir").parentElement).toHaveClass(
+			"stepCirclePending",
+		);
+	});
+
+	// jsdom does not load SCSS modules: the stylesheet is the only place the
+	// non-colour cue can be asserted.
+	it("rings the current step circle, which a pending or completed step does not have", () => {
+		const source = readFileSync(
+			join(__dirname, "..", "DeclarationProcessPanel.module.scss"),
+			"utf8",
+		);
+		expect(circleRule(source, "stepCircleCurrent")).toMatch(
+			/outline:\s*2px solid/,
+		);
+		expect(circleRule(source, "stepCirclePending")).not.toMatch(/outline/);
+		expect(circleRule(source, "stepCircleComplete")).not.toMatch(/outline/);
+	});
+});
 
 describe("VerticalStepper — bouton œil (viewHref)", () => {
 	it("shows the joint evaluation view only after its transmission", () => {

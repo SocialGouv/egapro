@@ -23,3 +23,10 @@ overrides:
   '@react-pdf/textkit': '^6.3.0'
   'next-auth>nodemailer': '-'
 
+
+# Recharts spreads `width`/`height` as HTML attributes on its `.recharts-wrapper`
+# <div>, which RGAA 10.1 forbids (presentation attributes are only allowed on
+# img, object, embed, canvas and svg); the size is already set in `style` (#5015).
+# Guarded by src/modules/admin/stats/__tests__/chartsPresentationAttributes.test.tsx.
+patchedDependencies:
+  recharts@3.10.1: patches/recharts@3.10.1.patch

@@ -286,7 +286,11 @@ export function Step2Upload({
 				<CseStepIndicator currentStep={2} />
 
 				<div>
-					<label className="fr-label" htmlFor="cse-file-upload">
+					<label
+						className="fr-label"
+						htmlFor="cse-file-upload"
+						id="cse-file-upload-label"
+					>
 						Veuillez déposer le ou les avis émis par votre CSE et renseigner le
 						type d'avis correspondant.
 						<span className="fr-hint-text">
@@ -303,6 +307,7 @@ export function Step2Upload({
 						disabled={isReadOnly || isUploadingFiles || isComplete}
 						error={uploadError}
 						inputId="cse-file-upload"
+						labelId="cse-file-upload-label"
 						maxFileCount={remainingSlots}
 						onFilesChange={handleFilesChange}
 						selectedFiles={selectedFiles}

@@ -65,7 +65,9 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 				initialData={emptyStep4Data()}
 			/>,
 		);
-		const seuilInputs = screen.getAllByLabelText(/Seuil maximum/);
+		const seuilInputs = screen.getAllByLabelText(
+			/Montants des tranches, maximum/,
+		);
 		expect(seuilInputs[0]).toHaveValue("25 000,00");
 		const womenCountInputs = screen.getAllByLabelText(/Nombre de femmes/);
 		expect(womenCountInputs[0]).toHaveValue("30");
@@ -106,7 +108,9 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 				initialData={emptyStep4Data()}
 			/>,
 		);
-		const seuilInputs = screen.getAllByLabelText(/Seuil maximum/);
+		const seuilInputs = screen.getAllByLabelText(
+			/Montants des tranches, maximum/,
+		);
 		expect(seuilInputs[0]).toHaveValue("25 000,00");
 		expect(seuilInputs[2]).toHaveValue("40 000,00");
 	});
@@ -133,7 +137,9 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 				initialData={emptyStep4Data()}
 			/>,
 		);
-		const seuilInputs = screen.getAllByLabelText(/Seuil maximum/);
+		const seuilInputs = screen.getAllByLabelText(
+			/Montants des tranches, maximum/,
+		);
 		for (const input of seuilInputs) {
 			expect(input).toHaveValue("");
 		}

@@ -4,7 +4,9 @@ const FRENCH_LOCAL_REGEX = /^0\d{9}$/;
 const INTERNATIONAL_REGEX = /^\+\d{8,15}$/;
 export const PHONE_FORMAT_MESSAGE =
 	"Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55";
-const PHONE_ERROR = "Veuillez renseigner votre numéro de téléphone";
+const PHONE_REQUIRED_ERROR = "Veuillez renseigner votre numéro de téléphone";
+const PHONE_INVALID_ERROR =
+	"Le numéro de téléphone n'est pas valide. Saisissez-le au format 01 22 33 44 55 ou +33 1 22 33 44 55";
 
 /** Strip whitespace, dots, and dashes. Keeps + and digits. */
 export function normalizePhone(value: string): string {
@@ -78,9 +80,13 @@ export function formatPhoneInput(raw: string): string {
  * normalizing them to the canonical "+CC…" form for storage.
  */
 export const phoneSchema = z.string().transform((value, ctx) => {
+	if (normalizePhone(value).length === 0) {
+		ctx.addIssue({ code: "custom", message: PHONE_REQUIRED_ERROR });
+		return z.NEVER;
+	}
 	const canonical = toCanonicalPhone(value);
 	if (canonical === null) {
-		ctx.addIssue({ code: "custom", message: PHONE_ERROR });
+		ctx.addIssue({ code: "custom", message: PHONE_INVALID_ERROR });
 		return z.NEVER;
 	}
 	return canonical;

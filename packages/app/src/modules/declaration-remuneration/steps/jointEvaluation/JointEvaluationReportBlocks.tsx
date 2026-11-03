@@ -97,7 +97,7 @@ export function JointEvaluationReportUpload({
 	return (
 		<>
 			<div>
-				<label className="fr-label" htmlFor={inputId}>
+				<label className="fr-label" htmlFor={inputId} id={`${inputId}-label`}>
 					Veuillez déposer le rapport de l&apos;évaluation conjointe.
 					<span className="fr-hint-text fr-mt-1v">
 						Taille maximale : 10 Mo. Format supporté : pdf.
@@ -115,6 +115,7 @@ export function JointEvaluationReportUpload({
 				error={error}
 				fileList="table"
 				inputId={inputId}
+				labelId={`${inputId}-label`}
 				onFilesChange={onFilesChange}
 				selectedFiles={selectedFiles}
 			/>
