@@ -218,9 +218,9 @@ export function CategoryImportExport({ onImport, disabled = false }: Props) {
 
 								<div className={styles.helpSection}>
 									<hr className="fr-hr" />
-									<p className="fr-text--md fr-text--bold fr-mb-0">
+									<h3 className="fr-text--md fr-text--bold fr-text-default--grey fr-mb-0">
 										Pour vous aider
-									</p>
+									</h3>
 									<div className={styles.helpLinks}>
 										{/* TODO(#3732): lien placeholder désactivé — brancher
 											« Ressources et modèles de fichiers » quand la page/URL
