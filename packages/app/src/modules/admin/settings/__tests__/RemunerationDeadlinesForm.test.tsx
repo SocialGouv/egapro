@@ -372,4 +372,41 @@ describe("RemunerationDeadlinesForm", () => {
 			screen.getByRole("button", { name: /enregistrement…/i }),
 		).toBeDisabled();
 	});
+
+	it("shows a visible required-fields mention that every editable deadline cites", () => {
+		render(<RemunerationDeadlinesForm year={2027} />);
+		const mention = "Toutes les échéances modifiables sont obligatoires.";
+		expect(screen.getByText(mention)).not.toHaveClass("fr-sr-only");
+
+		const requiredInputs = Array.from(
+			document.querySelectorAll<HTMLInputElement>("input[required]"),
+		);
+		expect(requiredInputs).toHaveLength(7);
+		for (const input of requiredInputs) {
+			expect(input).toHaveAccessibleDescription(mention);
+		}
+	});
+
+	it("does not cite the mention on the read-only derived deadlines", () => {
+		render(<RemunerationDeadlinesForm year={2027} />);
+		for (const input of document.querySelectorAll("input[readonly]")) {
+			expect(input).not.toBeRequired();
+			expect(input).not.toHaveAttribute("aria-describedby");
+		}
+	});
+
+	it("describes an invalid deadline by the mention then its error message", async () => {
+		await renderLoaded();
+		fireEvent.change(inputById("settings-decl2ModificationDeadline"), {
+			target: { value: "2027-05-01" },
+		});
+		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
+		await waitFor(() =>
+			expect(
+				inputById("settings-decl2ModificationDeadline"),
+			).toHaveAccessibleDescription(
+				/^Toutes les échéances modifiables sont obligatoires\. .*postérieure à l'échéance de déclaration/,
+			),
+		);
+	});
 });

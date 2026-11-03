@@ -17,6 +17,7 @@ import {
 	percentageOf,
 } from "~/modules/domain";
 import styles from "./CampaignProgressionChart.module.scss";
+import { renderLegendLabel } from "./renderLegendLabel";
 import type { CampaignProgressionSeries } from "./types";
 
 type TooltipEntry = {
@@ -153,7 +154,7 @@ export function CampaignProgressionChart({ series, currentYear }: Props) {
 				role="img"
 			>
 				<ResponsiveContainer>
-					<LineChart data={data}>
+					<LineChart accessibilityLayer={false} data={data}>
 						<CartesianGrid strokeDasharray="3 3" />
 						<XAxis
 							dataKey="dayOfYear"
@@ -162,7 +163,7 @@ export function CampaignProgressionChart({ series, currentYear }: Props) {
 						/>
 						<YAxis tickFormatter={(value: number) => formatCount(value)} />
 						<Tooltip content={<ProgressionTooltip totals={totals} />} />
-						<Legend />
+						<Legend formatter={renderLegendLabel} />
 						{series.map(({ year }) => (
 							<Line
 								connectNulls

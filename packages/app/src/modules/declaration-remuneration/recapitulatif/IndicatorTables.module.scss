@@ -43,6 +43,8 @@
 
 .subTitle {
 	margin: 0;
+	// A heading defaults to the title grey; keep the body colour of the former paragraph.
+	color: var(--text-default-grey);
 }
 
 .emptyNotice {
