@@ -18,6 +18,8 @@ RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
 
 # Copy minimal files first for better layer caching
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+# pnpm-workspace.yaml `patchedDependencies` points here; `pnpm install` fails without it.
+COPY patches/ ./patches/
 COPY packages/app/package.json ./packages/app/
 COPY packages/notifications/package.json ./packages/notifications/
 

@@ -8,6 +8,11 @@ overrides:
   '@react-pdf/textkit': ^6.3.0
   next-auth>nodemailer: '-'
 
+patchedDependencies:
+  recharts@3.10.1:
+    hash: 05889f1405bd008d107dc036fe56e994d05b584d13fac01e6e25146a70c5ca62
+    path: patches/recharts@3.10.1.patch
+
 importers:
 
   .:
@@ -95,7 +100,7 @@ importers:
         version: 7.89.0(@types/react@19.2.14)(react@19.2.8)
       recharts:
         specifier: ^3.10.1
-        version: 3.10.1(@types/react@19.2.14)(react-dom@19.2.8(react@19.2.8))(react-is@17.0.2)(react@19.2.8)(redux@5.0.1)
+        version: 3.10.1(patch_hash=05889f1405bd008d107dc036fe56e994d05b584d13fac01e6e25146a70c5ca62)(@types/react@19.2.14)(react-dom@19.2.8(react@19.2.8))(react-is@17.0.2)(react@19.2.8)(redux@5.0.1)
       redis:
         specifier: ^5.11.0
         version: 5.11.0
@@ -12551,7 +12556,7 @@ snapshots:
 
   readdirp@5.1.1: {}
 
-  recharts@3.10.1(@types/react@19.2.14)(react-dom@19.2.8(react@19.2.8))(react-is@17.0.2)(react@19.2.8)(redux@5.0.1):
+  recharts@3.10.1(patch_hash=05889f1405bd008d107dc036fe56e994d05b584d13fac01e6e25146a70c5ca62)(@types/react@19.2.14)(react-dom@19.2.8(react@19.2.8))(react-is@17.0.2)(react@19.2.8)(redux@5.0.1):
     dependencies:
       '@reduxjs/toolkit': 2.12.0(react-redux@9.3.0(@types/react@19.2.14)(react@19.2.8)(redux@5.0.1))(react@19.2.8)
       clsx: 2.1.1
