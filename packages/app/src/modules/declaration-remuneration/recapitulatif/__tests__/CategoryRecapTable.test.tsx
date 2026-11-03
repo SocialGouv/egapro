@@ -162,7 +162,9 @@ describe("CategoryRecapTable", () => {
 			expect(table.tBodies).toHaveLength(2);
 
 			Array.from(table.tBodies).forEach((body, sectionIndex) => {
-				const section = body.querySelector('th[scope="rowgroup"]');
+				const section = body.rows[0]?.querySelector("th");
+				expect(section).not.toHaveAttribute("scope");
+				expect(section?.id).toBeTruthy();
 				expect(section).toHaveTextContent(
 					sectionIndex === 0
 						? "Rémunération annuelle brute"
