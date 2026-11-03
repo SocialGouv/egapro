@@ -1,5 +1,7 @@
 import type { Ref } from "react";
 
+import { ChangesTable } from "~/modules/shared";
+
 import type { ProfileChange } from "./profileChanges";
 
 export const PROFILE_REVIEW_TITLE_ID = "profile-review-title";
@@ -34,7 +36,7 @@ export function ProfileReviewStep({
 						votre profil. Rien n’est enregistré tant que vous n’avez pas
 						confirmé.
 					</p>
-					<ProfileChangesTable changes={changes} />
+					<ChangesTable changes={changes} />
 				</>
 			)}
 			{!hasChanges && (
@@ -51,39 +53,5 @@ export function ProfileReviewStep({
 				</div>
 			)}
 		</section>
-	);
-}
-
-function ProfileChangesTable({ changes }: { changes: ProfileChange[] }) {
-	return (
-		<div className="fr-table fr-table--bordered fr-mb-2w">
-			<div className="fr-table__wrapper">
-				<div className="fr-table__container">
-					<div className="fr-table__content">
-						<table>
-							<caption className="fr-sr-only">
-								Modifications à confirmer
-							</caption>
-							<thead>
-								<tr>
-									<th scope="col">Information</th>
-									<th scope="col">Valeur actuelle</th>
-									<th scope="col">Nouvelle valeur</th>
-								</tr>
-							</thead>
-							<tbody>
-								{changes.map((change) => (
-									<tr key={change.field}>
-										<th scope="row">{change.label}</th>
-										<td>{change.previous}</td>
-										<td>{change.next}</td>
-									</tr>
-								))}
-							</tbody>
-						</table>
-					</div>
-				</div>
-			</div>
-		</div>
 	);
 }
