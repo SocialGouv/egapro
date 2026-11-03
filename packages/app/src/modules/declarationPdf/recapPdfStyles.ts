@@ -282,7 +282,6 @@ export const styles = StyleSheet.create({
 		fontSize: 9,
 		fontWeight: BOLD,
 		color: TEXT_TITLE_GREY,
-		textAlign: "center",
 		marginBottom: 2,
 	},
 
@@ -292,6 +291,7 @@ export const styles = StyleSheet.create({
 		borderRadius: 2,
 		paddingHorizontal: 3,
 		paddingVertical: 1,
+		alignSelf: "flex-start",
 	},
 	complianceBadgeCompliantText: {
 		fontSize: 9,
@@ -303,6 +303,7 @@ export const styles = StyleSheet.create({
 		borderRadius: 2,
 		paddingHorizontal: 3,
 		paddingVertical: 1,
+		alignSelf: "flex-start",
 	},
 	complianceBadgeNonCompliantText: {
 		fontSize: 9,
@@ -314,6 +315,7 @@ export const styles = StyleSheet.create({
 		borderRadius: 2,
 		paddingHorizontal: 3,
 		paddingVertical: 1,
+		alignSelf: "flex-start",
 	},
 	complianceBadgeNotApplicableText: {
 		fontSize: 9,
@@ -325,7 +327,7 @@ export const styles = StyleSheet.create({
 		fontSize: 9,
 		color: TEXT_TITLE_GREY,
 		paddingHorizontal: 8,
-		marginBottom: 6,
+		marginBottom: 12,
 	},
 	// `categoryBanner` has no marginTop, so a block opened by a category needs it back.
 	repCategoryBannerGroup: {
@@ -335,7 +337,7 @@ export const styles = StyleSheet.create({
 	repNotComputableReason: {
 		fontSize: 9,
 		color: TEXT_TITLE_GREY,
-		marginTop: 4,
+		marginBottom: 2,
 	},
 });
 

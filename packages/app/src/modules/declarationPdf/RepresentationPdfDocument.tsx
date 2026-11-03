@@ -6,7 +6,8 @@ import type {
 	RepresentationPdfIndicator,
 } from "./buildRepresentationPdfData";
 import { ensurePdfFontsRegistered } from "./pdfFonts";
-import { type PdfStyles, styles } from "./recapPdfStyles";
+import type { PdfStyles } from "./recapPdfStyles";
+import { representationStyles as styles } from "./representationPdfStyles";
 import { EgaproBanner } from "./sections/EgaproBanner";
 import { CategoryBanner, SectionBanner } from "./sections/headings";
 import { InfoSection } from "./sections/InfoSection";
@@ -65,24 +66,26 @@ function IndicatorColumn({
 		<View style={styles.repGapColumn}>
 			<Text style={styles.repGapColumnTitle}>{indicator.title}</Text>
 			{indicator.notComputableReason === null ? (
-				<Table>
+				<Table sheet={styles}>
 					<Row>
-						<Cell flex={1} header text="Femmes" />
-						<Cell flex={1} header text="Hommes" />
-						<Cell header text="Conformité" width={101} />
+						<Cell flex={1} header sheet={styles} text="Femmes" />
+						<Cell flex={1} header sheet={styles} text="Hommes" />
+						<Cell header sheet={styles} text="Conformité" width={101} />
 					</Row>
 					<Row>
 						<Cell
 							align="right"
 							flex={1}
+							sheet={styles}
 							text={formatPercentage(indicator.womenPercent)}
 						/>
 						<Cell
 							align="right"
 							flex={1}
+							sheet={styles}
 							text={formatPercentage(indicator.menPercent)}
 						/>
-						<Cell width={101}>
+						<Cell sheet={styles} width={101}>
 							<VerdictBadge verdict={indicator.verdict} />
 						</Cell>
 					</Row>
@@ -141,10 +144,10 @@ export function RepresentationPdfDocument({ data }: Props) {
 	return (
 		<Document>
 			<Page size="A4" style={styles.page} wrap>
-				<PdfPageHeader />
+				<PdfPageHeader sheet={styles} />
 				<PdfPageFooter label={footerLabel} />
 
-				<EgaproBanner />
+				<EgaproBanner sheet={styles} />
 
 				<View style={styles.content}>
 					<View style={styles.titleBlock}>
@@ -155,12 +158,13 @@ export function RepresentationPdfDocument({ data }: Props) {
 						<Text style={styles.titleDate}>{transmittedLabel}</Text>
 					</View>
 
-					<SectionBanner title="Informations" />
+					<SectionBanner sheet={styles} title="Informations" />
 
 					{data.declarantRows.length > 0 ? (
 						<View style={styles.repCategoryBannerGroup}>
 							<InfoSection
 								rows={data.declarantRows}
+								sheet={styles}
 								title="Déclarant"
 								tone="category"
 							/>
@@ -184,6 +188,7 @@ export function RepresentationPdfDocument({ data }: Props) {
 									value: data.company.workforceDisplay,
 								},
 							]}
+							sheet={styles}
 							title="Entreprise"
 							tone="category"
 						/>
@@ -194,12 +199,13 @@ export function RepresentationPdfDocument({ data }: Props) {
 							rows={[
 								{ label: "Période de référence", value: data.referencePeriod },
 							]}
+							sheet={styles}
 							title="Calcul"
 							tone="category"
 						/>
 					</View>
 
-					<SectionBanner title="Écarts de représentation" />
+					<SectionBanner sheet={styles} title="Écarts de représentation" />
 					<View style={styles.repGapColumnsRow}>
 						{data.indicators.map((indicator) => (
 							<IndicatorColumn indicator={indicator} key={indicator.title} />
@@ -210,6 +216,7 @@ export function RepresentationPdfDocument({ data }: Props) {
 						<View style={styles.repCategoryBannerGroup}>
 							<InfoSection
 								rows={publicationRows(data)}
+								sheet={styles}
 								title="Publication"
 								tone="category"
 							/>
