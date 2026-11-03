@@ -66,7 +66,7 @@ function PayGapDataRow({
 }) {
 	return (
 		<Row>
-			<Cell bold sheet={sheet} text={row.label} width={PAY_TABLE.label} />
+			<Cell rowHeader sheet={sheet} text={row.label} width={PAY_TABLE.label} />
 			<Cell
 				align="right"
 				sheet={sheet}

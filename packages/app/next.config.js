@@ -55,7 +55,15 @@ const config = {
 	// in the Dockerfile before the Next.js build).
 	// `redis` is only required from ./cache-handler.cjs (a standalone CJS
 	// handler loaded by Next.js outside the webpack graph).
-	serverExternalPackages: ["notifications", "@react-pdf/renderer", "redis"],
+	// Kept external with @react-pdf/renderer so the tagged renderer shares its font store and pdfkit.
+	serverExternalPackages: [
+		"notifications",
+		"@react-pdf/renderer",
+		"@react-pdf/layout",
+		"@react-pdf/render",
+		"@react-pdf/pdfkit",
+		"redis",
+	],
 	sassOptions: {
 		additionalData: `
 			@import "@gouvfr/dsfr/src/dsfr/core/style/selector/setting/breakpoint";

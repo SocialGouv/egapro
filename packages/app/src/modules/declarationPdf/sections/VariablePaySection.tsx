@@ -5,6 +5,7 @@ import type {
 } from "~/modules/declaration-remuneration";
 import { formatCurrency, formatVariablePayProportion } from "~/modules/domain";
 import { type PdfStyles, styles } from "../recapPdfStyles";
+import { pdfTag } from "../tagging/pdfStructure";
 import type { GapCellVariant } from "./GapCell";
 import { SectionBanner, SubTitle } from "./headings";
 import { PayGapTable } from "./PayGapTable";
@@ -56,7 +57,7 @@ function ProportionTable({
 			</Row>
 			<Row>
 				<Cell
-					bold
+					rowHeader
 					sheet={sheet}
 					text="Femmes"
 					width={BENEFICIARY_TABLE.label}
@@ -84,7 +85,7 @@ function ProportionTable({
 			</Row>
 			<Row>
 				<Cell
-					bold
+					rowHeader
 					sheet={sheet}
 					text="Hommes"
 					width={BENEFICIARY_TABLE.label}
@@ -152,7 +153,7 @@ export function VariablePaySection({
 		},
 	];
 	return (
-		<View>
+		<View {...pdfTag("Sect")}>
 			<View wrap={false}>
 				<SectionBanner
 					sheet={sheet}

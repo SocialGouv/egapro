@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-	renderToBuffer: vi.fn(),
+	renderTaggedPdf: vi.fn(),
 	buildPdfData: vi.fn(),
 	buildTransmittedPdfData: vi.fn(),
 	DeclarationPdfDocument: vi.fn(),
@@ -10,8 +10,8 @@ const mocks = vi.hoisted(() => ({
 	JointEvaluationPdfDocument: vi.fn(),
 }));
 
-vi.mock("@react-pdf/renderer", () => ({
-	renderToBuffer: mocks.renderToBuffer,
+vi.mock("~/modules/declarationPdf/tagging/renderTaggedPdf", () => ({
+	renderTaggedPdf: mocks.renderTaggedPdf,
 }));
 
 vi.mock("~/modules/declarationPdf/buildPdfData", () => ({
@@ -56,7 +56,7 @@ describe("buildReceiptAttachments", () => {
 		mocks.TransmittedPdfDocument.mockReturnValue("transmitted-doc");
 		mocks.buildJointEvaluationRecapData.mockResolvedValue({ year: YEAR });
 		mocks.JointEvaluationPdfDocument.mockReturnValue("joint-evaluation-doc");
-		mocks.renderToBuffer.mockImplementation((doc: unknown) =>
+		mocks.renderTaggedPdf.mockImplementation((doc: unknown) =>
 			Promise.resolve(Buffer.from(String(doc))),
 		);
 	});
@@ -138,7 +138,7 @@ describe("buildReceiptAttachments", () => {
 		});
 
 		it("lets a rendering failure reach the caller", async () => {
-			mocks.renderToBuffer.mockRejectedValue(new Error("pdf worker died"));
+			mocks.renderTaggedPdf.mockRejectedValue(new Error("pdf worker died"));
 
 			await expect(
 				buildJointEvaluationAttachments(SIREN, YEAR),
