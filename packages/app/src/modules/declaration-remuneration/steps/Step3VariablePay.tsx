@@ -419,6 +419,7 @@ export function Step3VariablePay({
 															aria-describedby={describedByForField(
 																BENEFICIARIES_ALERT_ID,
 																womenBeneficiaryError,
+																REQUIRED_FIELDS_NOTE_ID,
 															)}
 															aria-invalid={
 																womenBeneficiaryError ? true : undefined
@@ -462,6 +463,7 @@ export function Step3VariablePay({
 															aria-describedby={describedByForField(
 																BENEFICIARIES_ALERT_ID,
 																menBeneficiaryError,
+																REQUIRED_FIELDS_NOTE_ID,
 															)}
 															aria-invalid={
 																menBeneficiaryError ? true : undefined

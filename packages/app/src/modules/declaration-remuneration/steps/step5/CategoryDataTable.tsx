@@ -129,7 +129,11 @@ function EuroInputCell({
 	errors,
 }: EuroCellProps) {
 	const error = findFieldError(errors, id);
-	const ariaDescribedBy = describedByForField(errorAlertId, error);
+	const ariaDescribedBy = describedByForField(
+		errorAlertId,
+		error,
+		REQUIRED_FIELDS_NOTE_ID,
+	);
 	return (
 		<td>
 			<div className={stepStyles.inputCell}>

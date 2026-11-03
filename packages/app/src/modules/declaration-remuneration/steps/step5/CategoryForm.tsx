@@ -753,6 +753,7 @@ export function CategoryForm({
 							aria-describedby={describedByForField(
 								CATEGORY_ALERT_ID,
 								sourceSummaryError,
+								REQUIRED_FIELDS_NOTE_ID,
 							)}
 							aria-invalid={sourceSummaryError ? true : undefined}
 							className="fr-select"

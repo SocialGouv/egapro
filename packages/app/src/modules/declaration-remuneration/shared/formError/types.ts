@@ -44,13 +44,13 @@ export function findFieldError(
 
 export const REQUIRED_FIELDS_NOTE_ID = "remuneration-required-fields-note";
 
-// Only for fields of a form that renders the required-fields note under this id.
 export function describedByForField(
 	alertId: string,
 	error: FieldError | undefined,
+	requiredNoteId: string,
 ): string | undefined {
 	return composeDescribedBy(
-		REQUIRED_FIELDS_NOTE_ID,
+		requiredNoteId,
 		error && fieldErrorAlertId(alertId, error.category),
 	);
 }
