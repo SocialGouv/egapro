@@ -6,6 +6,7 @@ import { Controller } from "react-hook-form";
 import { TrackedLink } from "~/modules/analytics";
 import { formatCivilLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
+import { composeDescribedBy } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { nextCalendarDay, publicationSchema } from "../schemas";
 import { useRepresentationDraftContext } from "../shared/draft/DraftContext";
@@ -29,6 +30,7 @@ export function Step4Publication() {
 	const referencePeriodEnd = draft.referencePeriodEnd;
 
 	const baseId = useId();
+	const requiredNoteId = `${baseId}-required-note`;
 	const dateId = `${baseId}-date`;
 	const dateMessagesId = `${dateId}-messages`;
 	const websiteLegendId = `${baseId}-website-legend`;
@@ -115,7 +117,7 @@ export function Step4Publication() {
 				Vous devez déclarer la publication de vos écarts au plus tard le{" "}
 				{formatCivilLongDate(declarationDeadline)}.
 			</p>
-			<p className={`fr-mb-2w ${styles.mandatory}`}>
+			<p className={`fr-mb-2w ${styles.mandatory}`} id={requiredNoteId}>
 				Tous les champs sont obligatoires.
 			</p>
 
@@ -127,7 +129,7 @@ export function Step4Publication() {
 					<span className="fr-hint-text">Format attendu : JJ/MM/AAAA</span>
 				</label>
 				<input
-					aria-describedby={dateMessagesId}
+					aria-describedby={composeDescribedBy(requiredNoteId, dateMessagesId)}
 					aria-invalid={dateError ? true : undefined}
 					className="fr-input"
 					id={dateId}
@@ -167,6 +169,7 @@ export function Step4Publication() {
 							<div className="fr-fieldset__element fr-fieldset__element--inline">
 								<div className="fr-radio-group">
 									<input
+										aria-describedby={requiredNoteId}
 										checked={field.value === true}
 										disabled={isReadOnly}
 										id={websiteYesId}
@@ -184,6 +187,7 @@ export function Step4Publication() {
 							<div className="fr-fieldset__element fr-fieldset__element--inline">
 								<div className="fr-radio-group">
 									<input
+										aria-describedby={requiredNoteId}
 										checked={field.value === false}
 										disabled={isReadOnly}
 										id={websiteNoId}
@@ -225,7 +229,7 @@ export function Step4Publication() {
 						</span>
 					</label>
 					<input
-						aria-describedby={urlMessagesId}
+						aria-describedby={composeDescribedBy(requiredNoteId, urlMessagesId)}
 						aria-invalid={urlError ? true : undefined}
 						aria-required="true"
 						className="fr-input"
@@ -256,7 +260,10 @@ export function Step4Publication() {
 						auprès de vos salariés.
 					</label>
 					<textarea
-						aria-describedby={modalitiesMessagesId}
+						aria-describedby={composeDescribedBy(
+							requiredNoteId,
+							modalitiesMessagesId,
+						)}
 						aria-invalid={modalitiesError ? true : undefined}
 						aria-required="true"
 						className="fr-input"

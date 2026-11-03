@@ -9,7 +9,11 @@ import type { PayGapField, PayGapRow } from "../types";
 import common from "./common.module.scss";
 import { payGapFieldId } from "./formError/payGapErrors";
 import type { FieldError } from "./formError/types";
-import { describedByForField, findFieldError } from "./formError/types";
+import {
+	describedByForField,
+	findFieldError,
+	REQUIRED_FIELDS_NOTE_ID,
+} from "./formError/types";
 import { GapBadge } from "./GapValueBadge";
 import { numericInputClassName } from "./numericInputClassName";
 import styles from "./PayGapTable.module.scss";
@@ -117,7 +121,11 @@ export function PayGapTable({
 													<input
 														aria-describedby={
 															errorAlertId
-																? describedByForField(errorAlertId, womenError)
+																? describedByForField(
+																		errorAlertId,
+																		womenError,
+																		REQUIRED_FIELDS_NOTE_ID,
+																	)
 																: undefined
 														}
 														aria-invalid={womenError ? true : undefined}
@@ -148,7 +156,11 @@ export function PayGapTable({
 													<input
 														aria-describedby={
 															errorAlertId
-																? describedByForField(errorAlertId, menError)
+																? describedByForField(
+																		errorAlertId,
+																		menError,
+																		REQUIRED_FIELDS_NOTE_ID,
+																	)
 																: undefined
 														}
 														aria-invalid={menError ? true : undefined}

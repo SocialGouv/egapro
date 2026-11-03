@@ -413,10 +413,8 @@ test.describe("Declaration workflow", () => {
 			name: "Rémunération annuelle — Nombre de femmes",
 		});
 		await expect(womenInput).toHaveAttribute("aria-invalid", "true");
-		const describedBy = await womenInput.getAttribute("aria-describedby");
-		expect(describedBy).toBeTruthy();
-		await expect(page.locator(`#${describedBy}`)).toContainText(
-			"Renseignez le nombre de femmes pour la rémunération annuelle.",
+		await expect(womenInput).toHaveAccessibleDescription(
+			/^Tous les champs sont obligatoires\. .*Renseignez le nombre de femmes pour la rémunération annuelle\./,
 		);
 	});
 

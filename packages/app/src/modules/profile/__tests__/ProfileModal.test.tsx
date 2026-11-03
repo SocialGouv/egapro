@@ -193,7 +193,10 @@ describe("ProfileModal — identity fields", () => {
 		expect(input).toHaveAttribute("id", inputId);
 		expect(input).toHaveAttribute("type", "text");
 		expect(input).toHaveAttribute("aria-required", "true");
-		expect(input).toHaveAttribute("aria-describedby", `${inputId}-messages`);
+		expect(input).toHaveAttribute(
+			"aria-describedby",
+			`profile-modal-required-note ${inputId}-messages`,
+		);
 		expect(input).toHaveClass("fr-input");
 		expect(input).not.toHaveAttribute("readonly");
 		expect(input).not.toHaveAttribute("aria-invalid");
@@ -379,6 +382,44 @@ describe("ProfileModal — validation", () => {
 		expect(
 			document.querySelector("#profile-last-name-messages .fr-message--error"),
 		).not.toBeInTheDocument();
+	});
+});
+
+describe("ProfileModal — required-fields mention", () => {
+	const REQUIRED_MENTION = "Tous les champs sont obligatoires.";
+	const requiredFieldIds = [
+		"profile-last-name",
+		"profile-first-name",
+		"profile-phone",
+	];
+
+	it.each(
+		requiredFieldIds,
+	)("describes #%s with the form-level mention", async (inputId) => {
+		await renderOpenModal();
+
+		expect(getElement(inputId)).toHaveAccessibleDescription(
+			expect.stringContaining(REQUIRED_MENTION),
+		);
+	});
+
+	it.each(
+		requiredFieldIds,
+	)("keeps the mention and the error message on #%s once it is flagged", async (inputId) => {
+		await renderOpenModal();
+		fireEvent.change(getElement(inputId), { target: { value: "" } });
+		fireEvent.submit(getElement("profile-form"));
+
+		await waitFor(() => {
+			expect(getElement(inputId)).toHaveAttribute("aria-invalid", "true");
+		});
+		const errorMessage = document.querySelector(
+			`#${inputId}-messages .fr-message--error`,
+		)?.textContent;
+		expect(errorMessage).toBeTruthy();
+		expect(getElement(inputId)).toHaveAccessibleDescription(
+			`${REQUIRED_MENTION} ${errorMessage}`,
+		);
 	});
 });
 

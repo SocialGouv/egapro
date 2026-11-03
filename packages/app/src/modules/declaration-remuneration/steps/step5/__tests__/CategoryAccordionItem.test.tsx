@@ -179,7 +179,7 @@ describe("CategoryAccordionItem — name length cap (#3943)", () => {
 		expect(input).not.toHaveAttribute("aria-invalid");
 		expect(input).toHaveAttribute(
 			"aria-describedby",
-			"cat-0-name-hint cat-0-name-limit",
+			"remuneration-required-fields-note cat-0-name-hint cat-0-name-limit",
 		);
 		expect(
 			screen.queryByText(CATEGORY_NAME_MAX_LENGTH_MESSAGE, {
@@ -212,7 +212,7 @@ describe("CategoryAccordionItem — name length cap (#3943)", () => {
 		expect(input).toHaveAttribute("aria-invalid", "true");
 		expect(input).toHaveAttribute(
 			"aria-describedby",
-			"cat-0-name-hint cat-0-name-limit category-alert-invalid",
+			"remuneration-required-fields-note cat-0-name-hint cat-0-name-limit category-alert-invalid",
 		);
 	});
 });

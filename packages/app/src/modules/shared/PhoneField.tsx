@@ -7,12 +7,14 @@ import {
 	formatPhoneInput,
 	PHONE_FORMAT_MESSAGE,
 } from "~/modules/profile/phone";
+import { composeDescribedBy } from "./composeDescribedBy";
 
 type PhoneFieldProps = {
 	className?: string;
 	error: string | null;
 	inputId: string;
 	registration: UseFormRegisterReturn;
+	requiredNoteId?: string;
 };
 
 export function PhoneField({
@@ -20,6 +22,7 @@ export function PhoneField({
 	error,
 	inputId,
 	registration,
+	requiredNoteId,
 }: PhoneFieldProps) {
 	const messagesId = `${inputId}-messages`;
 
@@ -37,7 +40,7 @@ export function PhoneField({
 				<span className="fr-hint-text">{PHONE_FORMAT_MESSAGE}</span>
 			</label>
 			<input
-				aria-describedby={messagesId}
+				aria-describedby={composeDescribedBy(requiredNoteId, messagesId)}
 				aria-invalid={error ? "true" : undefined}
 				aria-required="true"
 				autoComplete="tel"

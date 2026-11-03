@@ -7,6 +7,7 @@ import type { FieldError } from "~/modules/declaration-remuneration/shared/formE
 import {
 	describedByForField,
 	findFieldError,
+	REQUIRED_FIELDS_NOTE_ID,
 } from "~/modules/declaration-remuneration/shared/formError/types";
 import { numericInputClassName } from "~/modules/declaration-remuneration/shared/numericInputClassName";
 import {
@@ -128,7 +129,11 @@ function EuroInputCell({
 	errors,
 }: EuroCellProps) {
 	const error = findFieldError(errors, id);
-	const ariaDescribedBy = describedByForField(errorAlertId, error);
+	const ariaDescribedBy = describedByForField(
+		errorAlertId,
+		error,
+		REQUIRED_FIELDS_NOTE_ID,
+	);
 	return (
 		<td>
 			<div className={stepStyles.inputCell}>
@@ -379,6 +384,7 @@ function CategoryWorkforceRow({
 	const countCell = (field: typeof row.womenField, sex: "women" | "men") => (
 		<td>
 			<input
+				aria-describedby={REQUIRED_FIELDS_NOTE_ID}
 				aria-label={`${workforceFieldLabel(row.workforceRow, sex)}, catégorie ${catIndex + 1}`}
 				className={`fr-input ${common.numericInput}`}
 				data-category-headcount-input={`cat-${catIndex}`}

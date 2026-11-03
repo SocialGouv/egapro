@@ -21,6 +21,7 @@ type HarnessProps = {
 	hint?: string;
 	womenLabel?: string;
 	menLabel?: string;
+	requiredNoteId?: string;
 	trailingContent?: ReactNode;
 };
 
@@ -304,6 +305,25 @@ describe("PercentagePairFields — accessibility and states", () => {
 		expect(women.getAttribute("aria-describedby")).toContain(
 			message.parentElement?.id,
 		);
+	});
+
+	it("reads the form-level required mention before the hint and the error", () => {
+		render(
+			<>
+				<p id="required-note">Tous les champs sont obligatoires.</p>
+				<Harness
+					error="La somme des pourcentages doit être égale à 100 %."
+					requiredNoteId="required-note"
+				/>
+			</>,
+		);
+		const { women, men } = fields();
+
+		for (const input of [women, men]) {
+			expect(input).toHaveAccessibleDescription(
+				"Tous les champs sont obligatoires. La saisie d'un pourcentage calcule automatiquement l'autre. La somme des pourcentages doit être égale à 100 %.",
+			);
+		}
 	});
 
 	it("marks both inputs read-only instead of disabling the fieldset", async () => {

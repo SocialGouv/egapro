@@ -19,6 +19,7 @@ import { useUpdateHasCse } from "./useUpdateHasCse";
 
 export const MISSING_INFO_PANEL_ID = "missing-info-modal";
 const PANEL_TITLE_ID = "missing-info-modal-title";
+const REQUIRED_NOTE_ID = "missing-info-modal-required-note";
 
 type Props = {
 	siren: string;
@@ -169,7 +170,10 @@ export function MissingInfoModal({
 						<p className="fr-text--regular fr-mb-3w">
 							{getDescription(needsPhone, needsCse)}
 						</p>
-						<p className="fr-text--regular fr-text-title--grey fr-mb-3w">
+						<p
+							className="fr-text--regular fr-text-title--grey fr-mb-3w"
+							id={REQUIRED_NOTE_ID}
+						>
 							Tous les champs sont obligatoires.
 						</p>
 						{needsPhone && (
@@ -177,6 +181,7 @@ export function MissingInfoModal({
 								error={phoneError}
 								inputId="missing-info-phone"
 								registration={form.register("phone")}
+								requiredNoteId={REQUIRED_NOTE_ID}
 							/>
 						)}
 						{needsCse && (
@@ -196,6 +201,7 @@ export function MissingInfoModal({
 								<div className="fr-fieldset__element fr-fieldset__element--inline">
 									<div className="fr-radio-group fr-radio-rich">
 										<input
+											aria-describedby={REQUIRED_NOTE_ID}
 											id="missing-info-cse-yes"
 											type="radio"
 											value="true"
@@ -209,6 +215,7 @@ export function MissingInfoModal({
 								<div className="fr-fieldset__element fr-fieldset__element--inline">
 									<div className="fr-radio-group fr-radio-rich">
 										<input
+											aria-describedby={REQUIRED_NOTE_ID}
 											id="missing-info-cse-no"
 											type="radio"
 											value="false"

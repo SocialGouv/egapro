@@ -64,6 +64,7 @@ export function Step3Members() {
 	const campaignYear = getRepresentationCampaignYear(year);
 	const legendId = `${baseId}-legend`;
 	const messagesId = `${baseId}-messages`;
+	const requiredNoteId = `${baseId}-required-note`;
 
 	// Raw strings, not re-derived from the draft on render (would drop an in-progress decimal separator).
 	const [percentageValues, setPercentageValues] =
@@ -135,13 +136,16 @@ export function Step3Members() {
 					dirigeantes pour déterminer si l'écart de représentation est
 					calculable.
 				</legend>
-				<p className="fr-mb-2w">Tous les champs sont obligatoires.</p>
+				<p className="fr-mb-2w" id={requiredNoteId}>
+					Tous les champs sont obligatoires.
+				</p>
 				<div
 					className={`${styles.radioZone} ${showSelectionError ? styles.radioZoneError : ""}`}
 				>
 					<div className="fr-fieldset__element">
 						<div className="fr-radio-group fr-radio-rich">
 							<input
+								aria-describedby={requiredNoteId}
 								checked={hasManagementBody === false}
 								disabled={isReadOnly}
 								id={`${baseId}-none`}
@@ -160,6 +164,7 @@ export function Step3Members() {
 					<div className="fr-fieldset__element">
 						<div className="fr-radio-group fr-radio-rich">
 							<input
+								aria-describedby={requiredNoteId}
 								checked={hasManagementBody === true}
 								disabled={isReadOnly}
 								id={`${baseId}-some`}
@@ -199,6 +204,7 @@ export function Step3Members() {
 						legend="Indiquez le pourcentage de représentation des femmes et des hommes parmi les membres des instances dirigeantes."
 						onChange={handlePercentageChange}
 						readOnly={isReadOnly}
+						requiredNoteId={requiredNoteId}
 						trailingContent={
 							decidedVerdict ? (
 								<ComplianceBadge verdict={decidedVerdict} />
