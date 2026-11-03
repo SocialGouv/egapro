@@ -269,8 +269,7 @@ export const styles = StyleSheet.create({
 		marginTop: 4,
 	},
 
-	// Representation recap — two side-by-side indicator columns, each either a
-	// 3-column table or a not-computable motive, headed by a centered title.
+	// Representation recap: two side-by-side indicator columns.
 	repGapColumnsRow: {
 		flexDirection: "row",
 		gap: 6,
@@ -287,8 +286,7 @@ export const styles = StyleSheet.create({
 		marginBottom: 2,
 	},
 
-	// Compliance badges — additive, kept separate from `badge`/`badgeText`
-	// (the GapCell warning badge), which stay untouched for the other PDFs.
+	// Kept apart from `badge`/`badgeText` so the other PDFs are untouched.
 	complianceBadgeCompliant: {
 		backgroundColor: BACKGROUND_CONTRAST_INFO,
 		borderRadius: 2,
@@ -329,14 +327,11 @@ export const styles = StyleSheet.create({
 		paddingHorizontal: 8,
 		marginBottom: 6,
 	},
-	// `categoryBanner` has no marginTop (its other callers sit right under a
-	// `sectionBanner`, which already carries one) — the maquette's uniform
-	// 10pt gap needs it added back when a category block itself opens a block.
+	// `categoryBanner` has no marginTop, so a block opened by a category needs it back.
 	repCategoryBannerGroup: {
 		marginTop: 4,
 	},
-	// Figma specifies `not-italic` for the not-computable motive — unlike
-	// `noData`'s italic, used elsewhere for an "n/a" style note.
+	// Figma sets the not-computable motive upright, unlike `noData`.
 	repNotComputableReason: {
 		fontSize: 9,
 		color: TEXT_TITLE_GREY,

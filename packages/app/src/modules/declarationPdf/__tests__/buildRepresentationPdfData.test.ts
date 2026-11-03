@@ -77,8 +77,7 @@ function stubDb(
 	company: Record<string, unknown> | null = COMPANY,
 	declarant: Record<string, unknown> | null = DECLARANT,
 ) {
-	// The builder fires company and declaration in a single Promise.all (company
-	// first), then — only once the declarant id is known — a third select.
+	// Company and declaration run in one Promise.all, then the declarant select.
 	mocks.rows = [
 		company ? [company] : [],
 		declaration ? [declaration] : [],
