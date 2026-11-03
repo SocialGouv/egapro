@@ -13,7 +13,7 @@ describe("AccessibilityPage — content not subject to the obligation", () => {
 		}).nextElementSibling;
 
 		expect(statement).toHaveTextContent(
-			"L'accord de protection des données de l'hébergeur OVH, document PDF non balisé",
+			"L'accord de protection des données de l'hébergeur OVH, document PDF non accessible",
 		);
 		expect(statement).toHaveTextContent("est un contenu tiers");
 		expect(screen.queryByText("Aucun contenu n'est exclu.")).toBeNull();
@@ -24,6 +24,6 @@ describe("AccessibilityPage — content not subject to the obligation", () => {
 
 		expect(
 			screen.getByRole("link", { name: "Données personnelles" }),
-		).toHaveAttribute("href", "/donnees-personnelles");
+		).toHaveAttribute("href", "/donnees-personnelles#garanties-hebergeur");
 	});
 });

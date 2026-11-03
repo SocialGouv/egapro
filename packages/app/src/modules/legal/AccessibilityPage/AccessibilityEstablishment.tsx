@@ -6,7 +6,7 @@ export function AccessibilityEstablishment() {
 			<p>
 				Cette déclaration a été établie le{" "}
 				<time dateTime="2024-03-01">1er mars 2024</time>. Elle a été mise à jour
-				le <time dateTime="2025-03-01">1er mars 2025</time>.
+				le <time dateTime="2026-11-03">3 novembre 2026</time>.
 			</p>
 			<p>Technologies utilisées pour la réalisation du site :</p>
 			<ul>

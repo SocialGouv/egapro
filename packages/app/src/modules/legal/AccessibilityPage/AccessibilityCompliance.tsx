@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import { PRIVACY } from "~/modules/routes";
 
+import { HOSTING_GUARANTEES_ID } from "../PrivacyPolicyPage/PrivacyHostingGuarantees";
+
 /** Compliance status, test results, and non-accessible content. */
 export function AccessibilityCompliance() {
 	return (
@@ -52,11 +54,13 @@ export function AccessibilityCompliance() {
 			</h3>
 			<p>
 				L'accord de protection des données de l'hébergeur OVH, document PDF non
-				balisé lié depuis la page{" "}
-				<Link href={PRIVACY}>Données personnelles</Link>, est un contenu tiers
-				qui n'est ni financé ni développé par la Direction générale du travail,
-				et qui n'est pas sous son contrôle. Ses garanties sont reprises en HTML
-				sur cette même page.
+				accessible, est un contenu tiers qui n'est ni financé ni développé par
+				la Direction générale du travail, et qui n'est pas sous son contrôle.
+				Ses garanties sont reprises en HTML sur la page{" "}
+				<Link href={`${PRIVACY}#${HOSTING_GUARANTEES_ID}`}>
+					Données personnelles
+				</Link>
+				.
 			</p>
 		</>
 	);

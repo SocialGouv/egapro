@@ -64,7 +64,7 @@ describe("PrivacyPolicyPage — hosting provider guarantees", () => {
 		);
 	});
 
-	it("keeps the full PDF reachable, announced as an untagged PDF opening in a new tab", () => {
+	it("keeps the full PDF reachable, announced as a non-accessible PDF opening in a new tab", () => {
 		render(<PrivacyPolicyPage />);
 
 		const pdfLink = screen.getByRole("link", {
@@ -74,6 +74,6 @@ describe("PrivacyPolicyPage — hosting provider guarantees", () => {
 		expect(pdfLink).toHaveAttribute("href", OVH_PDF_URL);
 		expect(pdfLink).toHaveAttribute("target", "_blank");
 		expect(pdfLink).toHaveAccessibleName(/nouvelle fenêtre|nouvel onglet/);
-		expect(pdfLink.closest("p")).toHaveTextContent("format PDF non balisé");
+		expect(pdfLink.closest("p")).toHaveTextContent("format PDF non accessible");
 	});
 });

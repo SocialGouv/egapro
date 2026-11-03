@@ -2,7 +2,6 @@ import { NewTabNotice } from "~/modules/layout";
 
 export const HOSTING_GUARANTEES_ID = "garanties-hebergeur";
 
-// The provider's agreement is an untagged PDF: this list is its accessible summary (RGAA 13.3).
 export function PrivacyHostingGuarantees() {
 	return (
 		<>
@@ -62,7 +61,7 @@ export function PrivacyHostingGuarantees() {
 			</ul>
 			<p>
 				Le texte intégral de l'accord est un document de l'hébergeur, publié au
-				format PDF non balisé :{" "}
+				format PDF non accessible :{" "}
 				<a
 					href="https://storage.gra.cloud.ovh.net/v1/AUTH_325716a587c64897acbef9a4a4726e38/contracts/9e74492-OVH_Data_Protection_Agreement-FR-6.0.pdf"
 					rel="noopener noreferrer"
