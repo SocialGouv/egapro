@@ -12,6 +12,53 @@
 		}
 	],
 	"sample": {
+		"global": [
+			"src/app/layout.tsx",
+			"src/modules/layout/designTokens.css",
+			"src/modules/layout/dsfrFixes.scss",
+			"src/middleware.ts",
+			"next.config.js",
+			"scripts/copy-dsfr.ts",
+			"package.json",
+			"../../pnpm-lock.yaml",
+			"../../patches/**",
+			"playwright.a11y.config.ts",
+			"src/e2e/a11y/**"
+		],
+		"exempt": [
+			{
+				"path": "src/app/declaration-remuneration/(with-banner)/page.tsx",
+				"reason": "Redirection inconditionnelle vers l'écran de la démarche : aucun contenu propre, l'enregistrer doublerait l'étape 1 sous une autre identité."
+			},
+			{
+				"path": "src/app/avis-cse/page.tsx",
+				"reason": "Redirection inconditionnelle vers l'étape 1 de l'avis du CSE : aucun contenu propre."
+			},
+			{
+				"path": "src/app/acces-backoffice/page.tsx",
+				"reason": "Ne s'affiche qu'à un administrateur dont le second facteur manque ou a expiré ; la suite se connecte par le seam MFA E2E, qui date chaque connexion : l'écran redirige pendant la capture."
+			},
+			{
+				"path": "src/app/cgu/[version]/page.tsx",
+				"reason": "Aucune version archivée des CGU : seule la version en vigueur existe, et son adresse datée redirige vers /cgu."
+			},
+			{
+				"path": "src/app/api/public/docs/page.tsx",
+				"reason": "Documentation technique de l'API publique, rendue par Swagger UI (composant tiers) : hors de l'échantillon RGAA tant que son inclusion n'est pas décidée."
+			},
+			{
+				"path": "src/app/dev-login/page.tsx",
+				"reason": "Connexion de développement : répond 404 hors EGAPRO_DEV_AUTH, donc sur le build de production capturé."
+			},
+			{
+				"path": "src/app/test-error/page.tsx",
+				"reason": "Route de test qui déclenche la page d'erreur 500 : pas un écran du service."
+			},
+			{
+				"path": "src/app/test-panel/**",
+				"reason": "Bacs à sable de développement : répondent 404 sur un build de production."
+			}
+		],
 		"pages": [
 			{
 				"id": "accueil",
@@ -117,6 +164,9 @@
 				"id": "declaration-etape-2",
 				"name": "Déclaration — étape 2 sur 6",
 				"url": "http://localhost:3000/declaration-remuneration/etape/2",
+				"sources": [
+					"src/app/declaration-remuneration/(with-banner)/etape/[step]/page.tsx"
+				],
 				"auth": true,
 				"notes": "Formulaire le plus dense du tunnel : saisie des effectifs. Déclaration en brouillon."
 			},
@@ -124,6 +174,7 @@
 				"id": "declaration-recapitulatif",
 				"name": "Déclaration — récapitulatif",
 				"url": "http://localhost:3000/declaration-remuneration/recapitulatif",
+				"sources": ["src/app/declaration-remuneration/recapitulatif/page.tsx"],
 				"auth": true,
 				"notes": "Page de tableaux récapitulatifs avant transmission."
 			},
@@ -131,6 +182,9 @@
 				"id": "parcours-conformite",
 				"name": "Parcours de conformité — choix du parcours",
 				"url": "http://localhost:3000/declaration-remuneration/parcours-conformite",
+				"sources": [
+					"src/app/declaration-remuneration/(with-banner)/parcours-conformite/page.tsx"
+				],
 				"auth": true,
 				"notes": "Déclaration transmise avec un écart ≥ 5 %."
 			},
@@ -138,6 +192,7 @@
 				"id": "avis-cse-etape-1",
 				"name": "Avis du CSE — étape 1 sur 2",
 				"url": "http://localhost:3000/avis-cse/etape/1",
+				"sources": ["src/app/avis-cse/etape/[step]/page.tsx"],
 				"auth": true,
 				"notes": "Entreprise ayant déclaré un CSE."
 			},
@@ -192,6 +247,17 @@
 				"name": "Backoffice — statistiques",
 				"url": "http://localhost:3000/admin/stats",
 				"sources": ["src/app/admin/stats/page.tsx"],
+				"auth": true,
+				"notes": "Requiert un compte listé dans ADMIN_EMAILS."
+			},
+			{
+				"id": "admin-plan",
+				"name": "Backoffice — plan",
+				"url": "http://localhost:3000/admin/plan",
+				"sources": [
+					"src/app/admin/plan/page.tsx",
+					"src/modules/admin/sitemap/AdminSitemapPage.tsx"
+				],
 				"auth": true,
 				"notes": "Requiert un compte listé dans ADMIN_EMAILS."
 			},

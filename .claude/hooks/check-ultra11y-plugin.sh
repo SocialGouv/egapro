@@ -3,8 +3,8 @@
 #
 # LE QUATRIÈME ENDROIT OÙ VIT LA VERSION D'ULTRA11Y, ET LE SEUL QUE LA CI NE VOIT PAS.
 #
-# `ci.yaml` tient ensemble les trois versions DU DÉPÔT (les deux `uses:` de l'Action et la
-# devDependency) via scripts/a11y/check-ultra11y-version.sh. Le plugin Claude Code, lui, est
+# `ci.yaml` tient ensemble les versions DU DÉPÔT (chaque `uses:` de l'Action et la
+# devDependency) via scripts/a11y/check-ultra11y-version.sh — lire le pin d'a11y.yaml suffit. Le plugin Claude Code, lui, est
 # installé sur TA MACHINE : `.claude/settings.json` déclare `"ultra11y@ultra11y": true` sans
 # version, donc l'install prend ce que la marketplace avait ce jour-là — et n'en bouge plus
 # jamais toute seule.

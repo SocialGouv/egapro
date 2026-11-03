@@ -127,9 +127,10 @@ jobs:
   a11y-version-coherence:
     # LA SEULE CHOSE QUI EMPÊCHE UNE DEMI-MONTÉE DE VERSION D'ULTRA11Y.
     #
-    # Le pin de l'Action (deux fois dans a11y.yaml, SHA + `# vX.Y.Z` ou `@vX.Y.Z`) et la
-    # devDependency `ultra11y` doivent porter la même version : le balayage Playwright ÉCRIT
-    # les instantanés avec la devDependency, l'Action les RÉINGÈRE avec son moteur embarqué.
+    # Le pin de l'Action (chaque `uses:` de a11y.yaml et a11y-lite.yaml, SHA + `# vX.Y.Z` ou
+    # `@vX.Y.Z`) et la devDependency `ultra11y` doivent porter la même version : le balayage
+    # Playwright ÉCRIT les instantanés avec la devDependency, l'Action les RÉINGÈRE avec son
+    # moteur embarqué.
     # Dependabot les met à jour dans deux PR distinctes, sur deux écosystèmes qui s'ignorent —
     # rien de son côté ne sait qu'elles vont ensemble. C'est ce job qui le sait.
     #
@@ -141,6 +142,8 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Check ultra11y version coherence
         run: ./scripts/a11y/check-ultra11y-version.sh
+      - name: Test the coherence check against half-bumps
+        run: bash scripts/a11y/check-ultra11y-version.test.sh
 
   app-check-journal:
     name: App · Journal monotone check
