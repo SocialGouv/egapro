@@ -245,7 +245,7 @@ test.describe("Declaration workflow", () => {
 
 		// S2 — fill annual Q1 max (the only threshold input on the Q1 row)
 		const seuil1Annual = annualTable.getByRole("textbox", {
-			name: "Seuil maximum 1er quartile annuel",
+			name: "Montants des tranches, maximum du 1er quartile annuel",
 		});
 		await seuil1Annual.fill("20000");
 
@@ -264,24 +264,36 @@ test.describe("Declaration workflow", () => {
 
 		// Fill non-crescent annual thresholds : 30000, 20000, 40000
 		await page
-			.getByRole("textbox", { name: "Seuil maximum 1er quartile annuel" })
+			.getByRole("textbox", {
+				name: "Montants des tranches, maximum du 1er quartile annuel",
+			})
 			.fill("30000");
 		await page
-			.getByRole("textbox", { name: "Seuil maximum 2e quartile annuel" })
+			.getByRole("textbox", {
+				name: "Montants des tranches, maximum du 2e quartile annuel",
+			})
 			.fill("20000");
 		await page
-			.getByRole("textbox", { name: "Seuil maximum 3e quartile annuel" })
+			.getByRole("textbox", {
+				name: "Montants des tranches, maximum du 3e quartile annuel",
+			})
 			.fill("40000");
 
 		// Fill hourly thresholds (valid) and all 8 counts to isolate the croissance error
 		await page
-			.getByRole("textbox", { name: "Seuil maximum 1er quartile horaire" })
+			.getByRole("textbox", {
+				name: "Montants des tranches, maximum du 1er quartile horaire",
+			})
 			.fill("10");
 		await page
-			.getByRole("textbox", { name: "Seuil maximum 2e quartile horaire" })
+			.getByRole("textbox", {
+				name: "Montants des tranches, maximum du 2e quartile horaire",
+			})
 			.fill("20");
 		await page
-			.getByRole("textbox", { name: "Seuil maximum 3e quartile horaire" })
+			.getByRole("textbox", {
+				name: "Montants des tranches, maximum du 3e quartile horaire",
+			})
 			.fill("30");
 		for (const ordinal of ["1er", "2e", "3e", "4e"] as const) {
 			await page
@@ -334,12 +346,12 @@ test.describe("Declaration workflow", () => {
 		for (const ordinal of ["1er", "2e", "3e"] as const) {
 			await page
 				.getByRole("textbox", {
-					name: `Seuil maximum ${ordinal} quartile annuel`,
+					name: `Montants des tranches, maximum du ${ordinal} quartile annuel`,
 				})
 				.fill("");
 			await page
 				.getByRole("textbox", {
-					name: `Seuil maximum ${ordinal} quartile horaire`,
+					name: `Montants des tranches, maximum du ${ordinal} quartile horaire`,
 				})
 				.fill("");
 		}
