@@ -213,9 +213,14 @@ async function importCategories(categories: EmployeeCategory[]) {
 		categories,
 	} satisfies ImportResult);
 
-	fireEvent.change(screen.getByLabelText("Sélectionner des fichiers"), {
-		target: { files: [new File(["x"], "import.csv", { type: "text/csv" })] },
-	});
+	fireEvent.change(
+		screen.getByLabelText("Importer vos données depuis un fichier", {
+			selector: "input",
+		}),
+		{
+			target: { files: [new File(["x"], "import.csv", { type: "text/csv" })] },
+		},
+	);
 	fireEvent.click(
 		screen.getByRole("button", { hidden: true, name: "Importer" }),
 	);

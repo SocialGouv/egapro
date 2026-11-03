@@ -74,7 +74,7 @@ export function PayGapSection({
 				</div>
 				<fieldset className="fr-segmented fr-segmented--no-legend">
 					<legend className="fr-segmented__legend">
-						Base de calcul des écarts
+						{title} : base de calcul des écarts
 					</legend>
 					<div className="fr-segmented__elements">
 						<div className="fr-segmented__element">

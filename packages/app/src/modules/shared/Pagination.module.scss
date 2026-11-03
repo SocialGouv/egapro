@@ -1,0 +1,16 @@
+// An inactive step button stays focusable (`aria-disabled`, never `disabled`)
+// so activating it never drops focus to <body> (RGAA 7.3). DSFR only greys out
+// `:disabled` pagination links, so restore that look — no hover tint, the
+// not-allowed cursor — on the ARIA state.
+.inactive:global(.fr-pagination__link) {
+	--hover-tint: transparent;
+	--active-tint: transparent;
+	color: var(--text-disabled-grey);
+	cursor: not-allowed;
+}
+
+@media (forced-colors: active) {
+	.inactive:global(.fr-pagination__link) {
+		color: graytext;
+	}
+}

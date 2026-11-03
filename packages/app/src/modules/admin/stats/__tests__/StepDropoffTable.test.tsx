@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { StepDropoffTable } from "../StepDropoffTable";
@@ -64,7 +64,9 @@ describe("StepDropoffTable", () => {
 			/>,
 		);
 
-		const headers = screen
+		const headers = within(
+			screen.getByRole<HTMLTableElement>("table").tHead as HTMLElement,
+		)
 			.getAllByRole("columnheader")
 			.map((el) => el.textContent);
 		expect(headers).toEqual([
@@ -80,8 +82,8 @@ describe("StepDropoffTable", () => {
 		expect(introRowheader).toBeInTheDocument();
 	});
 
-	it("groups wizard and post-submit rows under two distinct rowgroup headers", () => {
-		render(
+	it("links every cell to its phase, row and column headers, without scope on the phase header (RGAA 5.7)", () => {
+		const { container } = render(
 			<StepDropoffTable
 				rows={[
 					buildWizardRow({
@@ -97,14 +99,35 @@ describe("StepDropoffTable", () => {
 			/>,
 		);
 
+		expect(container.querySelector('[scope="rowgroup"]')).toBeNull();
+		const table = screen.getByRole<HTMLTableElement>("table");
+		const columnHeaders = Array.from(table.querySelectorAll("thead th[id]"));
+		expect(columnHeaders).toHaveLength(3);
 		expect(
-			screen.getByRole("rowheader", {
-				name: /Parcours initial \(wizard A–F\)/i,
-			}),
-		).toBeInTheDocument();
-		expect(
-			screen.getByRole("rowheader", { name: /Démarche post-transmission/i }),
-		).toBeInTheDocument();
+			Array.from(table.tBodies, (body) => body.rows[0]?.textContent),
+		).toEqual(["Parcours initial (wizard A–F)", "Démarche post-transmission"]);
+		for (const body of Array.from(table.tBodies)) {
+			const [headerRow, ...dataRows] = Array.from(body.rows);
+			const phaseHeader = headerRow?.querySelector("th");
+			expect(phaseHeader).not.toHaveAttribute("scope");
+			expect(phaseHeader?.id).toBeTruthy();
+			expect(dataRows).toHaveLength(1);
+			for (const row of dataRows) {
+				const rowHeader = row.querySelector('th[scope="row"]');
+				expect(rowHeader?.id).toBeTruthy();
+				expect(
+					Array.from(row.querySelectorAll("td"), (cell) =>
+						cell.getAttribute("headers"),
+					),
+				).toEqual(
+					columnHeaders.map(
+						(column) => `${phaseHeader?.id} ${rowHeader?.id} ${column.id}`,
+					),
+				);
+			}
+		}
+		const ids = Array.from(table.querySelectorAll("[id]"), (el) => el.id);
+		expect(new Set(ids).size).toBe(ids.length);
 		expect(
 			screen.getByRole("rowheader", { name: "Choix parcours conformité" }),
 		).toBeInTheDocument();

@@ -58,6 +58,15 @@ function locationFact(): string | null | undefined {
 }
 
 describe("CompanyHeader", () => {
+	it("names the Observatoire as the destination of the back link, visible text first", () => {
+		renderHeader(FRENCH);
+		const backLink = screen.getByRole("link", {
+			name: "Retour à l'Observatoire",
+		});
+		expect(backLink).toHaveTextContent(/^Retour$/);
+		expect(backLink).toHaveAttribute("href", "/index-egapro/recherche");
+	});
+
 	it("shows the address of a French company", () => {
 		renderHeader(FRENCH);
 		expect(locationFact()).toBe("Adresse : 1 rue de la Paix, 75002 Paris");

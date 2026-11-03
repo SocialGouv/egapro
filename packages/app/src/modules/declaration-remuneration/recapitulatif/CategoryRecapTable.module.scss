@@ -11,6 +11,8 @@
 
 .heading {
 	margin: 0;
+	// A heading defaults to the title grey; keep the body colour of the former paragraph.
+	color: var(--text-default-grey);
 }
 
 /* Specificity (0,2,3) beats the page-level white reset (0,2,2) so these

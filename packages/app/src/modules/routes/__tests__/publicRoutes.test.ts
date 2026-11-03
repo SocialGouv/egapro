@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { LOGIN } from "../shared/accountRoutes";
+import { LOGIN, MY_SPACE } from "../shared/accountRoutes";
 import {
 	ACCESSIBILITY,
 	CGU,
@@ -56,6 +56,7 @@ describe("PUBLIC_PAGES", () => {
 			FAQ,
 			REFERENTS,
 			OBSERVATORY_SEARCH,
+			MY_SPACE,
 			LOGIN,
 			LEGAL_NOTICE,
 			CGU,
@@ -92,9 +93,9 @@ describe("PUBLIC_PAGES", () => {
 
 describe("getIndexablePublicPages", () => {
 	it("drops the pages crawlers must not index", () => {
-		expect(getIndexablePublicPages().map((page) => page.path)).not.toContain(
-			LOGIN,
-		);
+		const paths = getIndexablePublicPages().map((page) => page.path);
+		expect(paths).not.toContain(LOGIN);
+		expect(paths).not.toContain(MY_SPACE);
 	});
 
 	it("keeps the rest", () => {

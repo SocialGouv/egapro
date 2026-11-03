@@ -99,7 +99,9 @@ describe("ContactPage", () => {
 		await waitFor(() => {
 			expect(writeText).toHaveBeenCalledWith("index@travail.gouv.fr");
 		});
-		expect(screen.getByRole("button", { name: /copiée/i })).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: /^Copié !/ }),
+		).toBeInTheDocument();
 	});
 
 	it("shows error state when clipboard API fails", async () => {
@@ -109,7 +111,7 @@ describe("ContactPage", () => {
 
 		await waitFor(() => {
 			expect(
-				screen.getByRole("button", { name: /échoué/i }),
+				screen.getByRole("button", { name: /^Échec de la copie/ }),
 			).toBeInTheDocument();
 		});
 	});

@@ -297,4 +297,30 @@ describe("RepresentationCampaignForm", () => {
 			screen.getByRole("button", { name: /enregistrement…/i }),
 		).toBeDisabled();
 	});
+
+	it("shows a visible required-fields mention that every date field cites", () => {
+		render(<RepresentationCampaignForm year={2026} />);
+		const note = screen.getByText("Tous les champs sont obligatoires.");
+		expect(note).not.toHaveClass("fr-sr-only");
+		for (const input of [startInput(), endInput(), deadlineInput()]) {
+			expect(input).toBeRequired();
+			expect(input).toHaveAccessibleDescription(
+				"Tous les champs sont obligatoires.",
+			);
+		}
+	});
+
+	it("keeps the required-fields mention before the error message in the description", async () => {
+		render(<RepresentationCampaignForm year={2026} />);
+		await waitFor(() => expect(startInput()).toHaveValue("2026-02-01"));
+
+		fireEvent.change(endInput(), { target: { value: "2026-01-15" } });
+		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
+
+		await waitFor(() =>
+			expect(endInput()).toHaveAccessibleDescription(
+				/^Tous les champs sont obligatoires\. .+/,
+			),
+		);
+	});
 });

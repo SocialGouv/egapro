@@ -57,7 +57,9 @@ describe("StepDurationsTable", () => {
 			/>,
 		);
 
-		const headers = screen
+		const headers = within(
+			screen.getByRole<HTMLTableElement>("table").tHead as HTMLElement,
+		)
 			.getAllByRole("columnheader")
 			.map((el) => el.textContent);
 		expect(headers).toEqual([
@@ -107,8 +109,8 @@ describe("StepDurationsTable", () => {
 		expect(cells.filter((value) => value === "—")).toHaveLength(2);
 	});
 
-	it("groups wizard and post-submit rows under distinct section headers", () => {
-		render(
+	it("links every cell to its phase, row and column headers, without scope on the phase header (RGAA 5.7)", () => {
+		const { container } = render(
 			<StepDurationsTable
 				rows={[
 					buildWizardRow({
@@ -121,16 +123,35 @@ describe("StepDurationsTable", () => {
 			/>,
 		);
 
+		expect(container.querySelector('[scope="rowgroup"]')).toBeNull();
+		const table = screen.getByRole<HTMLTableElement>("table");
+		const columnHeaders = Array.from(table.querySelectorAll("thead th[id]"));
+		expect(columnHeaders).toHaveLength(3);
 		expect(
-			screen.getByRole("rowheader", {
-				name: /Parcours initial \(wizard A–F\)/i,
-			}),
-		).toBeInTheDocument();
-		expect(
-			screen.getByRole("rowheader", {
-				name: "Démarche post-transmission",
-			}),
-		).toBeInTheDocument();
+			Array.from(table.tBodies, (body) => body.rows[0]?.textContent),
+		).toEqual(["Parcours initial (wizard A–F)", "Démarche post-transmission"]);
+		for (const body of Array.from(table.tBodies)) {
+			const [headerRow, ...dataRows] = Array.from(body.rows);
+			const phaseHeader = headerRow?.querySelector("th");
+			expect(phaseHeader).not.toHaveAttribute("scope");
+			expect(phaseHeader?.id).toBeTruthy();
+			expect(dataRows).toHaveLength(1);
+			for (const row of dataRows) {
+				const rowHeader = row.querySelector('th[scope="row"]');
+				expect(rowHeader?.id).toBeTruthy();
+				expect(
+					Array.from(row.querySelectorAll("td"), (cell) =>
+						cell.getAttribute("headers"),
+					),
+				).toEqual(
+					columnHeaders.map(
+						(column) => `${phaseHeader?.id} ${rowHeader?.id} ${column.id}`,
+					),
+				);
+			}
+		}
+		const ids = Array.from(table.querySelectorAll("[id]"), (el) => el.id);
+		expect(new Set(ids).size).toBe(ids.length);
 		expect(
 			screen.getByRole("rowheader", { name: "Introduction" }),
 		).toBeInTheDocument();

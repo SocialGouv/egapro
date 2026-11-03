@@ -235,6 +235,14 @@ export function StatsDashboard({
 					</div>
 					<div className="fr-col-12 fr-col-md-6">
 						<div className={styles.card}>
+							<p className="fr-text--sm fr-text-mention--grey">
+								Cumul des déclarations dont les indicateurs ont été transmis,
+								quel que soit l&apos;avancement de la démarche ensuite. Sans
+								filtre de tranche, les entreprises absentes du fichier GIP-MDS
+								sont comptées ; avec un filtre de tranche, seules celles dont
+								l&apos;effectif y figure le sont. Les déclarations annulées ne
+								sont pas comptées.
+							</p>
 							{selectedYears.length === 0 && (
 								<p className="fr-text--sm fr-text-mention--grey">
 									Sélectionnez au moins une année pour afficher le graphique.
@@ -251,31 +259,17 @@ export function StatsDashboard({
 								</div>
 							)}
 							{progressionQuery.data && (
-								<CampaignProgressionChart
-									currentYear={currentYear}
-									series={progressionQuery.data}
-								/>
+								<>
+									<CampaignProgressionChart
+										currentYear={currentYear}
+										series={progressionQuery.data}
+									/>
+									<CampaignProgressionTable series={progressionQuery.data} />
+								</>
 							)}
-							<p className="fr-text--sm fr-text-mention--grey fr-mt-2w fr-mb-0">
-								Cumul des déclarations dont les indicateurs ont été transmis,
-								quel que soit l&apos;avancement de la démarche ensuite. Sans
-								filtre de tranche, les entreprises absentes du fichier GIP-MDS
-								sont comptées ; avec un filtre de tranche, seules celles dont
-								l&apos;effectif y figure le sont. Les déclarations annulées ne
-								sont pas comptées.
-							</p>
 						</div>
 					</div>
 				</div>
-
-				{progressionQuery.data && (
-					<section
-						aria-label="Progression dans le temps"
-						className={`fr-mt-2w ${styles.card}`}
-					>
-						<CampaignProgressionTable series={progressionQuery.data} />
-					</section>
-				)}
 
 				<div className="fr-grid-row fr-grid-row--gutters fr-mt-4w">
 					<div className="fr-col-12 fr-col-md-6">
@@ -611,19 +605,19 @@ export function StatsDashboard({
 										series={MODEL_SERIES}
 										valueAxisLabel="Occurrences"
 									/>
-									{matomoCategoryModelQuery.data.avgImportDurationSeconds !==
-										null && (
-										<p className="fr-text--sm fr-text-mention--grey fr-mt-1w">
-											Durée moyenne de remplissage avant import :{" "}
-											{matomoCategoryModelQuery.data.avgImportDurationSeconds} s
-										</p>
-									)}
 									<StatsBarTable
 										caption="Usage du modèle de l'indicateur par catégorie"
 										columns={MODEL_TABLE_COLUMNS}
 										rowHeader="Indicateur"
 										rows={matomoCategoryModelQuery.data.rows}
 									/>
+									{matomoCategoryModelQuery.data.avgImportDurationSeconds !==
+										null && (
+										<p className="fr-text--sm fr-text-mention--grey fr-mt-2w fr-mb-0">
+											Durée moyenne de remplissage avant import :{" "}
+											{matomoCategoryModelQuery.data.avgImportDurationSeconds} s
+										</p>
+									)}
 								</>
 							)}
 						</section>

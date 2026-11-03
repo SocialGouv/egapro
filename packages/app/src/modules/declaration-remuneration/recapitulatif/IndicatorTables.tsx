@@ -268,7 +268,9 @@ function QuartileDistributionTable({
 
 	return (
 		<div className={styles.subTable}>
-			<p className={`fr-text--bold ${styles.subTitle}`}>{title}</p>
+			<h4 className={`fr-text--md fr-text--bold ${styles.subTitle}`}>
+				{title}
+			</h4>
 			<div className="fr-table fr-table--no-caption fr-mt-0 fr-mb-0">
 				<div className="fr-table__wrapper">
 					<div className="fr-table__container">

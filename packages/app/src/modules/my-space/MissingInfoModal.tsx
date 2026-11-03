@@ -246,9 +246,9 @@ export function MissingInfoModal({
 					<div>
 						<div className={panelStyles.helpSection}>
 							<hr className="fr-hr" />
-							<p className="fr-text--lg fr-text--bold fr-mb-0">
+							<h3 className="fr-text--lg fr-text--bold fr-text-default--grey fr-mb-0">
 								Pour vous aider
-							</p>
+							</h3>
 							<div className={panelStyles.helpLinks}>
 								<button className="fr-link" type="button">
 									Détail des étapes

@@ -32,25 +32,27 @@ function buildFacts(declaration: PublicDeclarationDTO): Fact[] {
 export function SearchResultItem({ declaration, searchQuery }: Props) {
 	const facts = buildFacts(declaration);
 	return (
-		<article className={styles.item}>
-			<h3 className={styles.title}>
-				<Link
-					className={`fr-link ${styles.link}`}
-					href={routeWithQuery(
-						observatoryCompanyHref(declaration.siren),
-						searchQuery ? `from=${encodeURIComponent(searchQuery)}` : "",
-					)}
-				>
-					{declaration.name ?? "Entreprise"}
-				</Link>
-			</h3>
-			<p className={styles.facts}>
-				{facts.map((fact) => (
-					<span className={styles.fact} key={fact.label}>
-						{fact.label} : <span className={styles.value}>{fact.value}</span>
-					</span>
-				))}
-			</p>
-		</article>
+		<li className={styles.item}>
+			<article>
+				<h3 className={styles.title}>
+					<Link
+						className={`fr-link ${styles.link}`}
+						href={routeWithQuery(
+							observatoryCompanyHref(declaration.siren),
+							searchQuery ? `from=${encodeURIComponent(searchQuery)}` : "",
+						)}
+					>
+						{declaration.name ?? "Entreprise"}
+					</Link>
+				</h3>
+				<p className={styles.facts}>
+					{facts.map((fact) => (
+						<span className={styles.fact} key={fact.label}>
+							{fact.label} : <span className={styles.value}>{fact.value}</span>
+						</span>
+					))}
+				</p>
+			</article>
+		</li>
 	);
 }

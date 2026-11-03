@@ -15,12 +15,37 @@ export const SNAPSHOTTED_ELSEWHERE = new Set([
 	// Screens gated by the state machine: they open only from a precise declaration state,
 	// which `funnels.a11y.ts` pins before each one. Sweeping them generically would produce a
 	// redirect, hence a skip — not a snapshot.
+	"declaration-etape-1",
 	"declaration-etape-2",
+	"declaration-etape-3",
+	"declaration-etape-4",
+	"declaration-etape-5",
+	"declaration-etape-6",
 	"declaration-recapitulatif",
 	"parcours-conformite",
+	"parcours-conformite-etape-1",
+	"parcours-conformite-etape-2",
+	"parcours-conformite-etape-3",
+	"parcours-conformite-confirmation",
+	"evaluation-conjointe",
 	"avis-cse-etape-1",
+	"avis-cse-etape-2",
+	"avis-cse-confirmation",
+	"declaration-representation",
+	"declaration-representation-etape-1",
+	"declaration-representation-etape-2",
+	"declaration-representation-etape-3",
+	"declaration-representation-etape-4",
+	"declaration-representation-etape-5",
+	"declaration-representation-confirmation",
+	"mise-en-demeure",
+	"mon-espace-avis-cse",
+	"mon-espace-evaluation-conjointe",
 	// Pages with a dynamic segment: their id comes from the database, so `dynamic.a11y.ts`.
 	"historique-declaration",
+	"representation-consultation",
+	"admin-declaration-detail",
+	"referent-detail",
 	// Pages that only exist WITHOUT a session: signed in, `/` redirects to the espace and
 	// `/login` redirects into the app, so the sweep correctly skipped both rather than filing
 	// another screen under their name. `anonymous.a11y.ts` drops the storageState and takes

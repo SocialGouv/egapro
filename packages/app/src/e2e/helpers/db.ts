@@ -58,6 +58,22 @@ export async function ensureCurrentYearDeclaration(year?: number) {
 	}
 }
 
+export async function getTestDeclarationId(
+	year: number,
+): Promise<string | null> {
+	const sql = createConnection();
+	try {
+		const rows = await sql<{ id: string }[]>`
+			SELECT id FROM app_declaration
+			WHERE siren = ${TEST_SIREN} AND year = ${year} AND cancelled_at IS NULL
+			LIMIT 1
+		`;
+		return rows[0]?.id ?? null;
+	} finally {
+		await sql.end();
+	}
+}
+
 export async function resetDeclarationToDraft() {
 	const sql = createConnection();
 	try {
@@ -715,6 +731,42 @@ export async function seedSubmittedRepresentationDeclaration(
 				40, 60, 20, 80,
 				${`${referenceYear + 1}-02-15`}, 'https://example.fr/representation-equilibree',
 				NOW(), NOW()
+			)
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
+// A draft is read back from its `draft` payload, never from the columns a submission fills.
+export async function seedRepresentationDraft(referenceYear: number) {
+	const draft = {
+		currentStep: 5,
+		referencePeriodStart: `${referenceYear}-01-01`,
+		referencePeriodEnd: `${referenceYear}-12-31`,
+		executivesCount: "two_or_more",
+		executiveWomenPercent: 40,
+		executiveMenPercent: 60,
+		hasManagementBody: true,
+		memberWomenPercent: 20,
+		memberMenPercent: 80,
+		hasWebsite: true,
+		publishDate: `${referenceYear + 1}-02-15`,
+		publishUrl: "https://example.fr/representation-equilibree",
+	};
+	const sql = createConnection();
+	try {
+		await sql`
+			DELETE FROM app_representation_declaration
+			WHERE siren = ${TEST_SIREN} AND year = ${referenceYear}
+		`;
+		await sql`
+			INSERT INTO app_representation_declaration (
+				id, siren, year, status, current_step, draft, draft_updated_at,
+				created_at, updated_at
+			) VALUES (
+				${crypto.randomUUID()}, ${TEST_SIREN}, ${referenceYear}, 'draft', 5,
+				${sql.json(draft)}, NOW(), NOW(), NOW()
 			)
 		`;
 	} finally {
