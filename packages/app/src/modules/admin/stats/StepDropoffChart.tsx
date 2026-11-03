@@ -101,6 +101,7 @@ export function StepDropoffChart({ rows }: Props) {
 			>
 				<ResponsiveContainer>
 					<BarChart
+						accessibilityLayer={false}
 						data={rows}
 						layout="vertical"
 						margin={{ top: 16, right: 32, bottom: 24, left: 8 }}

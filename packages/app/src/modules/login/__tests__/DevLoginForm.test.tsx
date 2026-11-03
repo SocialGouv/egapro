@@ -112,6 +112,21 @@ describe("DevLoginForm", () => {
 		expect(assignMock).not.toHaveBeenCalled();
 	});
 
+	it("announces the refused sign-in through an alert", async () => {
+		signInMock.mockResolvedValue({ error: "CredentialsSignin" });
+		render(<DevLoginForm />);
+
+		expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+
+		fillAndSubmit("dev@example.fr", "12345678901234");
+
+		const alert = await screen.findByRole("alert");
+		expect(alert).toHaveTextContent(
+			"Connexion refusée : vérifiez l'e-mail et le SIRET.",
+		);
+		expect(alert).not.toHaveAttribute("aria-live");
+	});
+
 	it("rejects an invalid SIRET without calling signIn", async () => {
 		render(<DevLoginForm />);
 

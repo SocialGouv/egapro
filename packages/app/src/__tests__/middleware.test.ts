@@ -24,6 +24,7 @@ vi.mock("~/modules/domain", async (importOriginal) => {
 
 import { middleware } from "~/middleware";
 import { ADMIN_MFA_WINDOW_SECONDS, resolveAdminAccess } from "~/modules/domain";
+import { ADMIN_SITEMAP } from "~/modules/routes";
 import { adminToken, makeRequest, nowSeconds } from "./middlewareRequest";
 
 describe("admin middleware", () => {
@@ -142,6 +143,24 @@ describe("admin middleware", () => {
 		});
 		const res = await middleware(makeRequest("/admin"));
 		expect(res.headers.get("location")).toBe("http://localhost/mon-espace");
+	});
+
+	it("guards the backoffice plan like every other backoffice page", async () => {
+		mockGetToken.mockResolvedValue(null);
+		const anonymous = await middleware(makeRequest(ADMIN_SITEMAP));
+		expect(anonymous.headers.get("location")).toBe(
+			"http://localhost/login?callbackUrl=%2Fadmin%2Fplan",
+		);
+
+		mockGetToken.mockResolvedValue({ id: "u1", isAdmin: false });
+		const nonAdmin = await middleware(makeRequest(ADMIN_SITEMAP));
+		expect(nonAdmin.headers.get("location")).toBe(
+			"http://localhost/mon-espace",
+		);
+
+		mockGetToken.mockResolvedValue(adminToken(0));
+		const admin = await middleware(makeRequest(ADMIN_SITEMAP));
+		expect(admin.headers.get("location")).toBeNull();
 	});
 
 	it("fails closed to /login on a decision the switch does not recognize", async () => {

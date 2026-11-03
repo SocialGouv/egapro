@@ -144,7 +144,9 @@ export function CategoryRecapTable({
 
 	return (
 		<section className={styles.section}>
-			<p className={`fr-text--bold ${styles.heading}`}>{heading}</p>
+			<h3 className={`fr-text--md fr-text--bold ${styles.heading}`}>
+				{heading}
+			</h3>
 			<CategoryEffectifTable category={category} heading={heading} />
 			{!payApplicable && (
 				<p className="fr-mt-2w fr-mb-1w">Aucun écart à calculer</p>
@@ -178,7 +180,7 @@ export function CategoryRecapTable({
 								</thead>
 								<tbody>
 									<tr className={styles.sectionRow}>
-										<th colSpan={4} id={annualSectionId} scope="rowgroup">
+										<th colSpan={4} id={annualSectionId}>
 											Rémunération annuelle brute
 										</th>
 									</tr>
@@ -291,7 +293,7 @@ export function CategoryRecapTable({
 								</tbody>
 								<tbody>
 									<tr className={styles.sectionRow}>
-										<th colSpan={4} id={hourlySectionId} scope="rowgroup">
+										<th colSpan={4} id={hourlySectionId}>
 											Rémunération horaire brute
 										</th>
 									</tr>

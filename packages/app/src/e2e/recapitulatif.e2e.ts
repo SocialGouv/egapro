@@ -39,8 +39,10 @@ test.describe("Recapitulatif page", () => {
 
 		await expect(bottomAction).toHaveClass(/fr-btn--secondary/);
 		await expect(bottomAction).not.toHaveClass(/fr-btn--primary/);
+		// The former bottom button « Retour à Mon Espace » is gone from <main>;
+		// the top « Retour » link, outside <main>, now carries that name (#5011).
 		await expect(
-			page.getByRole("link", { name: "Retour à Mon Espace" }),
+			page.getByRole("main").getByRole("link", { name: "Retour à Mon Espace" }),
 		).toHaveCount(0);
 
 		await bottomAction.click();

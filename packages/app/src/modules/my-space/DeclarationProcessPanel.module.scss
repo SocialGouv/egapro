@@ -89,7 +89,12 @@
 }
 
 .stepCircleCurrent {
+	// The ring tells the current step from a pending one without relying on
+	// the fill colour (RGAA 3.1); positioned so it paints over the connector.
+	position: relative;
 	background-color: var(--background-action-high-info);
+	outline: 2px solid var(--border-plain-info);
+	outline-offset: 2px;
 }
 
 .stepCirclePending {

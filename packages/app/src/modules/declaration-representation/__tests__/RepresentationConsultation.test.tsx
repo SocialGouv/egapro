@@ -160,10 +160,9 @@ describe("RepresentationConsultation — S1 nominal", () => {
 	});
 
 	it("sends Retour, the breadcrumb and the bottom action back to Mon espace", () => {
-		expect(screen.getByRole("link", { name: "Retour" })).toHaveAttribute(
-			"href",
-			"/mon-espace",
-		);
+		const backLink = screen.getByRole("link", { name: "Retour à Mon espace" });
+		expect(backLink).toHaveTextContent(/^Retour$/);
+		expect(backLink).toHaveAttribute("href", "/mon-espace");
 		const monEspaceLinks = screen.getAllByRole("link", {
 			name: "Mon espace",
 		});

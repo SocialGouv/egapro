@@ -13,6 +13,7 @@ import {
 } from "recharts";
 
 import { formatCount, formatDays } from "~/modules/domain";
+import { renderLegendLabel } from "./renderLegendLabel";
 import styles from "./StepDurationsChart.module.scss";
 import type { StepDurationRow } from "./types";
 
@@ -99,6 +100,7 @@ export function StepDurationsChart({ rows }: Props) {
 			>
 				<ResponsiveContainer>
 					<BarChart
+						accessibilityLayer={false}
 						data={rows}
 						layout="vertical"
 						margin={{ top: 16, right: 24, bottom: 16, left: 16 }}
@@ -115,7 +117,7 @@ export function StepDurationsChart({ rows }: Props) {
 						/>
 						<YAxis dataKey="label" interval={0} type="category" width={220} />
 						<Tooltip content={<DurationsTooltip />} />
-						<Legend />
+						<Legend formatter={renderLegendLabel} />
 						<Bar
 							dataKey="medianDays"
 							fill={WIZARD_MEDIAN_COLOR}

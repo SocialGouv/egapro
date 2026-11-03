@@ -11,6 +11,7 @@ import type { RemunerationDeadlinesFormValues } from "./schemas";
 type Props = {
 	group: DeadlineGroup;
 	pathChoiceValue: string;
+	requiredNoteId: string;
 	errors: FieldErrors<RemunerationDeadlinesFormValues>;
 	register: UseFormRegister<RemunerationDeadlinesFormValues>;
 };
@@ -18,6 +19,7 @@ type Props = {
 export function DeadlineFieldset({
 	group,
 	pathChoiceValue,
+	requiredNoteId,
 	errors,
 	register,
 }: Props) {
@@ -45,6 +47,7 @@ export function DeadlineFieldset({
 							label={FIELD_LABELS[key]}
 							registration={register(key)}
 							required
+							requiredNoteId={requiredNoteId}
 						/>
 					</div>
 				))}
