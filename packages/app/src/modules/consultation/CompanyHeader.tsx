@@ -78,6 +78,7 @@ export function CompanyHeader({
 					]}
 				/>
 				<Link
+					aria-label="Retour à l'Observatoire"
 					className={`fr-link fr-icon-arrow-left-line fr-link--icon-left ${styles.back}`}
 					href={backHref}
 				>

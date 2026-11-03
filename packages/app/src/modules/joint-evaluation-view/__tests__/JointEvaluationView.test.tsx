@@ -32,6 +32,13 @@ const baseProps = {
 };
 
 describe("JointEvaluationView", () => {
+	it("names Mon espace as the destination of the back link, visible text first", () => {
+		render(<JointEvaluationView {...baseProps} />);
+		const backLink = screen.getByRole("link", { name: "Retour à Mon espace" });
+		expect(backLink).toHaveTextContent(/^Retour$/);
+		expect(backLink).toHaveAttribute("href", "/mon-espace");
+	});
+
 	it("shows the transmission date, declarant and company details, and active report", () => {
 		render(<JointEvaluationView {...baseProps} />);
 		expect(
