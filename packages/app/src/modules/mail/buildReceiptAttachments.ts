@@ -2,9 +2,12 @@ import "server-only";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { buildJointEvaluationRecapData } from "~/modules/declarationPdf/buildJointEvaluationRecapData";
 import { buildPdfData } from "~/modules/declarationPdf/buildPdfData";
+import { buildRepresentationPdfData } from "~/modules/declarationPdf/buildRepresentationPdfData";
 import { DeclarationPdfDocument } from "~/modules/declarationPdf/DeclarationPdfDocument";
 import { JointEvaluationPdfDocument } from "~/modules/declarationPdf/JointEvaluationPdfDocument";
 import { jointEvaluationPdfFilename } from "~/modules/declarationPdf/jointEvaluationPdfFilename";
+import { RepresentationPdfDocument } from "~/modules/declarationPdf/RepresentationPdfDocument";
+import { representationPdfFilename } from "~/modules/declarationPdf/representationPdfFilename";
 import type { MailAttachment } from "./types";
 
 async function renderDeclarationPdf(
@@ -49,6 +52,21 @@ export async function buildJointEvaluationAttachments(
 	return [
 		{
 			filename: jointEvaluationPdfFilename(siren, year),
+			content: Buffer.from(buffer),
+			contentType: "application/pdf",
+		},
+	];
+}
+
+export async function buildRepresentationAttachments(
+	siren: string,
+	year: number,
+): Promise<MailAttachment[]> {
+	const data = await buildRepresentationPdfData(siren, year, new Date());
+	const buffer = await renderToBuffer(RepresentationPdfDocument({ data }));
+	return [
+		{
+			filename: representationPdfFilename(siren, data.campaignYear),
 			content: Buffer.from(buffer),
 			contentType: "application/pdf",
 		},

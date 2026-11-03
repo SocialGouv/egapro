@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
 	rows: [] as unknown[][],
 	selectCalls: 0,
+	workforceHistory: [] as { year: number; workforceEma: number }[],
 }));
 
 vi.mock("~/server/db", () => ({
@@ -20,6 +21,11 @@ vi.mock("~/server/db", () => ({
 	},
 }));
 
+vi.mock("~/server/db/getRepresentationWorkforceHistory", () => ({
+	getRepresentationWorkforceHistory: () =>
+		Promise.resolve(mocks.workforceHistory),
+}));
+
 import {
 	buildRepresentationPdfData,
 	RepresentationDeclarationNotFoundError,
@@ -31,10 +37,27 @@ const CAMPAIGN_YEAR = YEAR + 1;
 const NOW = new Date("2026-06-15T09:30:00.000Z");
 const SUBMITTED_AT = new Date("2026-03-10T08:00:00.000Z");
 
-const COMPANY = { name: "Société Représentation" };
+const COMPANY = {
+	name: "Société Représentation",
+	nafCode: "62.02A",
+	nafLabel: "Conseil en systèmes et logiciels informatiques",
+	address: "12 rue des Innovateurs",
+	countryCode: null,
+	countryLabel: null,
+	departmentLabel: "75011 Paris",
+};
+
+const DECLARANT = {
+	firstName: "Marie",
+	lastName: "Dupont",
+	email: "marie.dupont@exemple.fr",
+	phone: "06 01 02 03 04",
+};
 
 const SUBMITTED_DECLARATION = {
 	status: "submitted",
+	currentStep: 5,
+	declarantId: "user-1",
 	referencePeriodStart: "2025-01-01",
 	referencePeriodEnd: "2025-12-31",
 	executiveWomenPercent: "60",
@@ -52,9 +75,15 @@ const SUBMITTED_DECLARATION = {
 function stubDb(
 	declaration: Record<string, unknown> | null,
 	company: Record<string, unknown> | null = COMPANY,
+	declarant: Record<string, unknown> | null = DECLARANT,
 ) {
-	// The builder fires both selects in a single Promise.all: company first.
-	mocks.rows = [company ? [company] : [], declaration ? [declaration] : []];
+	// The builder fires company and declaration in a single Promise.all (company
+	// first), then — only once the declarant id is known — a third select.
+	mocks.rows = [
+		company ? [company] : [],
+		declaration ? [declaration] : [],
+		declarant ? [declarant] : [],
+	];
 	mocks.selectCalls = 0;
 }
 
@@ -64,6 +93,7 @@ function build() {
 
 describe("buildRepresentationPdfData", () => {
 	beforeEach(() => {
+		mocks.workforceHistory = [{ year: CAMPAIGN_YEAR, workforceEma: 2256 }];
 		stubDb(SUBMITTED_DECLARATION);
 	});
 
@@ -71,15 +101,26 @@ describe("buildRepresentationPdfData", () => {
 		const data = await build();
 
 		expect(data).toMatchObject({
-			companyName: "Société Représentation",
 			siren: SIREN,
 			year: YEAR,
 			campaignYear: CAMPAIGN_YEAR,
-			referencePeriodStart: "2025-01-01",
-			referencePeriodEnd: "2025-12-31",
+			referencePeriod: "01/01/2025 - 31/12/2025",
 			submittedAt: SUBMITTED_AT,
+			transmittedAt: "10/03/2026",
 			generatedAt: NOW,
 		});
+	});
+
+	it("marks an unfilled reference period boundary as not provided", async () => {
+		stubDb({
+			...SUBMITTED_DECLARATION,
+			referencePeriodStart: null,
+			referencePeriodEnd: null,
+		});
+
+		const data = await build();
+
+		expect(data.referencePeriod).toBe("— - —");
 	});
 
 	it("reads the two indicators as percentages and grades them against the campaign target", async () => {
@@ -128,8 +169,6 @@ describe("buildRepresentationPdfData", () => {
 			executiveWomenPercent: null,
 			executiveMenPercent: null,
 			notComputableReasonExecutives: reason,
-			publishDate: null,
-			publishUrl: null,
 		});
 
 		const data = await build();
@@ -225,8 +264,61 @@ describe("buildRepresentationPdfData", () => {
 		stubDb(SUBMITTED_DECLARATION, null);
 
 		await expect(build()).resolves.toMatchObject({
-			companyName: `Entreprise ${SIREN}`,
+			company: { name: `Entreprise ${SIREN}` },
 		});
+	});
+
+	it("builds the company block from the company row — location, NAF, siren and workforce", async () => {
+		const data = await build();
+
+		expect(data.company).toMatchObject({
+			name: "Société Représentation",
+			siren: "123 456 789",
+			location: { label: "Adresse", value: "12 rue des Innovateurs" },
+			naf: "62.02A - Conseil en systèmes et logiciels informatiques",
+			workforceLabel: `Effectif annuel moyen en ${YEAR}`,
+			workforceDisplay: "2 256",
+		});
+	});
+
+	it("reads the declarant through the declaration's declarant id", async () => {
+		const data = await build();
+
+		expect(data.declarantRows).toEqual([
+			{ label: "Nom Prénom", value: "Marie Dupont" },
+			{ label: "Adresse email", value: "marie.dupont@exemple.fr" },
+			{ label: "Numéro de téléphone", value: "06 01 02 03 04" },
+		]);
+	});
+
+	it("leaves the declarant rows empty when the declaration has no declarant id", async () => {
+		stubDb({ ...SUBMITTED_DECLARATION, declarantId: null }, COMPANY, null);
+
+		const data = await build();
+
+		expect(data.declarantRows).toEqual([]);
+	});
+
+	it("omits an unfilled declarant field instead of showing it empty", async () => {
+		stubDb(SUBMITTED_DECLARATION, COMPANY, { ...DECLARANT, phone: null });
+
+		const data = await build();
+
+		expect(data.declarantRows).toEqual([
+			{ label: "Nom Prénom", value: "Marie Dupont" },
+			{ label: "Adresse email", value: "marie.dupont@exemple.fr" },
+		]);
+	});
+
+	it("reads the workforce of the campaign year, not of the reference year", async () => {
+		mocks.workforceHistory = [
+			{ year: CAMPAIGN_YEAR - 1, workforceEma: 999 },
+			{ year: CAMPAIGN_YEAR, workforceEma: 2256 },
+		];
+
+		const data = await build();
+
+		expect(data.company.workforceDisplay).toBe("2 256");
 	});
 
 	it.each([

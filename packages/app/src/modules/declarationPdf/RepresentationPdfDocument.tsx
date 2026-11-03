@@ -1,142 +1,211 @@
 import { Document, Page, Text, View } from "@react-pdf/renderer";
-import {
-	formatIsoDate,
-	formatLongDate,
-	formatPercentage,
-} from "~/modules/domain";
+import { formatOptionalIsoDate, formatPercentage } from "~/modules/domain";
+
 import type {
 	RepresentationPdfData,
 	RepresentationPdfIndicator,
 } from "./buildRepresentationPdfData";
 import { ensurePdfFontsRegistered } from "./pdfFonts";
-import { styles } from "./pdfStyles";
+import { type PdfStyles, styles } from "./recapPdfStyles";
+import { EgaproBanner } from "./sections/EgaproBanner";
+import { CategoryBanner, SectionBanner } from "./sections/headings";
+import { InfoSection } from "./sections/InfoSection";
+import { PdfPageFooter } from "./sections/PdfPageFooter";
+import { PdfPageHeader } from "./sections/PdfPageHeader";
+import { Cell, Row, Table } from "./sections/tableParts";
 
 type Props = {
 	data: RepresentationPdfData;
 };
 
-const VERDICT_LABELS = {
-	compliant: "Conforme",
-	non_compliant: "Non conforme",
-	not_applicable: "Non calculable",
-} as const;
+const VERDICT_BADGE: Record<
+	RepresentationPdfIndicator["verdict"],
+	{
+		style: PdfStyles[keyof PdfStyles];
+		textStyle: PdfStyles[keyof PdfStyles];
+		label: string;
+	}
+> = {
+	compliant: {
+		style: styles.complianceBadgeCompliant,
+		textStyle: styles.complianceBadgeCompliantText,
+		label: "CONFORME",
+	},
+	non_compliant: {
+		style: styles.complianceBadgeNonCompliant,
+		textStyle: styles.complianceBadgeNonCompliantText,
+		label: "NON CONFORME",
+	},
+	not_applicable: {
+		style: styles.complianceBadgeNotApplicable,
+		textStyle: styles.complianceBadgeNotApplicableText,
+		label: "NON CALCULABLE",
+	},
+};
 
-function formatOptionalDate(value: string | null): string {
-	return value === null ? "Non renseignée" : formatIsoDate(value);
+function VerdictBadge({
+	verdict,
+}: {
+	verdict: RepresentationPdfIndicator["verdict"];
+}) {
+	const badge = VERDICT_BADGE[verdict];
+	return (
+		<View style={badge.style}>
+			<Text style={badge.textStyle}>{badge.label}</Text>
+		</View>
+	);
 }
 
-function IndicatorCard({
+function IndicatorColumn({
 	indicator,
 }: {
 	indicator: RepresentationPdfIndicator;
 }) {
 	return (
-		<View style={styles.card}>
-			<Text style={styles.cardTitle}>{indicator.title}</Text>
+		<View style={styles.repGapColumn}>
+			<Text style={styles.repGapColumnTitle}>{indicator.title}</Text>
 			{indicator.notComputableReason === null ? (
-				<View style={styles.proportionRow}>
-					<View style={styles.proportionItem}>
-						<Text style={styles.proportionLabel}>Femmes</Text>
-						<Text style={styles.proportionValue}>
-							{formatPercentage(indicator.womenPercent)}
-						</Text>
-					</View>
-					<View style={styles.proportionItem}>
-						<Text style={styles.proportionLabel}>Hommes</Text>
-						<Text style={styles.proportionValue}>
-							{formatPercentage(indicator.menPercent)}
-						</Text>
-					</View>
-				</View>
+				<Table>
+					<Row>
+						<Cell flex={1} header text="Femmes" />
+						<Cell flex={1} header text="Hommes" />
+						<Cell header text="Conformité" width={101} />
+					</Row>
+					<Row>
+						<Cell
+							align="right"
+							flex={1}
+							text={formatPercentage(indicator.womenPercent)}
+						/>
+						<Cell
+							align="right"
+							flex={1}
+							text={formatPercentage(indicator.menPercent)}
+						/>
+						<Cell width={101}>
+							<VerdictBadge verdict={indicator.verdict} />
+						</Cell>
+					</Row>
+				</Table>
 			) : (
-				<Text style={styles.noData}>{indicator.notComputableReason}</Text>
+				<>
+					<Text style={styles.noData}>{indicator.notComputableReason}</Text>
+					<VerdictBadge verdict={indicator.verdict} />
+				</>
 			)}
-			<Text style={styles.sectionLabel}>
-				Verdict : {VERDICT_LABELS[indicator.verdict]}
-			</Text>
 		</View>
 	);
+}
+
+function publicationRows(data: RepresentationPdfData) {
+	const rows = [
+		{
+			label: "Date de publication",
+			value: formatOptionalIsoDate(data.publishDate ?? undefined),
+		},
+		{
+			label: "Site internet de publication",
+			value: data.hasWebsite ? "Oui" : "Non",
+		},
+	];
+	return data.hasWebsite
+		? [
+				...rows,
+				{
+					label: "Adresse de la page (URL)",
+					value: data.publishUrl ?? "—",
+				},
+			]
+		: [
+				...rows,
+				{
+					label: "Modalités de communication",
+					value: data.publishModalities ?? "—",
+				},
+			];
 }
 
 export function RepresentationPdfDocument({ data }: Props) {
 	ensurePdfFontsRegistered();
 
+	const transmittedLabel =
+		data.transmittedAt === null
+			? "La déclaration a été transmise"
+			: `La déclaration a été transmise le ${data.transmittedAt}`;
+	const footerLabel = `Démarche des indicateurs de représentation ${data.campaignYear} - SIREN ${data.company.siren}${
+		data.transmittedAt === null ? "" : ` - transmise le ${data.transmittedAt}`
+	}`;
+
 	return (
 		<Document>
-			<Page size="A4" style={styles.page}>
-				<View style={styles.header}>
-					<Text style={styles.title}>
-						Démarche des indicateurs de représentation {data.campaignYear}
-					</Text>
-					<Text style={styles.subtitle}>Au titre des données {data.year}</Text>
-					<Text style={styles.companyInfo}>
-						{data.companyName} — SIREN {data.siren}
-					</Text>
-				</View>
+			<Page size="A4" style={styles.page} wrap>
+				<PdfPageHeader />
+				<PdfPageFooter label={footerLabel} />
 
-				<View style={styles.card}>
-					<Text style={styles.cardTitle}>Période de référence</Text>
-					<View style={styles.tableRow}>
-						<Text style={styles.tableCellLabel}>Début de la période</Text>
-						<Text style={styles.tableCellValue}>
-							{formatOptionalDate(data.referencePeriodStart)}
+				<EgaproBanner />
+
+				<View style={styles.content}>
+					<View style={styles.titleBlock}>
+						<Text style={styles.title}>
+							Récapitulatif : Démarche des indicateurs de représentation{" "}
+							{data.campaignYear}
 						</Text>
+						<Text style={styles.titleDate}>{transmittedLabel}</Text>
 					</View>
-					<View style={styles.tableRowLast}>
-						<Text style={styles.tableCellLabel}>Fin de la période</Text>
-						<Text style={styles.tableCellValue}>
-							{formatOptionalDate(data.referencePeriodEnd)}
-						</Text>
-					</View>
-				</View>
 
-				{data.indicators.map((indicator) => (
-					<IndicatorCard indicator={indicator} key={indicator.title} />
-				))}
+					<SectionBanner title="Informations" />
 
-				<View style={styles.card}>
-					<Text style={styles.cardTitle}>Publication</Text>
-					{data.publicationApplicable ? (
-						<>
-							<View style={styles.tableRow}>
-								<Text style={styles.tableCellLabel}>Date de publication</Text>
-								<Text style={styles.tableCellValue}>
-									{formatOptionalDate(data.publishDate)}
-								</Text>
-							</View>
-							{data.hasWebsite ? (
-								<View style={styles.tableRowLast}>
-									<Text style={styles.tableCellLabel}>
-										Adresse de la page (URL)
-									</Text>
-									<Text style={styles.tableCellValue}>
-										{data.publishUrl ?? "—"}
-									</Text>
-								</View>
-							) : (
-								<View style={styles.tableRowLast}>
-									<Text style={styles.tableCellLabel}>
-										Modalités de communication
-									</Text>
-									<Text style={styles.tableCellValue}>
-										{data.publishModalities ?? "—"}
-									</Text>
-								</View>
-							)}
-						</>
+					{data.declarantRows.length > 0 ? (
+						<InfoSection
+							rows={data.declarantRows}
+							title="Déclarant"
+							tone="category"
+						/>
 					) : (
-						<Text style={styles.noData}>
-							Non applicable — aucun écart calculable
-						</Text>
+						<View wrap={false}>
+							<CategoryBanner title="Déclarant" />
+							<Text style={styles.declarantEmptyText}>Non renseigné</Text>
+						</View>
 					)}
-				</View>
 
-				<Text style={styles.footer}>
-					{data.submittedAt
-						? `Déclaration transmise le ${formatLongDate(data.submittedAt)} — `
-						: ""}
-					Document généré le {formatLongDate(data.generatedAt)}
-				</Text>
+					<InfoSection
+						rows={[
+							{ label: "Raison sociale", value: data.company.name },
+							{ label: "SIREN", value: data.company.siren },
+							...(data.company.location ? [data.company.location] : []),
+							{ label: "Code NAF", value: data.company.naf },
+							{
+								label: data.company.workforceLabel,
+								value: data.company.workforceDisplay,
+							},
+						]}
+						title="Entreprise"
+						tone="category"
+					/>
+
+					<InfoSection
+						rows={[
+							{ label: "Période de référence", value: data.referencePeriod },
+						]}
+						title="Calcul"
+						tone="category"
+					/>
+
+					<SectionBanner title="Écarts de représentation" />
+					<View style={styles.repGapColumnsRow}>
+						{data.indicators.map((indicator) => (
+							<IndicatorColumn indicator={indicator} key={indicator.title} />
+						))}
+					</View>
+
+					{data.publicationApplicable ? (
+						<InfoSection
+							rows={publicationRows(data)}
+							title="Publication"
+							tone="category"
+						/>
+					) : null}
+				</View>
 			</Page>
 		</Document>
 	);

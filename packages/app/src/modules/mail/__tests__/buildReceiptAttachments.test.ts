@@ -8,6 +8,8 @@ const mocks = vi.hoisted(() => ({
 	TransmittedPdfDocument: vi.fn(),
 	buildJointEvaluationRecapData: vi.fn(),
 	JointEvaluationPdfDocument: vi.fn(),
+	buildRepresentationPdfData: vi.fn(),
+	RepresentationPdfDocument: vi.fn(),
 }));
 
 vi.mock("@react-pdf/renderer", () => ({
@@ -38,9 +40,18 @@ vi.mock("~/modules/declarationPdf/TransmittedPdfDocument", () => ({
 	TransmittedPdfDocument: mocks.TransmittedPdfDocument,
 }));
 
+vi.mock("~/modules/declarationPdf/buildRepresentationPdfData", () => ({
+	buildRepresentationPdfData: mocks.buildRepresentationPdfData,
+}));
+
+vi.mock("~/modules/declarationPdf/RepresentationPdfDocument", () => ({
+	RepresentationPdfDocument: mocks.RepresentationPdfDocument,
+}));
+
 import {
 	buildDeclarationAttachments,
 	buildJointEvaluationAttachments,
+	buildRepresentationAttachments,
 	buildSecondDeclarationAttachments,
 } from "../buildReceiptAttachments";
 
@@ -56,6 +67,10 @@ describe("buildReceiptAttachments", () => {
 		mocks.TransmittedPdfDocument.mockReturnValue("transmitted-doc");
 		mocks.buildJointEvaluationRecapData.mockResolvedValue({ year: YEAR });
 		mocks.JointEvaluationPdfDocument.mockReturnValue("joint-evaluation-doc");
+		mocks.buildRepresentationPdfData.mockResolvedValue({
+			campaignYear: YEAR + 1,
+		});
+		mocks.RepresentationPdfDocument.mockReturnValue("representation-doc");
 		mocks.renderToBuffer.mockImplementation((doc: unknown) =>
 			Promise.resolve(Buffer.from(String(doc))),
 		);
@@ -143,6 +158,43 @@ describe("buildReceiptAttachments", () => {
 			await expect(
 				buildJointEvaluationAttachments(SIREN, YEAR),
 			).rejects.toThrow("pdf worker died");
+		});
+	});
+
+	describe("buildRepresentationAttachments", () => {
+		it("attaches the representation recap under the download's file name", async () => {
+			const attachments = await buildRepresentationAttachments(SIREN, YEAR);
+
+			expect(attachments).toEqual([
+				{
+					filename: `representation-equilibree-${SIREN}-${YEAR + 1}.pdf`,
+					content: Buffer.from("representation-doc"),
+					contentType: "application/pdf",
+				},
+			]);
+		});
+
+		it("renders the recap from the shared builder", async () => {
+			await buildRepresentationAttachments(SIREN, YEAR);
+
+			expect(mocks.buildRepresentationPdfData).toHaveBeenCalledWith(
+				SIREN,
+				YEAR,
+				expect.any(Date),
+			);
+			expect(mocks.RepresentationPdfDocument).toHaveBeenCalledWith({
+				data: { campaignYear: YEAR + 1 },
+			});
+			expect(mocks.buildPdfData).not.toHaveBeenCalled();
+			expect(mocks.buildJointEvaluationRecapData).not.toHaveBeenCalled();
+		});
+
+		it("lets a rendering failure reach the caller", async () => {
+			mocks.renderToBuffer.mockRejectedValue(new Error("pdf worker died"));
+
+			await expect(buildRepresentationAttachments(SIREN, YEAR)).rejects.toThrow(
+				"pdf worker died",
+			);
 		});
 	});
 });

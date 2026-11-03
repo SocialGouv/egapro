@@ -5,6 +5,7 @@ import {
 	RepresentationDeclarationNotFoundError,
 } from "~/modules/declarationPdf/buildRepresentationPdfData";
 import { RepresentationPdfDocument } from "~/modules/declarationPdf/RepresentationPdfDocument";
+import { representationPdfFilename } from "~/modules/declarationPdf/representationPdfFilename";
 import { getCurrentYear, getReferenceYearFor } from "~/modules/domain";
 import { auditQueryMetadata } from "~/server/audit/queryMetadata";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
@@ -58,7 +59,7 @@ async function resolveRepresentationPdf(
 
 	return {
 		data,
-		filename: `representation-equilibree-${siren}-${data.campaignYear}.pdf`,
+		filename: representationPdfFilename(siren, data.campaignYear),
 	};
 }
 
