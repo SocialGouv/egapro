@@ -19,6 +19,10 @@ import { api } from "~/trpc/react";
 import { ContentTypeMatrix } from "./components/ContentTypeMatrix";
 import { CseStepIndicator } from "./components/CseStepIndicator";
 import { OpinionSummaryBox } from "./components/OpinionSummaryBox";
+import {
+	type SubmissionAlertSnapshot,
+	SubmissionAlerts,
+} from "./components/SubmissionAlerts";
 import { SubmitConfirmationModal } from "./components/SubmitConfirmationModal";
 import {
 	buildAssociationMap,
@@ -26,10 +30,7 @@ import {
 	getMissingColumns,
 	getSingleChoiceAssociation,
 	getUnassociatedFiles,
-	MISSING_OPINION_ALERT_TITLE,
-	NO_FILE_ALERT,
 	toAssociationPayload,
-	UNASSOCIATED_FILE_ALERT,
 } from "./contentTypeColumns";
 import formStyles from "./shared/formActions.module.scss";
 import layoutStyles from "./shared/stepLayout.module.scss";
@@ -61,7 +62,8 @@ export function Step2Upload({
 	const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
 	const [finalizeError, setFinalizeError] = useState<string | null>(null);
 	const [associationError, setAssociationError] = useState<string | null>(null);
-	const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
+	const [submissionAlert, setSubmissionAlert] =
+		useState<SubmissionAlertSnapshot | null>(null);
 	const [associations, setAssociations] = useState<AssociationMap>(() =>
 		buildAssociationMap(columns, initialAssociations),
 	);
@@ -225,12 +227,10 @@ export function Step2Upload({
 	const isComplete = missingColumns.length === 0;
 	const hasUnassociatedFiles = unassociatedFiles.length > 0;
 	const canSubmit = isComplete && !hasUnassociatedFiles;
-	// The validation errors are revealed only once the user has tried to submit
-	// (besoin epic-3476): loading files must never trigger them on their own.
-	const showNoFileError = hasAttemptedSubmit && !hasExistingFiles;
-	const showMissingError =
-		hasAttemptedSubmit && hasExistingFiles && !isComplete;
-	const showUnassociatedError = hasAttemptedSubmit && hasUnassociatedFiles;
+	const stillMissingIds = useMemo(
+		() => new Set(missingColumns.map((column) => column.id)),
+		[missingColumns],
+	);
 
 	const openFinalizeModal = useCallback(() => {
 		const dialog = modalRef.current;
@@ -248,13 +248,31 @@ export function Step2Upload({
 			event.preventDefault();
 			setFinalizeError(null);
 			if (!canSubmit) {
-				setHasAttemptedSubmit(true);
+				// The validation errors are revealed only once the user has tried to
+				// submit (besoin epic-3476): loading files must never trigger them.
+				setSubmissionAlert((previous) => ({
+					attempt: (previous?.attempt ?? 0) + 1,
+					noFile: !hasExistingFiles,
+					missing: hasExistingFiles
+						? missingColumns.map(({ id, missingMessage }) => ({
+								id,
+								message: missingMessage,
+							}))
+						: [],
+					unassociated: hasUnassociatedFiles,
+				}));
 				return;
 			}
-			setHasAttemptedSubmit(false);
+			setSubmissionAlert(null);
 			openFinalizeModal();
 		},
-		[canSubmit, openFinalizeModal],
+		[
+			canSubmit,
+			hasExistingFiles,
+			hasUnassociatedFiles,
+			missingColumns,
+			openFinalizeModal,
+		],
 	);
 
 	const confirmFinalize = useCallback(() => {
@@ -337,31 +355,18 @@ export function Step2Upload({
 					/>
 				)}
 
-				<div className={layoutStyles.alerts} role="alert">
-					{showNoFileError && (
-						<div className="fr-alert fr-alert--error">
-							<h2 className="fr-alert__title">{NO_FILE_ALERT.title}</h2>
-							<p>{NO_FILE_ALERT.message}</p>
-						</div>
-					)}
-					{showMissingError && (
-						<div className="fr-alert fr-alert--error">
-							<h2 className="fr-alert__title">{MISSING_OPINION_ALERT_TITLE}</h2>
-							{missingColumns.map((column) => (
-								<p key={column.id}>{column.missingMessage}</p>
-							))}
-						</div>
-					)}
-					{showUnassociatedError && (
-						<div className="fr-alert fr-alert--error">
-							<h2 className="fr-alert__title">
-								{UNASSOCIATED_FILE_ALERT.title}
-							</h2>
-							<p>{UNASSOCIATED_FILE_ALERT.message}</p>
-						</div>
+				<div className={layoutStyles.alerts}>
+					{submissionAlert && (
+						<SubmissionAlerts
+							key={submissionAlert.attempt}
+							snapshot={submissionAlert}
+							stillMissingIds={stillMissingIds}
+							stillNoFile={!hasExistingFiles}
+							stillUnassociated={hasUnassociatedFiles}
+						/>
 					)}
 					{associationError && (
-						<div className="fr-alert fr-alert--error">
+						<div className="fr-alert fr-alert--error" role="alert">
 							<p>{associationError}</p>
 						</div>
 					)}

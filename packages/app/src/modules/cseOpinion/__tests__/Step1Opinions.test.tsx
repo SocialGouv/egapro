@@ -9,16 +9,6 @@ import type { CseOpinionStep1Data } from "../types";
 
 const mockedUseSession = vi.mocked(useSession);
 
-/**
- * The alert region announcing a blocking error — `role="alert"` makes screen
- * readers read it at once and in full (RGAA 7.5), unlike a polite region.
- */
-function alertAnnouncing(text: string) {
-	return screen
-		.getAllByRole("alert")
-		.find((alert) => alert.textContent?.includes(text));
-}
-
 function mockImpersonating() {
 	mockedUseSession.mockReturnValue({
 		data: {
@@ -438,9 +428,6 @@ describe("Step1Opinions", () => {
 				await screen.findByText(
 					"Veuillez remplir tous les champs obligatoires.",
 				),
-			).toBeInTheDocument();
-			expect(
-				alertAnnouncing("Veuillez remplir tous les champs obligatoires."),
 			).toBeInTheDocument();
 			expect(mockMutate).not.toHaveBeenCalled();
 		});

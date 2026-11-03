@@ -118,10 +118,6 @@ const ACCURACY_AND_GAP_COLUMNS = computeContentTypeColumns({
 	secondDeclJustificationRequired: false,
 });
 
-/**
- * The alert region announcing a blocking error — `role="alert"` makes screen
- * readers read it at once and in full (RGAA 7.5), unlike a polite region.
- */
 function alertAnnouncing(text: string) {
 	return screen
 		.getAllByRole("alert")
@@ -535,6 +531,62 @@ describe("Step2Upload", () => {
 		expect(
 			screen.queryByText("Un avis CSE est manquant"),
 		).not.toBeInTheDocument();
+	});
+
+	it("moves focus to the alert announcing the blocking errors after a failed submit", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: DUAL_COLUMNS,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+		});
+
+		await user.click(screen.getByRole("button", { name: "Transmettre" }));
+
+		expect(alertAnnouncing("Un avis CSE est manquant")).toHaveFocus();
+	});
+
+	it("does not re-announce the alert when a checkbox is toggled after a failed submit, and drops the covered entry", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: DUAL_COLUMNS,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+		});
+
+		await user.click(screen.getByRole("button", { name: "Transmettre" }));
+		const alert = alertAnnouncing("Un avis CSE est manquant");
+		const accuracyMessage =
+			"Ajoutez l'avis d'exactitude des données et des méthodes de calcul de la première déclaration";
+		expect(alert?.textContent).toContain(accuracyMessage);
+
+		await user.click(
+			screen.getByRole("checkbox", {
+				name: "Exactitude — 1re déclaration — avis-1.pdf",
+			}),
+		);
+
+		const alertAfter = alertAnnouncing("Un avis CSE est manquant");
+		expect(alertAfter).toBe(alert);
+		expect(alertAfter?.textContent).not.toContain(accuracyMessage);
+		expect(alertAfter?.textContent).toContain("seconde déclaration");
+		expect(alertAfter).not.toHaveFocus();
+	});
+
+	it("announces the alert again on a second failed submit with the same errors", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: DUAL_COLUMNS,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+		});
+
+		await user.click(screen.getByRole("button", { name: "Transmettre" }));
+		const firstAlert = alertAnnouncing("Un avis CSE est manquant");
+
+		await user.click(screen.getByRole("button", { name: "Transmettre" }));
+
+		const secondAlert = alertAnnouncing("Un avis CSE est manquant");
+		expect(secondAlert).toBeInTheDocument();
+		expect(secondAlert).not.toBe(firstAlert);
+		expect(secondAlert).toHaveFocus();
 	});
 
 	it("blocks finalize and names a file row left without any checked checkbox", async () => {
