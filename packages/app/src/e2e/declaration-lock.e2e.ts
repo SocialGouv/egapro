@@ -10,6 +10,7 @@ import {
 	OTHER_LOCK_HOLDER_ID,
 	OTHER_LOCK_HOLDER_NAME,
 	readDeclarationLockOwner,
+	releaseDeclarationLock,
 	seedOtherDeclarantLock,
 	seedReadableWorkforce,
 } from "./helpers/db-lock";
@@ -18,6 +19,9 @@ import { clickAndExpectDialogOpen, waitForDsfrModal } from "./helpers/dsfr";
 const STEP_1 = remunerationStepHref(1);
 const PANEL_ID = "declaration-process-panel";
 const WOMEN = "Rémunération annuelle — Nombre de femmes";
+const LOCK_TITLE = "Déclaration en cours de modification";
+const LOCK_TIMEOUT_MINUTES = 45;
+const LOCK_DELAY_TEXT = `au plus tard ${LOCK_TIMEOUT_MINUTES} minutes après qu'elle aura quitté la déclaration`;
 
 test.describe("Declaration editing lock", () => {
 	test.describe.configure({ mode: "serial" });
@@ -55,7 +59,9 @@ test.describe("Declaration editing lock", () => {
 		page,
 	}) => {
 		await seedReadableWorkforce(year);
-		await seedOtherDeclarantLock(year);
+		await seedOtherDeclarantLock(year, {
+			timeoutMinutes: LOCK_TIMEOUT_MINUTES,
+		});
 		await page.goto(MY_SPACE);
 		await waitForDsfrModal(page, PANEL_ID);
 		await clickAndExpectDialogOpen(
@@ -64,8 +70,11 @@ test.describe("Declaration editing lock", () => {
 			PANEL_ID,
 		);
 		const panel = page.locator(`#${PANEL_ID}`);
-		await expect(panel.getByRole("alert")).toContainText(
-			OTHER_LOCK_HOLDER_NAME,
+		const panelAlert = panel.getByRole("alert");
+		await expect(panelAlert).toContainText(OTHER_LOCK_HOLDER_NAME);
+		await expect(panelAlert).toContainText(LOCK_DELAY_TEXT);
+		await expect(panelAlert).toContainText(
+			"Ouvrez la déclaration pour être prévenu dès qu'elle sera libérée.",
 		);
 		const readOnlyLink = panel.getByRole("link", {
 			name: /Consulter en lecture seule/,
@@ -73,11 +82,12 @@ test.describe("Declaration editing lock", () => {
 		await expect(readOnlyLink).toBeVisible();
 		await readOnlyLink.click();
 		await expect(page).toHaveURL(new RegExp(`${STEP_1}$`));
-		await expect(
-			page.getByRole("alert").filter({
-				hasText: "Déclaration en cours de modification",
-			}),
-		).toContainText(OTHER_LOCK_HOLDER_NAME);
+		const stepAlert = page.getByRole("alert").filter({ hasText: LOCK_TITLE });
+		await expect(stepAlert).toContainText(OTHER_LOCK_HOLDER_NAME);
+		await expect(stepAlert).toContainText(LOCK_DELAY_TEXT);
+		await expect(stepAlert).toContainText(
+			"Cette page vérifie automatiquement si la déclaration se libère",
+		);
 		const input = page.getByRole("textbox", { name: WOMEN });
 		await expect(input).toHaveValue("10");
 		await expect(input).toHaveAttribute("readonly", "");
@@ -89,6 +99,48 @@ test.describe("Declaration editing lock", () => {
 		await expect
 			.poll(() => readDeclarationLockOwner(year))
 			.toBe(OTHER_LOCK_HOLDER_ID);
+	});
+
+	test("offers to resume editing with fresh data once the other declarant leaves", async ({
+		page,
+	}) => {
+		await seedReadableWorkforce(year);
+		await seedOtherDeclarantLock(year);
+		await page.goto(STEP_1);
+		const input = page.getByRole("textbox", { name: WOMEN });
+		await expect(input).toHaveAttribute("readonly", "");
+		await expect(input).toHaveValue("10");
+		const retakeButton = page.getByRole("button", {
+			name: "Modifier la déclaration",
+		});
+		await expect(retakeButton).toHaveCount(0);
+
+		await seedReadableWorkforce(year, 12);
+		await releaseDeclarationLock(year);
+
+		const status = page.getByRole("status").filter({
+			hasText: "La déclaration n'est plus en cours de modification.",
+		});
+		// Availability is polled every LOCK_HEARTBEAT_INTERVAL_MS (10 s).
+		await expect(status).toBeVisible({ timeout: 25_000 });
+		await expect(input).toHaveAttribute("readonly", "");
+		await expect(input).toHaveValue("10");
+		await retakeButton.click();
+
+		await expect(
+			page.getByText("Vous pouvez maintenant modifier la déclaration."),
+		).toBeVisible();
+		await expect(retakeButton).toHaveCount(0);
+		await expect(page.getByText(LOCK_TITLE)).toHaveCount(0);
+		const freshInput = page.getByRole("textbox", { name: WOMEN });
+		await expect(freshInput).not.toHaveAttribute("readonly", "");
+		await expect(freshInput).toHaveValue("12");
+		await expect.poll(() => readDeclarationLockOwner(year)).not.toBeNull();
+		await expect
+			.poll(() => readDeclarationLockOwner(year))
+			.not.toBe(OTHER_LOCK_HOLDER_ID);
+		await freshInput.fill("13");
+		await expect(freshInput).toHaveValue("13");
 	});
 
 	test("releases the lock when the owning page closes and reacquires it", async ({
@@ -116,7 +168,7 @@ test.describe("Declaration editing lock", () => {
 	test("takes over an expired lock without entering read-only mode", async ({
 		page,
 	}) => {
-		await seedOtherDeclarantLock(year, true);
+		await seedOtherDeclarantLock(year, { expired: true });
 		await page.goto(STEP_1);
 		await expect(page.getByRole("textbox", { name: WOMEN })).toBeEnabled();
 		await expect(
