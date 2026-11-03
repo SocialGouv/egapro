@@ -8,10 +8,7 @@ import { pdfDocumentSamples } from "~/modules/declarationPdf/__tests__/helpers/p
 import { registerPdfFonts } from "~/modules/declarationPdf/__tests__/helpers/registerPdfFonts";
 import { renderTaggedPdf } from "~/modules/declarationPdf/tagging/renderTaggedPdf";
 
-// Validates every generated PDF against PDF/UA-1 with veraPDF, which needs a
-// Java runtime and therefore stays out of CI: run `pnpm check:pdf-ua` locally
-// after touching src/modules/declarationPdf. The CI-side guard is the vitest
-// suite taggedPdfDocuments.test.tsx.
+// veraPDF needs a Java runtime, so this stays out of CI: run `pnpm check:pdf-ua` after touching declarationPdf.
 
 const outputDirectory =
 	process.argv[2] ?? mkdtempSync(join(tmpdir(), "pdf-ua-"));

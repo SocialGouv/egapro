@@ -55,9 +55,7 @@ const config = {
 	// in the Dockerfile before the Next.js build).
 	// `redis` is only required from ./cache-handler.cjs (a standalone CJS
 	// handler loaded by Next.js outside the webpack graph).
-	// The tagged PDF renderer drives react-pdf's layout, render and pdfkit
-	// packages directly: they stay external like @react-pdf/renderer, so the
-	// app and react-pdf share one font store and one pdfkit.
+	// Kept external with @react-pdf/renderer so the tagged renderer shares its font store and pdfkit.
 	serverExternalPackages: [
 		"notifications",
 		"@react-pdf/renderer",

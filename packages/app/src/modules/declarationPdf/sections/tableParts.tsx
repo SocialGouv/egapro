@@ -12,8 +12,7 @@ type Align = "left" | "right";
 
 // Marianne (react-pdf) has no glyph for U+202F (the fr-FR thousands separator
 // emitted by toLocaleString) — it renders as a stray slash. Swap for U+00A0.
-// Nor for the superscript "ᵉʳ" formatLongDate writes on the first of a month:
-// react-pdf falls back to a Helvetica it never embeds, which breaks PDF/UA-1.
+// The superscript "ᵉʳ" of formatLongDate falls back to a never-embedded Helvetica (PDF/UA-1).
 export function normalizePdfText(value: string): string {
 	return value.replace(/\u202F/g, "\u00A0").replace(/\u1D49\u02B3/g, "er");
 }

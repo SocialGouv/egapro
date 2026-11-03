@@ -39,6 +39,11 @@ updates:
       time: "01:00"
       timezone: Europe/Paris
     versioning-strategy: increase-if-necessary
+    groups:
+      # Pinned to the exact versions @react-pdf/renderer resolves: a partial bump would install two layout/pdfkit copies.
+      react-pdf:
+        patterns:
+          - "@react-pdf/*"
     allow:
       - dependency-name: "*"
         dependency-type: direct

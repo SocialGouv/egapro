@@ -17,8 +17,7 @@ function drawsSomething(run: LayoutRun): boolean {
 	return (run.glyphs?.length ?? 0) > 0 || (run.xAdvance ?? 0) !== 0;
 }
 
-// textkit gives each "\n" its own glyph-less run in the standard Helvetica,
-// and drawing it still selects that never-embedded font in the content stream.
+// textkit emits a glyph-less run per "\n" whose drawing still selects the never-embedded Helvetica.
 export function withoutEmptyRuns(node: LayoutNode): LayoutNode {
 	return {
 		...node,

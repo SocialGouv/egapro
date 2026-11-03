@@ -20,6 +20,10 @@ const CONTENT_HOLDER_TAGS = new Set([
 	"TD",
 ]);
 
+const UNSUPPORTED_NODE_TYPES = new Set(["LINK", "SVG", "CANVAS", "NOTE"]);
+
+const UNSUPPORTED_STYLES = ["transform", "overflow"] as const;
+
 const BORDER_WIDTHS = [
 	"borderTopWidth",
 	"borderRightWidth",
@@ -32,6 +36,23 @@ function readStructure(node: LayoutNode): PdfStructure | undefined {
 	return typeof structure === "object" && structure !== null
 		? (structure as PdfStructure)
 		: undefined;
+}
+
+function assertSupported(node: LayoutNode): void {
+	if (UNSUPPORTED_NODE_TYPES.has(node.type)) {
+		throw new Error(
+			`Tagged PDF renderer does not support <${node.type}> nodes`,
+		);
+	}
+	const style = node.style ?? {};
+	const unsupportedStyle = UNSUPPORTED_STYLES.find(
+		(name) => style[name] !== undefined && style[name] !== null,
+	);
+	if (unsupportedStyle) {
+		throw new Error(
+			`Tagged PDF renderer does not support the "${unsupportedStyle}" style`,
+		);
+	}
 }
 
 function isDecorated(node: LayoutNode): boolean {
@@ -52,8 +73,7 @@ function withoutChildren(node: LayoutNode): LayoutNode {
 }
 
 export class TaggedLayoutRenderer {
-	// A node react-pdf splits across pages keeps its props object on every
-	// fragment: keying on it keeps one structure element for the whole node.
+	// react-pdf keeps the same props object on every page fragment of a split node.
 	private readonly openElements = new Map<object, OpenElement>();
 
 	constructor(
@@ -107,6 +127,7 @@ export class TaggedLayoutRenderer {
 		parent: OpenElement,
 		isFirstPage: boolean,
 	): void {
+		assertSupported(node);
 		const structure = readStructure(node);
 		const repeatsOnEveryPage = node.props?.fixed === true;
 

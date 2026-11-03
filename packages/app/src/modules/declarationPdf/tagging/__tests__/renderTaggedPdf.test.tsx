@@ -1,7 +1,7 @@
 // @vitest-environment node
 
 import { join } from "node:path";
-import { Document, Image, Page, Text, View } from "@react-pdf/renderer";
+import { Document, Image, Link, Page, Text, View } from "@react-pdf/renderer";
 import type { ReactNode } from "react";
 import { describe, expect, it } from "vitest";
 
@@ -149,5 +149,24 @@ describe("renderTaggedPdf", { timeout: 30_000 }, () => {
 		);
 
 		expect(page).toContain("/UserUnit 2");
+	});
+
+	it("refuses a <Link>, whose annotation it would silently drop", async () => {
+		await expect(
+			renderPages(<Link src="https://example.fr">Lien</Link>),
+		).rejects.toThrow("<LINK>");
+	});
+
+	it.each([
+		["transform", { transform: "rotate(10deg)" }],
+		["overflow", { overflow: "hidden" as const }],
+	])("refuses the %s style, which it would silently ignore", async (name, style) => {
+		await expect(
+			renderPages(
+				<View style={style}>
+					<Text>Contenu</Text>
+				</View>,
+			),
+		).rejects.toThrow(`"${name}" style`);
 	});
 });

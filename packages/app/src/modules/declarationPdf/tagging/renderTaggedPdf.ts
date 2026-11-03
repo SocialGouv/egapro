@@ -11,8 +11,7 @@ import { TaggedLayoutRenderer } from "./TaggedLayoutRenderer";
 
 type DocumentNode = Parameters<typeof layoutDocument>[0];
 
-// The published typing drops the font store that react-pdf's own pdf() passes
-// as second argument; without it every text node lays out with no font.
+// The published typing drops the font store that pdf() passes as second argument.
 const layoutWithFonts = layoutDocument as unknown as (
 	root: DocumentNode,
 	fonts: typeof Font,
@@ -57,10 +56,7 @@ function imageKey(source: unknown): string {
 		: String(source);
 }
 
-// react-pdf's render() draws a whole document and closes the stream; called on
-// one node at a time it must neither end the file nor re-embed an image it
-// already wrote on a previous page — fixed nodes are cloned per page with
-// their own copy of the image bytes, hence a key on the content.
+// render() ends the stream and fixed nodes carry cloned image bytes: neither must re-embed an image.
 function nodeDrawer(document: PDFDocument): (node: LayoutNode) => void {
 	const openedImages = new Map<string, unknown>();
 	const context = new Proxy(document, {
@@ -89,9 +85,7 @@ function nodeDrawer(document: PDFDocument): (node: LayoutNode) => void {
 	};
 }
 
-// @react-pdf/pdfkit 5 serialises its ParentTree number tree as a plain object
-// (`/_items …` instead of `/Nums […]`), which disconnects every marked-content
-// sequence from the structure tree. Upstream pdfkit fixed it; rewrite it here.
+// @react-pdf/pdfkit 5 writes ParentTree as a plain object instead of /Nums, detaching marked content from the tree.
 function writeParentTreeAsNumberTree(document: PDFDocument): void {
 	const root = document.getStructTreeRoot();
 	const tree = document.getStructParentTree();
