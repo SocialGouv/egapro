@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { AdminNavigation } from "./AdminNavigation";
 import styles from "./AdminShell.module.scss";
+import { AdminSitemapLink } from "./sitemap";
 
 type Props = { children: ReactNode };
 
@@ -11,6 +12,7 @@ export function AdminShell({ children }: Props) {
 			<div className={styles.shell}>
 				<div className={styles.nav}>
 					<AdminNavigation />
+					<AdminSitemapLink />
 				</div>
 				<main className={styles.content} id="content" tabIndex={-1}>
 					{children}
