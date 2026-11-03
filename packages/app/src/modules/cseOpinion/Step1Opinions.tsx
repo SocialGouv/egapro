@@ -2,10 +2,13 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useIsImpersonating, useReadOnlyGuard } from "~/modules/auth";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
+import { FieldErrorAlert } from "~/modules/declaration-remuneration/shared/formError/FieldErrorAlert";
+import type { FieldError } from "~/modules/declaration-remuneration/shared/formError/types";
+import { findFieldError } from "~/modules/declaration-remuneration/shared/formError/types";
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { cseOpinionStepHref } from "~/modules/routes";
@@ -16,9 +19,14 @@ import { OpinionCard } from "./components/OpinionCard";
 import { SubmissionBanner } from "./components/SubmissionBanner";
 import { DECLARATION_HEADINGS, getOpinionTitle } from "./contentTypeColumns";
 import {
+	getMissingOpinionFieldErrors,
+	type OpinionCardValues,
+	opinionDateId,
+	opinionFieldId,
+} from "./opinionFieldErrors";
+import {
 	buildOpinionsFormValues,
 	hydrateOpinionsForm,
-	isJustificationOpinionIncomplete,
 	type JustificationRequirements,
 	normalizeSubmittedOpinions,
 } from "./opinionsFormValues";
@@ -28,6 +36,7 @@ import formStyles from "./shared/formActions.module.scss";
 import layoutStyles from "./shared/stepLayout.module.scss";
 import type { SubmissionBannerState } from "./submissionBanner";
 import type {
+	ContentType,
 	CseOpinionStep1Data,
 	DeclarationNumber,
 	OpinionType,
@@ -59,6 +68,22 @@ const CARD_ID_PREFIXES: Record<DeclarationNumber, string> = {
 
 const PAGE_TITLE = "Transmission du ou des avis du CSE";
 const REQUIRED_NOTE_ID = "cse-opinions-required-note";
+
+const OPINIONS_ALERT_ID = "cse-opinions-errors";
+
+const UNIDENTIFIED_FIELD_ERROR: FieldError = {
+	fieldId: OPINIONS_ALERT_ID,
+	category: "invalid",
+	message:
+		"Certaines informations saisies sont invalides. Vérifiez les avis et les dates renseignés.",
+};
+
+function opinionCardId(
+	declarationNumber: DeclarationNumber,
+	type: ContentType,
+) {
+	return `${CARD_ID_PREFIXES[declarationNumber]}-${type}`;
+}
 
 type Props = {
 	banner?: SubmissionBannerState;
@@ -143,23 +168,52 @@ export function Step1Opinions({
 		? [1, 2]
 		: [1];
 
-	const onSubmit = form.handleSubmit((data) => {
-		const submittedData = normalizeSubmittedOpinions(data, requirements);
-		const incomplete = declarationNumbers.find((declarationNumber) =>
-			isJustificationOpinionIncomplete(
-				submittedData[DECLARATION_KEYS[declarationNumber]],
-				justificationRequired[declarationNumber],
-			),
-		);
-		if (incomplete) {
-			form.setError(`${DECLARATION_KEYS[incomplete]}.gapOpinion`, {
-				message: "Veuillez remplir tous les champs obligatoires.",
-			});
-			return;
-		}
+	const [fieldErrors, setFieldErrors] = useState<FieldError[]>([]);
+	const [validationAttempt, setValidationAttempt] = useState(0);
 
-		mutation.mutate(submittedData);
-	});
+	const reportMissingFields = () => {
+		const formValues = form.getValues();
+		const cards = declarationNumbers.flatMap((declarationNumber) => {
+			const declaration = formValues[DECLARATION_KEYS[declarationNumber]];
+			const accuracy: OpinionCardValues = {
+				cardId: opinionCardId(declarationNumber, "accuracy"),
+				declarationNumber,
+				type: "accuracy",
+				opinion: declaration?.accuracyOpinion,
+				date: declaration?.accuracyDate,
+			};
+			const gap: OpinionCardValues = {
+				cardId: opinionCardId(declarationNumber, "gap"),
+				declarationNumber,
+				type: "gap",
+				opinion: declaration?.gapOpinion,
+				date: declaration?.gapDate,
+			};
+			return justificationRequired[declarationNumber]
+				? [accuracy, gap]
+				: [accuracy];
+		});
+		const missing = getMissingOpinionFieldErrors(cards, hasSecondDeclaration);
+		setValidationAttempt((attempt) => attempt + 1);
+		setFieldErrors(missing);
+		return missing;
+	};
+
+	const clearFieldError = (fieldId: string) =>
+		setFieldErrors((previous) =>
+			previous.filter((error) => error.fieldId !== fieldId),
+		);
+
+	const onSubmit = form.handleSubmit(
+		(data) => {
+			if (reportMissingFields().length > 0) return;
+			mutation.mutate(normalizeSubmittedOpinions(data, requirements));
+		},
+		() => {
+			if (reportMissingFields().length > 0) return;
+			setFieldErrors([UNIDENTIFIED_FIELD_ERROR]);
+		},
+	);
 
 	const values = form.watch();
 
@@ -176,18 +230,22 @@ export function Step1Opinions({
 		const key = DECLARATION_KEYS[declarationNumber];
 		const declaration = values[key];
 		const isAccuracy = type === "accuracy";
+		const cardId = opinionCardId(declarationNumber, type);
 		return (
 			<OpinionCard
 				date={
 					(isAccuracy ? declaration?.accuracyDate : declaration?.gapDate) ?? ""
 				}
-				id={`${CARD_ID_PREFIXES[declarationNumber]}-${type}`}
+				dateError={findFieldError(fieldErrors, opinionDateId(cardId))}
+				errorAlertId={OPINIONS_ALERT_ID}
+				id={cardId}
 				key={type}
 				onDateChange={(value) => {
 					form.setValue(
 						isAccuracy ? `${key}.accuracyDate` : `${key}.gapDate`,
 						value,
 					);
+					clearFieldError(opinionDateId(cardId));
 					triggerDraftSave();
 				}}
 				onOpinionChange={(value) => {
@@ -195,6 +253,7 @@ export function Step1Opinions({
 						isAccuracy ? `${key}.accuracyOpinion` : `${key}.gapOpinion`,
 						value,
 					);
+					clearFieldError(opinionFieldId(cardId));
 					triggerDraftSave();
 				}}
 				opinion={
@@ -202,6 +261,7 @@ export function Step1Opinions({
 						? declaration?.accuracyOpinion
 						: declaration?.gapOpinion) ?? null
 				}
+				opinionError={findFieldError(fieldErrors, opinionFieldId(cardId))}
 				readOnly={isReadOnly}
 				requiredNoteId={REQUIRED_NOTE_ID}
 				title={getOpinionTitle(declarationNumber, type)}
@@ -264,15 +324,14 @@ export function Step1Opinions({
 					</section>
 				))}
 
-				<div aria-live="polite" className={layoutStyles.alerts}>
-					{(form.formState.errors.firstDeclaration ||
-						form.formState.errors.secondDeclaration) && (
-						<div className="fr-alert fr-alert--error">
-							<p>Veuillez remplir tous les champs obligatoires.</p>
-						</div>
-					)}
+				<div className={layoutStyles.alerts}>
+					<FieldErrorAlert
+						errors={fieldErrors}
+						id={OPINIONS_ALERT_ID}
+						validationAttempt={validationAttempt}
+					/>
 					{mutation.error && (
-						<div className="fr-alert fr-alert--error">
+						<div className="fr-alert fr-alert--error" role="alert">
 							<p>{mutation.error.message}</p>
 						</div>
 					)}

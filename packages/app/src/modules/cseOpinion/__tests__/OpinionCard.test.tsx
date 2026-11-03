@@ -11,6 +11,7 @@ describe("OpinionCard", () => {
 		date: "",
 		onOpinionChange: vi.fn(),
 		onDateChange: vi.fn(),
+		errorAlertId: "opinions-errors",
 		requiredNoteId: "test-required-note",
 	};
 
@@ -70,6 +71,73 @@ describe("OpinionCard", () => {
 
 		const dateInput = screen.getByLabelText(/Date de l'avis rendu par le CSE/);
 		expect(dateInput).toHaveValue("2026-01-15");
+	});
+
+	it("leaves the fields valid and described by the required note only when there is no error", () => {
+		render(<OpinionCard {...defaultProps} />);
+
+		for (const field of [
+			screen.getByLabelText("Favorable"),
+			screen.getByLabelText("Défavorable"),
+			screen.getByLabelText(/Date de l'avis rendu par le CSE/),
+		]) {
+			expect(field).not.toHaveAttribute("aria-invalid");
+			expect(field).toHaveAttribute("aria-describedby", "test-required-note");
+		}
+	});
+
+	it("marks the opinion radios invalid and points them at the alert message", () => {
+		render(
+			<OpinionCard
+				{...defaultProps}
+				opinionError={{
+					fieldId: "test-accuracy-favorable",
+					category: "empty",
+					message: "Indiquez si l'avis est favorable ou défavorable.",
+				}}
+			/>,
+		);
+
+		for (const radio of [
+			screen.getByLabelText("Favorable"),
+			screen.getByLabelText("Défavorable"),
+		]) {
+			expect(radio).toHaveAttribute("aria-invalid", "true");
+			expect(radio).toHaveAttribute(
+				"aria-describedby",
+				"test-required-note opinions-errors-empty",
+			);
+		}
+		expect(
+			screen.getByRole("group", { name: "Exactitude des données" }),
+		).toHaveClass("fr-fieldset--error");
+		expect(
+			screen.getByLabelText(/Date de l'avis rendu par le CSE/),
+		).not.toHaveAttribute("aria-invalid");
+	});
+
+	it("marks the date invalid and points it at the alert message", () => {
+		render(
+			<OpinionCard
+				{...defaultProps}
+				dateError={{
+					fieldId: "test-accuracy-date",
+					category: "empty",
+					message: "Renseignez la date de l'avis.",
+				}}
+			/>,
+		);
+
+		const dateInput = screen.getByLabelText(/Date de l'avis rendu par le CSE/);
+		expect(dateInput).toHaveAttribute("aria-invalid", "true");
+		expect(dateInput).toHaveAttribute(
+			"aria-describedby",
+			"test-required-note opinions-errors-empty",
+		);
+		expect(dateInput).toHaveClass("fr-input--error");
+		expect(screen.getByLabelText("Favorable")).not.toHaveAttribute(
+			"aria-invalid",
+		);
 	});
 
 	it("has accessible fieldset with legend", () => {
