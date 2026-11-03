@@ -17,7 +17,11 @@ import {
 	formatFixedPercentage,
 	isDropoffRateAboveThreshold,
 } from "~/modules/domain";
-import { DROPOFF_ALERT_MARK } from "./constants";
+import {
+	DROPOFF_ALERT_MARK,
+	DROPOFF_BAR_TONES,
+	DROPOFF_THRESHOLD_COLUMN_LABEL,
+} from "./constants";
 import styles from "./StepDropoffChart.module.scss";
 import { StepDropoffLegend } from "./StepDropoffLegend";
 import type { StepDropoffRow } from "./types";
@@ -38,19 +42,13 @@ type DropoffTooltipProps = {
 	payload?: TooltipEntry[];
 };
 
-const CHART_CAPTION = `Taux d'abandon par phase de la démarche déclarative : pourcentage de déclarations entrées sur chaque étape du wizard ou phase post-transmission et qui n'ont pas progressé depuis le délai sélectionné. Les barres rouges signalent une phase dont le taux dépasse ${DROPOFF_RATE_ALERT_THRESHOLD} %.`;
-
-const WIZARD_NORMAL_COLOR = "var(--background-action-high-blue-france)";
-const WIZARD_ALERT_COLOR = "var(--background-action-high-red-marianne)";
-const POST_SUBMIT_NORMAL_COLOR = "var(--background-action-low-blue-france)";
-const POST_SUBMIT_ALERT_COLOR = "var(--background-action-low-red-marianne)";
+const CHART_CAPTION = `Taux d'abandon par phase de la démarche déclarative : pourcentage de déclarations entrées sur chaque étape du wizard ou phase post-transmission et qui n'ont pas progressé depuis le délai sélectionné. Les barres rouges, précédées du symbole ${DROPOFF_ALERT_MARK}, signalent une phase dont le taux dépasse ${DROPOFF_RATE_ALERT_THRESHOLD} % ; le tableau ci-dessous les repère dans sa colonne « ${DROPOFF_THRESHOLD_COLUMN_LABEL} ».`;
 
 function getBarColor(row: StepDropoffRow): string {
-	const isAlert = isDropoffRateAboveThreshold(row.dropoffRate);
-	if (row.phase === "wizard") {
-		return isAlert ? WIZARD_ALERT_COLOR : WIZARD_NORMAL_COLOR;
-	}
-	return isAlert ? POST_SUBMIT_ALERT_COLOR : POST_SUBMIT_NORMAL_COLOR;
+	const tones = DROPOFF_BAR_TONES[row.phase];
+	return isDropoffRateAboveThreshold(row.dropoffRate)
+		? tones.alert.color
+		: tones.normal.color;
 }
 
 function formatBarLabel(value: unknown): string {
@@ -113,6 +111,7 @@ export function StepDropoffChart({ rows }: Props) {
 			>
 				<ResponsiveContainer>
 					<BarChart
+						accessibilityLayer={false}
 						data={rows}
 						layout="vertical"
 						margin={{ top: 16, right: 80, bottom: 24, left: 8 }}
@@ -138,7 +137,7 @@ export function StepDropoffChart({ rows }: Props) {
 						<Tooltip content={<DropoffTooltip />} />
 						<Bar
 							dataKey="dropoffRate"
-							fill={WIZARD_NORMAL_COLOR}
+							fill={DROPOFF_BAR_TONES.wizard.normal.color}
 							name="Taux d'abandon"
 						>
 							{rows.map((row) => (

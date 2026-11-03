@@ -69,7 +69,10 @@ function category(id: number, name: string): EmployeeCategory {
 
 const trigger = () =>
 	screen.getByRole("button", { name: "Importer les données" });
-const fileInput = () => screen.getByLabelText("Sélectionner des fichiers");
+const fileInput = () =>
+	screen.getByLabelText("Importer vos données depuis un fichier", {
+		selector: "input",
+	});
 const importButton = () =>
 	screen.getByRole("button", { name: "Importer", hidden: true });
 const templateCard = () =>
@@ -141,6 +144,24 @@ describe("CategoryImportExport panel contents", () => {
 		expect(helpLink).toHaveAttribute("href", "/aide");
 
 		expect(importButton()).toBeDisabled();
+	});
+
+	it("titles the help section as a level-3 heading under the panel's h2, keeping its look", () => {
+		render(<CategoryImportExport onImport={vi.fn()} />);
+
+		expect(
+			screen.getByRole("heading", {
+				level: 2,
+				name: "Importer vos données depuis un fichier",
+				hidden: true,
+			}),
+		).toBeInTheDocument();
+		const helpHeading = screen.getByRole("heading", {
+			level: 3,
+			name: "Pour vous aider",
+			hidden: true,
+		});
+		expect(helpHeading).toHaveClass("fr-text--md", "fr-text--bold", "fr-mb-0");
 	});
 
 	it("renders the guide card and the resources link as disabled placeholders", () => {

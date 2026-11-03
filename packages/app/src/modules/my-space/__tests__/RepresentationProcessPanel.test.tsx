@@ -147,6 +147,19 @@ describe("RepresentationProcessPanel", () => {
 		expect(panel.getByText("Échéance : 15 avril 2026")).toBeInTheDocument();
 	});
 
+	it("titles the help section as a level-3 heading under the panel's h2, keeping its look", () => {
+		const { panel } = renderPanel();
+		const helpHeading = panel.getByRole("heading", {
+			level: 3,
+			name: "Pour vous aider",
+			hidden: true,
+		});
+		expect(helpHeading).toHaveClass("fr-text--lg", "fr-text--bold", "fr-mb-0");
+		expect(
+			panel.getAllByRole("heading", { level: 2, hidden: true }),
+		).toHaveLength(1);
+	});
+
 	it("renders help section buttons", () => {
 		const { dialog } = renderPanel();
 		const texts = [...dialog.querySelectorAll("button.fr-link")].map(

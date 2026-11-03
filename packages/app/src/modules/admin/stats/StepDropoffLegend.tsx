@@ -2,7 +2,11 @@ import {
 	DROPOFF_RATE_ALERT_THRESHOLD,
 	formatWholePercentage,
 } from "~/modules/domain";
-import { DROPOFF_ALERT_MARK } from "./constants";
+import {
+	DROPOFF_ALERT_MARK,
+	DROPOFF_BAR_TONES,
+	PHASE_LABELS,
+} from "./constants";
 import styles from "./StepDropoffChart.module.scss";
 
 export function StepDropoffLegend() {
@@ -15,25 +19,25 @@ export function StepDropoffLegend() {
 				<li className={styles.legendItem}>
 					<span
 						aria-hidden="true"
-						className={`${styles.legendSwatch} ${styles.legendSwatchWizard}`}
+						className={`${styles.legendSwatch} ${DROPOFF_BAR_TONES.wizard.normal.swatchClass}`}
 					/>
-					Étape du parcours initial (wizard A–F)
+					{PHASE_LABELS.wizard}
 				</li>
 				<li className={styles.legendItem}>
 					<span
 						aria-hidden="true"
-						className={`${styles.legendSwatch} ${styles.legendSwatchPostSubmit}`}
+						className={`${styles.legendSwatch} ${DROPOFF_BAR_TONES.post_submit.normal.swatchClass}`}
 					/>
-					Phase post-transmission
+					{PHASE_LABELS.post_submit}
 				</li>
 				<li className={styles.legendItem}>
 					<span
 						aria-hidden="true"
-						className={`${styles.legendSwatch} ${styles.legendSwatchWizardAlert}`}
+						className={`${styles.legendSwatch} ${DROPOFF_BAR_TONES.wizard.alert.swatchClass}`}
 					/>
 					<span
 						aria-hidden="true"
-						className={`${styles.legendSwatch} ${styles.legendSwatchPostSubmitAlert}`}
+						className={`${styles.legendSwatch} ${DROPOFF_BAR_TONES.post_submit.alert.swatchClass}`}
 					/>
 					Barre rouge et symbole « {DROPOFF_ALERT_MARK} » devant la valeur :
 					taux d'abandon supérieur au seuil de {threshold}

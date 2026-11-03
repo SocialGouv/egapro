@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { DROPOFF_RATE_ALERT_THRESHOLD } from "~/modules/domain";
@@ -36,6 +36,15 @@ function buildPostSubmitRow(
 }
 
 describe("StepDropoffTable", () => {
+	it("explains the threshold column in the table caption", () => {
+		render(<StepDropoffTable rows={[buildWizardRow()]} />);
+		expect(
+			screen.getByRole("table", {
+				name: /La dernière colonne « Au-dessus du seuil de 15 % » signale/,
+			}),
+		).toBeInTheDocument();
+	});
+
 	it("renders nothing when given no rows", () => {
 		const { container } = render(<StepDropoffTable rows={[]} />);
 		expect(container).toBeEmptyDOMElement();
@@ -65,7 +74,9 @@ describe("StepDropoffTable", () => {
 			/>,
 		);
 
-		const headers = screen
+		const headers = within(
+			screen.getByRole<HTMLTableElement>("table").tHead as HTMLElement,
+		)
 			.getAllByRole("columnheader")
 			.map((el) => el.textContent);
 		expect(headers).toEqual([
@@ -82,8 +93,8 @@ describe("StepDropoffTable", () => {
 		expect(introRowheader).toBeInTheDocument();
 	});
 
-	it("groups wizard and post-submit rows under two distinct rowgroup headers", () => {
-		render(
+	it("links every cell to its phase, row and column headers, without scope on the phase header (RGAA 5.7)", () => {
+		const { container } = render(
 			<StepDropoffTable
 				rows={[
 					buildWizardRow({
@@ -99,14 +110,35 @@ describe("StepDropoffTable", () => {
 			/>,
 		);
 
+		expect(container.querySelector('[scope="rowgroup"]')).toBeNull();
+		const table = screen.getByRole<HTMLTableElement>("table");
+		const columnHeaders = Array.from(table.querySelectorAll("thead th[id]"));
+		expect(columnHeaders).toHaveLength(4);
 		expect(
-			screen.getByRole("rowheader", {
-				name: /Parcours initial \(wizard A–F\)/i,
-			}),
-		).toBeInTheDocument();
-		expect(
-			screen.getByRole("rowheader", { name: /Démarche post-transmission/i }),
-		).toBeInTheDocument();
+			Array.from(table.tBodies, (body) => body.rows[0]?.textContent),
+		).toEqual(["Parcours initial (wizard A–F)", "Démarche post-transmission"]);
+		for (const body of Array.from(table.tBodies)) {
+			const [headerRow, ...dataRows] = Array.from(body.rows);
+			const phaseHeader = headerRow?.querySelector("th");
+			expect(phaseHeader).not.toHaveAttribute("scope");
+			expect(phaseHeader?.id).toBeTruthy();
+			expect(dataRows).toHaveLength(1);
+			for (const row of dataRows) {
+				const rowHeader = row.querySelector('th[scope="row"]');
+				expect(rowHeader?.id).toBeTruthy();
+				expect(
+					Array.from(row.querySelectorAll("td"), (cell) =>
+						cell.getAttribute("headers"),
+					),
+				).toEqual(
+					columnHeaders.map(
+						(column) => `${phaseHeader?.id} ${rowHeader?.id} ${column.id}`,
+					),
+				);
+			}
+		}
+		const ids = Array.from(table.querySelectorAll("[id]"), (el) => el.id);
+		expect(new Set(ids).size).toBe(ids.length);
 		expect(
 			screen.getByRole("rowheader", { name: "Choix parcours conformité" }),
 		).toBeInTheDocument();
@@ -196,14 +228,7 @@ describe("StepDropoffTable", () => {
 				name: "Évaluation conjointe (révision)",
 			}),
 		).toBeInTheDocument();
-		const rowheaderTexts = screen
-			.getAllByRole("rowheader")
-			.map((el) => el.textContent);
-		const dataRowheaders = rowheaderTexts.filter(
-			(text) =>
-				text !== "Parcours initial (wizard A–F)" &&
-				text !== "Démarche post-transmission",
-		);
+		const dataRowheaders = screen.getAllByRole("rowheader");
 		expect(dataRowheaders).toHaveLength(12);
 	});
 
@@ -247,9 +272,12 @@ describe("StepDropoffTable", () => {
 	});
 
 	it("spans the phase group headers across every column, threshold column included", () => {
-		render(<StepDropoffTable rows={[buildWizardRow()]} />);
-		expect(
-			screen.getByRole("rowheader", { name: "Parcours initial (wizard A–F)" }),
-		).toHaveAttribute("colspan", "5");
+		const { container } = render(
+			<StepDropoffTable rows={[buildWizardRow()]} />,
+		);
+		expect(container.querySelector("tbody tr:first-child th")).toHaveAttribute(
+			"colspan",
+			"5",
+		);
 	});
 });

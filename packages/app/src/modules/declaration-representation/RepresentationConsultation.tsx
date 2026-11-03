@@ -121,6 +121,7 @@ export function RepresentationConsultation({
 					]}
 				/>
 				<Link
+					aria-label="Retour à Mon espace"
 					className="fr-link fr-icon-arrow-left-line fr-link--icon-left fr-mt-2w"
 					href={MY_SPACE}
 				>

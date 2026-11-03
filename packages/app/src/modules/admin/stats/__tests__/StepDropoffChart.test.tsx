@@ -71,11 +71,11 @@ describe("StepDropoffChart", () => {
 		).toBeInTheDocument();
 	});
 
-	it("mentions the alert threshold in the figcaption", () => {
+	it("mentions the alert threshold, the ▲ mark and the table column in the figcaption", () => {
 		render(<StepDropoffChart rows={POPULATED_ROWS} />);
 		expect(
 			screen.getByText(
-				/barres rouges signalent une phase dont le taux dépasse 15/i,
+				/barres rouges, précédées du symbole ▲, signalent une phase dont le taux dépasse 15 % ; le tableau ci-dessous les repère dans sa colonne « Au-dessus du seuil de 15 % »/i,
 			),
 		).toBeInTheDocument();
 		expect(
@@ -95,8 +95,8 @@ describe("StepDropoffChart", () => {
 			.getAllByRole("listitem")
 			.map((item) => item.textContent);
 		expect(items).toEqual([
-			"Étape du parcours initial (wizard A–F)",
-			"Phase post-transmission",
+			"Parcours initial (wizard A–F)",
+			"Démarche post-transmission",
 			"Barre rouge et symbole « ▲ » devant la valeur : taux d'abandon supérieur au seuil de 15 %",
 		]);
 		expect(legend.closest(".fr-sr-only")).toBeNull();
