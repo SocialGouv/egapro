@@ -99,6 +99,7 @@ export function StepDurationsChart({ rows }: Props) {
 			>
 				<ResponsiveContainer>
 					<BarChart
+						accessibilityLayer={false}
 						data={rows}
 						layout="vertical"
 						margin={{ top: 16, right: 24, bottom: 16, left: 16 }}
