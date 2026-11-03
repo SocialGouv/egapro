@@ -3,11 +3,17 @@ import postgres from "postgres";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import {
 	cleanRgaaObservatoryHistory,
+	isValidHistoryDepth,
+	MAX_HISTORY_YEARS,
 	type RgaaHistoryTarget,
 	resolveTargets,
 	seedRgaaObservatoryHistory,
 } from "#scripts/seed-rgaa-observatory-history";
 import { env } from "~/env.js";
+import {
+	formatObservatoryWorkforce,
+	REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
+} from "~/modules/domain";
 import {
 	getPublicDeclarationsBySiren,
 	getPublicRepresentationsBySiren,
@@ -46,7 +52,7 @@ describe("seedRgaaObservatoryHistory / cleanRgaaObservatoryHistory (real Postgre
 		await sql`DELETE FROM app_user WHERE id = ANY(${[DEMO_FIXTURE_USER_ID, FOREIGN_DECLARANT_ID]})`;
 		await sql`
 			DELETE FROM app_campaign_deadline
-			WHERE year BETWEEN ${CAMPAIGN_YEAR - 5} AND ${CAMPAIGN_YEAR}
+			WHERE year BETWEEN ${CAMPAIGN_YEAR - MAX_HISTORY_YEARS} AND ${CAMPAIGN_YEAR + 1}
 		`;
 	}
 
@@ -155,23 +161,142 @@ describe("seedRgaaObservatoryHistory / cleanRgaaObservatoryHistory (real Postgre
 			}
 		});
 
-		it("keeps each target's workforce within its JSON size bracket across every injected year", async () => {
-			await seedRgaaObservatoryHistory(sql, { campaignYear: CAMPAIGN_YEAR });
+		it("keeps each target's workforce bracket and representation subjection, even at the deepest history allowed", async () => {
+			await seedRgaaObservatoryHistory(sql, {
+				campaignYear: CAMPAIGN_YEAR,
+				years: MAX_HISTORY_YEARS,
+			});
 
 			for (const target of TARGETS) {
 				const declarations = await getPublicDeclarationsBySiren(target.siren);
-				expect(declarations.length).toBeGreaterThan(0);
+				expect(declarations).toHaveLength(MAX_HISTORY_YEARS);
 				for (const declaration of declarations) {
-					const workforce = declaration.workforceEma;
-					expect(workforce).not.toBeNull();
-					if (target.subjectToRepresentation) {
-						expect(workforce ?? 0).toBeGreaterThanOrEqual(1000);
-					} else {
-						expect(workforce ?? 0).toBeGreaterThanOrEqual(250);
-						expect(workforce ?? 0).toBeLessThanOrEqual(999);
-					}
+					const workforce = declaration.workforceEma ?? 0;
+					expect(formatObservatoryWorkforce(workforce)).toBe(
+						formatObservatoryWorkforce(target.workforce),
+					);
+					expect(workforce >= REPRESENTATION_SUBJECTION_WORKFORCE_MIN).toBe(
+						target.subjectToRepresentation,
+					);
 				}
 			}
+		});
+
+		it("rejects a history depth outside its bounds without writing anything", async () => {
+			expect(isValidHistoryDepth(0)).toBe(false);
+			expect(isValidHistoryDepth(MAX_HISTORY_YEARS + 1)).toBe(false);
+			expect(isValidHistoryDepth(2.5)).toBe(false);
+
+			await expect(
+				seedRgaaObservatoryHistory(sql, {
+					campaignYear: CAMPAIGN_YEAR,
+					years: MAX_HISTORY_YEARS + 1,
+				}),
+			).rejects.toThrow(/between 1 and/);
+			const rows = await sql`
+				SELECT 1 FROM app_declaration WHERE siren = ANY(${SIRENS})
+			`;
+			expect(rows).toHaveLength(0);
+		});
+
+		it("drops the rows of a previous run made with another campaign year", async () => {
+			await seedRgaaObservatoryHistory(sql, {
+				campaignYear: CAMPAIGN_YEAR + 1,
+			});
+			await seedRgaaObservatoryHistory(sql, { campaignYear: CAMPAIGN_YEAR });
+
+			const leftovers = await sql`
+				SELECT 1 FROM app_declaration
+				WHERE siren = ANY(${SIRENS}) AND year >= ${CAMPAIGN_YEAR}
+			`;
+			expect(leftovers).toHaveLength(0);
+			const staleRepresentations = await sql`
+				SELECT 1 FROM app_representation_declaration
+				WHERE siren = ANY(${SIRENS}) AND year >= ${CAMPAIGN_YEAR - 1}
+			`;
+			expect(staleRepresentations).toHaveLength(0);
+			for (const target of TARGETS) {
+				const declarations = await getPublicDeclarationsBySiren(target.siren);
+				expect(sortedYears(declarations)).toEqual(DECLARATION_YEARS);
+			}
+		});
+
+		it("leaves a representation and a GIP row it does not own intact, listing both", async () => {
+			const target = TARGETS.find((t) => t.subjectToRepresentation);
+			if (!target) throw new Error("no representation target in the fixture");
+			const year = CAMPAIGN_YEAR - 2;
+			await sql`
+				INSERT INTO app_user (id, email, first_name, last_name, is_admin)
+				VALUES (${FOREIGN_DECLARANT_ID}, 'foreign-declarant@example.fr', 'Foreign', 'Declarant', false)
+			`;
+			await sql`
+				INSERT INTO app_representation_declaration (
+					id, siren, year, declarant_id, status, created_at, updated_at
+				) VALUES (
+					'legitimate-representation', ${target.siren}, ${year},
+					${FOREIGN_DECLARANT_ID}, 'submitted', NOW(), NOW()
+				)
+			`;
+			await sql`
+				INSERT INTO app_gip_mds_data (siren, year, workforce_ema, imported_at)
+				VALUES (${target.siren}, ${year}, 4242, NOW())
+			`;
+
+			const result = await seedRgaaObservatoryHistory(sql, {
+				campaignYear: CAMPAIGN_YEAR,
+			});
+
+			expect(result.ignored).toEqual(
+				expect.arrayContaining([
+					expect.objectContaining({
+						table: "app_representation_declaration",
+						siren: target.siren,
+						year,
+					}),
+					expect.objectContaining({
+						table: "app_gip_mds_data",
+						siren: target.siren,
+						year,
+					}),
+				]),
+			);
+			const [representation] = await sql<[{ id: string }]>`
+				SELECT id FROM app_representation_declaration
+				WHERE siren = ${target.siren} AND year = ${year}
+			`;
+			expect(representation?.id).toBe("legitimate-representation");
+			const [gip] = await sql<[{ workforceEma: string }]>`
+				SELECT workforce_ema::text AS "workforceEma" FROM app_gip_mds_data
+				WHERE siren = ${target.siren} AND year = ${year}
+			`;
+			expect(gip?.workforceEma).toBe("4242.00");
+		});
+
+		it("brings a future public release date back into the past", async () => {
+			const futureYear = CAMPAIGN_YEAR - 1;
+			await sql`
+				INSERT INTO app_campaign_deadline (
+					year, public_data_release_date,
+					decl1_modification_deadline, decl1_justification_deadline,
+					decl1_joint_evaluation_deadline, decl2_modification_deadline,
+					decl2_justification_deadline, decl2_joint_evaluation_deadline,
+					decl2_cse_opinion_deadline
+				) VALUES (
+					${futureYear}, '2999-01-01',
+					${FILLER_DEADLINE}, ${FILLER_DEADLINE}, ${FILLER_DEADLINE},
+					${FILLER_DEADLINE}, ${FILLER_DEADLINE}, ${FILLER_DEADLINE}, ${FILLER_DEADLINE}
+				)
+			`;
+
+			const result = await seedRgaaObservatoryHistory(sql, {
+				campaignYear: CAMPAIGN_YEAR,
+			});
+
+			expect(result.correctedCampaignYears).toContain(futureYear);
+			const declarations = await getPublicDeclarationsBySiren(
+				TARGETS[0]?.siren ?? "",
+			);
+			expect(declarations.map((d) => d.year)).toContain(futureYear);
 		});
 
 		it("creates a missing campaign deadline, and releases a null public_data_release_date, listing the corrected year", async () => {

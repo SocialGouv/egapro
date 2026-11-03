@@ -35,6 +35,7 @@ import postgres from "postgres";
 import {
 	getDefaultCampaignDeadlineColumns,
 	parseCampaignYear,
+	REPRESENTATION_CAMPAIGN_YEAR_OFFSET,
 	REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
 } from "~/modules/domain";
 import dedicatedTestSirens from "../data/dedicated-test-sirens.json";
@@ -64,6 +65,9 @@ const REPRESENTATION_ID_PREFIX = "seed-rgaa-history-representation-";
 const GIP_SENTINEL_IMPORTED_AT = new Date("1970-01-01T00:00:00.000Z");
 // The oldest history year exists as soon as `years >= 2`, so this pair is always seeded.
 const NON_COMPUTABLE_REPRESENTATION_COMPANY_INDEX = 7;
+const DEFAULT_HISTORY_YEARS = 3;
+// At 1 % drift per year, 10 years keeps 375 above 250 and 1 500 above the representation threshold.
+export const MAX_HISTORY_YEARS = 10;
 
 function declarationId(siren: string, year: number): string {
 	return `${DECLARATION_ID_PREFIX}${siren}-${year}`;
@@ -92,7 +96,6 @@ export function resolveTargets(): RgaaHistoryTarget[] {
 		}));
 }
 
-/** A few percent of year-over-year drift, always below the current workforce — never enough to cross a size bracket. */
 function workforceForYear(baseWorkforce: number, yearsAgo: number): number {
 	return Math.max(1, Math.round(baseWorkforce * (1 - yearsAgo * 0.01)));
 }
@@ -129,7 +132,6 @@ function smallCompanyGapProfile(
 	return { annual: 0.02, hourly: 0.015, variable: 0.01 };
 }
 
-/** Gap profile for the 6 companies subject to representation — a plain, realistic drift, no special variety requirement. */
 function bigCompanyGapProfile(
 	companyIndex: number,
 	yearsAgo: number,
@@ -197,8 +199,8 @@ export type SeedRgaaHistoryResult = {
 	ignored: IgnoredRow[];
 };
 
-export async function assertDemoFixturePresent(sql: Sql): Promise<void> {
-	const rows = await sql`
+async function assertDemoFixturePresent(tx: TransactionSql): Promise<void> {
+	const rows = await tx`
 		SELECT 1 FROM app_user WHERE id = ${DEMO_SEED_USER_ID}
 	`;
 	if (rows.length === 0) {
@@ -208,11 +210,11 @@ export async function assertDemoFixturePresent(sql: Sql): Promise<void> {
 	}
 }
 
-export async function assertTargetCompaniesExist(
-	sql: Sql,
+async function assertTargetCompaniesExist(
+	tx: TransactionSql,
 	sirens: string[],
 ): Promise<void> {
-	const rows = await sql<{ siren: string }[]>`
+	const rows = await tx<{ siren: string }[]>`
 		SELECT siren FROM app_company WHERE siren = ANY(${sirens})
 	`;
 	const found = new Set(rows.map((row) => row.siren));
@@ -296,11 +298,6 @@ async function writeGipMdsRow(
 	await tx`
 		INSERT INTO app_gip_mds_data (siren, year, workforce_ema, period_start, period_end, imported_at)
 		VALUES (${siren}, ${year}, ${workforce}, ${periodStart}, ${periodEnd}, ${GIP_SENTINEL_IMPORTED_AT})
-		ON CONFLICT (siren, year) DO UPDATE SET
-			workforce_ema = EXCLUDED.workforce_ema,
-			period_start = EXCLUDED.period_start,
-			period_end = EXCLUDED.period_end,
-			imported_at = EXCLUDED.imported_at
 	`;
 }
 
@@ -316,9 +313,7 @@ async function writeDeclaration(
 
 	const foreign = await tx<{ id: string }[]>`
 		SELECT id FROM app_declaration
-		WHERE siren = ${target.siren} AND year = ${year}
-			AND cancelled_at IS NULL
-			AND id != ${id}
+		WHERE siren = ${target.siren} AND year = ${year} AND cancelled_at IS NULL
 	`;
 	if (foreign.length > 0) {
 		ignored.push({
@@ -329,8 +324,6 @@ async function writeDeclaration(
 		});
 		return;
 	}
-
-	await tx`DELETE FROM app_declaration WHERE id = ${id}`;
 
 	const values = indicatorValues(target.companyIndex, profile, workforce);
 	await tx`
@@ -382,7 +375,7 @@ async function writeRepresentation(
 
 	const foreign = await tx<{ id: string }[]>`
 		SELECT id FROM app_representation_declaration
-		WHERE siren = ${target.siren} AND year = ${year} AND id != ${id}
+		WHERE siren = ${target.siren} AND year = ${year}
 	`;
 	if (foreign.length > 0) {
 		ignored.push({
@@ -393,8 +386,6 @@ async function writeRepresentation(
 		});
 		return;
 	}
-
-	await tx`DELETE FROM app_representation_declaration WHERE id = ${id}`;
 
 	const executiveMenPercent =
 		profile.executiveWomenPercent === null
@@ -430,35 +421,51 @@ async function writeRepresentation(
 
 export type SeedRgaaHistoryOptions = {
 	campaignYear: number;
-	/** Depth of history to inject, in years before `campaignYear` (default 3). */
 	years?: number;
 };
 
-function assertValidYears(years: number): void {
-	if (!Number.isInteger(years) || years < 1) {
-		throw new Error("years must be a positive integer");
-	}
+export function isValidHistoryDepth(years: number): boolean {
+	return Number.isInteger(years) && years >= 1 && years <= MAX_HISTORY_YEARS;
 }
 
-/**
- * Writes the RGAA observatory history. Refuses — without writing anything —
- * unless the demo fixture is loaded and every target `app_company` exists.
- * Idempotent: a second call with the same options leaves the database
- * unchanged; a row it does not own (an active declaration, a representation,
- * or a GIP row from a real import) is left intact and reported in `ignored`.
- */
+async function deleteOwnedRows(
+	tx: TransactionSql,
+	sirens: string[],
+): Promise<void> {
+	await tx`
+		DELETE FROM app_representation_declaration
+		WHERE siren = ANY(${sirens}) AND id LIKE ${`${REPRESENTATION_ID_PREFIX}%`}
+	`;
+	await tx`
+		DELETE FROM app_declaration_status_history
+		WHERE declaration_id IN (
+			SELECT id FROM app_declaration
+			WHERE siren = ANY(${sirens}) AND id LIKE ${`${DECLARATION_ID_PREFIX}%`}
+		)
+	`;
+	await tx`
+		DELETE FROM app_declaration
+		WHERE siren = ANY(${sirens}) AND id LIKE ${`${DECLARATION_ID_PREFIX}%`}
+	`;
+	await tx`
+		DELETE FROM app_gip_mds_data
+		WHERE siren = ANY(${sirens}) AND imported_at = ${GIP_SENTINEL_IMPORTED_AT}
+	`;
+}
+
 export async function seedRgaaObservatoryHistory(
 	sql: Sql,
 	options: SeedRgaaHistoryOptions,
 ): Promise<SeedRgaaHistoryResult> {
-	const years = options.years ?? 3;
-	assertValidYears(years);
+	const years = options.years ?? DEFAULT_HISTORY_YEARS;
+	if (!isValidHistoryDepth(years)) {
+		throw new Error(
+			`years must be an integer between 1 and ${MAX_HISTORY_YEARS}`,
+		);
+	}
 
 	const targets = resolveTargets();
 	const sirens = targets.map((target) => target.siren);
-
-	await assertDemoFixturePresent(sql);
-	await assertTargetCompaniesExist(sql, sirens);
 
 	const campaignYear = options.campaignYear;
 	const oldestYear = campaignYear - years;
@@ -466,12 +473,20 @@ export async function seedRgaaObservatoryHistory(
 		{ length: years },
 		(_, i) => oldestYear + i,
 	);
-	const representationReferenceYears = declarationYears.slice(0, -1);
+	// A reference year's representation is released under campaign `year + offset`, which must stay in the history.
+	const representationReferenceYears = declarationYears.filter(
+		(year) => year + REPRESENTATION_CAMPAIGN_YEAR_OFFSET < campaignYear,
+	);
 
 	const ignored: IgnoredRow[] = [];
 	const correctedCampaignYears: number[] = [];
 
 	await sql.begin(async (tx) => {
+		await assertDemoFixturePresent(tx);
+		await assertTargetCompaniesExist(tx, sirens);
+		// Rows from a previous run with another campaign year or depth must not survive, least of all on year C.
+		await deleteOwnedRows(tx, sirens);
+
 		await tx`
 			INSERT INTO app_user (id, email, first_name, last_name, is_admin)
 			VALUES (${SEED_USER_ID}, ${SEED_USER_EMAIL}, 'Seed', 'RGAA Historique', false)
@@ -514,29 +529,11 @@ export async function seedRgaaObservatoryHistory(
 	};
 }
 
-/** Removes only the rows this script owns (by id prefix / GIP sentinel) and the seed user. Campaign deadline corrections are shared with the rest of the env and are never restored. */
+// Campaign deadline corrections are shared with the rest of the env and are never restored.
 export async function cleanRgaaObservatoryHistory(sql: Sql): Promise<void> {
 	const sirens = resolveTargets().map((target) => target.siren);
 	await sql.begin(async (tx) => {
-		await tx`
-			DELETE FROM app_representation_declaration
-			WHERE siren = ANY(${sirens}) AND id LIKE ${`${REPRESENTATION_ID_PREFIX}%`}
-		`;
-		await tx`
-			DELETE FROM app_declaration_status_history
-			WHERE declaration_id IN (
-				SELECT id FROM app_declaration
-				WHERE siren = ANY(${sirens}) AND id LIKE ${`${DECLARATION_ID_PREFIX}%`}
-			)
-		`;
-		await tx`
-			DELETE FROM app_declaration
-			WHERE siren = ANY(${sirens}) AND id LIKE ${`${DECLARATION_ID_PREFIX}%`}
-		`;
-		await tx`
-			DELETE FROM app_gip_mds_data
-			WHERE siren = ANY(${sirens}) AND imported_at = ${GIP_SENTINEL_IMPORTED_AT}
-		`;
+		await deleteOwnedRows(tx, sirens);
 		await tx`DELETE FROM app_user WHERE id = ${SEED_USER_ID}`;
 	});
 }
@@ -606,9 +603,11 @@ function parseCliArgs(argv: string[]): ParsedCliArgs {
 
 	const rawYears = args.years;
 	const years =
-		rawYears === undefined ? 3 : Number.parseInt(String(rawYears), 10);
-	if (!Number.isInteger(years) || years < 1) {
-		console.error("ERROR: --years must be a positive integer");
+		rawYears === undefined ? DEFAULT_HISTORY_YEARS : Number(String(rawYears));
+	if (!isValidHistoryDepth(years)) {
+		console.error(
+			`ERROR: --years must be an integer between 1 and ${MAX_HISTORY_YEARS}`,
+		);
 		return { ok: false };
 	}
 

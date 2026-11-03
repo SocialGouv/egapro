@@ -18,11 +18,7 @@ function ratioOrNull(ratio: number | null): number | null {
 	return ratio === null ? null : truncateRatio(ratio);
 }
 
-/**
- * Deterministic declaration indicator columns for a given gap profile and
- * workforce. `companyIndex` only seeds the women/quartile distribution so two
- * companies with the same gap profile still render differently.
- */
+// `companyIndex` only shifts the women/quartile split, so two companies with the same profile still render differently.
 export function indicatorValues(
 	companyIndex: number,
 	profile: GapProfile,
@@ -77,7 +73,6 @@ export function indicatorValues(
 	};
 }
 
-/** Resolves the Postgres connection string from `DATABASE_URL`, or from discrete `POSTGRES_*`/`PG*` parts. */
 export function resolveDatabaseUrl(): string {
 	if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
 	const host = process.env.POSTGRES_HOST ?? process.env.PGHOST;
@@ -100,9 +95,8 @@ export function resolveDatabaseUrl(): string {
 	return `postgresql://${encodeURIComponent(user)}${password ? `:${encodeURIComponent(password)}` : ""}@${host}:${port}/${database}${sslmode ? `?sslmode=${sslmode}` : ""}`;
 }
 
-/** `app_user.id` of the Observatoire demo seed (`seed-demo-observatory.ts`) — the sentinel other scripts probe to confirm the fixture is loaded before writing fictitious data next to it. */
+// Other scripts probe this user to confirm the demo fixture is loaded before writing fictitious data next to it.
 export const DEMO_SEED_USER_ID = "00000000-9989-4989-8989-000000009989";
 export const DEMO_SEED_USER_EMAIL = "seed-observatory@example.fr";
 
-/** Public release date the demo seed stamps on every campaign year it creates — always in the past, so a year it seeds is immediately publicly released. */
 export const DEMO_PUBLIC_RELEASE_DATE = "2000-01-01";

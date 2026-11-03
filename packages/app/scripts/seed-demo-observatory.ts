@@ -67,8 +67,6 @@ if (!Number.isFinite(SCHEMA_WAIT_SECONDS) || SCHEMA_WAIT_SECONDS < 0) {
 }
 
 const DATABASE_URL = resolveDatabaseUrl();
-const SEED_USER_ID = DEMO_SEED_USER_ID;
-const SEED_USER_EMAIL = DEMO_SEED_USER_EMAIL;
 
 type PaginationLocation = {
 	city: string;
@@ -523,7 +521,7 @@ async function cleanRows(sql: TransactionSql) {
 	await sql`DELETE FROM app_gip_mds_data WHERE siren = ANY(${SIRENS})`;
 	await sql`DELETE FROM app_user_company WHERE siren = ANY(${SIRENS})`;
 	await sql`DELETE FROM app_company WHERE siren = ANY(${SIRENS})`;
-	await sql`DELETE FROM app_user WHERE id = ${SEED_USER_ID}`;
+	await sql`DELETE FROM app_user WHERE id = ${DEMO_SEED_USER_ID}`;
 }
 
 async function clean(sql: Sql) {
@@ -574,7 +572,7 @@ async function main() {
 			await cleanRows(tx);
 			await tx`
 				INSERT INTO app_user (id, email, first_name, last_name, is_admin)
-				VALUES (${SEED_USER_ID}, ${SEED_USER_EMAIL}, 'Seed', 'Observatoire', false)
+				VALUES (${DEMO_SEED_USER_ID}, ${DEMO_SEED_USER_EMAIL}, 'Seed', 'Observatoire', false)
 			`;
 
 			await resetStaleDefaultDeadlines(tx);
@@ -646,7 +644,7 @@ async function main() {
 							created_at, updated_at
 						) VALUES (
 							${`seed-observatory-${company.siren}-${year}`}, ${company.siren}, ${year},
-							${SEED_USER_ID}, 'demarche_completed', ${values.totalWomen}, ${values.totalMen},
+							${DEMO_SEED_USER_ID}, 'demarche_completed', ${values.totalWomen}, ${values.totalMen},
 							${values.globalAnnualMeanGap}, ${values.globalHourlyMeanGap},
 							${values.variableAnnualMeanGap}, ${values.variableHourlyMeanGap},
 							${values.globalAnnualMedianGap}, ${values.globalHourlyMedianGap},
@@ -684,7 +682,7 @@ async function main() {
 						created_at, updated_at
 					) VALUES (
 						${`seed-observatory-representation-${company.siren}-${REPRESENTATION_REFERENCE_YEAR}`},
-						${company.siren}, ${REPRESENTATION_REFERENCE_YEAR}, ${SEED_USER_ID},
+						${company.siren}, ${REPRESENTATION_REFERENCE_YEAR}, ${DEMO_SEED_USER_ID},
 						${`${REPRESENTATION_REFERENCE_YEAR}-01-01`}, ${`${REPRESENTATION_REFERENCE_YEAR}-12-31`},
 						${executiveWomenPercent},
 						${executiveWomenPercent === null ? null : 100 - executiveWomenPercent},
