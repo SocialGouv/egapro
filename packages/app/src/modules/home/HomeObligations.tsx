@@ -179,7 +179,7 @@ export function HomeObligations() {
 							</div>
 							<ul
 								aria-labelledby="obligations-question"
-								className={`fr-tags-group ${styles.tags}`}
+								className="fr-tags-group"
 							>
 								{WORKFORCE_OBLIGATION_BRACKET_KEYS.map((bracket) => (
 									<li key={bracket}>
