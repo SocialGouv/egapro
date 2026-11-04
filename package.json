@@ -39,7 +39,7 @@
 		"playwright:install": "pnpm --filter app exec playwright install chromium",
 		"test:lighthouse": "pnpm --filter app run test:lighthouse",
 		"release": "semantic-release",
-		"prepare": "bash scripts/quality/install-hooks.sh"
+		"prepare": "test -f scripts/quality/install-hooks.sh && sh scripts/quality/install-hooks.sh || true"
 	},
 	"devDependencies": {
 		"@semantic-release/changelog": "^6.0.3",

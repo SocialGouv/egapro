@@ -1,7 +1,9 @@
-#!/usr/bin/env bash
+#!/bin/sh
 # `prepare` hook: install the git hooks declared in lefthook.yml.
 # Skipped in CI and outside a git checkout (Docker build context), where there is nothing to hook.
-set -euo pipefail
+# POSIX sh on purpose: the app Docker image (Alpine) has no bash, and runs this through `pnpm install`.
+# Never fails the install: a missing hook is reported, not fatal.
+set -eu
 [ -n "${CI:-}" ] && exit 0
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0
 
@@ -31,4 +33,4 @@ if [ -n "$hooks_path" ] && [ ! -d "$hooks_path" ]; then
 	echo "lefthook: run \`git config --global --unset core.hooksPath\` then \`pnpm install\` to enable them." >&2
 	exit 0
 fi
-exec pnpm exec lefthook install
+pnpm exec lefthook install || echo "lefthook: could not install the git hooks — run \`pnpm exec lefthook install\` and fix what it reports." >&2
