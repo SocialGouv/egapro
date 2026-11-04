@@ -125,6 +125,7 @@ export {
 } from "./shared/declarationFlags";
 // Declaration edit lock constants
 export {
+	computeLockTimeoutMinutes,
 	DECLARATION_LOCK_CONFLICT_MESSAGE,
 	DECLARATION_SUPERSEDED_MESSAGE,
 	DEFAULT_LOCK_TIMEOUT_MINUTES,
@@ -261,6 +262,7 @@ export {
 	formatGapCompact,
 	formatIsoDate,
 	formatLongDate,
+	formatMinutes,
 	formatMonthDay,
 	formatOptionalIsoDate,
 	formatPercentage,

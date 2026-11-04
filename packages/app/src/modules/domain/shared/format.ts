@@ -182,6 +182,11 @@ export function formatDays(
 	return withUnit ? `${formatted} j` : formatted;
 }
 
+export function formatMinutes(minutes: number): string {
+	const unit = minutes > 1 ? "minutes" : "minute";
+	return `${formatCount(minutes)} ${unit}`;
+}
+
 const ONE_KO = 1024;
 const ONE_MO = ONE_KO * 1024;
 

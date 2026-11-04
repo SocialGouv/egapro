@@ -8,6 +8,8 @@ const contextState: DeclarationLockState = {
 	reason: null,
 	holder: null,
 	isLoading: false,
+	retake: { isAvailable: false, status: "idle", retake: () => {} },
+	editSessionKey: 0,
 };
 
 vi.mock("../LockContext", () => ({

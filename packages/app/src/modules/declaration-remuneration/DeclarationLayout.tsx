@@ -3,6 +3,7 @@ import { RouteScrollReset } from "~/modules/layout";
 import { CompanyBanner } from "./shared/CompanyBanner";
 import { DeclarationLockAlertGate } from "./shared/lock/DeclarationLockAlertGate";
 import { LockProvider } from "./shared/lock/LockContext";
+import { LockEditSessionBoundary } from "./shared/lock/LockEditSessionBoundary";
 
 type CompanyData = {
 	name: string;
@@ -43,7 +44,7 @@ export function DeclarationLayout({
 					<div className="fr-grid-row fr-grid-row--center">
 						<div className="fr-col-12 fr-col-lg-8">
 							<DeclarationLockAlertGate />
-							{children}
+							<LockEditSessionBoundary>{children}</LockEditSessionBoundary>
 						</div>
 					</div>
 				</LockProvider>

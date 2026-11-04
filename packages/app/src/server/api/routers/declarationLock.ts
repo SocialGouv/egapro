@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import {
 	acquireLockSchema,
+	getLockAvailabilitySchema,
 	getLockStateSchema,
 	heartbeatSchema,
 	releaseLockSchema,
@@ -92,6 +93,7 @@ export const declarationLockRouter = createTRPCRouter({
 							firstName: holder.firstName,
 							lastName: holder.lastName,
 							email: holder.email,
+							lockTimeoutMinutes: holder.lockTimeoutMinutes,
 						}
 					: null,
 			};
@@ -188,6 +190,26 @@ export const declarationLockRouter = createTRPCRouter({
 			}
 
 			return { released };
+		}),
+
+	// Deliberately absent from PROCEDURE_TO_ACTION: it carries no identity and is polled every heartbeat by a locked-out tab, so auditing it would flood the trail.
+	getLockAvailability: companyProcedure
+		.input(getLockAvailabilitySchema)
+		.query(async ({ ctx, input }) => {
+			const declarationId = await resolveOwnDeclarationId(
+				ctx.db,
+				ctx.siren,
+				input.declarationId,
+			);
+
+			const holder = await getActiveLock(ctx.db, declarationId);
+			const lockedByOther =
+				holder !== null && holder.userId !== ctx.session.user.id;
+
+			return {
+				available: !lockedByOther,
+				lockTimeoutMinutes: lockedByOther ? holder.lockTimeoutMinutes : null,
+			};
 		}),
 
 	getLockState: companyProcedure

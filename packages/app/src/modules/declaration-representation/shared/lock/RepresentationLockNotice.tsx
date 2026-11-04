@@ -7,7 +7,10 @@ export function RepresentationLockNotice() {
 	const { holder, isLoading, isReadOnly, isUnavailable } =
 		useRepresentationLock();
 	if (!isReadOnly || isLoading) return null;
-	if (holder) return <DeclarationLockAlert holder={holder} />;
+	if (holder)
+		return (
+			<DeclarationLockAlert followUp="watchThenAutoEdit" holder={holder} />
+		);
 	if (!isUnavailable) return null;
 	return (
 		<div className="fr-alert fr-alert--error fr-mb-3w" role="alert">

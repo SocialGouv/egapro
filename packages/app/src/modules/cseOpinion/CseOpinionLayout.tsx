@@ -93,7 +93,10 @@ export function CseOpinionLayout({
 					<div className="fr-grid-row fr-grid-row--center">
 						<div className="fr-col-12 fr-col-lg-8">
 							{isReadOnly && lockHolder && (
-								<DeclarationLockAlert holder={lockHolder} />
+								<DeclarationLockAlert
+									followUp="refreshToCheck"
+									holder={lockHolder}
+								/>
 							)}
 							{children}
 						</div>

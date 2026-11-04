@@ -110,6 +110,7 @@ describe("declarationLockRouter", () => {
 					firstName: holder.firstName,
 					lastName: holder.lastName,
 					email: holder.email,
+					lockTimeoutMinutes: holder.lockTimeoutMinutes,
 				},
 			});
 		});
@@ -128,6 +129,7 @@ describe("declarationLockRouter", () => {
 					firstName: holder.firstName,
 					lastName: holder.lastName,
 					email: holder.email,
+					lockTimeoutMinutes: holder.lockTimeoutMinutes,
 				},
 			});
 		});
@@ -319,6 +321,66 @@ describe("declarationLockRouter", () => {
 			expect(result).toEqual({ released: false });
 			expect(mocks.releaseLock).not.toHaveBeenCalled();
 			expect(mockLogAction).not.toHaveBeenCalled();
+		});
+	});
+
+	describe("getLockAvailability", () => {
+		async function readAvailability() {
+			const db = createSelectDb([[{ id: DECLARATION_ID }]]);
+			const caller = await createCaller(db);
+			return caller.getLockAvailability({ declarationId: DECLARATION_ID });
+		}
+
+		it("reports an unavailable declaration with its timeout, without any identity, when another user holds the lock", async () => {
+			mocks.getActiveLock.mockResolvedValue(
+				buildLockHolder({ userId: OTHER_USER_ID }),
+			);
+
+			const result = await readAvailability();
+
+			expect(result).toEqual({ available: false, lockTimeoutMinutes: 30 });
+		});
+
+		it("is available when no active lock exists (none, or expired)", async () => {
+			mocks.getActiveLock.mockResolvedValue(null);
+
+			expect(await readAvailability()).toEqual({
+				available: true,
+				lockTimeoutMinutes: null,
+			});
+		});
+
+		it("is available when the caller holds the lock", async () => {
+			mocks.getActiveLock.mockResolvedValue(
+				buildLockHolder({ userId: USER_ID }),
+			);
+
+			expect(await readAvailability()).toEqual({
+				available: true,
+				lockTimeoutMinutes: null,
+			});
+		});
+
+		it("never writes an audit row nor touches the lock", async () => {
+			mocks.getActiveLock.mockResolvedValue(
+				buildLockHolder({ userId: OTHER_USER_ID }),
+			);
+
+			await readAvailability();
+
+			expect(mockLogAction).not.toHaveBeenCalled();
+			expect(mocks.acquireOrRefreshLock).not.toHaveBeenCalled();
+			expect(mocks.refreshLock).not.toHaveBeenCalled();
+		});
+
+		it("throws FORBIDDEN on a foreign declarationId (IDOR guard)", async () => {
+			const db = createSelectDb([[{ id: DECLARATION_ID }]]);
+			const caller = await createCaller(db);
+
+			await expect(
+				caller.getLockAvailability({ declarationId: FOREIGN_DECLARATION_ID }),
+			).rejects.toMatchObject({ code: "FORBIDDEN" });
+			expect(mocks.getActiveLock).not.toHaveBeenCalled();
 		});
 	});
 

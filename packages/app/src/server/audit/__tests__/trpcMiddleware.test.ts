@@ -546,6 +546,18 @@ describe("auditMiddleware", () => {
 		});
 	});
 
+	it("does not log the identity-free availability poll (declarationLock.getLockAvailability)", async () => {
+		await auditMiddleware({
+			ctx: buildCtx(),
+			type: "query",
+			path: "declarationLock.getLockAvailability",
+			getRawInput: buildGetRawInput({ declarationId: "decl-1" }),
+			next: async () => okResult({ available: false, lockTimeoutMinutes: 30 }),
+		});
+
+		expect(mockLogAction).not.toHaveBeenCalled();
+	});
+
 	it("drops phone numbers and secrets from tRPC metadata", async () => {
 		const next = vi.fn(async () => okResult(undefined));
 		await auditMiddleware({

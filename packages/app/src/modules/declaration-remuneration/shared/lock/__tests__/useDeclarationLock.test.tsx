@@ -1,159 +1,50 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, cleanup, renderHook } from "@testing-library/react";
-import { useSession } from "next-auth/react";
-import {
-	afterEach,
-	beforeEach,
-	describe,
-	expect,
-	it,
-	type Mock,
-	vi,
-} from "vitest";
+import { act } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
 	DECLARATION_LOCK_CONFLICT_MESSAGE,
 	LOCK_HEARTBEAT_INTERVAL_MS,
 } from "~/modules/domain";
 
-const acquireMutateAsync = vi.fn();
-const heartbeatMutateAsync = vi.fn();
-const releaseMutate = vi.fn();
-
-vi.mock("~/trpc/react", () => ({
-	api: {
-		declarationLock: {
-			acquireLock: { useMutation: () => ({ mutateAsync: acquireMutateAsync }) },
-			heartbeat: { useMutation: () => ({ mutateAsync: heartbeatMutateAsync }) },
-			releaseLock: { useMutation: () => ({ mutate: releaseMutate }) },
-		},
-	},
-}));
+vi.mock(
+	"next/navigation",
+	async () => (await import("./useDeclarationLockHarness")).navigationMock,
+);
+vi.mock(
+	"~/trpc/react",
+	async () => (await import("./useDeclarationLockHarness")).trpcMock,
+);
 
 import { useDeclarationLock } from "../useDeclarationLock";
+import {
+	acquireMutateAsync,
+	advance,
+	DECLARATION_ID,
+	failMutation,
+	firePageShow,
+	flush,
+	HOLDER,
+	heartbeatMutateAsync,
+	OWN_HOLDER,
+	recheckAvailability,
+	releaseMutate,
+	renderLockHook as renderHookWith,
+	resetLockHookMocks,
+	sendBeaconSpy,
+	setAvailability,
+	setSession,
+	setVisibility,
+	teardownLockHook,
+	useSessionMock,
+} from "./useDeclarationLockHarness";
 
-const useSessionMock = useSession as unknown as Mock;
-
-const DECLARATION_ID = "decl-1";
-const HOLDER = {
-	userId: "user-2",
-	email: "owner@example.fr",
-	firstName: "Alice",
-	lastName: "Martin",
-	expiresAt: new Date("2026-06-23T12:00:00Z"),
-};
-
-function setSession(
-	options: { authenticated?: boolean; impersonating?: boolean } = {},
-) {
-	const { authenticated = true, impersonating = false } = options;
-	if (!authenticated) {
-		useSessionMock.mockReturnValue({ data: null, status: "unauthenticated" });
-		return;
-	}
-	useSessionMock.mockReturnValue({
-		data: {
-			user: {
-				id: "user-1",
-				impersonation: impersonating ? { siren: "999999999" } : null,
-			},
-		},
-		status: "authenticated",
-	});
-}
-
-function sendBeaconSpy() {
-	const beacon = vi.fn().mockReturnValue(true);
-	Object.defineProperty(navigator, "sendBeacon", {
-		configurable: true,
-		value: beacon,
-	});
-	return beacon;
-}
-
-function setVisibility(state: DocumentVisibilityState) {
-	Object.defineProperty(document, "visibilityState", {
-		configurable: true,
-		get: () => state,
-	});
-}
-
-// Flush the mount IIFE's awaited acquisition + the state updates that follow,
-// without waitFor (incompatible with fake timers used to drive the heartbeat).
-async function flush() {
-	await act(async () => {
-		await vi.advanceTimersByTimeAsync(0);
-	});
-}
-
-async function advance(ms: number) {
-	await act(async () => {
-		await vi.advanceTimersByTimeAsync(ms);
-	});
-}
-
-function renderLockHook(options: { modificationClosed?: boolean } = {}) {
-	const queryClient = new QueryClient({
-		defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
-	});
-	const rendered = renderHook(
-		() =>
-			useDeclarationLock({
-				declarationId: DECLARATION_ID,
-				modificationClosed: options.modificationClosed,
-			}),
-		{
-			wrapper: ({ children }) => (
-				<QueryClientProvider client={queryClient}>
-					{children}
-				</QueryClientProvider>
-			),
-		},
-	);
-	return { ...rendered, queryClient };
-}
-
-// Drive a real mutation to failure so the hook sees the same mutation-cache
-// "error" action a rejected step submit produces.
-async function failMutation(queryClient: QueryClient, message: string) {
-	const mutation = queryClient.getMutationCache().build(queryClient, {
-		mutationFn: async () => {
-			throw new Error(message);
-		},
-	});
-	await act(async () => {
-		await mutation.execute(undefined).catch(() => {});
-		await vi.advanceTimersByTimeAsync(0);
-	});
-}
-
-function firePageShow(persisted: boolean) {
-	const event = new Event("pageshow");
-	Object.defineProperty(event, "persisted", { value: persisted });
-	act(() => {
-		window.dispatchEvent(event);
-	});
-}
+const renderLockHook = (options: { modificationClosed?: boolean } = {}) =>
+	renderHookWith(useDeclarationLock, options);
 
 describe("useDeclarationLock", () => {
-	beforeEach(() => {
-		vi.useFakeTimers();
-		acquireMutateAsync.mockReset();
-		heartbeatMutateAsync.mockReset();
-		heartbeatMutateAsync.mockResolvedValue({ held: true });
-		releaseMutate.mockReset();
-		setSession();
-		setVisibility("visible");
-	});
+	beforeEach(resetLockHookMocks);
 
-	afterEach(() => {
-		// Unmount the hook first so its pagehide/visibilitychange listeners are
-		// detached before the next test dispatches events on the shared window.
-		cleanup();
-		vi.runOnlyPendingTimers();
-		vi.useRealTimers();
-		useSessionMock.mockReset();
-	});
+	afterEach(teardownLockHook);
 
 	it("acquires the lock on mount and stays editable when held (S1)", async () => {
 		acquireMutateAsync.mockResolvedValue({ acquired: true, holder: HOLDER });
@@ -464,30 +355,40 @@ describe("useDeclarationLock", () => {
 			expect(result.current.holder).toEqual(HOLDER);
 		});
 
-		it("resumes the heartbeat after winning the lock back on return", async () => {
+		it("only re-reads availability on return once the lock was lost, then resumes the heartbeat after a retake", async () => {
 			acquireMutateAsync.mockResolvedValueOnce({
 				acquired: true,
-				holder: HOLDER,
+				holder: OWN_HOLDER,
 			});
 			heartbeatMutateAsync.mockResolvedValue({ held: false });
 			acquireMutateAsync.mockResolvedValueOnce({
 				acquired: false,
 				holder: HOLDER,
 			});
-			const { result } = renderLockHook();
+			const { result, rerender } = renderLockHook();
 			await flush();
 
 			await advance(LOCK_HEARTBEAT_INTERVAL_MS);
 			expect(result.current.isReadOnly).toBe(true);
+			expect(acquireMutateAsync).toHaveBeenCalledTimes(2);
 			const heartbeatsWhileLost = heartbeatMutateAsync.mock.calls.length;
+
+			act(() => {
+				document.dispatchEvent(new Event("visibilitychange"));
+			});
+			await flush();
+			expect(acquireMutateAsync).toHaveBeenCalledTimes(2);
+			expect(recheckAvailability).toHaveBeenCalledTimes(1);
+			expect(result.current.isReadOnly).toBe(true);
 
 			heartbeatMutateAsync.mockResolvedValue({ held: true });
 			acquireMutateAsync.mockResolvedValueOnce({
 				acquired: true,
-				holder: HOLDER,
+				holder: OWN_HOLDER,
 			});
+			setAvailability(rerender, { available: true, lockTimeoutMinutes: null });
 			act(() => {
-				document.dispatchEvent(new Event("visibilitychange"));
+				result.current.retake.retake();
 			});
 			await flush();
 			expect(result.current.isReadOnly).toBe(false);

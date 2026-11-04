@@ -24,6 +24,7 @@ describe("declarationLockService (real Postgres)", () => {
 
 	const UID1 = "lock-it-user-1";
 	const UID2 = "lock-it-user-2";
+	const UID3 = "lock-it-user-3";
 	const EMAIL1 = "lock-it-user-1@example.fr";
 	const EMAIL2 = "lock-it-user-2@example.fr";
 
@@ -32,7 +33,8 @@ describe("declarationLockService (real Postgres)", () => {
 			INSERT INTO app_user (id, email, first_name, last_name)
 			VALUES
 				(${UID1}, ${EMAIL1}, 'Alice', 'Martin'),
-				(${UID2}, ${EMAIL2}, 'Bob', 'Durand')
+				(${UID2}, ${EMAIL2}, 'Bob', 'Durand'),
+				(${UID3}, 'lock-it-user-3@example.fr', 'Chloé', 'Petit')
 		`;
 		await sql`
 			INSERT INTO app_company (siren, name)
@@ -47,10 +49,10 @@ describe("declarationLockService (real Postgres)", () => {
 	}
 
 	async function cleanup() {
-		await sql`DELETE FROM app_declaration_lock WHERE locked_by_user_id IN (${UID1}, ${UID2})`;
+		await sql`DELETE FROM app_declaration_lock WHERE locked_by_user_id IN (${UID1}, ${UID2}, ${UID3})`;
 		await sql`DELETE FROM app_declaration WHERE id IN (${DECLARATION_ID}, ${OTHER_DECLARATION_ID})`;
 		await sql`DELETE FROM app_company WHERE siren IN (${SIREN}, ${OTHER_SIREN})`;
-		await sql`DELETE FROM app_user WHERE id IN (${UID1}, ${UID2})`;
+		await sql`DELETE FROM app_user WHERE id IN (${UID1}, ${UID2}, ${UID3})`;
 	}
 
 	async function countLockRows(declarationId: string): Promise<number> {
@@ -310,6 +312,59 @@ describe("declarationLockService (real Postgres)", () => {
 
 			expect(await countLockRows(DECLARATION_ID)).toBe(0);
 			expect(await getActiveLock(db, DECLARATION_ID)).toBeNull();
+		});
+	});
+
+	describe("concurrent acquisitions", () => {
+		async function raceForLock() {
+			const results = await Promise.all([
+				acquireOrRefreshLock(db, DECLARATION_ID, UID2, TIMEOUT_MINUTES),
+				acquireOrRefreshLock(db, DECLARATION_ID, UID3, TIMEOUT_MINUTES),
+			]);
+			const winners = results.filter((result) => result.acquired);
+			const losers = results.filter((result) => !result.acquired);
+			return { winners, losers };
+		}
+
+		it("grants a free declaration to exactly one of two simultaneous callers", async () => {
+			const { winners, losers } = await raceForLock();
+
+			expect(winners).toHaveLength(1);
+			expect(losers).toHaveLength(1);
+			expect(losers[0]?.holder.userId).toBe(winners[0]?.holder.userId);
+			expect(await countLockRows(DECLARATION_ID)).toBe(1);
+		});
+
+		it("grants an expired lock to exactly one of two simultaneous callers", async () => {
+			await acquireOrRefreshLock(db, DECLARATION_ID, UID1, TIMEOUT_MINUTES);
+			await forceExpiry(DECLARATION_ID, new Date(Date.now() - 60_000));
+
+			const { winners, losers } = await raceForLock();
+
+			expect(winners).toHaveLength(1);
+			expect(losers).toHaveLength(1);
+			expect(losers[0]?.holder.userId).toBe(winners[0]?.holder.userId);
+			expect(winners[0]?.holder.userId).not.toBe(UID1);
+			expect(await countLockRows(DECLARATION_ID)).toBe(1);
+		});
+	});
+
+	describe("lock timeout carried by the lock row", () => {
+		it("reads the timeout the holder acquired with", async () => {
+			await acquireOrRefreshLock(db, DECLARATION_ID, UID1, 45);
+
+			const holder = await getActiveLock(db, DECLARATION_ID);
+
+			expect(holder?.lockTimeoutMinutes).toBe(45);
+		});
+
+		it("follows a timeout change from the holder's next heartbeat", async () => {
+			await acquireOrRefreshLock(db, DECLARATION_ID, UID1, 45);
+			await refreshLock(db, DECLARATION_ID, UID1, 10);
+
+			const holder = await getActiveLock(db, DECLARATION_ID);
+
+			expect(holder?.lockTimeoutMinutes).toBe(10);
 		});
 	});
 });

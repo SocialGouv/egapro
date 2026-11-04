@@ -2,6 +2,18 @@ export const DEFAULT_LOCK_TIMEOUT_MINUTES = 30;
 
 export const LOCK_HEARTBEAT_INTERVAL_MS = 10_000;
 
+const MS_PER_MINUTE = 60_000;
+
+// Read from the lock row rather than global settings: a holder who already left keeps the timeout that was in force at their last heartbeat.
+export function computeLockTimeoutMinutes(
+	lastHeartbeatAt: Date,
+	expiresAt: Date,
+): number {
+	return Math.round(
+		(expiresAt.getTime() - lastHeartbeatAt.getTime()) / MS_PER_MINUTE,
+	);
+}
+
 /**
  * Rejection message for a declaration write attempted without holding the edit
  * lock. Shared by the tRPC lock guard, the draft autosave and the upload route
