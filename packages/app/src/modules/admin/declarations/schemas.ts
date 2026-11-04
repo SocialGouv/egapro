@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import {
 	COMPANY_SIZE_RANGES,
-	DECLARATION_FSM_STATUSES,
+	DEMARCHE_LIFECYCLE_STATUSES,
 	FIRST_DECLARATION_YEAR,
 } from "~/modules/domain";
 
@@ -11,20 +11,16 @@ export const SORT_COLUMNS = [
 	"companyName",
 	"year",
 	"workforce",
-	"status",
+	"demarcheStatus",
 	"declarantEmail",
-	"createdAt",
+	"statusDate",
 ] as const;
 
 export type SortColumn = (typeof SORT_COLUMNS)[number];
 
-export const DEFAULT_PAGE_SIZE = 20;
+export const DEFAULT_SORT_BY = "statusDate" satisfies SortColumn;
 
-// Admin status filter = the FSM states + the admin-only "cancelled" filter (cancelledAt is set, not an FSM state — see queries.ts). Derived from DECLARATION_FSM_STATUSES so a new engine state propagates here by construction (or breaks tsc), never a hand-copied list.
-export const ADMIN_DECLARATION_STATUS_FILTERS = [
-	...DECLARATION_FSM_STATUSES,
-	"cancelled",
-] as const;
+export const DEFAULT_PAGE_SIZE = 20;
 
 // Derived from the domain constant so a new bracket propagates here or breaks tsc.
 const COMPANY_SIZE_RANGE_KEYS = Object.keys(COMPANY_SIZE_RANGES) as Array<
@@ -37,9 +33,9 @@ const COMPANY_SIZE_RANGE_FORM_OPTIONS = [
 	...COMPANY_SIZE_RANGE_KEYS,
 ] as const;
 
-const ADMIN_DECLARATION_STATUS_FORM_OPTIONS = [
+const DEMARCHE_STATUS_FORM_OPTIONS = [
 	"",
-	...ADMIN_DECLARATION_STATUS_FILTERS,
+	...DEMARCHE_LIFECYCLE_STATUSES,
 ] as const;
 
 export const searchDeclarationsSchema = z.object({
@@ -53,11 +49,11 @@ export const searchDeclarationsSchema = z.object({
 		.optional(),
 	dateFrom: z.string().date().optional().or(z.literal("")),
 	dateTo: z.string().date().optional().or(z.literal("")),
-	status: z.enum(ADMIN_DECLARATION_STATUS_FILTERS).optional(),
+	status: z.enum(DEMARCHE_LIFECYCLE_STATUSES).optional(),
 	sizeRange: z.enum(COMPANY_SIZE_RANGE_KEYS).optional(),
 	page: z.coerce.number().int().min(1).default(1),
 	pageSize: z.coerce.number().int().min(10).max(100).default(DEFAULT_PAGE_SIZE),
-	sortBy: z.enum(SORT_COLUMNS).default("createdAt"),
+	sortBy: z.enum(SORT_COLUMNS).default(DEFAULT_SORT_BY),
 	sortOrder: z.enum(["asc", "desc"]).default("desc"),
 });
 
@@ -72,7 +68,7 @@ export const searchDeclarationsFormSchema = z.object({
 	year: z.string().optional(),
 	dateFrom: z.string().optional(),
 	dateTo: z.string().optional(),
-	status: z.enum(ADMIN_DECLARATION_STATUS_FORM_OPTIONS).optional(),
+	status: z.enum(DEMARCHE_STATUS_FORM_OPTIONS).optional(),
 	sizeRange: z.enum(COMPANY_SIZE_RANGE_FORM_OPTIONS).optional(),
 });
 

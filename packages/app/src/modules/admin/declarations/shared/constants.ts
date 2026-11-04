@@ -1,12 +1,47 @@
-import { getDropoffPhaseLabel } from "~/modules/domain";
-import type { ADMIN_DECLARATION_STATUS_FILTERS } from "../schemas";
+import {
+	type DeclarationFsmStatus,
+	type DemarcheLifecycleStatus,
+	getDropoffPhaseLabel,
+} from "~/modules/domain";
 
 export const WORKFORCE_LABEL = "Effectif annuel moyen";
 
-export type AdminDeclarationStatusFilter =
-	(typeof ADMIN_DECLARATION_STATUS_FILTERS)[number];
+export const DEMARCHE_STATUS_COLUMN_LABEL = "Statut de la démarche";
+export const LAST_TRANSMITTED_STEP_COLUMN_LABEL = "Dernière étape transmise";
+export const NEXT_STEP_COLUMN_LABEL = "Prochaine étape";
+export const STATUS_DATE_COLUMN_LABEL = "Date";
 
-export const STATUS_LABELS: Record<AdminDeclarationStatusFilter, string> = {
+export const DEMARCHE_STATUS_LABELS: Record<DemarcheLifecycleStatus, string> = {
+	draft: "Brouillon",
+	in_progress: "En cours",
+	completed: "Finalisée",
+	cancelled: "Annulée",
+};
+
+export const DEMARCHE_STATUS_BADGE_CLASSES: Record<
+	DemarcheLifecycleStatus,
+	string
+> = {
+	draft: "",
+	in_progress: "fr-badge--info",
+	completed: "fr-badge--success",
+	cancelled: "fr-badge--warning",
+};
+
+export const DEMARCHE_STATUS_HELP =
+	"Brouillon : démarche ouverte, rien n'a encore été transmis. En cours : la première déclaration a été transmise, la démarche n'est pas terminée. Finalisée : démarche terminée. Annulée : démarche annulée par un administrateur.";
+export const LAST_TRANSMITTED_STEP_HELP =
+	"Dernière étape effectivement transmise par l'entreprise : déclaration, choix du parcours, seconde déclaration, évaluation conjointe ou avis du CSE.";
+export const NEXT_STEP_HELP =
+	"Étape que l'entreprise doit encore réaliser. Aucune lorsque la démarche est finalisée ou annulée.";
+export const STATUS_DATE_HELP =
+	"Brouillon : date d'ouverture de la démarche. En cours : date de la dernière étape transmise. Finalisée : date de finalisation. Annulée : date d'annulation.";
+
+export function columnHelpLabel(columnLabel: string): string {
+	return `Aide sur la colonne ${columnLabel}`;
+}
+
+export const STATUS_LABELS: Record<DeclarationFsmStatus, string> = {
 	draft: "Brouillon",
 	awaiting_compliance_path_choice: getDropoffPhaseLabel(
 		"awaiting_compliance_path_choice",
@@ -17,7 +52,6 @@ export const STATUS_LABELS: Record<AdminDeclarationStatusFilter, string> = {
 	revised_joint_evaluation_chosen: "Révision évaluation conjointe",
 	awaiting_cse_opinion: "Avis CSE en attente",
 	demarche_completed: "Démarche terminée",
-	cancelled: "Annulée",
 };
 
 const LABEL_BY_STATUS: Readonly<Record<string, string>> = STATUS_LABELS;

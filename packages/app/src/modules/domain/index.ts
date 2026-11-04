@@ -134,7 +134,10 @@ export {
 // Declaration prerequisites
 export { hasRequiredDeclarationInfo } from "./shared/declarationPrerequisites";
 // Declaration process step deadline
-export { getDeclarationProcessStepDeadline } from "./shared/declarationProcessStep";
+export {
+	DECLARATION_PROCESS_STEP_LABELS,
+	getDeclarationProcessStepDeadline,
+} from "./shared/declarationProcessStep";
 // Declaration status
 export type {
 	CompliancePathReadOnlyReason,
@@ -210,6 +213,20 @@ export {
 	isJointEvaluationFileTransmitted,
 	SUBSEQUENT_SUBMISSION_EVENT_TYPES,
 } from "./shared/declarationTrajectory";
+// Démarche lifecycle — admin-facing 4-value status, its date, and the transmission events
+export type {
+	DemarcheLifecycleStatus,
+	DemarcheStatusDateSources,
+	TransmissionEventType,
+} from "./shared/demarcheLifecycle";
+export {
+	DEMARCHE_LIFECYCLE_STATUSES,
+	getDemarcheLifecycleStatus,
+	getDemarcheNextStepLabel,
+	getDemarcheStatusDate,
+	isTransmissionEventType,
+	TRANSMISSION_EVENT_TYPES,
+} from "./shared/demarcheLifecycle";
 export type {
 	CategoryHeadcounts,
 	CategoryPayBasis,

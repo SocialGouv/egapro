@@ -5,14 +5,11 @@ import {
 	count,
 	desc,
 	eq,
-	gte,
 	inArray,
-	isNotNull,
-	isNull,
-	lt,
 	ne,
 	or,
 	type SQL,
+	type SQLWrapper,
 } from "drizzle-orm";
 
 import {
@@ -20,18 +17,35 @@ import {
 	getDeclarationByIdSchema,
 	getRecapSchema,
 	releaseLockSchema,
+	type SortColumn,
 	searchDeclarationsSchema,
 } from "~/modules/admin/declarations/schemas";
 import {
 	floorWorkforce,
 	getCurrentYear,
 	getDeclarationReferencePeriod,
+	getDemarcheLifecycleStatus,
+	getDemarcheNextStepLabel,
+	getDemarcheStatusDate,
 	isCancelled,
+	isTransmissionEventType,
 	parseGipWorkforce,
 } from "~/modules/domain";
+import { getStatusHistoryLabel } from "~/modules/export";
 import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
 import { mapToStepData } from "~/server/api/routers/declarationStepMapping";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
+import {
+	demarcheCompletedAt,
+	demarcheLifecycleSortKey,
+	demarcheLifecycleStatusCondition,
+	demarcheStatusDateBefore,
+	demarcheStatusDateFrom,
+	demarcheStatusDateSortKey,
+	type LastTransmissionEvent,
+	lastTransmissionAt,
+	lastTransmissionEvent,
+} from "~/server/db/declarationConditions";
 import {
 	gipSizeRangeFilter,
 	gipWorkforceJoinCondition,
@@ -54,15 +68,29 @@ import {
 	releaseLockAsAdmin,
 } from "~/server/services/declarationLockService";
 
-// `workforce` is absent: nullable joined column, sorted via gipWorkforceSortKey.
-const sortColumnMap = {
-	siren: declarations.siren,
-	companyName: companies.name,
-	year: declarations.year,
-	status: declarations.status,
-	declarantEmail: users.email,
-	createdAt: declarations.createdAt,
-} as const;
+type SortOrder = "asc" | "desc";
+
+function columnSortKey(column: SQLWrapper) {
+	return (sortOrder: SortOrder) =>
+		sortOrder === "asc" ? asc(column) : desc(column);
+}
+
+const sortKeys = {
+	siren: columnSortKey(declarations.siren),
+	companyName: columnSortKey(companies.name),
+	year: columnSortKey(declarations.year),
+	workforce: gipWorkforceSortKey,
+	demarcheStatus: demarcheLifecycleSortKey,
+	declarantEmail: columnSortKey(users.email),
+	statusDate: demarcheStatusDateSortKey,
+} satisfies Record<SortColumn, (sortOrder: SortOrder) => SQL>;
+
+function lastTransmittedStepLabel(
+	event: LastTransmissionEvent | null,
+): string | null {
+	if (event === null || !isTransmissionEventType(event.eventType)) return null;
+	return getStatusHistoryLabel(event.eventType, event.value);
+}
 
 export const adminDeclarationsRouter = createTRPCRouter({
 	listYears: adminProcedure.query(async ({ ctx }) => {
@@ -98,22 +126,15 @@ export const adminDeclarationsRouter = createTRPCRouter({
 			}
 
 			if (input.dateFrom) {
-				filters.push(
-					gte(declarations.createdAt, new Date(`${input.dateFrom}T00:00:00Z`)),
-				);
+				filters.push(demarcheStatusDateFrom(`${input.dateFrom}T00:00:00Z`));
 			}
 
 			if (input.dateTo) {
-				filters.push(
-					lt(declarations.createdAt, new Date(`${input.dateTo}T23:59:59Z`)),
-				);
+				filters.push(demarcheStatusDateBefore(`${input.dateTo}T23:59:59Z`));
 			}
 
-			if (input.status === "cancelled") {
-				filters.push(isNotNull(declarations.cancelledAt));
-			} else if (input.status) {
-				filters.push(eq(declarations.status, input.status));
-				filters.push(isNull(declarations.cancelledAt));
+			if (input.status) {
+				filters.push(demarcheLifecycleStatusCondition(input.status));
 			}
 
 			if (input.sizeRange) {
@@ -121,12 +142,11 @@ export const adminDeclarationsRouter = createTRPCRouter({
 			}
 
 			const where = filters.length > 0 ? and(...filters) : undefined;
-			const orderBy =
-				input.sortBy === "workforce"
-					? gipWorkforceSortKey(input.sortOrder)
-					: (input.sortOrder === "asc" ? asc : desc)(
-							sortColumnMap[input.sortBy],
-						);
+			// The id tie-break keeps pages disjoint when the sort key repeats (four statuses over many rows).
+			const orderBy = [
+				sortKeys[input.sortBy](input.sortOrder),
+				asc(declarations.id),
+			];
 			const offset = (input.page - 1) * input.pageSize;
 
 			// Join and filter on BOTH queries, else count and pagination describe another population.
@@ -146,13 +166,16 @@ export const adminDeclarationsRouter = createTRPCRouter({
 						declarantEmail: users.email,
 						declarantFirstName: users.firstName,
 						declarantLastName: users.lastName,
+						lastTransmission: lastTransmissionEvent(),
+						lastTransmissionAt: lastTransmissionAt(),
+						demarcheCompletedAt: demarcheCompletedAt(),
 					})
 					.from(declarations)
 					.innerJoin(companies, eq(declarations.siren, companies.siren))
 					.leftJoin(gipMdsData, gipWorkforceJoinCondition())
 					.innerJoin(users, eq(declarations.declarantId, users.id))
 					.where(where)
-					.orderBy(orderBy)
+					.orderBy(...orderBy)
 					.limit(input.pageSize)
 					.offset(offset),
 				ctx.db
@@ -165,10 +188,30 @@ export const adminDeclarationsRouter = createTRPCRouter({
 			]);
 
 			const total = totalResult[0]?.total ?? 0;
-			const rows = rawRows.map(({ workforceEma, ...row }) => ({
-				...row,
-				workforce: floorWorkforce(parseGipWorkforce(workforceEma)),
-			}));
+			const rows = rawRows.map(
+				({
+					workforceEma,
+					lastTransmission,
+					lastTransmissionAt,
+					demarcheCompletedAt,
+					...row
+				}) => {
+					const demarcheStatus = getDemarcheLifecycleStatus(row);
+					return {
+						...row,
+						workforce: floorWorkforce(parseGipWorkforce(workforceEma)),
+						demarcheStatus,
+						lastTransmittedStep: lastTransmittedStepLabel(lastTransmission),
+						nextStep: getDemarcheNextStepLabel(demarcheStatus, row.status),
+						statusDate: getDemarcheStatusDate(demarcheStatus, {
+							openedAt: row.createdAt,
+							lastTransmissionAt,
+							completedAt: demarcheCompletedAt,
+							cancelledAt: row.cancelledAt,
+						}),
+					};
+				},
+			);
 
 			return {
 				rows,

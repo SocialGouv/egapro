@@ -2,8 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import { getDefaultCampaignDeadlines } from "../shared/campaign";
 import { civilDate } from "../shared/civilDate";
-import { getDeclarationProcessStepDeadline } from "../shared/declarationProcessStep";
-import type { DeclarationFsmStatus } from "../types";
+import {
+	DECLARATION_PROCESS_STEP_LABELS,
+	getDeclarationProcessStepDeadline,
+} from "../shared/declarationProcessStep";
+import { DECLARATION_FSM_STATUSES, type DeclarationFsmStatus } from "../types";
 
 const YEAR = 2027;
 // decl2ModificationDeadline, pathChoiceDeadline and decl2JointEvaluationDeadline all default to January 1st N+1: give each a distinct date so a case below cannot pass by picking the wrong key.
@@ -71,4 +74,21 @@ describe("getDeclarationProcessStepDeadline", () => {
 			);
 		});
 	}
+});
+
+describe("DECLARATION_PROCESS_STEP_LABELS", () => {
+	it("labels every engine state", () => {
+		expect(Object.keys(DECLARATION_PROCESS_STEP_LABELS).sort()).toEqual(
+			[...DECLARATION_FSM_STATUSES].sort(),
+		);
+		for (const status of DECLARATION_FSM_STATUSES) {
+			expect(DECLARATION_PROCESS_STEP_LABELS[status]).not.toBe("");
+		}
+	});
+
+	it("names the first step of a démarche after the remuneration declaration", () => {
+		expect(DECLARATION_PROCESS_STEP_LABELS.draft).toBe(
+			"Déclaration des indicateurs de rémunération",
+		);
+	});
 });
