@@ -1,6 +1,10 @@
 // Kontinuous' degit sometimes extracts its target and then never exits, which
 // leaves the job stuck in Init until the deployment times out. Stop it once the
-// extracted tree has stopped changing, and fail fast if nothing arrives.
+// extraction is over and the tree has stopped changing, and fail fast if it
+// never gets there. In git mode, tiged clones into a hidden scratch directory
+// inside the target, moves the files out, then deletes it (`.git` without a
+// subdirectory): files in place with no scratch directory left is its own end
+// of extraction.
 const STABLE_SECONDS = 15;
 const TIMEOUT_SECONDS = 300;
 
@@ -13,7 +17,7 @@ const watchdog = (degitLine, target) =>
 		'ks_degit_previous=""',
 		'while kill -0 "$ks_degit_pid" 2>/dev/null; do',
 		`  ks_degit_current="$(find "${target}" -printf '%P %s %T@\\n' 2>/dev/null | sort)"`,
-		`  if [ -n "$(find "${target}" -mindepth 1 -maxdepth 1 ! -name '.*' 2>/dev/null)" ] && [ "$ks_degit_current" = "$ks_degit_previous" ]; then`,
+		`  if [ -n "$(find "${target}" -mindepth 1 -maxdepth 1 ! -name '.*' 2>/dev/null)" ] && [ ! -e "${target}/.tiged" ] && [ ! -e "${target}/.git" ] && [ "$ks_degit_current" = "$ks_degit_previous" ]; then`,
 		"    ks_degit_stable=$((ks_degit_stable + 1))",
 		"  else",
 		"    ks_degit_stable=0",
