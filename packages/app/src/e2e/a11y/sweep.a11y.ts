@@ -1,5 +1,6 @@
 import { sweepSample } from "ultra11y/playwright";
 
+import { isPageSelected } from "../helpers/a11y-selection";
 import { SNAPSHOTTED_ELSEWHERE } from "./ownership";
 import { settle } from "./snapshot";
 
@@ -28,5 +29,5 @@ import { settle } from "./snapshot";
  */
 sweepSample({
 	settle,
-	only: (p) => !SNAPSHOTTED_ELSEWHERE.has(p.id),
+	only: (p) => !SNAPSHOTTED_ELSEWHERE.has(p.id) && isPageSelected(p.id),
 });

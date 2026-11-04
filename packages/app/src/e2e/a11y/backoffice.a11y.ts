@@ -3,25 +3,11 @@ import { resolveAdminAccess } from "~/modules/domain";
 import { ADMIN_MFA_RESUME } from "~/modules/routes";
 import { snapshotRoute } from "./snapshot";
 
-const ADMIN_PLAN_PATH = "/admin/plan";
-
-// Where `/admin/plan` does not exist yet, the backoffice answers 404 at that address and
-// `snapshotRoute` skips on the status rather than filing the error page under the plan's name.
+// `/admin/plan` is not here: declared in `.ultra11yrc.json`, it belongs to the sweep.
 // `/acces-backoffice` renders only for an administrator whose second factor is missing or
 // expired, and the suite signs in through the E2E second-factor seam, which dates every
 // administrator sign-in: the screen is skipped on the decision the page itself would take.
 test.describe("RGAA — backoffice", () => {
-	test("snapshot le plan du backoffice", async ({ page }) => {
-		await snapshotRoute(page, {
-			path: ADMIN_PLAN_PATH,
-			id: "admin-plan",
-			name: "Backoffice — plan",
-			sources: ["src/app/admin/plan/page.tsx"],
-			auth: true,
-			notes: "Requiert un compte listé dans ADMIN_EMAILS.",
-		});
-	});
-
 	test("snapshot la reprise de l'authentification au backoffice", async ({
 		page,
 	}) => {
