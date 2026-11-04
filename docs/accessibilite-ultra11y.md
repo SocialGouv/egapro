@@ -1,6 +1,6 @@
 # Accessibilité — le dispositif ultra11y en détail
 
-> Complément d'`AGENTS.md` § Accessibilité (la règle courte, toujours chargée) et de `.claude/skills/review/references/a11y.md` (la revue).
+> Complément d'`AGENTS.md` § Accessibilité (la règle courte, toujours chargée) et de `.agents/skills/review/references/a11y.md` (la revue).
 > Ici : comment la chaîne CI est câblée, ce qu'elle coûte, les décisions déjà prises et
 > pourquoi — pour ne pas les reprendre à zéro. Rien de ce document n'est une règle à appliquer :
 > c'est de la mémoire d'exploitation.
@@ -511,10 +511,10 @@ avec la devDependency et l'Action les RÉINGÈRE avec son moteur embarqué ; deu
 formats, et rien ne lève d'erreur.
 
 Le **plugin Claude Code** est la quatrième surface, hors dépôt, et la seule que rien ici ne peut
-pinner. Le contrôle de dérive est la première étape de `.claude/skills/review/references/a11y.md` :
+pinner. Le contrôle de dérive est la première étape de `.agents/skills/review/references/a11y.md` :
 comparer la version installée au pin d'`a11y.yaml` (`@vX.Y.Z` ou `# vX.Y.Z`). Le gating, lui, n'en
 dépend plus — pre-commit, `pnpm verify` et la CI tournent sur la devDependency, et le plugin
-OpenCode (`.opencode/plugins/ultra11y.js`) se charge depuis elle. Ce contrôle existe pour une raison mesurée : le 31/08/2026, le plugin était en **4.5.1** pendant que le
+OpenCode (déclaré dans `opencode.json`) se charge depuis elle. Ce contrôle existe pour une raison mesurée : le 31/08/2026, le plugin était en **4.5.1** pendant que le
 dépôt tournait en 5.40.1.
 
 À noter si un bump échoue : la publication npm de la 5.3.0 est

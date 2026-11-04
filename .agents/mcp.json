@@ -1,0 +1,10 @@
+{
+	"$comment": "Source unique des serveurs MCP. Ne pas éditer .mcp.json, opencode.json (clé mcp) ni .codex/config.toml à la main : `node scripts/ai/sync-agent-config.mjs` les régénère, la CI vérifie avec --check.",
+	"servers": {
+		"next-devtools": { "command": "npx", "args": ["-y", "next-devtools-mcp@latest"] },
+		"dsfr": { "command": "npx", "args": ["dsfr-mcp"] },
+		"figma": { "url": "https://mcp.figma.com/mcp" },
+		"playwright": { "command": "npx", "args": ["-y", "@playwright/mcp@latest"] },
+		"ultra11y": { "command": "pnpm", "args": ["--dir", "packages/app", "exec", "ultra11y", "mcp"] }
+	}
+}

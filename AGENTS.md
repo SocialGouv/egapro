@@ -1,6 +1,6 @@
 # AGENTS.md — Monorepo egapro
 
-> Référence pour tout agent (Claude Code, OpenCode…) ou développeur travaillant sur ce dépôt. Source unique : `CLAUDE.md` ne fait que l'importer.
+> Référence pour tout agent (Claude Code, OpenCode, Codex…) ou développeur travaillant sur ce dépôt. Source unique : `CLAUDE.md` ne fait que l'importer (Claude Code ne lit pas `AGENTS.md` quand un `CLAUDE.md` existe, et les versions anciennes ne le lisent pas du tout).
 
 ---
 
@@ -43,7 +43,7 @@ Gestionnaire de paquets : **pnpm workspaces** (`pnpm@10`).
 | `/implement <issue#>` | une issue analysée | worktree, code + tests, `pnpm verify`, `/review gates`, E2E, PR draft |
 | `/review [gates]` · `/review <PR#>` | avant de déclarer une tâche terminée · une PR a des commentaires | gates qualité sur le diff · traitement des threads non résolus |
 
-Les skills vivent dans `.claude/skills/<nom>/` (lus par Claude Code **et** OpenCode) ; chacun charge ses références à la demande. Pas d'orchestrateur en tâche de fond : pour paralléliser un epic, ouvre une session par sous-ticket.
+Les skills vivent dans `.agents/skills/<nom>/`, l'emplacement standard lu par Codex et OpenCode ; Claude Code y accède par le symlink `.claude/skills` ; chacun charge ses références à la demande. Pas d'orchestrateur en tâche de fond : pour paralléliser un epic, ouvre une session par sous-ticket.
 
 ---
 
@@ -55,18 +55,18 @@ Avant de toucher à un périmètre, **ouvre la référence correspondante** (ell
 
 | Tu touches à… | Lis |
 |---|---|
-| tout `.ts` / `.tsx` | [`code-quality.md`](./.claude/skills/implement/references/conventions/code-quality.md) — source unique d'une règle métier, DRY, nommage, pas de commentaire |
-| tout `.tsx` | [`react-components.md`](./.claude/skills/implement/references/conventions/react-components.md) |
-| `.tsx` / `.scss` | [`styling-dsfr.md`](./.claude/skills/implement/references/conventions/styling-dsfr.md) |
-| un node Figma | [`figma.md`](./.claude/skills/implement/references/conventions/figma.md) |
-| `src/server/api/**` | [`trpc-api.md`](./.claude/skills/implement/references/conventions/trpc-api.md) |
-| `src/server/**` | [`database-drizzle.md`](./.claude/skills/implement/references/conventions/database-drizzle.md) |
-| mutation, query sensible, route handler, auth | [`audit-logging.md`](./.claude/skills/implement/references/conventions/audit-logging.md) |
-| parcours de déclaration, Mon espace, `src/server/rules/**` | [`demarche-state-machine.md`](./.claude/skills/implement/references/conventions/demarche-state-machine.md) |
-| `src/**/__tests__/**` | [`testing.md`](./.claude/skills/implement/references/conventions/testing.md) |
-| `src/e2e/**` | [`e2e.md`](./.claude/skills/implement/references/e2e.md) |
-| la correction d'un bug | [`bug-fix.md`](./.claude/skills/implement/references/bug-fix.md) |
-| l'accessibilité, ultra11y | [`a11y.md`](./.claude/skills/review/references/a11y.md) |
+| tout `.ts` / `.tsx` | [`code-quality.md`](./.agents/skills/implement/references/conventions/code-quality.md) — source unique d'une règle métier, DRY, nommage, pas de commentaire |
+| tout `.tsx` | [`react-components.md`](./.agents/skills/implement/references/conventions/react-components.md) |
+| `.tsx` / `.scss` | [`styling-dsfr.md`](./.agents/skills/implement/references/conventions/styling-dsfr.md) |
+| un node Figma | [`figma.md`](./.agents/skills/implement/references/conventions/figma.md) |
+| `src/server/api/**` | [`trpc-api.md`](./.agents/skills/implement/references/conventions/trpc-api.md) |
+| `src/server/**` | [`database-drizzle.md`](./.agents/skills/implement/references/conventions/database-drizzle.md) |
+| mutation, query sensible, route handler, auth | [`audit-logging.md`](./.agents/skills/implement/references/conventions/audit-logging.md) |
+| parcours de déclaration, Mon espace, `src/server/rules/**` | [`demarche-state-machine.md`](./.agents/skills/implement/references/conventions/demarche-state-machine.md) |
+| `src/**/__tests__/**` | [`testing.md`](./.agents/skills/implement/references/conventions/testing.md) |
+| `src/e2e/**` | [`e2e.md`](./.agents/skills/implement/references/e2e.md) |
+| la correction d'un bug | [`bug-fix.md`](./.agents/skills/implement/references/bug-fix.md) |
+| l'accessibilité, ultra11y | [`a11y.md`](./.agents/skills/review/references/a11y.md) |
 
 ---
 
@@ -88,11 +88,11 @@ Une tâche n'est **terminée** que quand `pnpm verify` est vert **et** que `/rev
 
 ## Accessibilité — RGAA 4.1.2 / WCAG 2.2 AA
 
-egapro est une plateforme de l'État : exigence first-class, au même titre que la sécurité. **Un seul dispositif : ultra11y** (devDependency de `packages/app`, plugin Claude Code `ultra11y@ultra11y`, plugin OpenCode `.opencode/plugins/ultra11y.js`, MCP `ultra11y`, Action CI). Il n'y a pas de second système, et c'est délibéré.
+egapro est une plateforme de l'État : exigence first-class, au même titre que la sécurité. **Un seul dispositif : ultra11y** (devDependency de `packages/app`, plugin Claude Code `ultra11y@ultra11y`, plugin OpenCode déclaré dans `opencode.json` (chargé depuis la devDependency), MCP `ultra11y`, Action CI). Il n'y a pas de second système, et c'est délibéré.
 
 - **HTML natif d'abord, ARIA en dernier.** Un `<button>` est accessible ; un `<div role="button">` demande d'écrire à la main focus, clavier et état. Ne double jamais une sémantique implicite (`role="navigation"` sur `<nav>` est faux, pas redondant).
 - **Ne devine pas un critère de mémoire** : demande-le au skill `ultra11y` ou au MCP (`criteria --standard rgaa 8.3`, `guidance`, `glossary`).
-- Le jugement (ce que le moteur ne tranche pas) passe par le skill `review-a11y`, lancé par `/review gates`. Détail, versions et CI → [`a11y.md`](./.claude/skills/review/references/a11y.md) et [`docs/accessibilite-ultra11y.md`](./docs/accessibilite-ultra11y.md).
+- Le jugement (ce que le moteur ne tranche pas) passe par le skill `review-a11y`, lancé par `/review gates`. Détail, versions et CI → [`a11y.md`](./.agents/skills/review/references/a11y.md) et [`docs/accessibilite-ultra11y.md`](./docs/accessibilite-ultra11y.md).
 
 ---
 
@@ -138,7 +138,7 @@ Données d'exemple fictives : `SIREN 123456789`, `email@example.fr`, `Société 
 
 ---
 
-## Serveurs MCP (`.mcp.json` pour Claude Code, `opencode.json` pour OpenCode)
+## Serveurs MCP (source unique : `.agents/mcp.json`)
 
 | Serveur | Quand | Outils clés |
 |---|---|---|
@@ -148,7 +148,7 @@ Données d'exemple fictives : `SIREN 123456789`, `email@example.fr`, `Société 
 | `playwright` | parcours réel dans le navigateur (checks fonctionnel et design) | `browser_navigate`, `browser_snapshot`, `browser_take_screenshot` |
 | `ultra11y` | critères RGAA, audit | `criteria`, `audit` |
 
-Le point commun : **ne jamais deviner de mémoire** une API Next.js, une classe DSFR, une valeur Figma ou un critère RGAA. Les deux fichiers de config déclarent les mêmes serveurs — en modifier un, c'est modifier l'autre.
+Le point commun : **ne jamais deviner de mémoire** une API Next.js, une classe DSFR, une valeur Figma ou un critère RGAA. Chaque outil exige son propre fichier (`.mcp.json` pour Claude Code, `opencode.json` pour OpenCode, `.codex/config.toml` pour Codex) : ils sont **générés** depuis `.agents/mcp.json` par `node scripts/ai/sync-agent-config.mjs` — n'en édite aucun à la main, la CI refuse un fichier désynchronisé.
 
 ---
 

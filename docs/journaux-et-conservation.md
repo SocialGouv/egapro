@@ -39,7 +39,7 @@
 
 ## 1. Objet et périmètre
 
-L'information sur les journaux et les durées de conservation est aujourd'hui dispersée entre [`architecture.md` §9](architecture.md#9-audit-logging), [`features.md` §13.2](features.md#132-audit-logging) et §13.8, [`audit-logging.md`](../.claude/skills/implement/references/conventions/audit-logging.md), [`matomo-cnil-exemption.md`](matomo-cnil-exemption.md), [`mails.md`](mails.md) et les pages publiques `/donnees-personnelles` et `/gestion-des-cookies`. Cette page les rassemble et comble les durées qui n'étaient écrites nulle part.
+L'information sur les journaux et les durées de conservation est aujourd'hui dispersée entre [`architecture.md` §9](architecture.md#9-audit-logging), [`features.md` §13.2](features.md#132-audit-logging) et §13.8, [`audit-logging.md`](../.agents/skills/implement/references/conventions/audit-logging.md), [`matomo-cnil-exemption.md`](matomo-cnil-exemption.md), [`mails.md`](mails.md) et les pages publiques `/donnees-personnelles` et `/gestion-des-cookies`. Cette page les rassemble et comble les durées qui n'étaient écrites nulle part.
 
 **Méthode** : chaque durée est lue là où elle s'applique — le script, le cron, la librairie — jamais recopiée d'une documentation existante. Une durée absente du dépôt (code, manifests `.kontinuous/`, page de doc existante) est notée « Non définie dans le dépôt » avec l'interlocuteur à solliciter, jamais inventée.
 
@@ -114,7 +114,7 @@ Pour `AUTH_ADMIN_MFA`, les métadonnées conservées incluent `granted`, la déc
 
 **Événements antivirus** : chaque fichier déposé (avis du CSE, évaluation conjointe, rapport après mise en demeure) est analysé par ClamAV avant d'être conservé. Une détection écrit une ligne `failure` sur l'action d'upload avec le code `HTTP_422_virus_detected` et, dans les métadonnées, le nom de la signature ClamAV (`virusName`, ex. `Win.Test.EICAR_HDB-1`) ; une valeur qui n'a pas la forme d'une signature est écartée. Une indisponibilité de l'antivirus (connexion refusée, coupure en cours d'envoi, délai dépassé) écrit le code `HTTP_503_antivirus_unavailable`. Le nom du fichier n'est jamais conservé. En parallèle, la sortie standard reçoit une ligne `[antivirus]` (voir [4.3](#43-logs-applicatifs-stdout-et-stderr)) qui ne porte ni la signature ni le nom du fichier.
 
-Ne sont pas recopiées ici : les clés d'action ni le détail par catégorie au-delà du tableau catégorie → durée ci-dessus. Voir `packages/app/src/modules/audit/shared/actionKeys.ts` et [`audit-logging.md`](../.claude/skills/implement/references/conventions/audit-logging.md) pour l'inventaire complet.
+Ne sont pas recopiées ici : les clés d'action ni le détail par catégorie au-delà du tableau catégorie → durée ci-dessus. Voir `packages/app/src/modules/audit/shared/actionKeys.ts` et [`audit-logging.md`](../.agents/skills/implement/references/conventions/audit-logging.md) pour l'inventaire complet.
 
 **Sources** : `packages/app/scripts/audit-cleanup.ts` · `.kontinuous/templates/audit-cleanup-cron.yaml` · `packages/app/src/server/db/auditSchema.ts` · `packages/app/src/server/audit/log.ts` · `packages/notifications/src/worker/auditLog.ts` · `packages/app/scripts/declaration-cleanup.ts`.
 
@@ -310,13 +310,13 @@ Tickets ouverts qui changeront une ligne de cette page :
 | [#4772](https://github.com/SocialGouv/egapro/issues/4772) | Sentry : réglage de l'enregistrement de session et de l'échantillonnage |
 | [#4773](https://github.com/SocialGouv/egapro/issues/4773) | Embarquer le script de purge des déclarations dans l'image de production |
 
-La règle [`audit-logging.md`](../.claude/skills/implement/references/conventions/audit-logging.md) demande de mettre cette page à jour lors de toute modification du contenu ou de la durée d'`audit.action_log`.
+La règle [`audit-logging.md`](../.agents/skills/implement/references/conventions/audit-logging.md) demande de mettre cette page à jour lors de toute modification du contenu ou de la durée d'`audit.action_log`.
 
 ## 9. Liens
 
 - **Détail technique du journal d'audit** : [`architecture.md` §9](architecture.md#9-audit-logging) et [`features.md` §13.2](features.md#132-audit-logging)
 - **Détail technique de la purge des déclarations** : [`architecture.md` §9.6](architecture.md#96-traitements-planifiés-crons-de-maintenance-des-données) et [`features.md` §13.8](features.md#138-purge-rgpd-des-déclarations)
-- **Règle de maintenance du journal d'audit** : [`audit-logging.md`](../.claude/skills/implement/references/conventions/audit-logging.md)
+- **Règle de maintenance du journal d'audit** : [`audit-logging.md`](../.agents/skills/implement/references/conventions/audit-logging.md)
 - **Matomo et exemption CNIL** : [`matomo-cnil-exemption.md`](matomo-cnil-exemption.md)
 - **Mails transactionnels** : [`mails.md`](mails.md)
 - **Pages publiques** : `/donnees-personnelles`, `/gestion-des-cookies`

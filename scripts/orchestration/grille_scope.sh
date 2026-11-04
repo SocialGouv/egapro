@@ -3,7 +3,7 @@
 # grille_scope.sh — decides whether the E2E step of /implement must replay the 185-coordinate
 # recette grid (`pnpm --filter app test:e2e:grille`) on top of the E2E suite.
 #
-# Single source of the rule: .claude/skills/implement/references/e2e.md
+# Single source of the rule: .agents/skills/implement/references/e2e.md
 # points here instead of restating the paths.
 #
 # Prints exactly one word on stdout:

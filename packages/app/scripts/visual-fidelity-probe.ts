@@ -1,6 +1,6 @@
 // Visual fidelity probe — deterministic render + DOM measurement + onion-skin overlay.
 //
-// Used by the design-fidelity review (see .claude/skills/review/references/design-fidelity.md).
+// Used by the design-fidelity review (see .agents/skills/review/references/design-fidelity.md).
 // It is NOT part of the app build; it drives a Playwright browser against a running
 // dev server to produce, for one screen scenario:
 //   - a cropped screenshot per viewport (the "rendered" side of the comparison)

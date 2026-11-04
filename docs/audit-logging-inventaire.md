@@ -1,6 +1,6 @@
 # Journalisation d'audit — inventaire et contrats
 
-> Snapshot de référence de la couche audit : couverture des route handlers, données conservées dans `audit.action_log` et contrat du miroir stdout. La **règle** (quand câbler, comment) vit dans [`.claude/skills/implement/references/conventions/audit-logging.md`](../.claude/skills/implement/references/conventions/audit-logging.md). Les durées de conservation, côté DPO, vivent dans [`journaux-et-conservation.md`](journaux-et-conservation.md).
+> Snapshot de référence de la couche audit : couverture des route handlers, données conservées dans `audit.action_log` et contrat du miroir stdout. La **règle** (quand câbler, comment) vit dans [`.agents/skills/implement/references/conventions/audit-logging.md`](../.agents/skills/implement/references/conventions/audit-logging.md). Les durées de conservation, côté DPO, vivent dans [`journaux-et-conservation.md`](journaux-et-conservation.md).
 
 Toute PR qui ajoute, retire ou ré-câble un route handler, ou change ce que `logAction` / `activityLog.ts` persistent ou émettent, met cette page à jour dans le même diff.
 

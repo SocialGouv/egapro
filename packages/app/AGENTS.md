@@ -107,7 +107,7 @@ La progression de la déclaration — écran suivant, transitions, conditions �
 
 **Ne jamais réencoder le graphe d'états à la main.** Une seule table dit où va l'utilisateur (`~/modules/navigation`, `getDemarcheStageHref`) ; `my-space/declarationProcessState.ts` n'en projette que la variante d'affichage du panneau. Ne pas en ouvrir un autre : tout code conscient de l'état se branche sur `~/modules/navigation`, ou se type sur `DeclarationFsmStatus` avec un `switch` exhaustif **sans `default:`**, ou dérive directement du moteur.
 
-> Détail et modèles de tests → [`demarche-state-machine.md`](../../.claude/skills/implement/references/conventions/demarche-state-machine.md)
+> Détail et modèles de tests → [`demarche-state-machine.md`](../../.agents/skills/implement/references/conventions/demarche-state-machine.md)
 
 ---
 
@@ -124,7 +124,7 @@ La progression de la déclaration — écran suivant, transitions, conditions �
 
 Trois points de câblage sont requis à chaque fois : la constante, la catégorie (qui décide le bucket de rétention CNIL), et le fil propre à la surface. `logAction` projette `metadata` par action selon une liste de clés et de valeurs validées ; secrets, IP, fichiers et texte libre n'y sont pas conservés.
 
-> Playbook complet, snippets et checklist → [`audit-logging.md`](../../.claude/skills/implement/references/conventions/audit-logging.md)
+> Playbook complet, snippets et checklist → [`audit-logging.md`](../../.agents/skills/implement/references/conventions/audit-logging.md)
 
 ---
 
@@ -137,7 +137,7 @@ Trois points de câblage sont requis à chaque fois : la constante, la catégori
 - **Doc Next.js** : `nextjs_docs` (lire d'abord la ressource `nextjs-docs://llms-index` pour trouver les chemins). **Ne jamais deviner une API Next.js de mémoire**
 - **Navigateur** : `browser_eval` pour naviguer, capturer, lire la console
 
-Les MCP `dsfr` et `figma` sont couverts par [`styling-dsfr.md`](../../.claude/skills/implement/references/conventions/styling-dsfr.md) et [`figma.md`](../../.claude/skills/implement/references/conventions/figma.md).
+Les MCP `dsfr` et `figma` sont couverts par [`styling-dsfr.md`](../../.agents/skills/implement/references/conventions/styling-dsfr.md) et [`figma.md`](../../.agents/skills/implement/references/conventions/figma.md).
 
 ### Scripts
 
@@ -163,7 +163,7 @@ pnpm db:push          # applique le schéma sans migration (dev local uniquement
 pnpm db:studio        # Drizzle Studio
 ```
 
-> Transactions, casing, interdits sur `drizzle/` → [`database-drizzle.md`](../../.claude/skills/implement/references/conventions/database-drizzle.md)
+> Transactions, casing, interdits sur `drizzle/` → [`database-drizzle.md`](../../.agents/skills/implement/references/conventions/database-drizzle.md)
 
 ### Variables d'environnement
 

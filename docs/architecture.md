@@ -225,7 +225,7 @@ domain/
   __tests__/      # 100% coverage sur toutes les fonctions
 ```
 
-`format.ts` est le **seul endroit** où une valeur devient du texte affichable — nombres, pourcentages, montants, durées, tailles de fichier, dates et heures. Un composant n'appelle jamais `toLocaleString`, `Intl.*` ni `toFixed` lui-même : la règle de nommage et la discipline associées vivent dans `.claude/skills/implement/references/conventions/code-quality.md` (« Formatage d'affichage »), et `scripts/quality/check-patterns.sh` refuse le motif hors du domaine.
+`format.ts` est le **seul endroit** où une valeur devient du texte affichable — nombres, pourcentages, montants, durées, tailles de fichier, dates et heures. Un composant n'appelle jamais `toLocaleString`, `Intl.*` ni `toFixed` lui-même : la règle de nommage et la discipline associées vivent dans `.agents/skills/implement/references/conventions/code-quality.md` (« Formatage d'affichage »), et `scripts/quality/check-patterns.sh` refuse le motif hors du domaine.
 
 **Pourquoi cette discipline** :
 
@@ -598,7 +598,7 @@ Lors de la purge RGPD des déclarations (§9.6), les objets S3 rattachés aux d�
 
 ## 9. Audit logging
 
-Module : `src/modules/audit/` (constantes, types) + `src/server/audit/` (runtime). Documentation détaillée : [`audit-logging.md`](../.claude/skills/implement/references/conventions/audit-logging.md).
+Module : `src/modules/audit/` (constantes, types) + `src/server/audit/` (runtime). Documentation détaillée : [`audit-logging.md`](../.agents/skills/implement/references/conventions/audit-logging.md).
 
 ### 9.1 Pourquoi
 
@@ -801,7 +801,7 @@ Activé via `data-fr-scheme="system"` sur `<html>`. Cookie `fr-theme` lu par un 
 
 ### 11.5 RGAA 4.1.2 / WCAG 2.2 AA
 
-Toute l'accessibilité passe par **ultra11y**, en deux surfaces : le skill `review-a11y`, lancé par `/review gates` sur le code sous changement (après l'audit statique du pre-commit et de `pnpm verify`), et le workflow `.github/workflows/a11y.yaml` (Action `SocialGouv/ultra11y`) — gate statique bloquante sur chaque PR, plus — au cron hebdomadaire ou en manuel — un balayage Playwright des pages qui décide les critères au rendu et fait adjuger les critères de jugement par le runner CLI du moteur. Lighthouse rapporte un score d'accessibilité en avertissement, ce n'est pas une gate. Aucun système a11y parallèle. Règle canonique : `AGENTS.md` § Accessibilité, et `.claude/skills/review/references/a11y.md` pour la revue.
+Toute l'accessibilité passe par **ultra11y**, en deux surfaces : le skill `review-a11y`, lancé par `/review gates` sur le code sous changement (après l'audit statique du pre-commit et de `pnpm verify`), et le workflow `.github/workflows/a11y.yaml` (Action `SocialGouv/ultra11y`) — gate statique bloquante sur chaque PR, plus — au cron hebdomadaire ou en manuel — un balayage Playwright des pages qui décide les critères au rendu et fait adjuger les critères de jugement par le runner CLI du moteur. Lighthouse rapporte un score d'accessibilité en avertissement, ce n'est pas une gate. Aucun système a11y parallèle. Règle canonique : `AGENTS.md` § Accessibilité, et `.agents/skills/review/references/a11y.md` pour la revue.
 
 ---
 
@@ -928,7 +928,7 @@ Les pannes de ProConnect bloquent **complètement** la connexion ; aucune procé
 ## Pour aller plus loin
 
 - **Conventions de code** détaillées : [`packages/app/CLAUDE.md`](../packages/app/CLAUDE.md)
-- **Règles de qualité** automatisées : [`conventions/`](../.claude/skills/implement/references/conventions/) (audit logging, code-quality, database-drizzle, react-components, styling-dsfr, testing, trpc-api, …)
+- **Règles de qualité** automatisées : [`conventions/`](../.agents/skills/implement/references/conventions/) (audit logging, code-quality, database-drizzle, react-components, styling-dsfr, testing, trpc-api, …)
 - **Wiki Spec V2** (réglementation) : <https://github.com/SocialGouv/egapro/wiki/Spec-V2>
 - **Features** (vue fonctionnelle) : [`docs/features.md`](features.md)
 - **Parcours utilisateurs** : [`docs/parcours-utilisateurs.md`](parcours-utilisateurs.md)

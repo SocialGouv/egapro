@@ -8,7 +8,7 @@
 #   VERIFY_BASE   ref the diff is taken against (default: origin/alpha)
 #   VERIFY_SKIP   space-separated step names to skip, e.g. "test typecheck" (never in CI)
 #
-# Steps: patterns · a11y · lint · format · typecheck · test
+# Steps: patterns · agent-config · a11y · lint · format · typecheck · test
 
 set -uo pipefail
 
@@ -40,6 +40,7 @@ a11y_static() {
 }
 
 step patterns bash scripts/quality/check-patterns.sh --diff "$BASE"
+step agent-config node scripts/ai/sync-agent-config.mjs --check
 step a11y a11y_static
 step lint pnpm lint:check
 step format pnpm format:check

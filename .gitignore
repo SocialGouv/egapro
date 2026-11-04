@@ -39,14 +39,17 @@ packages/notifications/dist/
 .vscode/
 
 # coding agents — ignore local state, whitelist the shared config.
-# Instructions live in AGENTS.md; skills in .claude/skills/ (read by Claude Code and OpenCode).
+# Instructions: AGENTS.md. Skills + MCP source: .agents/ (cross-tool standard).
+# .claude/skills is a symlink to ../.agents/skills (Claude Code does not scan .agents/).
+.agents/*
+!.agents/skills/
+!.agents/mcp.json
 .claude/*
-!.claude/skills/
+!.claude/skills
 !.claude/settings.json
-.opencode/*
-!.opencode/commands/
-!.opencode/plugins/
-.codex/
+.codex/*
+!.codex/config.toml
+.opencode/
 
 # SUIT signing keys
 suit-client-certs/

@@ -222,15 +222,17 @@ Le projet est configure pour tout agent de code qui lit `AGENTS.md` — [Claude 
 AGENTS.md                 <- contexte projet, source unique (toujours charge)
 packages/app/AGENTS.md    <- architecture du package app
 CLAUDE.md, packages/app/CLAUDE.md   <- "@AGENTS.md" : Claude Code importe AGENTS.md
-.claude/skills/           <- les 3 workflows, lus par Claude Code ET OpenCode
+.agents/skills/           <- les 3 workflows (standard Agent Skills : Codex, OpenCode ; Claude via le symlink)
   analyze/   SKILL.md + references/     (spec, board, sizing, PO, architecte, bug, rework)
   implement/ SKILL.md + references/     (workflow, epic, e2e, bug-fix, conventions/ = regles de code)
   review/    SKILL.md + references/     (checklists structure, securite, a11y, design, fonctionnel, PR)
+.agents/mcp.json          <- serveurs MCP, source unique
+.claude/skills            <- symlink -> ../.agents/skills (Claude Code ne lit pas .agents/)
 .claude/settings.json     <- plugin ultra11y (Claude Code)
-opencode.json             <- instructions, MCP, permissions (OpenCode)
-.opencode/commands/       <- /analyze, /implement, /review cote OpenCode
-.opencode/plugins/        <- plugin ultra11y (OpenCode), charge depuis la devDependency
-.mcp.json                 <- serveurs MCP (Claude Code) — memes serveurs que opencode.json
+opencode.json             <- instructions, permissions, plugin ultra11y (OpenCode) + MCP genere
+.mcp.json                 <- MCP genere (Claude Code)
+.codex/config.toml        <- MCP genere (Codex)
+scripts/ai/               <- sync-agent-config.mjs : genere les 3 configs MCP, --check en CI
 lefthook.yml              <- git hooks pre-commit / pre-push
 scripts/quality/          <- check-patterns.sh, verify.sh
 ```
@@ -258,7 +260,7 @@ scripts/quality/          <- check-patterns.sh, verify.sh
 
 ### Accessibilite
 
-ultra11y est le dispositif unique, a chaque etage : devDependency (moteur, pre-commit, `pnpm verify`), plugin Claude Code `ultra11y@ultra11y`, plugin OpenCode `.opencode/plugins/ultra11y.js` (gate commit / push / PR + skills `review-a11y` et `ultra11y`), serveur MCP `ultra11y`, Action CI. Detail : [`docs/accessibilite-ultra11y.md`](docs/accessibilite-ultra11y.md).
+ultra11y est le dispositif unique, a chaque etage : devDependency (moteur, pre-commit, `pnpm verify`), plugin Claude Code `ultra11y@ultra11y`, plugin OpenCode declare dans `opencode.json` et charge depuis la devDependency (gate commit / push / PR + skills `review-a11y` et `ultra11y`), Codex via `ultra11y install --codex` (portee utilisateur), serveur MCP `ultra11y`, Action CI. Detail : [`docs/accessibilite-ultra11y.md`](docs/accessibilite-ultra11y.md).
 
 > Hooks git : si `core.hooksPath` pointe vers un repertoire inexistant dans ta config git locale, `pnpm install` le signale — lance `git config --unset core.hooksPath` puis `pnpm install`.
 
