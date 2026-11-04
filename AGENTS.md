@@ -49,6 +49,21 @@ En début de session sur une branche (hors `alpha`) qui a une PR ouverte : si el
 
 ---
 
+## Décisions métier : l'humain tranche
+
+egapro applique une obligation légale : une règle métier fausse, c'est une entreprise mal déclarée. **Tu ne prends aucune décision métier seul** — tu la prépares, l'utilisateur la tranche.
+
+Est une décision métier : un seuil ou une tranche d'effectif, un calcul d'indicateur ou d'écart, une obligation déclenchée (seconde déclaration, avis du CSE…), une date ou un délai de campagne, un parcours ou une condition d'accès, un libellé à portée juridique, une durée de conservation, ce qu'on montre ou cache à un déclarant.
+
+- **Le spec ou la spec V2 tranche** → applique, et cite la source (`packages/app/src/modules/domain/`, section du spec, lien wiki).
+- **Ils sont muets, ambigus ou se contredisent** → **STOP** : pose **la** question, avec les options et leur conséquence concrète, et attends. Sans utilisateur présent (`/implement` lancé seul) : commente l'issue (`question métier : …`) et arrête-toi.
+- Le code existant **n'est pas** une réponse à une question métier nouvelle : il dit ce qui est, pas ce qui doit être. Un modèle « qui a l'habitude » non plus.
+- Une hypothèse métier que tu as dû faire pour avancer (même minime) s'écrit **en clair** dans le spec ou le body de PR, section « Hypothèses à valider ».
+
+`/analyze` est le lieu de cette discussion : un spec n'est posté qu'une fois validé par l'utilisateur.
+
+---
+
 ## Règles de code : où les lire
 
 **Une règle vit à un seul endroit.** Si tu la trouves écrite deux fois, la deuxième a déjà commencé à diverger : corrige la source et remplace la copie par un lien.

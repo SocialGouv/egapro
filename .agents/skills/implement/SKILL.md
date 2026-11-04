@@ -83,7 +83,7 @@ Ensuite, **toutes** les commandes se lancent depuis ce worktree.
 gh pr create --draft --base <alpha|epic/<parent>> --title "<type>(<scope>): #<N> — <résumé>" --body-file /tmp/pr-<N>.md
 bash scripts/orchestration/force_pr_issue_link.sh <PR>
 ```
-Body : `Closes #<N>` en **première ligne**, puis résumé, plan de test, « Tests » (triage), « E2E » (mode + justification), « Vérification » (bug : avant / après), screenshots desktop + mobile si UI (donnée seedée uniquement).
+Body : `Closes #<N>` en **première ligne**, puis résumé, « Hypothèses à valider » (toute hypothèse métier faite en route, sinon « aucune »), plan de test, « Tests » (triage), « E2E » (mode + justification), « Vérification » (bug : avant / après), screenshots desktop + mobile si UI (donnée seedée uniquement).
 
 **10. CI, Sonar, bots** — [`workflow.md`](references/workflow.md) § CI : tous les checks conclus et verts (critère jq), Sonar Quality Gate passé, **un** cycle `wait_for_bot_reviews.sh` → chaque thread corrigé ou répondu → `check_review_replies.sh` en exit 0. Même axe rouge 3 fois → **STOP** (§ Bloqué).
 
@@ -111,6 +111,7 @@ Next : relecture humaine de la PR ; commentaires → /review <PR>
 ## Interdits
 
 - Improviser un spec absent, ou sortir du sujet du ticket.
+- Trancher seul une question métier que le spec ne règle pas (seuil, calcul, obligation, parcours, libellé juridique) : **STOP**, commente l'issue avec la question et les options (`AGENTS.md` § Décisions métier).
 - Merger vers `alpha`, passer un ticket en `In review` / `Done`.
 - Contourner un garde-fou (hook git, `check-patterns.sh`, ultra11y, CI) : s'il bloque, c'est le code qui change.
 - Affaiblir un test pour le faire passer.
