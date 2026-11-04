@@ -23,7 +23,7 @@ Lis [`board.md`](board.md) et [`ticket-spec-format.md`](ticket-spec-format.md) a
    - `e2e-regression` : dans le commentaire `implement: régression E2E`, extraire le(s) test(s) en échec, le parcours cassé, le comportement attendu vs obtenu, le(s) fichier(s) source suspecté(s).
    - `user-feedback` : reformuler la demande en intentions concrètes — quels écrans, parcours, comportements changent.
 
-2. **Diagnostiquer / cadrer.** Lire le code intégré (`git fetch origin epic/<N> && git diff origin/alpha...origin/epic/<N>`) et les fichiers pertinents.
+2. **Diagnostiquer / cadrer.** Lire le code intégré (`git fetch origin epic/<N> && git diff origin/alpha...origin/epic/<N>`) et les fichiers pertinents — en `e2e-regression`, aussi le scénario qui casse (`src/e2e/<…>.e2e.ts`).
    - `e2e-regression` : **pourquoi** le parcours casse-t-il ? Quel sous-ticket a introduit l'effet de bord ? Deux cas :
      - le parcours **devait rester** tel quel → vraie régression de code → ticket de fix du code ;
      - le test asserte un ancien comportement **volontairement changé** → le fix est d'ajuster le scénario E2E : crée un ticket qui le demande **explicitement** — ou escalade si ce changement n'était pas spécifié.

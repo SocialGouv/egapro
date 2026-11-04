@@ -82,7 +82,7 @@ Ne juge que ce que couvre le ticket. Une divergence explicitement confiée à un
 
 ## 8. Contrat de fidélité (couche permanente, en E2E)
 
-Le contrôle ci-dessus est ponctuel. Ce qui survit est le **contrat de fidélité** : les valeurs du node Figma écrites une fois dans un `*.e2e.ts` dédié (constantes de module, assertions `getComputedStyle` / `getBoundingClientRect`), rejoué par chaque run E2E (`e2e.yaml`). Pas de moteur générique ni de dossier de fixtures. Modèles à copier :
+Le contrôle ci-dessus est ponctuel : rien n'empêche la dérive de revenir six semaines plus tard, et un verdict `degraded` (session ProConnect absente) laisse partir l'écran en production sans qu'il ait jamais été rendu — c'est arrivé sur #3576. Ce qui survit est le **contrat de fidélité** : les valeurs du node Figma écrites une fois dans un `*.e2e.ts` dédié (constantes de module, assertions `getComputedStyle` / `getBoundingClientRect`), rejoué par chaque run E2E (`e2e.yaml`). Pas de moteur générique ni de dossier de fixtures. Modèles à copier :
 
 | Fichier | Ce qu'il verrouille |
 |---|---|

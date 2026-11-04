@@ -50,7 +50,7 @@ gh api graphql -f query='{ repository(owner:"SocialGouv",name:"egapro"){ issue(n
 
 Absent → **STOP** : « Aucune analyse sur #<N>. Lance `/analyze <N>` d'abord. »
 
-**2. Branche + worktree.**
+**2. Branche + worktree.** Sous-ticket : `bash scripts/orchestration/ensure_epic_branch.sh <parent>` d'abord (idempotent) — sans `epic/<parent>` sur origin, `create_linked_branch.sh` échoue.
 ```bash
 git fetch origin
 BRANCH=$(bash scripts/orchestration/create_linked_branch.sh <N> <base>)
@@ -69,7 +69,7 @@ Ensuite, **toutes** les commandes se lancent depuis ce worktree.
 **4. Coder + tests vitest.** Relis le spec (body + tous les commentaires). Ouvre les conventions de la table ci-dessus **avant** d'écrire. Les tests TU (+ intégration si DB-layer) s'écrivent **pendant**, pas après — règles et triage d'un test rouge : [`workflow.md`](references/workflow.md) § Tests. Bug : exécute la vérification one-shot et le revert-verify ([`bug-fix.md`](references/bug-fix.md)).
 
 **5. `pnpm verify`** (racine du worktree) — `scripts/quality/check-patterns.sh` sur le diff depuis `VERIFY_BASE` (défaut `origin/alpha`), audit statique ultra11y de tout `src`, lint, format, typecheck, tests. Pour un sous-ticket : `VERIFY_BASE=origin/epic/<parent> pnpm verify`.
-- Rouge → corrige **la cause**, relance. Boucle jusqu'au vert.
+- Rouge → corrige **la cause**, relance. Boucle jusqu'au vert. `format` / `lint` rouges : `pnpm check:write` (dans `packages/app`) corrige d'un coup.
 - Interdit : `--no-verify`, `biome-ignore`, `@ts-ignore`, `.skip`, assertion supprimée ou relâchée.
 
 **6. Revue `gates`.** Exécute le skill review en mode gates ([`../review/SKILL.md`](../review/SKILL.md)) sur ton diff. Chaque checklist en `NEEDS WORK` → corrige → repasse `pnpm verify` → relance la revue. Continue jusqu'à **PASS sur toutes les checklists applicables**. Si ton outil sait lancer des tâches en parallèle, les checklists peuvent tourner en parallèle.

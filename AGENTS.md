@@ -45,6 +45,8 @@ Gestionnaire de paquets : **pnpm workspaces** (`pnpm@10`).
 
 Les skills vivent dans `.agents/skills/<nom>/`, l'emplacement standard lu par Codex et OpenCode ; Claude Code y accède par le symlink `.claude/skills` ; chacun charge ses références à la demande. Pas d'orchestrateur en tâche de fond : pour paralléliser un epic, ouvre une session par sous-ticket.
 
+En début de session sur une branche (hors `alpha`) qui a une PR ouverte : si elle porte des threads de revue non résolus, signale-le et propose `/review <PR#>`.
+
 ---
 
 ## Règles de code : où les lire

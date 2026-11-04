@@ -76,9 +76,11 @@ Ticket UI sans `## Référence Figma` → signale-le sur le ticket ; la revue re
 - `gh pr create --draft --base <base>` où `<base>` = `alpha` (Task/Bug standalone) ou `epic/<N>` (sous-ticket).
 - Body : **`Closes #<N>` en première ligne** (sinon `force_pr_issue_link.sh` échoue), puis résumé, plan de test, section « Tests » (triage), section « Vérification » (bugs), screenshots.
 - **Screenshots obligatoires** pour toute modif UI (desktop + mobile), pris sur le dev server du worktree avec de la **donnée seedée fictive uniquement** — vérifie l'écran avant capture (dépôt public, voir `AGENTS.md` § Hygiène git).
-- Juste après `gh pr create` : `bash scripts/orchestration/force_pr_issue_link.sh <PR>` (une seule fois — chaque flip de base relance ~2 runs CI). Sur une base `epic/<N>`, `Closes #N` ne ferme le ticket qu'au merge de la PR finale `epic/<N> → alpha`.
+- Juste après `gh pr create` : `bash scripts/orchestration/force_pr_issue_link.sh <PR>` (une seule fois — chaque flip de base relance ~2 runs CI). Échec « Closes keyword missing » → `gh pr edit <PR> --body-file /tmp/pr-<N>.md` avec `Closes #<N>` en première ligne, puis relance le script. Sur une base `epic/<N>`, `Closes #N` ne ferme le ticket qu'au merge de la PR finale `epic/<N> → alpha`.
 
 ## CI, Sonar, bots
+
+Substitue chaque `<PR>` par le numéro **avant** de lancer une commande : `<PR>` laissé tel quel est lu par le shell comme une redirection (`PR=1234` puis `"$PR"`).
 
 1. `gh pr checks <PR> --watch`. Un check rouge → `gh run view <run-id> --log-failed`, corrige, push, re-watch.
 2. **Attends que TOUS les checks aient conclu** (le déploiement de review app finit après build/lint/tests) :
@@ -87,12 +89,12 @@ Ticket UI sans `## Référence Figma` → signale-le sur le ticket ; la revue re
      '[.statusCheckRollup[]? | select(.name) | .conclusion] | (length > 0) and (all(. == "SUCCESS" or . == "SKIPPED" or . == "NEUTRAL"))'
    ```
    Doit répondre `true`. Une conclusion vide = check encore en cours → attends.
-3. **SonarCloud** : si `sonarcloud[bot]` dit `Quality Gate: Failed`, lis ses issues (bugs, vulnérabilités, hotspots, duplications, couverture), corrige, push.
+3. **SonarCloud** : si `sonarcloud[bot]` dit `Quality Gate: Failed`, lis ses issues (bugs, vulnérabilités, hotspots, duplications, couverture), corrige, push. Bloquants sans discussion : bugs, vulnérabilités, security hotspots non revus. Le bot n'a pas encore commenté → attends : pas de `gh pr ready` sans `Quality Gate: Passed` lu.
 4. **Un seul cycle de bots**, une fois tout vert :
    ```bash
    COMMENTS=$(timeout 1500 bash scripts/orchestration/wait_for_bot_reviews.sh <PR> < /dev/null)
    ```
-   `0` → fini. Sinon lis tout (`gh pr view <PR> --comments`, `gh api repos/SocialGouv/egapro/pulls/<PR>/comments`), et pour **chaque** thread : corrige et réponds, ou réponds avec la justification (faux positif, hors scope). Jamais d'ignorance silencieuse.
+   `0` → fini. Sinon lis tout (`gh pr view <PR> --comments`, `gh api repos/SocialGouv/egapro/pulls/<PR>/reviews`, `gh api repos/SocialGouv/egapro/pulls/<PR>/comments`), et pour **chaque** thread : corrige et réponds, ou réponds avec la justification (faux positif, hors scope) — catégories (question, désaccord…) → [`pr-comments.md`](../../review/references/pr-comments.md). Jamais d'ignorance silencieuse. Si tu as poussé un correctif dans ce cycle : re-attends CI + Sonar verts (critère jq du point 2) avant d'aller plus loin.
 5. Post-condition : `bash scripts/orchestration/check_review_replies.sh <PR> < /dev/null` doit sortir en 0. Réponse dans un thread : `gh api -X POST repos/SocialGouv/egapro/pulls/<PR>/comments -f in_reply_to=<comment_id> -f body='…'`.
 6. **Une seule itération.** Les commentaires postés après ton push de correction relèvent de `/review <PR>`, pas de ce ticket — sinon tu boucles sur le re-spam des bots.
 7. `gh pr ready <PR>`, puis re-vérifie le critère jq du point 2 (marquer ready relance certains workflows).

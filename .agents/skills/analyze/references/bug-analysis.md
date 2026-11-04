@@ -53,12 +53,12 @@ Si une session tourne déjà sur `localhost:3000` avec la bonne branche, réutil
 ### 2b. Spécifique à un env
 
 ```bash
-kubectl get ns | grep egapro                 # review app : namespace dérivé de la branche ; preprod : voir .kontinuous/
+kubectl get ns | grep egapro                 # review app : egapro-<branch-slug>-<hash> ; preprod : namespace fixe, voir .kontinuous/
 kubectl -n <namespace> logs <pod> --tail=200
 kubectl -n <namespace> describe pod <pod>
 ```
 
-- Navigateur sur l'URL de la review app ou de la preprod, avec le compte ProConnect de test (demande-le à l'utilisateur ; ne l'écris nulle part).
+- Navigateur sur l'URL de la review app (`https://<namespace>.ovh.fabrique.social.gouv.fr`) ou de la preprod, avec le compte ProConnect de test (demande-le à l'utilisateur ; ne l'écris nulle part).
 - **Jamais la prod** sans accord explicite de l'utilisateur — avant tout `kubectl` ou toute navigation. Règle dure.
 
 ### 2c. Écart visuel Figma ↔ app
@@ -105,7 +105,7 @@ Les 7 rubriques sont **obligatoires**, plus `## Complexité`.
    - correctif sur un **utilitaire partagé** (N appelants) ou sur un seul écran ?
    - un TU / test d'intégration suffirait-il (règle métier, fonction pure) ?
 
-   Conclus par **une ligne** : `Couverture permanente : E2E justifiée | TU/intégration suffisante | non justifiée | à l'appréciation de l'implémentation`, plus une phrase de motif. Le choix final (imbriquer, créer, ne rien faire) se fait à l'implémentation, sur le diff réel ([`e2e.md`](../../implement/references/e2e.md)). Ne propose donc **ni fichier hôte, ni viewport, ni forme d'assertion, ni seuil**.
+   Conclus par **une ligne** : `Couverture permanente : E2E justifiée | TU/intégration suffisante | non justifiée | à l'appréciation de l'implémentation`, plus une phrase de motif. Le choix final (imbriquer, créer, ne rien faire) se fait à l'implémentation, sur le diff réel ([`e2e.md`](../../implement/references/e2e.md)). Ne propose donc **ni fichier hôte, ni viewport, ni forme d'assertion, ni seuil** : une spec de test écrite ici serait lue en aval comme une décision déjà prise et court-circuiterait ce jugement.
 7. **Tags suggérés** — `complexe` si > 5 fichiers ou refacto multi-modules, sinon « aucun ».
 
 Ne gonfle pas la taille au titre d'un test permanent qui ne sera peut-être pas écrit : estime sur le correctif et sa vérification one-shot.

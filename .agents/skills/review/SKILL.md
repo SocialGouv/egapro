@@ -93,7 +93,7 @@ Lis d'abord [references/pr-comments.md](references/pr-comments.md) : il porte le
      - type absent → demander.
    Aucune PR trouvée → le dire et **STOP**.
 
-2. **Worktree.** Un worktree sur la branche de travail (jamais une nouvelle branche), puis `bash scripts/setup-worktree.sh <index>` s'il manque `packages/app/.env.local`.
+2. **Worktree.** Un worktree sur la branche de travail (jamais une nouvelle branche), puis `bash scripts/setup-worktree.sh <index>` s'il manque `packages/app/.env.local` — `<index>` libre entre 0 et 9 : port `3001 + index` sans écoute (`lsof -iTCP:<port> -sTCP:LISTEN` vide) et pris par aucun autre worktree.
 
 3. **Lire les threads NON RÉSOLUS** via GraphQL `reviewThreads` (pr-comments § 2), plus les commentaires de niveau PR. Zéro thread non résolu → `Rien à traiter` et **STOP**.
 

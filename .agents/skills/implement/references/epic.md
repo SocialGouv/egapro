@@ -38,7 +38,7 @@ Toutes les PR de sous-ticket ciblent `epic/<N>`. La PR finale `epic/<N> → alph
    | 1 | erreur dure (base ≠ `epic/<N>`, droits) | STOP, rapporter |
 6. **Garder `epic/<N>` à jour** quand `alpha` a avancé (entre deux tickets, ou avant la PR finale) : `bash scripts/orchestration/rebase_epic_branch.sh <N>`. Exit 2 = conflit : le script a commenté l'epic et posé `dispatch=escalate` → **STOP**, rends la main à l'utilisateur.
 7. **Quand tous les sous-tickets sont mergés** — E2E sur la feature complète :
-   - worktree sur `epic/<N>` (`git worktree add ../egapro-epic-<N> epic/<N>`), `bash scripts/setup-worktree.sh <index-libre>` ;
+   - worktree sur `epic/<N>` à jour des squash-merges : `git fetch origin`, `git worktree add ../egapro-epic-<N> epic/<N>`, puis dans le worktree `git pull --ff-only origin epic/<N>` (une branche `epic/<N>` locale d'une session précédente est en retard) ; `bash scripts/setup-worktree.sh <index-libre>` ;
    - déroulé de [`e2e.md`](e2e.md) avec **base = `origin/alpha`** (le diff = toute la feature) ;
    - régression → commentaire `implement: régression E2E` sur l'epic puis `/analyze <N> rework` ([`rework.md`](../../analyze/references/rework.md)) : il crée les tickets de fix, que l'on implémente comme les autres, puis on rejoue cette étape. Au **3ᵉ** tour rouge, stop et escalade à l'utilisateur.
    - vert → commit `test(e2e): …` poussé sur `epic/<N>`.

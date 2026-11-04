@@ -43,9 +43,9 @@ Hors création (statut initial d'une issue neuve), **analyze ne déplace aucun t
 
 ### Champs Size / Estimate / dates
 
-- **Size + Estimate** : `bash scripts/orchestration/set_ticket_size.sh <N> <XS|S|M|L|XL>` — rubrique dans [`complexity-estimation.md`](complexity-estimation.md).
+- **Size + Estimate** : `bash scripts/orchestration/set_ticket_size.sh <N> <XS|S|M|L|XL>` — rubrique dans [`complexity-estimation.md`](complexity-estimation.md). Options `Size` : XS `6c6483d2` (1 pt) · S `f784b110` (2) · M `7515a9f1` (3) · L `817d0097` (5) · XL `db339eb2` (8).
 - **Start date** : posée automatiquement par `set_ticket_status.sh` sur la transition `→ In progress` (le premier passage gagne).
-- **End date** : posée par le workflow `.github/workflows/ticket-end-date.yaml` au merge de la PR (résout `<N>` depuis la branche `ticket/<N>-*`).
+- **End date** : posée par le workflow `.github/workflows/ticket-end-date.yaml` au merge de la PR (résout `<N>` depuis la branche `ticket/<N>-*` ; la PR finale `epic/<N>` et les branches hors ticket sont ignorées). Écrire un project V2 d'org exige `organization_projects: write`, que le `GITHUB_TOKEN` par défaut ne porte jamais : le workflow passe par un token d'App minté par token-bureau (prérequis hors dépôt dans son en-tête). Rejouer la pose sans merger : `workflow_dispatch` (entrées `ticket`, `date`).
 - Écriture manuelle d'une date : `bash scripts/orchestration/set_ticket_date.sh <N> <start|end> [--if-empty] [YYYY-MM-DD]`.
 
 ---
@@ -174,4 +174,4 @@ gh api graphql -f query='
 }'
 ```
 
-Si le board a été recréé, mettre à jour les constantes en haut de ce fichier.
+Si le board a été recréé, mettre à jour les constantes en haut de ce fichier **et** celles embarquées dans `scripts/orchestration/set_ticket_*.sh`, qui sont les seules à écrire réellement le board.

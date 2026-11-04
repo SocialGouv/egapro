@@ -44,6 +44,7 @@ packages/notifications/dist/
 .agents/*
 !.agents/skills/
 !.agents/mcp.json
+!.agents/MIGRATION.md
 .claude/*
 !.claude/skills
 !.claude/settings.json

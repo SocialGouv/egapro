@@ -60,8 +60,8 @@ Objectif : transformer une task vague en spec exécutable, **sans découpage**, 
    - \> 5 fichiers à modifier ;
    - refacto multi-modules (plusieurs `~/modules/*` distincts, ou couches multiples domain + UI + tRPC + tests + scripts) ;
    - création d'un nouveau sous-module (`~/modules/<feature>/<sous-module>/`) ;
-   - plus d'un flow utilisateur indépendant impacté ;
-   - dépendances internes naturelles (fondation → câblage répété sur N formulaires) qui se découperaient en T1 + T2 + T3.
+   - plus d'un flow utilisateur indépendant impacté (ex. Step1 du parcours principal + `JointEvaluationForm` + `CompliancePathChoice`) ;
+   - dépendances internes naturelles (fondation → câblage répété sur N formulaires) qui se découperaient en T1 + T2 + T3 parallélisables.
 
    Cas limite : exactement 8 critères et 5 fichiers reste une task.
 
