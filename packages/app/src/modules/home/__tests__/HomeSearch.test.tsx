@@ -8,64 +8,38 @@ describe("HomeSearch", () => {
 		expect(
 			screen.getByRole("heading", {
 				level: 2,
-				name: /rechercher une entreprise et consulter ses résultats/i,
+				name: "Consulter les résultats d'une entreprise",
 			}),
 		).toBeInTheDocument();
 	});
 
-	it("mentions the remuneration indicators", () => {
+	it("explains which results are public", () => {
 		render(<HomeSearch />);
 		expect(
-			screen.getByText(/indicateurs de rémunération/i),
+			screen.getByText(
+				/^Les résultats déclarés par les entreprises sont publics pour les indicateurs de rémunération/,
+			),
 		).toBeInTheDocument();
 	});
 
-	it("mentions the representation indicators", () => {
+	it("renders the search form", () => {
 		render(<HomeSearch />);
 		expect(
-			screen.getByText(/indicateurs de représentation/i),
-		).toBeInTheDocument();
+			screen.getByRole("form", { name: "Rechercher une entreprise" }),
+		).toHaveAttribute("action", "/index-egapro/recherche");
 	});
 
-	it("renders the SIREN/name search input", () => {
+	it("hides the decorative illustration below md", () => {
 		render(<HomeSearch />);
-		expect(
-			screen.getByLabelText(/numéro siren ou le nom de l'entreprise/i),
-		).toBeInTheDocument();
-	});
-
-	it("renders the region select", () => {
-		render(<HomeSearch />);
-		expect(screen.getByLabelText(/région/i)).toBeInTheDocument();
-	});
-
-	it("renders the department select", () => {
-		render(<HomeSearch />);
-		expect(screen.getByLabelText(/département/i)).toBeInTheDocument();
-	});
-
-	it("renders the sector select", () => {
-		render(<HomeSearch />);
-		expect(screen.getByLabelText(/secteur d'activité/i)).toBeInTheDocument();
-	});
-
-	it("renders the search button", () => {
-		render(<HomeSearch />);
-		expect(
-			screen.getByRole("button", { name: /rechercher/i }),
-		).toBeInTheDocument();
-	});
-
-	it("submits the form to the index search results page", () => {
-		const { container } = render(<HomeSearch />);
-		const form = container.querySelector("form");
-		expect(form).toHaveAttribute("action", "/index-egapro/recherche");
-		expect(form).toHaveAttribute("method", "GET");
-	});
-
-	it("has the correct name attribute on the search input", () => {
-		render(<HomeSearch />);
-		const input = screen.getByLabelText(/numéro siren/i);
-		expect(input).toHaveAttribute("name", "q");
+		const illustration = screen.getByTestId("next-image");
+		expect(illustration).toHaveAttribute(
+			"data-src",
+			"/assets/images/home/search-illustration.svg",
+		);
+		expect(illustration.parentElement).toHaveClass(
+			"fr-hidden",
+			"fr-unhidden-md",
+		);
+		expect(illustration.parentElement).toHaveAttribute("aria-hidden", "true");
 	});
 });

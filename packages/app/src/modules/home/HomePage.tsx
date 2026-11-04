@@ -1,8 +1,8 @@
 import { HomeHero } from "./HomeHero";
 import { HomeNotice } from "./HomeNotice";
-import styles from "./HomePage.module.scss";
-import { HomePlaceholder } from "./HomePlaceholder";
+import { HomeObligations } from "./HomeObligations";
 import { HomeSearch } from "./HomeSearch";
+import { HomeWhyDeclare } from "./HomeWhyDeclare";
 
 type HomePageProps = {
 	remunerationDeadline: Date;
@@ -21,13 +21,11 @@ export function HomePage({
 				remunerationDeadline={remunerationDeadline}
 				representationDeadline={representationDeadline}
 			/>
-			<section aria-label="Contenu en cours de conception">
-				<div className={`fr-container fr-py-14v ${styles.placeholderSection}`}>
-					<HomePlaceholder />
-					<HomePlaceholder />
-					<HomePlaceholder />
-				</div>
-			</section>
+			<HomeWhyDeclare
+				remunerationDeadline={remunerationDeadline}
+				representationDeadline={representationDeadline}
+			/>
+			<HomeObligations />
 			<HomeSearch />
 		</main>
 	);

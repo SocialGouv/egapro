@@ -282,6 +282,15 @@
 				"notes": "Page de maintenance (503) rendue à son adresse dédiée."
 			},
 			{
+				"id": "en-construction",
+				"name": "Page en cours de construction",
+				"url": "http://localhost:3000/en-construction",
+				"sources": [
+					"src/app/en-construction/page.tsx",
+					"src/modules/error/UnderConstructionPage.tsx"
+				]
+			},
+			{
 				"id": "referent-detail",
 				"name": "Fiche d'un référent",
 				"url": "http://localhost:3000/referents/44444444-4444-4444-8444-444444444444",

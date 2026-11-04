@@ -20,6 +20,7 @@ import {
 	referentHref,
 	SITE_MAP,
 	termsOfUseVersionHref,
+	UNDER_CONSTRUCTION,
 } from "../shared/publicRoutes";
 
 describe("dynamic public hrefs", () => {
@@ -33,6 +34,10 @@ describe("dynamic public hrefs", () => {
 		expect(referentHref("r-1")).toBe("/referents/r-1");
 	});
 
+	it("points the holding page at /en-construction", () => {
+		expect(UNDER_CONSTRUCTION).toBe("/en-construction");
+	});
+
 	it("builds a terms of use archive page", () => {
 		expect(termsOfUseVersionHref("2026-10-12")).toBe("/cgu/2026-10-12");
 	});
@@ -42,6 +47,12 @@ describe("PUBLIC_PAGES", () => {
 	// The inventory `sitemap.xml` filters and `/plan-du-site` renders. They used
 	// to be two hand-kept lists that disagreed, so what matters here is
 	// that one list covers both surfaces.
+	it("leaves the holding page out of the sitemap and the site map", () => {
+		expect(PUBLIC_PAGES.map((page) => page.path)).not.toContain(
+			UNDER_CONSTRUCTION,
+		);
+	});
+
 	it("lists each page once", () => {
 		const paths = PUBLIC_PAGES.map((page) => page.path);
 		expect(new Set(paths).size).toBe(paths.length);

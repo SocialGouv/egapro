@@ -126,5 +126,6 @@ export {
 	SITE_MAP,
 	TEST_ERROR,
 	termsOfUseVersionHref,
+	UNDER_CONSTRUCTION,
 } from "./shared/publicRoutes";
 export { route, routeWithQuery, runtimeRoute } from "./shared/routeContract";

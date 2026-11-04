@@ -1,0 +1,26 @@
+.media {
+	align-items: center;
+	display: flex;
+	height: 100%;
+	justify-content: center;
+
+	@include respond-to(sm) {
+		padding: 1.5rem;
+	}
+}
+
+.remunerationMedia {
+	background-color: var(--background-alt-yellow-moutarde);
+}
+
+.representationMedia {
+	background-color: var(--background-alt-blue-france);
+}
+
+.media .illustration.illustration {
+	aspect-ratio: auto;
+	height: auto;
+	max-width: 100%;
+	object-fit: contain;
+	width: auto;
+}
