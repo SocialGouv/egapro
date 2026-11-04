@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
 	civilLongDateParts,
 	computePercentage,
+	formatCivilDayMonth,
 	formatCivilLongDate,
 	formatCivilShortDate,
 	formatCount,
@@ -487,6 +488,33 @@ describe("formatCivilLongDate", () => {
 			vi.stubEnv("TZ", timeZone);
 			expect(formatCivilLongDate(new Date("2026-06-01T00:00:00Z"))).toBe(
 				"1\u1d49\u02b3 juin 2026",
+			);
+		});
+	});
+});
+
+describe("formatCivilDayMonth", () => {
+	it("writes the day and the month without the year", () => {
+		expect(formatCivilDayMonth(new Date("2026-10-15T00:00:00Z"))).toBe(
+			"15 octobre",
+		);
+	});
+
+	it("writes the first day of a month with the French ordinal", () => {
+		expect(formatCivilDayMonth(new Date("2026-06-01T00:00:00Z"))).toBe(
+			"1\u1d49\u02b3 juin",
+		);
+	});
+
+	describe.each(NEGATIVE_OFFSET_TIMEZONES)("under %s", (timeZone) => {
+		afterEach(() => {
+			vi.unstubAllEnvs();
+		});
+
+		it("keeps the civil day instead of the day before", () => {
+			vi.stubEnv("TZ", timeZone);
+			expect(formatCivilDayMonth(new Date("2026-06-01T00:00:00Z"))).toBe(
+				"1\u1d49\u02b3 juin",
 			);
 		});
 	});

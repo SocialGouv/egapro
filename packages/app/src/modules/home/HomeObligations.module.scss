@@ -1,0 +1,62 @@
+.intro {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+}
+
+.checker {
+	background-color: var(--background-overlap-grey);
+	box-shadow: var(--overlap-shadow);
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	padding: 2rem;
+}
+
+.question {
+	align-items: center;
+	display: flex;
+	gap: 1rem;
+}
+
+.result {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	padding: 0.5rem 1rem;
+}
+
+.resultTitle {
+	font-size: 1rem;
+	line-height: 1.5rem;
+}
+
+.representation {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.item {
+	display: flex;
+	gap: 0.5rem;
+	padding-bottom: 0;
+}
+
+.itemIcon {
+	flex-shrink: 0;
+	padding-top: 0.125rem;
+
+	&::before {
+		--icon-size: 1.25rem;
+	}
+}

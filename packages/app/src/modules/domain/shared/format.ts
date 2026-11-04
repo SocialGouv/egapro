@@ -249,14 +249,19 @@ export function formatShortDateTime(date: Date | null | undefined): string {
 	}).format(new Date(date));
 }
 
-function longDate(date: Date, timeZone?: string): string {
+type LongDateOptions = { timeZone?: string; withYear?: boolean };
+
+function longDate(
+	date: Date,
+	{ timeZone, withYear = true }: LongDateOptions = {},
+): string {
 	// `formatToParts` rather than a regex over the formatted string: the ordinal
 	// is applied to the day part itself, whatever separator or part order the
 	// runtime's locale data produces.
 	return new Intl.DateTimeFormat("fr-FR", {
 		day: "numeric",
 		month: "long",
-		year: "numeric",
+		year: withYear ? "numeric" : undefined,
 		timeZone,
 	})
 		.formatToParts(date)
@@ -279,7 +284,11 @@ export function formatLongDate(date: Date): string {
  * time zone: `new Date("2026-06-01")` → `"1ᵉʳ juin 2026"`.
  */
 export function formatCivilLongDate(date: Date): string {
-	return longDate(date, CIVIL_DATE_TIME_ZONE);
+	return longDate(date, { timeZone: CIVIL_DATE_TIME_ZONE });
+}
+
+export function formatCivilDayMonth(date: Date): string {
+	return longDate(date, { timeZone: CIVIL_DATE_TIME_ZONE, withYear: false });
 }
 
 /**

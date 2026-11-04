@@ -2,37 +2,14 @@ import Image from "next/image";
 import styles from "./HomeSearch.module.scss";
 import { HomeSearchForm } from "./HomeSearchForm";
 
-/** Company search section by SIREN, region, department or sector. */
 export function HomeSearch() {
 	return (
-		<section aria-labelledby="search-heading" className="fr-py-8w">
+		<section aria-labelledby="search-heading" className="fr-py-7w">
 			<div className="fr-container">
-				<div className="fr-grid-row fr-grid-row--gutters">
-					<div className="fr-col-12">
-						<h2 className="fr-mb-2w" id="search-heading">
-							Rechercher une entreprise et consulter ses résultats
-						</h2>
-						<p>
-							Accédez aux résultats d&apos;égalité professionnelle des
-							entreprises, comprenant :
-						</p>
-						<ul>
-							<li>
-								les <strong>indicateurs de rémunération</strong>
-								{" femmes-hommes pour l'ensemble des salariés"}
-							</li>
-							<li>
-								les <strong>indicateurs de représentation</strong>
-								{" femmes-hommes au sein des postes de direction"}
-							</li>
-						</ul>
-					</div>
-				</div>
-
 				<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
 					<div
 						aria-hidden="true"
-						className={`fr-hidden fr-unhidden-md fr-col-md-3 ${styles.illustrationWrapper}`}
+						className={`fr-hidden fr-unhidden-md fr-col-md-4 ${styles.illustrationWrapper}`}
 					>
 						<Image
 							alt=""
@@ -44,9 +21,17 @@ export function HomeSearch() {
 						/>
 					</div>
 
-					<search className="fr-col-12 fr-col-md-9">
+					<div className={`fr-col-12 fr-col-md-8 ${styles.content}`}>
+						<h2 className="fr-h3 fr-mb-0" id="search-heading">
+							Consulter les résultats d&apos;une entreprise
+						</h2>
+						<p className={`fr-mb-0 ${styles.description}`}>
+							Les résultats déclarés par les entreprises sont publics pour les
+							indicateurs de rémunération pour l&apos;ensemble des salariés et
+							les indicateurs de représentation dans les postes de direction.
+						</p>
 						<HomeSearchForm />
-					</search>
+					</div>
 				</div>
 			</div>
 		</section>

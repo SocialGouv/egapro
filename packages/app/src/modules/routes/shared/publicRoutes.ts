@@ -18,6 +18,7 @@ export const PRIVACY = route("/donnees-personnelles");
 export const COOKIES = route("/gestion-des-cookies");
 export const ACCESSIBILITY = route("/declaration-accessibilite");
 export const MAINTENANCE = route("/maintenance");
+export const UNDER_CONSTRUCTION = route("/en-construction");
 
 // Internal harness, never linked from the site chrome.
 export const TEST_ERROR = route("/test-error");

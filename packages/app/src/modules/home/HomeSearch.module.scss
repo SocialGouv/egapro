@@ -8,3 +8,13 @@
 	max-width: 100%;
 	width: auto;
 }
+
+.content {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+}
+
+.description {
+	max-width: 38.5rem;
+}
