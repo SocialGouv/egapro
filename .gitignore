@@ -39,12 +39,10 @@ packages/notifications/dist/
 .vscode/
 
 # coding agents — ignore local state, whitelist the shared config.
-# Instructions: AGENTS.md. Skills + MCP source: .agents/ (cross-tool standard).
+# Instructions: AGENTS.md. Skills: .agents/skills (cross-tool standard). MCP source: .mcp.json.
 # .claude/skills is a symlink to ../.agents/skills (Claude Code does not scan .agents/).
 .agents/*
 !.agents/skills/
-!.agents/mcp.json
-!.agents/MIGRATION.md
 .claude/*
 !.claude/skills
 !.claude/settings.json

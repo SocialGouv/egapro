@@ -510,12 +510,15 @@ PR ne font qu'avertir. Ce n'est pas de l'hygiène — la suite Playwright ÉCRIT
 avec la devDependency et l'Action les RÉINGÈRE avec son moteur embarqué ; deux versions, deux
 formats, et rien ne lève d'erreur.
 
-Le **plugin Claude Code** est la quatrième surface, hors dépôt, et la seule que rien ici ne peut
-pinner. Le contrôle de dérive est la première étape de `.agents/skills/review/references/a11y.md` :
-comparer la version installée au pin d'`a11y.yaml` (`@vX.Y.Z` ou `# vX.Y.Z`). Le gating, lui, n'en
-dépend plus — pre-commit, `pnpm verify` et la CI tournent sur la devDependency, et le plugin
-OpenCode (déclaré dans `opencode.json`) se charge depuis elle. Ce contrôle existe pour une raison mesurée : le 31/08/2026, le plugin était en **4.5.1** pendant que le
-dépôt tournait en 5.40.1.
+Les **outils IA** n'ont plus de copie à eux : les skills `review-a11y` et `ultra11y` sont des
+symlinks de `.agents/skills/` vers la devDependency (lus par Claude Code, OpenCode et Codex), le
+gate commit / push / PR de Claude Code est un hook de `.claude/settings.json` qui lance le
+`pre-tool-use.mjs` de la devDependency, et le plugin OpenCode (`opencode.json`) se charge depuis
+elle. La version des agents est donc celle de la devDependency, tenue par la CI. C'est la raison
+de l'abandon du plugin marketplace Claude Code, que rien ne pouvait épingler : le 31/08/2026, il
+était en **4.5.1** pendant que le dépôt tournait en 5.40.1. Seul Codex garde une copie en portée
+utilisateur (`ultra11y install --codex`, à relancer après un bump) — le gating, lui, n'en dépend
+pas : pre-commit, `pnpm verify` et la CI tournent sur la devDependency.
 
 À noter si un bump échoue : la publication npm de la 5.3.0 est
 tombée sur la signature de provenance (`CA_CREATE_SIGNING_CERTIFICATE_ERROR`, 403 du CA) alors

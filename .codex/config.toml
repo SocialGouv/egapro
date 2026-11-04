@@ -1,4 +1,4 @@
-# Généré par scripts/ai/sync-agent-config.mjs depuis .agents/mcp.json — ne pas éditer.
+# Généré par scripts/ai/sync-agent-config.mjs depuis .mcp.json — ne pas éditer.
 
 [mcp_servers.next-devtools]
 command = "npx"

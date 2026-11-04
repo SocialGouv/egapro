@@ -289,14 +289,6 @@ case "${1:-}" in
 		check_one "$f" "A" "$(cat -- "$f")"
 	done
 	;;
---verdict)
-	# <path> <A|M> <content-file>: judge content as if added to <path> (scripts/ai/migration-parity.sh)
-	[ $# -eq 4 ] || {
-		echo "usage: $0 --verdict <path> <A|M> <content-file>" >&2
-		exit 2
-	}
-	check_one "$2" "$3" "$(cat -- "$4")"
-	;;
 --self-test)
 	self_test
 	;;

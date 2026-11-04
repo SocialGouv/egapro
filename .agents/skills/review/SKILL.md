@@ -44,7 +44,7 @@ Tu **rapportes**, tu ne corriges pas. L'appelant (toi plus tard, ou le skill `im
    ```bash
    pnpm verify
    ```
-   (patterns sur le diff, audit statique ultra11y de tout `src` — comme la gate CI —, lint, format, typecheck, tests.)
+   (patterns sur le diff, audit statique ultra11y de tout `src` — comme la gate CI —, lint, format, typecheck, tests.) Si ce code exact a déjà passé `pnpm verify` au vert (l'étape 5 de `/implement`), la commande répond aussitôt — lance-la quand même, c'est elle qui fait foi.
    **FAIL → STOP.** Rends le tableau avec `verify: FAIL` et les lignes d'erreur utiles. Les checklists ne servent à rien tant que la machine est rouge.
    Si un dev server tourne : appelle aussi `nextjs_call` (`get_errors`) du MCP `next-devtools`.
 

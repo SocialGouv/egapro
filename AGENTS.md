@@ -43,7 +43,7 @@ Gestionnaire de paquets : **pnpm workspaces** (`pnpm@10`).
 | `/implement <issue#>` | une issue analysée | worktree, code + tests, `pnpm verify`, `/review gates`, E2E, PR draft |
 | `/review [gates]` · `/review <PR#>` | avant de déclarer une tâche terminée · une PR a des commentaires | gates qualité sur le diff · traitement des threads non résolus |
 
-Les skills vivent dans `.agents/skills/<nom>/`, l'emplacement standard lu par Codex et OpenCode ; Claude Code y accède par le symlink `.claude/skills` ; chacun charge ses références à la demande. Pas d'orchestrateur en tâche de fond : pour paralléliser un epic, ouvre une session par sous-ticket.
+Les skills vivent dans `.agents/skills/<nom>/`, l'emplacement standard lu par Codex et OpenCode ; Claude Code y accède par le symlink `.claude/skills` ; chacun charge ses références à la demande. `review-a11y` et `ultra11y` y sont aussi, en symlinks vers la devDependency (lancer `pnpm install` s'ils sont introuvables). Pas d'orchestrateur en tâche de fond : pour paralléliser un epic, ouvre une session par sous-ticket.
 
 En début de session sur une branche (hors `alpha`) qui a une PR ouverte : si elle porte des threads de revue non résolus, signale-le et propose `/review <PR#>`.
 
@@ -90,7 +90,7 @@ Une tâche n'est **terminée** que quand `pnpm verify` est vert **et** que `/rev
 
 ## Accessibilité — RGAA 4.1.2 / WCAG 2.2 AA
 
-egapro est une plateforme de l'État : exigence first-class, au même titre que la sécurité. **Un seul dispositif : ultra11y** (devDependency de `packages/app`, plugin Claude Code `ultra11y@ultra11y`, plugin OpenCode déclaré dans `opencode.json` (chargé depuis la devDependency), MCP `ultra11y`, Action CI). Il n'y a pas de second système, et c'est délibéré.
+egapro est une plateforme de l'État : exigence first-class, au même titre que la sécurité. **Un seul dispositif : ultra11y**, à une seule version — la devDependency de `packages/app`, tenue égale à l'Action CI. Tout en découle : pre-commit, `pnpm verify`, les skills `review-a11y` et `ultra11y` (symlinks dans `.agents/skills/`, lus par chaque outil), le gate commit / push / PR côté agent (hook dans `.claude/settings.json`, plugin dans `opencode.json`), le MCP `ultra11y`. Il n'y a pas de second système, et c'est délibéré.
 
 - **HTML natif d'abord, ARIA en dernier.** Un `<button>` est accessible ; un `<div role="button">` demande d'écrire à la main focus, clavier et état. Ne double jamais une sémantique implicite (`role="navigation"` sur `<nav>` est faux, pas redondant).
 - **Ne devine pas un critère de mémoire** : demande-le au skill `ultra11y` ou au MCP (`criteria --standard rgaa 8.3`, `guidance`, `glossary`).
@@ -140,7 +140,7 @@ Données d'exemple fictives : `SIREN 123456789`, `email@example.fr`, `Société 
 
 ---
 
-## Serveurs MCP (source unique : `.agents/mcp.json`)
+## Serveurs MCP (source unique : `.mcp.json`)
 
 | Serveur | Quand | Outils clés |
 |---|---|---|
@@ -150,14 +150,14 @@ Données d'exemple fictives : `SIREN 123456789`, `email@example.fr`, `Société 
 | `playwright` | parcours réel dans le navigateur (checks fonctionnel et design) | `browser_navigate`, `browser_snapshot`, `browser_take_screenshot` |
 | `ultra11y` | critères RGAA, audit | `criteria`, `audit` |
 
-Le point commun : **ne jamais deviner de mémoire** une API Next.js, une classe DSFR, une valeur Figma ou un critère RGAA. Chaque outil exige son propre fichier (`.mcp.json` pour Claude Code, `opencode.json` pour OpenCode, `.codex/config.toml` pour Codex) : ils sont **générés** depuis `.agents/mcp.json` par `node scripts/ai/sync-agent-config.mjs` — n'en édite aucun à la main, la CI refuse un fichier désynchronisé.
+Le point commun : **ne jamais deviner de mémoire** une API Next.js, une classe DSFR, une valeur Figma ou un critère RGAA. On ajoute un serveur dans `.mcp.json` (racine, lu tel quel par Claude Code) puis `node scripts/ai/sync-agent-config.mjs` : il régénère le bloc `mcp` d'`opencode.json` et `.codex/config.toml`, qui n'acceptent pas ce format. N'édite jamais ces deux-là à la main, la CI refuse une copie désynchronisée.
 
 ---
 
 ## Scripts racine
 
 ```bash
-pnpm verify               # TOUS les gates locaux — le verdict « prêt » (cf. Garde-fous)
+pnpm verify               # TOUS les gates locaux — le verdict « prêt » (cf. Garde-fous) ; instantané si ce code exact est déjà vert, --force pour rejouer
 pnpm check:patterns       # interdits mécaniques sur le diff
 pnpm dev:app              # app en dev (port 3000)
 pnpm build                # build de tous les packages
