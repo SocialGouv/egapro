@@ -8,6 +8,8 @@ import { SectionBanner } from "./sections/headings";
 import { InfoSection } from "./sections/InfoSection";
 import { PdfPageFooter } from "./sections/PdfPageFooter";
 import { PdfPageHeader } from "./sections/PdfPageHeader";
+import { pdfDocumentMetadata } from "./tagging/pdfDocumentMetadata";
+import { pdfHeading } from "./tagging/pdfStructure";
 
 type Props = {
 	data: JointEvaluationRecapData;
@@ -18,7 +20,13 @@ export function JointEvaluationPdfDocument({ data }: Props) {
 	const { company } = data;
 
 	return (
-		<Document>
+		<Document
+			{...pdfDocumentMetadata({
+				title: `Récapitulatif : Évaluation conjointe des rémunérations ${data.year}`,
+				subject: "Évaluation conjointe des rémunérations",
+				siren: company.siren,
+			})}
+		>
 			<Page size="A4" style={styles.page} wrap>
 				<PdfPageHeader />
 				<PdfPageFooter
@@ -29,7 +37,7 @@ export function JointEvaluationPdfDocument({ data }: Props) {
 
 				<View style={styles.content}>
 					<View style={styles.titleBlock}>
-						<Text style={styles.title}>
+						<Text {...pdfHeading(1)} style={styles.title}>
 							Récapitulatif : Évaluation conjointe des rémunérations {data.year}
 						</Text>
 						<Text style={styles.titleDate}>

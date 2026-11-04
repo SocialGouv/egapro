@@ -1,10 +1,10 @@
 import "server-only";
-import { renderToBuffer } from "@react-pdf/renderer";
 import { buildJointEvaluationRecapData } from "~/modules/declarationPdf/buildJointEvaluationRecapData";
 import { buildPdfData } from "~/modules/declarationPdf/buildPdfData";
 import { DeclarationPdfDocument } from "~/modules/declarationPdf/DeclarationPdfDocument";
 import { JointEvaluationPdfDocument } from "~/modules/declarationPdf/JointEvaluationPdfDocument";
 import { jointEvaluationPdfFilename } from "~/modules/declarationPdf/jointEvaluationPdfFilename";
+import { renderTaggedPdf } from "~/modules/declarationPdf/tagging/renderTaggedPdf";
 import type { MailAttachment } from "./types";
 
 async function renderDeclarationPdf(
@@ -13,7 +13,7 @@ async function renderDeclarationPdf(
 	declarationType: "initial" | "correction",
 ): Promise<MailAttachment> {
 	const data = await buildPdfData(siren, year, new Date(), declarationType);
-	const buffer = await renderToBuffer(DeclarationPdfDocument({ data }));
+	const buffer = await renderTaggedPdf(DeclarationPdfDocument({ data }));
 	const prefix =
 		declarationType === "correction"
 			? "seconde-declaration"
@@ -45,7 +45,7 @@ export async function buildJointEvaluationAttachments(
 	year: number,
 ): Promise<MailAttachment[]> {
 	const data = await buildJointEvaluationRecapData(siren, year);
-	const buffer = await renderToBuffer(JointEvaluationPdfDocument({ data }));
+	const buffer = await renderTaggedPdf(JointEvaluationPdfDocument({ data }));
 	return [
 		{
 			filename: jointEvaluationPdfFilename(siren, year),

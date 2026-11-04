@@ -1,0 +1,130 @@
+name: "♿ Accessibilité au rendu (ultra11y lite)"
+
+# LA GATE DE RENDU DE CHAQUE PR, entre l'audit statique (a11y.yaml, `a11y-gate`), qui ne voit
+# pas la page rendue, et le run complet hebdomadaire (a11y.yaml, `a11y-pages`), qui la voit
+# mais ne bloque rien et adjuge par un modèle. Pourquoi ce mode, ce qu'il couvre et ce qu'il ne
+# couvre pas → docs/accessibilite-ultra11y.md, « Le mode lite sur chaque PR ».
+#
+#   affected  quelles pages de l'échantillon ce diff peut-il changer ? (sources des pages, leurs
+#             imports, les layouts au-dessus d'elles, `sample.global`). Une route ajoutée ou
+#             modifiée que personne ne déclare ni n'exempte fait rougir (`require-sampled`).
+#   capture   la suite Playwright `src/e2e/a11y/`, limitée à ces pages par ULTRA11Y_PAGES.
+#   audit     le moteur seul sur ces instantanés — aucun modèle, aucun rapport — et ne rougit
+#             que sur un constat bloquant NOUVEAU par rapport à la baseline de la merge-base.
+#
+# Un fichier à part, et pas un job de plus dans a11y.yaml : celui-ci tourne sur chaque push
+# d'alpha, celui-là non. Partager leur groupe de concurrence ferait attendre — et remplacer,
+# tant qu'il est en file — le run hebdomadaire payé derrière un push.
+
+on:
+  pull_request:
+    branches:
+      - alpha
+  # LE PUSH SUR ALPHA ÉCRIT LA BASELINE : toutes les pages, rangées dans le cache Actions sous
+  # une clé qui porte le SHA. Une PR restaure celle de sa merge-base. Sans ce push, une PR n'a
+  # aucune référence et ne fait qu'avertir.
+  push:
+    branches:
+      - alpha
+
+concurrency:
+  # Une PR qui repousse annule son run précédent. Le push d'alpha, jamais : chaque SHA écrit SA
+  # baseline, et un run annulé ou remplacé en file laisserait les PR suivantes sur une baseline
+  # approchée, qui ne bloque plus une page nouvelle. D'où un groupe par SHA pour le push.
+  group: "${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.sha }}"
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+  security-events: write # SARIF → code scanning ; sans ça les annotations prennent le relais
+
+jobs:
+  a11y-lite:
+    name: "RGAA · rendu des pages touchées"
+    runs-on: ubuntu-22.04
+    # Mesuré sur la PR #5084, échantillon entier (53 pages, fichiers `sample.global` touchés) :
+    # 8 min 55 — stack 2 min 50 (cache pnpm chaud), capture 5 min 20, audit 10 s. Une PR qui ne
+    # touche aucune page s'arrête après `affected`, en une vingtaine de secondes. Large exprès :
+    # un job coupé sur timeout ne dit rien de l'accessibilité.
+    timeout-minutes: 45
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # la merge-base, pour le diff ET pour la clé de baseline
+      - name: ultra11y lite — pages touchées par le diff
+        id: affected
+        # Same 5.58.1 release commit as a11y.yaml; scripts/a11y/check-ultra11y-version.sh holds them together.
+        uses: SocialGouv/ultra11y@b245094b7528f8624cfbf84d00ee05422aeac24e # v5.58.1
+        with:
+          mode: lite
+          step: affected
+          working-directory: packages/app
+          require-sampled: "true"
+      - name: Préparer la stack (deps, navigateur, services, build, base)
+        if: steps.affected.outputs.affected-none != 'true'
+        uses: ./.github/actions/a11y-stack
+        with:
+          proconnect-client-id: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_ID }}
+          proconnect-client-secret: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_SECRET }}
+          proconnect-issuer: ${{ secrets.EGAPRO_PROCONNECT_ISSUER }}
+          weez-api-url: ${{ secrets.EGAPRO_WEEZ_API_URL }}
+      # Même masque qu'`a11y-pages` : un écran qui coince ne doit pas coûter l'audit des autres.
+      # Il doit coûter le vert, et c'est la step « pages capturées » qui le lui fait payer.
+      - name: ultra11y lite — capture des pages touchées (Playwright)
+        id: capture
+        if: steps.affected.outputs.affected-none != 'true'
+        continue-on-error: true
+        timeout-minutes: 30
+        env:
+          ULTRA11Y_PAGES: ${{ steps.affected.outputs.affected-pages }}
+          EGAPRO_PROCONNECT_CLIENT_ID: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_ID }}
+          EGAPRO_PROCONNECT_CLIENT_SECRET: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_SECRET }}
+          EGAPRO_PROCONNECT_ISSUER: ${{ secrets.EGAPRO_PROCONNECT_ISSUER }}
+          EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL }}
+        run: pnpm --filter app test:e2e:a11y
+      - name: ultra11y lite — audit des pages et gate
+        if: steps.affected.outputs.affected-none != 'true'
+        uses: SocialGouv/ultra11y@b245094b7528f8624cfbf84d00ee05422aeac24e # v5.58.1
+        with:
+          mode: lite
+          step: audit
+          working-directory: packages/app
+          pages: ${{ steps.affected.outputs.affected-pages }}
+          standard: rgaa
+          lang: fr
+          fail-on: blocking
+      # Le moteur n'audite que les instantanés présents, et une page demandée sans instantané
+      # n'y est qu'un avertissement : une capture amputée se lirait comme une page conforme.
+      # Chaque page déclarée est capturée par le run hebdomadaire (`require-sample`), donc une
+      # absence ici est une panne de capture, pas un écran volontairement sauté.
+      - name: ultra11y lite — chaque page sélectionnée a été capturée
+        if: always() && steps.affected.outcome == 'success' && steps.affected.outputs.affected-none != 'true'
+        working-directory: packages/app
+        env:
+          PAGES: ${{ steps.affected.outputs.affected-pages }}
+        run: |
+          set -euo pipefail
+          missing=()
+          IFS=',' read -ra ids <<<"$PAGES"
+          for id in "${ids[@]}"; do
+            [ -f ".ultra11y/pages/$id/dom.html" ] || missing+=("$id")
+          done
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "::error::ultra11y lite : ${#missing[@]} page(s) sélectionnée(s) sans instantané — ${missing[*]}. Voir le rapport Playwright."
+            exit 1
+          fi
+          echo "ultra11y lite : ${#ids[@]} page(s) sélectionnée(s), toutes capturées."
+      - name: Upload du rapport Playwright a11y
+        if: always() && steps.capture.outcome == 'failure'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ultra11y-lite-playwright
+          path: |
+            packages/app/playwright-report/a11y/
+            packages/app/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+      - name: Stop services
+        if: always() && steps.affected.outcome == 'success' && steps.affected.outputs.affected-none != 'true'
+        run: docker compose down

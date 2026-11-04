@@ -105,12 +105,13 @@ describe("phoneSchema", () => {
 		expect(phoneSchema.parse("+33 1 22 33 44 55")).toBe("+33122334455");
 	});
 
-	it("rejects an invalid format", () => {
+	it("rejects an invalid format with a message suggesting the expected format", () => {
 		const result = phoneSchema.safeParse("123");
 		expect(result.success).toBe(false);
 		if (!result.success) {
+			expect(result.error.issues).toHaveLength(1);
 			expect(result.error.issues[0]?.message).toBe(
-				"Veuillez renseigner votre numéro de téléphone",
+				"Le numéro de téléphone n'est pas valide. Saisissez-le au format 01 22 33 44 55 ou +33 1 22 33 44 55",
 			);
 		}
 	});

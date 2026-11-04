@@ -18,6 +18,7 @@ export const PRIVACY = route("/donnees-personnelles");
 export const COOKIES = route("/gestion-des-cookies");
 export const ACCESSIBILITY = route("/declaration-accessibilite");
 export const MAINTENANCE = route("/maintenance");
+export const UNDER_CONSTRUCTION = route("/en-construction");
 
 // Internal harness, never linked from the site chrome.
 export const TEST_ERROR = route("/test-error");
@@ -58,8 +59,10 @@ export type PublicPage = {
 	priority: number;
 };
 
-// Every page a visitor can reach without signing in. Authenticated areas, the
-// declaration funnels and the internal harness are excluded on purpose.
+// Every page a visitor can reach without signing in, plus the entry of the
+// authenticated area: `/mon-espace` sends a signed-out visitor to the login, and
+// RGAA 12.3 wants the site map to show it. The rest of the authenticated areas,
+// the declaration funnels and the internal harness are excluded on purpose.
 // `/stats` is absent because #4342 deleted that page — listing it would publish
 // a 404 into `sitemap.xml`.
 export const PUBLIC_PAGES: readonly PublicPage[] = [
@@ -110,6 +113,14 @@ export const PUBLIC_PAGES: readonly PublicPage[] = [
 		indexable: true,
 		changeFrequency: "daily",
 		priority: 0.9,
+	},
+	{
+		path: MY_SPACE,
+		label: "Mon espace",
+		group: "main",
+		indexable: false,
+		changeFrequency: "yearly",
+		priority: 0.3,
 	},
 	{
 		path: LOGIN,

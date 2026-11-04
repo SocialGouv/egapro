@@ -5,6 +5,7 @@ import type { FieldError } from "~/modules/declaration-remuneration/shared/formE
 import {
 	describedByForField,
 	findFieldError,
+	REQUIRED_FIELDS_NOTE_ID,
 } from "~/modules/declaration-remuneration/shared/formError/types";
 import { computeWorkforceTotal } from "~/modules/domain";
 import { WorkforceRowHeader } from "./WorkforceTableHeaders";
@@ -40,7 +41,11 @@ function WorkforceCell({
 				}
 			>
 				<input
-					aria-describedby={describedByForField(errorAlertId, error)}
+					aria-describedby={describedByForField(
+						errorAlertId,
+						error,
+						REQUIRED_FIELDS_NOTE_ID,
+					)}
 					aria-invalid={error ? true : undefined}
 					aria-label={label}
 					className={

@@ -171,6 +171,31 @@ describe("adminReferentsRouter", () => {
 		});
 	});
 
+	describe("count", () => {
+		it("returns the number of stored referents, whatever the filters of the list", async () => {
+			selectQueue = [[{ total: 42 }]];
+			const db = createMockDb();
+			const caller = await createCaller(db);
+
+			await expect(caller.count()).resolves.toEqual({ total: 42 });
+			expect(db.select).toHaveBeenCalledOnce();
+		});
+
+		it("returns 0 when the count query yields no row", async () => {
+			selectQueue = [[]];
+			const caller = await createCaller(createMockDb());
+
+			await expect(caller.count()).resolves.toEqual({ total: 0 });
+		});
+
+		it("rejects non-admin users", async () => {
+			const caller = await createCaller(createMockDb(), false);
+			await expect(caller.count()).rejects.toMatchObject({
+				code: "FORBIDDEN",
+			});
+		});
+	});
+
 	describe("create", () => {
 		it("inserts a referent and strips empty optional strings", async () => {
 			const caller = await createCaller(createMockDb());

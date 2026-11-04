@@ -6,41 +6,27 @@ import {
 	MATOMO_EVENT_CATEGORY,
 	trackEvent,
 } from "~/modules/analytics";
-import {
-	COUNTIES,
-	NAF_SECTION_CODES,
-	NAF_SECTIONS,
-	REGION_CODES,
-	REGIONS,
-	REGIONS_TO_COUNTIES,
-} from "~/modules/domain";
+import { COMPANY_SIZE_VOLUNTARY_MAX, formatCount } from "~/modules/domain";
 import { OBSERVATORY_SEARCH } from "~/modules/routes";
+import { TooltipButton } from "~/modules/shared/TooltipButton";
+import styles from "./HomeSearchForm.module.scss";
 
-const FACET_FIELDS = ["q", "region", "departement", "naf"] as const;
+const QUERY_FIELD = "q";
 
-// Records which search facets were used — by field name only, never their
-// values (the free-text query may contain a SIREN or a company name).
-function usedFacets(form: HTMLFormElement): string {
-	const used = FACET_FIELDS.filter((field) => {
-		const element = form.elements.namedItem(field);
-		return element instanceof HTMLInputElement ||
-			element instanceof HTMLSelectElement
-			? element.value.trim() !== ""
-			: false;
-	});
-	return used.length > 0 ? used.join("+") : "empty";
+function usedFacet(form: HTMLFormElement): string {
+	const query = form.elements.namedItem(QUERY_FIELD);
+	return query instanceof HTMLInputElement && query.value.trim() !== ""
+		? QUERY_FIELD
+		: "empty";
 }
 
-/** Public company search form — submits (GET) to the external consultation site. */
 export function HomeSearchForm() {
 	function handleSubmit(event: FormEvent<HTMLFormElement>): void {
 		trackEvent({
 			category: MATOMO_EVENT_CATEGORY.SEARCH,
 			action: MATOMO_ACTION.SEARCH_SUBMIT,
-			name: usedFacets(event.currentTarget),
+			name: usedFacet(event.currentTarget),
 		});
-		// No preventDefault: let the native GET navigation to the consultation
-		// site proceed.
 	}
 
 	return (
@@ -48,104 +34,33 @@ export function HomeSearchForm() {
 			action={OBSERVATORY_SEARCH}
 			aria-label="Rechercher une entreprise"
 			autoComplete="off"
+			className={styles.form}
 			method="GET"
 			onSubmit={handleSubmit}
 		>
-			<div className="fr-input-group">
-				<label className="fr-label" htmlFor="search-query">
-					Numéro Siren ou le nom de l&apos;entreprise
-					<span className="fr-hint-text">
-						Le numéro Siren se compose de 9 chiffres
-					</span>
+			<div className={styles.labelRow}>
+				<label className="fr-label" htmlFor="home-search-query">
+					Recherchez une entreprise par son nom ou son numéro SIREN (9
+					chiffres).
 				</label>
-				<input
-					className="fr-input"
-					id="search-query"
-					name="q"
-					placeholder="[siren] [raison sociale]"
-					type="search"
+				<TooltipButton
+					id="home-search-tooltip"
+					label="Information sur les entreprises assujetties"
+					text={`Les entreprises assujetties sont celles qui comptent au moins ${formatCount(COMPANY_SIZE_VOLUNTARY_MAX)} salariés.`}
 				/>
 			</div>
-
-			<div className="fr-grid-row fr-grid-row--gutters">
-				<div className="fr-col-12 fr-col-md-4">
-					<div className="fr-select-group">
-						<label className="fr-label" htmlFor="search-region">
-							Région
-						</label>
-						<select
-							className="fr-select"
-							defaultValue=""
-							id="search-region"
-							name="region"
-						>
-							<option value="">Toutes les régions</option>
-							{REGION_CODES.map((code) => (
-								<option key={code} value={code}>
-									{REGIONS[code]}
-								</option>
-							))}
-						</select>
-					</div>
-				</div>
-
-				<div className="fr-col-12 fr-col-md-4">
-					<div className="fr-select-group">
-						<label className="fr-label" htmlFor="search-departement">
-							Département
-						</label>
-						<select
-							className="fr-select"
-							defaultValue=""
-							id="search-departement"
-							name="departement"
-						>
-							<option value="">Tous les départements</option>
-							{REGION_CODES.map((regionCode) => (
-								<optgroup key={regionCode} label={REGIONS[regionCode]}>
-									{[...REGIONS_TO_COUNTIES[regionCode]]
-										.sort((left, right) =>
-											left.localeCompare(right, "fr", { numeric: true }),
-										)
-										.map((code) => (
-											<option key={code} value={code}>
-												{code} — {COUNTIES[code]}
-											</option>
-										))}
-								</optgroup>
-							))}
-						</select>
-					</div>
-				</div>
-
-				<div className="fr-col-12 fr-col-md-4">
-					<div className="fr-select-group">
-						<label className="fr-label" htmlFor="search-secteur">
-							Secteur d'activité
-						</label>
-						<select
-							className="fr-select"
-							defaultValue=""
-							id="search-secteur"
-							name="naf"
-						>
-							<option value="">Tous les secteurs</option>
-							{NAF_SECTION_CODES.map((code) => (
-								<option key={code} value={code}>
-									{code} — {NAF_SECTIONS[code]}
-								</option>
-							))}
-						</select>
-					</div>
-				</div>
-			</div>
-
-			<button
-				className="fr-btn fr-btn--secondary fr-icon-search-line fr-btn--icon-right fr-mt-2w"
-				type="submit"
-			>
-				Rechercher
-			</button>
+			<search className="fr-search-bar fr-search-bar--lg">
+				<input
+					className="fr-input"
+					id="home-search-query"
+					name={QUERY_FIELD}
+					placeholder="Rechercher une entreprise"
+					type="search"
+				/>
+				<button className="fr-btn" title="Rechercher" type="submit">
+					Rechercher
+				</button>
+			</search>
 		</form>
 	);
 }

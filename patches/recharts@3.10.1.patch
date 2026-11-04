@@ -1,0 +1,108 @@
+diff --git a/es6/chart/RechartsWrapper.js b/es6/chart/RechartsWrapper.js
+index 60f2294fdcb846a4116bad3c4571d49aed9ab604..b37027c4d0b73ca868841e0a69319ee1192c8570 100644
+--- a/es6/chart/RechartsWrapper.js
++++ b/es6/chart/RechartsWrapper.js
+@@ -25,6 +25,13 @@ import { TooltipPortalContext } from '../context/tooltipPortalContext';
+ import { LegendPortalContext } from '../context/legendPortalContext';
+ import { ReportChartSize } from '../context/chartLayoutContext';
+ import { useResponsiveContainerContext } from '../component/ResponsiveContainer';
++// RGAA 10.1: width/height are not valid attributes on a <div>; the wrapper size is already set in `style`.
++var omitSizeAttributes = props => {
++  var divProps = _extends({}, props);
++  delete divProps.width;
++  delete divProps.height;
++  return divProps;
++};
+ var EventSynchronizer = () => {
+   useSynchronisedEventsFromOtherCharts();
+   return null;
+@@ -110,7 +117,7 @@ var ResponsiveDiv = /*#__PURE__*/forwardRef((props, ref) => {
+     height: sizes.containerHeight
+   }), /*#__PURE__*/React.createElement("div", _extends({
+     ref: innerRef
+-  }, props)));
++  }, omitSizeAttributes(props))));
+ });
+ var ReadSizeOnceDiv = /*#__PURE__*/forwardRef((props, ref) => {
+   var width = props.width,
+@@ -151,7 +158,7 @@ var ReadSizeOnceDiv = /*#__PURE__*/forwardRef((props, ref) => {
+     height: sizes.containerHeight
+   }), /*#__PURE__*/React.createElement("div", _extends({
+     ref: innerRef
+-  }, props)));
++  }, omitSizeAttributes(props))));
+ });
+ var StaticDiv = /*#__PURE__*/forwardRef((props, ref) => {
+   var width = props.width,
+@@ -161,7 +168,7 @@ var StaticDiv = /*#__PURE__*/forwardRef((props, ref) => {
+     height: height
+   }), /*#__PURE__*/React.createElement("div", _extends({
+     ref: ref
+-  }, props)));
++  }, omitSizeAttributes(props))));
+ });
+ var NonResponsiveDiv = /*#__PURE__*/forwardRef((props, ref) => {
+   var width = props.width,
+@@ -187,7 +194,7 @@ var NonResponsiveDiv = /*#__PURE__*/forwardRef((props, ref) => {
+     height: height
+   }), /*#__PURE__*/React.createElement("div", _extends({
+     ref: ref
+-  }, props)));
++  }, omitSizeAttributes(props))));
+ });
+ function getWrapperDivComponent(responsive) {
+   return responsive ? ResponsiveDiv : NonResponsiveDiv;
+diff --git a/lib/chart/RechartsWrapper.js b/lib/chart/RechartsWrapper.js
+index 974c9ba84bb76474a9d6c9d75b6577b6455b07d7..b4d872dd09091b6299f19438bb1b4dadf64053bd 100644
+--- a/lib/chart/RechartsWrapper.js
++++ b/lib/chart/RechartsWrapper.js
+@@ -32,6 +32,13 @@ function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r)
+ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+ function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
++// RGAA 10.1: width/height are not valid attributes on a <div>; the wrapper size is already set in `style`.
++var omitSizeAttributes = props => {
++  var divProps = _extends({}, props);
++  delete divProps.width;
++  delete divProps.height;
++  return divProps;
++};
+ var EventSynchronizer = () => {
+   (0, _useChartSynchronisation.useSynchronisedEventsFromOtherCharts)();
+   return null;
+@@ -117,7 +124,7 @@ var ResponsiveDiv = /*#__PURE__*/(0, _react.forwardRef)((props, ref) => {
+     height: sizes.containerHeight
+   }), /*#__PURE__*/React.createElement("div", _extends({
+     ref: innerRef
+-  }, props)));
++  }, omitSizeAttributes(props))));
+ });
+ var ReadSizeOnceDiv = /*#__PURE__*/(0, _react.forwardRef)((props, ref) => {
+   var width = props.width,
+@@ -158,7 +165,7 @@ var ReadSizeOnceDiv = /*#__PURE__*/(0, _react.forwardRef)((props, ref) => {
+     height: sizes.containerHeight
+   }), /*#__PURE__*/React.createElement("div", _extends({
+     ref: innerRef
+-  }, props)));
++  }, omitSizeAttributes(props))));
+ });
+ var StaticDiv = /*#__PURE__*/(0, _react.forwardRef)((props, ref) => {
+   var width = props.width,
+@@ -168,7 +175,7 @@ var StaticDiv = /*#__PURE__*/(0, _react.forwardRef)((props, ref) => {
+     height: height
+   }), /*#__PURE__*/React.createElement("div", _extends({
+     ref: ref
+-  }, props)));
++  }, omitSizeAttributes(props))));
+ });
+ var NonResponsiveDiv = /*#__PURE__*/(0, _react.forwardRef)((props, ref) => {
+   var width = props.width,
+@@ -194,7 +201,7 @@ var NonResponsiveDiv = /*#__PURE__*/(0, _react.forwardRef)((props, ref) => {
+     height: height
+   }), /*#__PURE__*/React.createElement("div", _extends({
+     ref: ref
+-  }, props)));
++  }, omitSizeAttributes(props))));
+ });
+ function getWrapperDivComponent(responsive) {
+   return responsive ? ResponsiveDiv : NonResponsiveDiv;

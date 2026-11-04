@@ -182,8 +182,7 @@ describe("Step2PayGap", () => {
 		await user.clear(menInput);
 		await user.type(menInput, "100");
 
-		// Gap = |((100-95)/100)*100| = 5.0 % — table cell + interpretation callout
-		expect(screen.getAllByText("5,00 %").length).toBeGreaterThan(0);
+		expect(screen.getByText("5,00 %")).toBeInTheDocument();
 		expect(screen.getByText("élevé")).toBeInTheDocument();
 	});
 
@@ -206,8 +205,7 @@ describe("Step2PayGap", () => {
 		await user.clear(menInput);
 		await user.type(menInput, "100");
 
-		// Gap = 3.0 % — table cell + interpretation callout
-		expect(screen.getAllByText("3,00 %").length).toBeGreaterThan(0);
+		expect(screen.getByText("3,00 %")).toBeInTheDocument();
 		expect(screen.queryByText("faible")).not.toBeInTheDocument();
 		expect(screen.queryByText("élevé")).not.toBeInTheDocument();
 	});
@@ -411,5 +409,46 @@ describe("Step2PayGap", () => {
 			screen.queryByText(/Interprétation des résultats/),
 		).not.toBeInTheDocument();
 		expect(screen.queryByText(/Écart en défaveur des/)).not.toBeInTheDocument();
+	});
+});
+
+describe("Step2PayGap — required-fields mention", () => {
+	const REQUIRED_MENTION = "Tous les champs sont obligatoires.";
+
+	function renderEmptyStep() {
+		render(
+			<Step2PayGap
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialData={emptyStep2Data()}
+			/>,
+		);
+		return screen.getAllByRole("textbox");
+	}
+
+	it("describes every amount with the form-level mention", () => {
+		const inputs = renderEmptyStep();
+
+		expect(inputs).toHaveLength(8);
+		for (const input of inputs) {
+			expect(input).toHaveAccessibleDescription(REQUIRED_MENTION);
+		}
+	});
+
+	it("keeps the mention next to the error message once an amount is flagged", async () => {
+		const user = userEvent.setup();
+		const inputs = renderEmptyStep();
+
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		for (const input of inputs) {
+			expect(input).toHaveAttribute("aria-invalid", "true");
+			expect(input).toHaveAccessibleDescription(
+				expect.stringMatching(
+					/^Tous les champs sont obligatoires\. .*Renseignez le montant Annuelle brute moyenne pour les femmes\./,
+				),
+			);
+		}
 	});
 });

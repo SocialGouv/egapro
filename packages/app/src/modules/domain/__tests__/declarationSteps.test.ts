@@ -13,6 +13,7 @@ import {
 	FUNNEL_REVISION_KEY_STEPS,
 	getDropoffPhaseLabel,
 	getStepLabel,
+	isDropoffRateAboveThreshold,
 	POST_SUBMIT_DROPOFF_PHASES,
 	POST_SUBMIT_MILESTONES,
 } from "../shared/declarationSteps";
@@ -126,6 +127,20 @@ describe("POST_SUBMIT_DROPOFF_PHASES", () => {
 		for (const phase of POST_SUBMIT_DROPOFF_PHASES) {
 			expect(phase.status).toBe(phase.key);
 		}
+	});
+});
+
+describe("isDropoffRateAboveThreshold", () => {
+	it("flags only a rate strictly above the alert threshold", () => {
+		expect(
+			isDropoffRateAboveThreshold(DROPOFF_RATE_ALERT_THRESHOLD - 0.1),
+		).toBe(false);
+		expect(isDropoffRateAboveThreshold(DROPOFF_RATE_ALERT_THRESHOLD)).toBe(
+			false,
+		);
+		expect(
+			isDropoffRateAboveThreshold(DROPOFF_RATE_ALERT_THRESHOLD + 0.1),
+		).toBe(true);
 	});
 });
 

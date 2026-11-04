@@ -43,6 +43,11 @@ describe("payGapReadingNote", () => {
 		expect(payGapReadingNote(rows("", "100"))).toBeNull();
 	});
 
+	it("returns null when an operand is not a number", () => {
+		expect(payGapReadingNote(rows(".", "100"))).toBeNull();
+		expect(payGapReadingNote(rows("100", "."))).toBeNull();
+	});
+
 	it("returns null when the men value is zero (gap undefined)", () => {
 		expect(payGapReadingNote(rows("100", "0"))).toBeNull();
 	});
@@ -92,6 +97,10 @@ describe("beneficiariesReadingNote", () => {
 		expect(beneficiariesReadingNote("", 120)).toBeNull();
 	});
 
+	it("returns null when the beneficiary count is not a number", () => {
+		expect(beneficiariesReadingNote(".", 120)).toBeNull();
+	});
+
 	it("returns null when the workforce reference is missing", () => {
 		expect(beneficiariesReadingNote("60", undefined)).toBeNull();
 	});
@@ -124,6 +133,11 @@ describe("annualQuartileReadingNote", () => {
 
 	it("returns null when the threshold is an empty string", () => {
 		expect(annualQuartileReadingNote(firstQuartile("", 60, 30))).toBeNull();
+	});
+
+	it("returns null when the threshold is not a number", () => {
+		expect(annualQuartileReadingNote(firstQuartile(".", 60, 30))).toBeNull();
+		expect(annualQuartileReadingNote(firstQuartile("-", 60, 30))).toBeNull();
 	});
 
 	it("returns null when the quartile headcount is zero", () => {

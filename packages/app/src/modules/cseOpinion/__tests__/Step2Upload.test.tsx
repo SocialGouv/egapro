@@ -118,6 +118,12 @@ const ACCURACY_AND_GAP_COLUMNS = computeContentTypeColumns({
 	secondDeclJustificationRequired: false,
 });
 
+function alertAnnouncing(text: string) {
+	return screen
+		.getAllByRole("alert")
+		.find((alert) => alert.textContent?.includes(text));
+}
+
 function getFileInput() {
 	return document.getElementById("cse-file-upload") as HTMLInputElement;
 }
@@ -299,6 +305,20 @@ describe("Step2Upload", () => {
 		expect(
 			screen.getByText("La taille du fichier ne doit pas dépasser 10 Mo."),
 		).toBeInTheDocument();
+	});
+
+	it("keeps the non-blocking upload progress message polite, outside any alert", async () => {
+		uploadFileMock.mockReturnValue(new Promise(() => undefined));
+		renderStep();
+
+		const file = new File(["content"], "avis.pdf", { type: "application/pdf" });
+		fireEvent.change(getFileInput(), { target: { files: [file] } });
+
+		const progress = await screen.findByText(
+			"Import du ou des fichiers en cours…",
+		);
+		expect(progress.closest('[aria-live="polite"]')).not.toBeNull();
+		expect(progress.closest('[role="alert"]')).toBeNull();
 	});
 
 	it("renders the confirmation modal dialog", () => {
@@ -487,6 +507,7 @@ describe("Step2Upload", () => {
 				"Ajoutez l'avis d'exactitude des données et des méthodes de calcul de la première déclaration, ou indiquez s'il est déjà inclus dans l'un des fichiers déposés.",
 			),
 		).toBeInTheDocument();
+		expect(alertAnnouncing("Un avis CSE est manquant")).toBeInTheDocument();
 		expect(finalizeMutateAsyncMock).not.toHaveBeenCalled();
 	});
 
@@ -510,6 +531,62 @@ describe("Step2Upload", () => {
 		expect(
 			screen.queryByText("Un avis CSE est manquant"),
 		).not.toBeInTheDocument();
+	});
+
+	it("moves focus to the alert announcing the blocking errors after a failed submit", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: DUAL_COLUMNS,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+		});
+
+		await user.click(screen.getByRole("button", { name: "Transmettre" }));
+
+		expect(alertAnnouncing("Un avis CSE est manquant")).toHaveFocus();
+	});
+
+	it("does not re-announce the alert when a checkbox is toggled after a failed submit, and drops the covered entry", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: DUAL_COLUMNS,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+		});
+
+		await user.click(screen.getByRole("button", { name: "Transmettre" }));
+		const alert = alertAnnouncing("Un avis CSE est manquant");
+		const accuracyMessage =
+			"Ajoutez l'avis d'exactitude des données et des méthodes de calcul de la première déclaration";
+		expect(alert?.textContent).toContain(accuracyMessage);
+
+		await user.click(
+			screen.getByRole("checkbox", {
+				name: "Exactitude — 1re déclaration — avis-1.pdf",
+			}),
+		);
+
+		const alertAfter = alertAnnouncing("Un avis CSE est manquant");
+		expect(alertAfter).toBe(alert);
+		expect(alertAfter?.textContent).not.toContain(accuracyMessage);
+		expect(alertAfter?.textContent).toContain("seconde déclaration");
+		expect(alertAfter).not.toHaveFocus();
+	});
+
+	it("announces the alert again on a second failed submit with the same errors", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: DUAL_COLUMNS,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+		});
+
+		await user.click(screen.getByRole("button", { name: "Transmettre" }));
+		const firstAlert = alertAnnouncing("Un avis CSE est manquant");
+
+		await user.click(screen.getByRole("button", { name: "Transmettre" }));
+
+		const secondAlert = alertAnnouncing("Un avis CSE est manquant");
+		expect(secondAlert).toBeInTheDocument();
+		expect(secondAlert).not.toBe(firstAlert);
+		expect(secondAlert).toHaveFocus();
 	});
 
 	it("blocks finalize and names a file row left without any checked checkbox", async () => {
@@ -538,6 +615,7 @@ describe("Step2Upload", () => {
 				"Pour chaque fichier déposé, cochez le ou les types d'avis qu'il contient avant de transmettre.",
 			),
 		).toBeInTheDocument();
+		expect(alertAnnouncing("Type d'avis non renseigné")).toBeInTheDocument();
 		expect(finalizeMutateAsyncMock).not.toHaveBeenCalled();
 	});
 
@@ -1350,6 +1428,7 @@ describe("Step2Upload", () => {
 					"Vous devez déposer le ou les avis de votre CSE au format PDF avant de transmettre.",
 				),
 			).toBeInTheDocument();
+			expect(alertAnnouncing("Aucun avis déposé")).toBeInTheDocument();
 			expect(
 				screen.queryByText("Un avis CSE est manquant"),
 			).not.toBeInTheDocument();

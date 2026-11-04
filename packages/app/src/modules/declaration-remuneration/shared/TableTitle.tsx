@@ -1,6 +1,5 @@
 import { TooltipButton } from "~/modules/shared/TooltipButton";
 import common from "./common.module.scss";
-import styles from "./TableTitle.module.scss";
 
 type TableTitleProps = {
 	level: "h2" | "h3";
@@ -18,7 +17,7 @@ export function TableTitle({
 	const Heading = level;
 	return (
 		<div className={common.flexRowCenter}>
-			<Heading className={styles.title}>{title}</Heading>
+			<Heading className="fr-text--md fr-text--bold fr-m-0">{title}</Heading>
 			{readingNote !== null && (
 				<TooltipButton
 					id={tooltipId}

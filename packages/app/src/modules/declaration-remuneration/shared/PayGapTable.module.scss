@@ -55,3 +55,14 @@
 .colGap {
 	width: 190px;
 }
+
+.fixedTable :global(.fr-table__content) tbody .rowHeader {
+	// Row labels are <th scope="row"> so each gap is announced with its row
+	// (RGAA 5.6), but the Figma cell is a bold data cell: DSFR paints body
+	// <th> grey with a darker right border, so restore the <td> look.
+	font-weight: 700;
+	background-color: var(--background-default-grey);
+	background-image:
+		linear-gradient(0deg, var(--border-contrast-grey), var(--border-contrast-grey)),
+		linear-gradient(0deg, var(--border-contrast-grey), var(--border-contrast-grey));
+}

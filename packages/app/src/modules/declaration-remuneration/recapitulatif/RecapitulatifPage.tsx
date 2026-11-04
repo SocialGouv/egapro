@@ -3,6 +3,7 @@ import {
 	companyLocationRow,
 	formatWorkforceForUser,
 	getObligationWorkforce,
+	getReferenceYearFor,
 	isCseRequired,
 	isIndicatorGRequiredForGip,
 } from "~/modules/domain";
@@ -138,7 +139,9 @@ export function RecapitulatifPage({
 		});
 	}
 	companyItems.push({
-		label: `Effectif annuel moyen en ${declarationYear}`,
+		// Same year as the downloadable PDF and the rest of the app (N-1, the GIP-MDS reference
+		// year): the HTML recap is the accessible version of that document (RGAA 13.3, #4922).
+		label: `Effectif annuel moyen en ${getReferenceYearFor(declarationYear)}`,
 		value: formatWorkforceForUser(company.gipWorkforce),
 	});
 	if (isCseRequired(getObligationWorkforce(company.gipWorkforce))) {
@@ -192,6 +195,10 @@ export function RecapitulatifPage({
 					</a>
 					<p className="fr-text--xs fr-text-mention--grey fr-mb-0 fr-mt-1v">
 						<FileFormatDetail href={pdfHref} />
+					</p>
+					<p className="fr-text--xs fr-mb-0 fr-mt-1v">
+						Version accessible : cette page reprend l&apos;intégralité du
+						document.
 					</p>
 				</div>
 			</div>

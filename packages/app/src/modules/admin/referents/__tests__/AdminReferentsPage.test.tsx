@@ -24,6 +24,9 @@ vi.mock("next/navigation", async () => {
 
 vi.mock("~/trpc/react", () => ({
 	api: {
+		useUtils: () => ({
+			adminReferents: { count: { fetch: vi.fn() } },
+		}),
 		adminReferents: {
 			search: {
 				useQuery: vi.fn().mockReturnValue({

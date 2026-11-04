@@ -9,8 +9,10 @@ import {
 } from "@react-pdf/renderer";
 
 import {
+	ASSOCIATED_FILE_LABEL,
 	SUBMITTED_FILES_TITLE,
 	type SubmittedOpinionBlock,
+	UNASSOCIATED_FILE_LABEL,
 } from "~/modules/cseOpinion/submittedOpinionLabels";
 
 import type { CseOpinionRecapData } from "./buildCseOpinionRecapData";
@@ -21,7 +23,9 @@ import { CategoryBanner, SectionBanner, SubTitle } from "./sections/headings";
 import { InfoSection } from "./sections/InfoSection";
 import { PdfPageFooter } from "./sections/PdfPageFooter";
 import { PdfPageHeader } from "./sections/PdfPageHeader";
-import { Cell, normalizeSpaces, Row } from "./sections/tableParts";
+import { Cell, normalizePdfText, Row } from "./sections/tableParts";
+import { pdfDocumentMetadata } from "./tagging/pdfDocumentMetadata";
+import { pdfHeading, pdfStructure, pdfTag } from "./tagging/pdfStructure";
 
 const FILE_COLUMN_WIDTH = 227;
 const MARK_SIZE = 12;
@@ -67,15 +71,21 @@ type Props = {
 function OpinionBlock({ title, rows }: Omit<SubmittedOpinionBlock, "id">) {
 	return (
 		<View style={localStyles.opinionBlock} wrap={false}>
-			<SubTitle title={title} />
-			<View style={localStyles.opinionRows}>
+			<SubTitle level={4} title={title} />
+			<View {...pdfTag("L")} style={localStyles.opinionRows}>
 				{rows.map((row) => (
-					<View key={row.label} style={styles.infoRow}>
-						<Text style={[styles.infoLabelColumn, styles.infoLabel]}>
+					<View {...pdfTag("LI")} key={row.label} style={styles.infoRow}>
+						<Text
+							{...pdfTag("Lbl")}
+							style={[styles.infoLabelColumn, styles.infoLabel]}
+						>
 							{row.label}
 						</Text>
-						<Text style={[styles.infoValueColumn, styles.infoValue]}>
-							{normalizeSpaces(row.value)}
+						<Text
+							{...pdfTag("LBody")}
+							style={[styles.infoValueColumn, styles.infoValue]}
+						>
+							{normalizePdfText(row.value)}
 						</Text>
 					</View>
 				))}
@@ -92,7 +102,7 @@ function FilesTable({
 	files: CseOpinionRecapData["files"];
 }) {
 	return (
-		<View style={styles.table}>
+		<View {...pdfTag("Table")} style={styles.table}>
 			<View minPresenceAhead={40} wrap={false}>
 				<Row>
 					<Cell header text={SUBMITTED_FILES_TITLE} width={FILE_COLUMN_WIDTH} />
@@ -112,28 +122,33 @@ function FilesTable({
 			{files.map((file) => (
 				<View key={file.id} wrap={false}>
 					<Row>
-						<Cell width={FILE_COLUMN_WIDTH}>
+						<Cell rowHeader width={FILE_COLUMN_WIDTH}>
 							<Text style={styles.cellTextBold}>
-								{normalizeSpaces(file.name)}
+								{normalizePdfText(file.name)}
 							</Text>
 							<Text style={styles.infoDetail}>
-								{normalizeSpaces(file.detail)}
+								{normalizePdfText(file.detail)}
 							</Text>
 						</Cell>
-						{columns.map((column) => (
-							<Cell key={column.id}>
-								<View style={localStyles.markCell}>
-									<Image
-										src={markPath(
-											file.columnIds.includes(column.id)
-												? "associated"
-												: "unassociated",
-										)}
-										style={localStyles.mark}
-									/>
-								</View>
-							</Cell>
-						))}
+						{columns.map((column) => {
+							const associated = file.columnIds.includes(column.id);
+							return (
+								<Cell key={column.id}>
+									<View style={localStyles.markCell}>
+										<Image
+											{...pdfStructure({
+												tag: "Figure",
+												alt: associated
+													? ASSOCIATED_FILE_LABEL
+													: UNASSOCIATED_FILE_LABEL,
+											})}
+											src={markPath(associated ? "associated" : "unassociated")}
+											style={localStyles.mark}
+										/>
+									</View>
+								</Cell>
+							);
+						})}
 					</Row>
 				</View>
 			))}
@@ -146,7 +161,13 @@ export function CseOpinionPdfDocument({ data }: Props) {
 	const { company } = data;
 
 	return (
-		<Document>
+		<Document
+			{...pdfDocumentMetadata({
+				title: `Récapitulatif : Transmission du ou des avis du CSE ${data.year}`,
+				subject: "Avis du comité social et économique",
+				siren: company.siren,
+			})}
+		>
 			<Page size="A4" style={styles.page} wrap>
 				<PdfPageHeader />
 				<PdfPageFooter
@@ -157,7 +178,7 @@ export function CseOpinionPdfDocument({ data }: Props) {
 
 				<View style={styles.content}>
 					<View style={styles.titleBlock}>
-						<Text style={styles.title}>
+						<Text {...pdfHeading(1)} style={styles.title}>
 							Récapitulatif : Transmission du ou des avis du CSE {data.year}
 						</Text>
 						<Text style={styles.titleDate}>

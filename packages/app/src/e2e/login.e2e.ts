@@ -2,12 +2,15 @@ import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import { urlGlob } from "~/e2e/helpers/routes";
 import {
+	DECLARATION_REMUNERATION,
+	FIRST_REMUNERATION_STEP,
 	HELP,
 	HOME,
 	LOGIN,
 	MY_SPACE,
 	OBSERVATORY_SEARCH,
 	observatoryCompanyHref,
+	remunerationStepHref,
 	routeWithQuery,
 } from "~/modules/routes";
 import { TEST_SIREN } from "./constants";
@@ -376,7 +379,7 @@ test.describe("Header account entry point", () => {
 	});
 });
 
-test.describe("Mon espace — menu principal", () => {
+test.describe("Démarche — menu principal", () => {
 	test("mon espace drops the main menu, which comes back on the help page", async ({
 		page,
 	}) => {
@@ -397,5 +400,20 @@ test.describe("Mon espace — menu principal", () => {
 		await expect(
 			mainMenu.getByRole("link", { name: "Observatoire" }),
 		).toBeVisible();
+	});
+
+	test("the declaration journey drops the main menu too", async ({ page }) => {
+		await page.goto(remunerationStepHref(FIRST_REMUNERATION_STEP));
+		await page.waitForURL(urlGlob(`${DECLARATION_REMUNERATION}/**`));
+		await dismissCookieBanner(page);
+
+		const banner = page.getByRole("banner");
+		await expect(banner.getByRole("link", { name: "Aide" })).toBeVisible();
+		await expect(
+			page.getByRole("navigation", {
+				name: "Menu principal",
+				includeHidden: true,
+			}),
+		).toHaveCount(0);
 	});
 });

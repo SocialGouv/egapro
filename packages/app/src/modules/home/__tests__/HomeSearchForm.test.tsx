@@ -11,19 +11,62 @@ vi.mock("~/modules/analytics", async (importOriginal) => {
 import { MATOMO_ACTION, MATOMO_EVENT_CATEGORY } from "~/modules/analytics";
 import { HomeSearchForm } from "../HomeSearchForm";
 
+const LABEL =
+	"Recherchez une entreprise par son nom ou son numéro SIREN (9 chiffres).";
+
 beforeEach(() => {
 	trackEventMock.mockReset();
 });
 
-describe("HomeSearchForm tracking", () => {
-	it("emits a SEARCH_SUBMIT event naming only the facets used", () => {
+describe("HomeSearchForm", () => {
+	it("submits a GET to the observatory search with the query as q", () => {
 		render(<HomeSearchForm />);
 
-		fireEvent.change(screen.getByLabelText(/Numéro Siren/i), {
-			target: { value: "Some Company" },
+		const form = screen.getByRole("form", {
+			name: "Rechercher une entreprise",
 		});
-		fireEvent.change(screen.getByLabelText("Région"), {
-			target: { value: "11" },
+		expect(form).toHaveAttribute("action", "/index-egapro/recherche");
+		expect(form).toHaveAttribute("method", "GET");
+		expect(screen.getByLabelText(LABEL)).toHaveAttribute("name", "q");
+	});
+
+	it("names the single search field with the visible sentence", () => {
+		render(<HomeSearchForm />);
+
+		const input = screen.getByRole("searchbox", { name: LABEL });
+		expect(input).toHaveAttribute("placeholder", "Rechercher une entreprise");
+		expect(screen.getByText(LABEL).closest(".fr-search-bar")).toBeNull();
+		expect(screen.getAllByRole("searchbox")).toHaveLength(1);
+		expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+	});
+
+	it("renders the large DSFR search bar with its submit button", () => {
+		render(<HomeSearchForm />);
+
+		const button = screen.getByRole("button", { name: "Rechercher" });
+		expect(button).toHaveAttribute("type", "submit");
+		expect(button.closest(".fr-search-bar")).toHaveClass("fr-search-bar--lg");
+	});
+
+	it("offers a help button about the companies subject to the obligation", () => {
+		render(<HomeSearchForm />);
+
+		expect(
+			screen.getByRole("button", {
+				name: "Information sur les entreprises assujetties",
+			}),
+		).toHaveAccessibleDescription(
+			"Les entreprises assujetties sont celles qui comptent au moins 50 salariés.",
+		);
+	});
+});
+
+describe("HomeSearchForm tracking", () => {
+	it("reports q when a query is typed", () => {
+		render(<HomeSearchForm />);
+
+		fireEvent.change(screen.getByLabelText(LABEL), {
+			target: { value: "Société Démo" },
 		});
 		fireEvent.submit(screen.getByRole("form"));
 
@@ -31,26 +74,29 @@ describe("HomeSearchForm tracking", () => {
 		expect(trackEventMock).toHaveBeenCalledWith({
 			category: MATOMO_EVENT_CATEGORY.SEARCH,
 			action: MATOMO_ACTION.SEARCH_SUBMIT,
-			name: "q+region",
+			name: "q",
 		});
 	});
 
 	it("never leaks the raw search query (no PII in the payload)", () => {
 		render(<HomeSearchForm />);
 
-		fireEvent.change(screen.getByLabelText(/Numéro Siren/i), {
-			target: { value: "552100554 Acme" },
+		fireEvent.change(screen.getByLabelText(LABEL), {
+			target: { value: "123456789 Société Démo" },
 		});
 		fireEvent.submit(screen.getByRole("form"));
 
 		const payload = JSON.stringify(trackEventMock.mock.calls[0]?.[0]);
-		expect(payload).not.toContain("552100554");
-		expect(payload).not.toContain("Acme");
+		expect(payload).not.toContain("123456789");
+		expect(payload).not.toContain("Démo");
 	});
 
-	it("reports 'empty' when no facet is filled", () => {
+	it("reports 'empty' when nothing or only spaces are typed", () => {
 		render(<HomeSearchForm />);
 
+		fireEvent.change(screen.getByLabelText(LABEL), {
+			target: { value: "   " },
+		});
 		fireEvent.submit(screen.getByRole("form"));
 
 		expect(trackEventMock).toHaveBeenCalledWith({
@@ -58,27 +104,5 @@ describe("HomeSearchForm tracking", () => {
 			action: MATOMO_ACTION.SEARCH_SUBMIT,
 			name: "empty",
 		});
-	});
-});
-
-describe("HomeSearchForm departments", () => {
-	it("groups all departments by region", () => {
-		render(<HomeSearchForm />);
-
-		const select = screen.getByLabelText("Département");
-		const groups = Array.from(select.querySelectorAll("optgroup"));
-		const options = Array.from(select.querySelectorAll("option"));
-
-		expect(groups).toHaveLength(18);
-		expect(options).toHaveLength(102);
-		expect(
-			groups.find((group) => group.label === "Île-de-France"),
-		).toContainElement(
-			select.querySelector('option[value="75"]') as HTMLOptionElement,
-		);
-		expect(new Set(options.map((option) => option.value)).size).toBe(102);
-		expect(select.querySelector('option[value=""]')?.textContent).toBe(
-			"Tous les départements",
-		);
 	});
 });

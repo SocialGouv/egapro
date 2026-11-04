@@ -32,7 +32,7 @@ export function WorkforceRowHeader({
 	tooltipId,
 }: WorkforceRowHeaderProps) {
 	return (
-		<th scope="row">
+		<th className="fr-cell--multiline" scope="row">
 			{row.label}
 			{tooltipId && (
 				<TooltipButton

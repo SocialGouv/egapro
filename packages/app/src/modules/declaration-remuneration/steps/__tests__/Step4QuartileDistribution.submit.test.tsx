@@ -193,7 +193,9 @@ describe("Step4QuartileDistribution submit behaviour", () => {
 			screen.getAllByText("Le seuil est obligatoire").length,
 		).toBeGreaterThan(0);
 		// All threshold inputs should be aria-invalid
-		const seuil1 = screen.getByLabelText(/Seuil maximum 1er quartile annuel/i);
+		const seuil1 = screen.getByLabelText(
+			/Montants des tranches, maximum du 1er quartile annuel/i,
+		);
 		expect(seuil1).toHaveAttribute("aria-invalid", "true");
 	});
 

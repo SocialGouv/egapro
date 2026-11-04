@@ -8,6 +8,11 @@ overrides:
   '@react-pdf/textkit': ^6.3.0
   next-auth>nodemailer: '-'
 
+patchedDependencies:
+  recharts@3.10.1:
+    hash: 05889f1405bd008d107dc036fe56e994d05b584d13fac01e6e25146a70c5ca62
+    path: patches/recharts@3.10.1.patch
+
 importers:
 
   .:
@@ -36,8 +41,17 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.89.0(@types/react@19.2.14)(react@19.2.8))(zod@4.3.6)
+      '@react-pdf/layout':
+        specifier: 4.5.1
+        version: 4.5.1
+      '@react-pdf/pdfkit':
+        specifier: 5.0.0
+        version: 5.0.0
+      '@react-pdf/render':
+        specifier: 4.4.1
+        version: 4.4.1
       '@react-pdf/renderer':
-        specifier: ^4.4.1
+        specifier: 4.4.1
         version: 4.4.1(react@19.2.8)
       '@sentry/nextjs':
         specifier: ^11.6.0
@@ -95,7 +109,7 @@ importers:
         version: 7.89.0(@types/react@19.2.14)(react@19.2.8)
       recharts:
         specifier: ^3.10.1
-        version: 3.10.1(@types/react@19.2.14)(react-dom@19.2.8(react@19.2.8))(react-is@17.0.2)(react@19.2.8)(redux@5.0.1)
+        version: 3.10.1(patch_hash=05889f1405bd008d107dc036fe56e994d05b584d13fac01e6e25146a70c5ca62)(@types/react@19.2.14)(react-dom@19.2.8(react@19.2.8))(react-is@17.0.2)(react@19.2.8)(redux@5.0.1)
       redis:
         specifier: ^5.11.0
         version: 5.11.0
@@ -173,8 +187,8 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
       ultra11y:
-        specifier: 5.42.1
-        version: 5.42.1(playwright-core@1.62.1)
+        specifier: 5.58.1
+        version: 5.58.1(playwright-core@1.62.1)
       vite-tsconfig-paths:
         specifier: ^6.1.1
         version: 6.1.1(typescript@6.0.2)(vite@7.3.1(@types/node@26.4.0)(sass@1.105.1)(terser@5.51.2)(tsx@4.23.12)(yaml@2.8.3))
@@ -660,11 +674,11 @@ packages:
 
   '@esbuild-kit/core-utils@3.3.2':
     resolution: {integrity: sha512-sPRAnw9CdSsRmEtnsl2WXWdyquogVpB3yZ3dgwJfe8zrOzTsV7cJvmwrKVa+0ma5BoiGJ+BoqkMvawbayKUsqQ==}
-    deprecated: 'Merged into tsx: https://tsx.is'
+    deprecated: 'Merged into tsx: https://tsx.hirok.io'
 
   '@esbuild-kit/esm-loader@2.6.5':
     resolution: {integrity: sha512-FxEMIkJKnodyA1OaCUoEvbYRkoZlLZ4d/eXFu9Fh8CbBBgP5EmZxrfTRyN0qpXZ4vOvqnE5YdRdcrmUUXuU+dA==}
-    deprecated: 'Merged into tsx: https://tsx.is'
+    deprecated: 'Merged into tsx: https://tsx.hirok.io'
 
   '@esbuild/aix-ppc64@0.25.12':
     resolution: {integrity: sha512-Hhmwd6CInZ3dwpuGTF8fJG6yoWmsToE+vYgD4nytZVxcu1ulHpUQRAB1UJ8+N1Am3Mz4+xOByoQoSZf4D+CpkA==}
@@ -2678,6 +2692,7 @@ packages:
   '@smithy/smithy-client@4.12.9':
     resolution: {integrity: sha512-ovaLEcTU5olSeHcRXcxV6viaKtpkHZumn6Ps0yn7dRf2rRSfy794vpjOtrWDO0d1auDSvAqxO+lyhERSXQ03EQ==}
     engines: {node: '>=18.0.0'}
+    deprecated: Deprecated due to a bug in custom logger data redaction. See https://github.com/aws/aws-sdk-js-v3/issues/8393.
 
   '@smithy/types@4.14.0':
     resolution: {integrity: sha512-OWgntFLW88kx2qvf/c/67Vno1yuXm/f9M7QFAtVkkO29IJXGBIg0ycEaBTH0kvCtwmvZxRujrgP5a86RvsXJAQ==}
@@ -4775,8 +4790,8 @@ packages:
   leac@0.6.0:
     resolution: {integrity: sha512-y+SqErxb8h7nE/fiEX07jsbuhrpO9lL8eca7/Y1nuWV2moNlXhyd59iDGcRf6moVyDMbmTNzL40SUyrFU/yDpg==}
 
-  legacy-javascript@0.0.3:
-    resolution: {integrity: sha512-1r6MT4dVaJyXt4G07Cm2cQ0AUaLJdefiEp4SmIAylA++gnEQ82YvmzE58RkM5EP0fk5hROLCslUPGnwIYdZQVA==}
+  legacy-javascript@0.0.4:
+    resolution: {integrity: sha512-UTmeKBVxnfJcpmpOvzzNnLsQT99BXHpPlc/ZKddIRmWmrR0fw6335I3lq4+sJoP60UTbBNaYsGYVPc65YB1x3A==}
 
   lie@3.1.1:
     resolution: {integrity: sha512-RiNhHysUjhrDQntfYSfY4MU24coXXdEOgw9WGcKHNeEwffDYbF//u87M1EWaMGzuFoSbqW0C9C6lEEhDOAswfw==}
@@ -6477,8 +6492,8 @@ packages:
     engines: {node: '>=0.8.0'}
     hasBin: true
 
-  ultra11y@5.42.1:
-    resolution: {integrity: sha512-2ZQfJIOjlFDfldBlerWi106RuWW3EvkhHZOz8gIOGTZrmro2ozJh7zjHZRuPv+VQzzgOAnu102ShbSSfoonuBA==}
+  ultra11y@5.58.1:
+    resolution: {integrity: sha512-XUaC+NXY4D9Msntre378oLAhlliCExZ5dHUA5c6o2Pg0ajq20VNDBUvopXw4fNOwW2rrmKb7lKQGWScIDsIsIw==}
     engines: {node: '>=22.18.0'}
     hasBin: true
 
@@ -8409,7 +8424,7 @@ snapshots:
 
   '@paulirish/trace_engine@0.0.53':
     dependencies:
-      legacy-javascript: 0.0.3
+      legacy-javascript: 0.0.4
       third-party-web: 0.30.0
 
   '@pkgjs/parseargs@0.11.0':
@@ -11613,7 +11628,7 @@ snapshots:
 
   leac@0.6.0: {}
 
-  legacy-javascript@0.0.3: {}
+  legacy-javascript@0.0.4: {}
 
   lie@3.1.1:
     dependencies:
@@ -12550,7 +12565,7 @@ snapshots:
 
   readdirp@5.1.1: {}
 
-  recharts@3.10.1(@types/react@19.2.14)(react-dom@19.2.8(react@19.2.8))(react-is@17.0.2)(react@19.2.8)(redux@5.0.1):
+  recharts@3.10.1(patch_hash=05889f1405bd008d107dc036fe56e994d05b584d13fac01e6e25146a70c5ca62)(@types/react@19.2.14)(react-dom@19.2.8(react@19.2.8))(react-is@17.0.2)(react@19.2.8)(redux@5.0.1):
     dependencies:
       '@reduxjs/toolkit': 2.12.0(react-redux@9.3.0(@types/react@19.2.14)(react@19.2.8)(redux@5.0.1))(react@19.2.8)
       clsx: 2.1.1
@@ -13322,7 +13337,7 @@ snapshots:
   uglify-js@3.19.3:
     optional: true
 
-  ultra11y@5.42.1(playwright-core@1.62.1):
+  ultra11y@5.58.1(playwright-core@1.62.1):
     dependencies:
       '@axe-core/playwright': 4.13.0(playwright-core@1.62.1)
       '@babel/parser': 8.0.4

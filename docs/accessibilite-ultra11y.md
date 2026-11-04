@@ -14,14 +14,16 @@ SHA du commit de release avec un commentaire `# vX.Y.Z` :
 
 | Job | Quand | Ce qu'il fait |
 |---|---|---|
-| `a11y-gate` | **chaque PR** (bloquant) | Audit statique JSX/TSX de tout `src`. Gratuit, quelques secondes, aucun navigateur et aucun modèle. **C'est la seule gate du dispositif qui arrête un merge sur un constat** (`fail-on: blocking`) : SARIF, annotations, commentaire sticky `digest` et rapport `ultra11y-pr-static`. |
-| `a11y-pages` | **cron hebdomadaire** (`schedule`, lundi 04:00 UTC, sur `alpha`) et manuel (`workflow_dispatch`) | La suite Playwright `src/e2e/a11y/` enregistre **39 pages** en épinglant l'état applicatif que chaque écran de tunnel exige — dont **37 sont effectivement capturées**, les 2 restantes étant gardées par un `test.skip` faute de données ; **24** seulement sont déclarées dans `.ultra11yrc.json`, et c'est ce sous-ensemble que `require-sample` tient. L'Action réaudite tout `src`, réingère les instantanés, rejoue le registre puis transmet seulement le reliquat à Claude CLI par lots de huit (`claude-sonnet-5`, effort `high`, sans plafond par lot). Produit LE rapport page par page. Les constats ne bloquent pas — on mesure —, et un critère « à évaluer » non plus (`require-decided: false`). Bloquent : une panne, un rendu requis mais absent (`require-rendered`), un balayage amputé (`require-sample`). |
+| `a11y-gate` | **chaque PR** (bloquant) | Audit statique JSX/TSX de tout `src`. Gratuit, quelques secondes, aucun navigateur et aucun modèle. **Elle arrête un merge sur un constat du code** (`fail-on: blocking`) — le rendu est l'affaire d'`a11y-lite` : SARIF, annotations, commentaire sticky `digest` et rapport `ultra11y-pr-static`. |
+| `a11y-pages` | **cron hebdomadaire** (`schedule`, lundi 04:00 UTC, sur `alpha`) et manuel (`workflow_dispatch`) | La suite Playwright `src/e2e/a11y/` enregistre **55 pages** en épinglant l'état applicatif que chaque écran exige — dont **53 sont effectivement capturées** et déclarées dans `.ultra11yrc.json`, ce que `require-sample` tient ; les 2 restantes (`cgu-version` sans version archivée, `acces-backoffice` sous le seam MFA E2E) sont gardées par un `test.skip` qui nomme sa raison. L'Action réaudite tout `src`, réingère les instantanés, rejoue le registre puis transmet seulement le reliquat à Claude CLI par lots de huit (`claude-sonnet-5`, effort `high`, sans plafond par lot). Produit LE rapport page par page. Les constats ne bloquent pas — on mesure —, et un critère « à évaluer » non plus (`require-decided: false`). Bloquent : une panne, un rendu requis mais absent (`require-rendered`), un balayage amputé (`require-sample`). |
 | `a11y-bundle` | cron, manuel | Fusionne les parties en un seul artefact `ultra11y-rgaa`. |
+| `a11y-lite` (`a11y-lite.yaml`) | **chaque PR vers `alpha`** (bloquant) et chaque push sur `alpha` | Mode lite : capture des seules pages que le diff peut changer, moteur seul, rouge sur un constat bloquant **nouveau** par rapport à la baseline de la merge-base, ou sur une route ni échantillonnée ni exemptée. Le push sur `alpha` capture tout et écrit la baseline. Aucun modèle. Voir « Le mode lite sur chaque PR ». |
 
-**Deux moitiés, et elles ne paient pas la même chose.** `pull_request` ne lance que la gate
-statique — gratuite, sans modèle, bloquante. Le cron hebdomadaire, ou un `workflow_dispatch`,
-lance la chaîne complète : balayage navigateur, critères de
-rendu, rejeu du registre puis adjudication IA du reliquat, livrable.
+**Trois étages, et ils ne paient pas la même chose.** `pull_request` lance la gate statique —
+gratuite, sans modèle, bloquante — et, dans `a11y-lite.yaml`, la capture des pages touchées,
+jugée par le moteur seul : des minutes de runner, aucun modèle, bloquante sur ce qui est
+nouveau. Le cron hebdomadaire, ou un `workflow_dispatch`, lance la chaîne complète : balayage
+navigateur, critères de rendu, rejeu du registre puis adjudication IA du reliquat, livrable.
 
 ### Pourquoi un cron hebdomadaire, et pas un run à chaque merge
 
@@ -64,11 +66,113 @@ Le run tourne donc **une fois par semaine**, sur l'état courant d'`alpha` :
 `gh workflow run a11y.yaml --ref alpha` reste là pour un livrable daté, une autre branche, ou un
 contrôle après un changement d'UI significatif.
 
-**Ce que ça donne, et ce que ça ne donne pas :** une régression RGAA de rendu est rattrapée **au
-plus tard le lundi suivant**. Ce qui la rattrape sur une PR reste l'audit statique, qui ne voit
-pas la page rendue ; et le run hebdomadaire ne bloque rien, il mesure et publie.
+**Ce que ça donne, et ce que ça ne donne pas :** une régression de rendu sur un critère que le
+**moteur** tranche est arrêtée sur la PR, page touchée par page touchée, par le mode lite. Sur un
+critère de **jugement** — ceux qu'il faut adjuger — elle est rattrapée **au plus tard le lundi
+suivant**, et le run hebdomadaire ne bloque rien, il mesure et publie.
 
 `gate-adjudicated` reste à `false` : la gate ré-audite la **source**, donc le rouge/vert reste une fonction pure du commit, quoi qu'un modèle ait dit.
+
+### Le mode lite sur chaque PR
+
+`.github/workflows/a11y-lite.yaml`, depuis ultra11y 5.58.1 (#5083).
+
+**Pourquoi.** Entre la gate statique, qui tourne sur chaque PR mais ne voit pas la page rendue,
+et le run hebdomadaire, qui la voit mais adjuge par un modèle et ne bloque rien, il n'y avait
+rien : une PR pouvait casser le contraste calculé ou le focus visible d'un écran et passer
+verte. Le mode lite comble ce trou au prix d'un runner, pas d'un modèle :
+
+1. **`affected`** — l'Action diffe la PR contre sa merge-base et suit, pour chaque page de
+   `sample.pages`, ses `sources`, leurs imports (alias `~/`, `import()`, feuilles de style) et
+   chaque `layout` au-dessus d'elle. Résultat : la liste des pages que le diff peut changer.
+   Aucune ? Le job s'arrête là, en une vingtaine de secondes.
+2. **capture** — la préparation d'`a11y-pages` (action locale `.github/actions/a11y-stack`,
+   partagée par les deux jobs), puis `test:e2e:a11y` limité à ces pages par `ULTRA11Y_PAGES`.
+3. **`audit`** — le moteur seul sur ces instantanés : pas d'audit du code, pas d'adjudication,
+   pas de rapport. Rouge sur un constat `bloquant` **nouveau** par rapport à la baseline.
+
+**Ce que ça coûte**, mesuré sur la PR #5084 qui touchait des fichiers `global`, donc
+l'échantillon entier : **8 min 55** de runner pour 53 pages (stack 2 min 50, capture 5 min 20,
+audit 10 s), aucun modèle. Une PR qui ne touche qu'une poignée de pages paie la même stack et une
+capture plus courte.
+
+**Ce qu'il couvre.**
+
+- les critères que le **moteur** tranche sur la page rendue, sondes comprises (zoom, reflow,
+  espacement du texte, focus visible, contenu au survol), sur les **pages touchées** ;
+- les **nouvelles pages** : une page absente de la baseline exacte de la merge-base a été ajoutée
+  par la PR, donc chacun de ses constats bloquants bloque — elle est jugée sans référence ;
+- les **nouvelles routes** : un `page.tsx` ajouté ou modifié que ni `sample.pages` ne déclare ni
+  `sample.exempt` n'exempte fait rougir l'étape `affected` (`require-sampled: true`). Déclarer
+  la page (avec ses `sources`), ou l'exempter avec sa raison.
+
+**Ce qu'il ne couvre pas.**
+
+- les **critères de jugement** — pertinence d'une alternative, d'un intitulé en contexte, ordre
+  de lecture… — qui exigent l'adjudication : ils restent au run hebdomadaire ;
+- le **backlog** : un constat déjà présent dans la baseline ne bloque pas, seul l'excédent compte
+  (la clé est `page|règle|critère|sélecteur normalisé`, donc un élément qui a seulement bougé
+  n'est pas nouveau) ;
+- un changement qu'aucun import ne relie à une page : donnée seedée, asset de `public/`,
+  contenu servi par l'API. Il est listé `unmapped` en avertissement quand c'est du balisage ;
+- une PR sans référence exacte : pas de baseline (premier run, cache expiré), baseline écrite
+  par une autre version d'ultra11y, ou seulement la plus proche par préfixe. Elle **avertit** et
+  ne bloque pas.
+
+**La baseline** vit dans le cache Actions, jamais dans le dépôt. Le push sur `alpha` capture
+**toutes** les pages et l'écrit sous une clé qui porte son SHA ; une PR restaure celle de sa
+merge-base. D'où la concurrence : annulée sur une PR qui repousse, **jamais** sur le push, dont
+le groupe est son SHA — un push annulé ou remplacé en file laisserait les PR suivantes sur une
+baseline approchée, qui ne bloque plus une page nouvelle. Une page déclarée qui n'a pas laissé
+d'instantané sur ce push est notée `skipped` et n'est jamais jugée nouvelle.
+
+Ce push sur chaque merge n'est pas le `push: alpha` écarté plus haut pour le run complet : celui-là
+payait un modèle à chaque merge, celui-ci ne paie que des minutes de runner, sans modèle.
+
+**Une capture amputée ne passe pas pour une page conforme.** Le moteur n'audite que les
+instantanés présents, et une page demandée sans instantané n'y est qu'un avertissement. La step
+« chaque page sélectionnée a été capturée » fait donc rougir le job — comme `require-sample` sur
+le run hebdomadaire, qui garantit par ailleurs que chaque page déclarée est capturable.
+
+**Le filtre de capture** est `src/e2e/helpers/a11y-selection.ts` (sous `helpers/`, le seul
+endroit de `e2e/` où le hook autorise `process.env`). Le sweep ne déclare pas les pages non
+sélectionnées ; les specs à état (`funnels`, `dynamic`, `anonymous`, `backoffice`) les sautent
+**au moment de l'instantané**, jamais avant : dans un `describe` série, la soumission réelle d'un
+test est ce qui ouvre l'écran du suivant. Variable vide = toutes les pages : le run hebdomadaire
+ne la pose pas, donc rien ne change pour `require-sample`.
+
+**`sample.global`** — ce qu'aucun import ne dit, et qui change le rendu de toutes les pages.
+Touché, il sélectionne l'échantillon entier :
+
+| Glob | Pourquoi |
+|---|---|
+| `src/app/layout.tsx`, `src/modules/layout/designTokens.css`, `src/modules/layout/dsfrFixes.scss` | layout racine et styles globaux. Déjà atteints par l'enveloppe des layouts ; listés pour qu'une page aux `sources` incomplètes ne leur échappe pas |
+| `src/middleware.ts` | CSP et nonce, redirections de session : sur toutes les routes, importé par aucune |
+| `next.config.js`, `scripts/copy-dsfr.ts` | configuration du build ; la copie du CSS DSFR servi sous `/dsfr/` |
+| `package.json`, `../../pnpm-lock.yaml`, `../../patches/**` | les dépendances, DSFR compris, et leurs patchs |
+| `playwright.a11y.config.ts`, `src/e2e/a11y/**`, `src/e2e/helpers/a11y-selection.ts` | la capture elle-même et son filtre : la changer change tous les instantanés, et c'est sur la PR qu'il faut savoir qu'elle tient encore |
+
+Les autres helpers que les specs a11y importent (`db`, `db-campaign`, `declaration-flows`,
+`declaration-history`, `routes`, `src/e2e/constants.ts`) ne sont **pas** globaux, délibérément :
+`affected` suit les imports des pages, pas ceux des specs, mais ces fichiers sont partagés avec la
+suite E2E principale. Les rendre globaux relancerait la capture complète (~9 min) sur chaque PR
+qui touche un test E2E, alors que « Test e2e », check requis, les exerce déjà. Le prix assumé :
+une PR qui ne casse la capture que par eux n'est vue qu'au push suivant sur `alpha`, qui rougit,
+et les pages non capturées y sont marquées `skipped` dans la baseline jusqu'à la réparation.
+
+`.ultra11yrc.json` est global d'office. **L'en-tête, le pied de page et les providers n'y sont
+pas**, et c'est délibéré : le layout racine les importe, donc `affected` les atteint déjà —
+mesuré, toucher `Header/index.tsx` sélectionne chaque page qui déclare ses `sources`. Les y
+mettre n'ajouterait rien qu'un deuxième chemin vers la même réponse.
+
+**`sample.exempt`** — les routes que l'échantillon ne couvre pas, chacune avec sa raison, dans
+`.ultra11yrc.json` même (la raison est obligatoire, la porte la refuse vide). Vérifié avec
+`affected --since <commit racine>`, qui traite chaque route du dépôt comme modifiée : aucune
+n'est `unsampled`. `admin-plan` en est sorti : la route rend depuis #5005, elle est déclarée et
+capturée par le sweep.
+
+En local, depuis `packages/app` : `pnpm exec ultra11y affected --since origin/alpha` dit quelles
+pages une branche sélectionnera, et pourquoi (`--json` pour le détail par page).
 
 ### Le registre de verdicts, et pourquoi il est revenu
 
@@ -387,19 +491,22 @@ pnpm exec ultra11y scan <une-page.html> --runtime local --json | head -3
 
 ## Bump de version
 
-Trois surfaces à bouger ensemble — deux dans le dépôt, une hors dépôt :
+Trois surfaces à bouger ensemble — deux dans le dépôt (les `uses:` de l'Action, la devDependency), une hors dépôt :
 
 ```bash
 pnpm --filter app add -D ultra11y@<version>   # version EXACTE, pas de ^
-# puis aligner les DEUX `uses:` de .github/workflows/a11y.yaml sur le SHA de release :
+# puis aligner CHAQUE `uses:` de .github/workflows/ (a11y.yaml ×2, a11y-lite.yaml ×2) sur le SHA de release :
 #   uses: SocialGouv/ultra11y@<sha> # v<version>
 # Le SHA doit correspondre au commit de la release `v<version>`.
 ./scripts/a11y/check-ultra11y-version.sh      # refuse une demi-montée, y compris SHA ≠ version npm
 ```
 
-La devDependency et les deux usages de l'Action sont alignés sur **5.42.1**, et ce n'est plus une
-consigne : `scripts/a11y/check-ultra11y-version.sh` tourne dans `ci.yaml` sur chaque push et
-refuse un désalignement. Ce n'est pas de l'hygiène — la suite Playwright ÉCRIT les instantanés
+La devDependency et les quatre usages de l'Action sont alignés sur **5.58.1**, et ce n'est plus une
+consigne : `scripts/a11y/check-ultra11y-version.sh` lit tous les `uses: SocialGouv/ultra11y@` de
+`.github/workflows/`, tourne dans `ci.yaml` sur chaque push et refuse un désalignement — son test,
+`check-ultra11y-version.test.sh`, rejoue les demi-montées dans le même job. Un bump laisse aussi la
+baseline du mode lite à l'ancienne version : jusqu'au premier push sur `alpha` qui la réécrit, les
+PR ne font qu'avertir. Ce n'est pas de l'hygiène — la suite Playwright ÉCRIT les instantanés
 avec la devDependency et l'Action les RÉINGÈRE avec son moteur embarqué ; deux versions, deux
 formats, et rien ne lève d'erreur.
 

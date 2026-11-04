@@ -1,10 +1,10 @@
-import { renderToBuffer } from "@react-pdf/renderer";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import {
 	buildRepresentationPdfData,
 	RepresentationDeclarationNotFoundError,
 } from "~/modules/declarationPdf/buildRepresentationPdfData";
 import { RepresentationPdfDocument } from "~/modules/declarationPdf/RepresentationPdfDocument";
+import { renderTaggedPdf } from "~/modules/declarationPdf/tagging/renderTaggedPdf";
 import { getCurrentYear, getReferenceYearFor } from "~/modules/domain";
 import { auditQueryMetadata } from "~/server/audit/queryMetadata";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
@@ -73,7 +73,7 @@ export const GET = withAuditedRoute(
 			if (resolved.error) return resolved.error;
 
 			const body = await renderPdfAndCacheSize(ROUTE, resolved.data, () =>
-				renderToBuffer(RepresentationPdfDocument({ data: resolved.data })),
+				renderTaggedPdf(RepresentationPdfDocument({ data: resolved.data })),
 			);
 
 			return new Response(body, {
@@ -102,7 +102,7 @@ export const HEAD = withAuditedRoute(
 			}
 
 			const size = await resolvePdfSize(ROUTE, resolved.data, () =>
-				renderToBuffer(RepresentationPdfDocument({ data: resolved.data })),
+				renderTaggedPdf(RepresentationPdfDocument({ data: resolved.data })),
 			);
 
 			return new Response(null, {

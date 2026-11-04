@@ -29,6 +29,7 @@ export {
 	ADMIN_NAV_LINKS,
 	ADMIN_REFERENTS,
 	ADMIN_SETTINGS,
+	ADMIN_SITEMAP,
 	ADMIN_STATS,
 	ADMIN_STATS_CAMPAIGN,
 	ADMIN_STATS_PLATFORM,
@@ -125,5 +126,6 @@ export {
 	SITE_MAP,
 	TEST_ERROR,
 	termsOfUseVersionHref,
+	UNDER_CONSTRUCTION,
 } from "./shared/publicRoutes";
 export { route, routeWithQuery, runtimeRoute } from "./shared/routeContract";

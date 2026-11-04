@@ -9,6 +9,7 @@ import type { RegionCode } from "~/modules/domain";
 import { COUNTIES, REGIONS, REGIONS_TO_COUNTIES } from "~/modules/domain";
 
 import type { ReferentFormValues } from "./schemas";
+import { REFERENT_FIELD_LABELS } from "./shared/fieldLabels";
 
 type Props = {
 	modalId: string;
@@ -42,13 +43,13 @@ export function ReferentFormFields({
 					{...register("principal")}
 				/>
 				<label className="fr-label" htmlFor={`${modalId}-principal`}>
-					Principal
+					{REFERENT_FIELD_LABELS.principal}
 				</label>
 			</div>
 
 			<div className="fr-input-group fr-mb-3w">
 				<label className="fr-label" htmlFor={`${modalId}-name`}>
-					Nom
+					{REFERENT_FIELD_LABELS.name}
 					<span className="fr-hint-text">
 						Format : &quot;Prénom NOM&quot; ou &quot;Nom du service&quot;
 					</span>
@@ -70,7 +71,7 @@ export function ReferentFormFields({
 
 			<div className="fr-select-group fr-mb-3w">
 				<label className="fr-label" htmlFor={`${modalId}-region`}>
-					Région
+					{REFERENT_FIELD_LABELS.region}
 				</label>
 				<select
 					aria-describedby={
@@ -97,7 +98,7 @@ export function ReferentFormFields({
 
 			<div className="fr-select-group fr-mb-3w">
 				<label className="fr-label" htmlFor={`${modalId}-county`}>
-					Département
+					{REFERENT_FIELD_LABELS.county}
 					<span className="fr-hint-text">
 						Non obligatoire (ex : coordination régionale)
 					</span>
@@ -120,7 +121,9 @@ export function ReferentFormFields({
 			</div>
 
 			<fieldset className="fr-fieldset fr-mb-3w">
-				<legend className="fr-fieldset__legend">Type de la valeur</legend>
+				<legend className="fr-fieldset__legend">
+					{REFERENT_FIELD_LABELS.type}
+				</legend>
 				<div className="fr-fieldset__content">
 					<div className="fr-radio-group">
 						<input
@@ -149,7 +152,7 @@ export function ReferentFormFields({
 
 			<div className="fr-input-group fr-mb-3w">
 				<label className="fr-label" htmlFor={`${modalId}-value`}>
-					Valeur
+					{REFERENT_FIELD_LABELS.value}
 					<span className="fr-hint-text">
 						{selectedType === "url" ? "https://site.gouv.fr" : "email@gouv.fr"}
 					</span>
@@ -177,7 +180,7 @@ export function ReferentFormFields({
 				<div className="fr-fieldset__content">
 					<div className="fr-input-group fr-mb-2w">
 						<label className="fr-label" htmlFor={`${modalId}-sub-name`}>
-							Nom du suppléant
+							{REFERENT_FIELD_LABELS.substituteName}
 						</label>
 						<input
 							className="fr-input"
@@ -188,7 +191,7 @@ export function ReferentFormFields({
 					</div>
 					<div className="fr-input-group">
 						<label className="fr-label" htmlFor={`${modalId}-sub-email`}>
-							Email du suppléant
+							{REFERENT_FIELD_LABELS.substituteEmail}
 						</label>
 						<input
 							aria-describedby={

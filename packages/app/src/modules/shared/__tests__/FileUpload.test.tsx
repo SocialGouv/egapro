@@ -10,6 +10,7 @@ const PDF_MIME = "application/pdf";
 
 const baseProps = {
 	inputId: "test-upload",
+	labelId: "test-upload-label",
 	accept: ".pdf",
 	acceptLabel: "pdf",
 	allowedMimeTypes: [PDF_MIME],
@@ -50,6 +51,7 @@ function ControlledFileUpload({
 			error={error}
 			fileList={fileList}
 			inputId="test-upload"
+			labelId="test-upload-label"
 			maxFileCount={maxFileCount}
 			onFilesChange={(files, nextError) => {
 				setSelectedFiles(files);
@@ -60,6 +62,48 @@ function ControlledFileUpload({
 		/>
 	);
 }
+
+describe("FileUpload — accessible name (RGAA 11.2)", () => {
+	function renderWithLabel() {
+		return render(
+			<>
+				<label
+					className="fr-label"
+					htmlFor="test-upload"
+					id="test-upload-label"
+				>
+					Veuillez déposer le rapport de l&apos;évaluation conjointe.
+					<span className="fr-hint-text">Taille maximale : 10 Mo.</span>
+				</label>
+				<FileUpload
+					{...baseProps}
+					error={null}
+					onFilesChange={vi.fn()}
+					selectedFiles={[]}
+				/>
+			</>,
+		);
+	}
+
+	it("names the file input with the visible label instead of a generic text", () => {
+		renderWithLabel();
+		const input = getInput();
+		expect(input).not.toHaveAttribute("aria-label");
+		expect(input).toHaveAccessibleName(
+			/Veuillez déposer le rapport de l.évaluation conjointe\./,
+		);
+	});
+
+	it("keeps the select button's visible name and describes it with the requested document", () => {
+		renderWithLabel();
+		const button = screen.getByRole("button", {
+			name: /Sélectionner un fichier/,
+		});
+		expect(button).toHaveAccessibleDescription(
+			/Veuillez déposer le rapport de l.évaluation conjointe\./,
+		);
+	});
+});
 
 describe("FileUpload", () => {
 	beforeEach(() => {

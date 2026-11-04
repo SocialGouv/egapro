@@ -32,7 +32,11 @@ import {
 	payGapFieldId,
 } from "../shared/formError/payGapErrors";
 import type { FieldError } from "../shared/formError/types";
-import { describedByForField, findFieldError } from "../shared/formError/types";
+import {
+	describedByForField,
+	findFieldError,
+	REQUIRED_FIELDS_NOTE_ID,
+} from "../shared/formError/types";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
 import { gipToStep3 } from "../shared/gipToStepData";
 import {
@@ -329,7 +333,9 @@ export function Step3VariablePay({
 						)}
 					</p>
 
-					<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
+					<p className="fr-mb-0" id={REQUIRED_FIELDS_NOTE_ID}>
+						Tous les champs sont obligatoires.
+					</p>
 				</div>
 
 				<div className={`${common.dataSection} ${common.tableGap}`}>
@@ -423,6 +429,7 @@ export function Step3VariablePay({
 															aria-describedby={describedByForField(
 																BENEFICIARIES_ALERT_ID,
 																womenBeneficiaryError,
+																REQUIRED_FIELDS_NOTE_ID,
 															)}
 															aria-invalid={
 																womenBeneficiaryError ? true : undefined
@@ -466,6 +473,7 @@ export function Step3VariablePay({
 															aria-describedby={describedByForField(
 																BENEFICIARIES_ALERT_ID,
 																menBeneficiaryError,
+																REQUIRED_FIELDS_NOTE_ID,
 															)}
 															aria-invalid={
 																menBeneficiaryError ? true : undefined

@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
+import { userEvent } from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
 import type { RepresentationCampaign } from "~/modules/domain";
@@ -424,6 +425,39 @@ describe("DeclarationsSection", () => {
 		fireEvent.click(screen.getByTitle("Première page"));
 		expect(
 			screen.getByRole("button", { name: "1", current: "page" }),
+		).toBeInTheDocument();
+	});
+
+	it("keeps keyboard focus on « Page suivante » once the last page is shown", async () => {
+		const user = userEvent.setup();
+		const manyDeclarations: DeclarationItem[] = Array.from(
+			{ length: 15 },
+			(_, i) => ({
+				type: "remuneration" as const,
+				siren: SIREN,
+				year: currentYear - i,
+				status: "done" as const,
+				currentStep: 6,
+				updatedAt: new Date("2025-01-01"),
+				...NO_COMPLIANCE,
+				deadline: null,
+			}),
+		);
+		renderSection({ declarations: manyDeclarations });
+		const next = screen.getByRole("button", { name: "Page suivante" });
+		next.focus();
+
+		await user.keyboard("{Enter}");
+		expect(
+			screen.getByRole("button", { name: "2", current: "page" }),
+		).toBeInTheDocument();
+		expect(next).toHaveAttribute("aria-disabled", "true");
+		expect(next).toBeEnabled();
+		expect(next).toHaveFocus();
+
+		await user.keyboard("{Enter}");
+		expect(
+			screen.getByRole("button", { name: "2", current: "page" }),
 		).toBeInTheDocument();
 	});
 

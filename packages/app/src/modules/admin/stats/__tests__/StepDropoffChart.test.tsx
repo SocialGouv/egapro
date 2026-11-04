@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { StepDropoffChart } from "../StepDropoffChart";
@@ -71,11 +71,11 @@ describe("StepDropoffChart", () => {
 		).toBeInTheDocument();
 	});
 
-	it("mentions the alert threshold in the figcaption", () => {
+	it("mentions the alert threshold, the ▲ mark and the table column in the figcaption", () => {
 		render(<StepDropoffChart rows={POPULATED_ROWS} />);
 		expect(
 			screen.getByText(
-				/barres rouges signalent une phase dont le taux dépasse 15/i,
+				/barres rouges, précédées du symbole ▲, signalent une phase dont le taux dépasse 15 % ; le tableau ci-dessous les repère dans sa colonne « Au-dessus du seuil de 15 % »/i,
 			),
 		).toBeInTheDocument();
 		expect(
@@ -83,5 +83,27 @@ describe("StepDropoffChart", () => {
 				name: /Taux d'abandon par phase.*tableau ci-dessous/i,
 			}),
 		).toBeInTheDocument();
+	});
+
+	it("shows a visible legend explaining the colour code and the non-colour threshold mark", () => {
+		render(<StepDropoffChart rows={POPULATED_ROWS} />);
+		const legendTitle = screen.getByText("Légende");
+		expect(legendTitle).not.toHaveClass("fr-sr-only");
+
+		const legend = screen.getByRole("list");
+		const items = within(legend)
+			.getAllByRole("listitem")
+			.map((item) => item.textContent);
+		expect(items).toEqual([
+			"Parcours initial (wizard A–F)",
+			"Démarche post-transmission",
+			"Barre rouge et symbole « ▲ » devant la valeur : taux d'abandon supérieur au seuil de 15 %",
+		]);
+		expect(legend.closest(".fr-sr-only")).toBeNull();
+	});
+
+	it("does not render the legend in the empty state", () => {
+		render(<StepDropoffChart rows={EMPTY_ROWS} />);
+		expect(screen.queryByText("Légende")).not.toBeInTheDocument();
 	});
 });

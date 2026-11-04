@@ -67,6 +67,30 @@ describe("MissingInfoModal", () => {
 		).toHaveTextContent("Informations manquantes");
 	});
 
+	it("titles the help section as a level-3 heading under the modal's h2, keeping its look", () => {
+		render(
+			<MissingInfoModal
+				cseApplicable={true}
+				hasCse={null}
+				siren="532847196"
+				userPhone={null}
+			/>,
+		);
+		expect(
+			screen.getByRole("heading", {
+				level: 2,
+				name: "Informations manquantes",
+				hidden: true,
+			}),
+		).toBeInTheDocument();
+		const helpHeading = screen.getByRole("heading", {
+			level: 3,
+			name: "Pour vous aider",
+			hidden: true,
+		});
+		expect(helpHeading).toHaveClass("fr-text--lg", "fr-text--bold", "fr-mb-0");
+	});
+
 	it("shows both phone and CSE description when both are missing", () => {
 		render(
 			<MissingInfoModal
@@ -286,7 +310,7 @@ describe("MissingInfoModal", () => {
 		});
 	});
 
-	it("keeps the format hint and generic error while correcting the phone", async () => {
+	it("keeps the format hint and switches to the format error while correcting the phone", async () => {
 		render(
 			<MissingInfoModal
 				cseApplicable={false}
@@ -309,7 +333,9 @@ describe("MissingInfoModal", () => {
 				document.querySelector(
 					"#missing-info-phone-messages .fr-message--error",
 				),
-			).toHaveTextContent("Veuillez renseigner votre numéro de téléphone");
+			).toHaveTextContent(
+				"Le numéro de téléphone n'est pas valide. Saisissez-le au format 01 22 33 44 55 ou +33 1 22 33 44 55",
+			);
 			expect(
 				screen.getAllByText(
 					"Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55",
@@ -318,7 +344,7 @@ describe("MissingInfoModal", () => {
 		});
 	});
 
-	it("keeps the generic error when the phone number is malformed", async () => {
+	it("shows the format error when the phone number is malformed", async () => {
 		render(
 			<MissingInfoModal
 				cseApplicable={false}
@@ -338,7 +364,9 @@ describe("MissingInfoModal", () => {
 				document.querySelector(
 					"#missing-info-phone-messages .fr-message--error",
 				),
-			).toHaveTextContent("Veuillez renseigner votre numéro de téléphone");
+			).toHaveTextContent(
+				"Le numéro de téléphone n'est pas valide. Saisissez-le au format 01 22 33 44 55 ou +33 1 22 33 44 55",
+			);
 		});
 		expect(
 			screen.getByText("Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55"),

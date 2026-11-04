@@ -29,6 +29,7 @@ export function SubjectionScreen({
 	const router = useRouter();
 	const legendId = useId();
 	const messagesId = useId();
+	const requiredNoteId = useId();
 	const lock = useRepresentationLock();
 	const readOnlyGuard = useReadOnlyGuard();
 	const isReadOnly = lock.isReadOnly || readOnlyGuard.isReadOnly;
@@ -71,7 +72,7 @@ export function SubjectionScreen({
 				de représentation femmes-hommes parmi les cadres dirigeants et les
 				membres des instances dirigeantes.
 			</p>
-			<p className="fr-text-title--grey fr-mb-4w">
+			<p className="fr-text-title--grey fr-mb-4w" id={requiredNoteId}>
 				Tous les champs sont obligatoires.
 			</p>
 
@@ -95,6 +96,7 @@ export function SubjectionScreen({
 							<div className="fr-fieldset__element">
 								<div className="fr-radio-group fr-radio-rich">
 									<input
+										aria-describedby={requiredNoteId}
 										checked={field.value === "concerned"}
 										id="subjection-concerned"
 										name={field.name}
@@ -118,6 +120,7 @@ export function SubjectionScreen({
 							<div className="fr-fieldset__element">
 								<div className="fr-radio-group fr-radio-rich">
 									<input
+										aria-describedby={requiredNoteId}
 										checked={field.value === "not_concerned"}
 										id="subjection-not-concerned"
 										name={field.name}

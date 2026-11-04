@@ -44,7 +44,11 @@ function EffectifTable({ category }: { category: EmployeeCategoryRow }) {
 						: null;
 				return (
 					<Row key={row.workforceRow.basis}>
-						<Cell bold text={row.workforceRow.label} width={PAY_TABLE.label} />
+						<Cell
+							rowHeader
+							text={row.workforceRow.label}
+							width={PAY_TABLE.label}
+						/>
 						<Cell
 							align="right"
 							text={formatWorkforceCount(women)}
@@ -103,7 +107,7 @@ function PayTable({
 				/>
 			</Row>
 			<Row>
-				<Cell bold text="Salaire de base" width={PAY_TABLE.label} />
+				<Cell rowHeader text="Salaire de base" width={PAY_TABLE.label} />
 				<Cell
 					align="right"
 					text={formatCurrency(baseWomen)}
@@ -120,7 +124,7 @@ function PayTable({
 			</Row>
 			<Row>
 				<Cell
-					bold
+					rowHeader
 					text={"Composantes variables\nou complémentaires"}
 					width={PAY_TABLE.label}
 				/>
@@ -139,7 +143,7 @@ function PayTable({
 				</Cell>
 			</Row>
 			<Row>
-				<Cell bold text="Total" width={PAY_TABLE.label} />
+				<Cell rowHeader text="Total" width={PAY_TABLE.label} />
 				<Cell
 					align="right"
 					bold
@@ -171,14 +175,14 @@ function CategoryBlock({
 		<>
 			<View wrap={false}>
 				<CategoryBanner title={heading} />
-				<SubTitle title="Effectifs physiques" />
+				<SubTitle level={4} title="Effectifs physiques" />
 				<EffectifTable category={category} />
 			</View>
 			{!payApplicable && (
 				<Text style={styles.noData}>Aucun écart à calculer</Text>
 			)}
 			<View wrap={false}>
-				<SubTitle title="Rémunération annuelle brute moyenne" />
+				<SubTitle level={4} title="Rémunération annuelle brute moyenne" />
 				<PayTable
 					baseMen={category.annualBaseMen}
 					baseWomen={category.annualBaseWomen}
@@ -187,7 +191,7 @@ function CategoryBlock({
 				/>
 			</View>
 			<View wrap={false}>
-				<SubTitle title="Rémunération horaire brute moyenne" />
+				<SubTitle level={4} title="Rémunération horaire brute moyenne" />
 				<PayTable
 					baseMen={category.hourlyBaseMen}
 					baseWomen={category.hourlyBaseWomen}

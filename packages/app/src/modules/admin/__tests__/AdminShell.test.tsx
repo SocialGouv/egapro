@@ -1,5 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { ADMIN_SITEMAP } from "~/modules/routes";
+
 import { AdminShell } from "../AdminShell";
 
 vi.mock("../AdminNavigation", () => ({
@@ -12,6 +14,14 @@ describe("AdminShell", () => {
 		expect(
 			screen.getByRole("navigation", { name: /administration/i }),
 		).toBeInTheDocument();
+	});
+
+	it("offers the backoffice plan next to the side menu, outside the main content", () => {
+		render(<AdminShell>content</AdminShell>);
+		const link = screen.getByRole("link", { name: "Plan du back-office" });
+
+		expect(link).toHaveAttribute("href", ADMIN_SITEMAP);
+		expect(screen.getByRole("main")).not.toContainElement(link);
 	});
 
 	it("renders children inside the content area", () => {

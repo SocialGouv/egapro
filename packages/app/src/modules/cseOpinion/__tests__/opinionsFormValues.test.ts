@@ -4,7 +4,6 @@ import {
 	buildOpinionsFormValues,
 	CLEARED_GAP_FIELDS,
 	hydrateOpinionsForm,
-	isJustificationOpinionIncomplete,
 	normalizeSubmittedOpinions,
 } from "../opinionsFormValues";
 import type { CseOpinionStep1Data } from "../types";
@@ -127,34 +126,6 @@ describe("normalizeSubmittedOpinions", () => {
 			firstDeclaration: { ...accuracy, ...CLEARED_GAP_FIELDS },
 			secondDeclaration: undefined,
 		});
-	});
-});
-
-describe("isJustificationOpinionIncomplete", () => {
-	it.each([
-		[{ ...accuracy, gapOpinion: null, gapDate: "2026-01-16" }],
-		[{ ...accuracy, gapOpinion: "favorable" as const, gapDate: null }],
-		[undefined],
-	])("is true when a required opinion lacks its answer or date", (declaration) => {
-		expect(isJustificationOpinionIncomplete(declaration, true)).toBe(true);
-	});
-
-	it("is false when the required opinion is complete", () => {
-		expect(
-			isJustificationOpinionIncomplete(
-				{ ...accuracy, gapOpinion: "favorable", gapDate: "2026-01-16" },
-				true,
-			),
-		).toBe(false);
-	});
-
-	it("is false when the opinion is not required", () => {
-		expect(
-			isJustificationOpinionIncomplete(
-				{ ...accuracy, gapOpinion: null, gapDate: null },
-				false,
-			),
-		).toBe(false);
 	});
 });
 

@@ -103,7 +103,7 @@ export async function ConsultationSearchPage({ searchParams }: Props) {
 					</div>
 				) : (
 					<>
-						<div>
+						<ul className="fr-raw-list">
 							{result.data.map((declaration) => (
 								<SearchResultItem
 									declaration={declaration}
@@ -111,7 +111,7 @@ export async function ConsultationSearchPage({ searchParams }: Props) {
 									searchQuery={searchQuery}
 								/>
 							))}
-						</div>
+						</ul>
 						<div className={styles.listFooter}>
 							<PageSizeSelect params={params} />
 							<SearchPagination

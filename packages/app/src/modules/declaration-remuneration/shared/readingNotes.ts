@@ -48,10 +48,11 @@ function quartileReadingNote(
 	firstQuartile: QuartileData | undefined,
 	basis: string,
 ): string | null {
-	if (!firstQuartile?.threshold) return null;
+	if (!firstQuartile) return null;
+	const threshold = formatCurrencyFixedTwo(firstQuartile.threshold);
+	if (threshold === "-") return null;
 	const total = (firstQuartile.women ?? 0) + (firstQuartile.men ?? 0);
 	if (total === 0) return null;
-	const threshold = formatCurrencyFixedTwo(firstQuartile.threshold);
 	const womenPct = quartileGenderPercentage(firstQuartile, "women");
 	const menPct = quartileGenderPercentage(firstQuartile, "men");
 	return `Note de lecture : ${womenPct} des femmes du premier quartile ont perçu une rémunération ${basis} brute moyenne inférieure à ${threshold} contre ${menPct} d'hommes.`;

@@ -13,6 +13,12 @@ import {
 
 type Props = {
 	inputId: string;
+	/**
+	 * Id of the visible text that asks for this document (the field's `<label>` or the
+	 * heading of its panel). It names the file input and describes the selection button,
+	 * so the requested document stays identifiable when several uploads share a page.
+	 */
+	labelId: string;
 	selectedFiles: File[];
 	error: string | null;
 	onFilesChange: (files: File[], error: string | null) => void;
@@ -36,6 +42,7 @@ type Props = {
 
 export function FileUpload({
 	inputId,
+	labelId,
 	selectedFiles,
 	error,
 	onFilesChange,
@@ -166,6 +173,7 @@ export function FileUpload({
 				<div className={styles.dropzoneActions}>
 					<span>
 						<button
+							aria-describedby={labelId}
 							className={styles.selectButton}
 							disabled={!canAddMore}
 							onClick={() => fileInputRef.current?.click()}
@@ -230,7 +238,7 @@ export function FileUpload({
 				accept={accept}
 				aria-describedby={messagesId}
 				aria-invalid={error !== null}
-				aria-label="Sélectionner des fichiers"
+				aria-labelledby={labelId}
 				className="fr-sr-only"
 				disabled={!canAddMore}
 				id={inputId}

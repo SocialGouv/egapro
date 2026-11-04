@@ -1,4 +1,8 @@
-type DsfrModalApi = { disclose: () => void; conceal: () => void };
+type DsfrModalApi = {
+	disclose: () => void;
+	conceal: () => void;
+	focus: () => void;
+};
 
 export function getDsfrModal(element: HTMLElement): DsfrModalApi | null {
 	if (!("dsfr" in window)) return null;

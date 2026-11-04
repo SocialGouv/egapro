@@ -1,8 +1,10 @@
 "use client";
 
 import { QUARTILE_NAMES } from "~/modules/declaration-remuneration/shared/constants";
+import { REQUIRED_FIELDS_NOTE_ID } from "~/modules/declaration-remuneration/shared/formError/types";
 import type { QuartileData } from "~/modules/declaration-remuneration/types";
 import { displayDecimal, padDecimalOnBlur } from "~/modules/domain";
+import { composeDescribedBy } from "~/modules/shared";
 import { TooltipButton } from "~/modules/shared/TooltipButton";
 import stepStyles from "../Step4QuartileDistribution.module.scss";
 import type { QuartileFieldErrors } from "./QuartileTable";
@@ -15,6 +17,8 @@ const TYPE_LABEL: Record<TableType, string> = {
 	annual: "annuel",
 	hourly: "horaire",
 };
+
+export const TRANCHE_AMOUNTS_HEADER = "Montants des tranches";
 
 function ordinalSuffix(index: number) {
 	return index === 0 ? "er" : "e";
@@ -29,7 +33,7 @@ function fieldId(
 }
 
 function thresholdAriaLabel(tableType: TableType, index: number) {
-	return `Seuil maximum ${index + 1}${ordinalSuffix(index)} quartile ${TYPE_LABEL[tableType]}`;
+	return `${TRANCHE_AMOUNTS_HEADER}, maximum du ${index + 1}${ordinalSuffix(index)} quartile ${TYPE_LABEL[tableType]}`;
 }
 
 function womenAriaLabel(tableType: TableType, index: number) {
@@ -117,7 +121,10 @@ export function QuartileTableRow({
 						</span>
 						<span className={stepStyles.inputWithUnit}>
 							<input
-								aria-describedby={thresholdErr ? `${idMax}-error` : undefined}
+								aria-describedby={composeDescribedBy(
+									REQUIRED_FIELDS_NOTE_ID,
+									thresholdErr && `${idMax}-error`,
+								)}
 								aria-invalid={thresholdErr ? "true" : undefined}
 								aria-labelledby={`${idMax}-label`}
 								className="fr-input"
@@ -164,7 +171,10 @@ export function QuartileTableRow({
 						{womenAriaLabel(tableType, index)}
 					</span>
 					<input
-						aria-describedby={womenErr ? `${idF}-error` : undefined}
+						aria-describedby={composeDescribedBy(
+							REQUIRED_FIELDS_NOTE_ID,
+							womenErr && `${idF}-error`,
+						)}
 						aria-invalid={womenErr ? "true" : undefined}
 						aria-labelledby={`${idF}-label`}
 						className="fr-input"
@@ -202,7 +212,10 @@ export function QuartileTableRow({
 						{menAriaLabel(tableType, index)}
 					</span>
 					<input
-						aria-describedby={menErr ? `${idH}-error` : undefined}
+						aria-describedby={composeDescribedBy(
+							REQUIRED_FIELDS_NOTE_ID,
+							menErr && `${idH}-error`,
+						)}
 						aria-invalid={menErr ? "true" : undefined}
 						aria-labelledby={`${idH}-label`}
 						className="fr-input"

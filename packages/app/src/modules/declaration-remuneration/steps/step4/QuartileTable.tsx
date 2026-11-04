@@ -4,7 +4,7 @@ import { TableTitle } from "~/modules/declaration-remuneration/shared/TableTitle
 import type { QuartileTuple } from "~/modules/declaration-remuneration/types";
 import { computePercentage, sumQuartileWorkforce } from "~/modules/domain";
 import stepStyles from "../Step4QuartileDistribution.module.scss";
-import { QuartileTableRow } from "./QuartileTableRow";
+import { QuartileTableRow, TRANCHE_AMOUNTS_HEADER } from "./QuartileTableRow";
 
 type Field = "threshold" | "women" | "men";
 
@@ -99,7 +99,7 @@ export function QuartileTable({
 												<span className="fr-sr-only">Quartile</span>
 											</th>
 											<th colSpan={2} scope="col">
-												Montants des tranches
+												{TRANCHE_AMOUNTS_HEADER}
 												<br />
 												{trancheSuffix}
 											</th>
