@@ -56,16 +56,38 @@ describe("DeclarationLockAlertGate", () => {
 		expect(alert.contains(status)).toBe(false);
 	});
 
-	it("shows the retake button under the banner once the declaration is released", () => {
+	it("replaces the banner by the retake button once the declaration is released", () => {
 		lockState.current = {
 			...lockState.current,
 			retake: { isAvailable: true, status: "idle", retake: () => {} },
 		};
 		renderGate();
 
+		expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 		expect(
 			screen.getByRole("button", { name: "Modifier la déclaration" }),
 		).toBeInTheDocument();
+	});
+
+	it("keeps the banner hidden while the retake is in progress", () => {
+		lockState.current = {
+			...lockState.current,
+			retake: { isAvailable: false, status: "pending", retake: () => {} },
+		};
+		renderGate();
+
+		expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+	});
+
+	it("brings the banner back on the new holder when someone else retook the declaration first", () => {
+		lockState.current = {
+			...lockState.current,
+			holder: { ...HOLDER, userId: "user-3", firstName: "Dominique" },
+			retake: { isAvailable: false, status: "outpaced", retake: () => {} },
+		};
+		renderGate();
+
+		expect(screen.getByRole("alert")).toHaveTextContent("Dominique Martin");
 	});
 
 	it("hides the banner but keeps the status region once editable", () => {

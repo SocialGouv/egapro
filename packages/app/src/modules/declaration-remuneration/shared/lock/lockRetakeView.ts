@@ -17,3 +17,9 @@ export function resolveLockRetakeView(
 			return retake.isAvailable ? "available" : null;
 	}
 }
+
+export function isLockReleasedOrRetaking(
+	retake: LockRetake | undefined,
+): boolean {
+	return retake?.isAvailable === true || retake?.status === "pending";
+}
