@@ -433,7 +433,7 @@ describe("adminDeclarationsRouter — search", () => {
 		expect(params).toContain("completed");
 	});
 
-	it("bounds the date filter on the status date with the same day bounds as before", async () => {
+	it("bounds the date filter on the Paris day of the status date, both days included", async () => {
 		const db = buildDb([activeRow]);
 		const caller = await callSearch(db);
 
@@ -442,10 +442,11 @@ describe("adminDeclarationsRouter — search", () => {
 		const { sql, params } = dialect.sqlToQuery(
 			db.__chain.where.mock.calls[0]?.[0] as never,
 		);
-		expect(sql).toContain("::timestamptz");
+		expect(sql).toContain("AT TIME ZONE 'Europe/Paris')::date >= $");
+		expect(sql).toContain("AT TIME ZONE 'Europe/Paris')::date <= $");
 		expect(sql).not.toContain('"app_declaration"."created_at" >=');
 		expect(params).toEqual(
-			expect.arrayContaining(["2027-03-14T00:00:00Z", "2027-03-20T23:59:59Z"]),
+			expect.arrayContaining(["2027-03-14", "2027-03-20"]),
 		);
 		expect(db.__countChain.where.mock.calls[0]?.[0]).toBe(
 			db.__chain.where.mock.calls[0]?.[0],

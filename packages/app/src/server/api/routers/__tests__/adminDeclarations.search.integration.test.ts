@@ -126,7 +126,7 @@ describe("adminDeclarations.search — démarche status and date (real Postgres)
 			history: [
 				{ type: "submit", at: "2081-03-02T09:00:00Z" },
 				{ type: "cse_opinion_submit", at: "2081-03-20T09:00:00Z" },
-				{ type: "demarche_complete", at: "2081-03-20T09:00:01Z" },
+				{ type: "demarche_complete", at: "2081-03-20T22:59:59.500Z" },
 			],
 		},
 		{
@@ -166,6 +166,14 @@ describe("adminDeclarations.search — démarche status and date (real Postgres)
 	const SIRENS = FIXTURES.map(
 		(_, index) => `9810000${String(index).padStart(2, "0")}`,
 	);
+
+	const parisDayFormat = new Intl.DateTimeFormat("en-CA", {
+		timeZone: "Europe/Paris",
+	});
+
+	function parisDay(date: Date): string {
+		return parisDayFormat.format(date);
+	}
 
 	function declarationId(fixture: Fixture): string {
 		return `admin-search-lifecycle-${fixture.key}`;
@@ -378,19 +386,15 @@ describe("adminDeclarations.search — démarche status and date (real Postgres)
 	])("keeps the date filter within its bounds: %o", async (bounds) => {
 		const result = await search(bounds);
 
-		const from = bounds.dateFrom
-			? new Date(`${bounds.dateFrom}T00:00:00Z`)
-			: null;
-		const to =
-			"dateTo" in bounds && bounds.dateTo
-				? new Date(`${bounds.dateTo}T23:59:59Z`)
-				: null;
+		const from = bounds.dateFrom ?? null;
+		const to = "dateTo" in bounds && bounds.dateTo ? bounds.dateTo : null;
 		const all = (await search({})).rows;
 		const expectedIds = all
 			.filter((row) => {
 				if (row.statusDate === null) return false;
-				if (from && row.statusDate < from) return false;
-				if (to && row.statusDate >= to) return false;
+				const day = parisDay(row.statusDate);
+				if (from && day < from) return false;
+				if (to && day > to) return false;
 				return true;
 			})
 			.map((row) => row.id)
@@ -399,6 +403,30 @@ describe("adminDeclarations.search — démarche status and date (real Postgres)
 		expect(expectedIds.length).toBeGreaterThan(0);
 		expect(result.rows.map((row) => row.id).sort()).toEqual(expectedIds);
 		expect(result.total).toBe(expectedIds.length);
+	});
+
+	it("files a démarche cancelled at 00:30 in Paris under that Paris day, not the UTC one", async () => {
+		const until18 = await search({ dateTo: "2081-03-18" });
+		const on19 = await search({ dateFrom: "2081-03-19", dateTo: "2081-03-19" });
+
+		expect(until18.rows.map((row) => row.id)).not.toContain(
+			"admin-search-lifecycle-cancelled",
+		);
+		expect(on19.rows.map((row) => row.id)).toContain(
+			"admin-search-lifecycle-cancelled",
+		);
+	});
+
+	it("keeps a démarche completed in the last second of a Paris day when filtering up to that day", async () => {
+		const until20 = await search({ dateTo: "2081-03-20" });
+		const from21 = await search({ dateFrom: "2081-03-21" });
+
+		expect(until20.rows.map((row) => row.id)).toContain(
+			"admin-search-lifecycle-completed",
+		);
+		expect(from21.rows.map((row) => row.id)).not.toContain(
+			"admin-search-lifecycle-completed",
+		);
 	});
 
 	it("keeps a démarche transmitted on 15/03 and drops one opened on 10/03 from a date filter starting 14/03", async () => {

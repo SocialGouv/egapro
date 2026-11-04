@@ -145,12 +145,16 @@ export function demarcheStatusDateSortKey(sortOrder: "asc" | "desc"): SQL {
 		: sql`${demarcheStatusDate()} DESC NULLS LAST`;
 }
 
-export function demarcheStatusDateFrom(isoInstant: string): SQL {
-	return sql`${demarcheStatusDate()} >= ${isoInstant}::timestamptz`;
+function demarcheStatusParisDay(): SQL {
+	return sql`(${demarcheStatusDate()} AT TIME ZONE 'Europe/Paris')::date`;
 }
 
-export function demarcheStatusDateBefore(isoInstant: string): SQL {
-	return sql`${demarcheStatusDate()} < ${isoInstant}::timestamptz`;
+export function demarcheStatusOnOrAfter(civilDate: string): SQL {
+	return sql`${demarcheStatusParisDay()} >= ${civilDate}::date`;
+}
+
+export function demarcheStatusOnOrBefore(civilDate: string): SQL {
+	return sql`${demarcheStatusParisDay()} <= ${civilDate}::date`;
 }
 
 /**

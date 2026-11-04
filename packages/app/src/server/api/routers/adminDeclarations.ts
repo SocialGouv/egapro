@@ -39,9 +39,9 @@ import {
 	demarcheCompletedAt,
 	demarcheLifecycleSortKey,
 	demarcheLifecycleStatusCondition,
-	demarcheStatusDateBefore,
-	demarcheStatusDateFrom,
 	demarcheStatusDateSortKey,
+	demarcheStatusOnOrAfter,
+	demarcheStatusOnOrBefore,
 	type LastTransmissionEvent,
 	lastTransmissionAt,
 	lastTransmissionEvent,
@@ -126,11 +126,11 @@ export const adminDeclarationsRouter = createTRPCRouter({
 			}
 
 			if (input.dateFrom) {
-				filters.push(demarcheStatusDateFrom(`${input.dateFrom}T00:00:00Z`));
+				filters.push(demarcheStatusOnOrAfter(input.dateFrom));
 			}
 
 			if (input.dateTo) {
-				filters.push(demarcheStatusDateBefore(`${input.dateTo}T23:59:59Z`));
+				filters.push(demarcheStatusOnOrBefore(input.dateTo));
 			}
 
 			if (input.status) {
