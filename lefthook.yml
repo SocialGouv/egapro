@@ -1,0 +1,25 @@
+# Git hooks — the same gates for humans and for every coding agent (Claude Code, OpenCode…).
+# Installed by `pnpm install` (root `prepare`). Never bypass with --no-verify: fix the cause.
+# Full local gate before declaring a task done: `pnpm verify`.
+
+pre-commit:
+  parallel: true
+  jobs:
+    - name: biome
+      root: packages/app/
+      glob: "*.{ts,tsx,js,jsx,json,jsonc}"
+      run: pnpm exec biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+      stage_fixed: true
+
+    - name: patterns
+      run: bash scripts/quality/check-patterns.sh --staged
+
+    - name: a11y
+      root: packages/app/
+      glob: "*.{tsx,jsx,html}"
+      run: pnpm exec ultra11y audit src --jsx --graph --standard rgaa --lang fr --fail-on blocking
+
+pre-push:
+  jobs:
+    - name: typecheck
+      run: pnpm typecheck

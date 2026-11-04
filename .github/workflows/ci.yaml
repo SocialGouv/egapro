@@ -145,6 +145,23 @@ jobs:
       - name: Test the coherence check against half-bumps
         run: bash scripts/a11y/check-ultra11y-version.test.sh
 
+  quality-patterns:
+    # Les interdits mécaniques (any, process.env, ../../, style={}, helpers métier réécrits hors
+    # domain/…) sur les lignes AJOUTÉES depuis alpha. Même script que le pre-commit (lefthook)
+    # et `pnpm verify` : un commit poussé avec --no-verify, ou écrit hors de tout hook, est
+    # rattrapé ici.
+    name: "Qualité · Interdits mécaniques"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Self-test the pattern rules
+        run: bash scripts/quality/check-patterns.sh --self-test
+      - name: Check added lines since alpha
+        run: bash scripts/quality/check-patterns.sh --diff origin/alpha
+
   app-check-journal:
     name: App · Journal monotone check
     runs-on: ubuntu-latest
