@@ -1,193 +1,127 @@
 ---
 name: review
-description: "Adresse les commentaires de revue sur les PR (humain + bots). Mode auto-détecté selon le type d'issue. Usage: /review [<issue#>|<PR#>]"
+description: "Revue de code, deux modes. `gates` (défaut sans argument) : passe les contrôles qualité sur le diff courant — pnpm verify, puis les checklists structure, sécurité, accessibilité (ultra11y), fidélité Figma, fonctionnel — et rend un verdict, sans rien modifier. `pr` : traite les threads de revue non résolus d'une PR (humains + bots), corrige, pousse, prépare les réponses et les poste après validation. Usage: /review [gates] | /review <PR#|issue#>"
+argument-hint: "[gates] | <PR#|issue#>"
 ---
 
 # /review
 
-Délègue à l'agent **`review-fixer`** dans un worktree dédié pour : lire les commentaires non résolus, appliquer les fixes, valider, push, répondre aux threads. Trois modes auto-détectés :
+Deux modes. Choisis-le à l'étape 0, puis suis **uniquement** la section du mode choisi.
 
-| Mode | Trigger | Scope du review |
-|---|---|---|
-| **epic** | Issue type `Feature` | Toutes les sub-task PRs liées à la feature + la PR finale `epic/<N> → alpha`. Les fixes sont appliqués sur la **branche d'intégration `epic/<N>`** (les sub-tasks sont déjà squash-mergées dedans). |
-| **task** | Issue type `Task` | La PR du ticket en review. Fixes sur la branche head du PR. |
-| **bug** | Issue type `Bug` | La PR du bug en review. Fixes sur la branche head du PR. |
-| (no-arg) | Aucun argument, sur une branche de PR | La PR de la branche courante (équivalent task/bug single-PR). |
+| Argument | Mode |
+|---|---|
+| vide, ou `gates` | **gates** — revue du diff courant, lecture seule |
+| numéro ou URL de PR / d'issue | **pr** — traiter les commentaires de revue |
+| vide, mais la branche courante a une PR avec des threads non résolus | demander : « gates ou pr ? » |
 
-Globalement le fonctionnement reste identique au précédent `/review` : fetch, fix, re-validate, reply. La nouveauté c'est que le travail réel se passe dans un agent qui tourne en worktree (comme `code-dev` pour `/implement`), pas dans le main context.
+## Quand → lis
 
----
-
-## Step 0 — Détecter le mode
-
-```bash
-ARG_HEAD="$(echo "$ARGUMENTS" | awk '{print $1}')"
-case "$ARG_HEAD" in
-  '#'[0-9]*|[0-9]*)
-    ID="${ARG_HEAD#\#}"
-    # ID peut être un issue number ou un PR number — on essaie d'abord issue
-    ;;
-  https://github.com/*/issues/*)
-    ID="$(echo "$ARG_HEAD" | sed -E 's#.*/issues/([0-9]+).*#\1#')"
-    ;;
-  https://github.com/*/pull/*)
-    ID="$(echo "$ARG_HEAD" | sed -E 's#.*/pull/([0-9]+).*#\1#')"
-    IS_PR=1
-    ;;
-  *)
-    ID=""
-    ;;
-esac
-```
-
-### Cas A — argument fourni
-
-- Si l'argument est un **numéro d'issue** : `gh issue view <ID> --json number,issueType,labels` → brancher selon `issueType.name` (Feature/Task/Bug).
-- Si l'argument est un **numéro de PR** : `gh pr view <ID> --json closingIssuesReferences` → trouver l'issue liée → brancher selon son type.
-- Type absent ou ambigu → demander à l'utilisateur quel mode utiliser.
-
-### Cas B — pas d'argument
-
-- Si la branche courante est une PR branch (`gh pr view --json number` réussit) → mode `task` ou `bug` selon l'issue liée à cette PR. PR = la PR courante.
-- Sinon : lister les PRs ouvertes avec des reviews non adressées (`gh pr list --state open --json number,title,reviewDecision --jq '.[] | select(.reviewDecision == "REVIEW_REQUIRED" or .reviewDecision == "CHANGES_REQUESTED")'`) et demander laquelle traiter.
+| Quand | Lis |
+|---|---|
+| un `.ts` / `.tsx` / un test est dans le diff | [references/structural.md](references/structural.md) |
+| le diff touche `src/server/**`, `routers/`, tRPC, `src/app/api/**`, l'auth | [references/security.md](references/security.md) |
+| un `.tsx` est dans le diff | [references/a11y.md](references/a11y.md) |
+| un `.tsx` / `.scss` est dans le diff **et** le ticket a une `## Référence Figma` (ou un bug visuel) **et** un dev server tourne | [references/design-fidelity.md](references/design-fidelity.md) |
+| le ticket a des scénarios PO ou une « Vérification du correctif » **et** un dev server tourne | [references/functional.md](references/functional.md) |
+| mode **pr** | [references/pr-comments.md](references/pr-comments.md) |
+| une convention de code à vérifier | `../implement/references/conventions/` (index dans `AGENTS.md`) |
 
 ---
 
-## Step 1 — Identifier le scope
+## Mode gates — revue du diff courant (lecture seule)
 
-### Mode `epic`
+Tu **rapportes**, tu ne corriges pas. L'appelant (toi plus tard, ou le skill `implement`) corrige puis relance `/review gates`.
 
-```bash
-EPIC_N="$ID"
+1. **Base et périmètre.**
+   ```bash
+   BASE="${VERIFY_BASE:-origin/alpha}"     # sur un sous-ticket d'epic : origin/epic/<N>
+   git fetch -q origin "${BASE#origin/}"
+   git diff --name-only "$(git merge-base HEAD "$BASE")" ; git diff --name-only HEAD ; git ls-files --others --exclude-standard
+   ```
+   Note la liste des fichiers modifiés. Diff vide → réponds `Rien à revoir` et **STOP**.
 
-# 1. PR finale epic/<N> → alpha (si ouverte)
-FINAL_PR=$(gh pr list --head "epic/$EPIC_N" --base alpha --state open --json number --jq '.[0].number // empty')
+2. **La machine d'abord — toujours.**
+   ```bash
+   pnpm verify
+   ```
+   (patterns sur le diff, audit statique ultra11y de tout `src` — comme la gate CI —, lint, format, typecheck, tests.)
+   **FAIL → STOP.** Rends le tableau avec `verify: FAIL` et les lignes d'erreur utiles. Les checklists ne servent à rien tant que la machine est rouge.
+   Si un dev server tourne : appelle aussi `nextjs_call` (`get_errors`) du MCP `next-devtools`.
 
-# 2. Sub-task PRs (open ET closed-merged — les comments restent lisibles sur les closed PRs)
-SUBTASK_PRS=$(gh api graphql -f query='{
-    repository(owner:"SocialGouv", name:"egapro") {
-        issue(number: '$EPIC_N') {
-            subIssues(first: 50) {
-                nodes {
-                    closedByPullRequestsReferences(first: 5) { nodes { number state } }
-                }
-            }
-        }
-    }
-}' --jq '[.data.repository.issue.subIssues.nodes[].closedByPullRequestsReferences.nodes[].number] | unique')
+3. **Choisis les checklists** avec la table « Quand → lis ». Lis chaque référence retenue **en entier** avant de l'appliquer. Une checklist non pertinente est notée `skip — <raison>`, jamais omise.
+   *Si ton outil sait lancer des sous-agents en parallèle, tu peux exécuter les checklists retenues en parallèle — une par sous-agent, chacune avec sa référence.*
 
-# 3. Filtrer les PRs avec des unresolved comments
-PR_LIST=$(echo "$FINAL_PR $SUBTASK_PRS" | tr ' ' '\n' | sort -u | while read PR; do
-    [ -z "$PR" ] && continue
-    HAS=$(gh pr view "$PR" --json reviewDecision --jq '.reviewDecision' 2>/dev/null)
-    if [ "$HAS" = "REVIEW_REQUIRED" ] || [ "$HAS" = "CHANGES_REQUESTED" ]; then
-        echo "$PR"
-    fi
-done | tr '\n' ' ')
+4. **Applique chaque checklist** sur les fichiers du diff uniquement. Chaque constat = `[SÉVÉRITÉ] fichier:ligne — description → correctif`. Pas de `fichier:ligne` vérifiable = pas de constat. Le code préexistant hors diff : une ligne max en fin de rapport, hors verdict.
 
-WORKING_BRANCH="epic/$EPIC_N"
-```
+5. **Rends le rapport** — exactement ce gabarit :
 
-Si aucune PR n'a de review en attente → afficher `Aucune review non adressée sur l'epic #<N> ; rien à faire.` et exit.
+   ```
+   ## Review gates: PASS | NEEDS WORK
 
-### Mode `task` ou `bug` (single PR)
+   Base: <BASE>  ·  Fichiers: <n>
 
-```bash
-# Trouver la PR liée à l'issue
-PR_LIST=$(gh issue view "$ID" --json closedByPullRequestsReferences \
-    --jq '[.closedByPullRequestsReferences.nodes[] | select(.state == "OPEN") | .number] | join(" ")')
-# Fallback : chercher par branche linkée
-[ -z "$PR_LIST" ] && PR_LIST=$(gh pr list --search "linked:$ID" --json number --jq '.[0].number')
+   | Gate | Verdict | Constats |
+   |---|---|---|
+   | verify | PASS / FAIL | — |
+   | structure | PASS / NEEDS WORK / MINOR / skip | <n> |
+   | sécurité | SECURE / VULNERABLE / HARDENING NEEDED / skip | <n> |
+   | accessibilité | PASS / NEEDS WORK / MINOR / skip | <n> (+ risques résiduels) |
+   | fidélité Figma | PASS / RETRY / REFACTO / degraded / skip | <n> |
+   | fonctionnel | PASS / RETRY / REFACTO / skip | <n> |
 
-WORKING_BRANCH=$(gh pr view "$PR_LIST" --json headRefName --jq '.headRefName')
-```
+   ### Constats
+   - [ERROR] path/file.tsx:42 — … → …
 
----
+   ### Risques résiduels
+   - …
+   ```
 
-## Step 2 — Worktree
+   Verdict global **PASS** seulement si : `verify` PASS, aucune gate en NEEDS WORK / VULNERABLE / RETRY / REFACTO. Un `MINOR` ou `HARDENING NEEDED` n'empêche pas PASS mais ses constats sont listés.
 
-Réutiliser ou créer un worktree sur `WORKING_BRANCH` :
-
-```bash
-# Picker un index libre dans [0, EPIC_MAX_PARALLEL[
-INDEX=$(...)  # premier libre via lsof sur 3001+
-WT_PATH="$(cd "${REPO_ROOT}/.." && pwd)/egapro-review-${ID}"
-
-if [ ! -d "$WT_PATH" ]; then
-    git fetch origin "$WORKING_BRANCH"
-    git worktree add "$WT_PATH" "origin/$WORKING_BRANCH"
-fi
-
-if [ ! -f "$WT_PATH/packages/app/.env.local" ]; then
-    (cd "$WT_PATH" && bash scripts/setup-worktree.sh "$INDEX")
-fi
-```
+**Interdits en mode gates** : modifier un fichier, relâcher un test pour le faire passer, déclarer conforme un critère d'accessibilité de rendu (contraste, focus, zoom) depuis la source.
 
 ---
 
-## Step 3 — Déléguer à `review-fixer`
+## Mode pr — traiter les commentaires de revue
 
-Invoquer l'agent `review-fixer` (`.claude/agents/review-fixer/AGENT.md`) en foreground synchrone avec :
+Lis d'abord [references/pr-comments.md](references/pr-comments.md) : il porte les commandes exactes.
 
-- `mode` : `epic` / `task` / `bug`
-- `PR_LIST` : numéros séparés par espaces
-- `WORKING_BRANCH` : `epic/<N>` en mode epic, ou la PR head branch en mode task/bug
-- `WT_PATH` + `INDEX`
+1. **Résoudre la PR et la branche de travail** (pr-comments § 1) :
+   - numéro de PR → cette PR ; numéro d'issue → son type décide :
+     - `Task` / `Bug` → la PR ouverte liée ; branche = sa branche head ;
+     - `Feature` (epic) → la PR finale `epic/<N> → alpha` + les PR des sous-tickets ; branche = `epic/<N>` ;
+     - type absent → demander.
+   Aucune PR trouvée → le dire et **STOP**.
 
-L'agent :
-1. Checkout `WORKING_BRANCH` dans le worktree
-2. Lit toutes les unresolved comments sur les PRs en scope
-3. Catégorise (fix / non-pertinent / question / déjà adressé / ambigu)
-4. Pour les ambigus → demande clarification à l'utilisateur
-5. Applique les fixes
-6. Re-run les 4 quality gates (validator, structural-auditor, rgaa-auditor, security-auditor)
-7. Push sur `WORKING_BRANCH`
-8. Watch CI sur les PRs en scope jusqu'au vert
-9. **Prépare** les replies pour chaque thread mais **ne les poste pas** — gate utilisateur explicite avant de poster
-10. Sur approbation utilisateur → poste les replies via `gh api`
-11. Vérifie qu'aucun thread n'a été ignoré silencieusement
+2. **Worktree.** Un worktree sur la branche de travail (jamais une nouvelle branche), puis `bash scripts/setup-worktree.sh <index>` s'il manque `packages/app/.env.local`.
 
-L'agent retourne un JSON strict :
-- `{"status":"validated","prs":[...],"fixes_applied":N,"replies_posted":M}` → tout est réglé
-- `{"status":"needs_user","prs":[...],"unposted_replies":N}` → des replies pendantes (l'utilisateur a refusé / demandé à attendre)
-- `{"status":"failed","prs":[...],"reason":"..."}` → erreur technique
-- `{"status":"watching","prs":[...],"resume_after":<sec>}` → l'utilisateur veut surveiller les nouveaux commentaires
+3. **Lire les threads NON RÉSOLUS** via GraphQL `reviewThreads` (pr-comments § 2), plus les commentaires de niveau PR. Zéro thread non résolu → `Rien à traiter` et **STOP**.
 
----
+4. **Catégoriser chaque thread** : `fix` · `non pertinent` (à justifier) · `question` · `déjà adressé` (vérifié au diff) · `ambigu`.
+   Au moins un `ambigu` → **pose la question à l'utilisateur et attends** avant de toucher au code.
 
-## Step 4 — Loop optionnel
+5. **Corriger** les `fix`, en suivant `AGENTS.md`, `packages/app/AGENTS.md` et les conventions. Pas de commentaire ajouté dans le code. Si le comportement change : mets à jour les tests vitest ; si un parcours utilisateur est touché : mets à jour l'E2E selon `../implement/references/e2e.md`.
 
-Si l'utilisateur souhaite continuer à surveiller les nouveaux commentaires sur les mêmes PRs :
+6. **Revue** : exécute le **mode gates** ci-dessus sur la branche. Pas PASS → corrige → relance, jusqu'au PASS.
 
-- Boucle : sleep `resume_after` (typiquement 5 min) → re-fetch comments → si nouveau comment depuis le dernier push → re-spawner `review-fixer`
-- L'utilisateur peut interrompre (`Ctrl+C` ou `arrêter` en chat) à tout moment
+7. **Push.** `git commit` signé (`fix(review): <résumé>`), `git push origin <branche>`. Jamais `--no-verify`, jamais `--no-gpg-sign`, jamais de force-push sans accord explicite de l'utilisateur.
 
-Sinon → exit avec un report court :
+8. **CI.** `gh pr checks <PR> --watch`. Tout doit finir `SUCCESS` / `SKIPPED` / `NEUTRAL`. Rouge → corriger, pousser, reboucler.
 
-```
-## Review: <PASS | NEEDS_USER | FAILED>
+9. **Préparer les réponses — sans les poster.** Un brouillon par thread (gabarits en pr-comments § 3). Passe chaque brouillon au filtre anti-secret (pr-comments § 4). Présente **tous** les brouillons à l'utilisateur et **attends sa validation explicite**.
 
-Mode: <epic|task|bug>
-PRs traitées: #N1, #N2, …
-Fixes appliqués: K
-Replies postées: M
-Working branch: <branch>
-```
+10. **Poster** les réponses validées (pr-comments § 5).
 
----
+11. **Contrôle final** : chaque thread non résolu de l'étape 3 a une réponse de toi, ou est listé comme « en attente de décision utilisateur ». Aucun thread ignoré en silence.
 
-## Règles
+12. **Rapport** :
+    ```
+    ## Review PR: DONE | NEEDS_USER | FAILED
 
-- **Pas de force-push** sans validation utilisateur explicite (cf. agent `review-fixer`).
-- **Pas de transition de statut board** — `/review` ne touche jamais au board. `In review` et `Done` sont user-only.
-- **Mode epic** : les fixes vont sur `epic/<N>`, **pas** sur les sub-task branches (qui sont supprimées après squash-merge). Si un sub-task PR est encore OPEN (rare en pratique — la pipeline aurait dû le squash-merger), le pipeline `/implement` reprend la main, pas `/review`.
-- **Reply gate** : `review-fixer` **prépare** les replies, l'utilisateur les valide avant de les poster. Cette discipline est conservée du `/review` historique.
-- **Git artefact hygiene** — voir `.claude/rules/git-artefact-hygiene.md`. Les replies sont publiques : pas de secret/PII/infra interne.
+    PR: #N1, #N2  ·  Branche: <branche>
+    Threads: <total> — corrigés <a>, justifiés <b>, questions <c>, déjà adressés <d>, en attente <e>
+    Commits: <sha…>  ·  CI: verte | rouge (<check>)
+    ```
+    Proposer ensuite : « Je surveille les nouveaux commentaires ? » — si oui, refaire depuis l'étape 3 plus tard.
 
----
-
-## Référence
-
-- Agent : `.claude/agents/review-fixer/AGENT.md`
-- Quality gates : `.claude/agents/{validator,structural-auditor,rgaa-auditor,security-auditor}/AGENT.md`
-- Git artefact hygiene : `.claude/rules/git-artefact-hygiene.md`
+**Interdits en mode pr** : changer le statut d'un ticket sur le board, merger, poster une réponse non validée, réécrire l'historique publié sans accord. Les réponses sont publiques : voir `AGENTS.md` § Hygiène git.
