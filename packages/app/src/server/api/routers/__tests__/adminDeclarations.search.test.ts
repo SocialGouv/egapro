@@ -1,7 +1,10 @@
 import { PgDialect } from "drizzle-orm/pg-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { COMPANY_SIZE_RANGES } from "~/modules/domain";
+import {
+	COMPANY_SIZE_RANGES,
+	DECLARATION_PROCESS_STEP_LABELS,
+} from "~/modules/domain";
 
 vi.mock("~/server/auth", () => ({
 	auth: vi.fn(),
@@ -38,6 +41,9 @@ type Row = {
 	declarantEmail: string;
 	declarantFirstName: string | null;
 	declarantLastName: string | null;
+	lastTransmission: { eventType: string; value: string | null } | null;
+	lastTransmissionAt: Date | null;
+	demarcheCompletedAt: Date | null;
 };
 
 // Same casing as the app's db instance, so the generated column names match.
@@ -97,6 +103,9 @@ const activeRow: Row = {
 	declarantEmail: "alice@example.fr",
 	declarantFirstName: "Alice",
 	declarantLastName: "Dupont",
+	lastTransmission: { eventType: "submit", value: null },
+	lastTransmissionAt: new Date("2026-03-12T10:00:00Z"),
+	demarcheCompletedAt: null,
 };
 
 const cancelledRow: Row = {
@@ -147,7 +156,7 @@ describe("adminDeclarationsRouter — search", () => {
 		} as never);
 
 		const result = await caller.search({
-			status: "awaiting_compliance_path_choice",
+			status: "in_progress",
 		});
 
 		expect(result.rows).toHaveLength(1);
@@ -265,6 +274,182 @@ describe("adminDeclarationsRouter — search", () => {
 
 		expect(renderSql(db.__chain.where.mock.calls[0]?.[0])).not.toContain(
 			"workforce_ema",
+		);
+	});
+
+	it("shapes an in-progress row with its last transmitted step, its next step and the date of that transmission", async () => {
+		const db = buildDb([
+			{
+				...activeRow,
+				status: "corrective_actions_chosen",
+				lastTransmission: {
+					eventType: "path_choice",
+					value: "corrective_action",
+				},
+				lastTransmissionAt: new Date("2026-03-15T10:00:00Z"),
+			},
+		]);
+		const caller = await callSearch(db);
+
+		const [row] = (await caller.search({})).rows;
+
+		expect(row).toMatchObject({
+			demarcheStatus: "in_progress",
+			lastTransmittedStep: "Choix du parcours — Actions correctives",
+			nextStep: "Actions correctives et seconde déclaration",
+			statusDate: new Date("2026-03-15T10:00:00Z"),
+		});
+		expect(row).not.toHaveProperty("lastTransmission");
+		expect(row).not.toHaveProperty("lastTransmissionAt");
+		expect(row).not.toHaveProperty("demarcheCompletedAt");
+	});
+
+	it("shapes a draft with no transmitted step and dates it from its opening", async () => {
+		const db = buildDb([
+			{
+				...activeRow,
+				status: "draft",
+				lastTransmission: null,
+				lastTransmissionAt: null,
+			},
+		]);
+		const caller = await callSearch(db);
+
+		const [row] = (await caller.search({})).rows;
+
+		expect(row).toMatchObject({
+			demarcheStatus: "draft",
+			lastTransmittedStep: null,
+			nextStep: DECLARATION_PROCESS_STEP_LABELS.draft,
+			statusDate: activeRow.createdAt,
+		});
+	});
+
+	it("shapes a completed démarche with no next step, dated from its completion", async () => {
+		const db = buildDb([
+			{
+				...activeRow,
+				status: "demarche_completed",
+				lastTransmission: { eventType: "cse_opinion_submit", value: null },
+				demarcheCompletedAt: new Date("2026-03-20T10:00:00Z"),
+			},
+		]);
+		const caller = await callSearch(db);
+
+		const [row] = (await caller.search({})).rows;
+
+		expect(row).toMatchObject({
+			demarcheStatus: "completed",
+			lastTransmittedStep: "Dépôt d'un avis CSE",
+			nextStep: null,
+			statusDate: new Date("2026-03-20T10:00:00Z"),
+		});
+	});
+
+	it("shapes a cancelled démarche with what it had transmitted, dated from its cancellation", async () => {
+		const db = buildDb([cancelledRow]);
+		const caller = await callSearch(db);
+
+		const [row] = (await caller.search({})).rows;
+
+		expect(row).toMatchObject({
+			demarcheStatus: "cancelled",
+			lastTransmittedStep: "Transmission de la déclaration",
+			nextStep: null,
+			statusDate: cancelledRow.cancelledAt,
+		});
+	});
+
+	it("ignores a history event that is not a transmission", async () => {
+		const db = buildDb([
+			{
+				...activeRow,
+				lastTransmission: { eventType: "step_change", value: null },
+			},
+		]);
+		const caller = await callSearch(db);
+
+		const [row] = (await caller.search({})).rows;
+
+		expect(row?.lastTransmittedStep).toBeNull();
+	});
+
+	it("sorts by default on the status date, most recent first, undated rows last, then on the id", async () => {
+		const db = buildDb([activeRow]);
+		const caller = await callSearch(db);
+
+		await caller.search({});
+
+		const [primary, tieBreak] = db.__chain.orderBy.mock.calls[0] ?? [];
+		const primarySql = renderSql(primary);
+		expect(primarySql).toContain("CASE");
+		expect(primarySql).toContain("DESC NULLS LAST");
+		expect(renderSql(tieBreak)).toBe('"app_declaration"."id" asc');
+	});
+
+	it.each([
+		"siren",
+		"companyName",
+		"year",
+		"workforce",
+		"demarcheStatus",
+		"declarantEmail",
+		"statusDate",
+	] as const)("breaks ties on the id when sorting by %s", async (sortBy) => {
+		const db = buildDb([activeRow]);
+		const caller = await callSearch(db);
+
+		await caller.search({ sortBy, sortOrder: "asc" });
+
+		const args = db.__chain.orderBy.mock.calls[0] ?? [];
+		expect(args).toHaveLength(2);
+		expect(renderSql(args[1])).toBe('"app_declaration"."id" asc');
+	});
+
+	it.each([
+		"asc",
+		"desc",
+	] as const)("sorts the démarche status %s on its rank", async (sortOrder) => {
+		const db = buildDb([activeRow]);
+		const caller = await callSearch(db);
+
+		await caller.search({ sortBy: "demarcheStatus", sortOrder });
+
+		const orderBy = renderSql(db.__chain.orderBy.mock.calls[0]?.[0]);
+		expect(orderBy).toContain("CASE");
+		expect(orderBy).toMatch(sortOrder === "asc" ? / ASC$/ : / DESC$/);
+	});
+
+	it("filters on the démarche status through the SQL classification", async () => {
+		const db = buildDb([activeRow]);
+		const caller = await callSearch(db);
+
+		await caller.search({ status: "completed" });
+
+		const { sql, params } = dialect.sqlToQuery(
+			db.__chain.where.mock.calls[0]?.[0] as never,
+		);
+		expect(sql).toContain("CASE");
+		expect(params).toContain("completed");
+	});
+
+	it("bounds the date filter on the Paris day of the status date, both days included", async () => {
+		const db = buildDb([activeRow]);
+		const caller = await callSearch(db);
+
+		await caller.search({ dateFrom: "2027-03-14", dateTo: "2027-03-20" });
+
+		const { sql, params } = dialect.sqlToQuery(
+			db.__chain.where.mock.calls[0]?.[0] as never,
+		);
+		expect(sql).toContain("AT TIME ZONE 'Europe/Paris')::date >= $");
+		expect(sql).toContain("AT TIME ZONE 'Europe/Paris')::date <= $");
+		expect(sql).not.toContain('"app_declaration"."created_at" >=');
+		expect(params).toEqual(
+			expect.arrayContaining(["2027-03-14", "2027-03-20"]),
+		);
+		expect(db.__countChain.where.mock.calls[0]?.[0]).toBe(
+			db.__chain.where.mock.calls[0]?.[0],
 		);
 	});
 });

@@ -1,9 +1,15 @@
 import "server-only";
 
-import { and, desc, eq, isNull, ne, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, ne, type SQL, sql } from "drizzle-orm";
 
+import {
+	DEMARCHE_LIFECYCLE_STATUSES,
+	type DemarcheLifecycleStatus,
+	TRANSMISSION_EVENT_TYPES,
+	type TransmissionEventType,
+} from "~/modules/domain";
 import type { DB } from "./index";
-import { declarations } from "./schema";
+import { declarationStatusHistory, declarations } from "./schema";
 
 type Tx = Parameters<Parameters<DB["transaction"]>[0]>[0];
 type DbOrTx = DB | Tx;
@@ -30,6 +36,125 @@ export function complianceProcessCompletedCondition() {
 /** Drizzle condition mirroring `isCancelled` (negated): the declaration is not cancelled. */
 export function notCancelledCondition() {
 	return isNull(declarations.cancelledAt);
+}
+
+// postgres.js hands raw SQL timestamps back as strings: the column type metadata is lost in a subquery or a CASE.
+const toDate = (value: unknown): Date | null =>
+	value == null ? null : new Date(value as string | number | Date);
+
+/** SQL mirror of `getDemarcheLifecycleStatus`: one CASE whose branches follow the domain order (cancellation first). */
+function demarcheLifecycleCase(
+	branches: Record<DemarcheLifecycleStatus, SQL>,
+): SQL {
+	return sql`CASE
+		WHEN NOT (${notCancelledCondition()}) THEN ${branches.cancelled}
+		WHEN NOT (${submittedDeclarationCondition()}) THEN ${branches.draft}
+		WHEN ${complianceProcessCompletedCondition()} THEN ${branches.completed}
+		ELSE ${branches.in_progress}
+	END`;
+}
+
+function statusLiteral(status: DemarcheLifecycleStatus): SQL {
+	return sql.raw(`'${status}'`);
+}
+
+function statusRank(status: DemarcheLifecycleStatus): SQL {
+	return sql.raw(String(DEMARCHE_LIFECYCLE_STATUSES.indexOf(status)));
+}
+
+export function demarcheLifecycleStatusCondition(
+	status: DemarcheLifecycleStatus,
+): SQL {
+	return sql`${demarcheLifecycleCase({
+		draft: statusLiteral("draft"),
+		in_progress: statusLiteral("in_progress"),
+		completed: statusLiteral("completed"),
+		cancelled: statusLiteral("cancelled"),
+	})} = ${status}`;
+}
+
+function demarcheLifecycleRank(): SQL {
+	return demarcheLifecycleCase({
+		draft: statusRank("draft"),
+		in_progress: statusRank("in_progress"),
+		completed: statusRank("completed"),
+		cancelled: statusRank("cancelled"),
+	});
+}
+
+export function demarcheLifecycleSortKey(sortOrder: "asc" | "desc"): SQL {
+	return sortOrder === "asc"
+		? sql`${demarcheLifecycleRank()} ASC`
+		: sql`${demarcheLifecycleRank()} DESC`;
+}
+
+function latestHistoryEventAt(
+	eventTypes: ReadonlyArray<TransmissionEventType | "demarche_complete">,
+): SQL<Date | null> {
+	return sql<Date | null>`(
+		SELECT MAX(${declarationStatusHistory.createdAt})
+		FROM ${declarationStatusHistory}
+		WHERE ${declarationStatusHistory.declarationId} = ${declarations.id}
+		AND ${inArray(declarationStatusHistory.eventType, [...eventTypes])}
+	)`;
+}
+
+export function lastTransmissionAt(): SQL<Date | null> {
+	return latestHistoryEventAt(TRANSMISSION_EVENT_TYPES).mapWith(toDate);
+}
+
+export function demarcheCompletedAt(): SQL<Date | null> {
+	return latestHistoryEventAt(["demarche_complete"]).mapWith(toDate);
+}
+
+export type LastTransmissionEvent = {
+	eventType: string;
+	value: string | null;
+};
+
+export function lastTransmissionEvent(): SQL<LastTransmissionEvent | null> {
+	return sql<LastTransmissionEvent | null>`(
+		SELECT json_build_object(
+			'eventType', ${declarationStatusHistory.eventType},
+			'value', ${declarationStatusHistory.value}
+		)
+		FROM ${declarationStatusHistory}
+		WHERE ${declarationStatusHistory.declarationId} = ${declarations.id}
+		AND ${inArray(declarationStatusHistory.eventType, [...TRANSMISSION_EVENT_TYPES])}
+		ORDER BY ${declarationStatusHistory.createdAt} DESC, ${declarationStatusHistory.id} DESC
+		LIMIT 1
+	)`.mapWith((value: unknown) =>
+		value == null ? null : (value as LastTransmissionEvent),
+	);
+}
+
+/** SQL mirror of `getDemarcheStatusDate`. `cancelled_at` has no time zone: it holds the UTC wall clock Drizzle wrote. */
+export function demarcheStatusDate(): SQL<Date | null> {
+	return demarcheLifecycleCase({
+		draft: sql`${declarations.createdAt}`,
+		in_progress: latestHistoryEventAt(TRANSMISSION_EVENT_TYPES),
+		completed: latestHistoryEventAt(["demarche_complete"]),
+		cancelled: sql`(${declarations.cancelledAt} AT TIME ZONE 'UTC')`,
+	}).mapWith(toDate);
+}
+
+// NULLS LAST spelled out both ways: Postgres defaults to NULLS FIRST on DESC.
+export function demarcheStatusDateSortKey(sortOrder: "asc" | "desc"): SQL {
+	return sortOrder === "asc"
+		? sql`${demarcheStatusDate()} ASC NULLS LAST`
+		: sql`${demarcheStatusDate()} DESC NULLS LAST`;
+}
+
+function demarcheStatusParisDay(): SQL {
+	return sql`(${demarcheStatusDate()} AT TIME ZONE 'Europe/Paris')::date`;
+}
+
+export function demarcheStatusOnOrAfter(civilDate: string): SQL {
+	return sql`${demarcheStatusParisDay()} >= ${civilDate}::date`;
+}
+
+export function demarcheStatusOnOrBefore(civilDate: string): SQL {
+	return sql`${demarcheStatusParisDay()} <= ${civilDate}::date`;
 }
 
 /**

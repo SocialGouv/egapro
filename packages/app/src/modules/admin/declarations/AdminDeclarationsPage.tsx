@@ -8,7 +8,7 @@ import { api } from "~/trpc/react";
 import { DeclarationTable } from "./DeclarationTable";
 import { SearchForm } from "./SearchForm";
 import type { SearchDeclarationsOutput, SortColumn } from "./schemas";
-import { DEFAULT_PAGE_SIZE } from "./schemas";
+import { DEFAULT_PAGE_SIZE, DEFAULT_SORT_BY } from "./schemas";
 
 function DeclarationsContent() {
 	const searchParams = useSearchParams();
@@ -30,7 +30,7 @@ function DeclarationsContent() {
 			undefined) as SearchDeclarationsOutput["sizeRange"],
 		page: Number(searchParams.get("page") ?? "1"),
 		pageSize: Number(searchParams.get("pageSize") ?? String(DEFAULT_PAGE_SIZE)),
-		sortBy: (searchParams.get("sortBy") as SortColumn) ?? "createdAt",
+		sortBy: (searchParams.get("sortBy") as SortColumn) ?? DEFAULT_SORT_BY,
 		sortOrder: (searchParams.get("sortOrder") as "asc" | "desc") ?? "desc",
 	};
 

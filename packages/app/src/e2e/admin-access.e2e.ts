@@ -458,7 +458,7 @@ test.describe("admin declarations — GIP headcount column and size filter", () 
 		}
 	});
 
-	test("shows the floored GIP headcount between Année and Statut, and — when it is unknown", async ({
+	test("shows the floored GIP headcount between Année and Statut de la démarche, and — when it is unknown", async ({
 		page,
 	}) => {
 		await page.goto(routeWithQuery(ADMIN_DECLARATIONS, "pageSize=100"));
@@ -466,7 +466,9 @@ test.describe("admin declarations — GIP headcount column and size filter", () 
 		const headers = page.locator("thead th");
 		await expect(headers.nth(WORKFORCE_HEADER_INDEX - 1)).toHaveText(/^Année/);
 		await expect(headers.nth(WORKFORCE_HEADER_INDEX)).toHaveText(/^Effectif/);
-		await expect(headers.nth(WORKFORCE_HEADER_INDEX + 1)).toHaveText(/^Statut/);
+		await expect(headers.nth(WORKFORCE_HEADER_INDEX + 1)).toHaveText(
+			/^Statut de la démarche/,
+		);
 
 		await expect(
 			rowForYear(page, FLOORED_YEAR).locator(WORKFORCE_CELL),

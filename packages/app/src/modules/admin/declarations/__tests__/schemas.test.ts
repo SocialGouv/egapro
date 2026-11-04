@@ -4,9 +4,9 @@ import {
 	COMPANY_SIZE_RANGES,
 	type CompanySizeRange,
 	DECLARATION_FSM_STATUSES,
+	DEMARCHE_LIFECYCLE_STATUSES,
 } from "~/modules/domain";
 import {
-	ADMIN_DECLARATION_STATUS_FILTERS,
 	getDeclarationByIdSchema,
 	releaseLockSchema,
 	SORT_COLUMNS,
@@ -24,7 +24,7 @@ describe("searchDeclarationsSchema", () => {
 		expect(result).toEqual({
 			page: 1,
 			pageSize: 20,
-			sortBy: "createdAt",
+			sortBy: "statusDate",
 			sortOrder: "desc",
 		});
 	});
@@ -36,7 +36,7 @@ describe("searchDeclarationsSchema", () => {
 			year: "2024",
 			dateFrom: "2024-01-01",
 			dateTo: "2024-12-31",
-			status: "awaiting_compliance_path_choice",
+			status: "in_progress",
 			sizeRange: "100-149",
 			page: "2",
 			pageSize: "50",
@@ -50,7 +50,7 @@ describe("searchDeclarationsSchema", () => {
 			year: 2024,
 			dateFrom: "2024-01-01",
 			dateTo: "2024-12-31",
-			status: "awaiting_compliance_path_choice",
+			status: "in_progress",
 			sizeRange: "100-149",
 			page: 2,
 			pageSize: 50,
@@ -80,17 +80,9 @@ describe("searchDeclarationsSchema", () => {
 });
 
 describe("admin declaration status filter vocabulary", () => {
-	// Built by iterating the derived const — never a hand-copied state list.
-	it("derives from the FSM states plus the admin-only cancelled filter", () => {
-		expect(ADMIN_DECLARATION_STATUS_FILTERS).toEqual([
-			...DECLARATION_FSM_STATUSES,
-			"cancelled",
-		]);
-	});
-
 	it.each(
-		ADMIN_DECLARATION_STATUS_FILTERS,
-	)("searchDeclarationsSchema accepts the derived status %s", (status) => {
+		DEMARCHE_LIFECYCLE_STATUSES,
+	)("searchDeclarationsSchema accepts the démarche status %s", (status) => {
 		expect(searchDeclarationsSchema.parse({ status }).status).toBe(status);
 	});
 
@@ -100,13 +92,19 @@ describe("admin declaration status filter vocabulary", () => {
 		).toThrow();
 	});
 
+	it.each(
+		DECLARATION_FSM_STATUSES.filter((status) => status !== "draft"),
+	)("searchDeclarationsSchema no longer accepts the engine state %s", (status) => {
+		expect(() => searchDeclarationsSchema.parse({ status })).toThrow();
+	});
+
 	it("searchDeclarationsFormSchema accepts the empty « all statuses » option", () => {
 		expect(searchDeclarationsFormSchema.parse({ status: "" }).status).toBe("");
 	});
 
 	it.each(
-		ADMIN_DECLARATION_STATUS_FILTERS,
-	)("searchDeclarationsFormSchema accepts the derived status %s", (status) => {
+		DEMARCHE_LIFECYCLE_STATUSES,
+	)("searchDeclarationsFormSchema accepts the démarche status %s", (status) => {
 		expect(searchDeclarationsFormSchema.parse({ status }).status).toBe(status);
 	});
 });
@@ -147,13 +145,20 @@ describe("admin declaration size bracket vocabulary", () => {
 });
 
 describe("sortable columns", () => {
-	it("offers the workforce column between year and status", () => {
+	it("offers the workforce column between year and démarche status", () => {
 		expect(SORT_COLUMNS.indexOf("workforce")).toBe(
 			SORT_COLUMNS.indexOf("year") + 1,
 		);
-		expect(SORT_COLUMNS.indexOf("status")).toBe(
+		expect(SORT_COLUMNS.indexOf("demarcheStatus")).toBe(
 			SORT_COLUMNS.indexOf("workforce") + 1,
 		);
+	});
+
+	it.each([
+		"status",
+		"createdAt",
+	])("rejects the retired sort key %s", (column) => {
+		expect(() => searchDeclarationsSchema.parse({ sortBy: column })).toThrow();
 	});
 
 	it.each(
