@@ -1,7 +1,4 @@
 {
-  "env": {
-    "EPIC_MAX_PARALLEL": "5"
-  },
   "extraKnownMarketplaces": {
     "ultra11y": {
       "source": {
@@ -12,43 +9,5 @@
   },
   "enabledPlugins": {
     "ultra11y@ultra11y": true
-  },
-  "hooks": {
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-pr-reviews.sh"
-          },
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-ultra11y-plugin.sh"
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/block-bad-patterns.sh"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write|Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/auto-lint.sh"
-          }
-        ]
-      }
-    ]
   }
 }

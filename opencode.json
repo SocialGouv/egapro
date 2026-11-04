@@ -1,0 +1,36 @@
+{
+	"$schema": "https://opencode.ai/config.json",
+	"instructions": ["packages/app/AGENTS.md"],
+	"mcp": {
+		"next-devtools": {
+			"type": "local",
+			"command": ["npx", "-y", "next-devtools-mcp@latest"]
+		},
+		"dsfr": {
+			"type": "local",
+			"command": ["npx", "dsfr-mcp"]
+		},
+		"figma": {
+			"type": "remote",
+			"url": "https://mcp.figma.com/mcp"
+		},
+		"playwright": {
+			"type": "local",
+			"command": ["npx", "-y", "@playwright/mcp@latest"]
+		},
+		"ultra11y": {
+			"type": "local",
+			"command": ["pnpm", "--dir", "packages/app", "exec", "ultra11y", "mcp"]
+		}
+	},
+	"permission": {
+		"bash": {
+			"*--no-verify*": "deny",
+			"*--no-gpg-sign*": "deny",
+			"*commit.gpgsign=false*": "deny",
+			"*commit.gpgSign=false*": "deny",
+			"git push --force*": "ask",
+			"git push -f*": "ask"
+		}
+	}
+}
