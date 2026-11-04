@@ -43,6 +43,21 @@ describe("FooterBottom", () => {
 		expect(versionIndex).toBe(labels.length - 1);
 	});
 
+	it("shows the privacy policy link, and no longer a personal data link", async () => {
+		const Comp = await withEnv({
+			NEXT_PUBLIC_APP_VERSION: undefined,
+			NEXT_PUBLIC_PR_NUMBER: undefined,
+		});
+		render(<Comp />);
+
+		expect(
+			screen.getByRole("link", { name: "Politique de confidentialité" }),
+		).toHaveAttribute("href", "/donnees-personnelles");
+		expect(
+			screen.queryByRole("link", { name: "Données personnelles" }),
+		).not.toBeInTheDocument();
+	});
+
 	it("shows the terms of use link right after the legal notice", async () => {
 		const Comp = await withEnv({
 			NEXT_PUBLIC_APP_VERSION: undefined,

@@ -23,7 +23,7 @@ describe("AccessibilityPage — content not subject to the obligation", () => {
 		render(<AccessibilityPage />);
 
 		expect(
-			screen.getByRole("link", { name: "Données personnelles" }),
+			screen.getByRole("link", { name: "Politique de confidentialité" }),
 		).toHaveAttribute("href", "/donnees-personnelles#garanties-hebergeur");
 	});
 });

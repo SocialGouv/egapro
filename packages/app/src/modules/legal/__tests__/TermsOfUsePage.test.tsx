@@ -17,6 +17,7 @@ const ARCHIVE: TermsOfUseVersion = {
 	Content: FakeContent,
 };
 const VERSIONS: readonly TermsOfUseVersion[] = [CURRENT, ARCHIVE];
+const SINGLE_VERSION: readonly TermsOfUseVersion[] = [CURRENT];
 
 describe("TermsOfUsePage", () => {
 	it("renders the in-force version with its date, an anchor to the history, and no archive banner", () => {
@@ -66,7 +67,25 @@ describe("TermsOfUsePage", () => {
 		).not.toBeInTheDocument();
 	});
 
-	it("always renders the version history, with the currently viewed version left unlinked", () => {
+	it("renders no history link or section when the registry has only the in-force version", () => {
+		render(
+			<TermsOfUsePage isCurrent version={CURRENT} versions={SINGLE_VERSION} />,
+		);
+
+		expect(
+			screen.getByText("En vigueur à partir du 12/10/2026"),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole("link", {
+				name: "Consulter l'historique des versions",
+			}),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole("heading", { name: "Historique des versions" }),
+		).not.toBeInTheDocument();
+	});
+
+	it("renders the version history when an archive exists, with the currently viewed version left unlinked", () => {
 		render(
 			<TermsOfUsePage
 				isCurrent={false}
