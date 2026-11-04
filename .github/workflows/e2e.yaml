@@ -283,7 +283,7 @@ jobs:
         if: always()
         run: docker compose down
       - name: Upload blob report
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: blob-report-${{ matrix.suite }}-${{ matrix.shard }}
@@ -291,7 +291,7 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
       - name: Upload Playwright traces
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: playwright-traces-${{ matrix.suite }}-${{ matrix.shard }}
@@ -348,7 +348,7 @@ jobs:
       # failure to this artifact, the merged HTML report that carries the traces.
       - name: Upload merged Playwright report
         id: upload-report
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: playwright-report
@@ -369,7 +369,7 @@ jobs:
             --commit "$COMMIT_SHA" \
             --report-url "$REPORT_URL"
       - name: Upload recette report
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: grille-recette
