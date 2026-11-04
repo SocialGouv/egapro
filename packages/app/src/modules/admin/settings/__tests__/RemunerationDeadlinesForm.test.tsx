@@ -98,7 +98,7 @@ import { RemunerationDeadlinesForm } from "../RemunerationDeadlinesForm";
 const storedDeadlines: DeadlinesData = {
 	year: 2027,
 	exists: true,
-	gipPublicationDate: "2027-03-01",
+	gipPublicationDate: "2027-03-02",
 	campaignStartDate: "2027-03-15",
 	publicDataReleaseDate: "2028-01-15",
 	pathChoiceRound1Deadline: "2027-07-01",
@@ -154,18 +154,12 @@ describe("RemunerationDeadlinesForm", () => {
 		]);
 	});
 
-	it("populates the seven editable deadlines from the query", async () => {
+	it("populates the five editable deadlines from the query", async () => {
 		await renderLoaded();
-		expect(inputById("settings-decl1JustificationDeadline")).toHaveValue(
-			"2028-03-01",
-		);
 		expect(inputById("settings-decl1JointEvaluationDeadline")).toHaveValue(
 			"2027-08-01",
 		);
 		expect(inputById("settings-decl2ModificationDeadline")).toHaveValue(
-			"2027-12-01",
-		);
-		expect(inputById("settings-decl2JustificationDeadline")).toHaveValue(
 			"2027-12-01",
 		);
 		expect(inputById("settings-decl2JointEvaluationDeadline")).toHaveValue(
@@ -176,21 +170,67 @@ describe("RemunerationDeadlinesForm", () => {
 		);
 	});
 
-	it("shows the derived path choice deadlines read-only in each round", async () => {
+	it("never shows the justification deadlines", () => {
+		render(<RemunerationDeadlinesForm year={2027} />);
+		expect(
+			document.getElementById("settings-decl1JustificationDeadline"),
+		).toBeNull();
+		expect(
+			document.getElementById("settings-decl2JustificationDeadline"),
+		).toBeNull();
+		expect(screen.queryByLabelText(/justification des écarts/i)).toBeNull();
+	});
+
+	it("shows the derived path choice deadlines read-only in each round, without hint", async () => {
 		await renderLoaded();
 		const round1 = within(
 			fieldsetByLegend("Parcours de mise en conformité — 1er tour"),
-		).getByLabelText(/échéance de choix du parcours/i);
+		).getByLabelText(/échéance pour le choix du parcours/i);
 		const round2 = within(
 			fieldsetByLegend("Parcours de mise en conformité — 2nd tour"),
-		).getByLabelText(/échéance de choix du parcours/i);
+		).getByLabelText(/échéance pour le choix du parcours/i);
 
 		expect(round1).toHaveValue("2027-07-01");
 		expect(round2).toHaveValue("2028-01-01");
 		for (const field of [round1, round2]) {
 			expect(field).toHaveAttribute("readonly");
-			expect(field).toHaveAccessibleName(/calculée — non paramétrable/i);
+			expect(field).toHaveAccessibleName("Échéance pour le choix du parcours");
 		}
+		expect(screen.queryByText(/calculée — non paramétrable/i)).toBeNull();
+	});
+
+	it("shows the GIP date read-only as the first field of the declaration group, in French format", async () => {
+		await renderLoaded();
+		const declaration = fieldsetByLegend("Déclaration des indicateurs");
+		const gip = within(declaration).getByLabelText(
+			/^date de mise à disposition des données gip/i,
+		);
+		expect(gip).toHaveValue("02/03/2027");
+		expect(gip).toHaveAttribute("readonly");
+		expect(gip).toHaveAccessibleName(
+			/^Date de mise à disposition des données GIP\s*Lecture seule\. Date issue du fichier GIP récupéré depuis SUIT\.$/,
+		);
+		expect(declaration.querySelector("input")).toBe(gip);
+		expect(
+			document.querySelectorAll("#settings-gipPublicationDate"),
+		).toHaveLength(1);
+	});
+
+	it("falls back to 'Non disponible' when no GIP file has been imported", () => {
+		queryState.data = { ...storedDeadlines, gipPublicationDate: null };
+		render(<RemunerationDeadlinesForm year={2027} />);
+		expect(
+			screen.getByLabelText(/^date de mise à disposition des données gip/i),
+		).toHaveValue("Non disponible");
+	});
+
+	it("shows 'Non disponible' for the GIP date while the year is loading", () => {
+		queryState.data = undefined;
+		queryState.isLoading = true;
+		render(<RemunerationDeadlinesForm year={2027} />);
+		expect(
+			screen.getByLabelText(/^date de mise à disposition des données gip/i),
+		).toHaveValue("Non disponible");
 	});
 
 	it("places each deadline in its round", () => {
@@ -205,14 +245,11 @@ describe("RemunerationDeadlinesForm", () => {
 		const cse = fieldsetByLegend("Avis du CSE");
 
 		expect(
-			within(declaration).getByLabelText(/^échéance de déclaration/i),
-		).toBeInTheDocument();
-		expect(
-			within(round1).getByLabelText(/^échéance de justification des écarts/i),
+			within(declaration).getByLabelText(/^échéance de la déclaration/i),
 		).toBeInTheDocument();
 		expect(
 			within(round1).getByLabelText(
-				/^échéance de dépôt du rapport d'évaluation conjointe/i,
+				/^échéance pour le dépôt du rapport de l'évaluation conjointe/i,
 			),
 		).toBeInTheDocument();
 		expect(
@@ -221,26 +258,30 @@ describe("RemunerationDeadlinesForm", () => {
 			),
 		).toBeInTheDocument();
 		expect(
-			within(round2).getByLabelText(/^échéance de justification des écarts/i),
-		).toBeInTheDocument();
-		expect(
 			within(round2).getByLabelText(
-				/^échéance de dépôt du rapport d'évaluation conjointe/i,
+				/^échéance pour le dépôt du rapport de l'évaluation conjointe/i,
 			),
 		).toBeInTheDocument();
 		expect(
-			within(cse).getByLabelText(/^échéance de dépôt de l'avis du cse/i),
+			within(cse).getByLabelText(
+				/^échéance pour le dépôt de l'avis ou des avis cse/i,
+			),
 		).toBeInTheDocument();
 		for (const round of [round1, round2]) {
-			expect(within(round).queryByLabelText(/avis du cse/i)).toBeNull();
+			expect(
+				within(round).queryByLabelText(/avis ou des avis cse/i),
+			).toBeNull();
 		}
 	});
 
-	it("explains that the CSE opinion deadline applies whatever the path", () => {
+	it("labels the CSE opinion deadline without any hint", () => {
 		render(<RemunerationDeadlinesForm year={2027} />);
 		expect(
-			screen.getByLabelText(/^échéance de dépôt de l'avis du cse/i),
-		).toHaveAccessibleName(/quel que soit le parcours/i);
+			screen.getByLabelText(
+				/^échéance pour le dépôt de l'avis ou des avis cse/i,
+			),
+		).toHaveAccessibleName("Échéance pour le dépôt de l'avis ou des avis CSE");
+		expect(screen.queryByText(/quel que soit le parcours/i)).toBeNull();
 	});
 
 	it("does not display any 'date limite' label", () => {
@@ -248,17 +289,15 @@ describe("RemunerationDeadlinesForm", () => {
 		expect(screen.queryByText(/date limite/i)).not.toBeInTheDocument();
 	});
 
-	it("submits only the year and the seven deadlines, never the derived or common dates", async () => {
+	it("submits only the year and the five deadlines, never the derived, justification, GIP or common dates", async () => {
 		await renderLoaded();
 		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
 		await waitFor(() => expect(upsertMutate).toHaveBeenCalled());
 		expect(upsertMutate.mock.calls[0]?.[0]).toEqual({
 			year: 2027,
 			decl1ModificationDeadline: "2027-06-01",
-			decl1JustificationDeadline: "2028-03-01",
 			decl1JointEvaluationDeadline: "2027-08-01",
 			decl2ModificationDeadline: "2027-12-01",
-			decl2JustificationDeadline: "2027-12-01",
 			decl2JointEvaluationDeadline: "2028-01-01",
 			decl2CseOpinionDeadline: "2028-02-01",
 		});
@@ -317,7 +356,7 @@ describe("RemunerationDeadlinesForm", () => {
 		expect(
 			within(
 				fieldsetByLegend("Parcours de mise en conformité — 1er tour"),
-			).getByLabelText(/échéance de choix du parcours/i),
+			).getByLabelText(/échéance pour le choix du parcours/i),
 		).toHaveValue("");
 		expect(screen.getByRole("button", { name: /enregistrer/i })).toBeDisabled();
 		expect(screen.queryByText(/valeurs par défaut/i)).not.toBeInTheDocument();
@@ -381,7 +420,7 @@ describe("RemunerationDeadlinesForm", () => {
 		const requiredInputs = Array.from(
 			document.querySelectorAll<HTMLInputElement>("input[required]"),
 		);
-		expect(requiredInputs).toHaveLength(7);
+		expect(requiredInputs).toHaveLength(5);
 		for (const input of requiredInputs) {
 			expect(input).toHaveAccessibleDescription(mention);
 		}

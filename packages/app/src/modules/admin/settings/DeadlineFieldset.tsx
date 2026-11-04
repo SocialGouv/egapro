@@ -1,15 +1,14 @@
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
 
-import {
-	type DeadlineGroup,
-	FIELD_HINTS,
-	FIELD_LABELS,
-} from "./remunerationDeadlineGroups";
+import { formatIsoDate } from "~/modules/domain";
+
+import { type DeadlineGroup, FIELD_LABELS } from "./remunerationDeadlineGroups";
 import { SettingsDateField, SettingsReadOnlyField } from "./SettingsFields";
 import type { RemunerationDeadlinesFormValues } from "./schemas";
 
 type Props = {
 	group: DeadlineGroup;
+	gipPublicationDate: string | null;
 	pathChoiceValue: string;
 	requiredNoteId: string;
 	errors: FieldErrors<RemunerationDeadlinesFormValues>;
@@ -18,6 +17,7 @@ type Props = {
 
 export function DeadlineFieldset({
 	group,
+	gipPublicationDate,
 	pathChoiceValue,
 	requiredNoteId,
 	errors,
@@ -27,12 +27,26 @@ export function DeadlineFieldset({
 		<fieldset className="fr-fieldset">
 			<legend className="fr-fieldset__legend">{group.legend}</legend>
 			<div className="fr-fieldset__content fr-grid-row fr-grid-row--gutters fr-grid-row--bottom">
+				{group.showsGipPublicationDate && (
+					<div className="fr-col-12 fr-col-md-4">
+						<SettingsReadOnlyField
+							hint="Lecture seule. Date issue du fichier GIP récupéré depuis SUIT."
+							id="settings-gipPublicationDate"
+							label="Date de mise à disposition des données GIP"
+							type="text"
+							value={
+								gipPublicationDate
+									? formatIsoDate(gipPublicationDate)
+									: "Non disponible"
+							}
+						/>
+					</div>
+				)}
 				{group.pathChoiceKey && (
 					<div className="fr-col-12 fr-col-md-4">
 						<SettingsReadOnlyField
-							hint="Calculée — non paramétrable"
 							id={`settings-${group.pathChoiceKey}`}
-							label="Échéance de choix du parcours"
+							label="Échéance pour le choix du parcours"
 							type="date"
 							value={pathChoiceValue}
 						/>
@@ -42,7 +56,6 @@ export function DeadlineFieldset({
 					<div className="fr-col-12 fr-col-md-4" key={key}>
 						<SettingsDateField
 							error={errors[key]?.message}
-							hint={FIELD_HINTS[key]}
 							id={`settings-${key}`}
 							label={FIELD_LABELS[key]}
 							registration={register(key)}

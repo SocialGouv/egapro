@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
@@ -9,7 +9,6 @@ import {
 	SettingsFormFooter,
 	type SettingsFormStatus,
 	SettingsLoadError,
-	SettingsReadOnlyField,
 } from "./SettingsFields";
 import {
 	commonCalendarFormSchema,
@@ -25,7 +24,6 @@ function selectCommonCalendar(data: CampaignDeadlinesByYear) {
 	return {
 		year: data.year,
 		exists: data.exists,
-		gipPublicationDate: data.gipPublicationDate,
 		campaignStartDate: data.campaignStartDate,
 		publicDataReleaseDate: data.publicDataReleaseDate,
 	};
@@ -34,6 +32,7 @@ function selectCommonCalendar(data: CampaignDeadlinesByYear) {
 export function CommonCalendarForm({ year }: Props) {
 	const [status, setStatus] = useState<SettingsFormStatus>("idle");
 	const [serverError, setServerError] = useState<string | null>(null);
+	const requiredNoteId = useId();
 
 	const utils = api.useUtils();
 	const calendarQuery = api.adminSettings.getDeadlinesByYear.useQuery(
@@ -101,6 +100,10 @@ export function CommonCalendarForm({ year }: Props) {
 			)}
 
 			<div className="fr-p-3w fr-background-alt--grey">
+				<p className="fr-text--sm fr-mb-2w" id={requiredNoteId}>
+					La date d'ouverture de la campagne est obligatoire.
+				</p>
+
 				<fieldset
 					aria-describedby={isLocked ? lockedMessageId : undefined}
 					className="fr-fieldset"
@@ -111,30 +114,22 @@ export function CommonCalendarForm({ year }: Props) {
 					</legend>
 					<div className="fr-fieldset__content fr-grid-row fr-grid-row--gutters fr-grid-row--bottom">
 						<div className="fr-col-12 fr-col-md-4">
-							<SettingsReadOnlyField
-								hint="Lecture seule — valeur issue du fichier GIP récupéré depuis SUIT."
-								id="settings-gipPublicationDate"
-								label="Date de publication des données GIP"
-								type="text"
-								value={data?.gipPublicationDate ?? "Non disponible"}
-							/>
-						</div>
-						<div className="fr-col-12 fr-col-md-4">
 							<SettingsDateField
 								error={form.formState.errors.campaignStartDate?.message}
-								hint="Optionnel. Détermine l'année de campagne présentée sur la page Aide. N'ouvre ni ne ferme la saisie des déclarations."
+								hint="Date à partir de laquelle les entreprises peuvent effectuer leur démarche."
 								id="settings-campaignStartDate"
-								label="Date de démarrage de la campagne"
+								label="Date d'ouverture de la campagne"
 								registration={form.register("campaignStartDate")}
-								required={false}
+								required
+								requiredNoteId={requiredNoteId}
 							/>
 						</div>
 						<div className="fr-col-12 fr-col-md-4">
 							<SettingsDateField
 								error={form.formState.errors.publicDataReleaseDate?.message}
-								hint="Optionnel. Date à partir de laquelle les indicateurs A à F et les écarts de représentation de cette campagne sont publiés. Vide : non publiés."
+								hint="Date à partir de laquelle les indicateurs de rémunération et les indicateurs de représentation de cette campagne sont publiés. Vide : non publiés."
 								id="settings-publicDataReleaseDate"
-								label="Date de rendu public des données"
+								label="Date de publication des résultats"
 								registration={form.register("publicDataReleaseDate")}
 								required={false}
 							/>

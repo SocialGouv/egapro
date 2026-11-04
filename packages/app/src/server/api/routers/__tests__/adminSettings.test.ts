@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DEFAULT_LOCK_TIMEOUT_MINUTES } from "~/modules/domain";
+import {
+	DEFAULT_LOCK_TIMEOUT_MINUTES,
+	getDefaultCampaignDeadlineColumns,
+} from "~/modules/domain";
 import { campaignDeadlines, representationCampaigns } from "~/server/db/schema";
 
 vi.mock("~/server/auth", () => ({
@@ -14,12 +17,17 @@ vi.mock("~/server/db", () => ({
 const validInput = {
 	year: 2026,
 	decl1ModificationDeadline: "2026-06-01",
-	decl1JustificationDeadline: "2026-06-01",
 	decl1JointEvaluationDeadline: "2026-08-01",
 	decl2ModificationDeadline: "2026-12-01",
-	decl2JustificationDeadline: "2026-12-01",
 	decl2JointEvaluationDeadline: "2027-01-01",
 	decl2CseOpinionDeadline: "2027-02-01",
+};
+
+const defaultJustificationDeadlines = {
+	decl1JustificationDeadline:
+		getDefaultCampaignDeadlineColumns(2026).decl1JustificationDeadline,
+	decl2JustificationDeadline:
+		getDefaultCampaignDeadlineColumns(2026).decl2JustificationDeadline,
 };
 
 const validCommonCalendarInput = {
@@ -30,8 +38,6 @@ const validCommonCalendarInput = {
 
 const validRepresentationInput = {
 	year: 2026,
-	campaignStartDate: "2026-02-01",
-	campaignEndDate: "2026-11-30",
 	declarationDeadline: "2026-04-15",
 };
 
@@ -206,17 +212,20 @@ describe("adminSettingsRouter — getDeadlinesByYear", () => {
 describe("adminSettingsRouter — upsertRemunerationDeadlines", () => {
 	beforeEach(() => vi.resetAllMocks());
 
-	it("calls insert().onConflictDoUpdate with the validated values", async () => {
+	it("inserts the validated values with the default justification deadlines of the year", async () => {
 		const db = buildDb();
 		const caller = await buildCaller(db);
 		const result = await caller.upsertRemunerationDeadlines(validInput);
 		expect(result).toEqual({ success: true });
 		expect(db.insert).toHaveBeenCalledWith(campaignDeadlines);
-		expect(db.__insert.values).toHaveBeenCalledWith(validInput);
+		expect(db.__insert.values).toHaveBeenCalledWith({
+			...validInput,
+			...defaultJustificationDeadlines,
+		});
 		expect(db.__onConflict).toHaveBeenCalled();
 	});
 
-	it("only rewrites the seven remuneration deadlines on conflict", async () => {
+	it("only rewrites the five remuneration deadlines on conflict, never the justification ones", async () => {
 		const db = buildDb();
 		const caller = await buildCaller(db);
 
@@ -224,6 +233,8 @@ describe("adminSettingsRouter — upsertRemunerationDeadlines", () => {
 			...validInput,
 			campaignStartDate: "2026-03-15",
 			publicDataReleaseDate: "2027-01-15",
+			decl1JustificationDeadline: "2030-01-01",
+			decl2JustificationDeadline: "2030-02-01",
 		} as typeof validInput);
 
 		const { year, ...deadlines } = validInput;
@@ -231,7 +242,11 @@ describe("adminSettingsRouter — upsertRemunerationDeadlines", () => {
 			target: campaignDeadlines.year,
 			set: deadlines,
 		});
-		expect(db.__insert.values).toHaveBeenCalledWith({ year, ...deadlines });
+		expect(db.__insert.values).toHaveBeenCalledWith({
+			year,
+			...defaultJustificationDeadlines,
+			...deadlines,
+		});
 	});
 
 	it("rejects when decl2 is not strictly after decl1", async () => {
@@ -281,20 +296,36 @@ describe("adminSettingsRouter — updateCommonCalendar", () => {
 		expect(db.insert).not.toHaveBeenCalled();
 	});
 
-	it("writes null for cleared dates", async () => {
+	it("writes null for a cleared public release date", async () => {
 		const { db, set } = buildUpdateDb([{ year: 2026 }]);
 		const caller = await buildCaller(db);
 
 		await caller.updateCommonCalendar({
 			year: 2026,
-			campaignStartDate: "",
+			campaignStartDate: "2026-03-15",
 			publicDataReleaseDate: "",
 		});
 
 		expect(set).toHaveBeenCalledWith({
-			campaignStartDate: null,
+			campaignStartDate: "2026-03-15",
 			publicDataReleaseDate: null,
 		});
+	});
+
+	it.each([
+		["an empty", ""],
+		["a null", null],
+	])("refuses %s opening date with BAD_REQUEST, without writing anything", async (_label, campaignStartDate) => {
+		const { db, update } = buildUpdateDb([{ year: 2026 }]);
+		const caller = await buildCaller(db);
+
+		await expect(
+			caller.updateCommonCalendar({
+				...validCommonCalendarInput,
+				campaignStartDate,
+			} as unknown as typeof validCommonCalendarInput),
+		).rejects.toMatchObject({ code: "BAD_REQUEST" });
+		expect(update).not.toHaveBeenCalled();
 	});
 
 	it("refuses with PRECONDITION_FAILED when the year has no row, without inserting one", async () => {
@@ -461,7 +492,7 @@ describe("adminSettingsRouter — getRepresentationCampaignByYear", () => {
 describe("adminSettingsRouter — upsertRepresentationCampaign", () => {
 	beforeEach(() => vi.resetAllMocks());
 
-	it("inserts the validated values into representation_campaign", async () => {
+	it("inserts the declaration deadline with the default campaign window of the year", async () => {
 		const db = buildDb();
 		const caller = await buildCaller(db);
 
@@ -471,19 +502,34 @@ describe("adminSettingsRouter — upsertRepresentationCampaign", () => {
 
 		expect(result).toEqual({ success: true });
 		expect(db.insert).toHaveBeenCalledWith(representationCampaigns);
-		expect(db.__insert.values).toHaveBeenCalledWith(validRepresentationInput);
+		expect(db.__insert.values).toHaveBeenCalledWith({
+			year: 2026,
+			campaignStartDate: "2026-01-01",
+			campaignEndDate: "2026-12-31",
+			declarationDeadline: "2026-04-15",
+		});
 	});
 
-	it("updates the existing row on conflict instead of duplicating the year", async () => {
+	it("only rewrites the declaration deadline on conflict, never the campaign window", async () => {
 		const db = buildDb();
 		const caller = await buildCaller(db);
 
-		await caller.upsertRepresentationCampaign(validRepresentationInput);
+		await caller.upsertRepresentationCampaign({
+			...validRepresentationInput,
+			campaignStartDate: "2026-02-01",
+			campaignEndDate: "2026-11-30",
+		} as typeof validRepresentationInput);
 
 		expect(db.__onConflict).toHaveBeenCalledWith({
 			target: representationCampaigns.year,
-			set: validRepresentationInput,
+			set: { declarationDeadline: "2026-04-15" },
 		});
+		expect(db.__insert.values).toHaveBeenCalledWith(
+			expect.objectContaining({
+				campaignStartDate: "2026-01-01",
+				campaignEndDate: "2026-12-31",
+			}),
+		);
 	});
 
 	it("never writes to campaign_deadline", async () => {
@@ -493,19 +539,6 @@ describe("adminSettingsRouter — upsertRepresentationCampaign", () => {
 		await caller.upsertRepresentationCampaign(validRepresentationInput);
 
 		expect(db.insert).not.toHaveBeenCalledWith(campaignDeadlines);
-	});
-
-	it("rejects when the start date is not strictly before the end date", async () => {
-		const db = buildDb();
-		const caller = await buildCaller(db);
-
-		await expect(
-			caller.upsertRepresentationCampaign({
-				...validRepresentationInput,
-				campaignEndDate: "2026-01-15",
-			}),
-		).rejects.toThrow();
-		expect(db.insert).not.toHaveBeenCalled();
 	});
 
 	it("rejects a malformed date", async () => {
@@ -518,6 +551,7 @@ describe("adminSettingsRouter — upsertRepresentationCampaign", () => {
 				declarationDeadline: "15/04/2026",
 			}),
 		).rejects.toThrow();
+		expect(db.insert).not.toHaveBeenCalled();
 	});
 
 	it("rejects non-admin callers", async () => {

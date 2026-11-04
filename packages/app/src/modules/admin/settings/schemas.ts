@@ -29,10 +29,8 @@ export const remunerationDeadlinesFormSchema = z
 	.object({
 		year: campaignYearSchema,
 		decl1ModificationDeadline: isoDateString,
-		decl1JustificationDeadline: isoDateString,
 		decl1JointEvaluationDeadline: isoDateString,
 		decl2ModificationDeadline: isoDateString,
-		decl2JustificationDeadline: isoDateString,
 		decl2JointEvaluationDeadline: isoDateString,
 		decl2CseOpinionDeadline: isoDateString,
 	})
@@ -54,7 +52,7 @@ export type RemunerationDeadlinesFormValues = z.output<
 
 export const commonCalendarFormSchema = z.object({
 	year: campaignYearSchema,
-	campaignStartDate: optionalIsoDateString,
+	campaignStartDate: isoDateString,
 	publicDataReleaseDate: optionalIsoDateString,
 });
 
@@ -75,18 +73,10 @@ export const getCampaignDeadlinesByYearSchema = campaignYearParamSchema;
 
 export const getRepresentationCampaignByYearSchema = campaignYearParamSchema;
 
-export const representationCampaignFormSchema = z
-	.object({
-		year: campaignYearSchema,
-		campaignStartDate: isoDateString,
-		campaignEndDate: isoDateString,
-		declarationDeadline: isoDateString,
-	})
-	.refine((data) => data.campaignStartDate < data.campaignEndDate, {
-		message:
-			"La date de démarrage de la campagne doit être antérieure à la date de clôture.",
-		path: ["campaignEndDate"],
-	});
+export const representationCampaignFormSchema = z.object({
+	year: campaignYearSchema,
+	declarationDeadline: isoDateString,
+});
 
 export type RepresentationCampaignFormInput = z.input<
 	typeof representationCampaignFormSchema

@@ -77,7 +77,7 @@ function renderSections(
 }
 
 const yearSelector = () =>
-	screen.getByRole("combobox", { name: /année de campagne/i });
+	screen.getByRole("combobox", { name: "Année de la campagne" });
 
 const headingOutline = () =>
 	screen
@@ -93,13 +93,12 @@ describe("AdminSettingsSections", () => {
 		remunerationMutate.mockReset();
 	});
 
-	it("renders a single year selector, preset on the initial year, that governs the annual blocks", () => {
+	it("renders a single year selector, preset on the initial year, labelled without any hint", () => {
 		renderSections();
 		expect(screen.getAllByRole("combobox")).toHaveLength(1);
 		expect(yearSelector()).toHaveValue("2026");
-		expect(yearSelector()).toHaveAccessibleName(
-			/calendrier commun, échéances rémunération, campagne représentation — portent sur l'année sélectionnée/i,
-		);
+		expect(yearSelector()).toHaveAccessibleName("Année de la campagne");
+		expect(screen.queryByText(/portent sur l'année sélectionnée/i)).toBeNull();
 	});
 
 	it("orders common settings, then the remuneration démarche, then the representation démarche", () => {
@@ -107,21 +106,35 @@ describe("AdminSettingsSections", () => {
 		expect(headingOutline()).toEqual([
 			"h2 Paramètres communs",
 			"h3 Calendrier de la campagne 2026",
+			"h3 Verrou de connexion",
 			"h2 Démarche Rémunération",
 			"h3 Échéances de la campagne 2026",
-			"h3 Verrou de déclaration",
 			"h2 Démarche Représentation équilibrée",
-			"h3 Campagne 2026",
+			"h3 Échéances de la campagne 2026",
 		]);
 	});
 
-	it("keeps the common calendar as the only block of the common settings", () => {
+	it("groups the common calendar then the lock timeout under the common settings", () => {
 		renderSections();
 		const common = screen
 			.getByRole("heading", { level: 2, name: "Paramètres communs" })
 			.closest("section") as HTMLElement;
-		expect(common).toContainElement(screen.getByTestId("common-calendar-form"));
-		expect(common.querySelectorAll("form")).toHaveLength(1);
+		const forms = common.querySelectorAll("form");
+		expect(forms).toHaveLength(2);
+		expect(forms[0]).toBe(screen.getByTestId("common-calendar-form"));
+		expect(forms[1]).toContainElement(
+			screen.getByLabelText(/délai d'expiration du verrou/i),
+		);
+	});
+
+	it("leaves the deadlines form as the only block of the remuneration démarche", () => {
+		renderSections();
+		const remuneration = screen
+			.getByRole("heading", { level: 2, name: "Démarche Rémunération" })
+			.closest("section") as HTMLElement;
+		const forms = remuneration.querySelectorAll("form");
+		expect(forms).toHaveLength(1);
+		expect(forms[0]).toBe(screen.getByTestId("remuneration-deadlines-form"));
 	});
 
 	it("lists every year from FIRST_DECLARATION_YEAR to ten years ahead, flagging unconfigured ones", () => {
@@ -163,26 +176,30 @@ describe("AdminSettingsSections", () => {
 				.getByTestId("representation-campaign-form")
 				.getAttribute("data-year"),
 		).toBe("2027");
+		expect(headingOutline().filter((h) => h.endsWith("2027"))).toHaveLength(3);
 		expect(headingOutline()).toEqual(
 			expect.arrayContaining([
 				"h3 Calendrier de la campagne 2027",
 				"h3 Échéances de la campagne 2027",
-				"h3 Campagne 2027",
 			]),
 		);
 	});
 
-	it("places the lock timeout under the remuneration démarche, outside the deadlines form", () => {
+	it("places the lock timeout under the common settings, outside the calendar form", () => {
 		renderSections();
 		const lockInput = screen.getByLabelText(/délai d'expiration du verrou/i);
+		const common = screen
+			.getByRole("heading", { level: 2, name: "Paramètres communs" })
+			.closest("section") as HTMLElement;
 		const remuneration = screen
 			.getByRole("heading", { level: 2, name: "Démarche Rémunération" })
 			.closest("section") as HTMLElement;
 
-		expect(remuneration).toContainElement(lockInput);
-		expect(
-			screen.getByTestId("remuneration-deadlines-form"),
-		).not.toContainElement(lockInput);
+		expect(common).toContainElement(lockInput);
+		expect(remuneration).not.toContainElement(lockInput);
+		expect(screen.getByTestId("common-calendar-form")).not.toContainElement(
+			lockInput,
+		);
 	});
 
 	it("keeps the lock timeout unchanged when another year is selected", async () => {

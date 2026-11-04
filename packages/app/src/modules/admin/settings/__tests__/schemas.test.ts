@@ -10,10 +10,8 @@ import {
 
 const validDates = {
 	decl1ModificationDeadline: "2026-06-01",
-	decl1JustificationDeadline: "2026-06-01",
 	decl1JointEvaluationDeadline: "2026-08-01",
 	decl2ModificationDeadline: "2026-12-01",
-	decl2JustificationDeadline: "2026-12-01",
 	decl2JointEvaluationDeadline: "2027-01-01",
 	decl2CseOpinionDeadline: "2027-02-01",
 };
@@ -41,6 +39,21 @@ describe("remunerationDeadlinesFormSchema", () => {
 			expect("gipPublicationDate" in data).toBe(false);
 			expect("campaignStartDate" in data).toBe(false);
 			expect("publicDataReleaseDate" in data).toBe(false);
+		}
+	});
+
+	it("ignores the justification deadlines sent from the client", () => {
+		const result = remunerationDeadlinesFormSchema.safeParse({
+			year: 2026,
+			decl1JustificationDeadline: "2026-06-01",
+			decl2JustificationDeadline: "2026-12-01",
+			...validDates,
+		});
+		expect(result.success).toBe(true);
+		if (result.success) {
+			const data = result.data as Record<string, unknown>;
+			expect("decl1JustificationDeadline" in data).toBe(false);
+			expect("decl2JustificationDeadline" in data).toBe(false);
 		}
 	});
 
@@ -143,24 +156,47 @@ describe("commonCalendarFormSchema", () => {
 		expect(result.success).toBe(true);
 	});
 
-	it("coerces empty optional dates to null", () => {
+	it("coerces an empty publicDataReleaseDate to null", () => {
 		const result = commonCalendarFormSchema.safeParse({
 			year: 2026,
-			campaignStartDate: "",
+			campaignStartDate: "2026-03-15",
 			publicDataReleaseDate: "",
 		});
 		expect(result.success).toBe(true);
 		if (result.success) {
-			expect(result.data.campaignStartDate).toBeNull();
+			expect(result.data.campaignStartDate).toBe("2026-03-15");
 			expect(result.data.publicDataReleaseDate).toBeNull();
 		}
+	});
+
+	it.each([
+		["an empty", ""],
+		["a null", null],
+	])("rejects %s campaignStartDate", (_label, campaignStartDate) => {
+		const result = commonCalendarFormSchema.safeParse({
+			year: 2026,
+			campaignStartDate,
+			publicDataReleaseDate: null,
+		});
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			expect(result.error.issues[0]?.path).toEqual(["campaignStartDate"]);
+		}
+	});
+
+	it("rejects a missing campaignStartDate", () => {
+		const result = commonCalendarFormSchema.safeParse({
+			year: 2026,
+			publicDataReleaseDate: null,
+		});
+		expect(result.success).toBe(false);
 	});
 
 	it("ignores the remuneration deadlines and the GIP date sent from the client", () => {
 		const result = commonCalendarFormSchema.safeParse({
 			year: 2026,
 			gipPublicationDate: "2026-03-01",
-			campaignStartDate: null,
+			campaignStartDate: "2026-03-15",
 			publicDataReleaseDate: null,
 			...validDates,
 		});
@@ -177,7 +213,7 @@ describe("commonCalendarFormSchema", () => {
 	it("rejects an invalid publicDataReleaseDate format", () => {
 		const result = commonCalendarFormSchema.safeParse({
 			year: 2026,
-			campaignStartDate: null,
+			campaignStartDate: "2026-03-15",
 			publicDataReleaseDate: "2026/06/15",
 		});
 		expect(result.success).toBe(false);
@@ -195,7 +231,7 @@ describe("commonCalendarFormSchema", () => {
 	it("rejects years below FIRST_DECLARATION_YEAR", () => {
 		const result = commonCalendarFormSchema.safeParse({
 			year: 1999,
-			campaignStartDate: null,
+			campaignStartDate: "2026-03-15",
 			publicDataReleaseDate: null,
 		});
 		expect(result.success).toBe(false);
@@ -212,8 +248,6 @@ describe("getCommonCalendarPreconditionMessage", () => {
 
 const validRepresentationCampaign = {
 	year: 2026,
-	campaignStartDate: "2026-02-01",
-	campaignEndDate: "2026-11-30",
 	declarationDeadline: "2026-04-15",
 };
 
@@ -225,59 +259,35 @@ describe("representationCampaignFormSchema", () => {
 		expect(result.success).toBe(true);
 	});
 
-	it.each([
-		"campaignStartDate",
-		"campaignEndDate",
-		"declarationDeadline",
-	] as const)("requires %s", (field) => {
+	it("requires declarationDeadline", () => {
 		const result = representationCampaignFormSchema.safeParse({
 			...validRepresentationCampaign,
-			[field]: "",
+			declarationDeadline: "",
 		});
 		expect(result.success).toBe(false);
 	});
 
-	it.each([
-		"campaignStartDate",
-		"campaignEndDate",
-		"declarationDeadline",
-	] as const)("rejects a non ISO %s", (field) => {
+	it("rejects a non ISO declarationDeadline", () => {
 		const result = representationCampaignFormSchema.safeParse({
 			...validRepresentationCampaign,
-			[field]: "01/02/2026",
+			declarationDeadline: "01/02/2026",
 		});
 		expect(result.success).toBe(false);
 	});
 
-	it("rejects an end date before the start date, flagged on campaignEndDate", () => {
+	it("ignores the campaign start and end dates sent from the client", () => {
 		const result = representationCampaignFormSchema.safeParse({
 			...validRepresentationCampaign,
-			campaignEndDate: "2026-01-15",
-		});
-		expect(result.success).toBe(false);
-		if (!result.success) {
-			const issue = result.error.issues[0];
-			expect(issue?.path).toEqual(["campaignEndDate"]);
-			expect(issue?.message).toBe(
-				"La date de démarrage de la campagne doit être antérieure à la date de clôture.",
-			);
-		}
-	});
-
-	it("rejects an end date equal to the start date", () => {
-		const result = representationCampaignFormSchema.safeParse({
-			...validRepresentationCampaign,
-			campaignEndDate: validRepresentationCampaign.campaignStartDate,
-		});
-		expect(result.success).toBe(false);
-	});
-
-	it("accepts a declaration deadline outside the campaign window", () => {
-		const result = representationCampaignFormSchema.safeParse({
-			...validRepresentationCampaign,
-			declarationDeadline: "2027-01-31",
+			campaignStartDate: "2026-11-30",
+			campaignEndDate: "2026-02-01",
 		});
 		expect(result.success).toBe(true);
+		if (result.success) {
+			expect(Object.keys(result.data).sort()).toEqual([
+				"declarationDeadline",
+				"year",
+			]);
+		}
 	});
 
 	it("rejects years below FIRST_DECLARATION_YEAR", () => {
