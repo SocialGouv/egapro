@@ -229,10 +229,11 @@ CLAUDE.md, packages/app/CLAUDE.md   <- "@AGENTS.md" : Claude Code importe AGENTS
   review-a11y, ultra11y -> symlinks vers la devDependency ultra11y (version epinglee, memes octets partout)
 .mcp.json                 <- serveurs MCP, source unique (lu tel quel par Claude Code)
 .claude/skills            <- symlink -> ../.agents/skills (Claude Code ne lit pas .agents/)
-.claude/settings.json     <- Claude Code : gate ultra11y (hook epingle) + refus de --no-verify / --no-gpg-sign
-opencode.json             <- OpenCode : instructions, memes refus, plugin ultra11y + MCP genere
+.claude/settings.json     <- Claude Code : gate ultra11y (hook epingle) + commandes refusees (generees)
+opencode.json             <- OpenCode : instructions, plugin ultra11y + MCP et commandes refusees (generes)
 .codex/config.toml        <- MCP genere (Codex)
-scripts/ai/               <- sync-agent-config.mjs : genere les configs MCP OpenCode et Codex, --check en CI
+.codex/rules/egapro.rules <- commandes refusees / a confirmer (Codex), generees
+scripts/ai/               <- sync-agent-config.mjs : genere MCP et commandes refusees pour les 3 outils, --check en CI
 lefthook.yml              <- git hooks pre-commit / pre-push
 scripts/quality/          <- check-patterns.sh, verify.sh
 ```

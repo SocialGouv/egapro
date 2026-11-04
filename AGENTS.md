@@ -155,6 +155,21 @@ Données d'exemple fictives : `SIREN 123456789`, `email@example.fr`, `Société 
 
 ---
 
+## Même config pour Claude Code, OpenCode et Codex
+
+| | Claude Code | OpenCode | Codex | Source |
+|---|---|---|---|---|
+| Instructions | `CLAUDE.md` → `@AGENTS.md` | `AGENTS.md` + `instructions` d'`opencode.json` | `AGENTS.md` | `AGENTS.md` |
+| Skills | `.claude/skills` (symlink) | `.agents/skills/` | `.agents/skills/` | `.agents/skills/` |
+| MCP | `.mcp.json` | `opencode.json` (`mcp`, généré) | `.codex/config.toml` (généré) | `.mcp.json` |
+| Commandes refusées / à confirmer | `.claude/settings.json` (`permissions`, généré) | `opencode.json` (`permission`, généré) | `.codex/rules/egapro.rules` (généré) | `POLICY` de `scripts/ai/sync-agent-config.mjs` |
+| Gate ultra11y côté agent | hook de `.claude/settings.json` | plugin d'`opencode.json` | portée utilisateur : `ultra11y install --codex` (`pnpm install` le rappelle) | devDependency |
+| git hooks, `pnpm verify`, CI | identiques | identiques | identiques | `lefthook.yml`, `scripts/quality/` |
+
+Ce qui reste propre à chaque développeur (config utilisateur, plugins perso, modèle choisi) ne change rien aux trois dernières lignes : c'est là que se joue la barrière.
+
+---
+
 ## Serveurs MCP (source unique : `.mcp.json`)
 
 | Serveur | Quand | Outils clés |
@@ -165,7 +180,7 @@ Données d'exemple fictives : `SIREN 123456789`, `email@example.fr`, `Société 
 | `playwright` | parcours réel dans le navigateur (checks fonctionnel et design) | `browser_navigate`, `browser_snapshot`, `browser_take_screenshot` |
 | `ultra11y` | critères RGAA, audit | `criteria`, `audit` |
 
-Le point commun : **ne jamais deviner de mémoire** une API Next.js, une classe DSFR, une valeur Figma ou un critère RGAA. On ajoute un serveur dans `.mcp.json` (racine, lu tel quel par Claude Code) puis `node scripts/ai/sync-agent-config.mjs` : il régénère le bloc `mcp` d'`opencode.json` et `.codex/config.toml`, qui n'acceptent pas ce format. N'édite jamais ces deux-là à la main, la CI refuse une copie désynchronisée.
+Le point commun : **ne jamais deviner de mémoire** une API Next.js, une classe DSFR, une valeur Figma ou un critère RGAA. On ajoute un serveur dans `.mcp.json` (racine, lu tel quel par Claude Code) puis `node scripts/ai/sync-agent-config.mjs` : il régénère le bloc `mcp` d'`opencode.json` et `.codex/config.toml`, qui n'acceptent pas ce format. N'édite jamais ces parties générées à la main, la CI refuse une copie désynchronisée.
 
 ---
 

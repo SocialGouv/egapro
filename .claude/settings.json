@@ -3,11 +3,15 @@
   "permissions": {
     "deny": [
       "Bash(*--no-verify*)",
+      "Bash(git commit -n*)",
       "Bash(*--no-gpg-sign*)",
       "Bash(*commit.gpgsign=false*)",
       "Bash(*commit.gpgSign=false*)"
     ],
-    "ask": ["Bash(git push --force*)", "Bash(git push -f*)"]
+    "ask": [
+      "Bash(git push --force*)",
+      "Bash(git push -f*)"
+    ]
   },
   "hooks": {
     "PreToolUse": [

@@ -49,6 +49,7 @@
 	"permission": {
 		"bash": {
 			"*--no-verify*": "deny",
+			"git commit -n*": "deny",
 			"*--no-gpg-sign*": "deny",
 			"*commit.gpgsign=false*": "deny",
 			"*commit.gpgSign=false*": "deny",

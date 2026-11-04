@@ -161,7 +161,7 @@ jobs:
         run: bash scripts/quality/check-patterns.sh --self-test
       - name: Check added lines since alpha
         run: bash scripts/quality/check-patterns.sh --diff origin/alpha
-      - name: Check agent MCP configs are generated from .mcp.json
+      - name: Check Claude Code, OpenCode and Codex configs are in sync
         run: node scripts/ai/sync-agent-config.mjs --check
 
   app-check-journal:

@@ -48,6 +48,7 @@ packages/notifications/dist/
 !.claude/settings.json
 .codex/*
 !.codex/config.toml
+!.codex/rules/
 .opencode/
 
 # SUIT signing keys
