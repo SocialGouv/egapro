@@ -263,7 +263,7 @@ scripts/quality/          <- check-patterns.sh, verify.sh
 
 ultra11y est le dispositif unique, a chaque etage : devDependency (moteur, pre-commit, `pnpm verify`), skills `review-a11y` et `ultra11y` lus depuis la devDependency par les trois outils (symlinks dans `.agents/skills/`), gate commit / push / PR cote agent (hook Claude Code dans `.claude/settings.json`, plugin OpenCode dans `opencode.json`, tous deux charges depuis la devDependency ; Codex : `ultra11y install --codex`, portee utilisateur), serveur MCP `ultra11y`, Action CI. Detail : [`docs/accessibilite-ultra11y.md`](docs/accessibilite-ultra11y.md).
 
-> Hooks git : si `core.hooksPath` pointe vers un repertoire inexistant dans ta config git locale, `pnpm install` le signale — lance `git config --unset core.hooksPath` puis `pnpm install`.
+> Hooks git : rien a installer a la main. `lefthook` est une devDependency (binaire precompile par plateforme, comme husky), et `pnpm install` pose les hooks ; un `core.hooksPath` local qui pointe vers un repertoire disparu est retire automatiquement.
 
 ## Specifications completes
 

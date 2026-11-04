@@ -17,10 +17,18 @@ if command -v codex >/dev/null 2>&1 && [ -x "$engine" ]; then
 	fi
 fi
 
+# A core.hooksPath pointing to a directory that no longer exists (a clone copied from another
+# machine, a removed hook manager) silently disables every git hook. In this repo's own config it
+# can only be stale: drop it so nobody has to. Set globally, it is the developer's choice — say so.
+local_hooks_path="$(git config --local --get core.hooksPath || true)"
+if [ -n "$local_hooks_path" ] && [ ! -d "$local_hooks_path" ]; then
+	git config --local --unset core.hooksPath
+	echo "lefthook: removed this repo's core.hooksPath, which pointed to a missing directory ($local_hooks_path)." >&2
+fi
 hooks_path="$(git config --get core.hooksPath || true)"
 if [ -n "$hooks_path" ] && [ ! -d "$hooks_path" ]; then
-	echo "lefthook: core.hooksPath points to a missing directory ($hooks_path)." >&2
-	echo "lefthook: run \`git config --unset core.hooksPath\` then \`pnpm install\` to enable the git hooks." >&2
+	echo "lefthook: your global core.hooksPath points to a missing directory ($hooks_path): git hooks are off." >&2
+	echo "lefthook: run \`git config --global --unset core.hooksPath\` then \`pnpm install\` to enable them." >&2
 	exit 0
 fi
-exec lefthook install
+exec pnpm exec lefthook install
