@@ -27,12 +27,15 @@ import { getNextStepHref } from "../shared/funnelSteps";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
 import { useLockContext } from "../shared/lock/LockContext";
 import { PrefillSource } from "../shared/PrefillSource";
+import {
+	annualQuartileReadingNote,
+	hourlyQuartileReadingNote,
+} from "../shared/readingNotes";
 import { StepIndicator } from "../shared/StepIndicator";
 import { StepTitleRow } from "../shared/StepTitleRow";
 import type { QuartileTuple, Step4Data } from "../types";
 import stepStyles from "./Step4QuartileDistribution.module.scss";
 import { CoherenceNote } from "./step4/CoherenceNote";
-import { QuartileInterpretationCallout } from "./step4/QuartileInterpretationCallout";
 import { QuartileTable } from "./step4/QuartileTable";
 import {
 	deriveCoherenceErrors,
@@ -408,6 +411,7 @@ export function Step4QuartileDistribution({
 							handleQuartileChange("annual", index, field, value)
 						}
 						quartiles={annual}
+						readingNote={annualQuartileReadingNote(annual[0])}
 						readOnly={isReadOnly}
 						referenceMen={references.annual.men}
 						referenceWomen={references.annual.women}
@@ -421,6 +425,7 @@ export function Step4QuartileDistribution({
 						}
 						tableType="annual"
 						title="Rémunération annuelle brute moyenne"
+						tooltipId="tooltip-reading-note-step4-annual"
 					/>
 
 					<QuartileTable
@@ -442,6 +447,7 @@ export function Step4QuartileDistribution({
 							handleQuartileChange("hourly", index, field, value)
 						}
 						quartiles={hourly}
+						readingNote={hourlyQuartileReadingNote(hourly[0])}
 						readOnly={isReadOnly}
 						referenceMen={references.hourly.men}
 						referenceWomen={references.hourly.women}
@@ -455,6 +461,7 @@ export function Step4QuartileDistribution({
 						}
 						tableType="hourly"
 						title="Rémunération horaire brute moyenne"
+						tooltipId="tooltip-reading-note-step4-hourly"
 					/>
 
 					<FieldErrorAlert
@@ -495,13 +502,6 @@ export function Step4QuartileDistribution({
 						</div>
 					</DefinitionAccordion>
 				</div>
-
-				{gipPrefillData && (
-					<QuartileInterpretationCallout
-						annualCategories={annual}
-						hourlyCategories={hourly}
-					/>
-				)}
 
 				<FormErrors mutationError={mutation.error?.message} />
 
