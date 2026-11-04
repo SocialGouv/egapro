@@ -15,6 +15,8 @@ const BACKGROUND_ALT_BLUE_FRANCE = "#F5F5FE"; // $background-alt-blue-france (eg
 const BORDER_CONTRAST_GREY = "#929292"; // $border-contrast-grey (table grid)
 const BACKGROUND_CONTRAST_WARNING = "#FFE9E6"; // $background-contrast-warning (badge fill)
 const TEXT_DEFAULT_WARNING = "#B34000"; // $text-default-warning (badge text)
+const BACKGROUND_CONTRAST_INFO = "#E8EDFF"; // $background-contrast-info (compliance badge fill)
+const TEXT_DEFAULT_INFO = "#0063CB"; // $text-default-info (compliance badge text)
 const WHITE = "#FFFFFF";
 
 const REGULAR = 400;
@@ -265,6 +267,73 @@ export const styles = StyleSheet.create({
 		color: TEXT_DEFAULT_GREY,
 		fontStyle: "italic",
 		marginTop: 4,
+	},
+
+	repGapColumnsRow: {
+		flexDirection: "row",
+		gap: 6,
+		marginBottom: 6,
+	},
+	repGapColumn: {
+		flex: 1,
+	},
+	repGapColumnTitle: {
+		fontSize: 9,
+		fontWeight: BOLD,
+		color: TEXT_TITLE_GREY,
+		marginBottom: 2,
+	},
+
+	// Kept apart from `badge`/`badgeText` so the other PDFs are untouched.
+	complianceBadgeCompliant: {
+		backgroundColor: BACKGROUND_CONTRAST_INFO,
+		borderRadius: 2,
+		paddingHorizontal: 3,
+		alignSelf: "flex-start",
+	},
+	complianceBadgeCompliantText: {
+		fontSize: 9,
+		fontWeight: BOLD,
+		color: TEXT_DEFAULT_INFO,
+	},
+	complianceBadgeNonCompliant: {
+		backgroundColor: BACKGROUND_CONTRAST_WARNING,
+		borderRadius: 2,
+		paddingHorizontal: 3,
+		alignSelf: "flex-start",
+	},
+	complianceBadgeNonCompliantText: {
+		fontSize: 9,
+		fontWeight: BOLD,
+		color: TEXT_DEFAULT_WARNING,
+	},
+	complianceBadgeNotApplicable: {
+		backgroundColor: BACKGROUND_ALT_GREY,
+		borderRadius: 2,
+		paddingHorizontal: 3,
+		alignSelf: "flex-start",
+	},
+	complianceBadgeNotApplicableText: {
+		fontSize: 9,
+		fontWeight: BOLD,
+		color: TEXT_MENTION_GREY,
+	},
+
+	declarantEmptyText: {
+		fontSize: 9,
+		color: TEXT_TITLE_GREY,
+		paddingHorizontal: 8,
+		marginBottom: 12,
+	},
+	// `categoryBanner` has no marginTop, so a block opened by a category needs it back.
+	repCategoryBannerGroup: {
+		marginTop: 4,
+	},
+	// Figma sets the not-computable motive upright, unlike `noData`.
+	repNotComputableReason: {
+		fontSize: 9,
+		color: TEXT_TITLE_GREY,
+		marginBottom: 2,
 	},
 });
 

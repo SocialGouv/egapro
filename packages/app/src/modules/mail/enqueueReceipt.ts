@@ -20,6 +20,7 @@ import { companies, declarations } from "~/server/db/schema";
 import {
 	buildDeclarationAttachments,
 	buildJointEvaluationAttachments,
+	buildRepresentationAttachments,
 	buildSecondDeclarationAttachments,
 } from "./buildReceiptAttachments";
 import {
@@ -182,6 +183,9 @@ async function buildAttachments(
 	}
 	if (kind === "jointEvaluation") {
 		return buildJointEvaluationAttachments(siren, year);
+	}
+	if (kind === "representation") {
+		return buildRepresentationAttachments(siren, year);
 	}
 	return [];
 }

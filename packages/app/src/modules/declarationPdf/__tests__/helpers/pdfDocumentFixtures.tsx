@@ -140,12 +140,24 @@ export const TRANSMITTED_DATA: TransmittedPdfData = {
 };
 
 export const REPRESENTATION_DATA: RepresentationPdfData = {
-	companyName: "Société Démo",
 	siren: "123456789",
 	year: 2025,
 	campaignYear: 2026,
-	referencePeriodStart: "2025-01-01",
-	referencePeriodEnd: "2025-12-31",
+	submittedAt: new Date("2026-03-10T08:00:00.000Z"),
+	transmittedAt: "10/03/2026",
+	referencePeriod: "01/01/2025 - 31/12/2025",
+	declarantRows: [
+		{ label: "Nom Prénom", value: "Marie Dupont" },
+		{ label: "Adresse email", value: "email@example.fr" },
+	],
+	company: {
+		name: "Société Démo",
+		siren: "123 456 789",
+		location: { label: "Adresse", value: "12 rue des Innovateurs, Paris" },
+		naf: "62.02A - Conseil en systèmes et logiciels informatiques",
+		workforceLabel: "Effectif annuel moyen en 2025",
+		workforceDisplay: "2 256",
+	},
 	indicators: [
 		{
 			title: "Cadres dirigeants",
@@ -167,7 +179,6 @@ export const REPRESENTATION_DATA: RepresentationPdfData = {
 	hasWebsite: true,
 	publishUrl: "https://exemple.fr/egalite-professionnelle",
 	publishModalities: null,
-	submittedAt: new Date("2026-03-10T08:00:00.000Z"),
 	generatedAt: new Date("2026-06-15T09:30:00.000Z"),
 };
 
@@ -284,7 +295,7 @@ export function pdfDocumentSamples(): PdfDocumentSample[] {
 		},
 		{
 			name: "representation",
-			title: "Démarche des indicateurs de représentation 2026",
+			title: "Récapitulatif : Démarche des indicateurs de représentation 2026",
 			element: RepresentationPdfDocument({ data: REPRESENTATION_DATA }),
 		},
 		{
