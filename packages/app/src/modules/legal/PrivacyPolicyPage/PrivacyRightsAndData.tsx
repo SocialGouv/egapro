@@ -1,5 +1,10 @@
 import { NewTabNotice } from "~/modules/layout";
 
+import {
+	HOSTING_GUARANTEES_ID,
+	PrivacyHostingGuarantees,
+} from "./PrivacyHostingGuarantees";
+
 /** Data retention, user rights, data access, and subprocessors. */
 export function PrivacyRightsAndData() {
 	return (
@@ -100,19 +105,15 @@ export function PrivacyRightsAndData() {
 							<td>Hébergement</td>
 							<td>France</td>
 							<td>
-								<a
-									href="https://storage.gra.cloud.ovh.net/v1/AUTH_325716a587c64897acbef9a4a4726e38/contracts/9e74492-OVH_Data_Protection_Agreement-FR-6.0.pdf"
-									rel="noopener noreferrer"
-									target="_blank"
-								>
-									Accord de protection des données d'OVH (PDF)
-									<NewTabNotice />
+								<a href={`#${HOSTING_GUARANTEES_ID}`}>
+									Garanties apportées par OVH
 								</a>
 							</td>
 						</tr>
 					</tbody>
 				</table>
 			</div>
+			<PrivacyHostingGuarantees />
 		</>
 	);
 }

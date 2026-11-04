@@ -1,5 +1,4 @@
 import "server-only";
-import { renderToBuffer } from "@react-pdf/renderer";
 import { buildJointEvaluationRecapData } from "~/modules/declarationPdf/buildJointEvaluationRecapData";
 import { buildPdfData } from "~/modules/declarationPdf/buildPdfData";
 import { buildRepresentationPdfData } from "~/modules/declarationPdf/buildRepresentationPdfData";
@@ -8,6 +7,7 @@ import { JointEvaluationPdfDocument } from "~/modules/declarationPdf/JointEvalua
 import { jointEvaluationPdfFilename } from "~/modules/declarationPdf/jointEvaluationPdfFilename";
 import { RepresentationPdfDocument } from "~/modules/declarationPdf/RepresentationPdfDocument";
 import { representationPdfFilename } from "~/modules/declarationPdf/representationPdfFilename";
+import { renderTaggedPdf } from "~/modules/declarationPdf/tagging/renderTaggedPdf";
 import type { MailAttachment } from "./types";
 
 async function renderDeclarationPdf(
@@ -16,7 +16,7 @@ async function renderDeclarationPdf(
 	declarationType: "initial" | "correction",
 ): Promise<MailAttachment> {
 	const data = await buildPdfData(siren, year, new Date(), declarationType);
-	const buffer = await renderToBuffer(DeclarationPdfDocument({ data }));
+	const buffer = await renderTaggedPdf(DeclarationPdfDocument({ data }));
 	const prefix =
 		declarationType === "correction"
 			? "seconde-declaration"
@@ -48,7 +48,7 @@ export async function buildJointEvaluationAttachments(
 	year: number,
 ): Promise<MailAttachment[]> {
 	const data = await buildJointEvaluationRecapData(siren, year);
-	const buffer = await renderToBuffer(JointEvaluationPdfDocument({ data }));
+	const buffer = await renderTaggedPdf(JointEvaluationPdfDocument({ data }));
 	return [
 		{
 			filename: jointEvaluationPdfFilename(siren, year),
@@ -63,7 +63,7 @@ export async function buildRepresentationAttachments(
 	year: number,
 ): Promise<MailAttachment[]> {
 	const data = await buildRepresentationPdfData(siren, year, new Date());
-	const buffer = await renderToBuffer(RepresentationPdfDocument({ data }));
+	const buffer = await renderTaggedPdf(RepresentationPdfDocument({ data }));
 	return [
 		{
 			filename: representationPdfFilename(siren, data.campaignYear),

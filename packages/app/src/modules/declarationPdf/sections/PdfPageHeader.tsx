@@ -2,6 +2,8 @@ import { join } from "node:path";
 import { Image, Text, View } from "@react-pdf/renderer";
 
 import { type PdfStyles, styles } from "../recapPdfStyles";
+import { PDF_AUTHOR } from "../tagging/pdfDocumentMetadata";
+import { pdfStructure } from "../tagging/pdfStructure";
 
 const MINISTERE_LOGO = join(
 	process.cwd(),
@@ -12,10 +14,16 @@ const MINISTERE_LOGO = join(
 	"ministere-travail.png",
 );
 
+const MINISTERE_LOGO_ALT = `${PDF_AUTHOR}. Liberté, Égalité, Fraternité`;
+
 export function PdfPageHeader({ sheet = styles }: { sheet?: PdfStyles }) {
 	return (
 		<View fixed style={sheet.header}>
-			<Image src={MINISTERE_LOGO} style={sheet.headerLogo} />
+			<Image
+				{...pdfStructure({ tag: "Figure", alt: MINISTERE_LOGO_ALT })}
+				src={MINISTERE_LOGO}
+				style={sheet.headerLogo}
+			/>
 			<Text style={sheet.headerText}>Direction Générale{"\n"}du Travail</Text>
 		</View>
 	);

@@ -4,7 +4,7 @@ const mocks = vi.hoisted(() => ({
 	auth: vi.fn(),
 	logAction: vi.fn().mockResolvedValue(undefined),
 	buildTransmittedPdfData: vi.fn(),
-	renderToBuffer: vi.fn(),
+	renderTaggedPdf: vi.fn(),
 	TransmittedPdfDocument: vi.fn(),
 }));
 
@@ -14,8 +14,8 @@ vi.mock("~/server/audit/log", () => ({ logAction: mocks.logAction }));
 
 vi.mock("~/server/db", () => ({ db: {} }));
 
-vi.mock("@react-pdf/renderer", () => ({
-	renderToBuffer: mocks.renderToBuffer,
+vi.mock("~/modules/declarationPdf/tagging/renderTaggedPdf", () => ({
+	renderTaggedPdf: mocks.renderTaggedPdf,
 }));
 
 vi.mock("~/modules/declarationPdf/TransmittedPdfDocument", () => ({
@@ -54,7 +54,7 @@ function auditRow(): Record<string, unknown> {
 describe("GET /api/transmitted-pdf", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		mocks.renderToBuffer.mockResolvedValue(PDF_BYTES);
+		mocks.renderTaggedPdf.mockResolvedValue(PDF_BYTES);
 		mocks.TransmittedPdfDocument.mockReturnValue(DOCUMENT);
 		mocks.buildTransmittedPdfData.mockResolvedValue({ year: YEAR });
 		signedIn({ id: "user-1", email: "declarant@exemple.fr", siret: SIRET });
@@ -79,7 +79,7 @@ describe("GET /api/transmitted-pdf", () => {
 			YEAR,
 			expect.any(Date),
 		);
-		expect(mocks.renderToBuffer).toHaveBeenCalledWith(DOCUMENT);
+		expect(mocks.renderTaggedPdf).toHaveBeenCalledWith(DOCUMENT);
 	});
 
 	it("falls back on the current year when none is requested", async () => {
@@ -146,7 +146,7 @@ describe("GET /api/transmitted-pdf", () => {
 
 	it("answers 500 when the recap cannot be rendered", async () => {
 		vi.spyOn(console, "error").mockImplementation(() => undefined);
-		mocks.renderToBuffer.mockRejectedValue(new Error("pdf worker died"));
+		mocks.renderTaggedPdf.mockRejectedValue(new Error("pdf worker died"));
 
 		const response = await GET(request());
 

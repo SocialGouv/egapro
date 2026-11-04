@@ -2,7 +2,10 @@ export {
 	CampaignRateTileError,
 	CampaignRateTileLoading,
 } from "./CampaignRateTileStates";
+export type { ChangeRow } from "./ChangesTable";
+export { ChangesTable } from "./ChangesTable";
 export { CompanySizeFilter } from "./CompanySizeFilter";
+export { composeDescribedBy } from "./composeDescribedBy";
 export { DownloadCard } from "./DownloadCard";
 export { DownloadStatusRegion } from "./DownloadStatusRegion";
 export { formatDocumentSubtitle } from "./documentSubtitle";

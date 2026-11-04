@@ -14,6 +14,8 @@ import { InfoSection } from "./sections/InfoSection";
 import { PdfPageFooter } from "./sections/PdfPageFooter";
 import { PdfPageHeader } from "./sections/PdfPageHeader";
 import { Cell, Row, Table } from "./sections/tableParts";
+import { pdfDocumentMetadata } from "./tagging/pdfDocumentMetadata";
+import { pdfHeading, pdfTag } from "./tagging/pdfStructure";
 
 type Props = {
 	data: RepresentationPdfData;
@@ -63,8 +65,10 @@ function IndicatorColumn({
 	indicator: RepresentationPdfIndicator;
 }) {
 	return (
-		<View style={styles.repGapColumn}>
-			<Text style={styles.repGapColumnTitle}>{indicator.title}</Text>
+		<View {...pdfTag("Sect")} style={styles.repGapColumn}>
+			<Text {...pdfHeading(3)} style={styles.repGapColumnTitle}>
+				{indicator.title}
+			</Text>
 			{indicator.notComputableReason === null ? (
 				<Table sheet={styles}>
 					<Row>
@@ -142,7 +146,13 @@ export function RepresentationPdfDocument({ data }: Props) {
 	}`;
 
 	return (
-		<Document>
+		<Document
+			{...pdfDocumentMetadata({
+				title: `Récapitulatif : Démarche des indicateurs de représentation ${data.campaignYear}`,
+				subject: "Indicateurs de représentation femmes-hommes",
+				siren: data.siren,
+			})}
+		>
 			<Page size="A4" style={styles.page} wrap>
 				<PdfPageHeader sheet={styles} />
 				<PdfPageFooter label={footerLabel} />
@@ -151,7 +161,7 @@ export function RepresentationPdfDocument({ data }: Props) {
 
 				<View style={styles.content}>
 					<View style={styles.titleBlock}>
-						<Text style={styles.title}>
+						<Text {...pdfHeading(1)} style={styles.title}>
 							Récapitulatif : Démarche des indicateurs de représentation{" "}
 							{data.campaignYear}
 						</Text>

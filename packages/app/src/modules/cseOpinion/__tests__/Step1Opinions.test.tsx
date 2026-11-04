@@ -127,6 +127,10 @@ const ACCURACY_2_TITLE =
 	"Exactitude des données utilisées pour le calcul, la méthode de calcul et les résultats de la seconde déclaration de l'indicateur par catégorie d'emplois.";
 const JUSTIFICATION_TITLE =
 	"Justification des écarts ≥ 5 % par des critères objectifs et non fondés sur le sexe de l'indicateur par catégorie d'emplois.";
+const ACCURACY_OPINION_ERROR =
+	"Indiquez si l'avis d'exactitude des données et des méthodes de calcul est favorable ou défavorable.";
+const ACCURACY_DATE_ERROR =
+	"Renseignez la date de l'avis d'exactitude des données et des méthodes de calcul.";
 const COMPLIANCE_TITLE =
 	"Parcours de mise en conformité pour l'indicateur par catégorie d'emplois";
 const PAGE_TITLE = "Transmission du ou des avis du CSE";
@@ -391,6 +395,32 @@ describe("Step1Opinions", () => {
 		}
 	});
 
+	it("describes every opinion field of every card with the form-level mention", () => {
+		renderStep1({
+			firstDeclJustificationRequired: true,
+			hasSecondDeclaration: true,
+			secondDeclJustificationRequired: true,
+		});
+
+		for (const id of [
+			"first-decl-accuracy",
+			"first-decl-gap",
+			"second-decl-accuracy",
+			"second-decl-gap",
+		]) {
+			const card = cardOf(id);
+			for (const field of [
+				within(card).getByLabelText("Favorable"),
+				within(card).getByLabelText("Défavorable"),
+				within(card).getByLabelText(/Date de l'avis rendu par le CSE/),
+			]) {
+				expect(field).toHaveAccessibleDescription(
+					"Tous les champs sont obligatoires.",
+				);
+			}
+		}
+	});
+
 	it("offers a lone next button, without a link back to a transmitted step", () => {
 		renderStep1();
 
@@ -418,17 +448,121 @@ describe("Step1Opinions", () => {
 	});
 
 	describe("submission", () => {
-		it("shows the validation error on an empty form", async () => {
+		it("lists each empty field of an empty form in the error alert", async () => {
 			const user = userEvent.setup();
 			renderStep1();
 
 			await user.click(screen.getByRole("button", { name: /Suivant/ }));
 
+			const alert = await screen.findByRole("alert");
+			expect(within(alert).getByText("Champ vide")).toBeInTheDocument();
 			expect(
-				await screen.findByText(
-					"Veuillez remplir tous les champs obligatoires.",
+				within(alert)
+					.getAllByRole("link")
+					.map((link) => [link.textContent, link.getAttribute("href")]),
+			).toEqual([
+				[ACCURACY_OPINION_ERROR, "#first-decl-accuracy-favorable"],
+				[ACCURACY_DATE_ERROR, "#first-decl-accuracy-date"],
+			]);
+			expect(mockMutate).not.toHaveBeenCalled();
+		});
+
+		it("marks each empty field invalid and describes it by the alert message (RGAA 11.10)", async () => {
+			const user = userEvent.setup();
+			renderStep1();
+
+			await user.click(screen.getByRole("button", { name: /Suivant/ }));
+
+			const card = cardOf("first-decl-accuracy");
+			const dateInput = within(card).getByLabelText(
+				/Date de l'avis rendu par le CSE/,
+			);
+			for (const field of [
+				within(card).getByLabelText("Favorable"),
+				within(card).getByLabelText("Défavorable"),
+				dateInput,
+			]) {
+				expect(field).toHaveAttribute("aria-invalid", "true");
+				expect(field).toHaveAccessibleDescription(
+					`Tous les champs sont obligatoires. ${ACCURACY_OPINION_ERROR} ${ACCURACY_DATE_ERROR}`,
+				);
+			}
+		});
+
+		it("still reports an error when the schema rejects values that no empty field explains", async () => {
+			mockUseDeclarationDraft.mockReturnValue({
+				draft: {
+					firstDeclaration: {
+						accuracyOpinion: "unknown",
+						accuracyDate: "2026-03-01",
+					},
+				},
+				setField: mockSetField,
+				clearDraft: mockClearDraft,
+				hasDraft: true,
+				isLoadingDraft: false,
+				isSaving: false,
+				isPendingSave: false,
+			});
+			const user = userEvent.setup();
+			renderStep1();
+
+			await user.click(screen.getByRole("button", { name: /Suivant/ }));
+
+			const alert = await screen.findByRole("alert");
+			expect(within(alert).getByText("Valeur invalide")).toBeInTheDocument();
+			expect(within(alert).queryByRole("link")).toBeNull();
+			expect(
+				within(alert).getByText(
+					/Certaines informations saisies sont invalides/,
 				),
 			).toBeInTheDocument();
+			expect(mockMutate).not.toHaveBeenCalled();
+		});
+
+		it("clears a field's error state as soon as it is answered", async () => {
+			const user = userEvent.setup();
+			renderStep1();
+			await user.click(screen.getByRole("button", { name: /Suivant/ }));
+
+			await user.click(screen.getByLabelText("Favorable"));
+
+			expect(screen.getByLabelText("Favorable")).not.toHaveAttribute(
+				"aria-invalid",
+			);
+			expect(
+				screen.getByLabelText(/Date de l'avis rendu par le CSE/),
+			).toHaveAttribute("aria-invalid", "true");
+			const alert = screen.getByRole("alert");
+			expect(within(alert).queryByText(ACCURACY_OPINION_ERROR)).toBeNull();
+			expect(within(alert).getByText(ACCURACY_DATE_ERROR)).toBeInTheDocument();
+		});
+
+		it("names the declaration and the opinion of every empty field across four cards", async () => {
+			const user = userEvent.setup();
+			renderStep1({
+				firstDeclJustificationRequired: true,
+				hasSecondDeclaration: true,
+				secondDeclJustificationRequired: true,
+			});
+
+			await user.click(screen.getByRole("button", { name: /Suivant/ }));
+
+			const alert = await screen.findByRole("alert");
+			expect(
+				within(alert)
+					.getAllByRole("listitem")
+					.map((item) => item.textContent),
+			).toEqual([
+				"Indiquez si l'avis d'exactitude des données et des méthodes de calcul de la première déclaration est favorable ou défavorable.",
+				"Renseignez la date de l'avis d'exactitude des données et des méthodes de calcul de la première déclaration.",
+				"Indiquez si l'avis justifiant les écarts ≥ 5 % de la première déclaration est favorable ou défavorable.",
+				"Renseignez la date de l'avis justifiant les écarts ≥ 5 % de la première déclaration.",
+				"Indiquez si l'avis d'exactitude des données et des méthodes de calcul de la seconde déclaration est favorable ou défavorable.",
+				"Renseignez la date de l'avis d'exactitude des données et des méthodes de calcul de la seconde déclaration.",
+				"Indiquez si l'avis justifiant les écarts ≥ 5 % de la seconde déclaration est favorable ou défavorable.",
+				"Renseignez la date de l'avis justifiant les écarts ≥ 5 % de la seconde déclaration.",
+			]);
 			expect(mockMutate).not.toHaveBeenCalled();
 		});
 
@@ -484,10 +618,10 @@ describe("Step1Opinions", () => {
 				"second",
 				{ hasSecondDeclaration: true, secondDeclJustificationRequired: true },
 			],
-		] as const)("blocks an incomplete required %s-declaration justification", async (_which, props) => {
+		] as const)("blocks an incomplete required %s-declaration justification", async (which, props) => {
 			const user = userEvent.setup();
 			renderStep1({ ...props, initialData: SAVED_OPINIONS });
-			const prefix = _which === "first" ? "first-decl" : "second-decl";
+			const prefix = which === "first" ? "first-decl" : "second-decl";
 			const dateInput = document.getElementById(
 				`${prefix}-gap-date`,
 			) as HTMLInputElement;
@@ -495,11 +629,16 @@ describe("Step1Opinions", () => {
 
 			await user.click(screen.getByRole("button", { name: /Suivant/ }));
 
+			const alert = await screen.findByRole("alert");
 			expect(
-				await screen.findByText(
-					"Veuillez remplir tous les champs obligatoires.",
-				),
-			).toBeInTheDocument();
+				within(alert).getByRole("link", {
+					name: `Renseignez la date de l'avis justifiant les écarts ≥ 5 %${which === "first" ? "" : " de la seconde déclaration"}.`,
+				}),
+			).toHaveAttribute("href", `#${prefix}-gap-date`);
+			expect(dateInput).toHaveAttribute("aria-invalid", "true");
+			expect(
+				document.getElementById(`${prefix}-gap-favorable`),
+			).not.toHaveAttribute("aria-invalid");
 			expect(mockMutate).not.toHaveBeenCalled();
 		});
 	});

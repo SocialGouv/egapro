@@ -1,22 +1,32 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { type FormEvent, useCallback, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import type { UseFormRegisterReturn } from "react-hook-form";
 
-import { getDsfrModal } from "~/modules/shared";
+import { composeDescribedBy, getDsfrModal } from "~/modules/shared";
 import { PhoneField } from "~/modules/shared/PhoneField";
 import { useDsfrDialogOpen } from "~/modules/shared/useDsfrDialogOpen";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import styles from "./ProfileModal.module.scss";
-import { updateProfileSchema } from "./schemas";
+import { EditActions, ReviewActions } from "./ProfileModalActions";
+import { ProfileReviewStep } from "./ProfileReviewStep";
+import { listProfileChanges } from "./profileChanges";
+import { type ProfileUpdate, updateProfileSchema } from "./schemas";
 
 const MODAL_ID = "profile-modal";
 const MODAL_TITLE_ID = "profile-modal-title";
+const REQUIRED_NOTE_ID = "profile-modal-required-note";
 
 /** DSFR modal displaying the declarant profile with editable identity fields. */
 export function ProfileModal() {
 	const dialogRef = useRef<HTMLDialogElement>(null);
+	const titleRef = useRef<HTMLHeadingElement>(null);
+	const reviewHeadingRef = useRef<HTMLHeadingElement>(null);
+	const [pendingUpdate, setPendingUpdate] = useState<ProfileUpdate | null>(
+		null,
+	);
 
 	const form = useZodForm(updateProfileSchema, {
 		defaultValues: { firstName: "", lastName: "", phone: "" },
@@ -36,10 +46,18 @@ export function ProfileModal() {
 
 	const closeModal = useCallback(() => {
 		const dialog = dialogRef.current;
-		if (dialog) getDsfrModal(dialog)?.conceal();
+		if (!dialog?.open) return;
+		const modal = getDsfrModal(dialog);
+		modal?.conceal();
+		// A programmatic conceal does not return focus to the opening control.
+		modal?.focus();
 	}, []);
 
+	const resetMutation = updateProfileMutation.reset;
+
 	const handleDialogOpen = useCallback(() => {
+		setPendingUpdate(null);
+		resetMutation();
 		profileQuery
 			.refetch()
 			.then((result) => {
@@ -54,13 +72,43 @@ export function ProfileModal() {
 			.catch(() => {
 				// Query error is already handled by React Query's error state
 			});
-	}, [profileQuery, form]);
+	}, [profileQuery, form, resetMutation]);
 
 	useDsfrDialogOpen(dialogRef, handleDialogOpen);
 
-	const onSubmit = form.handleSubmit((data) => {
-		updateProfileMutation.mutate(data);
+	const isSaving = updateProfileMutation.isPending;
+	const isProfileLoading = profileQuery.isFetching;
+	const isProfileReady =
+		Boolean(profileQuery.data) && !isProfileLoading && !profileQuery.isError;
+	const isReviewing = pendingUpdate !== null;
+	const changes = pendingUpdate
+		? listProfileChanges(profileQuery.data, pendingUpdate)
+		: [];
+
+	const submitForReview = form.handleSubmit((data) => {
+		flushSync(() => setPendingUpdate(data));
+		reviewHeadingRef.current?.focus();
 	});
+
+	const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+		if (!isProfileReady) {
+			event.preventDefault();
+			return;
+		}
+		return submitForReview(event);
+	};
+
+	const backToFields = () => {
+		if (isSaving) return;
+		resetMutation();
+		flushSync(() => setPendingUpdate(null));
+		titleRef.current?.focus();
+	};
+
+	const confirmUpdate = () => {
+		if (!pendingUpdate || isSaving) return;
+		updateProfileMutation.mutate(pendingUpdate);
+	};
 
 	return (
 		<dialog
@@ -87,7 +135,12 @@ export function ProfileModal() {
 							<div className="fr-modal__content">
 								<div className="fr-grid-row fr-grid-row--middle fr-mb-4w">
 									<div className="fr-col">
-										<h2 className="fr-modal__title fr-mb-0" id={MODAL_TITLE_ID}>
+										<h2
+											className="fr-modal__title fr-mb-0"
+											id={MODAL_TITLE_ID}
+											ref={titleRef}
+											tabIndex={-1}
+										>
 											Mon profil
 										</h2>
 									</div>
@@ -109,71 +162,88 @@ export function ProfileModal() {
 										</span>
 									</div>
 								</div>
-								<p className="fr-text--regular fr-text-title--grey fr-mb-2w">
-									Vérifier les informations pré-remplies à partir de votre
-									compte ProConnect et compléter les informations manquantes si
-									nécessaire.
-								</p>
-								<p className="fr-text--regular fr-text-title--grey fr-mb-4w">
-									Tous les champs sont obligatoires.
-								</p>
-								<form id="profile-form" onSubmit={onSubmit}>
-									<div className="fr-grid-row fr-grid-row--gutters fr-mb-4w">
-										<div className="fr-col-12 fr-col-md-6">
-											<IdentityField
-												autoComplete="family-name"
-												error={errors.lastName?.message ?? null}
-												inputId="profile-last-name"
-												label="Nom"
-												registration={form.register("lastName")}
-											/>
+								<div hidden={isReviewing}>
+									<p className="fr-text--regular fr-text-title--grey fr-mb-2w">
+										Vérifier les informations pré-remplies à partir de votre
+										compte ProConnect et compléter les informations manquantes
+										si nécessaire.
+									</p>
+									<p
+										className="fr-text--regular fr-text-title--grey fr-mb-4w"
+										id={REQUIRED_NOTE_ID}
+									>
+										Tous les champs sont obligatoires.
+									</p>
+									{profileQuery.isError && !isProfileLoading && (
+										<div
+											className="fr-alert fr-alert--error fr-alert--sm fr-mb-2w"
+											role="alert"
+										>
+											<p>
+												Vos informations de profil n’ont pas pu être chargées.
+												Fermez cette fenêtre puis rouvrez-la pour réessayer.
+											</p>
 										</div>
-										<div className="fr-col-12 fr-col-md-6">
-											<IdentityField
-												autoComplete="given-name"
-												error={errors.firstName?.message ?? null}
-												inputId="profile-first-name"
-												label="Prénom"
-												registration={form.register("firstName")}
-											/>
+									)}
+									<form id="profile-form" onSubmit={onSubmit}>
+										<div className="fr-grid-row fr-grid-row--gutters fr-mb-4w">
+											<div className="fr-col-12 fr-col-md-6">
+												<IdentityField
+													autoComplete="family-name"
+													error={errors.lastName?.message ?? null}
+													inputId="profile-last-name"
+													label="Nom"
+													registration={form.register("lastName")}
+													requiredNoteId={REQUIRED_NOTE_ID}
+												/>
+											</div>
+											<div className="fr-col-12 fr-col-md-6">
+												<IdentityField
+													autoComplete="given-name"
+													error={errors.firstName?.message ?? null}
+													inputId="profile-first-name"
+													label="Prénom"
+													registration={form.register("firstName")}
+													requiredNoteId={REQUIRED_NOTE_ID}
+												/>
+											</div>
 										</div>
-									</div>
-									<div className={`fr-mb-4w ${styles.emailBlock}`}>
-										<p className="fr-mb-0">
-											E-mail :{" "}
-											<strong>{profileQuery.data?.email || "—"}</strong>
-										</p>
-									</div>
-									<PhoneField
-										className={styles.narrowField}
-										error={errors.phone?.message ?? null}
-										inputId="profile-phone"
-										registration={form.register("phone")}
+										<div className={`fr-mb-4w ${styles.emailBlock}`}>
+											<p className="fr-mb-0">
+												E-mail :{" "}
+												<strong>{profileQuery.data?.email || "—"}</strong>
+											</p>
+										</div>
+										<PhoneField
+											className={styles.narrowField}
+											error={errors.phone?.message ?? null}
+											inputId="profile-phone"
+											registration={form.register("phone")}
+											requiredNoteId={REQUIRED_NOTE_ID}
+										/>
+									</form>
+								</div>
+								{isReviewing && (
+									<ProfileReviewStep
+										changes={changes}
+										hasSaveFailed={updateProfileMutation.isError}
+										headingRef={reviewHeadingRef}
 									/>
-								</form>
+								)}
 							</div>
 							<div className="fr-modal__footer">
-								<ul className="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg">
-									<li>
-										<button
-											className="fr-btn"
-											disabled={updateProfileMutation.isPending}
-											form="profile-form"
-											type="submit"
-										>
-											Enregistrer
-										</button>
-									</li>
-									<li>
-										<button
-											aria-controls={MODAL_ID}
-											className="fr-btn fr-btn--secondary"
-											type="button"
-										>
-											Annuler
-										</button>
-									</li>
-								</ul>
+								{isReviewing && (
+									<ReviewActions
+										canConfirm={changes.length > 0}
+										isSaving={isSaving}
+										modalId={MODAL_ID}
+										onBack={backToFields}
+										onConfirm={confirmUpdate}
+									/>
+								)}
+								{!isReviewing && (
+									<EditActions canReview={isProfileReady} modalId={MODAL_ID} />
+								)}
 							</div>
 						</div>
 					</div>
@@ -189,6 +259,7 @@ type IdentityFieldProps = {
 	inputId: string;
 	label: string;
 	registration: UseFormRegisterReturn;
+	requiredNoteId: string;
 };
 
 function IdentityField({
@@ -197,6 +268,7 @@ function IdentityField({
 	inputId,
 	label,
 	registration,
+	requiredNoteId,
 }: IdentityFieldProps) {
 	const messagesId = `${inputId}-messages`;
 	return (
@@ -209,7 +281,7 @@ function IdentityField({
 				{label}
 			</label>
 			<input
-				aria-describedby={messagesId}
+				aria-describedby={composeDescribedBy(requiredNoteId, messagesId)}
 				aria-invalid={error ? "true" : undefined}
 				aria-required="true"
 				autoComplete={autoComplete}

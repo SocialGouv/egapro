@@ -1,5 +1,6 @@
 import { type Page, test } from "@playwright/test";
 import { checkA11y } from "ultra11y/playwright";
+import { isPageSelected } from "../helpers/a11y-selection";
 
 export type A11yRoute = {
 	/** Path to visit, relative to the config's baseURL. */
@@ -55,6 +56,14 @@ export async function settle(page: Page) {
 	await page.waitForTimeout(300);
 }
 
+// At the snapshot, never earlier: a skipped test's own submission may open the next serial screen.
+function skipUnselected(route: A11yRoute) {
+	test.skip(
+		!isPageSelected(route.id),
+		`${route.id} hors de la sélection ULTRA11Y_PAGES — page non touchée par le diff`,
+	);
+}
+
 /**
  * Record one page of the RGAA sample.
  *
@@ -77,6 +86,7 @@ export async function settle(page: Page) {
  * returning — the assertions that follow must not be measuring their leftovers.
  */
 export async function snapshotRoute(page: Page, route: A11yRoute) {
+	skipUnselected(route);
 	const response = await page.goto(route.path);
 	await settle(page);
 
@@ -124,6 +134,7 @@ export async function snapshotRoute(page: Page, route: A11yRoute) {
  * form. Unlike {@link snapshotRoute} it does not navigate: the state is the caller's.
  */
 export async function snapshotCurrentPage(page: Page, route: A11yRoute) {
+	skipUnselected(route);
 	await settle(page);
 
 	await checkA11y(page, {

@@ -1,7 +1,8 @@
 import { Text, View } from "@react-pdf/renderer";
 
 import { type PdfStyles, styles } from "../recapPdfStyles";
-import { normalizeSpaces } from "./tableParts";
+import { pdfHeading, pdfTag } from "../tagging/pdfStructure";
+import { normalizePdfText } from "./tableParts";
 
 type InfoRow = {
 	label: string;
@@ -24,9 +25,10 @@ export function InfoSection({
 }) {
 	const isCategory = tone === "category";
 	return (
-		<View wrap={false}>
+		<View {...pdfTag("Sect")} wrap={false}>
 			<View style={isCategory ? sheet.categoryBanner : sheet.sectionBanner}>
 				<Text
+					{...pdfHeading(isCategory ? 3 : 2)}
 					style={
 						isCategory ? sheet.categoryBannerText : sheet.sectionBannerText
 					}
@@ -34,17 +36,23 @@ export function InfoSection({
 					{title}
 				</Text>
 			</View>
-			<View style={sheet.infoBody}>
+			<View {...pdfTag("L")} style={sheet.infoBody}>
 				{rows.map((row) => (
-					<View key={row.label} style={sheet.infoRow}>
-						<Text style={[sheet.infoLabelColumn, sheet.infoLabel]}>
+					<View {...pdfTag("LI")} key={row.label} style={sheet.infoRow}>
+						<Text
+							{...pdfTag("Lbl")}
+							style={[sheet.infoLabelColumn, sheet.infoLabel]}
+						>
 							{row.label}
 						</Text>
-						<Text style={[sheet.infoValueColumn, sheet.infoValue]}>
-							{normalizeSpaces(row.value)}
+						<Text
+							{...pdfTag("LBody")}
+							style={[sheet.infoValueColumn, sheet.infoValue]}
+						>
+							{normalizePdfText(row.value)}
 							{row.detail !== undefined && (
 								<Text style={sheet.infoDetail}>
-									{`\n${normalizeSpaces(row.detail)}`}
+									{`\n${normalizePdfText(row.detail)}`}
 								</Text>
 							)}
 						</Text>

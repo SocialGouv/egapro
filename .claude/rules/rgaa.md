@@ -10,27 +10,29 @@ Deux surfaces, et deux seulement.
 
 **La revue** — l'agent `rgaa-auditor` lance le skill **`review-a11y`** sur le code sous changement et rend son verdict. C'est tout ce qu'il fait : le skill cadre l'audit sur le diff, lance le moteur, réfute les faux positifs, tranche les critères de jugement depuis la source et nomme les critères de rendu comme risques résiduels. Le skill vient du plugin déclaré dans `.claude/settings.json` ; il s'installe une fois avec `claude plugin install ultra11y@ultra11y`. Le plugin apporte aussi un hook `PreToolUse` qui arrête un `git commit` / `git push` / `gh pr create` porteur de non-conformités — coupe-circuits `SKIP_A11Y=1` (une commande), `ULTRA11Y_HOOK=off` (une session), `"hook": { "failOn": "off" }` dans `.ultra11yrc.json` (le dépôt).
 
-**L'analyse** — `.github/workflows/a11y.yaml`, trois jobs portés par la même Action Ultra11y,
-épinglée au SHA du commit de release (`uses: SocialGouv/ultra11y@<sha> # vX.Y.Z`) :
+**L'analyse** — `.github/workflows/a11y.yaml` (trois jobs) et `a11y-lite.yaml` (un job), portés
+par la même Action Ultra11y, épinglée au SHA du commit de release
+(`uses: SocialGouv/ultra11y@<sha> # vX.Y.Z`) :
 
 | Job | Quand | Ce qu'il fait |
 |---|---|---|
-| `a11y-gate` | **chaque PR** (bloquant) | audit statique JSX/TSX de tout `src` — gratuit, quelques secondes, aucun navigateur et aucun modèle. **La seule gate du dispositif qui arrête un merge sur un constat** (`fail-on: blocking`) : SARIF, annotations, commentaire sticky |
+| `a11y-gate` | **chaque PR** (bloquant) | audit statique JSX/TSX de tout `src` — gratuit, quelques secondes, aucun navigateur et aucun modèle. Bloque un merge sur un constat du code (`fail-on: blocking`) : SARIF, annotations, commentaire sticky |
 | `a11y-pages` | **cron hebdomadaire** (lundi 04:00 UTC, sur `alpha`) et manuel (`gh workflow run a11y.yaml`) | balayage Playwright, critères décidés **au rendu**, rejeu du registre, puis adjudication Sonnet 5 / effort `high` du reliquat par Claude CLI en lots de huit, sans plafond par lot. **Ne bloque ni sur les constats, ni sur un critère « à évaluer »** — on mesure et on publie. Bloque sur une panne, un rendu absent ou un balayage amputé |
 | `a11y-bundle` | cron, manuel | fusionne le tout dans l'artefact `ultra11y-rgaa` |
+| `a11y-lite` | **chaque PR vers `alpha`** (bloquant) et chaque push sur `alpha` | mode lite : capture des seules pages que le diff peut changer, **moteur seul**, aucun modèle. Bloque sur un constat bloquant **nouveau** au rendu (page touchée, ou page nouvelle jugée sans référence), sur une route ni déclarée ni exemptée dans `.ultra11yrc.json` (`require-sampled`), ou sur une page sélectionnée non capturée. Le push sur `alpha` capture tout et écrit la baseline |
 
-Ce que ça ne donne pas, et il faut le savoir : **une régression RGAA de rendu peut vivre jusqu'au lundi suivant.** Depuis ultra11y 5.42, 104 des 106 critères RGAA exigent une adjudication par le modèle : un run complet à chaque merge sur `alpha` se paierait presque à chaque merge, d'où l'horloge plutôt que le merge. Ce qui rattrape une régression sur une PR reste l'audit statique, qui ne voit pas la page rendue.
+Ce que ça ne donne pas, et il faut le savoir : **une régression RGAA de rendu sur un critère de jugement peut vivre jusqu'au lundi suivant.** Depuis ultra11y 5.42, 104 des 106 critères RGAA exigent une adjudication par le modèle : un run complet à chaque merge sur `alpha` se paierait presque à chaque merge, d'où l'horloge plutôt que le merge. Sur une PR, `a11y-lite` arrête ce que le **moteur** tranche au rendu, sur les pages touchées et les pages nouvelles ; il ne voit ni le backlog existant, ni ce qu'aucun import ne relie à une page (`sample.global` sert à ça), ni les critères de jugement.
 
 > Câblage complet, coûts mesurés, registre de verdicts, `undecidable.json`, runner CLI par lots, pourquoi un cron hebdomadaire plutôt qu'un run à chaque merge, commandes locales et procédure de bump → **[`docs/accessibilite-ultra11y.md`](../../docs/accessibilite-ultra11y.md)**. À lire avant de toucher à `a11y.yaml` ou à la version d'ultra11y — plusieurs de ces choix ont déjà été faits, défaits, puis refaits.
 
-## La version, et pourquoi elle vit à quatre endroits
+## La version, et pourquoi elle vit à plusieurs endroits
 
 Le moteur ultra11y est **embarqué** dans chaque surface, donc « la version » n'est pas un
-numéro unique mais quatre copies qui doivent s'accorder :
+numéro unique mais plusieurs copies qui doivent s'accorder :
 
 | Où | Quoi | Tenu par |
 |---|---|---|
-| `a11y.yaml`, `uses:` ×2 | le moteur de la CI (gate PR + `a11y-pages`) | `a11y-version-coherence` (ci.yaml) |
+| chaque `uses:` des workflows (`a11y.yaml` ×2, `a11y-lite.yaml` ×2) | le moteur de la CI (gate PR, `a11y-pages`, mode lite) | `a11y-version-coherence` (ci.yaml) |
 | `packages/app/package.json` | le binaire et le plugin Playwright qui **écrivent** les instantanés | idem |
 | le plugin Claude Code | le skill `review-a11y`, donc l'agent `rgaa-auditor` | hook `check-ultra11y-plugin.sh` |
 

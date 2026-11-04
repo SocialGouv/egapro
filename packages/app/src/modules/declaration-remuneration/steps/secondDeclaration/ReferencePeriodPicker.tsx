@@ -1,4 +1,5 @@
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
+import { REQUIRED_FIELDS_NOTE_ID } from "~/modules/declaration-remuneration/shared/formError/types";
 import { TooltipButton } from "~/modules/shared/TooltipButton";
 import styles from "./ReferencePeriodPicker.module.scss";
 
@@ -41,6 +42,7 @@ export function ReferencePeriodPicker({
 							<span className="fr-hint-text">Format attendu : JJ/MM/AAAA</span>
 						</label>
 						<input
+							aria-describedby={REQUIRED_FIELDS_NOTE_ID}
 							className="fr-input"
 							disabled={disabled}
 							id="period-start-date"
@@ -58,6 +60,7 @@ export function ReferencePeriodPicker({
 							<span className="fr-hint-text">Format attendu : JJ/MM/AAAA</span>
 						</label>
 						<input
+							aria-describedby={REQUIRED_FIELDS_NOTE_ID}
 							className="fr-input"
 							disabled={disabled}
 							id="period-end-date"

@@ -1,4 +1,11 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+	within,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 type ProfileData = {
@@ -12,34 +19,55 @@ const { mockMutate, mockRefetch, trpcState } = vi.hoisted(() => ({
 	mockMutate: vi.fn(),
 	mockRefetch: vi.fn(),
 	trpcState: {
-		profile: null as {
-			firstName: string | null;
-			lastName: string | null;
-			email: string | null;
-			phone: string | null;
-		} | null,
-		isPending: false,
+		profile: null as ProfileData | null,
+		isFetching: false,
+		isError: false,
+		saveOutcome: "success" as "success" | "error" | "pending",
+		settlePendingSave: null as (() => void) | null,
 	},
 }));
 
-vi.mock("~/trpc/react", () => ({
-	api: {
-		profile: {
-			get: {
-				useQuery: () => ({ data: trpcState.profile, refetch: mockRefetch }),
-			},
-			updateProfile: {
-				useMutation: ({ onSuccess }: { onSuccess?: () => void }) => ({
-					mutate: (input: unknown) => {
-						mockMutate(input);
-						onSuccess?.();
+vi.mock("~/trpc/react", async () => {
+	const { useState } = await vi.importActual<typeof import("react")>("react");
+	return {
+		api: {
+			profile: {
+				get: {
+					useQuery: () => ({
+						data: trpcState.profile,
+						isFetching: trpcState.isFetching,
+						isError: trpcState.isError,
+						refetch: mockRefetch,
+					}),
+				},
+				updateProfile: {
+					useMutation: ({ onSuccess }: { onSuccess?: () => void }) => {
+						const [status, setStatus] = useState<"idle" | "pending" | "error">(
+							"idle",
+						);
+						return {
+							mutate: (input: unknown) => {
+								mockMutate(input);
+								if (trpcState.saveOutcome === "success") {
+									onSuccess?.();
+									return;
+								}
+								setStatus(trpcState.saveOutcome);
+								trpcState.settlePendingSave = () => {
+									setStatus("idle");
+									onSuccess?.();
+								};
+							},
+							reset: () => setStatus("idle"),
+							isPending: status === "pending",
+							isError: status === "error",
+						};
 					},
-					isPending: trpcState.isPending,
-				}),
+				},
 			},
 		},
-	},
-}));
+	};
+});
 
 import { ProfileModal } from "../ProfileModal";
 
@@ -86,9 +114,39 @@ async function renderOpenModal() {
 	await openDialog();
 }
 
+const REVIEW_HEADING = "Vérifier vos modifications";
+
+function findReviewHeading() {
+	return screen.findByRole("heading", { name: REVIEW_HEADING, level: 3 });
+}
+
+function queryReviewHeading() {
+	return screen.queryByRole("heading", {
+		name: REVIEW_HEADING,
+		...hiddenOpt,
+	});
+}
+
+async function reviewEdits(edits: Record<string, string>) {
+	for (const [id, value] of Object.entries(edits)) {
+		fireEvent.change(getElement(id), { target: { value } });
+	}
+	fireEvent.submit(getElement("profile-form"));
+	return findReviewHeading();
+}
+
+function mockDsfrModal() {
+	const modal = { conceal: vi.fn(), disclose: vi.fn(), focus: vi.fn() };
+	Object.assign(window, { dsfr: () => ({ modal }) });
+	return modal;
+}
+
 beforeEach(() => {
 	trpcState.profile = { ...PROFILE };
-	trpcState.isPending = false;
+	trpcState.isFetching = false;
+	trpcState.isError = false;
+	trpcState.saveOutcome = "success";
+	trpcState.settlePendingSave = null;
 	mockMutate.mockClear();
 	mockRefetch
 		.mockReset()
@@ -149,22 +207,20 @@ describe("ProfileModal — shell", () => {
 		);
 	});
 
-	it("renders the Enregistrer and Annuler buttons", () => {
+	it("renders the review and cancel buttons, and no direct save button", () => {
 		render(<ProfileModal />);
 		expect(
-			screen.getByRole("button", { name: "Enregistrer", ...hiddenOpt }),
-		).toBeEnabled();
+			screen.getByRole("button", {
+				name: "Vérifier mes modifications",
+				...hiddenOpt,
+			}),
+		).toHaveAttribute("type", "submit");
 		expect(
 			screen.getByRole("button", { name: "Annuler", ...hiddenOpt }),
 		).toHaveAttribute("aria-controls", MODAL_ID);
-	});
-
-	it("disables the submit button while the mutation is pending", () => {
-		trpcState.isPending = true;
-		render(<ProfileModal />);
 		expect(
-			screen.getByRole("button", { name: "Enregistrer", ...hiddenOpt }),
-		).toBeDisabled();
+			screen.queryByRole("button", { name: /enregistrer/i, ...hiddenOpt }),
+		).not.toBeInTheDocument();
 	});
 });
 
@@ -193,7 +249,10 @@ describe("ProfileModal — identity fields", () => {
 		expect(input).toHaveAttribute("id", inputId);
 		expect(input).toHaveAttribute("type", "text");
 		expect(input).toHaveAttribute("aria-required", "true");
-		expect(input).toHaveAttribute("aria-describedby", `${inputId}-messages`);
+		expect(input).toHaveAttribute(
+			"aria-describedby",
+			`profile-modal-required-note ${inputId}-messages`,
+		);
 		expect(input).toHaveClass("fr-input");
 		expect(input).not.toHaveAttribute("readonly");
 		expect(input).not.toHaveAttribute("aria-invalid");
@@ -252,7 +311,7 @@ describe("ProfileModal — identity fields", () => {
 		});
 		expect(screen.getByLabelText("Nom")).toHaveValue("");
 		expect(
-			screen.getByRole("button", { name: "Enregistrer", ...hiddenOpt }),
+			screen.getByRole("button", { name: "Vérifier mes modifications" }),
 		).toBeEnabled();
 	});
 
@@ -332,6 +391,7 @@ describe("ProfileModal — validation", () => {
 			"fr-input-group--error",
 		);
 		expect(getElement(inputId)).toHaveAttribute("aria-invalid", "true");
+		expect(queryReviewHeading()).not.toBeInTheDocument();
 		expect(mockMutate).not.toHaveBeenCalled();
 	});
 
@@ -373,44 +433,280 @@ describe("ProfileModal — validation", () => {
 		});
 		fireEvent.submit(getElement("profile-form"));
 
-		await waitFor(() => {
-			expect(mockMutate).toHaveBeenCalled();
-		});
+		expect(await findReviewHeading()).toBeInTheDocument();
 		expect(
 			document.querySelector("#profile-last-name-messages .fr-message--error"),
 		).not.toBeInTheDocument();
+		expect(mockMutate).not.toHaveBeenCalled();
 	});
 });
 
-describe("ProfileModal — submission", () => {
-	it("sends the edited identity along with the canonical phone", async () => {
+describe("ProfileModal — required-fields mention", () => {
+	const REQUIRED_MENTION = "Tous les champs sont obligatoires.";
+	const requiredFieldIds = [
+		"profile-last-name",
+		"profile-first-name",
+		"profile-phone",
+	];
+
+	it.each(
+		requiredFieldIds,
+	)("describes #%s with the form-level mention", async (inputId) => {
 		await renderOpenModal();
-		fireEvent.change(screen.getByLabelText("Nom"), {
-			target: { value: "Durand" },
-		});
-		fireEvent.change(screen.getByLabelText("Prénom"), {
-			target: { value: "Camille" },
-		});
+
+		expect(getElement(inputId)).toHaveAccessibleDescription(
+			expect.stringContaining(REQUIRED_MENTION),
+		);
+	});
+
+	it.each(
+		requiredFieldIds,
+	)("keeps the mention and the error message on #%s once it is flagged", async (inputId) => {
+		await renderOpenModal();
+		fireEvent.change(getElement(inputId), { target: { value: "" } });
 		fireEvent.submit(getElement("profile-form"));
 
 		await waitFor(() => {
-			expect(mockMutate).toHaveBeenCalledWith({
-				firstName: "Camille",
-				lastName: "Durand",
-				phone: "+33122334455",
-			});
+			expect(getElement(inputId)).toHaveAttribute("aria-invalid", "true");
+		});
+		const errorMessage = document.querySelector(
+			`#${inputId}-messages .fr-message--error`,
+		)?.textContent;
+		expect(errorMessage).toBeTruthy();
+		expect(getElement(inputId)).toHaveAccessibleDescription(
+			`${REQUIRED_MENTION} ${errorMessage}`,
+		);
+	});
+});
+
+describe("ProfileModal — review step", () => {
+	it("shows a summary of old and new values without saving anything", async () => {
+		await renderOpenModal();
+
+		const heading = await reviewEdits({
+			"profile-last-name": "Durand",
+			"profile-phone": "01 22 33 44 56",
+		});
+
+		expect(heading).toHaveFocus();
+		expect(mockMutate).not.toHaveBeenCalled();
+		expect(getElement("profile-form").parentElement).not.toBeVisible();
+
+		const table = screen.getByRole("table", {
+			name: "Modifications à confirmer",
+		});
+		const rows = within(table).getAllByRole("row").slice(1);
+		expect(rows.map((row) => row.textContent)).toEqual([
+			"NomMartinDurand",
+			"Numéro de téléphone+33 1 22 33 44 55+33 1 22 33 44 56",
+		]);
+		expect(
+			within(table).getByRole("rowheader", { name: "Nom" }),
+		).toBeInTheDocument();
+		expect(
+			within(table).getByRole("columnheader", { name: "Nouvelle valeur" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "Confirmer et enregistrer" }),
+		).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Annuler" })).toHaveAttribute(
+			"aria-controls",
+			MODAL_ID,
+		);
+	});
+
+	it("offers no confirmation when nothing was changed", async () => {
+		await renderOpenModal();
+
+		await reviewEdits({});
+
+		expect(
+			screen.getByText(
+				"Vous n’avez modifié aucune information : il n’y a rien à enregistrer.",
+			),
+		).toBeInTheDocument();
+		expect(screen.queryByRole("table")).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole("button", { name: "Confirmer et enregistrer" }),
+		).not.toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "Revenir aux champs" }),
+		).toBeInTheDocument();
+	});
+
+	it("returns to the fields with the edits kept and the title focused", async () => {
+		await renderOpenModal();
+		await reviewEdits({ "profile-first-name": "Camille" });
+
+		fireEvent.click(screen.getByRole("button", { name: "Revenir aux champs" }));
+
+		expect(queryReviewHeading()).not.toBeInTheDocument();
+		expect(screen.getByRole("heading", { name: "Mon profil" })).toHaveFocus();
+		expect(screen.getByLabelText("Prénom")).toBeVisible();
+		expect(screen.getByLabelText("Prénom")).toHaveValue("Camille");
+		expect(mockMutate).not.toHaveBeenCalled();
+	});
+
+	it("refuses to open the review while the stored profile is not loaded", async () => {
+		trpcState.profile = null;
+		trpcState.isError = true;
+		await renderOpenModal();
+
+		fireEvent.change(getElement("profile-last-name"), {
+			target: { value: "Durand" },
+		});
+		fireEvent.submit(getElement("profile-form"));
+
+		expect(queryReviewHeading()).not.toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "Vérifier mes modifications" }),
+		).toHaveAttribute("aria-disabled", "true");
+		expect(screen.getByRole("alert")).toHaveTextContent(
+			"Vos informations de profil n’ont pas pu être chargées.",
+		);
+	});
+
+	it("refuses to open the review while the profile is being refetched", async () => {
+		trpcState.isFetching = true;
+		await renderOpenModal();
+
+		fireEvent.change(getElement("profile-last-name"), {
+			target: { value: "Durand" },
+		});
+		fireEvent.submit(getElement("profile-form"));
+
+		expect(queryReviewHeading()).not.toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "Vérifier mes modifications" }),
+		).toHaveAttribute("aria-disabled", "true");
+	});
+
+	it("saves nothing when the review is cancelled, and reopens on the stored values", async () => {
+		await renderOpenModal();
+		await reviewEdits({ "profile-last-name": "Durand" });
+
+		closeDialog();
+		await openDialog();
+
+		expect(mockMutate).not.toHaveBeenCalled();
+		expect(queryReviewHeading()).not.toBeInTheDocument();
+		expect(screen.getByLabelText("Nom")).toHaveValue("Martin");
+		expect(screen.getByLabelText("Nom")).toBeVisible();
+	});
+});
+
+describe("ProfileModal — confirmation", () => {
+	it("sends the edited identity along with the canonical phone once confirmed", async () => {
+		await renderOpenModal();
+		await reviewEdits({
+			"profile-last-name": "Durand",
+			"profile-first-name": "Camille",
+		});
+
+		fireEvent.click(
+			screen.getByRole("button", { name: "Confirmer et enregistrer" }),
+		);
+
+		expect(mockMutate).toHaveBeenCalledTimes(1);
+		expect(mockMutate).toHaveBeenCalledWith({
+			firstName: "Camille",
+			lastName: "Durand",
+			phone: "+33122334455",
 		});
 	});
 
-	it("closes the modal through the DSFR API once the mutation succeeds", async () => {
-		const conceal = vi.fn();
-		Object.assign(window, { dsfr: () => ({ modal: { conceal } }) });
+	it("closes the modal and gives focus back to the opening control once saved", async () => {
+		const modal = mockDsfrModal();
 		await renderOpenModal();
+		await reviewEdits({ "profile-last-name": "Durand" });
 
-		fireEvent.submit(getElement("profile-form"));
+		fireEvent.click(
+			screen.getByRole("button", { name: "Confirmer et enregistrer" }),
+		);
 
-		await waitFor(() => {
-			expect(conceal).toHaveBeenCalled();
+		expect(modal.conceal).toHaveBeenCalledTimes(1);
+		expect(modal.focus).toHaveBeenCalledTimes(1);
+	});
+
+	it("applies a single update while the save is pending", async () => {
+		trpcState.saveOutcome = "pending";
+		await renderOpenModal();
+		await reviewEdits({ "profile-last-name": "Durand" });
+
+		fireEvent.click(
+			screen.getByRole("button", { name: "Confirmer et enregistrer" }),
+		);
+		const pendingButton = screen.getByRole("button", {
+			name: "Enregistrement en cours…",
 		});
+		fireEvent.click(pendingButton);
+		fireEvent.click(screen.getByRole("button", { name: "Revenir aux champs" }));
+
+		expect(pendingButton).toHaveAttribute("aria-disabled", "true");
+		expect(
+			document.querySelector("#profile-modal .fr-modal__footer [aria-live]"),
+		).toBeNull();
+		expect(mockMutate).toHaveBeenCalledTimes(1);
+		expect(await findReviewHeading()).toBeInTheDocument();
+	});
+
+	it("leaves focus alone when the save lands after the modal was closed", async () => {
+		const modal = mockDsfrModal();
+		trpcState.saveOutcome = "pending";
+		await renderOpenModal();
+		await reviewEdits({ "profile-last-name": "Durand" });
+		fireEvent.click(
+			screen.getByRole("button", { name: "Confirmer et enregistrer" }),
+		);
+
+		closeDialog();
+		act(() => trpcState.settlePendingSave?.());
+
+		expect(modal.conceal).not.toHaveBeenCalled();
+		expect(modal.focus).not.toHaveBeenCalled();
+	});
+
+	it("keeps the review open with an alert when the save fails, and lets the user retry", async () => {
+		const modal = mockDsfrModal();
+		trpcState.saveOutcome = "error";
+		await renderOpenModal();
+		await reviewEdits({ "profile-last-name": "Durand" });
+
+		fireEvent.click(
+			screen.getByRole("button", { name: "Confirmer et enregistrer" }),
+		);
+
+		expect(await screen.findByRole("alert")).toHaveTextContent(
+			"L’enregistrement de vos informations a échoué. Vos modifications sont conservées : vous pouvez réessayer.",
+		);
+		expect(modal.conceal).not.toHaveBeenCalled();
+
+		trpcState.saveOutcome = "success";
+		fireEvent.click(
+			screen.getByRole("button", { name: "Confirmer et enregistrer" }),
+		);
+
+		expect(mockMutate).toHaveBeenCalledTimes(2);
+		expect(mockMutate).toHaveBeenLastCalledWith({
+			firstName: "Julien",
+			lastName: "Durand",
+			phone: "+33122334455",
+		});
+		expect(modal.conceal).toHaveBeenCalledTimes(1);
+	});
+
+	it("clears the save error when going back to the fields", async () => {
+		trpcState.saveOutcome = "error";
+		await renderOpenModal();
+		await reviewEdits({ "profile-last-name": "Durand" });
+		fireEvent.click(
+			screen.getByRole("button", { name: "Confirmer et enregistrer" }),
+		);
+		await screen.findByRole("alert");
+
+		fireEvent.click(screen.getByRole("button", { name: "Revenir aux champs" }));
+		await reviewEdits({});
+
+		expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 	});
 });

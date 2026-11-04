@@ -40,4 +40,24 @@ describe("Navigation", () => {
 		const { container } = render(<Navigation />);
 		expect(container).toBeEmptyDOMElement();
 	});
+
+	it("renders nothing on a declaration-remuneration step", () => {
+		(usePathname as Mock).mockReturnValue("/declaration-remuneration/etape/1");
+		const { container } = render(<Navigation />);
+		expect(container).toBeEmptyDOMElement();
+	});
+
+	it("renders nothing on a declaration-representation confirmation", () => {
+		(usePathname as Mock).mockReturnValue(
+			"/declaration-representation/confirmation",
+		);
+		const { container } = render(<Navigation />);
+		expect(container).toBeEmptyDOMElement();
+	});
+
+	it("renders nothing on avis-cse", () => {
+		(usePathname as Mock).mockReturnValue("/avis-cse");
+		const { container } = render(<Navigation />);
+		expect(container).toBeEmptyDOMElement();
+	});
 });

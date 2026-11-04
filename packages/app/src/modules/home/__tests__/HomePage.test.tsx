@@ -53,19 +53,27 @@ describe("HomePage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders the search section", () => {
+	it("renders the sections in the design order", () => {
 		renderPage();
 		expect(
-			screen.getByRole("heading", {
-				level: 2,
-				name: /rechercher une entreprise/i,
-			}),
-		).toBeInTheDocument();
+			screen
+				.getAllByRole("heading", { level: 2 })
+				.map((heading) => heading.textContent),
+		).toEqual([
+			"Pourquoi déclarer ?",
+			"Que devez-vous déclarer ?",
+			"Consulter les résultats d'une entreprise",
+		]);
 	});
 
-	it("renders the three placeholder sections", () => {
+	it("passes the campaign deadlines down to the why-declare cards", () => {
 		renderPage();
-		const placeholders = screen.getAllByText("Section non finalisée");
-		expect(placeholders).toHaveLength(3);
+		expect(screen.getByText("Échéance au 1ᵉʳ juin")).toBeInTheDocument();
+		expect(screen.getByText("Échéance au 1ᵉʳ mars")).toBeInTheDocument();
+	});
+
+	it("no longer renders any unfinished section placeholder", () => {
+		renderPage();
+		expect(screen.queryByText("Section non finalisée")).not.toBeInTheDocument();
 	});
 });

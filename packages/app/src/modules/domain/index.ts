@@ -181,6 +181,7 @@ export {
 	FUNNEL_REVISION_KEY_STEPS,
 	getDropoffPhaseLabel,
 	getStepLabel,
+	isDropoffRateAboveThreshold,
 	POST_SUBMIT_DROPOFF_PHASES,
 	POST_SUBMIT_MILESTONES,
 } from "./shared/declarationSteps";
@@ -229,6 +230,7 @@ export {
 export {
 	civilLongDateParts,
 	computePercentage,
+	formatCivilDayMonth,
 	formatCivilLongDate,
 	formatCivilShortDate,
 	formatCount,
@@ -421,6 +423,16 @@ export {
 	sumQuartileWorkforce,
 } from "./shared/workforce";
 export type {
+	DeclarationCadence,
+	WorkforceObligations,
+} from "./shared/workforceObligations";
+export {
+	findDeclarationCadence,
+	getWorkforceObligations,
+	WORKFORCE_OBLIGATION_BRACKET_KEYS,
+	WORKFORCE_OBLIGATION_BRACKETS,
+} from "./shared/workforceObligations";
+export type {
 	CampaignDeadlines,
 	CompanySize,
 	CompanySizeRange,
@@ -434,6 +446,7 @@ export type {
 	GapLevel,
 	ObservatoryWorkforceRange,
 	RepresentationCampaign,
+	WorkforceObligationBracket,
 } from "./types";
 export {
 	COMPLIANCE_PATHS,

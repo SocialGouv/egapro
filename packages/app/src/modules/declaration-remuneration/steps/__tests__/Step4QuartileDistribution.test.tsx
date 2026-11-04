@@ -576,10 +576,8 @@ describe("Step4QuartileDistribution", () => {
 			await user.type(input, "200");
 			expect(input).not.toHaveValue("200");
 			expect(input).toHaveAttribute("aria-invalid", "true");
-			const describedBy = input.getAttribute("aria-describedby");
-			expect(describedBy).toBeTruthy();
-			expect(document.getElementById(describedBy as string)).toHaveTextContent(
-				`Le nombre ne peut pas dépasser l'effectif de l'étape 1 (${max}).`,
+			expect(input).toHaveAccessibleDescription(
+				`Tous les champs sont obligatoires. Le nombre ne peut pas dépasser l'effectif de l'étape 1 (${max}).`,
 			);
 		}
 	});
