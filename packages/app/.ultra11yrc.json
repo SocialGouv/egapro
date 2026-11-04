@@ -23,7 +23,8 @@
 			"../../pnpm-lock.yaml",
 			"../../patches/**",
 			"playwright.a11y.config.ts",
-			"src/e2e/a11y/**"
+			"src/e2e/a11y/**",
+			"src/e2e/helpers/a11y-selection.ts"
 		],
 		"exempt": [
 			{

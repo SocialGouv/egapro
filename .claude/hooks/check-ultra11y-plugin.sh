@@ -4,10 +4,10 @@
 # LE QUATRIÈME ENDROIT OÙ VIT LA VERSION D'ULTRA11Y, ET LE SEUL QUE LA CI NE VOIT PAS.
 #
 # `ci.yaml` tient ensemble les versions DU DÉPÔT (chaque `uses:` de l'Action et la
-# devDependency) via scripts/a11y/check-ultra11y-version.sh — lire le pin d'a11y.yaml suffit. Le plugin Claude Code, lui, est
-# installé sur TA MACHINE : `.claude/settings.json` déclare `"ultra11y@ultra11y": true` sans
-# version, donc l'install prend ce que la marketplace avait ce jour-là — et n'en bouge plus
-# jamais toute seule.
+# devDependency) via scripts/a11y/check-ultra11y-version.sh — lire le pin d'a11y.yaml
+# suffit. Le plugin Claude Code, lui, est installé sur TA MACHINE : `.claude/settings.json`
+# déclare `"ultra11y@ultra11y": true` sans version, donc l'install prend ce que la
+# marketplace avait ce jour-là — et n'en bouge plus jamais toute seule.
 #
 # Ce n'est pas théorique : mesuré le 31/08/2026, le plugin installé était en **4.5.1** pendant
 # que le dépôt tournait en 5.40.1. L'agent `rgaa-auditor`, qui EST la gate d'accessibilité des

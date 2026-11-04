@@ -150,7 +150,15 @@ Touché, il sélectionne l'échantillon entier :
 | `src/middleware.ts` | CSP et nonce, redirections de session : sur toutes les routes, importé par aucune |
 | `next.config.js`, `scripts/copy-dsfr.ts` | configuration du build ; la copie du CSS DSFR servi sous `/dsfr/` |
 | `package.json`, `../../pnpm-lock.yaml`, `../../patches/**` | les dépendances, DSFR compris, et leurs patchs |
-| `playwright.a11y.config.ts`, `src/e2e/a11y/**` | la capture elle-même : la changer change tous les instantanés, et c'est sur la PR qu'il faut savoir qu'elle tient encore |
+| `playwright.a11y.config.ts`, `src/e2e/a11y/**`, `src/e2e/helpers/a11y-selection.ts` | la capture elle-même et son filtre : la changer change tous les instantanés, et c'est sur la PR qu'il faut savoir qu'elle tient encore |
+
+Les autres helpers que les specs a11y importent (`db`, `db-campaign`, `declaration-flows`,
+`declaration-history`, `routes`, `src/e2e/constants.ts`) ne sont **pas** globaux, délibérément :
+`affected` suit les imports des pages, pas ceux des specs, mais ces fichiers sont partagés avec la
+suite E2E principale. Les rendre globaux relancerait la capture complète (~9 min) sur chaque PR
+qui touche un test E2E, alors que « Test e2e », check requis, les exerce déjà. Le prix assumé :
+une PR qui ne casse la capture que par eux n'est vue qu'au push suivant sur `alpha`, qui rougit,
+et les pages non capturées y sont marquées `skipped` dans la baseline jusqu'à la réparation.
 
 `.ultra11yrc.json` est global d'office. **L'en-tête, le pied de page et les providers n'y sont
 pas**, et c'est délibéré : le layout racine les importe, donc `affected` les atteint déjà —
