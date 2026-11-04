@@ -8,7 +8,7 @@
 #
 # Usage:  scripts/setup-worktree.sh <index> [<extra-service> ...]
 #
-#   <index>          worktree index assigned by /epic (0, 1, 2 ...). Drives all port
+#   <index>          worktree index (0, 1, 2 ...), one per parallel session. Drives all port
 #                    offsets; must be unique among concurrent worktrees.
 #   <extra-service>  optional service names to start on top of the default stack
 #                    (currently only `clamavd`). See `docker-compose.yml`.
@@ -40,7 +40,7 @@ if [ ! -f docker-compose.yml ]; then
 fi
 
 # Branch-based project name → unique containers/volumes/networks per worktree.
-# In detached-HEAD mode (how /epic provisions worktrees), `git branch
+# In detached-HEAD mode (how /implement provisions worktrees), `git branch
 # --show-current` returns empty; fall back to the worktree directory name,
 # which encodes the ticket (e.g. egapro-epic42-t123).
 BRANCH=$(git branch --show-current)

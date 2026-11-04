@@ -12,19 +12,18 @@ fi
 # via `gh pr merge --squash`. Branch auto-deletion is handled by repo-level
 # settings.
 #
-# Called by process_tick_result.sh on `status=validated`. The repo's branch
+# Run by /implement <epic> once a sub-ticket PR is green. The repo's branch
 # protection MUST allow the gh-authenticated user to merge into epic/* (no
-# review approval required, CI green is enough — code-dev step 9b already
-# enforces all-checks-green before returning validated).
+# review approval required, CI green is enough — /implement already
+# enforces all-checks-green before merging).
 #
 # Exit codes:
 #   0  merged successfully
 #   1  hard error (PR base ≠ epic/<N>, network, gh permission)
-#   2  PR conflicts with epic/<N> — caller should bump attempt counter and
-#      re-dispatch code-dev to rebase. The script also comments on the PR
-#      and resets the ticket to To Do (dispatch_plan only picks up To Do,
-#      so In progress would strand the ticket forever).
-#   3  GitHub still computing mergeability — caller should retry next tick
+#   2  PR conflicts with epic/<N> — the sub-ticket must be rebased on epic/<N>
+#      and re-implemented. The script also comments on the PR and resets the
+#      ticket to To Do.
+#   3  GitHub still computing mergeability — caller should retry in a moment
 
 set -euo pipefail
 
@@ -54,9 +53,9 @@ case "$MERGEABLE" in
     MERGEABLE) ;;
     CONFLICTING)
         echo "[merge_validated_ticket] PR #$PR conflicts with $BRANCH — comment + reset ticket" >&2
-        gh pr comment "$PR" --body "**process_tick_result : conflit avec \`${BRANCH}\`**
+        gh pr comment "$PR" --body "**merge_validated_ticket : conflit avec \`${BRANCH}\`**
 
-Le ticket a été validé techniquement (CI verte, validators IA OK, Sonar OK), mais la squash-merge dans \`${BRANCH}\` est impossible à cause d'un conflit avec une PR mergée juste avant. Le ticket repasse en \`To Do\` pour un nouveau dispatch \`code-dev\` qui doit rebaser sur \`${BRANCH}\` :
+Le ticket a été validé techniquement (CI verte, \`/review gates\` PASS, Sonar OK), mais la squash-merge dans \`${BRANCH}\` est impossible à cause d'un conflit avec une PR mergée juste avant. Le ticket repasse en \`To Do\` et doit être rebasé sur \`${BRANCH}\` :
 
 \`\`\`bash
 git fetch origin ${BRANCH}
@@ -82,9 +81,9 @@ Une fois la PR à nouveau verte, le pipeline retentera le squash-merge automatiq
                 MERGEABLE) break ;;
                 CONFLICTING)
                     echo "[merge_validated_ticket] PR #$PR conflicts with $BRANCH (detected after $ATTEMPTS poll(s)) — comment + reset ticket" >&2
-                    gh pr comment "$PR" --body "**process_tick_result : conflit avec \`${BRANCH}\`**
+                    gh pr comment "$PR" --body "**merge_validated_ticket : conflit avec \`${BRANCH}\`**
 
-Le ticket a été validé techniquement mais la squash-merge dans \`${BRANCH}\` est impossible à cause d'un conflit. Le ticket repasse en \`To Do\` pour un nouveau dispatch \`code-dev\` qui doit rebaser sur \`${BRANCH}\` :
+Le ticket a été validé techniquement mais la squash-merge dans \`${BRANCH}\` est impossible à cause d'un conflit. Le ticket repasse en \`To Do\` et doit être rebasé sur \`${BRANCH}\` :
 
 \`\`\`bash
 git fetch origin ${BRANCH}

@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 #
-# grille_scope.sh — decides whether e2e-dev must replay the 185-coordinate
+# grille_scope.sh — decides whether the E2E step of /implement must replay the 185-coordinate
 # recette grid (`pnpm --filter app test:e2e:grille`) on top of the E2E suite.
 #
-# Single source of the rule: .claude/agents/e2e-dev/AGENT.md and
-# .claude/rules/e2e.md point here instead of restating the paths.
+# Single source of the rule: .claude/skills/implement/references/e2e.md
+# points here instead of restating the paths.
 #
 # Prints exactly one word on stdout:
 #   play  — the diff touches the declaration démarche the grid replays
 #   skip  — it does not; CI (`e2e.yaml`) still replays the grid on the PR
-# The files that triggered `play` are listed on stderr, for the e2e-dev comment.
+# The files that triggered `play` are listed on stderr, for the E2E report.
 #
 # Fail-safe: if the diff cannot be computed (unknown base ref, shallow clone),
 # the answer is `play` — an unneeded grid run costs minutes, a skipped one can
