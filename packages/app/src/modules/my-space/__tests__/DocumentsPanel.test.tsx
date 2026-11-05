@@ -176,6 +176,28 @@ describe("getDocumentResourceCount", () => {
 		).toBe(2);
 	});
 
+	it("counts no CSE opinion recap while an unsubmitted revision makes it unavailable", () => {
+		expect(
+			getDocumentResourceCount(
+				makeDeclaration({
+					hasSubmittedCseOpinion: true,
+					cseOpinionViewAvailable: false,
+				}),
+			),
+		).toBe(1);
+	});
+
+	it("falls back to the submission flag when CSE opinion availability is unknown", () => {
+		expect(
+			getDocumentResourceCount(
+				makeDeclaration({
+					hasSubmittedCseOpinion: true,
+					cseOpinionViewAvailable: undefined,
+				}),
+			),
+		).toBe(2);
+	});
+
 	it("adds no recap for a joint evaluation file deposited alone", () => {
 		expect(
 			getDocumentResourceCount(
@@ -427,6 +449,27 @@ describe("DocumentsPanel", () => {
 		const { links } = renderPanel({
 			fsmStatus: "awaiting_cse_opinion",
 			hasSubmittedCseOpinion: true,
+		});
+
+		expect(links().map((link) => link.textContent)).toEqual([
+			RECAP_TITLE,
+			CSE_OPINION_TITLE,
+		]);
+	});
+
+	it("offers no CSE opinion recap while an unsubmitted revision makes it unavailable", () => {
+		const { links } = renderPanel({
+			hasSubmittedCseOpinion: true,
+			cseOpinionViewAvailable: false,
+		});
+
+		expect(links().map((link) => link.textContent)).toEqual([RECAP_TITLE]);
+	});
+
+	it("falls back to the submission flag when CSE opinion availability is unknown", () => {
+		const { links } = renderPanel({
+			hasSubmittedCseOpinion: true,
+			cseOpinionViewAvailable: undefined,
 		});
 
 		expect(links().map((link) => link.textContent)).toEqual([

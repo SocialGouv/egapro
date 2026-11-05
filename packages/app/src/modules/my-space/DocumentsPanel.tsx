@@ -85,7 +85,10 @@ function getRemunerationResources(
 		});
 	}
 
-	if (declaration.hasSubmittedCseOpinion) {
+	if (
+		declaration.cseOpinionViewAvailable ??
+		declaration.hasSubmittedCseOpinion
+	) {
 		resources.push({
 			title: CSE_OPINION_RECAP_TITLE,
 			subtitle,
