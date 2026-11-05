@@ -213,7 +213,6 @@ counts — never inside them.
 | `public/declarations/export` | `PUBLIC_DECLARATIONS_EXPORT` |
 | `public/referents-egalite-professionnelle` | `PUBLIC_REFERENT_SEARCH` |
 | `representation-pdf` | `PDF_REPRESENTATION_DOWNLOAD` |
-| `transmitted-pdf` | `PDF_TRANSMITTED_DOWNLOAD` |
 | `v1/export/declarations` | `EXPORT_API_DECLARATIONS` |
 | `v1/export/representations` | `EXPORT_API_REPRESENTATIONS` |
 | `v1/files` | `EXPORT_API_FILES` |
