@@ -1,5 +1,5 @@
 .hero {
-	background: linear-gradient(-33deg, var(--background-alt-blue-france) 39%, var(--background-alt-purple-glycine) 113%);
+	background: linear-gradient(-31deg, var(--background-alt-blue-france) 39.44%, #dfd3ff 112.75%);
 	padding-block: 3.5rem;
 }
 
@@ -26,41 +26,4 @@
 		justify-content: center;
 		width: 100%;
 	}
-}
-
-.infoList {
-	display: flex;
-	flex-direction: column;
-	gap: 2rem;
-	padding: 1.5rem;
-}
-
-.infoItem {
-	align-items: center;
-	display: flex;
-	gap: 2rem;
-}
-
-.infoItemIcon {
-	align-items: center;
-	background: var(--background-default-grey);
-	border-radius: 50%;
-	color: var(--artwork-minor-blue-france);
-	display: flex;
-	flex-shrink: 0;
-	height: 4rem;
-	justify-content: center;
-	width: 4rem;
-}
-
-.infoItemContent {
-	display: flex;
-	flex-direction: column;
-	gap: 0.5rem;
-}
-
-.infoItemTitle {
-	font-size: 1.25rem;
-	font-weight: 700;
-	line-height: 1.75rem;
 }

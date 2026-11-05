@@ -24,3 +24,34 @@
 	object-fit: contain;
 	width: auto;
 }
+
+.tags {
+	flex-wrap: nowrap !important;
+
+	li {
+		flex-shrink: 0;
+		line-height: 2rem !important;
+	}
+
+	.fr-tag {
+		white-space: nowrap !important;
+	}
+}
+
+.actionRow {
+	display: flex;
+	height: auto;
+	justify-content: flex-end;
+	margin-top: auto;
+	padding-top: 0.5rem;
+}
+
+.actionArrow {
+	background-color: var(--text-action-high-blue-france);
+	height: 1.5rem;
+	mask-image: url("/dsfr/icons/arrows/arrow-right-line.svg");
+	mask-position: center;
+	mask-repeat: no-repeat;
+	mask-size: 1.5rem 1.5rem;
+	width: 1.5rem;
+}
