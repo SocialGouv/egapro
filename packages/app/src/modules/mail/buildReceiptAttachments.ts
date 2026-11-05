@@ -1,7 +1,12 @@
 import "server-only";
+import {
+	buildCseOpinionRecapData,
+	cseOpinionPdfFilename,
+} from "~/modules/declarationPdf/buildCseOpinionRecapData";
 import { buildJointEvaluationRecapData } from "~/modules/declarationPdf/buildJointEvaluationRecapData";
 import { buildPdfData } from "~/modules/declarationPdf/buildPdfData";
 import { buildRepresentationPdfData } from "~/modules/declarationPdf/buildRepresentationPdfData";
+import { CseOpinionPdfDocument } from "~/modules/declarationPdf/CseOpinionPdfDocument";
 import { DeclarationPdfDocument } from "~/modules/declarationPdf/DeclarationPdfDocument";
 import { JointEvaluationPdfDocument } from "~/modules/declarationPdf/JointEvaluationPdfDocument";
 import { jointEvaluationPdfFilename } from "~/modules/declarationPdf/jointEvaluationPdfFilename";
@@ -32,7 +37,6 @@ export async function buildDeclarationAttachments(
 	siren: string,
 	year: number,
 ): Promise<MailAttachment[]> {
-	// The transmitted recap is structurally empty at first declaration.
 	return [await renderDeclarationPdf(siren, year, "initial")];
 }
 
@@ -67,6 +71,21 @@ export async function buildRepresentationAttachments(
 	return [
 		{
 			filename: representationPdfFilename(siren, data.campaignYear),
+			content: Buffer.from(buffer),
+			contentType: "application/pdf",
+		},
+	];
+}
+
+export async function buildCseOpinionAttachments(
+	siren: string,
+	year: number,
+): Promise<MailAttachment[]> {
+	const data = await buildCseOpinionRecapData(siren, year);
+	const buffer = await renderTaggedPdf(CseOpinionPdfDocument({ data }));
+	return [
+		{
+			filename: cseOpinionPdfFilename(siren, year),
 			content: Buffer.from(buffer),
 			contentType: "application/pdf",
 		},

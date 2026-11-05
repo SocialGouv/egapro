@@ -10,6 +10,8 @@ vi.mock(
 const DECLARATION_YEAR = 2025;
 const COMPANY_NAME = "Société Démo";
 
+const CSE_OPINION_CARD =
+	/récapitulatif de la transmission du ou des avis du CSE/;
 const TRANSMITTED_CARD = /récapitulatif des éléments transmis/;
 const JOINT_EVALUATION_CARD =
 	"Télécharger le récapitulatif de l'évaluation conjointe des rémunérations";
@@ -18,7 +20,7 @@ type Overrides = {
 	companyName?: string;
 	email?: string;
 	hasSecondDeclaration?: boolean;
-	hasTransmittedElements?: boolean;
+	hasSubmittedCseOpinion?: boolean;
 	hasTransmittedJointEvaluation?: boolean;
 };
 
@@ -121,21 +123,21 @@ describe("ConfirmationPage", () => {
 		).toBeInTheDocument();
 	});
 
-	// The PDF is empty unless something was transmitted, hence the condition.
-	it("offers the transmitted elements card when elements were transmitted", () => {
-		renderConfirmation({ hasTransmittedElements: true });
+	it("offers the CSE opinion recap card once a CSE opinion was transmitted", () => {
+		renderConfirmation({ hasSubmittedCseOpinion: true });
 
-		expect(screen.getByText(TRANSMITTED_CARD)).toBeInTheDocument();
-	});
-
-	it("omits the transmitted elements card when nothing was transmitted", () => {
-		renderConfirmation();
-
+		expect(screen.getByText(CSE_OPINION_CARD)).toBeInTheDocument();
 		expect(screen.queryByText(TRANSMITTED_CARD)).not.toBeInTheDocument();
 	});
 
+	it("omits the CSE opinion recap card when no CSE opinion was transmitted", () => {
+		renderConfirmation();
+
+		expect(screen.queryByText(CSE_OPINION_CARD)).not.toBeInTheDocument();
+	});
+
 	it("renders download cards as links with correct hrefs", () => {
-		renderConfirmation({ hasTransmittedElements: true });
+		renderConfirmation({ hasSubmittedCseOpinion: true });
 
 		const declarationLink = screen
 			.getByText(/récapitulatif de la déclaration des indicateurs/)
@@ -146,12 +148,12 @@ describe("ConfirmationPage", () => {
 		);
 		expect(declarationLink).toHaveAttribute("download");
 
-		const transmittedLink = screen.getByText(TRANSMITTED_CARD).closest("a");
-		expect(transmittedLink).toHaveAttribute(
+		const cseOpinionLink = screen.getByText(CSE_OPINION_CARD).closest("a");
+		expect(cseOpinionLink).toHaveAttribute(
 			"href",
-			`/api/transmitted-pdf?year=${DECLARATION_YEAR}`,
+			`/api/cse-opinion-pdf?year=${DECLARATION_YEAR}`,
 		);
-		expect(transmittedLink).toHaveAttribute("download");
+		expect(cseOpinionLink).toHaveAttribute("download");
 	});
 
 	it("renders second declaration download card with correction href", () => {

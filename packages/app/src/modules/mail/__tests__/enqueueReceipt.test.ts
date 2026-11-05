@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
 	buildSecondDeclarationAttachments: vi.fn(),
 	buildJointEvaluationAttachments: vi.fn(),
 	buildRepresentationAttachments: vi.fn(),
+	buildCseOpinionAttachments: vi.fn(),
 	getCampaignDeadlines: vi.fn(),
 	dbResults: [] as unknown[][],
 	limit: vi.fn(),
@@ -30,6 +31,7 @@ vi.mock("../buildReceiptAttachments", () => ({
 	buildSecondDeclarationAttachments: mocks.buildSecondDeclarationAttachments,
 	buildJointEvaluationAttachments: mocks.buildJointEvaluationAttachments,
 	buildRepresentationAttachments: mocks.buildRepresentationAttachments,
+	buildCseOpinionAttachments: mocks.buildCseOpinionAttachments,
 }));
 
 vi.mock("~/server/db/getCampaignDeadlines", () => ({
@@ -103,6 +105,7 @@ describe("enqueueReceipt", () => {
 		mocks.buildSecondDeclarationAttachments.mockResolvedValue([PDF_ATTACHMENT]);
 		mocks.buildJointEvaluationAttachments.mockResolvedValue([PDF_ATTACHMENT]);
 		mocks.buildRepresentationAttachments.mockResolvedValue([PDF_ATTACHMENT]);
+		mocks.buildCseOpinionAttachments.mockResolvedValue([PDF_ATTACHMENT]);
 		mocks.getCampaignDeadlines.mockResolvedValue(CAMPAIGN_DEADLINES);
 		mocks.enqueueNotification.mockResolvedValue({
 			status: "enqueued",
@@ -165,18 +168,52 @@ describe("enqueueReceipt", () => {
 		);
 	});
 
-	it("maps cseOpinion to cse_opinion_receipt without attachments", async () => {
+	it("maps cseOpinion to cse_opinion_receipt with its recap attached", async () => {
 		await enqueueReceipt({ ...baseInput, kind: "cseOpinion" });
 
+		expect(mocks.buildCseOpinionAttachments).toHaveBeenCalledWith(
+			"552100554",
+			2025,
+		);
 		expect(mocks.buildDeclarationAttachments).not.toHaveBeenCalled();
 		expect(mocks.buildSecondDeclarationAttachments).not.toHaveBeenCalled();
 		expect(mocks.enqueueNotification).toHaveBeenCalledWith(
-			expect.objectContaining({ type: "cse_opinion_receipt" }),
+			expect.objectContaining({
+				type: "cse_opinion_receipt",
+				attachments: [PDF_ATTACHMENT],
+			}),
 		);
-		const call = mocks.enqueueNotification.mock.calls[0]?.[0] as {
-			attachments?: unknown;
-		};
-		expect(call.attachments).toBeUndefined();
+	});
+
+	it("attaches the CSE opinion recap to a resent receipt too", async () => {
+		await enqueueReceipt({ ...baseInput, kind: "cseOpinion", isResend: true });
+
+		expect(mocks.enqueueNotification).toHaveBeenCalledWith(
+			expect.objectContaining({
+				type: "cse_opinion_receipt",
+				attachments: [PDF_ATTACHMENT],
+			}),
+		);
+		expect(auditMetadataOf()).toMatchObject({ isResend: true });
+	});
+
+	it("still sends the CSE opinion receipt when its recap cannot be rendered", async () => {
+		mocks.buildCseOpinionAttachments.mockRejectedValue(
+			new Error("pdf rendering failed"),
+		);
+
+		await enqueueReceipt({ ...baseInput, kind: "cseOpinion" });
+
+		expect(mocks.enqueueNotification).toHaveBeenCalledWith(
+			expect.not.objectContaining({ attachments: expect.anything() }),
+		);
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				status: "success",
+				errorMessage: "ATTACHMENT_DROPPED:",
+				metadata: expect.objectContaining({ attachmentsDropped: true }),
+			}),
+		);
 	});
 
 	it("maps jointEvaluation to joint_evaluation_submitted with its recap attached", async () => {

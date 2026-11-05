@@ -2,14 +2,17 @@
 
 import { getReferenceYearFor, isDeclarationSubmitted } from "~/modules/domain";
 import {
+	API_CSE_OPINION_PDF,
 	API_DECLARATION_PDF,
 	API_JOINT_EVALUATION_PDF,
 	API_PREFILL_PDF,
 	API_REPRESENTATION_PDF,
-	API_TRANSMITTED_PDF,
 } from "~/modules/routes";
 import { DownloadCard, formatDocumentSubtitle } from "~/modules/shared";
-import { JOINT_EVALUATION_RECAP_TITLE } from "~/modules/shared/demarcheDocuments";
+import {
+	CSE_OPINION_RECAP_TITLE,
+	JOINT_EVALUATION_RECAP_TITLE,
+} from "~/modules/shared/demarcheDocuments";
 import styles from "./DeclarationProcessPanel.module.scss";
 import type { DeclarationItem } from "./types";
 
@@ -82,15 +85,11 @@ function getRemunerationResources(
 		});
 	}
 
-	if (
-		declaration.hasSubmittedCseOpinion ||
-		declaration.hasJointEvaluationFile ||
-		declaration.hasSubmittedFormalNoticeJointEvaluation
-	) {
+	if (declaration.hasSubmittedCseOpinion) {
 		resources.push({
-			title: "Télécharger le récapitulatif des éléments transmis",
+			title: CSE_OPINION_RECAP_TITLE,
 			subtitle,
-			href: `${API_TRANSMITTED_PDF}?year=${declaration.year}`,
+			href: `${API_CSE_OPINION_PDF}?year=${declaration.year}`,
 		});
 	}
 

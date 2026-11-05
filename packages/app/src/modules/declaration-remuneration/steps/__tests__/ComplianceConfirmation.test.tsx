@@ -165,35 +165,45 @@ describe("ComplianceConfirmation", () => {
 		).not.toBeInTheDocument();
 	});
 
-	// Offered when the PDF has content — the rule DocumentsPanel already applies.
-	describe("transmitted elements card", () => {
-		function transmittedCard() {
+	describe("CSE opinion recap card", () => {
+		function cseOpinionCard() {
 			return screen.queryByRole("link", {
-				name: /Télécharger le récapitulatif des éléments transmis/,
+				name: /Télécharger le récapitulatif de la transmission du ou des avis du CSE/,
 			});
 		}
 
-		it.each([
-			{ hasSubmittedCseOpinion: true, hasSubmittedJointEvaluation: false },
-			{ hasSubmittedCseOpinion: false, hasSubmittedJointEvaluation: true },
-			{ hasSubmittedCseOpinion: true, hasSubmittedJointEvaluation: true },
-		])("offers it once something was transmitted (cseOpinion: $hasSubmittedCseOpinion, jointEvaluation: $hasSubmittedJointEvaluation)", async (submissions) => {
-			await renderConfirmation(submissions);
+		it("offers it once a CSE opinion was transmitted", async () => {
+			await renderConfirmation({ hasSubmittedCseOpinion: true });
 
-			expect(transmittedCard()).toHaveAttribute(
+			expect(cseOpinionCard()).toHaveAttribute(
 				"href",
-				`/api/transmitted-pdf?year=${DECLARATION_YEAR}`,
+				`/api/cse-opinion-pdf?year=${DECLARATION_YEAR}`,
 			);
-			expect(transmittedCard()).toHaveAttribute("download");
+			expect(cseOpinionCard()).toHaveAttribute("download");
 		});
 
-		it("omits it when nothing was transmitted", async () => {
+		it("omits it when no CSE opinion was transmitted, even with a joint evaluation", async () => {
 			await renderConfirmation({
 				hasSubmittedCseOpinion: false,
-				hasSubmittedJointEvaluation: false,
+				hasSubmittedJointEvaluation: true,
+				jointEvaluationTransmitted: true,
 			});
 
-			expect(transmittedCard()).not.toBeInTheDocument();
+			expect(cseOpinionCard()).not.toBeInTheDocument();
+		});
+
+		it("never offers the retired transmitted elements recap", async () => {
+			await renderConfirmation({
+				hasSubmittedCseOpinion: true,
+				hasSubmittedJointEvaluation: true,
+				jointEvaluationTransmitted: true,
+			});
+
+			expect(
+				screen.queryByRole("link", {
+					name: /récapitulatif des éléments transmis/,
+				}),
+			).not.toBeInTheDocument();
 		});
 	});
 

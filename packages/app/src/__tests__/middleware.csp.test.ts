@@ -60,8 +60,8 @@ describe("content security policy", () => {
 		"/api/v1/filesystem",
 		"/api/declaration-pdf",
 		"/api/representation-pdf",
-		"/api/transmitted-pdf",
 		"/api/prefill-pdf",
+		"/api/cse-opinion-pdf",
 	];
 
 	it.each(
