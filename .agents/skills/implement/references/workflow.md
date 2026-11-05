@@ -4,13 +4,7 @@
 
 ## Où est le spec
 
-| Type d'issue | Spec |
-|---|---|
-| Sous-issue d'un epic (Feature) | le **body**, au format [`ticket-spec-format.md`](../../analyze/references/ticket-spec-format.md) |
-| Task | le **dernier** commentaire `## Analyse architecte` (le body = la demande originale, intacte) |
-| Bug | le **dernier** commentaire `## Analyse du bug` (root cause + vérification one-shot à exécuter) |
-
-Spec absent ou non conforme → **STOP**. Commente le ticket en listant les manques, ne bouge pas le board, propose `/analyze <N>`. **Ne jamais improviser un spec.**
+Table : étape 1 du [`SKILL.md`](../SKILL.md). Task ou Bug : c'est le **dernier** commentaire d'analyse qui fait foi (le body reste la demande originale, intacte). Spec absent ou non conforme → **STOP** : commente le ticket en listant les manques, ne bouge pas le board, propose `/analyze <N>`. **Ne jamais improviser un spec.**
 
 La liste « Fichiers impactés » du spec est un **point de départ**, pas un périmètre fermé : si tu découvres d'autres fichiers nécessaires, touche-les — mais tout ce qui sort du sujet du ticket (refacto opportuniste, fix voisin) va dans un autre ticket.
 
@@ -30,13 +24,7 @@ Une commande qui attend une réponse sur un TTY peut bloquer indéfiniment (vu :
 
 ## Tests vitest — écrits pendant, pas après
 
-Selon [`conventions/testing.md`](conventions/testing.md) :
-
-- nominal + cas d'erreur + edge cases ; **100 % de couverture** sur les fichiers de logique créés ou modifiés ;
-- mocks centralisés de `src/test/setup.ts`, **jamais redupliqués** ;
-- `__tests__/` à côté du module testé, jamais dans `src/app/` ;
-- tester le comportement observable, pas l'implémentation ;
-- `*.integration.test.ts` (`pnpm test:integration`, Docker) **dès que** le diff touche le DB-layer ou du SQL non trivial : les TU mockent le driver et ratent ses bugs.
+Règles (couverture, mocks de `src/test/setup.ts`, emplacement, tests d'intégration dès que le DB-layer bouge) → [`conventions/testing.md`](conventions/testing.md).
 
 ### Triage d'un test rouge — décision écrite
 
@@ -47,34 +35,16 @@ Pour **chaque** test en échec, tranche explicitement et note-le (message de com
 
 Méthode : croise l'assertion qui casse, la section `## Scénarios de test` du spec et ton diff. **Dans le doute → régression.** Ne **jamais** retirer une assertion, ajouter `.skip` / `.todo` / `.only`, ni relâcher une attente : la revue `gates` le vérifie au diff et c'est un échec bloquant.
 
-## Bug : deux preuves dues
+## Bug et UI
 
-Détail → [`bug-fix.md`](bug-fix.md). En bref :
-
-1. **Vérification one-shot** (toujours) : exécute la procédure « Vérification du correctif (one-shot) » de l'analyse, relève la valeur **avant** (base, sans fix) et **après**. Consigne `<ce qui a été fait>` → `<avant>` / `<après>` dans le body de PR, section « Vérification ». Procédure absente ou inexécutable → écris-le explicitement, ne l'invente pas.
-2. **Revert-verify** du test de non-régression :
-   ```bash
-   git diff <base> -- <fichiers-source> > /tmp/fix.patch
-   git apply -R /tmp/fix.patch && pnpm --filter app test <le-test>   # doit être RED
-   git apply /tmp/fix.patch    && pnpm --filter app test <le-test>   # doit être GREEN
-   ```
-   Vert sans le fix → le test ne reproduit pas le bug : retravaille-le.
-
-## UI : construire fidèle au Figma
-
-La **vérification** est faite en revue (`/review gates`, checklist [`design-fidelity.md`](../../review/references/design-fidelity.md)) — tu ne te notes pas toi-même. Ta part, c'est la **construction** selon [`conventions/figma.md`](conventions/figma.md) :
-
-- pour chaque URL de la section `## Référence Figma`, `get_design_context` (code de référence + tokens + screenshot) ; `get_metadata` pour cartographier un gros frame, `get_variable_defs` pour les tokens par nom ;
-- le code renvoyé est du React + Tailwind à **traduire** en DSFR, jamais à coller : token → classe ou `var(--…)` DSFR, `fontSize` → `fr-text--xs/sm/lg/xl`, `fontWeight ≥ 600` → `<strong>`, `itemSpacing` → `fr-m{b,t,r,l}-Xw` ;
-- `get_screenshot` en spot-check quand la structure est ambiguë (gras cellule par cellule dans un tableau : l'API ne rend que le style dominant d'un node).
-
-Ticket UI sans `## Référence Figma` → signale-le sur le ticket ; la revue rendra la fidélité « non vérifiable », jamais PASS silencieux.
+- **Bug** : deux preuves dues, vérification one-shot avant / après et revert-verify du test → [`bug-fix.md`](bug-fix.md).
+- **UI** : construire selon [`conventions/figma.md`](conventions/figma.md) ; la fidélité est vérifiée en revue (`design-fidelity.md`), tu ne te notes pas toi-même. Ticket UI sans `## Référence Figma` → signale-le sur le ticket ; la revue rendra la fidélité « non vérifiable », jamais PASS silencieux.
 
 ## PR
 
 - **Une branche = un ticket = une PR.** Pas de bundle.
 - `gh pr create --draft --base <base>` où `<base>` = `alpha` (Task/Bug standalone) ou `epic/<N>` (sous-ticket).
-- Body : **`Closes #<N>` en première ligne** (sinon `force_pr_issue_link.sh` échoue), puis résumé, plan de test, section « Tests » (triage), section « Vérification » (bugs), screenshots.
+- Body : gabarit de l'étape 9 du SKILL ; **`Closes #<N>` en première ligne**, sinon `force_pr_issue_link.sh` échoue.
 - **Screenshots obligatoires** pour toute modif UI (desktop + mobile), pris sur le dev server du worktree avec de la **donnée seedée fictive uniquement** — vérifie l'écran avant capture (dépôt public, voir `AGENTS.md` § Hygiène git).
 - Juste après `gh pr create` : `bash scripts/orchestration/force_pr_issue_link.sh <PR>` (une seule fois — chaque flip de base relance ~2 runs CI). Échec « Closes keyword missing » → `gh pr edit <PR> --body-file /tmp/pr-<N>.md` avec `Closes #<N>` en première ligne, puis relance le script. Sur une base `epic/<N>`, `Closes #N` ne ferme le ticket qu'au merge de la PR finale `epic/<N> → alpha`.
 

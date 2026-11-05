@@ -43,7 +43,7 @@ Gestionnaire de paquets : **pnpm workspaces** (`pnpm@10`).
 | `/implement <issue#>` | une issue analysée | worktree, code + tests, `pnpm verify`, `/review gates`, E2E, PR draft |
 | `/review [gates]` · `/review <PR#>` | avant de déclarer une tâche terminée · une PR a des commentaires | gates qualité sur le diff · traitement des threads non résolus |
 
-Les skills vivent dans `.agents/skills/<nom>/`, l'emplacement standard lu par Codex et OpenCode ; Claude Code y accède par le symlink `.claude/skills` ; chacun charge ses références à la demande. `review-a11y` et `ultra11y` y sont aussi, en symlinks vers la devDependency (lancer `pnpm install` s'ils sont introuvables). Pas d'orchestrateur en tâche de fond : pour paralléliser un epic, ouvre une session par sous-ticket.
+Les skills vivent dans `.agents/skills/<nom>/`, l'emplacement standard lu par Codex et OpenCode ; Claude Code y accède par le symlink `.claude/skills` ; chacun charge ses références à la demande. `review-a11y` et `ultra11y` y sont aussi, en symlinks vers la devDependency (lancer `pnpm install` s'ils sont introuvables). Pas d'orchestrateur en tâche de fond : pour paralléliser un epic, ouvre une session par sous-ticket. Sous-agents : seulement sur demande explicite, `--subagents` ([`subagents.md`](./.agents/skills/review/references/subagents.md) : checklists de revue et exploration du code, jamais l'écriture).
 
 En début de session sur une branche (hors `alpha`) qui a une PR ouverte : si elle porte des threads de revue non résolus, signale-le et propose `/review <PR#>`.
 
@@ -155,75 +155,11 @@ Données d'exemple fictives : `SIREN 123456789`, `email@example.fr`, `Société 
 
 ---
 
-## Même config pour Claude Code, OpenCode et Codex
+## Outils : MCP, scripts, CI
 
-| | Claude Code | OpenCode | Codex | Source |
-|---|---|---|---|---|
-| Instructions | `CLAUDE.md` → `@AGENTS.md` | `AGENTS.md` + `instructions` d'`opencode.json` | `AGENTS.md` | `AGENTS.md` |
-| Skills | `.claude/skills` (symlink) | `.agents/skills/` | `.agents/skills/` | `.agents/skills/` |
-| MCP | `.mcp.json` | `opencode.json` (`mcp`, généré) | `.codex/config.toml` (généré) | `.mcp.json` |
-| Commandes refusées / à confirmer | `.claude/settings.json` (`permissions`, généré) | `opencode.json` (`permission`, généré) | `.codex/rules/egapro.rules` (généré) | `POLICY` de `scripts/ai/sync-agent-config.mjs` |
-| Gate ultra11y côté agent | hook de `.claude/settings.json` | plugin d'`opencode.json` | portée utilisateur : `ultra11y install --codex` (`pnpm install` le rappelle) | devDependency |
-| git hooks, `pnpm verify`, CI | identiques | identiques | identiques | `lefthook.yml`, `scripts/quality/` |
+- **MCP** (`next-devtools`, `dsfr`, `figma`, `playwright`, `ultra11y`) : **ne devine jamais de mémoire** une API Next.js, une classe DSFR, une valeur Figma ou un critère RGAA — demande au serveur.
+- **Config générée** : `.mcp.json` et la `POLICY` de `scripts/ai/sync-agent-config.mjs` sont les sources ; `node scripts/ai/sync-agent-config.mjs` régénère les blocs `mcp` / `permission` d'`opencode.json`, les `permissions` de `.claude/settings.json` et `.codex/`. Jamais à la main : la CI refuse une copie désynchronisée.
+- **Scripts** : `pnpm verify` (le verdict « prêt » ; instantané si ce code exact est déjà vert, `--force` pour rejouer), `pnpm check:patterns`, `pnpm dev:app` (port 3000), `pnpm test:e2e` (exige un dev server). Le reste : `package.json`.
+- **CI** : un check rouge → lis son workflow dans `.github/workflows/`. Bloquants sur PR : `ci.yaml`, `a11y.yaml` (`a11y-gate`), `a11y-lite.yaml`, `e2e.yaml` (check requis « Test e2e »).
 
-Ce qui reste propre à chaque développeur (config utilisateur, plugins perso, modèle choisi) ne change rien aux trois dernières lignes : c'est là que se joue la barrière.
-
----
-
-## Serveurs MCP (source unique : `.mcp.json`)
-
-| Serveur | Quand | Outils clés |
-|---|---|---|
-| `next-devtools` | debug, erreurs runtime, routes, doc Next.js | `nextjs_index`, `nextjs_call`, `nextjs_docs`, `browser_eval` |
-| `dsfr` | avant d'écrire du HTML DSFR | `get_component_doc`, `search_components`, `get_color_tokens` |
-| `figma` | implémentation depuis un design | `get_design_context`, `get_metadata`, `get_variable_defs`, `get_screenshot` |
-| `playwright` | parcours réel dans le navigateur (checks fonctionnel et design) | `browser_navigate`, `browser_snapshot`, `browser_take_screenshot` |
-| `ultra11y` | critères RGAA, audit | `criteria`, `audit` |
-
-Le point commun : **ne jamais deviner de mémoire** une API Next.js, une classe DSFR, une valeur Figma ou un critère RGAA. On ajoute un serveur dans `.mcp.json` (racine, lu tel quel par Claude Code) puis `node scripts/ai/sync-agent-config.mjs` : il régénère le bloc `mcp` d'`opencode.json` et `.codex/config.toml`, qui n'acceptent pas ce format. N'édite jamais ces parties générées à la main, la CI refuse une copie désynchronisée.
-
----
-
-## Scripts racine
-
-```bash
-pnpm verify               # TOUS les gates locaux — le verdict « prêt » (cf. Garde-fous) ; instantané si ce code exact est déjà vert, --force pour rejouer
-pnpm check:patterns       # interdits mécaniques sur le diff
-pnpm dev:app              # app en dev (port 3000)
-pnpm build                # build de tous les packages
-pnpm lint:check           # lint (CI)
-pnpm format:check         # format (CI)
-pnpm typecheck            # types TypeScript
-pnpm test                 # tests unitaires
-pnpm test:e2e             # Playwright (exige le dev server sur le port 3000)
-pnpm test:lighthouse      # audit Lighthouse (exige le dev server sur le port 3000)
-pnpm db:migrate           # migrations Drizzle
-pnpm db:studio            # Drizzle Studio
-```
-
-> Lighthouse rapporte un score d'accessibilité en **warning**, pas en gate : l'accessibilité est tranchée par ultra11y, et deux seuils concurrents sur un même sujet donnent deux verdicts à réconcilier à la main.
-
----
-
-## CI
-
-| Fichier | Déclencheur | Rôle |
-|---|---|---|
-| `ci.yaml` | chaque push | build · lint · format · patterns · typecheck · tests · cohérence des versions ultra11y |
-| `a11y.yaml` | PR, cron lundi 04:00 UTC, manuel | ultra11y. Sur **PR** : `a11y-gate` seul — audit statique de tout `src`, **bloquant**. Sur **cron** ou **manuel** : chaîne complète (`a11y-pages` + `a11y-bundle`), non bloquante et payante |
-| `a11y-lite.yaml` | PR → `alpha`, push `alpha` | ultra11y mode lite. Sur **PR** : capture des pages que le diff peut changer, moteur seul, **bloquant** sur un constat de rendu nouveau ou une route non échantillonnée. Sur **push `alpha`** : capture tout et écrit la baseline |
-| `e2e.yaml` | PR → `alpha`, manuel | suite Playwright complète **et** les coordonnées de la grille de recette, en shards parallèles ; le check requis « Test e2e » est le job agrégateur |
-| `e2e-grille.yaml` | manuel | grille de recette seule |
-| `lighthouse.yaml` | `deployment_status` (success, hors env `build-*`) | audit Lighthouse sur l'URL déployée |
-| `review-auto.yaml` | push sur toute branche sauf `master` et `**-persist` | déploiement des review apps |
-| `deactivate.yaml` | PR closed, `delete` de branche | destruction de la review app |
-| `preproduction.yaml` | push `beta` | déploiement preprod |
-| `production.yaml` | push tag `v*` | déploiement prod |
-| `promote-test-env.yaml` | manuel (`release`, `target`) | déploie une release sur un env de test persistant (`rgaa` / `perf`) |
-| `release.yml` | manuel (branche `beta`) | semantic-release |
-| `release-alpha.yaml` | manuel (branche `alpha`) | semantic-release — prerelease `-alpha.N` |
-| `release-changelog.yaml` | `release: published`, manuel | changelog FR généré, injecté dans le corps de la release |
-| `db-schema.yaml` | push `alpha`/`master` sur le schéma, manuel | publie la doc de schéma DB sur le wiki |
-| `sync-docs-to-wiki.yaml` | push `alpha`/`master` sur `docs/**`, manuel | miroir `docs/` → wiki |
-| `ticket-end-date.yaml` | PR closed | estampille « End date » sur le board |
-| `claude-question.yml` | issue labellisée `question` | réponse automatique |
+Tableaux complets (même config par outil, CI, scripts) : [README.md](./README.md).

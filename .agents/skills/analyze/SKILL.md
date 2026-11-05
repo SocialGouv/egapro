@@ -1,7 +1,7 @@
 ---
 name: analyze
 description: "Phase conception : transforme une demande ou une issue GitHub en spec exécutable avant tout code. Détecte le mode selon le type d'issue — epic (Feature : besoin PO puis découpage en sous-issues), task (commentaire ## Analyse architecte), bug (reproduction + cause racine, commentaire ## Analyse du bug), rework (tickets de fix en fin d'epic). Ne modifie jamais le code. Usage: /analyze [<issue#>] [<description>]"
-argument-hint: "[<issue#>] [<description>]"
+argument-hint: "[<issue#>] [<description>] [--subagents]"
 ---
 
 # /analyze
@@ -28,6 +28,7 @@ Phase **conception**. Tu produis un spec que `/implement` exécutera. **Tu ne mo
 | Avant de rédiger un spec | [references/ticket-spec-format.md](references/ticket-spec-format.md) |
 | Avant de poser une taille | [references/complexity-estimation.md](references/complexity-estimation.md) |
 | Avant toute opération GitHub (issue, type, parent, board) | [references/board.md](references/board.md) |
+| L'argument contient `--subagents` | [subagents.md](../review/references/subagents.md) |
 
 **Ouvre la référence du mode avant d'agir** : ce fichier ne dit que l'enchaînement, la méthode est dans la référence.
 
@@ -35,7 +36,7 @@ Phase **conception**. Tu produis un spec que `/implement` exécutera. **Tu ne mo
 
 ## Étape 0 — Lire l'argument
 
-Le premier mot de l'argument est un numéro (`123`, `#123`) ou une URL `https://github.com/SocialGouv/egapro/issues/123` → `N`. Le reste est du contexte additionnel.
+Le premier mot de l'argument est un numéro (`123`, `#123`) ou une URL `https://github.com/SocialGouv/egapro/issues/123` → `N`. Le reste est du contexte additionnel. `--subagents` n'importe où : retire-le, et tu peux déléguer l'exploration du code selon [subagents.md](../review/references/subagents.md) (jamais les échanges avec l'utilisateur ni les écritures GitHub). Sans lui, aucun sous-agent.
 
 - **Numéro fourni** :
   ```bash
@@ -85,7 +86,7 @@ Coche chaque ligne, sinon reprends l'étape concernée :
 - [ ] Le commentaire d'analyse commence exactement par l'en-tête attendu — `/implement` le cherche tel quel : `## Analyse PO` (epic), `## Analyse architecte` (task), `## Analyse du bug` (bug).
 - [ ] Le marqueur `[Validation utilisateur] …` est posté.
 - [ ] Chaque **feuille** (Task, Bug, sous-issue, ticket de fix) a sa taille sur le board (`set_ticket_size.sh`) **et** une section `## Complexité` de même taille. L'epic n'est **pas** sizé.
-- [ ] Label `complexe` posé si > 5 fichiers ou refacto multi-modules.
+- [ ] Label `complexe` posé selon le critère de [ticket-spec-format.md](references/ticket-spec-format.md) § Règles de rédaction.
 - [ ] Mode epic : chaque sous-issue a le type Task, l'epic pour parent, le statut To Do, et ses `## Depends on`, sans cycle.
 - [ ] Aucun secret, PII ou nom d'infra interne dans ce qui a été posté.
 

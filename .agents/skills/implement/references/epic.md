@@ -24,7 +24,7 @@ Toutes les PR de sous-ticket ciblent `epic/<N>`. La PR finale `epic/<N> → alph
    ```
    `totalCount = 0` ou pas d'analyse PO → **STOP**, propose `/analyze <N>`.
 2. **Branche d'intégration** (idempotent) : `bash scripts/orchestration/ensure_epic_branch.sh <N>`.
-3. **Ordre** — lis le body de chaque sous-issue ouverte, section `## Depends on` (format → [`ticket-spec-format.md`](../../analyze/references/ticket-spec-format.md)). Un ticket est **prêt** quand toutes ses dépendances sont mergées dans `epic/<N>` (leur PR est `MERGED`). Ignore les tickets portant le label `dispatch=escalate` : ils attendent un humain.
+3. **Ordre** — lis le body de chaque sous-issue ouverte, section `## Depends on` (format → [`ticket-spec-format.md`](../../analyze/references/ticket-spec-format.md)). Un ticket est **prêt** quand toutes ses dépendances sont mergées dans `epic/<N>` (leur PR est `MERGED`).
 4. **Présenter le plan** à l'utilisateur : la liste des tickets prêts maintenant, puis les vagues suivantes. Propose : « je traite <T1> ici ; pour paralléliser, ouvre une session par ticket prêt et lance `/implement <T>` ». Attends sa réponse avant de démarrer.
 5. **Pour chaque ticket traité dans cette session** : flux standard du SKILL (étapes 1 à 11) avec **base = `origin/epic/<N>`**. Une fois la PR ready et tous les checks verts :
    ```bash
@@ -36,7 +36,7 @@ Toutes les PR de sous-ticket ciblent `epic/<N>`. La PR finale `epic/<N> → alph
    | 2 | conflit avec `epic/<N>` (le script a commenté et remis le ticket en To Do) | `git fetch origin && git rebase origin/epic/<N>`, résoudre, `git push --force-with-lease`, revérifier, relancer le script |
    | 3 | GitHub calcule encore la mergeabilité | attendre 30 s, relancer |
    | 1 | erreur dure (base ≠ `epic/<N>`, droits) | STOP, rapporter |
-6. **Garder `epic/<N>` à jour** quand `alpha` a avancé (entre deux tickets, ou avant la PR finale) : `bash scripts/orchestration/rebase_epic_branch.sh <N>`. Exit 2 = conflit : le script a commenté l'epic et posé `dispatch=escalate` → **STOP**, rends la main à l'utilisateur.
+6. **Garder `epic/<N>` à jour** quand `alpha` a avancé (entre deux tickets, ou avant la PR finale) : `bash scripts/orchestration/rebase_epic_branch.sh <N>`. Exit 2 = conflit : le script a commenté l'epic → **STOP**, rends la main à l'utilisateur.
 7. **Quand tous les sous-tickets sont mergés** — E2E sur la feature complète :
    - worktree sur `epic/<N>` à jour des squash-merges : `git fetch origin`, `git worktree add ../egapro-epic-<N> epic/<N>`, puis dans le worktree `git pull --ff-only origin epic/<N>` (une branche `epic/<N>` locale d'une session précédente est en retard) ; `bash scripts/setup-worktree.sh <index-libre>` ;
    - déroulé de [`e2e.md`](e2e.md) avec **base = `origin/alpha`** (le diff = toute la feature) ;

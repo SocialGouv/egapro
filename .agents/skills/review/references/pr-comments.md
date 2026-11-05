@@ -70,16 +70,7 @@ Réponses en français, courtes, sans formule IA, **aucune mention d'outil ou de
 
 ## 4. Filtre anti-secret — obligatoire avant tout post
 
-Passer **chaque** brouillon (et tout `gh pr comment` / `gh issue comment`) au filtre :
-
-```bash
-echo "$BODY" | grep -E '(ghp_|ghs_|gho_|ghu_|github_pat_|sk-ant-|sk-proj-|AKIA[A-Z0-9]{16}|eyJ[A-Za-z0-9_=-]{20,}\.|postgres://[^@]+:[^@]+@|Bearer\s+[A-Za-z0-9._-]{20,})' && {
-    echo "STOP: secret-shaped string detected in payload, refusing to post" >&2
-    return 1
-}
-```
-
-Puis relire à la main : ni PII (email, nom, SIREN réel → `<email>`, `<SIREN>`), ni credentials de test, ni infra interne (namespace K8s, pods, IP, dashboards). Règle complète → `AGENTS.md` § Hygiène git.
+Passer **chaque** brouillon (et tout `gh pr comment` / `gh issue comment`) au filtre anti-secret d'`AGENTS.md` § Hygiène git, puis relire à la main : ni PII, ni credentials de test, ni infra interne.
 
 **Si c'est un reviewer qui a leaké un secret** dans son commentaire : avertir l'utilisateur immédiatement — la **rotation** à la source est obligatoire, l'édition du commentaire ne suffit pas.
 
@@ -111,9 +102,4 @@ done
 
 Chaque id restant doit figurer dans la liste « en attente de décision utilisateur ». Sinon : un thread a été oublié → le traiter.
 
-## Règles
-
-- Corrections sur la **branche de travail** existante — jamais une nouvelle branche.
-- Commits signés, jamais `--no-verify` / `--no-gpg-sign`. **Pas de force-push** sans accord explicite ; exception à demander : un `git rebase` propre sur `epic/<N>` si la branche d'intégration a bougé.
-- **Aucun changement de statut sur le board**, **aucun merge** : le merge reste humain.
-- CI : `gh pr checks <PR> --watch` jusqu'à `SUCCESS` / `SKIPPED` / `NEUTRAL` ; rouge → corriger, pousser, reboucler.
+Force-push : jamais sans accord explicite ; seule exception à demander, un `git rebase` propre sur `epic/<N>` si la branche d'intégration a bougé.

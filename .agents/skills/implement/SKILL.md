@@ -1,7 +1,7 @@
 ---
 name: implement
 description: "Phase exécution. Implémente un ticket analysé de bout en bout : worktree + branche liée, code + tests vitest, pnpm verify, revue gates, E2E, PR draft, CI et bots. Feature → epic ticket par ticket (une session par sous-ticket pour paralléliser). Usage: /implement <issue#>"
-argument-hint: "<issue#>"
+argument-hint: "<issue#> [--subagents]"
 ---
 
 # /implement
@@ -17,27 +17,21 @@ Tu implémentes **un** ticket déjà analysé, jusqu'à une PR prête. Suis les 
 | au premier ticket de la session | [`references/workflow.md`](references/workflow.md) — en entier |
 | l'issue est une `Feature` | [`references/epic.md`](references/epic.md) — et suis-le à la place de ce fichier |
 | l'issue est un `Bug` | [`references/bug-fix.md`](references/bug-fix.md) |
-| tu touches un `.ts` / `.tsx` | [`conventions/code-quality.md`](references/conventions/code-quality.md) |
-| tu touches un `.tsx` | [`conventions/react-components.md`](references/conventions/react-components.md) |
-| tu touches un `.tsx` / `.scss` | [`conventions/styling-dsfr.md`](references/conventions/styling-dsfr.md) |
-| le ticket a une `## Référence Figma` | [`conventions/figma.md`](references/conventions/figma.md) |
-| `src/server/api/**` | [`conventions/trpc-api.md`](references/conventions/trpc-api.md) |
-| `src/server/**` (DB, transactions) | [`conventions/database-drizzle.md`](references/conventions/database-drizzle.md) |
-| mutation, query sensible, route handler, auth | [`conventions/audit-logging.md`](references/conventions/audit-logging.md) |
-| parcours de déclaration, Mon espace, `src/server/rules/**` | [`conventions/demarche-state-machine.md`](references/conventions/demarche-state-machine.md) |
+| tu touches du code | la convention du périmètre, table « Règles de code : où les lire » d'`AGENTS.md` (dossier [`references/conventions/`](references/conventions/)) |
 | tu écris un test vitest | [`conventions/testing.md`](references/conventions/testing.md) |
 | étape E2E | [`references/e2e.md`](references/e2e.md) |
 | tu bouges le board | [`board.md`](../analyze/references/board.md) |
 
 ## Étapes
 
-**0. Lire l'issue.** `$ARGUMENTS` = un numéro (`123`, `#123` ou URL). Vide → demande lequel.
+**0. Lire l'issue.** `$ARGUMENTS` = un numéro (`123`, `#123` ou URL), éventuellement suivi de `--subagents` (transmis à l'étape 6, voir [`subagents.md`](../review/references/subagents.md)). Vide → demande lequel.
 ```bash
 gh issue view <N> --json number,title,body,state,issueType,labels,comments
 gh api graphql -f query='{ repository(owner:"SocialGouv",name:"egapro"){ issue(number:<N>){ parent{ number issueType{name} } } } }'
 ```
 - `state != OPEN` → demande confirmation avant de continuer.
 - `issueType = Feature` → **lis [`references/epic.md`](references/epic.md) et suis-le**. Fin de ce fichier pour toi.
+- Label `complexe` → écris en tête de session : « ticket complexe : modèle frontier conseillé, et `--subagents` pour la revue ». Utilisateur présent → attends sa réponse ; sinon continue.
 - **Base** : parent de type `Feature` → `origin/epic/<parent>` ; sinon → `origin/alpha`.
 
 **1. Vérifier l'analyse.** Le spec doit exister :
@@ -72,7 +66,7 @@ Ensuite, **toutes** les commandes se lancent depuis ce worktree.
 - Rouge → corrige **la cause**, relance. Boucle jusqu'au vert. `format` / `lint` rouges : `pnpm check:write` (dans `packages/app`) corrige d'un coup.
 - Interdit : `--no-verify`, `biome-ignore`, `@ts-ignore`, `.skip`, assertion supprimée ou relâchée.
 
-**6. Revue `gates`.** Exécute le skill review en mode gates ([`../review/SKILL.md`](../review/SKILL.md)) sur ton diff. Chaque checklist en `NEEDS WORK` → corrige → repasse `pnpm verify` → relance la revue. Continue jusqu'à **PASS sur toutes les checklists applicables**. Si ton outil sait lancer des tâches en parallèle, les checklists peuvent tourner en parallèle.
+**6. Revue `gates`.** Exécute le skill review en mode gates ([`../review/SKILL.md`](../review/SKILL.md)) sur ton diff. Chaque checklist en `NEEDS WORK` → corrige → repasse `pnpm verify` → relance la revue. Continue jusqu'à **PASS sur toutes les checklists applicables**. Lancé avec `--subagents` : lance la revue avec `--subagents` aussi.
 
 **7. Commit + push.** Messages conventionnels : `feat(<scope>): … (#<N>)`, `fix(<scope>): … (#<N>)`, `test(<scope>): …`. Puis `git push -u origin HEAD`.
 

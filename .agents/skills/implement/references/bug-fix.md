@@ -30,9 +30,14 @@ if (value == null) return "default";
 // CORRECT — corriger la fonction en amont qui propage le undefined
 ```
 
-**3. Exécuter la vérification one-shot** décrite dans `## Analyse du bug` : valeur **avant** (base, sans fix) et **après**. Pour un bug visuel ou CSS, la preuve est une **mesure DOM** (`getBoundingClientRect`, `getComputedStyle`, `Range.getClientRects`), jamais un jugement à l'œil.
+**3. Exécuter la vérification one-shot** décrite dans `## Analyse du bug` : valeur **avant** (base, sans fix) et **après**. Procédure absente ou inexécutable → écris-le explicitement, ne l'invente pas. Pour un bug visuel ou CSS, la preuve est une **mesure DOM** (`getBoundingClientRect`, `getComputedStyle`, `Range.getClientRects`), jamais un jugement à l'œil.
 
-**4. Prouver le test par revert-verify.** Reverse-appliquer le diff **source** (`git apply -R`) → le test doit être **RED** ; ré-appliquer → **GREEN**. Un test qui passe sans le fix ne reproduit pas le bug : le retravailler. Commandes → [`workflow.md`](workflow.md) § Bug.
+**4. Prouver le test par revert-verify.** Reverse-appliquer le diff **source** (`git apply -R`) → le test doit être **RED** ; ré-appliquer → **GREEN**. Un test qui passe sans le fix ne reproduit pas le bug : le retravailler.
+   ```bash
+   git diff <base> -- <fichiers-source> > /tmp/fix.patch
+   git apply -R /tmp/fix.patch && pnpm --filter app test <le-test>   # doit être RED
+   git apply /tmp/fix.patch    && pnpm --filter app test <le-test>   # doit être GREEN
+   ```
 
 **5. Consigner.** Body de la PR, section « Vérification » : ce qui a été fait → valeur **avant** / valeur **après**, plus la preuve du revert-verify. Sans cette trace, personne ne distingue un fix vérifié d'un fix plausible.
 

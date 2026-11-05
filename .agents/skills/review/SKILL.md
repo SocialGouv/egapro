@@ -1,7 +1,7 @@
 ---
 name: review
 description: "Revue de code, deux modes. `gates` (défaut sans argument) : passe les contrôles qualité sur le diff courant — pnpm verify, puis les checklists structure, sécurité, accessibilité (ultra11y), fidélité Figma, fonctionnel — et rend un verdict, sans rien modifier. `pr` : traite les threads de revue non résolus d'une PR (humains + bots), corrige, pousse, prépare les réponses et les poste après validation. Usage: /review [gates] | /review <PR#|issue#>"
-argument-hint: "[gates] | <PR#|issue#>"
+argument-hint: "[gates] [--subagents] | <PR#|issue#>"
 ---
 
 # /review
@@ -14,6 +14,8 @@ Deux modes. Choisis-le à l'étape 0, puis suis **uniquement** la section du mod
 | numéro ou URL de PR / d'issue | **pr** — traiter les commentaires de revue |
 | vide, mais la branche courante a une PR avec des threads non résolus | demander : « gates ou pr ? » |
 
+`--subagents` (n'importe où dans l'argument, mode gates seulement) : retire-le avant de choisir le mode, puis lis [references/subagents.md](references/subagents.md). Sans lui, aucun sous-agent.
+
 ## Quand → lis
 
 | Quand | Lis |
@@ -21,9 +23,10 @@ Deux modes. Choisis-le à l'étape 0, puis suis **uniquement** la section du mod
 | un `.ts` / `.tsx` / un test est dans le diff | [references/structural.md](references/structural.md) |
 | le diff touche `src/server/**`, `routers/`, tRPC, `src/app/api/**`, l'auth | [references/security.md](references/security.md) |
 | un `.tsx` est dans le diff | [references/a11y.md](references/a11y.md) |
-| un `.tsx` / `.scss` est dans le diff **et** le ticket a une `## Référence Figma` (ou un bug visuel) **et** un dev server tourne | [references/design-fidelity.md](references/design-fidelity.md) |
-| le ticket a des scénarios PO ou une « Vérification du correctif » **et** un dev server tourne | [references/functional.md](references/functional.md) |
+| un `.tsx` / `.scss` est dans le diff | [references/design-fidelity.md](references/design-fidelity.md) |
+| le diff change le comportement de l'app (pas seulement tests, docs, config d'outillage) | [references/functional.md](references/functional.md) |
 | mode **pr** | [references/pr-comments.md](references/pr-comments.md) |
+| l'argument contient `--subagents` | [references/subagents.md](references/subagents.md) |
 | une convention de code à vérifier | `../implement/references/conventions/` (index dans `AGENTS.md`) |
 
 ---
@@ -49,7 +52,9 @@ Tu **rapportes**, tu ne corriges pas. L'appelant (toi plus tard, ou le skill `im
    Si un dev server tourne : appelle aussi `nextjs_call` (`get_errors`) du MCP `next-devtools`.
 
 3. **Choisis les checklists** avec la table « Quand → lis ». Lis chaque référence retenue **en entier** avant de l'appliquer. Une checklist non pertinente est notée `skip — <raison>`, jamais omise.
-   *Si ton outil sait lancer des sous-agents en parallèle, tu peux exécuter les checklists retenues en parallèle — une par sous-agent, chacune avec sa référence.*
+   Avec `--subagents` seulement : délègue structure, sécurité et accessibilité selon [references/subagents.md](references/subagents.md) ; tu gardes fidélité Figma et fonctionnel.
+
+   **Fidélité Figma et fonctionnel ont besoin de l'app qui tourne.** Pas de dev server → démarre-le en arrière-plan depuis la racine du worktree (`pnpm --filter app dev`, sur le port de `packages/app/.env.local` ; sans `.env.local` : `bash scripts/setup-worktree.sh <index libre>` d'abord). Impossible à démarrer → ces deux gates rendent `degraded` avec la raison. Jamais `skip` ni PASS faute de serveur.
 
 4. **Applique chaque checklist** sur les fichiers du diff uniquement. Chaque constat = `[SÉVÉRITÉ] fichier:ligne — description → correctif`. Pas de `fichier:ligne` vérifiable = pas de constat. Le code préexistant hors diff : une ligne max en fin de rapport, hors verdict.
 
@@ -67,7 +72,7 @@ Tu **rapportes**, tu ne corriges pas. L'appelant (toi plus tard, ou le skill `im
    | sécurité | SECURE / VULNERABLE / HARDENING NEEDED / skip | <n> |
    | accessibilité | PASS / NEEDS WORK / MINOR / skip | <n> (+ risques résiduels) |
    | fidélité Figma | PASS / RETRY / REFACTO / degraded / skip | <n> |
-   | fonctionnel | PASS / RETRY / REFACTO / skip | <n> |
+   | fonctionnel | PASS / RETRY / REFACTO / degraded / skip | <n> |
 
    ### Constats
    - [ERROR] path/file.tsx:42 — … → …
@@ -76,7 +81,7 @@ Tu **rapportes**, tu ne corriges pas. L'appelant (toi plus tard, ou le skill `im
    - …
    ```
 
-   Verdict global **PASS** seulement si : `verify` PASS, aucune gate en NEEDS WORK / VULNERABLE / RETRY / REFACTO. Un `MINOR` ou `HARDENING NEEDED` n'empêche pas PASS mais ses constats sont listés.
+   Verdict global **PASS** seulement si : `verify` PASS, aucune gate en NEEDS WORK / VULNERABLE / RETRY / REFACTO. Un `MINOR`, `HARDENING NEEDED` ou `degraded` n'empêche pas PASS mais se liste (`degraded` : avec ce qui n'a pas pu être vérifié).
 
 **Interdits en mode gates** : modifier un fichier, relâcher un test pour le faire passer, déclarer conforme un critère d'accessibilité de rendu (contraste, focus, zoom) depuis la source.
 

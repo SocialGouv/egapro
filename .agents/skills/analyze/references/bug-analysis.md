@@ -106,7 +106,7 @@ Les 7 rubriques sont **obligatoires**, plus `## Complexité`.
    - un TU / test d'intégration suffirait-il (règle métier, fonction pure) ?
 
    Conclus par **une ligne** : `Couverture permanente : E2E justifiée | TU/intégration suffisante | non justifiée | à l'appréciation de l'implémentation`, plus une phrase de motif. Le choix final (imbriquer, créer, ne rien faire) se fait à l'implémentation, sur le diff réel ([`e2e.md`](../../implement/references/e2e.md)). Ne propose donc **ni fichier hôte, ni viewport, ni forme d'assertion, ni seuil** : une spec de test écrite ici serait lue en aval comme une décision déjà prise et court-circuiterait ce jugement.
-7. **Tags suggérés** — `complexe` si > 5 fichiers ou refacto multi-modules, sinon « aucun ».
+7. **Tags suggérés** — `complexe` selon [`ticket-spec-format.md`](ticket-spec-format.md) § Règles de rédaction, sinon « aucun ».
 
 Ne gonfle pas la taille au titre d'un test permanent qui ne sera peut-être pas écrit : estime sur le correctif et sa vérification one-shot.
 

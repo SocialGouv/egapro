@@ -1,6 +1,6 @@
 # Checklist — fidélité visuelle au Figma
 
-Périmètre : le diff touche un `.tsx` ou un `.scss` (UI) **et** un dev server tourne. Sans dev server → `skip — no dev server` (le dire, ne pas PASS). La discipline de **construction** (tokens Figma → DSFR, pièges) est dans `../../implement/references/conventions/figma.md` ; ici, la **vérification**.
+Périmètre : le diff touche un `.tsx` ou un `.scss` (UI). Le dev server est démarré à l'étape 3 du mode gates ; inatteignable → `degraded`, jamais PASS. La discipline de **construction** (tokens Figma → DSFR, pièges) est dans `../../implement/references/conventions/figma.md` ; ici, la **vérification**.
 
 Tu compares le **rendu** au **node Figma de référence** — jamais à une maquette HTML. **Les nombres d'abord** (mesurés dans le DOM), **les pixels ensuite** (overlay onion-skin + vision du modèle) — jamais l'œil seul.
 

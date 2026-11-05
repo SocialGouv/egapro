@@ -34,7 +34,7 @@ Avant d'écrire quoi que ce soit : lis [`board.md`](board.md) (IDs non devinable
      - nouveaux découpages → création standard.
    - **Avant chaque `gh issue create`** : vérifier qu'aucune issue OPEN équivalente n'existe (`gh issue list --repo SocialGouv/egapro --state open --search "in:title <mots-clés>"`). Si oui : réutiliser, ou fermer l'ancienne en duplicate.
    - Le **parent** sert uniquement à rattacher à l'epic ; les dépendances vont dans `## Depends on` (`- #<N>`).
-   - Label `complexe` uniquement si refacto multi-fichiers, perf critique ou algo non trivial.
+   - Label `complexe` : critère unique dans [`ticket-spec-format.md`](ticket-spec-format.md) § Règles de rédaction.
    - **Sur erreur partielle** (rate limit, timeout) : **ne retente pas à l'aveugle**. Relis ce qui a déjà été créé (board.md Op. F), complète seulement le reste, mentionne la reprise dans le compte rendu.
 7. **Sizing de chaque sous-issue** créée ou amendée ([`complexity-estimation.md`](complexity-estimation.md)) : `bash scripts/orchestration/set_ticket_size.sh <N> <taille>` + section `## Complexité` dans le body. **Jamais l'epic.** Un XL est un signal de re-découpage.
 8. **Commentaire final sur l'epic** : `[Validation utilisateur] Architecture validée — N tickets créés (sizés), prêt pour /implement`.
@@ -73,7 +73,7 @@ Objectif : transformer une task vague en spec exécutable, **sans découpage**, 
    ```bash
    gh issue comment <N> --repo SocialGouv/egapro --body-file <fichier>   # commence par "## Analyse architecte", inclut "## Complexité"
    ```
-   Label `complexe` si > 5 fichiers ou refacto multi-modules : `gh issue edit <N> --add-label complexe`.
+   Label `complexe` si le critère de [`ticket-spec-format.md`](ticket-spec-format.md) § Règles de rédaction est rempli : `gh issue edit <N> --add-label complexe`.
 8. **Sizing** : `bash scripts/orchestration/set_ticket_size.sh <N> <taille>` (même taille que la section `## Complexité`).
 9. **Commentaire final** : `[Validation utilisateur] Analyse validée (taille <T>) — prêt pour /implement`.
 

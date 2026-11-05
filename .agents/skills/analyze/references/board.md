@@ -29,21 +29,21 @@ L'epic porte le type **Feature** ; chaque sous-issue porte le type **Task**. À 
 
 ### Status options
 
-| Statut | Option ID | Qui le pose | Quand |
-|---|---|---|---|
-| Backlog | `f75ad846` | analyze, mode epic | création de l'epic |
-| To Do | `61e4505c` | analyze, mode epic / rework | sous-issues et tickets de fix créés |
-| In progress | `47fc9ee4` | implement | début d'implémentation — le ticket **y reste** une fois la PR prête |
-| In review | `df73e18b` | **utilisateur uniquement** | quand l'humain décide qu'une PR est prête pour sa revue |
-| Done | `98236657` | **utilisateur uniquement** | après validation humaine de la PR mergée |
+| Statut | Qui le pose | Quand |
+|---|---|---|
+| Backlog | analyze, mode epic | création de l'epic |
+| To Do | analyze, mode epic / rework | sous-issues et tickets de fix créés |
+| In progress | implement | début d'implémentation — le ticket **y reste** une fois la PR prête |
+| In review | **utilisateur uniquement** | quand l'humain décide qu'une PR est prête pour sa revue |
+| Done | **utilisateur uniquement** | après validation humaine de la PR mergée |
 
-**Règle absolue** : aucun agent ne passe un ticket à `In review` ni `Done`. Ces deux IDs ne doivent apparaître dans **aucune** mutation. `set_ticket_status.sh` refuse ces deux transitions (exit 3).
+**Règle absolue** : aucun agent ne passe un ticket à `In review` ni `Done`. `set_ticket_status.sh` refuse ces deux transitions (exit 3).
 
 Hors création (statut initial d'une issue neuve), **analyze ne déplace aucun ticket existant** : `To Do → In progress` appartient à implement.
 
 ### Champs Size / Estimate / dates
 
-- **Size + Estimate** : `bash scripts/orchestration/set_ticket_size.sh <N> <XS|S|M|L|XL>` — rubrique dans [`complexity-estimation.md`](complexity-estimation.md). Options `Size` : XS `6c6483d2` (1 pt) · S `f784b110` (2) · M `7515a9f1` (3) · L `817d0097` (5) · XL `db339eb2` (8).
+- **Size + Estimate** : `bash scripts/orchestration/set_ticket_size.sh <N> <XS|S|M|L|XL>` — rubrique dans [`complexity-estimation.md`](complexity-estimation.md).
 - **Start date** : posée automatiquement par `set_ticket_status.sh` sur la transition `→ In progress` (le premier passage gagne).
 - **End date** : posée par le workflow `.github/workflows/ticket-end-date.yaml` au merge de la PR (résout `<N>` depuis la branche `ticket/<N>-*` ; la PR finale `epic/<N>` et les branches hors ticket sont ignorées). Écrire un project V2 d'org exige `organization_projects: write`, que le `GITHUB_TOKEN` par défaut ne porte jamais : le workflow passe par un token d'App minté par token-bureau (prérequis hors dépôt dans son en-tête). Rejouer la pose sans merger : `workflow_dispatch` (entrées `ticket`, `date`).
 - Écriture manuelle d'une date : `bash scripts/orchestration/set_ticket_date.sh <N> <start|end> [--if-empty] [YYYY-MM-DD]`.
@@ -79,19 +79,6 @@ Les mutations Projects V2 sont standard ; ce qui ne l'est pas, ce sont les IDs c
 gh api graphql -f query='query($n:Int!){ repository(owner:"SocialGouv", name:"egapro"){ issue(number:$n){ id } } }' \
   -F n=<N> --jq '.data.repository.issue.id'
 ```
-
-### Op. B — ajouter au project
-
-Normalement inutile (les scripts le font). Si besoin :
-
-```bash
-gh api graphql -f query='mutation($p:ID!,$c:ID!){ addProjectV2ItemById(input:{projectId:$p, contentId:$c}){ item { id } } }' \
-  -f p=PVT_kwDOAh0HH84BFsK7 -f c=<ISSUE_NODE_ID>
-```
-
-### Op. C — item ID d'une issue déjà dans le project
-
-`repository.issue(number:).projectItems(first:10){ nodes { id project { id } } }`, puis filtrer sur `project.id == "PVT_kwDOAh0HH84BFsK7"` (piège 3).
 
 ### Op. D — lier un ticket à son epic (sous-issue)
 
@@ -155,23 +142,4 @@ Filtrer sur `project.id == "PVT_kwDOAh0HH84BFsK7"`, extraire le champ `Status` (
 
 ---
 
-## Diagnostic — ré-extraire les IDs
-
-```bash
-gh api graphql -f query='
-{
-  node(id: "PVT_kwDOAh0HH84BFsK7") {
-    ... on ProjectV2 {
-      title
-      fields(first: 20) {
-        nodes {
-          ... on ProjectV2SingleSelectField { id name options { id name } }
-          ... on ProjectV2Field { id name }
-        }
-      }
-    }
-  }
-}'
-```
-
-Si le board a été recréé, mettre à jour les constantes en haut de ce fichier **et** celles embarquées dans `scripts/orchestration/set_ticket_*.sh`, qui sont les seules à écrire réellement le board.
+Board recréé → mettre à jour les IDs en tête de ce fichier **et** dans `scripts/orchestration/set_ticket_*.sh`, seuls à écrire le board.

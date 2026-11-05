@@ -103,28 +103,13 @@ Intégration DSFR : `register()` se spread directement sur un `<input>` natif po
 
 ## Moteur d'étapes de la démarche (FSM)
 
-La progression de la déclaration — écran suivant, transitions, conditions — a **une seule autorité** : `src/server/rules/v2027.1.json` + `engine.ts`, dont le vocabulaire d'états est la const `DECLARATION_FSM_STATUSES` de `~/modules/domain` (l'union `DeclarationFsmStatus` en dérive). Depuis #3974 le lien est **imposé par le compilateur**.
-
-**Ne jamais réencoder le graphe d'états à la main.** Une seule table dit où va l'utilisateur (`~/modules/navigation`, `getDemarcheStageHref`) ; `my-space/declarationProcessState.ts` n'en projette que la variante d'affichage du panneau. Ne pas en ouvrir un autre : tout code conscient de l'état se branche sur `~/modules/navigation`, ou se type sur `DeclarationFsmStatus` avec un `switch` exhaustif **sans `default:`**, ou dérive directement du moteur.
-
-> Détail et modèles de tests → [`demarche-state-machine.md`](../../.agents/skills/implement/references/conventions/demarche-state-machine.md)
+La progression de la déclaration a **une seule autorité** : `src/server/rules/v2027.1.json` + `engine.ts`, sur le vocabulaire `DECLARATION_FSM_STATUSES` de `~/modules/domain`. **Ne réencode jamais le graphe d'états** : branche-toi sur `~/modules/navigation`, ou type sur `DeclarationFsmStatus` avec un `switch` exhaustif **sans `default:`**. Avant d'y toucher → [`demarche-state-machine.md`](../../.agents/skills/implement/references/conventions/demarche-state-machine.md).
 
 ---
 
 ## Journalisation d'audit (#3174)
 
-**Toute nouvelle surface relevant de la taxonomie d'audit câble son log en même temps.** Oublier le log est un bug de conformité, pas une amélioration.
-
-| Surface | Câblage |
-|---|---|
-| Mutation tRPC | `AUDIT_ACTIONS.*` + catégorie `"mutation"` + entrée dans `PROCEDURE_TO_ACTION` |
-| Query tRPC exposant PII / données GIP / données d'entreprise | idem, catégorie `"read_sensitive"` (rétention 180 j) |
-| Route handler `src/app/api/**/route.ts` | wrapper `withAuditedRoute(…)` + `cachedAuth(request)` |
-| Événement NextAuth, action cron / système | `logAction` direct |
-
-Trois points de câblage sont requis à chaque fois : la constante, la catégorie (qui décide le bucket de rétention CNIL), et le fil propre à la surface. `logAction` projette `metadata` par action selon une liste de clés et de valeurs validées ; secrets, IP, fichiers et texte libre n'y sont pas conservés.
-
-> Playbook complet, snippets et checklist → [`audit-logging.md`](../../.agents/skills/implement/references/conventions/audit-logging.md)
+**Toute nouvelle surface auditable (mutation tRPC, query sensible, route handler, auth, cron) câble son log dans la même PR** : constante `AUDIT_ACTIONS.*`, catégorie (qui fixe la rétention CNIL), câblage propre à la surface. Un oubli est silencieux et c'est un bug de conformité. Avant d'y toucher → [`audit-logging.md`](../../.agents/skills/implement/references/conventions/audit-logging.md).
 
 ---
 
@@ -147,12 +132,12 @@ pnpm build            # copie les assets DSFR + build production
 pnpm typecheck        # tsc --noEmit
 pnpm test             # Vitest
 pnpm test:integration # Vitest + testcontainers (exige Docker)
-pnpm test:e2e         # Playwright (exige le dev server sur le port 3000)
+pnpm test:e2e         # Playwright (exige un dev server, voir ci-dessous)
 pnpm check:write      # Biome : corrige lint + format d'un coup
 pnpm a11y:dev         # side-car ultra11y (dashboard sur 127.0.0.1:4111) — optionnel
 ```
 
-`pnpm test:e2e` et `pnpm test:lighthouse` exigent `pnpm dev` sur le **port 3000** — la connexion ProConnect passe par le proxy OAuth **Charon**, dont la liste d'adresses de retour autorisées pour egapro ne contient, en local, que `http://localhost:3000`. Détail et conséquences → README, § Connexion ProConnect.
+`pnpm test:e2e` et `pnpm test:lighthouse` exigent un dev server sur un port que Charon (proxy OAuth de ProConnect) accepte : **3000 à 3010** en local (worktree d'index `i` → `3001 + i`). Le serveur, `NEXTAUTH_URL` et `PLAYWRIGHT_BASE_URL` désignent le même port. Détail → README, § Connexion ProConnect.
 
 ### Base de données
 

@@ -1,6 +1,6 @@
 # Checklist — comportement fonctionnel
 
-Périmètre : un dev server tourne **et** le ticket a quelque chose d'observable à rejouer. Sans dev server → `skip — no dev server` (le dire). Outils : MCP `playwright` (`browser_navigate`, actions, `browser_console_messages`, `browser_network_requests`) et MCP `next-devtools` (`nextjs_call` → `get_errors`).
+Périmètre : le diff change le comportement de l'app. Le dev server est démarré à l'étape 3 du mode gates ; inatteignable → `degraded` (le dire), jamais PASS. Rien d'observable à exercer → dis-le et justifie-le, jamais un PASS vide. Outils : MCP `playwright` (`browser_navigate`, actions, `browser_console_messages`, `browser_network_requests`) et MCP `next-devtools` (`nextjs_call` → `get_errors`).
 
 Tu vérifies que le comportement **visible par l'utilisateur** correspond à ce qui a été spécifié. Tu es la seconde paire d'yeux : tu ne crois pas l'implémentation sur parole, tu rejoues.
 

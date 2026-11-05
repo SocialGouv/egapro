@@ -218,30 +218,10 @@ itself (IP truncation, error-code derivation, input/inputKeys projection,
 the 16-key contract, the test-env guard), extend
 `~/server/audit/__tests__/activityLog.test.ts`.
 
-For `cleanup.ts` changes that touch the DB layer (new SQL predicates, new
+For `packages/app/scripts/audit-cleanup.ts` changes that touch the DB layer (new SQL predicates, new
 retention categories), **add an integration test** in
-`cleanup.integration.test.ts` — mocked unit tests do not execute real SQL
+`~/server/audit/__tests__/auditCleanupScript.integration.test.ts` — mocked unit tests do not execute real SQL
 and miss driver-level bugs (see the `Date` → `sql\`\`` regression that
 triggered the addition of `pnpm test:integration`).
 
----
-
-## Checklist when touching an audited surface
-
-Copy this into the PR description when adding a new endpoint / mutation /
-sensitive read:
-
-- [ ] `AUDIT_ACTIONS.*` constant added in `actionKeys.ts`
-- [ ] Category mapped in `AUDIT_ACTION_CATEGORIES` (right retention bucket?)
-- [ ] Wire-up done for the relevant surface:
-  - [ ] tRPC mutation → `PROCEDURE_TO_ACTION` entry
-  - [ ] tRPC sensitive query → `PROCEDURE_TO_ACTION` entry (category
-        `read_sensitive`)
-  - [ ] Route Handler → `withAuditedRoute(...)` wrapper + `cachedAuth`
-  - [ ] Auth flow → `logAction` in the JWT sign-in branch or NextAuth `logger` hook, with the local user UUID for success
-  - [ ] System / cron → direct `logAction` call
-- [ ] Any needed `metadata` key is explicitly permitted and validated for
-      this action in `metadata.ts`; free text and PII are excluded
-- [ ] Existing unit tests still green (`actionKeys.test.ts` especially)
-- [ ] Manually verified on a review app: the row actually lands in
-      `audit.action_log` with the expected category / status / metadata
+Before opening the PR, re-check, for every new surface, the wiring of « When a new audit entry is REQUIRED » (constant, category, surface wire-up, `metadata.ts` allow-list), then verify on a review app that the row lands in `audit.action_log` with the expected category / status / metadata.

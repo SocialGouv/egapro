@@ -79,7 +79,7 @@ Omettre la section s'il n'y a aucune dépendance.>
 
 ## Requires services
 
-<Services docker-compose en plus du core (db, minio, maildev, valkey). Un par ligne :
+<Services docker-compose en plus du core (db, minio, minio-init, mailpit, valkey). Un par ligne :
 
 - clamavd  (antivirus — upload de fichiers)
 
@@ -98,5 +98,5 @@ Omettre s'il n'y a besoin que du core.>
 - **`Depends on` fixe l'ordre d'exécution.** Implement traite un sous-ticket seulement quand chacun de ses `Depends on` est squash-mergé dans `epic/<N>` (signal canonique : la branche `ticket/<T1>-*` a disparu d'origin). L'exécution n'attend jamais la review humaine d'une PR de sous-ticket.
 - **Pas de cycle** dans les `Depends on`.
 - **Le parent issue GitHub sert à pointer l'epic**, jamais à exprimer une dépendance entre tickets — c'est `Depends on` qui le fait.
-- **Le label `complexe`** signale un ticket qui demande un raisonnement multi-étapes non trivial (refacto transverse, perf critique, algo). Le poser pour ça, pas par précaution.
+- **Le label `complexe`** (seule définition) : plus de 5 fichiers, refacto multi-modules, perf critique ou algorithme non trivial. Le poser pour ça, pas par précaution : `/implement` le lit pour conseiller un modèle frontier et `--subagents`.
 - **Données fictives** dans les exemples (`SIREN 123456789`, `email@example.fr`, « Société Démo »). Voir AGENTS.md § Hygiène git.

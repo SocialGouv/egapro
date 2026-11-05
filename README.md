@@ -156,6 +156,8 @@ Les identifiants (`EGAPRO_PROCONNECT_CLIENT_ID`, `EGAPRO_PROCONNECT_CLIENT_SECRE
 
 | Commande | Description |
 |---|---|
+| `pnpm verify` | Tous les gates locaux (patterns, a11y, lint, format, typecheck, tests) ; instantané si ce code exact est déjà vert, `--force` pour rejouer |
+| `pnpm check:patterns` | Interdits mécaniques sur le diff |
 | `pnpm dev:app` | Serveur de développement (port 3000) |
 | `pnpm build` | Build de tous les packages |
 | `pnpm lint:check` | Vérification du lint |
@@ -166,6 +168,31 @@ Les identifiants (`EGAPRO_PROCONNECT_CLIENT_ID`, `EGAPRO_PROCONNECT_CLIENT_SECRE
 | `pnpm test:lighthouse` | Audit Lighthouse (nécessite le serveur sur le port 3000) |
 | `pnpm db:migrate` | Migrations Drizzle |
 | `pnpm db:studio` | Drizzle Studio |
+
+> Lighthouse rapporte un score d'accessibilité en **warning**, pas en gate : l'accessibilité est tranchée par ultra11y, et deux seuils concurrents sur un même sujet donnent deux verdicts à réconcilier à la main.
+
+## CI
+
+| Fichier | Déclencheur | Rôle |
+|---|---|---|
+| `ci.yaml` | chaque push | build · lint · format · patterns · typecheck · tests · cohérence des versions ultra11y |
+| `a11y.yaml` | PR, cron lundi 04:00 UTC, manuel | ultra11y. Sur **PR** : `a11y-gate` seul — audit statique de tout `src`, **bloquant**. Sur **cron** ou **manuel** : chaîne complète (`a11y-pages` + `a11y-bundle`), non bloquante et payante |
+| `a11y-lite.yaml` | PR → `alpha`, push `alpha` | ultra11y mode lite. Sur **PR** : capture des pages que le diff peut changer, moteur seul, **bloquant** sur un constat de rendu nouveau ou une route non échantillonnée. Sur **push `alpha`** : capture tout et écrit la baseline |
+| `e2e.yaml` | PR → `alpha`, manuel | suite Playwright complète **et** les coordonnées de la grille de recette, en shards parallèles ; le check requis « Test e2e » est le job agrégateur |
+| `e2e-grille.yaml` | cron nocturne (02:00 UTC), manuel | grille de recette seule, rapport de recette |
+| `lighthouse.yaml` | `deployment_status` (success, hors env `build-*`) | audit Lighthouse sur l'URL déployée |
+| `review-auto.yaml` | push sur toute branche sauf `master` et `**-persist` | déploiement des review apps |
+| `deactivate.yaml` | PR closed, `delete` de branche | destruction de la review app |
+| `preproduction.yaml` | push `beta` | déploiement preprod |
+| `production.yaml` | push tag `v*` | déploiement prod |
+| `promote-test-env.yaml` | manuel (`release`, `target`) | déploie une release sur un env de test persistant (`rgaa` / `perf`) |
+| `release.yml` | manuel (branche `beta`) | semantic-release |
+| `release-alpha.yaml` | manuel (branche `alpha`) | semantic-release — prerelease `-alpha.N` |
+| `release-changelog.yaml` | `release: published`, manuel | changelog FR généré, injecté dans le corps de la release |
+| `db-schema.yaml` | push `alpha`/`master` sur le schéma, manuel | publie la doc de schéma DB sur le wiki |
+| `sync-docs-to-wiki.yaml` | push `alpha`/`master` sur `docs/**`, manuel | miroir `docs/` → wiki |
+| `ticket-end-date.yaml` | PR closed | estampille « End date » sur le board |
+| `claude-question.yml` | issue labellisée `question` | réponse automatique |
 
 ## Sécurisation de l'API SUIT (via passerelle APISIX)
 
@@ -212,7 +239,7 @@ Quand l'infra fournira une API Gateway native :
 - supprimer les fichiers `.kontinuous/templates/apisix-suit.*.yaml`
 - selon la nouvelle gateway, adapter ou supprimer `src/middleware.ts` + la var `EGAPRO_GATEWAY_SHARED_SECRET`
 
-## Configuration AI (Claude Code, OpenCode)
+## Configuration AI (Claude Code, OpenCode, Codex)
 
 Le projet est configure pour tout agent de code qui lit `AGENTS.md` — [Claude Code](https://claude.com/claude-code) et [OpenCode](https://opencode.ai) en tete. Toute la configuration est versionnee : chaque developpeur qui clone le repo beneficie de la meme intelligence, quel que soit l'outil ou le modele.
 
@@ -240,6 +267,19 @@ scripts/quality/          <- check-patterns.sh, verify.sh
 
 **Le principe qui structure tout** : ce qu'une machine peut trancher n'est pas laisse a la lecture d'un modele. Les interdits mecaniques, le lint, les types, les tests et l'audit statique RGAA tournent dans le **git pre-commit**, dans **`pnpm verify`** et dans la **CI** — identiques pour un humain, un modele frontier ou un petit modele. Le texte (skills et references, charges a la demande) ne porte que ce qui demande du jugement, et une regle vit a **un seul endroit**.
 
+### Même config pour Claude Code, OpenCode et Codex
+
+| | Claude Code | OpenCode | Codex | Source |
+|---|---|---|---|---|
+| Instructions | `CLAUDE.md` → `@AGENTS.md` | `AGENTS.md` + `instructions` d'`opencode.json` | `AGENTS.md` | `AGENTS.md` |
+| Skills | `.claude/skills` (symlink) | `.agents/skills/` | `.agents/skills/` | `.agents/skills/` |
+| MCP | `.mcp.json` | `opencode.json` (`mcp`, généré) | `.codex/config.toml` (généré) | `.mcp.json` |
+| Commandes refusées / à confirmer | `.claude/settings.json` (`permissions`, généré) | `opencode.json` (`permission`, généré) | `.codex/rules/egapro.rules` (généré) | `POLICY` de `scripts/ai/sync-agent-config.mjs` |
+| Gate ultra11y côté agent | hook de `.claude/settings.json` | plugin d'`opencode.json` | portée utilisateur : `ultra11y install --codex` (`pnpm install` le rappelle) | devDependency |
+| git hooks, `pnpm verify`, CI | identiques | identiques | identiques | `lefthook.yml`, `scripts/quality/` |
+
+Ce qui reste propre à chaque développeur (config utilisateur, plugins perso, modèle choisi) ne change rien aux trois dernières lignes : c'est là que se joue la barrière.
+
 ### Les 3 skills
 
 | Commande | Ce que ca fait |
@@ -247,6 +287,8 @@ scripts/quality/          <- check-patterns.sh, verify.sh
 | `/analyze [#N] [description]` | conception — detecte epic / task / bug / rework, produit une spec validee par l'utilisateur et la poste sur l'issue |
 | `/implement #N` | execution — worktree, code + tests, `pnpm verify`, `/review gates`, E2E, PR draft. Un epic se traite sous-ticket par sous-ticket (une session par sous-ticket pour paralleliser) |
 | `/review [gates] \| /review #PR` | gates qualite sur le diff courant (verdict, sans rien modifier), ou traitement des threads de revue non resolus d'une PR |
+
+`--subagents` (optionnel, sur les trois) : delegue les checklists de revue et l'exploration du code a des sous-agents generiques, en parallele. Utile sur un gros diff ; sans le flag, tout se fait dans la session. Detail : [`subagents.md`](.agents/skills/review/references/subagents.md).
 
 ### Garde-fous
 

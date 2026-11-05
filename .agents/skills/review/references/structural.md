@@ -6,34 +6,14 @@ Principe : **là où une machine décide, tu ne réénonces pas — tu rapportes
 
 Base : `BASE="${VERIFY_BASE:-origin/alpha}"` (sous-ticket d'epic : `origin/epic/<N>`). Saute tout check sans rapport avec les fichiers touchés.
 
-## 1. Greps mécaniques (filet a posteriori)
+## 1. Ce que la machine a déjà tranché
 
-`pnpm verify` lance déjà `scripts/quality/check-patterns.sh` sur les lignes ajoutées. Ces greps attrapent ce qui est arrivé autrement (rebase, merge). Ne réexplique pas la règle : rapporte `fichier:ligne`.
+Les interdits mécaniques (`any`, `process.env`, `../../`, `zod` dans un routeur ou un composant, suppressions de lint, `style={}`, `<svg>` / `<img>`, `@media`, composant hors route dans `src/app/`…) sont dans `scripts/quality/check-patterns.sh`, lancé par `pnpm verify` sur tout le diff (working tree compris) : `verify` vert = rien à rapporter de ce côté. Ne réénonce pas ces règles. Deux checks restent à faire à la main, sur les fichiers du diff :
 
 ```bash
 cd packages/app
-
-# [ERROR] — doivent retourner ZÉRO sur les fichiers du diff
-grep -rn "from ['\"]zod['\"]" src/server/api/routers/ --include="*.ts"
-grep -rn "from ['\"]zod['\"]" src/modules/ --include="*.tsx"
-grep -rn "z\.object(" src/app/api/ --include="*.ts"
-grep -rn "from ['\"]\.\.\/\.\.\/" src/modules/ --include="*.ts" --include="*.tsx"
-grep -rn ": any\b\|as any\b" src/modules/ src/server/ --include="*.ts" --include="*.tsx" | grep -v "__tests__\|\.test\."
-grep -rn "biome-ignore\|eslint-disable\|@ts-ignore\|@ts-expect-error" src/ --include="*.ts" --include="*.tsx"
-grep -rn "dangerouslySetInnerHTML" src/ --include="*.tsx"
-grep -rn "process\.env" src/ --include="*.ts" --include="*.tsx" | grep -v "env.js\|instrumentation\|next.config\|trpc/react.tsx\|sentry\.\|e2e/helpers/\|playwright.config\|drizzle.*config"
-grep -rn "@media[[:space:]]\+.*\((min\|max\)-width\|screen)" src/ --include="*.scss"
-grep -rn "style={" src/ --include="*.tsx" | grep -v "declarationPdf/\|noSanctionAttestation/"
-grep -rn "<svg[[:space:]>]\|<img[[:space:]>]" src/ --include="*.tsx" | grep -v "DsfrPictogram\|ErrorArtwork\|__tests__\|\.test\."
-
-# [ERROR] — composant sur mesure dans src/app/ (seuls les fichiers de route Next.js y vivent)
-find src/app -name "*.tsx" \
-  ! -name "page.tsx" ! -name "layout.tsx" ! -name "loading.tsx" ! -name "error.tsx" \
-  ! -name "not-found.tsx" ! -name "global-error.tsx" ! -name "template.tsx" ! -name "default.tsx" \
-  ! -name "opengraph-image.tsx" ! -name "icon.tsx" ! -name "apple-icon.tsx" ! -path "*/__tests__/*"
-
-# Taille de fichier : [WARN] 200+ · [ERROR] 400+ · [ERROR CRITICAL] 800+
-wc -l $(git diff --name-only HEAD -- '*.ts' '*.tsx') 2>/dev/null | sort -rn | head -20
+grep -rn "z\.object(" src/app/api/ --include="*.ts"                          # [ERROR] schéma inline dans un route handler : il vit dans modules/*/schemas.ts
+wc -l $(git diff --name-only HEAD -- '*.ts' '*.tsx') 2>/dev/null | sort -rn | head -20   # [WARN] 200+ · [ERROR] 400+ · [ERROR CRITICAL] 800+
 ```
 
 Les occurrences legacy hors diff ne comptent pas (une ligne max, hors verdict).
@@ -46,10 +26,7 @@ Une règle métier recopiée hors de `~/modules/domain` est un bug le jour où l
 bash packages/app/scripts/audit-domain-leaks.sh
 ```
 
-Diff-scopé par défaut. Une règle métier peut fuiter dans un fichier que le ticket ne touche pas : sur un audit large, le lancer sur tout l'arbre.
-
-- `[ERROR]` : `getFullYear()` ; extraction SIREN inline (y compris `slice(0, SIREN_LENGTH)`, un `SIREN_LENGTH = 9` local) ; `.getMonth()` / `.getDate()` ; fonction locale qui duplique le domaine ; seuil réglementaire en dur (5 %, 50, 100, 2018) ; condition qui ré-implémente un prédicat (`cancelledAt !== null`, `workforce >= 100`) ; `gap >= GAP_ALERT_THRESHOLD` au lieu de `gapLevel()` ; formule d'écart signé inline.
-- `[WARN]` : décision sur une chaîne de statut (`status === "draft"`) répétée entre fichiers ; direction déterminée en comparant les valeurs genrées ; `Number(row.xxxGap) * 100` ; `toLocaleString("fr-FR")` hors du domaine. Chacun est candidat à devenir une fonction domain **nommée**.
+Le script balaie **tout l'arbre** et imprime chaque fuite avec son niveau (`[ERROR]` / `[WARN]`) et la fonction domaine à utiliser. Retiens ses constats sur les fichiers du diff ; le reste = une ligne hors verdict. Il ne voit que ses signatures. Se trouvent en lisant le code, `[ERROR]` : une fonction locale qui recalcule ce que fait déjà `~/modules/domain` ; un seuil réglementaire en dur (5 %, 50, 100) ; une condition qui ré-implémente un prédicat (`workforce >= 100`). Chaque `[WARN]` est candidat à devenir une fonction domaine **nommée**.
 
 ## 3. Ce qui demande de lire le code
 
@@ -73,7 +50,7 @@ Diff-scopé par défaut. Une règle métier peut fuiter dans un fichier que le t
 | **Tests** — mock local qui duplique `src/test/setup.ts` | ERROR |
 | **Assets** — PNG/JPG pour une illustration ou une icône (seule une vraie photo peut être raster, en WebP) | WARN |
 
-Conventions à ouvrir selon le fichier : `code-quality.md` (tout `.ts`/`.tsx`), `react-components.md` (`.tsx`), `styling-dsfr.md` (`.tsx`/`.scss`), `trpc-api.md` (`src/server/api/**`), `database-drizzle.md` (`src/server/**`), `audit-logging.md` (mutation, query sensible, route handler, auth), `demarche-state-machine.md` (parcours de déclaration, Mon espace, `src/server/rules/**`), `testing.md` (`__tests__/**`), `figma.md` (UI depuis un node Figma) — toutes dans `../../implement/references/conventions/`.
+Conventions à ouvrir selon le fichier : la table « Règles de code : où les lire » d'`AGENTS.md`.
 
 ## 4. Affaiblissement de test
 
