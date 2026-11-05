@@ -173,7 +173,7 @@ Les erreurs **transitoires** (SMTP timeout, réseau) sont retentées. Les erreur
 
 ### Sécurité SMTP
 
-`worker/transporter.ts` impose `requireTLS: true` et `tls.minVersion: "TLSv1.2"` dès qu'un couple `SMTP_USER` / `SMTP_PASS` est configuré (prod / preprod). En dev local (Mailpit sans auth), ces options sont skip pour rester compatibles avec le conteneur.
+`worker/transporter.ts` impose `requireTLS: true` et `tls.minVersion: "TLSv1.2"` dès qu'un couple `SMTP_USER` / `SMTP_PASS` est configuré (prod / preprod). En dev local (Mailpit sans authentification SMTP — à ne pas confondre avec l'auth de l'UI web, retirée sur dev/review/persist depuis #4956, cf. ci-dessous), ces options sont skip pour rester compatibles avec le conteneur.
 
 ### Dégradation gracieuse
 
@@ -196,20 +196,24 @@ Le Prometheus de la plateforme sonde en HTTP **tous les ports de tous les servic
 
 Le déploiement Mailpit embarque donc un sidecar HAProxy (`smtp-demux`, template `.kontinuous/env/*/templates/mailpit.yaml`) qui écoute le port 1025 exposé par le Service et démultiplexe : trafic HTTP → UI Mailpit (8025), tout le reste → smtpd. Le smtpd de Mailpit n'écoute plus qu'en loopback (`MP_SMTP_BIND_ADDR=127.0.0.1:1026`). Conséquence : les clients SMTP reçoivent la bannière avec ~2 s de latence (`inspect-delay`), sans impact fonctionnel.
 
-### Mailpit in-cluster : authentification de l'interface web (#4695)
+### Mailpit in-cluster : authentification de l'interface web (#4695, retirée sur dev/review/persist par #4956)
 
-L'interface web et l'API de Mailpit (dev, preprod) exigent une authentification basic, portée par Mailpit lui-même (`MP_UI_AUTH`) :
+#4695 avait ajouté une authentification basic sur l'UI/API Mailpit (`MP_UI_AUTH`), sur dev et preprod. #4956 l'a retirée sur la famille des envs de test — `alpha`/dev, review apps par PR, envs persistants (`rgaa-persist`, `perf-persist`, `recette-persist`) — par suppression pure (pas de restriction réseau, pas de retrait d'Ingress) : ces envs sont publics par design et ne portent que des données fictives/mock. **La preprod est hors périmètre de ce retrait et conserve son authentification inchangée.** Le reste de cette section décrit donc l'état actuel des deux familles.
 
-- le secret `mailpit-basic-auth` porte deux clés, `MAILPIT_USER` et `MAILPIT_PASSWORD`, scellées en cluster-wide dans `.kontinuous/env/{dev,preprod}/templates/mailpit-basic-auth.sealed-secret.yaml`. Le conteneur `mailpit` les reçoit par `secretKeyRef` (`optional: false`), et Kubernetes les assemble en `MP_UI_AUTH="$(MAILPIT_USER):$(MAILPIT_PASSWORD)"` ;
+**Dev / review / persistants (depuis #4956) — sans authentification.** `.kontinuous/env/dev/templates/mailpit.yaml` ne porte plus ni secret, ni garde de démarrage, ni `MP_UI_AUTH` : le conteneur `mailpit` lance directement `exec /mailpit`. L'UI, l'API (`/api/v1/*`), le websocket `/api/events` et le port SMTP démultiplexé (1025) sont tous accessibles sans identifiants, comme `/livez` et `/readyz` le sont déjà. Le fichier `.kontinuous/env/dev/templates/mailpit-basic-auth.sealed-secret.yaml` a été supprimé : le secret `mailpit-basic-auth` n'est plus créé dans ces namespaces.
+
+**Preprod — authentification basic inchangée.** L'interface web et l'API de Mailpit en preprod exigent toujours une authentification basic, portée par Mailpit lui-même (`MP_UI_AUTH`) :
+
+- le secret `mailpit-basic-auth` porte deux clés, `MAILPIT_USER` et `MAILPIT_PASSWORD`, scellées en cluster-wide dans `.kontinuous/env/preprod/templates/mailpit-basic-auth.sealed-secret.yaml`. Le conteneur `mailpit` les reçoit par `secretKeyRef` (`optional: false`), et Kubernetes les assemble en `MP_UI_AUTH="$(MAILPIT_USER):$(MAILPIT_PASSWORD)"` ;
 - l'authentification couvre tous les chemins vers l'UI : l'Ingress `mailpit-<host>`, le Service (port 8025) et le HTTP démultiplexé sur le port 1025. Elle couvre aussi `/api/v1/*` et le websocket `/api/events`. Seuls `/livez` et `/readyz` restent ouverts, pour la sonde de readiness ;
 - le SMTP (port 1025, envoi par le worker) n'est pas concerné : il a sa propre option d'authentification, non activée ;
 - l'Ingress ne porte **pas** d'annotation `auth-type: basic`. ingress-nginx vide l'en-tête `Authorization` avant de relayer une requête qu'il a authentifiée. Mailpit ne verrait jamais les identifiants et répondrait 401 en boucle.
 
 Les identifiants sont demandés à l'équipe ; ils ne figurent jamais dans le dépôt.
 
-**Garde au démarrage.** Mailpit v1.31.0 désactive son authentification, sans erreur, si `MP_UI_AUTH` est vide, et l'accepte avec un utilisateur ou un mot de passe vide (`MP_UI_AUTH=":"` laisse entrer `curl -u :`). Il découpe aussi `MP_UI_AUTH` sur les espaces : un saut de ligne final dans une valeur scellée casserait la connexion. Le conteneur `mailpit` lance donc un court script avant `exec /mailpit` : si `MAILPIT_USER` ou `MAILPIT_PASSWORD` est vide ou contient un espace, ou si `MAILPIT_USER` contient `:`, il s'arrête en erreur. Sans le secret, ou avec une valeur invalide, le pod ne démarre pas et l'UI reste fermée ; le SMTP des review apps est alors indisponible lui aussi. Le mot de passe peut contenir `:`.
+**Garde au démarrage (preprod uniquement).** Mailpit v1.31.0 désactive son authentification, sans erreur, si `MP_UI_AUTH` est vide, et l'accepte avec un utilisateur ou un mot de passe vide (`MP_UI_AUTH=":"` laisse entrer `curl -u :`). Il découpe aussi `MP_UI_AUTH` sur les espaces : un saut de ligne final dans une valeur scellée casserait la connexion. Le conteneur `mailpit` lance donc un court script avant `exec /mailpit` : si `MAILPIT_USER` ou `MAILPIT_PASSWORD` est vide ou contient un espace, ou si `MAILPIT_USER` contient `:`, il s'arrête en erreur. Sans le secret, ou avec une valeur invalide, le pod ne démarre pas et l'UI reste fermée ; le SMTP de preprod est alors indisponible lui aussi. Le mot de passe peut contenir `:`.
 
-Pour (re)sceller, sans écrire les valeurs sur disque ni les passer en argument de commande (certificat et scope : même procédure que [`architecture.md` § 5.7](architecture.md#57-provenance-de-admin_emails)) :
+Pour (re)sceller le secret preprod, sans écrire les valeurs sur disque ni les passer en argument de commande (certificat et scope : même procédure que [`architecture.md` § 5.7](architecture.md#57-provenance-de-admin_emails)) :
 
 ```bash
 curl -s https://kubeseal.ovh.fabrique.social.gouv.fr/v1/cert.pem -o /tmp/cert-dev.pem
@@ -226,9 +230,9 @@ unset MAILPIT_USER MAILPIT_PASSWORD
 
 - `printf '%s'` scelle la valeur sans saut de ligne final.
 - `${!key}` est la syntaxe bash ; en zsh, utiliser `${(P)key}`.
-- Les deux chiffrés remplacent `encryptedData.MAILPIT_USER` et `encryptedData.MAILPIT_PASSWORD` dans **les deux** fichiers (`env/dev` et `env/preprod`).
-- Mailpit lit `MP_UI_AUTH` au démarrage : après un re-scellement, redémarrer le pod (`kubectl rollout restart deployment/mailpit`) dans les namespaces concernés.
-- Après déploiement, vérifier que `https://mailpit-<host>/` et `https://mailpit-<host>/api/v1/messages` répondent **401** sans identifiants.
+- Les deux chiffrés remplacent `encryptedData.MAILPIT_USER` et `encryptedData.MAILPIT_PASSWORD` dans `.kontinuous/env/preprod/templates/mailpit-basic-auth.sealed-secret.yaml` — seul fichier concerné depuis #4956 (le fichier `env/dev` homonyme n'existe plus).
+- Mailpit lit `MP_UI_AUTH` au démarrage : après un re-scellement, redémarrer le pod (`kubectl rollout restart deployment/mailpit`) dans le namespace preprod.
+- Après déploiement, vérifier que `https://mailpit-<host-preprod>/` et `https://mailpit-<host-preprod>/api/v1/messages` répondent toujours **401** sans identifiants, et que `https://mailpit-<host>/` (dev/review) répond **200**.
 
 ---
 
