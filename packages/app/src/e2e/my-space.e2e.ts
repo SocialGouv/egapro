@@ -2,6 +2,7 @@ import { expect, type Page, test } from "@playwright/test";
 
 import { getCurrentYear } from "~/modules/domain";
 import {
+	API_CSE_OPINION_PDF,
 	API_JOINT_EVALUATION_PDF,
 	API_PREFILL_PDF,
 	CSE_OPINION,
@@ -20,6 +21,7 @@ import {
 	ensureCurrentYearDeclaration,
 	getCurrentDbYear,
 	insertCseOpinion,
+	insertCseOpinionFile,
 	insertJointEvaluationFile,
 	resetDeclarationToDraft,
 	resetGipWorkforce,
@@ -394,11 +396,10 @@ test.describe("Declaration process panel", () => {
 // to end — seeded FSM state → server payload → cell count → panel → an endpoint
 // that really returns the PDF — which the DocumentsPanel unit tests cannot observe.
 //
-// #4209 — submission alone no longer opens the *transmitted* recap: that PDF only
-// ever carries CSE opinions and the joint evaluation file, so before the démarche
-// produces one it rendered as empty blocks. Both branches are seeded from real
-// rows, because the server derives the two flags gating it from app_file and the
-// status history, not from the declaration record the unit tests hand the panel.
+// The CSE opinion recap is gated on the opinions' transmission, which the server
+// derives from the status history, not from the declaration record the unit tests
+// hand the panel — so each branch is seeded from real rows. A deposited joint
+// evaluation file no longer opens a recap of its own: only its transmission does.
 test.describe("Mon espace — Ressources cell of the rémunération row", () => {
 	test.describe.configure({ mode: "serial" });
 	test.setTimeout(90_000);
@@ -408,8 +409,8 @@ test.describe("Mon espace — Ressources cell of the rémunération row", () => 
 		"Télécharger les données préremplies (issues des données DSN)";
 	const RECAP_INDICATORS_TITLE =
 		"Télécharger le récapitulatif de la déclaration des indicateurs";
-	const RECAP_TRANSMITTED_TITLE =
-		"Télécharger le récapitulatif des éléments transmis";
+	const RECAP_CSE_OPINION_TITLE =
+		"Télécharger le récapitulatif de la transmission du ou des avis du CSE";
 	const RECAP_JOINT_EVALUATION_TITLE =
 		"Télécharger le récapitulatif de l'évaluation conjointe des rémunérations";
 
@@ -452,7 +453,7 @@ test.describe("Mon espace — Ressources cell of the rémunération row", () => 
 			await deleteCseOpinions();
 		});
 
-		test("the indicators recap sits next to the prefill file, and the transmitted recap stays out until it has content", async ({
+		test("the indicators recap sits next to the prefill file, and the CSE opinion recap stays out until opinions are transmitted", async ({
 			page,
 		}) => {
 			const panel = await openDocumentsPanel(page);
@@ -468,7 +469,7 @@ test.describe("Mon espace — Ressources cell of the rémunération row", () => 
 				panel.getByRole("link", { name: RECAP_INDICATORS_TITLE }),
 			).toHaveAttribute("href", indicatorsHref);
 			await expect(
-				panel.getByRole("link", { name: RECAP_TRANSMITTED_TITLE }),
+				panel.getByRole("link", { name: RECAP_CSE_OPINION_TITLE }),
 			).toHaveCount(0);
 
 			const response = await page.request.get(indicatorsHref, {
@@ -493,28 +494,16 @@ test.describe("Mon espace — Ressources cell of the rémunération row", () => 
 			await deleteJointEvaluationFiles();
 		});
 
-		test("the transmitted recap joins the two others, and its endpoint serves a PDF", async ({
-			page,
-		}) => {
+		test("a deposited file alone adds no recap", async ({ page }) => {
 			const panel = await openDocumentsPanel(page);
 
-			await expect(documentsTrigger(page)).toHaveText("Documents (3)");
-
-			const transmittedHref = `/api/transmitted-pdf?year=${CURRENT_YEAR}`;
-
+			await expect(documentsTrigger(page)).toHaveText("Documents (2)");
 			await expect(
-				panel.getByRole("link", { name: RECAP_TRANSMITTED_TITLE }),
-			).toHaveAttribute("href", transmittedHref);
-
+				panel.getByRole("link", { name: RECAP_CSE_OPINION_TITLE }),
+			).toHaveCount(0);
 			await expect(
 				panel.getByRole("link", { name: RECAP_JOINT_EVALUATION_TITLE }),
 			).toHaveCount(0);
-
-			const response = await page.request.get(transmittedHref, {
-				timeout: 30_000,
-			});
-			expect(response.status(), `GET ${transmittedHref}`).toBe(200);
-			expect(response.headers()["content-type"]).toContain("pdf");
 		});
 
 		test("once the report is transmitted, its own recap is offered and its endpoint serves a PDF", async ({
@@ -523,7 +512,7 @@ test.describe("Mon espace — Ressources cell of the rémunération row", () => 
 			await insertJointEvaluationSubmission(CURRENT_YEAR);
 			const panel = await openDocumentsPanel(page);
 
-			await expect(documentsTrigger(page)).toHaveText("Documents (4)");
+			await expect(documentsTrigger(page)).toHaveText("Documents (3)");
 
 			const jointEvaluationHref = `${API_JOINT_EVALUATION_PDF}?year=${CURRENT_YEAR}`;
 
@@ -535,6 +524,45 @@ test.describe("Mon espace — Ressources cell of the rémunération row", () => 
 				timeout: 30_000,
 			});
 			expect(response.status(), `GET ${jointEvaluationHref}`).toBe(200);
+			expect(response.headers()["content-type"]).toContain("pdf");
+		});
+	});
+
+	test.describe("CSE opinions transmitted", () => {
+		test.beforeAll(async () => {
+			await setDeclarationComplianceState({
+				status: "demarche_completed",
+				currentStep: 6,
+				firstDeclarationPathChoice: "justify",
+				cseRequired: true,
+				cseOpinionCompletedAt: new Date(),
+				demarcheCompletedAt: new Date(),
+			});
+			await insertCseOpinion(CURRENT_YEAR);
+			await insertCseOpinionFile(CURRENT_YEAR);
+		});
+
+		test.afterAll(async () => {
+			await deleteCseOpinions();
+		});
+
+		test("the CSE opinion recap is offered and its endpoint serves a PDF", async ({
+			page,
+		}) => {
+			const panel = await openDocumentsPanel(page);
+
+			await expect(documentsTrigger(page)).toHaveText("Documents (3)");
+
+			const cseOpinionHref = `${API_CSE_OPINION_PDF}?year=${CURRENT_YEAR}`;
+
+			await expect(
+				panel.getByRole("link", { name: RECAP_CSE_OPINION_TITLE }),
+			).toHaveAttribute("href", cseOpinionHref);
+
+			const response = await page.request.get(cseOpinionHref, {
+				timeout: 30_000,
+			});
+			expect(response.status(), `GET ${cseOpinionHref}`).toBe(200);
 			expect(response.headers()["content-type"]).toContain("pdf");
 		});
 	});
@@ -560,7 +588,7 @@ test.describe("Mon espace — Ressources cell of the rémunération row", () => 
 				panel.getByRole("link", { name: RECAP_INDICATORS_TITLE }),
 			).toHaveCount(0);
 			await expect(
-				panel.getByRole("link", { name: RECAP_TRANSMITTED_TITLE }),
+				panel.getByRole("link", { name: RECAP_CSE_OPINION_TITLE }),
 			).toHaveCount(0);
 
 			// The route unit test mocks the DB and the renderer: only here does a real GIP row get rendered.
