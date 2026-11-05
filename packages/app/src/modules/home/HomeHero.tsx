@@ -16,7 +16,8 @@ export function HomeHero() {
 							<p className={`fr-mb-0 ${styles.heroDescription}`}>
 								L&apos;espace dédié aux entreprises pour déclarer leurs
 								indicateurs de <br className={styles.heroDescriptionBreak} />
-								rémunération et de représentation entre les femmes et les hommes.
+								rémunération et de représentation entre les femmes et les
+								hommes.
 							</p>
 							<Link
 								className={`fr-btn fr-icon-file-text-line fr-btn--icon-left ${styles.cta}`}

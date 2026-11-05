@@ -25,21 +25,29 @@
 	width: auto;
 }
 
+.card :global(.fr-card__body),
+.card :global(.fr-card__content) {
+	min-width: 0;
+}
+
 .tags {
-	flex-wrap: nowrap !important;
+	flex-wrap: wrap;
 
 	li {
-		flex-shrink: 0;
 		line-height: 2rem !important;
+		max-width: 100%;
+		min-width: 0;
 	}
 
-	.fr-tag {
-		white-space: nowrap !important;
+	:global(.fr-tag) {
+		max-width: 100%;
+		min-width: 0;
 	}
 }
 
-.actionRow {
+.actionRow.actionRow {
 	display: flex;
+	flex-direction: row;
 	height: auto;
 	justify-content: flex-end;
 	margin-top: auto;

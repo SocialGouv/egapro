@@ -26,7 +26,9 @@ function WhyDeclareCard({
 	mediaClassName,
 }: WhyDeclareCardProps) {
 	return (
-		<div className="fr-card fr-card--horizontal fr-enlarge-link fr-card--no-icon">
+		<div
+			className={`fr-card fr-card--horizontal fr-enlarge-link fr-card--no-icon ${styles.card}`}
+		>
 			<div className="fr-card__body">
 				<div className="fr-card__content">
 					<div className="fr-card__start">
@@ -43,10 +45,7 @@ function WhyDeclareCard({
 					</h3>
 					<p className="fr-card__desc">{description}</p>
 					<div className={`fr-card__end ${styles.actionRow}`}>
-						<span
-							aria-hidden="true"
-							className={styles.actionArrow}
-						/>
+						<span aria-hidden="true" className={styles.actionArrow} />
 					</div>
 				</div>
 			</div>
