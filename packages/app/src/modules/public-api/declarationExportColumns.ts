@@ -7,6 +7,11 @@ export type CsvColumn = {
 	percent?: true;
 };
 
+/** Builds a ratio column: rendered in the CSV as percentage points (see `ratioToPercentPoints`). */
+function percentColumn(key: CsvColumn["key"], header: string): CsvColumn {
+	return { key, header, percent: true };
+}
+
 const CSV_COLUMN_DEFINITIONS: CsvColumn[] = [
 	{ key: "year", header: "Annee_declaration" },
 	{ key: "siren", header: "SIREN" },
@@ -23,65 +28,29 @@ const CSV_COLUMN_DEFINITIONS: CsvColumn[] = [
 	{ key: "totalMen", header: "Effectif_H_rem_annuelle" },
 	{ key: "hourlyWomen", header: "Effectif_F_rem_horaire" },
 	{ key: "hourlyMen", header: "Effectif_H_rem_horaire" },
-	{
-		key: "globalAnnualMeanGap",
-		header: "Ecart_rem_annuelle_moyenne",
-		percent: true,
-	},
-	{
-		key: "globalAnnualMedianGap",
-		header: "Ecart_rem_annuelle_mediane",
-		percent: true,
-	},
-	{
-		key: "globalHourlyMeanGap",
-		header: "Ecart_rem_horaire_moyenne",
-		percent: true,
-	},
-	{
-		key: "globalHourlyMedianGap",
-		header: "Ecart_rem_horaire_mediane",
-		percent: true,
-	},
-	{
-		key: "variableAnnualMeanGap",
-		header: "Ecart_rem_variable_annuelle_moyenne",
-		percent: true,
-	},
-	{
-		key: "variableAnnualMedianGap",
-		header: "Ecart_rem_variable_annuelle_mediane",
-		percent: true,
-	},
-	{
-		key: "variableHourlyMeanGap",
-		header: "Ecart_rem_variable_horaire_moyenne",
-		percent: true,
-	},
-	{
-		key: "variableHourlyMedianGap",
-		header: "Ecart_rem_variable_horaire_mediane",
-		percent: true,
-	},
-	{
-		key: "variableProportionWomen",
-		header: "Proportion_variable_F",
-		percent: true,
-	},
-	{
-		key: "variableProportionMen",
-		header: "Proportion_variable_H",
-		percent: true,
-	},
+	percentColumn("globalAnnualMeanGap", "Ecart_rem_annuelle_moyenne"),
+	percentColumn("globalAnnualMedianGap", "Ecart_rem_annuelle_mediane"),
+	percentColumn("globalHourlyMeanGap", "Ecart_rem_horaire_moyenne"),
+	percentColumn("globalHourlyMedianGap", "Ecart_rem_horaire_mediane"),
+	percentColumn("variableAnnualMeanGap", "Ecart_rem_variable_annuelle_moyenne"),
+	percentColumn(
+		"variableAnnualMedianGap",
+		"Ecart_rem_variable_annuelle_mediane",
+	),
+	percentColumn("variableHourlyMeanGap", "Ecart_rem_variable_horaire_moyenne"),
+	percentColumn(
+		"variableHourlyMedianGap",
+		"Ecart_rem_variable_horaire_mediane",
+	),
+	percentColumn("variableProportionWomen", "Proportion_variable_F"),
+	percentColumn("variableProportionMen", "Proportion_variable_H"),
 	...(["annual", "hourly"] as const).flatMap((period) =>
 		(["Women", "Men"] as const).flatMap((gender) =>
-			([1, 2, 3, 4] as const).map(
-				(quartile) =>
-					({
-						key: `${period}Quartile${quartile}Proportion${gender}`,
-						header: `Quartile${quartile}_${period === "annual" ? "rem_annuelle" : "rem_horaire"}_proportion_${gender === "Women" ? "F" : "H"}`,
-						percent: true,
-					}) satisfies CsvColumn,
+			([1, 2, 3, 4] as const).map((quartile) =>
+				percentColumn(
+					`${period}Quartile${quartile}Proportion${gender}`,
+					`Quartile${quartile}_${period === "annual" ? "rem_annuelle" : "rem_horaire"}_proportion_${gender === "Women" ? "F" : "H"}`,
+				),
 			),
 		),
 	),
