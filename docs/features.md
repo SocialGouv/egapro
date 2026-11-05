@@ -377,7 +377,7 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 - Pages **statiques** (pas de BDD), contenu maintenu manuellement dans le code.
 - L'accessibilité est auditée par ultra11y (pre-commit, `pnpm verify`, skill `review-a11y` via `/review gates`, workflow `a11y.yaml`) ; Lighthouse en rapporte un score indicatif, en avertissement.
 - La politique de confidentialité `/donnees-personnelles` correspond au dispositif de **conservation limitée** appliqué techniquement par la purge RGPD des déclarations (voir §13.8).
-- Les CGU ont un historique de versions (`~/modules/legal/TermsOfUsePage/termsOfUseVersions.ts`) : chaque entrée associe une date d'entrée en vigueur ISO à son texte figé. La première entrée est la version en vigueur, servie sur `/cgu` ; les suivantes sont des archives, servies sur `/cgu/AAAA-MM-JJ`. `/cgu/[version]` redirige vers `/cgu` pour la date en vigueur et répond 404 pour une date inconnue.
+- Les CGU ont un historique de versions (`~/modules/legal/TermsOfUsePage/termsOfUseVersions.ts`) : chaque entrée associe une date d'entrée en vigueur ISO à son texte figé. La première entrée est la version en vigueur, servie sur `/cgu` ; les suivantes sont des archives, servies sur `/cgu/AAAA-MM-JJ`. `/cgu/[version]` redirige vers `/cgu` pour la date en vigueur et répond 404 pour une date inconnue. Tant que le registre ne contient que la version en vigueur, `/cgu` n'affiche ni le lien ni la section d'historique ; ils réapparaissent dès l'ajout d'une première archive.
 
 **Publier une nouvelle version des CGU** :
 

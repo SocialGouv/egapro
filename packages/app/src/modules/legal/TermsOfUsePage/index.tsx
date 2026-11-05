@@ -6,6 +6,7 @@ import { CGU } from "~/modules/routes";
 
 import { TermsOfUseVersionHistory } from "./TermsOfUseVersionHistory";
 import {
+	hasArchivedTermsOfUseVersions,
 	TERMS_OF_USE_VERSIONS,
 	type TermsOfUseVersion,
 } from "./termsOfUseVersions";
@@ -29,6 +30,7 @@ export function TermsOfUsePage({
 }: Props) {
 	const { Content, effectiveDate } = version;
 	const formattedDate = formatIsoDate(effectiveDate);
+	const hasArchive = hasArchivedTermsOfUseVersions(versions);
 	return (
 		<main id="content" tabIndex={-1}>
 			<div className="fr-container fr-py-6w">
@@ -52,11 +54,13 @@ export function TermsOfUsePage({
 				{isCurrent ? (
 					<>
 						<p>En vigueur à partir du {formattedDate}</p>
-						<p>
-							<a href="#historique-des-versions">
-								Consulter l'historique des versions
-							</a>
-						</p>
+						{hasArchive && (
+							<p>
+								<a href="#historique-des-versions">
+									Consulter l'historique des versions
+								</a>
+							</p>
+						)}
 					</>
 				) : (
 					<>
@@ -72,10 +76,12 @@ export function TermsOfUsePage({
 
 				<Content />
 
-				<TermsOfUseVersionHistory
-					versions={versions}
-					viewedEffectiveDate={effectiveDate}
-				/>
+				{hasArchive && (
+					<TermsOfUseVersionHistory
+						versions={versions}
+						viewedEffectiveDate={effectiveDate}
+					/>
+				)}
 			</div>
 		</main>
 	);

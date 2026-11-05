@@ -58,7 +58,7 @@ export function AccessibilityCompliance() {
 				la Direction générale du travail, et qui n'est pas sous son contrôle.
 				Ses garanties sont reprises en HTML sur la page{" "}
 				<Link href={`${PRIVACY}#${HOSTING_GUARANTEES_ID}`}>
-					Données personnelles
+					Politique de confidentialité
 				</Link>
 				.
 			</p>
