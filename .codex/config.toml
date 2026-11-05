@@ -17,4 +17,4 @@ args = ["-y", "@playwright/mcp@latest"]
 
 [mcp_servers.ultra11y]
 command = "pnpm"
-args = ["--dir", "packages/app", "exec", "ultra11y", "mcp"]
+args = ["--filter", "app", "exec", "ultra11y", "mcp"]

@@ -38,8 +38,8 @@
 			"type": "local",
 			"command": [
 				"pnpm",
-				"--dir",
-				"packages/app",
+				"--filter",
+				"app",
 				"exec",
 				"ultra11y",
 				"mcp"
@@ -48,13 +48,16 @@
 	},
 	"permission": {
 		"bash": {
+			"git push* --force*": "ask",
+			"git -* push* --force*": "ask",
+			"git push* -f*": "ask",
+			"git -* push* -f*": "ask",
 			"*--no-verify*": "deny",
-			"git commit -n*": "deny",
+			"git commit* -n*": "deny",
+			"git -* commit* -n*": "deny",
 			"*--no-gpg-sign*": "deny",
 			"*commit.gpgsign=false*": "deny",
-			"*commit.gpgSign=false*": "deny",
-			"git push --force*": "ask",
-			"git push -f*": "ask"
+			"*commit.gpgSign=false*": "deny"
 		}
 	}
 }

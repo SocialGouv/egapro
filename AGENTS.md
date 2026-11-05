@@ -158,7 +158,7 @@ Données d'exemple fictives : `SIREN 123456789`, `email@example.fr`, `Société 
 ## Outils : MCP, scripts, CI
 
 - **MCP** (`next-devtools`, `dsfr`, `figma`, `playwright`, `ultra11y`) : **ne devine jamais de mémoire** une API Next.js, une classe DSFR, une valeur Figma ou un critère RGAA — demande au serveur.
-- **Config générée** : `.mcp.json` et la `POLICY` de `scripts/ai/sync-agent-config.mjs` sont les sources ; `node scripts/ai/sync-agent-config.mjs` régénère les blocs `mcp` / `permission` d'`opencode.json`, les `permissions` de `.claude/settings.json` et `.codex/`. Jamais à la main : la CI refuse une copie désynchronisée.
+- **Config générée** : `.mcp.json` et la `POLICY` de `scripts/ai/sync-agent-config.mjs` sont les sources ; `node scripts/ai/sync-agent-config.mjs` régénère les blocs `mcp` / `permission` d'`opencode.json`, les `permissions` de `.claude/settings.json` et `.codex/`. Jamais à la main : la CI refuse une copie désynchronisée. Les règles Codex ne comparent que des préfixes de tokens : elles refusent `--no-verify` / `-n` / `--force` collés à la sous-commande, pas placés après d'autres arguments (Claude Code et OpenCode, eux, les attrapent partout) ; pour Codex, le rattrapage est la CI (`quality-patterns`, `a11y-gate`).
 - **Scripts** : `pnpm verify` (le verdict « prêt » ; instantané si ce code exact est déjà vert, `--force` pour rejouer), `pnpm check:patterns`, `pnpm dev:app` (port 3000), `pnpm test:e2e` (exige un dev server). Le reste : `package.json`.
 - **CI** : un check rouge → lis son workflow dans `.github/workflows/`. Bloquants sur PR : `ci.yaml`, `a11y.yaml` (`a11y-gate`), `a11y-lite.yaml`, `e2e.yaml` (check requis « Test e2e »).
 

@@ -159,10 +159,24 @@ jobs:
           fetch-depth: 0
       - name: Self-test the pattern rules
         run: bash scripts/quality/check-patterns.sh --self-test
-      - name: Check added lines since alpha
-        run: bash scripts/quality/check-patterns.sh --diff origin/alpha
+      - name: Check added lines of the push
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          base=origin/alpha
+          if [ "$GITHUB_REF" = refs/heads/alpha ]; then
+            if [[ "$BEFORE" =~ ^0+$ ]] || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+              echo "No usable previous SHA on alpha (new ref or force push): checking the pushed commit only"
+              base=HEAD^
+            else
+              base="$BEFORE"
+            fi
+          fi
+          bash scripts/quality/check-patterns.sh --diff "$base"
       - name: Check Claude Code, OpenCode and Codex configs are in sync
         run: node scripts/ai/sync-agent-config.mjs --check
+      - name: Test the agent command policy
+        run: node --test scripts/ai/sync-agent-config.test.mjs
 
   app-check-journal:
     name: App · Journal monotone check

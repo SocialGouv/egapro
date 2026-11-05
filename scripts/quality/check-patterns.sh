@@ -38,7 +38,7 @@ rule() {
 	fi
 	[[ "$FILE_PATH" =~ $file_filter ]] || return 0
 	local sample
-	sample=$(printf '%s\n' "$CONTENT" | grep -m1 -E -- "$pattern") || return 0
+	sample=$(grep -m1 -E -- "$pattern" <<<"$CONTENT") || return 0
 	report "$message" "$(printf '%s' "$sample" | sed -E 's/^[[:space:]]+//' | cut -c1-160)"
 }
 
@@ -215,7 +215,7 @@ self_test() {
 		[ "$VIOLATIONS" -gt "$before" ] && got="block"
 		if [ "$got" != "$want" ]; then
 			failures=$((failures + 1))
-			printf 'self-test FAIL: expected %s, got %s — %s: %s\n' "$want" "$got" "$path" "$content" >&2
+			printf 'self-test FAIL: expected %s, got %s — %s: %s\n' "$want" "$got" "$path" "${content:0:120}" >&2
 		fi
 	}
 	local m='packages/app/src/modules/demo/Demo.tsx'
@@ -228,6 +228,7 @@ self_test() {
 	expect block "$m" M '<svg viewBox="0 0 1 1">'
 	expect block "$t" M 'const url = process.env.SITE_URL;'
 	expect pass 'packages/app/next.config.ts' M 'const x = process.env.X;'
+	expect block "$t" M "$(printf 'const url = process.env.SITE_URL;\n'; yes 'const filler = "padding padding padding padding padding padding padding";' | head -n 2000)"
 	expect block "$t" M 'import { x } from "../../shared";'
 	expect block 'packages/app/src/modules/demo/demo.module.scss' M 'color: #fff;'
 	expect block 'packages/app/src/modules/demo/demo.module.scss' M 'color: rgba(0, 0, 0, 0.5);'

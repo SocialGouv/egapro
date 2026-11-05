@@ -9,7 +9,7 @@
 #   VERIFY_SKIP   space-separated step names to skip, e.g. "test typecheck" (never in CI)
 #   --force       re-run even if this exact code state already passed
 #
-# Steps: patterns · agent-config · a11y · lint · format · typecheck · test
+# Steps: patterns · agent-config · agent-policy · a11y · lint · format · typecheck · test
 #
 # A full green run (no step skipped) records a fingerprint of the exact code state — HEAD, the
 # merge-base, the working-tree diff and every untracked file. Re-running on the same state (the
@@ -63,6 +63,7 @@ a11y_static() {
 
 step patterns bash scripts/quality/check-patterns.sh --diff "$BASE"
 step agent-config node scripts/ai/sync-agent-config.mjs --check
+step agent-policy node --test scripts/ai/sync-agent-config.test.mjs
 step a11y a11y_static
 step lint pnpm lint:check
 step format pnpm format:check

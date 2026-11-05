@@ -27,8 +27,8 @@
 		"ultra11y": {
 			"command": "pnpm",
 			"args": [
-				"--dir",
-				"packages/app",
+				"--filter",
+				"app",
 				"exec",
 				"ultra11y",
 				"mcp"

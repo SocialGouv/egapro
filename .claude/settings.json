@@ -3,14 +3,17 @@
   "permissions": {
     "deny": [
       "Bash(*--no-verify*)",
-      "Bash(git commit -n*)",
+      "Bash(git commit* -n*)",
+      "Bash(git -* commit* -n*)",
       "Bash(*--no-gpg-sign*)",
       "Bash(*commit.gpgsign=false*)",
       "Bash(*commit.gpgSign=false*)"
     ],
     "ask": [
-      "Bash(git push --force*)",
-      "Bash(git push -f*)"
+      "Bash(git push* --force*)",
+      "Bash(git -* push* --force*)",
+      "Bash(git push* -f*)",
+      "Bash(git -* push* -f*)"
     ]
   },
   "hooks": {
@@ -20,7 +23,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "f=\"$CLAUDE_PROJECT_DIR/packages/app/node_modules/ultra11y/hooks/pre-tool-use.mjs\"; [ -f \"$f\" ] && node \"$f\" || true",
+            "command": "f=\"$CLAUDE_PROJECT_DIR/packages/app/node_modules/ultra11y/hooks/pre-tool-use.mjs\"; if [ -f \"$f\" ]; then node \"$f\"; else echo \"ultra11y hook missing, commit/push/PR a11y gate inactive: run pnpm install\" >&2; exit 1; fi",
             "timeout": 30
           }
         ]
