@@ -2,15 +2,37 @@
 	"mcpServers": {
 		"next-devtools": {
 			"command": "npx",
-			"args": ["-y", "next-devtools-mcp@latest"]
+			"args": [
+				"-y",
+				"next-devtools-mcp@latest"
+			]
 		},
 		"dsfr": {
 			"command": "npx",
-			"args": ["dsfr-mcp"]
+			"args": [
+				"dsfr-mcp"
+			]
 		},
 		"figma": {
 			"type": "http",
 			"url": "https://mcp.figma.com/mcp"
+		},
+		"playwright": {
+			"command": "npx",
+			"args": [
+				"-y",
+				"@playwright/mcp@latest"
+			]
+		},
+		"ultra11y": {
+			"command": "pnpm",
+			"args": [
+				"--filter",
+				"app",
+				"exec",
+				"ultra11y",
+				"mcp"
+			]
 		}
 	}
 }

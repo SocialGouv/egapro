@@ -1,5 +1,4 @@
-[mcp_servers.figma]
-url = "http://127.0.0.1:3845/mcp"
+# Généré par scripts/ai/sync-agent-config.mjs depuis .mcp.json — ne pas éditer.
 
 [mcp_servers.next-devtools]
 command = "npx"
@@ -8,3 +7,14 @@ args = ["-y", "next-devtools-mcp@latest"]
 [mcp_servers.dsfr]
 command = "npx"
 args = ["dsfr-mcp"]
+
+[mcp_servers.figma]
+url = "https://mcp.figma.com/mcp"
+
+[mcp_servers.playwright]
+command = "npx"
+args = ["-y", "@playwright/mcp@latest"]
+
+[mcp_servers.ultra11y]
+command = "pnpm"
+args = ["--filter", "app", "exec", "ultra11y", "mcp"]

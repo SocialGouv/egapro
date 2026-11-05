@@ -1,6 +1,6 @@
 // Visual fidelity probe — deterministic render + DOM measurement + onion-skin overlay.
 //
-// Used by the `design-validator` agent (see .claude/agents/design-validator/AGENT.md).
+// Used by the design-fidelity review (see .agents/skills/review/references/design-fidelity.md).
 // It is NOT part of the app build; it drives a Playwright browser against a running
 // dev server to produce, for one screen scenario:
 //   - a cropped screenshot per viewport (the "rendered" side of the comparison)
@@ -10,7 +10,7 @@
 // Figma node export so positional drift shows as ghosting regardless of its cause.
 //
 // Security model: this is a trusted local dev tool. The scenario JSON is authored by
-// the `design-validator` agent (never end-user input) and runs only against an
+// the reviewing developer or agent (never end-user input) and runs only against an
 // ephemeral local dev server. The `evaluate` setup action and the `measures` selectors
 // are therefore executed as-is in the page context; do not feed it untrusted JSON.
 //

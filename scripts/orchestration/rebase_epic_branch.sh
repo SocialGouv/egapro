@@ -20,13 +20,13 @@ fi
 # In-place rebase requires the worktree to be clean — if dirty, the script
 # refuses (exit 1) rather than silently losing the user's edits.
 #
-# Called by epic_loop.sh between ticks (in NEW-mode epics only).
+# Run by /implement <epic> between two sub-tickets.
 #
 # Exit codes:
 #   0  rebase clean (or no-op: already up-to-date)
 #   1  hard error (cannot fetch, push rejected, worktree creation failed)
-#   2  rebase conflict — aborted, comment posted on the epic, label
-#      `dispatch=escalate` applied. Caller should halt this epic.
+#   2  rebase conflict — aborted, comment posted on the epic.
+#      Caller should halt this epic until it is resolved by hand.
 
 set -euo pipefail
 
@@ -110,7 +110,7 @@ git rebase --abort >&2 || true
 
 gh issue comment "$EPIC" --body "**rebase_epic_branch : conflit \`${BRANCH}\` ↔ \`origin/alpha\`**
 
-Le rebase automatique de la branche d'intégration a échoué. Le pipeline est arrêté pour cet epic (label \`dispatch=escalate\` posé) jusqu'à résolution manuelle :
+Le rebase automatique de la branche d'intégration a échoué. Aucun nouveau sous-ticket ne doit être implémenté sur cet epic avant résolution manuelle :
 
 \`\`\`bash
 git fetch origin alpha
@@ -119,11 +119,8 @@ git rebase origin/alpha
 # résoudre les conflits
 git rebase --continue
 git push --force-with-lease origin ${BRANCH}
-gh issue edit ${EPIC} --remove-label dispatch=escalate
 \`\`\`
 
-Tant que le label reste posé, \`epic_loop.sh\` exitera en code 2 sans dispatcher de nouveaux tickets sur cet epic." >/dev/null 2>&1 || true
-
-gh issue edit "$EPIC" --add-label "dispatch=escalate" >/dev/null 2>&1 || true
+Puis relancer \`/implement ${EPIC}\`." >/dev/null 2>&1 || true
 
 exit 2

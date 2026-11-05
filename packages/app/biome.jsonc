@@ -34,7 +34,17 @@
 		"enabled": true,
 		"rules": {
 			"recommended": true,
+			"suspicious": {
+				"noExplicitAny": "error"
+			},
+			"security": {
+				"noDangerouslySetInnerHtml": "error"
+			},
+			"performance": {
+				"noImgElement": "error"
+			},
 			"nursery": {
+				"noInlineStyles": "error",
 				"useSortedClasses": {
 					"level": "warn",
 					"fix": "safe",

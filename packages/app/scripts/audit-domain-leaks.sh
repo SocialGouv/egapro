@@ -3,8 +3,8 @@
 # audit-domain-leaks.sh — repo-wide sweep for business rules leaked outside the
 # domain layer (`src/modules/domain`).
 #
-# WHY this exists: the `block-bad-patterns` hook and the `structural-auditor`
-# agent only see the CHANGED files of the current ticket. A business rule can
+# WHY this exists: `scripts/quality/check-patterns.sh` and the structural review
+# checklist only see the CHANGED lines of the current ticket. A business rule can
 # sit re-implemented inline in a file that the ticket never touches — invisible
 # to both. This script applies every detection signature to the WHOLE tree, so a
 # broad audit catches those latent leaks. Run it manually or from CI.

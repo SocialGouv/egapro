@@ -9,7 +9,7 @@ fi
 # ensure_epic_branch.sh <epic_N>
 #
 # Idempotent: ensures the integration branch `epic/<N>` exists on origin.
-# Created from origin/alpha if missing. Used by epic_loop.sh at startup so
+# Created from origin/alpha if missing. Run by /implement <epic> before the first sub-ticket so
 # every ticket PR for the epic targets a single integration branch — no
 # more stacked-PR pattern.
 #

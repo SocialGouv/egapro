@@ -168,7 +168,7 @@ modules/
                   #   FileUpload, uploadFile, fileNameValidation, …)
 ```
 
-Règle d'or : **pas de composant custom dans `src/app/`**. Les fichiers `page.tsx` sont des wrappers fins qui importent depuis un module. Cette règle est **bloquée par le hook `block-bad-patterns`** (rejet de l'edit).
+Règle d'or : **pas de composant custom dans `src/app/`**. Les fichiers `page.tsx` sont des wrappers fins qui importent depuis un module. Cette règle est **bloquée par `scripts/quality/check-patterns.sh`** (pre-commit + CI).
 
 ### Server (`src/server/`)
 
@@ -225,7 +225,7 @@ domain/
   __tests__/      # 100% coverage sur toutes les fonctions
 ```
 
-`format.ts` est le **seul endroit** où une valeur devient du texte affichable — nombres, pourcentages, montants, durées, tailles de fichier, dates et heures. Un composant n'appelle jamais `toLocaleString`, `Intl.*` ni `toFixed` lui-même : la règle de nommage et la discipline associées vivent dans `.claude/rules/code-quality.md` (« Formatage d'affichage »), et le hook `block-bad-patterns` refuse le motif hors du domaine.
+`format.ts` est le **seul endroit** où une valeur devient du texte affichable — nombres, pourcentages, montants, durées, tailles de fichier, dates et heures. Un composant n'appelle jamais `toLocaleString`, `Intl.*` ni `toFixed` lui-même : la règle de nommage et la discipline associées vivent dans `.agents/skills/implement/references/conventions/code-quality.md` (« Formatage d'affichage »), et `scripts/quality/check-patterns.sh` refuse le motif hors du domaine.
 
 **Pourquoi cette discipline** :
 
@@ -234,7 +234,7 @@ domain/
 - Les contraintes du règlement (seuils, calendriers) sont **lisibles à un endroit unique**, ce qui simplifie l'audit métier.
 - La source unique évite les divergences silencieuses entre le wizard, l'export et les routers tRPC.
 
-Hooks de garde — le hook `block-bad-patterns` bloque les patterns suivants en dehors de `domain/` et des tests :
+Garde-fous — `scripts/quality/check-patterns.sh` (pre-commit + CI) bloque les patterns suivants en dehors de `domain/` et des tests :
 
 | Pattern bloqué | Alternative obligatoire |
 |---|---|
@@ -433,7 +433,7 @@ Définies dans `src/server/api/trpc.ts`. Les routers (un par domaine) composent 
 
 ### 6.3 Schémas Zod partagés
 
-Les schémas Zod sont la **single source of truth** : utilisés à la fois par le formulaire React (`useZodForm`) et par la procédure tRPC (`.input(schema)`). Ils vivent dans `src/modules/{domain}/schemas.ts`, **jamais inline dans `src/server/api/routers/`** (règle bloquée par hook).
+Les schémas Zod sont la **single source of truth** : utilisés à la fois par le formulaire React (`useZodForm`) et par la procédure tRPC (`.input(schema)`). Ils vivent dans `src/modules/{domain}/schemas.ts`, **jamais inline dans `src/server/api/routers/`** (règle bloquée par `check-patterns.sh`).
 
 ### 6.4 Audit middleware
 
@@ -518,7 +518,7 @@ Les migrations sont **versionnées dans le repo** (`packages/app/drizzle/`). En 
 
 ### 7.4 Transactions
 
-Toute opération qui touche **plusieurs tables** doit utiliser `db.transaction(...)`. Règle enforcée par `structural-auditor` et `security-auditor`. La purge RGPD des déclarations (§9.6) illustre le pattern : toutes les suppressions BDD relationnelles sont exécutées dans **une seule transaction**, tandis que les effets non transactionnels (suppression S3, écriture de la ligne d'audit) sont volontairement rejetés **hors** de la transaction.
+Toute opération qui touche **plusieurs tables** doit utiliser `db.transaction(...)`. Règle vérifiée par les checklists structure et sécurité de `/review gates`. La purge RGPD des déclarations (§9.6) illustre le pattern : toutes les suppressions BDD relationnelles sont exécutées dans **une seule transaction**, tandis que les effets non transactionnels (suppression S3, écriture de la ligne d'audit) sont volontairement rejetés **hors** de la transaction.
 
 ---
 
@@ -598,7 +598,7 @@ Lors de la purge RGPD des déclarations (§9.6), les objets S3 rattachés aux d�
 
 ## 9. Audit logging
 
-Module : `src/modules/audit/` (constantes, types) + `src/server/audit/` (runtime). Documentation détaillée : [`.claude/rules/audit-logging.md`](../.claude/rules/audit-logging.md).
+Module : `src/modules/audit/` (constantes, types) + `src/server/audit/` (runtime). Documentation détaillée : [`audit-logging.md`](../.agents/skills/implement/references/conventions/audit-logging.md).
 
 ### 9.1 Pourquoi
 
@@ -752,7 +752,7 @@ Toute entrée externe est validée via **Zod** : formulaires, procédures tRPC, 
 
 ### 10.4 Variables d'environnement
 
-Déclarées et validées dans `src/env.js`. **Jamais lire `process.env` directement** (bloqué par hook). Les scripts autonomes de `packages/app/scripts/` (crons) font exception : n'étant pas des modules du bundle app, ils lisent `process.env` et re-valident eux-mêmes leurs entrées (ex. `EGAPRO_DECLARATION_RETENTION_YEARS` re-parsé en entier positif par la purge, avec repli sur le défaut 6).
+Déclarées et validées dans `src/env.js`. **Jamais lire `process.env` directement** (bloqué par `check-patterns.sh`). Les scripts autonomes de `packages/app/scripts/` (crons) font exception : n'étant pas des modules du bundle app, ils lisent `process.env` et re-valident eux-mêmes leurs entrées (ex. `EGAPRO_DECLARATION_RETENTION_YEARS` re-parsé en entier positif par la purge, avec repli sur le défaut 6).
 
 ### 10.5 Secrets
 
@@ -793,7 +793,7 @@ Discipline RSC stricte : **Server Component par défaut**. `"use client"` unique
 
 Priorité stricte : 1) classes DSFR → 2) utilities DSFR + CSS variables → 3) SCSS Module scopé (dernier recours).
 
-`style={}` inline est **bloqué par hook**. Les `@media (width|screen)` en SCSS aussi (forcer `@include respond-from(md)`).
+`style={}` inline est **bloqué par `check-patterns.sh`**. Les `@media (width|screen)` en SCSS aussi (forcer `@include respond-from(md)`).
 
 ### 11.4 Dark mode
 
@@ -801,7 +801,7 @@ Activé via `data-fr-scheme="system"` sur `<html>`. Cookie `fr-theme` lu par un 
 
 ### 11.5 RGAA 4.1.2 / WCAG 2.2 AA
 
-Toute l'accessibilité passe par **ultra11y**, en deux surfaces : l'agent `rgaa-auditor`, qui lance le skill `review-a11y` sur le code sous changement, et le workflow `.github/workflows/a11y.yaml` (Action `SocialGouv/ultra11y`) — gate statique bloquante sur chaque PR, plus — au cron hebdomadaire ou en manuel — un balayage Playwright des pages qui décide les critères au rendu et fait adjuger les critères de jugement par le runner CLI du moteur. Lighthouse rapporte un score d'accessibilité en avertissement, ce n'est pas une gate. Aucun système a11y parallèle. Règle canonique : `.claude/rules/rgaa.md`.
+Toute l'accessibilité passe par **ultra11y**, en deux surfaces : le skill `review-a11y`, lancé par `/review gates` sur le code sous changement (après l'audit statique du pre-commit et de `pnpm verify`), et le workflow `.github/workflows/a11y.yaml` (Action `SocialGouv/ultra11y`) — gate statique bloquante sur chaque PR, plus — au cron hebdomadaire ou en manuel — un balayage Playwright des pages qui décide les critères au rendu et fait adjuger les critères de jugement par le runner CLI du moteur. Lighthouse rapporte un score d'accessibilité en avertissement, ce n'est pas une gate. Aucun système a11y parallèle. Règle canonique : `AGENTS.md` § Accessibilité, et `.agents/skills/review/references/a11y.md` pour la revue.
 
 ---
 
@@ -928,7 +928,7 @@ Les pannes de ProConnect bloquent **complètement** la connexion ; aucune procé
 ## Pour aller plus loin
 
 - **Conventions de code** détaillées : [`packages/app/CLAUDE.md`](../packages/app/CLAUDE.md)
-- **Règles de qualité** automatisées : [`.claude/rules/`](../.claude/rules/) (audit logging, code-quality, database-drizzle, react-components, styling-dsfr, testing, trpc-api, …)
+- **Règles de qualité** automatisées : [`conventions/`](../.agents/skills/implement/references/conventions/) (audit logging, code-quality, database-drizzle, react-components, styling-dsfr, testing, trpc-api, …)
 - **Wiki Spec V2** (réglementation) : <https://github.com/SocialGouv/egapro/wiki/Spec-V2>
 - **Features** (vue fonctionnelle) : [`docs/features.md`](features.md)
 - **Parcours utilisateurs** : [`docs/parcours-utilisateurs.md`](parcours-utilisateurs.md)

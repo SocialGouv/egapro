@@ -156,6 +156,8 @@ Les identifiants (`EGAPRO_PROCONNECT_CLIENT_ID`, `EGAPRO_PROCONNECT_CLIENT_SECRE
 
 | Commande | Description |
 |---|---|
+| `pnpm verify` | Tous les gates locaux (patterns, a11y, lint, format, typecheck, tests) ; instantané si ce code exact est déjà vert, `--force` pour rejouer |
+| `pnpm check:patterns` | Interdits mécaniques sur le diff |
 | `pnpm dev:app` | Serveur de développement (port 3000) |
 | `pnpm build` | Build de tous les packages |
 | `pnpm lint:check` | Vérification du lint |
@@ -166,6 +168,31 @@ Les identifiants (`EGAPRO_PROCONNECT_CLIENT_ID`, `EGAPRO_PROCONNECT_CLIENT_SECRE
 | `pnpm test:lighthouse` | Audit Lighthouse (nécessite le serveur sur le port 3000) |
 | `pnpm db:migrate` | Migrations Drizzle |
 | `pnpm db:studio` | Drizzle Studio |
+
+> Lighthouse rapporte un score d'accessibilité en **warning**, pas en gate : l'accessibilité est tranchée par ultra11y, et deux seuils concurrents sur un même sujet donnent deux verdicts à réconcilier à la main.
+
+## CI
+
+| Fichier | Déclencheur | Rôle |
+|---|---|---|
+| `ci.yaml` | chaque push | build · lint · format · patterns · typecheck · tests · cohérence des versions ultra11y |
+| `a11y.yaml` | PR, cron lundi 04:00 UTC, manuel | ultra11y. Sur **PR** : `a11y-gate` seul — audit statique de tout `src`, **bloquant**. Sur **cron** ou **manuel** : chaîne complète (`a11y-pages` + `a11y-bundle`), non bloquante et payante |
+| `a11y-lite.yaml` | PR → `alpha`, push `alpha` | ultra11y mode lite. Sur **PR** : capture des pages que le diff peut changer, moteur seul, **bloquant** sur un constat de rendu nouveau ou une route non échantillonnée. Sur **push `alpha`** : capture tout et écrit la baseline |
+| `e2e.yaml` | PR → `alpha`, manuel | suite Playwright complète **et** les coordonnées de la grille de recette, en shards parallèles ; le check requis « Test e2e » est le job agrégateur |
+| `e2e-grille.yaml` | cron nocturne (02:00 UTC), manuel | grille de recette seule, rapport de recette |
+| `lighthouse.yaml` | `deployment_status` (success, hors env `build-*`) | audit Lighthouse sur l'URL déployée |
+| `review-auto.yaml` | push sur toute branche sauf `master` et `**-persist` | déploiement des review apps |
+| `deactivate.yaml` | PR closed, `delete` de branche | destruction de la review app |
+| `preproduction.yaml` | push `beta` | déploiement preprod |
+| `production.yaml` | push tag `v*` | déploiement prod |
+| `promote-test-env.yaml` | manuel (`release`, `target`) | déploie une release sur un env de test persistant (`rgaa` / `perf`) |
+| `release.yml` | manuel (branche `beta`) | semantic-release |
+| `release-alpha.yaml` | manuel (branche `alpha`) | semantic-release — prerelease `-alpha.N` |
+| `release-changelog.yaml` | `release: published`, manuel | changelog FR généré, injecté dans le corps de la release |
+| `db-schema.yaml` | push `alpha`/`master` sur le schéma, manuel | publie la doc de schéma DB sur le wiki |
+| `sync-docs-to-wiki.yaml` | push `alpha`/`master` sur `docs/**`, manuel | miroir `docs/` → wiki |
+| `ticket-end-date.yaml` | PR closed | estampille « End date » sur le board |
+| `claude-question.yml` | issue labellisée `question` | réponse automatique |
 
 ## Sécurisation de l'API SUIT (via passerelle APISIX)
 
@@ -212,126 +239,73 @@ Quand l'infra fournira une API Gateway native :
 - supprimer les fichiers `.kontinuous/templates/apisix-suit.*.yaml`
 - selon la nouvelle gateway, adapter ou supprimer `src/middleware.ts` + la var `EGAPRO_GATEWAY_SHARED_SECRET`
 
-## Configuration AI (Claude Code)
+## Configuration AI (Claude Code, OpenCode, Codex)
 
-Le projet est entierement configure pour [Claude Code](https://claude.com/claude-code). Toute la configuration est versionnee dans `.claude/` et `.mcp.json` : chaque developpeur qui clone le repo beneficie automatiquement de toute l'intelligence du projet.
+Le projet est configure pour tout agent de code qui lit `AGENTS.md` — [Claude Code](https://claude.com/claude-code) et [OpenCode](https://opencode.ai) en tete. Toute la configuration est versionnee : chaque developpeur qui clone le repo beneficie de la meme intelligence, quel que soit l'outil ou le modele.
 
 ### Comment ca fonctionne
 
 ```
-.claude/
-  settings.json           <- hooks + plugins
-  hooks/                  <- scripts shell executes automatiquement
-  rules/                  <- socle produit et code, charge selon le fichier edite
-  pipeline/               <- mecanique d'orchestration, JAMAIS charge automatiquement
-  agents/                 <- sous-agents specialises
-  skills/                 <- workflows invocables via /commande
-
-CLAUDE.md (racine)        <- contexte projet (toujours charge)
-packages/app/CLAUDE.md    <- architecture du package app (charge quand on y travaille)
-.mcp.json                 <- serveurs MCP (DSFR, Figma, GitHub, Next.js)
+AGENTS.md                 <- contexte projet, source unique (toujours charge)
+packages/app/AGENTS.md    <- architecture du package app
+CLAUDE.md, packages/app/CLAUDE.md   <- "@AGENTS.md" : Claude Code importe AGENTS.md
+.agents/skills/           <- les skills (standard Agent Skills : Codex, OpenCode ; Claude via le symlink)
+  analyze/   SKILL.md + references/     (spec, board, sizing, PO, architecte, bug, rework)
+  implement/ SKILL.md + references/     (workflow, epic, e2e, bug-fix, conventions/ = regles de code)
+  review/    SKILL.md + references/     (checklists structure, securite, a11y, design, fonctionnel, PR)
+  review-a11y, ultra11y -> symlinks vers la devDependency ultra11y (version epinglee, memes octets partout)
+.mcp.json                 <- serveurs MCP, source unique (lu tel quel par Claude Code)
+.claude/skills            <- symlink -> ../.agents/skills (Claude Code ne lit pas .agents/)
+.claude/settings.json     <- Claude Code : gate ultra11y (hook epingle) + commandes refusees (generees)
+opencode.json             <- OpenCode : instructions, plugin ultra11y + MCP et commandes refusees (generes)
+.codex/config.toml        <- MCP genere (Codex)
+.codex/rules/egapro.rules <- commandes refusees / a confirmer (Codex), generees
+scripts/ai/               <- sync-agent-config.mjs : genere MCP et commandes refusees pour les 3 outils, --check en CI
+lefthook.yml              <- git hooks pre-commit / pre-push
+scripts/quality/          <- check-patterns.sh, verify.sh
 ```
 
-**Le principe qui structure tout** : une regle vit a **un seul endroit**, et ce qu'une machine decide n'est pas re-enonce en prose. Les hooks bloquent mecaniquement, les `rules/` portent ce qui demande du jugement, les `agents/` rapportent, et `pipeline/` decrit l'orchestration — jamais chargee automatiquement, ouverte a la demande.
+**Le principe qui structure tout** : ce qu'une machine peut trancher n'est pas laisse a la lecture d'un modele. Les interdits mecaniques, le lint, les types, les tests et l'audit statique RGAA tournent dans le **git pre-commit**, dans **`pnpm verify`** et dans la **CI** — identiques pour un humain, un modele frontier ou un petit modele. Le texte (skills et references, charges a la demande) ne porte que ce qui demande du jugement, et une regle vit a **un seul endroit**.
 
-### Rules (`.claude/rules/`)
+### Même config pour Claude Code, OpenCode et Codex
 
-Chargees **automatiquement** selon le `paths:` de leur frontmatter. Trois n'en ont pas et sont donc toujours en contexte, parce qu'elles s'appliquent a toute action.
+| | Claude Code | OpenCode | Codex | Source |
+|---|---|---|---|---|
+| Instructions | `CLAUDE.md` → `@AGENTS.md` | `AGENTS.md` + `instructions` d'`opencode.json` | `AGENTS.md` | `AGENTS.md` |
+| Skills | `.claude/skills` (symlink) | `.agents/skills/` | `.agents/skills/` | `.agents/skills/` |
+| MCP | `.mcp.json` | `opencode.json` (`mcp`, généré) | `.codex/config.toml` (généré) | `.mcp.json` |
+| Commandes refusées / à confirmer | `.claude/settings.json` (`permissions`, généré) | `opencode.json` (`permission`, généré) | `.codex/rules/egapro.rules` (généré) | `POLICY` de `scripts/ai/sync-agent-config.mjs` |
+| Gate ultra11y côté agent | hook de `.claude/settings.json` | plugin d'`opencode.json` | portée utilisateur : `ultra11y install --codex` (`pnpm install` le rappelle) | devDependency |
+| git hooks, `pnpm verify`, CI | identiques | identiques | identiques | `lefthook.yml`, `scripts/quality/` |
 
-| Fichier | S'active sur | Contenu |
-|---|---|---|
-| `automation.md` | *(toujours)* | les 22 patterns bloques par le hook, les 4 gates, la verif avant push |
-| `rgaa.md` | *(toujours)* | accessibilite RGAA 4.1.2 / WCAG 2.2 AA — le dispositif ultra11y |
-| `git-artefact-hygiene.md` | *(toujours)* | depot public : zero secret, scrubbing du PII et de l'infra |
-| `code-quality.md` | `src/**/*.{ts,tsx,js,jsx}` | source unique d'une regle metier, DRY, nommage, pas de commentaire |
-| `react-components.md` | `src/**/*.tsx` | pas de logique dans le JSX, granularite, `useEffect`, `useId` |
-| `styling-dsfr.md` | `src/**/*.{tsx,scss}` | cascade DSFR, tokens de couleur, breakpoints, runtime DSFR |
-| `figma-workflow.md` | `src/**/*.{tsx,scss}` | construire depuis un node Figma : traduction des tokens, les pieges |
-| `visual-quality-validation.md` | `src/**/*.{tsx,scss}` | verifier le rendu : mesure DOM, overlay, contrats de fidelite |
-| `bug-fix-workflow.md` | `src/**/*.{ts,tsx}` | reproduire, cause racine, revert-verify, consigner |
-| `database-drizzle.md` | `src/server/**/*.ts` | transactions obligatoires, casing, migrations generees |
-| `trpc-api.md` | `src/server/api/**/*.ts` | schemas Zod hors routeurs, ownership, codes `TRPCError` |
-| `audit-logging.md` | routeurs, route handlers, auth, audit | les 3 points de cablage d'une action auditee |
-| `demarche-state-machine.md` | parcours de declaration, Mon espace, regles serveur, E2E | l'autorite unique du graphe d'etats |
-| `testing.md` | `src/**/__tests__/**` | couverture, frontieres de mock, pieges rencontres |
-| `e2e.md` | `src/e2e/**` | peu de scenarios riches, couverture des pages, ports locaux autorisés par Charon |
+Ce qui reste propre à chaque développeur (config utilisateur, plugins perso, modèle choisi) ne change rien aux trois dernières lignes : c'est là que se joue la barrière.
 
-### Pipeline (`.claude/pipeline/`)
-
-**Jamais charge automatiquement** — lu a la demande par les skills, les agents pipeline et `scripts/orchestration/`. Une session de travail directe n'a aucun usage du board GitHub ni du format de spec des tickets.
-
-| Fichier | Contenu |
-|---|---|
-| `orchestration.md` | la pipeline de bout en bout : agents, skills, scripts, modele de branches |
-| `board.md` | les IDs du board **EGAPRO V2** (non devinables) et les pieges GraphQL |
-| `ticket-spec-format.md` | ce qu'un spec de ticket porte, et ou il vit selon le type d'issue |
-| `complexity-estimation.md` | la rubrique de sizing t-shirt et ses anchors |
-
-### Hooks (`.claude/hooks/`)
-
-Executes **automatiquement**, sans intervention.
-
-| Hook | Quand | Ce qu'il fait |
-|---|---|---|
-| `block-bad-patterns.sh` | **avant** chaque edit | bloque **22 patterns** : suppressions de lint, `: any`, `process.env`, `../../`, `dangerouslySetInnerHTML`, `style={}`, `<svg>`, `<img>`, couleurs en dur et `@media` en SCSS, `zod` dans un routeur ou un composant, helpers `domain` re-inlines, composant sur mesure dans `src/app/`. L'edit est rejete |
-| `auto-lint.sh` | **apres** chaque edit ou commande bash | `biome check --write` sur le fichier edite, ou sur tous les fichiers modifies apres un `pnpm test/build/typecheck` |
-| `check-pr-reviews.sh` | au premier message d'une session | signale les commentaires de review non resolus sur la PR de la branche courante |
-
-### Agents (`.claude/agents/`)
-
-Chaque agent porte son couple `model:` / `effort:` en frontmatter, et les invocations CLI headless repassent les memes valeurs en `--model` / `--effort` : la redondance est volontaire, aucune precedence ne peut produire de divergence. **Seule exception : `code-dev`**, dont ni le modele ni l'effort ne sont pinnes en frontmatter — les deux sont passes a l'invocation : le modele varie par ticket (`--model`), et l'effort est fixe pour le run (`--effort high`, surchargeable par `EPIC_LOOP_EFFORT_CODE_DEV`). C'est le poste de depense de la pipeline (1 run par ticket, session la plus longue), donc un reglage de run et non une propriete de l'agent.
-
-| Agent | Role | Modele | Effort |
-|---|---|---|---|
-| `validator` | typecheck + tests + lint + format en parallele | sonnet | low |
-| `structural-auditor` | greps mecaniques, fuites du domaine, affaiblissement de test | sonnet | high |
-| `rgaa-auditor` | lance le skill ultra11y `review-a11y` sur le code modifie | sonnet | high |
-| `security-auditor` | OWASP Top 10 + RGS, cible sur les mecanismes du projet | sonnet | high |
-| `code-dev` | implemente un ticket end-to-end **et ecrit ses tests vitest** | passe en `--model` : sonnet, opus si `complexe` | passe en `--effort` : high |
-| `e2e-dev` | ecrit tous les tests Playwright, en fin de pipeline | opus | high |
-| `functional-validator` | rejoue les scenarios PO sur le dev server | sonnet | medium |
-| `design-validator` | mesure la fidelite visuelle contre le Figma | sonnet | xhigh |
-| `product-owner`, `bug-analyst`, `architect-rework` | conception : besoin, diagnostic, rework | opus | xhigh |
-| `architect` | decoupage et redaction des specs | opus | xhigh |
-| `review-fixer` | adresse les commentaires de revue | sonnet | high |
-| `doc-writer` | regenere `docs/` depuis le code | sonnet | medium |
-
-Les quatre premiers sont **read-only** : ils rapportent, l'agent principal corrige.
-
-### Skills (`.claude/skills/`)
+### Les 3 skills
 
 | Commande | Ce que ca fait |
 |---|---|
-| `/analyse [#N] [description]` | phase conception — detecte epic / task / bug et invoque les agents adaptes |
-| `/implement #N` | phase execution — loop background pour un epic, `code-dev` synchrone pour une task ou un bug |
-| `/review [#N \| #PR]` | adresse les commentaires de review (humains + bots) |
-| `/report [#N]` | dashboard des agents actifs et de l'etat des sous-tickets |
-| `/doc [#N]` | regenere `docs/features.md`, `architecture.md`, `parcours-utilisateurs.md` |
-| `/open #PR` | recree un worktree local pour tester une PR |
-| `/velocity [sprint]` | velocite des sprints termines + capacite conseillee |
-| `/plan-sprint [sprint]` | planifie le prochain sprint (capacite, report, backlog) |
+| `/analyze [#N] [description]` | conception — detecte epic / task / bug / rework, produit une spec validee par l'utilisateur et la poste sur l'issue |
+| `/implement #N` | execution — worktree, code + tests, `pnpm verify`, `/review gates`, E2E, PR draft. Un epic se traite sous-ticket par sous-ticket (une session par sous-ticket pour paralleliser) |
+| `/review [gates] \| /review #PR` | gates qualite sur le diff courant (verdict, sans rien modifier), ou traitement des threads de revue non resolus d'une PR |
 
-### Gates automatiques
+`--subagents` (optionnel, sur les trois) : delegue les checklists de revue et l'exploration du code a des sous-agents generiques, en parallele. Utile sur un gros diff ; sans le flag, tout se fait dans la session. Detail : [`subagents.md`](.agents/skills/review/references/subagents.md).
 
-Elles se declenchent **toutes seules**, sans commande.
+### Garde-fous
 
-| Gate | Se declenche quand... | Ce qui se passe |
+| Couche | Quand | Ce qui tourne |
 |---|---|---|
-| **Validation** | une tache se termine | 4 agents paralleles (typecheck/tests/lint, structure, RGAA, securite) avant de reporter « termine » |
-| **RGAA** | un `.tsx` est modifie | `rgaa-auditor` lance le moteur ultra11y sur le diff. Pas de checklist ecrite a la main : deux jeux de regles sur un meme sujet divergent |
-| **Securite** | `server/` ou tRPC est modifie | `security-auditor` sur les mecanismes du projet (ownership, `~/env.js`, Drizzle, audit) |
-| **Patterns interdits** | a chaque edit | le hook bloque avant l'ecriture — rien a lancer |
-| **PR review** | la branche a une PR ouverte | les commentaires non resolus sont signales en debut de session |
+| **git pre-commit** (`lefthook.yml`, installe par `pnpm install`) | chaque commit | `biome check --write`, `check-patterns.sh --staged`, audit statique ultra11y |
+| **git pre-push** | chaque push | typecheck |
+| **`pnpm verify`** | avant de declarer une tache terminee | patterns, a11y, lint, format, typecheck, tests |
+| **CI** | chaque push / PR | les memes, plus e2e, `a11y-gate`, `a11y-lite` |
 
-### Workflow type
+`scripts/quality/check-patterns.sh` porte les interdits mecaniques sur les lignes ajoutees : suppressions de lint, `: any`, `process.env`, `../../`, `dangerouslySetInnerHTML`, `style={}`, `<svg>`, `<img>`, couleurs en dur et `@media` en SCSS, `zod` dans un routeur ou un composant, helpers `domain` re-inlines, composant sur mesure dans `src/app/`. `--self-test` verifie chaque regle.
 
-« Ajoute une page de profil » :
+### Accessibilite
 
-1. `CLAUDE.md` + `packages/app/CLAUDE.md` donnent le contexte
-2. `code-quality.md`, `react-components.md`, `styling-dsfr.md`, `figma-workflow.md` s'activent sur les `.tsx`
-3. `block-bad-patterns` empeche d'ecrire du code interdit, `auto-lint` formate
-4. les 4 gates tournent en parallele avant que la tache soit declaree finie
-5. si la branche a une PR, les commentaires non resolus sont signales
+ultra11y est le dispositif unique, a chaque etage : devDependency (moteur, pre-commit, `pnpm verify`), skills `review-a11y` et `ultra11y` lus depuis la devDependency par les trois outils (symlinks dans `.agents/skills/`), gate commit / push / PR cote agent (hook Claude Code dans `.claude/settings.json`, plugin OpenCode dans `opencode.json`, tous deux charges depuis la devDependency ; Codex : `ultra11y install --codex`, portee utilisateur), serveur MCP `ultra11y`, Action CI. Detail : [`docs/accessibilite-ultra11y.md`](docs/accessibilite-ultra11y.md).
+
+> Hooks git : rien a installer a la main. `lefthook` est une devDependency (binaire precompile par plateforme, comme husky), et `pnpm install` pose les hooks ; un `core.hooksPath` local qui pointe vers un repertoire disparu est retire automatiquement.
 
 ## Specifications completes
 
