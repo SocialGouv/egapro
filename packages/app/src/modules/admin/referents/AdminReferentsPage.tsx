@@ -3,7 +3,13 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useState } from "react";
 
-import { type CountyCode, type RegionCode, toCsvField } from "~/modules/domain";
+import {
+	COUNTIES,
+	type CountyCode,
+	REGIONS,
+	type RegionCode,
+	toCsvField,
+} from "~/modules/domain";
 import { api } from "~/trpc/react";
 import { DeleteModal, useDeleteModal } from "./DeleteConfirmationModal";
 import { ImportReferentsModal, useImportModal } from "./ImportReferentsModal";
@@ -12,7 +18,8 @@ import { ReferentTable } from "./ReferentTable";
 import { SearchForm } from "./SearchForm";
 import type { ReferentFormValues, SortColumn } from "./schemas";
 import { DEFAULT_PAGE_SIZE } from "./schemas";
-import type { ReferentSearchRow } from "./types";
+import { REFERENT_TYPE_LABELS } from "./shared/constants";
+import type { ReferentExportRow, ReferentSearchRow } from "./types";
 
 function ExportButton() {
 	const { refetch, isFetching } = api.adminReferents.exportAll.useQuery(
@@ -30,20 +37,34 @@ function ExportButton() {
 			let extension: string;
 
 			if (format === "csv") {
-				const headers = [
-					"region",
-					"county",
-					"name",
-					"type",
-					"value",
-					"principal",
-					"substituteName",
-					"substituteEmail",
+				const columns: Array<{
+					header: string;
+					value: (row: ReferentExportRow) => unknown;
+				}> = [
+					{ header: "Principal", value: (row) => row.principal },
+					{
+						header: "Region (libellé)",
+						value: (row) => REGIONS[row.region as RegionCode],
+					},
+					{ header: "Code_departement", value: (row) => row.county },
+					{
+						header: "Departement (libellé)",
+						value: (row) =>
+							row.county ? COUNTIES[row.county as CountyCode] : null,
+					},
+					{ header: "Nom", value: (row) => row.name },
+					{
+						header: "Type",
+						value: (row) => REFERENT_TYPE_LABELS[row.type] ?? row.type,
+					},
+					{ header: "Contact (value)", value: (row) => row.value },
+					{ header: "Nom_suppleant", value: (row) => row.substituteName },
+					{ header: "Email_suppleant", value: (row) => row.substituteEmail },
 				];
 				const csvRows = [
-					headers.join(";"),
-					...result.map((r) =>
-						headers.map((h) => toCsvField(r[h as keyof typeof r])).join(";"),
+					columns.map((column) => column.header).join(";"),
+					...result.map((row) =>
+						columns.map((column) => toCsvField(column.value(row))).join(";"),
 					),
 				];
 				content = csvRows.join("\n");

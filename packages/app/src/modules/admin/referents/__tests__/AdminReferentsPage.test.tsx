@@ -154,10 +154,10 @@ describe("AdminReferentsPage", () => {
 		const blob = vi.mocked(URL.createObjectURL).mock.calls[0]?.[0] as Blob;
 		const [header, dataLine] = (await blob.text()).split("\n");
 		expect(header).toBe(
-			"region;county;name;type;value;principal;substituteName;substituteEmail",
+			"Principal;Region (libellé);Code_departement;Departement (libellé);Nom;Type;Contact (value);Nom_suppleant;Email_suppleant",
 		);
 		expect(dataLine).toBe(
-			`"11";"75";"'=1+1";"email";"email@example.fr";"true";"'@SUM(""A1"")";""`,
+			`"true";"Île-de-France";"75";"Paris";"'=1+1";"Email";"email@example.fr";"'@SUM(""A1"")";""`,
 		);
 	});
 
