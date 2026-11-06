@@ -25,10 +25,11 @@ const RECAP: DemarcheDocument = {
 	year: YEAR,
 };
 
-const TRANSMITTED: DemarcheDocument = {
+const CSE_OPINION_RECAP: DemarcheDocument = {
 	dataYear: DATA_YEAR,
-	href: `/api/transmitted-pdf?year=${YEAR}`,
-	title: "Télécharger le récapitulatif des éléments transmis",
+	href: `/api/cse-opinion-pdf?year=${YEAR}`,
+	title:
+		"Télécharger le récapitulatif de la transmission du ou des avis du CSE",
 	year: YEAR,
 };
 
@@ -118,14 +119,14 @@ describe("DemarcheConfirmation", () => {
 	});
 
 	it("renders every document as a download card, in the order given", () => {
-		renderConfirmation({ documents: [RECAP, TRANSMITTED] });
+		renderConfirmation({ documents: [RECAP, CSE_OPINION_RECAP] });
 
 		const links = screen.getAllByRole("link", {
 			name: /Télécharger le récapitulatif/,
 		});
 		expect(links.map((link) => link.getAttribute("href"))).toEqual([
 			RECAP.href,
-			TRANSMITTED.href,
+			CSE_OPINION_RECAP.href,
 		]);
 		expect(links[0]).toHaveAttribute("download");
 		expect(

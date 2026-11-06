@@ -27,7 +27,8 @@ const PREFILL_TITLE =
 	"Télécharger les données préremplies (issues des données DSN)";
 const RECAP_TITLE =
 	"Télécharger le récapitulatif de la déclaration des indicateurs";
-const TRANSMITTED_TITLE = "Télécharger le récapitulatif des éléments transmis";
+const CSE_OPINION_TITLE =
+	"Télécharger le récapitulatif de la transmission du ou des avis du CSE";
 const SECOND_TITLE = "Télécharger le récapitulatif de la seconde déclaration";
 const JOINT_EVALUATION_TITLE =
 	"Télécharger le récapitulatif de l'évaluation conjointe des rémunérations";
@@ -163,11 +164,11 @@ describe("getDocumentResourceCount", () => {
 
 	it.each(
 		SUBMITTED_FSM_STATUSES,
-	)("counts the declaration recap alone once submitted, without any transmitted element (%s)", (fsmStatus) => {
+	)("counts the declaration recap alone once submitted, without any CSE opinion (%s)", (fsmStatus) => {
 		expect(getDocumentResourceCount(makeDeclaration({ fsmStatus }))).toBe(1);
 	});
 
-	it("adds the transmitted-elements recap once a CSE opinion has been submitted", () => {
+	it("adds the CSE opinion recap once a CSE opinion has been submitted", () => {
 		expect(
 			getDocumentResourceCount(
 				makeDeclaration({ hasSubmittedCseOpinion: true }),
@@ -175,20 +176,42 @@ describe("getDocumentResourceCount", () => {
 		).toBe(2);
 	});
 
-	it("adds the transmitted-elements recap once a joint evaluation file has been deposited", () => {
+	it("counts no CSE opinion recap while an unsubmitted revision makes it unavailable", () => {
 		expect(
 			getDocumentResourceCount(
-				makeDeclaration({ hasJointEvaluationFile: true }),
+				makeDeclaration({
+					hasSubmittedCseOpinion: true,
+					cseOpinionViewAvailable: false,
+				}),
+			),
+		).toBe(1);
+	});
+
+	it("falls back to the submission flag when CSE opinion availability is unknown", () => {
+		expect(
+			getDocumentResourceCount(
+				makeDeclaration({
+					hasSubmittedCseOpinion: true,
+					cseOpinionViewAvailable: undefined,
+				}),
 			),
 		).toBe(2);
 	});
 
-	it("adds the transmitted-elements recap once a joint evaluation report has been transmitted after a formal notice", () => {
+	it("adds no recap for a joint evaluation file deposited alone", () => {
+		expect(
+			getDocumentResourceCount(
+				makeDeclaration({ hasJointEvaluationFile: true }),
+			),
+		).toBe(1);
+	});
+
+	it("adds no recap for a joint evaluation report transmitted after a formal notice", () => {
 		expect(
 			getDocumentResourceCount(
 				makeDeclaration({ hasSubmittedFormalNoticeJointEvaluation: true }),
 			),
-		).toBe(2);
+		).toBe(1);
 	});
 
 	it("adds the joint evaluation recap once the joint evaluation is transmitted", () => {
@@ -199,7 +222,7 @@ describe("getDocumentResourceCount", () => {
 					jointEvaluationViewAvailable: true,
 				}),
 			),
-		).toBe(3);
+		).toBe(2);
 	});
 
 	it("counts no joint evaluation recap for a report deposited but not transmitted", () => {
@@ -210,7 +233,7 @@ describe("getDocumentResourceCount", () => {
 					jointEvaluationViewAvailable: false,
 				}),
 			),
-		).toBe(2);
+		).toBe(1);
 	});
 
 	it("counts only the prefill and the declaration recap while the compliance path choice is pending", () => {
@@ -224,13 +247,13 @@ describe("getDocumentResourceCount", () => {
 		).toBe(2);
 	});
 
-	it("counts every resource when the second declaration and a transmitted element are present", () => {
+	it("counts every resource when the second declaration and a CSE opinion are present", () => {
 		expect(
 			getDocumentResourceCount(
 				makeDeclaration({
 					hasPrefillData: true,
 					hasSubmittedSecondDeclaration: true,
-					hasJointEvaluationFile: true,
+					hasSubmittedCseOpinion: true,
 				}),
 			),
 		).toBe(4);
@@ -302,7 +325,7 @@ describe("DocumentsPanel", () => {
 	it("renders one card per available resource, in order", () => {
 		const { links } = renderPanel({
 			hasPrefillData: true,
-			hasJointEvaluationFile: true,
+			hasSubmittedCseOpinion: true,
 			hasSubmittedSecondDeclaration: true,
 		});
 
@@ -310,13 +333,14 @@ describe("DocumentsPanel", () => {
 			PREFILL_TITLE,
 			RECAP_TITLE,
 			SECOND_TITLE,
-			TRANSMITTED_TITLE,
+			CSE_OPINION_TITLE,
 		]);
 	});
 
-	it("places the joint evaluation recap between the second declaration and the transmitted elements", () => {
+	it("places the joint evaluation recap between the second declaration and the CSE opinion recap", () => {
 		const { links } = renderPanel({
 			hasJointEvaluationFile: true,
+			hasSubmittedCseOpinion: true,
 			hasSubmittedSecondDeclaration: true,
 			jointEvaluationViewAvailable: true,
 		});
@@ -325,7 +349,7 @@ describe("DocumentsPanel", () => {
 			RECAP_TITLE,
 			SECOND_TITLE,
 			JOINT_EVALUATION_TITLE,
-			TRANSMITTED_TITLE,
+			CSE_OPINION_TITLE,
 		]);
 		expect(links()[2]).toHaveAttribute(
 			"href",
@@ -344,25 +368,18 @@ describe("DocumentsPanel", () => {
 		);
 	});
 
-	it("offers the transmitted-elements recap after a formal notice joint evaluation deposit", () => {
+	it("offers no extra recap after a formal notice joint evaluation deposit", () => {
 		const { links } = renderPanel({
 			hasSubmittedFormalNoticeJointEvaluation: true,
 		});
 
-		expect(links().map((link) => link.textContent)).toEqual([
-			RECAP_TITLE,
-			TRANSMITTED_TITLE,
-		]);
-		expect(links().at(-1)).toHaveAttribute(
-			"href",
-			`/api/transmitted-pdf?year=${DECLARATION_YEAR}`,
-		);
+		expect(links().map((link) => link.textContent)).toEqual([RECAP_TITLE]);
 	});
 
 	it("points each card at its own PDF route and dates it with the reference year", () => {
 		const { panel, links } = renderPanel({
 			hasPrefillData: true,
-			hasJointEvaluationFile: true,
+			hasSubmittedCseOpinion: true,
 			hasSubmittedSecondDeclaration: true,
 		});
 
@@ -370,28 +387,21 @@ describe("DocumentsPanel", () => {
 			`/api/prefill-pdf?year=${DECLARATION_YEAR}`,
 			`/api/declaration-pdf?year=${DECLARATION_YEAR}`,
 			`/api/declaration-pdf?type=correction&year=${DECLARATION_YEAR}`,
-			`/api/transmitted-pdf?year=${DECLARATION_YEAR}`,
+			`/api/cse-opinion-pdf?year=${DECLARATION_YEAR}`,
 		]);
 		expect(panel.getAllByText(SUBTITLE)).toHaveLength(4);
 		expect(panel.getAllByText("PDF")).toHaveLength(4);
 	});
 
-	// "Last" is an absolute position: any resource added later must land ahead of
-	// the transmitted-elements recap, whichever other resources are present.
 	it.each<[string, Partial<Omit<DeclarationItem, "status">>]>([
 		["a CSE opinion alone", { hasSubmittedCseOpinion: true }],
-		["a joint evaluation file alone", { hasJointEvaluationFile: true }],
-		[
-			"a formal notice joint evaluation alone",
-			{ hasSubmittedFormalNoticeJointEvaluation: true },
-		],
 		[
 			"prefill data ahead of it",
 			{ hasPrefillData: true, hasSubmittedCseOpinion: true },
 		],
 		[
 			"a second declaration ahead of it",
-			{ hasJointEvaluationFile: true, hasSubmittedSecondDeclaration: true },
+			{ hasSubmittedCseOpinion: true, hasSubmittedSecondDeclaration: true },
 		],
 		[
 			"every other resource ahead of it",
@@ -400,12 +410,13 @@ describe("DocumentsPanel", () => {
 				hasPrefillData: true,
 				hasSubmittedCseOpinion: true,
 				hasSubmittedSecondDeclaration: true,
+				jointEvaluationViewAvailable: true,
 			},
 		],
-	])("closes the list with the transmitted-elements recap, with %s", (_case, overrides) => {
+	])("closes the list with the CSE opinion recap, with %s", (_case, overrides) => {
 		const { links } = renderPanel(overrides);
 
-		expect(links().at(-1)?.textContent).toBe(TRANSMITTED_TITLE);
+		expect(links().at(-1)?.textContent).toBe(CSE_OPINION_TITLE);
 	});
 
 	it("omits the prefill card when no DSN data is available", () => {
@@ -422,7 +433,7 @@ describe("DocumentsPanel", () => {
 		expect(links().map((link) => link.textContent)).toEqual([PREFILL_TITLE]);
 	});
 
-	it("hides the transmitted-elements recap while the compliance path choice is pending and nothing has been transmitted", () => {
+	it("hides the CSE opinion recap while the compliance path choice is pending and no CSE opinion has been transmitted", () => {
 		const { links } = renderPanel({
 			fsmStatus: "awaiting_compliance_path_choice",
 			hasPrefillData: true,
@@ -434,7 +445,7 @@ describe("DocumentsPanel", () => {
 		]);
 	});
 
-	it("offers the transmitted-elements recap once a transmitted element exists", () => {
+	it("offers the CSE opinion recap once a CSE opinion has been transmitted", () => {
 		const { links } = renderPanel({
 			fsmStatus: "awaiting_cse_opinion",
 			hasSubmittedCseOpinion: true,
@@ -442,7 +453,28 @@ describe("DocumentsPanel", () => {
 
 		expect(links().map((link) => link.textContent)).toEqual([
 			RECAP_TITLE,
-			TRANSMITTED_TITLE,
+			CSE_OPINION_TITLE,
+		]);
+	});
+
+	it("offers no CSE opinion recap while an unsubmitted revision makes it unavailable", () => {
+		const { links } = renderPanel({
+			hasSubmittedCseOpinion: true,
+			cseOpinionViewAvailable: false,
+		});
+
+		expect(links().map((link) => link.textContent)).toEqual([RECAP_TITLE]);
+	});
+
+	it("falls back to the submission flag when CSE opinion availability is unknown", () => {
+		const { links } = renderPanel({
+			hasSubmittedCseOpinion: true,
+			cseOpinionViewAvailable: undefined,
+		});
+
+		expect(links().map((link) => link.textContent)).toEqual([
+			RECAP_TITLE,
+			CSE_OPINION_TITLE,
 		]);
 	});
 
@@ -488,7 +520,7 @@ describe("DocumentsPanel", () => {
 	it("announces the pending state and marks the card busy while downloading", () => {
 		vi.stubGlobal("fetch", pendingFetch());
 		const { dialog, panel, links } = renderPanel({
-			hasJointEvaluationFile: true,
+			hasSubmittedCseOpinion: true,
 		});
 
 		fireEvent.click(links()[0] as HTMLAnchorElement);
@@ -505,7 +537,7 @@ describe("DocumentsPanel", () => {
 
 	it("keeps each card's download state independent", () => {
 		vi.stubGlobal("fetch", pendingFetch());
-		const { links } = renderPanel({ hasJointEvaluationFile: true });
+		const { links } = renderPanel({ hasSubmittedCseOpinion: true });
 
 		fireEvent.click(links()[0] as HTMLAnchorElement);
 

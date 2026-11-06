@@ -7,7 +7,6 @@ import { ConfirmationPage, CSE_FUNNEL } from "~/modules/cseOpinion";
 import { isDeclarationSubmitted } from "~/modules/cseOpinion/confirmationHelpers";
 import { getReferenceYearFor } from "~/modules/domain";
 import { MY_SPACE } from "~/modules/routes";
-import { offersTransmittedElements } from "~/modules/shared/demarcheDocuments";
 import { findTransmittedJointEvaluation } from "~/server/api/routers/declarationHelpers";
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
@@ -42,7 +41,7 @@ export default async function CseOpinionConfirmationPage() {
 				declarationYear={declarationData.declaration.year}
 				email={session?.user?.email ?? undefined}
 				hasSecondDeclaration={declarationData.hasSubmittedSecondDeclaration}
-				hasTransmittedElements={offersTransmittedElements(declarationData)}
+				hasSubmittedCseOpinion={declarationData.hasSubmittedCseOpinion}
 				hasTransmittedJointEvaluation={transmittedJointEvaluation !== null}
 			/>
 		</>

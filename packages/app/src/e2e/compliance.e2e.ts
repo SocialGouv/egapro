@@ -3,7 +3,6 @@ import { expect, test } from "@playwright/test";
 import { urlGlob, urlPattern } from "~/e2e/helpers/routes";
 import { NO_FILE_ALERT } from "~/modules/cseOpinion/contentTypeColumns";
 import {
-	API_TRANSMITTED_PDF,
 	COMPLIANCE_CONFIRMATION,
 	COMPLIANCE_JOINT_EVALUATION,
 	COMPLIANCE_PATH,
@@ -652,13 +651,5 @@ test.describe("[S11] CAS-04 with défavorable opinion — routing unchanged, opi
 		await expect(
 			page.locator("#first-decl-accuracy-unfavorable"),
 		).toBeChecked();
-	});
-
-	test("transmitted PDF endpoint returns a valid PDF for défavorable opinion", async ({
-		page,
-	}) => {
-		const response = await page.request.get(API_TRANSMITTED_PDF);
-		expect(response.ok()).toBe(true);
-		expect(response.headers()["content-type"]).toContain("application/pdf");
 	});
 });

@@ -1,7 +1,13 @@
 import type { ChildProcess } from "node:child_process";
 import { expect, test } from "@playwright/test";
 import { urlGlob } from "~/e2e/helpers/routes";
-import { COMPLIANCE_PATH, CSE_OPINION } from "~/modules/routes";
+import { getCurrentYear } from "~/modules/domain";
+import {
+	API_CSE_OPINION_PDF,
+	COMPLIANCE_PATH,
+	CSE_OPINION,
+} from "~/modules/routes";
+import { TEST_SIREN } from "./constants";
 import {
 	associateCseContentTypes,
 	completeSecondDeclaration,
@@ -18,6 +24,7 @@ import {
 import { completeDeclaration } from "./helpers/declaration-flows";
 import {
 	clearMailpit,
+	fetchAttachment,
 	listEmailsTo,
 	mailpitReachable,
 	waitForEmail,
@@ -130,6 +137,15 @@ test.describe("notifications email flow (publisher → pg-boss → worker → SM
 			]);
 			await submitCseOpinion(page);
 
+			await expect(
+				page.getByRole("link", {
+					name: "Télécharger le récapitulatif de la transmission du ou des avis du CSE",
+				}),
+			).toHaveAttribute(
+				"href",
+				`${API_CSE_OPINION_PDF}?year=${getCurrentYear()}`,
+			);
+
 			const receipt = await waitForEmail(
 				getTestUserEmail(),
 				(m) => CSE_OPINION_RECEIPT.test(m.subject),
@@ -139,6 +155,17 @@ test.describe("notifications email flow (publisher → pg-boss → worker → SM
 				true,
 			);
 			expect(receipt.html).toMatch(/démarche est désormais terminée/i);
+
+			expect(receipt.attachments.map((a) => a.fileName)).toEqual([
+				`avis-cse-${TEST_SIREN}-${getCurrentYear()}.pdf`,
+			]);
+			const [attachment] = receipt.attachments;
+			expect(attachment?.contentType).toBe("application/pdf");
+			const content = await fetchAttachment(
+				receipt.id,
+				attachment?.partId ?? "",
+			);
+			expect(content.subarray(0, 5).toString("latin1")).toBe("%PDF-");
 
 			// Any deposit-time receipt would have been queued before this one, so it
 			// would already have been delivered — the total is the real assertion.

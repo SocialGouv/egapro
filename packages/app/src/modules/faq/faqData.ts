@@ -387,7 +387,7 @@ export const FAQ_SECTIONS: FaqSection[] = [
 					{
 						question: "Où retrouver mes déclarations passées ?",
 						answer:
-							"Dans Mon espace, qui liste vos démarches par année, leur état d'avancement et les documents associés : données pré-remplies, récapitulatifs de déclaration et récapitulatif des éléments transmis.",
+							"Dans Mon espace, qui liste vos démarches par année, leur état d'avancement et les documents associés : données pré-remplies, récapitulatifs de déclaration, de l'évaluation conjointe et de la transmission des avis du CSE.",
 					},
 					{
 						question: "Pourquoi me demande-t-on mon numéro de téléphone ?",

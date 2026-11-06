@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-	buildRemunerationDocuments,
-	offersTransmittedElements,
-} from "../demarcheDocuments";
+import { buildRemunerationDocuments } from "../demarcheDocuments";
 
 const YEAR = 2025;
 const DATA_YEAR = YEAR - 1;
@@ -11,19 +8,20 @@ const DECLARATION_RECAP =
 	"Télécharger le récapitulatif de la déclaration des indicateurs";
 const SECOND_DECLARATION_RECAP =
 	"Télécharger le récapitulatif de la seconde déclaration de l'indicateur par catégorie d'emplois";
-const TRANSMITTED_RECAP = "Télécharger le récapitulatif des éléments transmis";
+const CSE_OPINION_RECAP =
+	"Télécharger le récapitulatif de la transmission du ou des avis du CSE";
 const JOINT_EVALUATION_RECAP =
 	"Télécharger le récapitulatif de l'évaluation conjointe des rémunérations";
 
 function build({
 	hasSecondDeclaration = false,
-	hasTransmittedElements = false,
+	hasSubmittedCseOpinion = false,
 	hasTransmittedJointEvaluation = false,
 } = {}) {
 	return buildRemunerationDocuments({
 		dataYear: DATA_YEAR,
 		hasSecondDeclaration,
-		hasTransmittedElements,
+		hasSubmittedCseOpinion,
 		hasTransmittedJointEvaluation,
 		year: YEAR,
 	});
@@ -50,11 +48,11 @@ describe("buildRemunerationDocuments", () => {
 		});
 	});
 
-	it("adds the transmitted elements recap once something was transmitted", () => {
-		expect(build({ hasTransmittedElements: true })).toContainEqual({
+	it("adds the CSE opinion recap once a CSE opinion was transmitted", () => {
+		expect(build({ hasSubmittedCseOpinion: true })).toContainEqual({
 			dataYear: DATA_YEAR,
-			href: `/api/transmitted-pdf?year=${YEAR}`,
-			title: TRANSMITTED_RECAP,
+			href: `/api/cse-opinion-pdf?year=${YEAR}`,
+			title: CSE_OPINION_RECAP,
 			year: YEAR,
 		});
 	});
@@ -68,10 +66,10 @@ describe("buildRemunerationDocuments", () => {
 		});
 	});
 
-	it("places the joint evaluation recap between the second declaration and the transmitted elements", () => {
+	it("places the joint evaluation recap between the second declaration and the CSE opinion recap", () => {
 		const documents = build({
 			hasSecondDeclaration: true,
-			hasTransmittedElements: true,
+			hasSubmittedCseOpinion: true,
 			hasTransmittedJointEvaluation: true,
 		});
 
@@ -79,7 +77,7 @@ describe("buildRemunerationDocuments", () => {
 			DECLARATION_RECAP,
 			SECOND_DECLARATION_RECAP,
 			JOINT_EVALUATION_RECAP,
-			TRANSMITTED_RECAP,
+			CSE_OPINION_RECAP,
 		]);
 	});
 
@@ -88,28 +86,28 @@ describe("buildRemunerationDocuments", () => {
 		{
 			expected: [DECLARATION_RECAP],
 			hasSecondDeclaration: false,
-			hasTransmittedElements: false,
+			hasSubmittedCseOpinion: false,
 		},
 		{
 			expected: [DECLARATION_RECAP, SECOND_DECLARATION_RECAP],
 			hasSecondDeclaration: true,
-			hasTransmittedElements: false,
+			hasSubmittedCseOpinion: false,
 		},
 		{
-			expected: [DECLARATION_RECAP, TRANSMITTED_RECAP],
+			expected: [DECLARATION_RECAP, CSE_OPINION_RECAP],
 			hasSecondDeclaration: false,
-			hasTransmittedElements: true,
+			hasSubmittedCseOpinion: true,
 		},
 		{
 			expected: [
 				DECLARATION_RECAP,
 				SECOND_DECLARATION_RECAP,
-				TRANSMITTED_RECAP,
+				CSE_OPINION_RECAP,
 			],
 			hasSecondDeclaration: true,
-			hasTransmittedElements: true,
+			hasSubmittedCseOpinion: true,
 		},
-	])("lists the documents in maquette order (secondDeclaration: $hasSecondDeclaration, transmitted: $hasTransmittedElements)", ({
+	])("lists the documents in maquette order (secondDeclaration: $hasSecondDeclaration, cseOpinion: $hasSubmittedCseOpinion)", ({
 		expected,
 		...flags
 	}) => {
@@ -119,54 +117,13 @@ describe("buildRemunerationDocuments", () => {
 	it("stamps every document with the campaign year and its reference data year", () => {
 		const documents = build({
 			hasSecondDeclaration: true,
-			hasTransmittedElements: true,
+			hasSubmittedCseOpinion: true,
 		});
 
 		expect(
 			documents.every(
 				(document) => document.year === YEAR && document.dataYear === DATA_YEAR,
 			),
-		).toBe(true);
-	});
-});
-
-describe("offersTransmittedElements", () => {
-	it.each([
-		{
-			expected: false,
-			hasSubmittedCseOpinion: false,
-			hasSubmittedJointEvaluation: false,
-		},
-		{
-			expected: true,
-			hasSubmittedCseOpinion: true,
-			hasSubmittedJointEvaluation: false,
-		},
-		{
-			expected: true,
-			hasSubmittedCseOpinion: false,
-			hasSubmittedJointEvaluation: true,
-		},
-		{
-			expected: true,
-			hasSubmittedCseOpinion: true,
-			hasSubmittedJointEvaluation: true,
-		},
-	])("is $expected (cseOpinion: $hasSubmittedCseOpinion, jointEvaluation: $hasSubmittedJointEvaluation)", ({
-		expected,
-		...submissions
-	}) => {
-		expect(offersTransmittedElements(submissions)).toBe(expected);
-	});
-
-	// The joint evaluation report is a compliance-path choice, not a CSE artefact:
-	// a company without a CSE that filed one has a non-empty recap (issue 4268).
-	it("offers the recap to a company without a CSE that filed a joint evaluation", () => {
-		expect(
-			offersTransmittedElements({
-				hasSubmittedCseOpinion: false,
-				hasSubmittedJointEvaluation: true,
-			}),
 		).toBe(true);
 	});
 });

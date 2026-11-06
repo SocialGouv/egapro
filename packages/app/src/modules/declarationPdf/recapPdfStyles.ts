@@ -4,8 +4,7 @@ import { PDF_FONT_FAMILY } from "./pdfFonts";
 
 // @react-pdf/renderer cannot use CSS variables — hex values are required.
 // Each constant maps to a DSFR decision token read from the Figma maquette
-// (file axsrSDEVqsrFvHdWrZJIkQ). Kept separate from pdfStyles.ts, which stays
-// frozen for TransmittedPdfDocument / RepresentationPdfDocument.
+// (file axsrSDEVqsrFvHdWrZJIkQ).
 const TEXT_TITLE_GREY = "#161616"; // $text-title-grey
 const TEXT_DEFAULT_GREY = "#3A3A3A"; // $text-default-grey
 const TEXT_MENTION_GREY = "#666666"; // $text-mention-grey (file meta)

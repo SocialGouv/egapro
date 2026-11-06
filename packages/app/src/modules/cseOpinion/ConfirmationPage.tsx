@@ -7,7 +7,7 @@ type Props = {
 	declarationYear: number;
 	email?: string;
 	hasSecondDeclaration?: boolean;
-	hasTransmittedElements?: boolean;
+	hasSubmittedCseOpinion?: boolean;
 	hasTransmittedJointEvaluation?: boolean;
 };
 
@@ -17,7 +17,7 @@ export function ConfirmationPage({
 	declarationYear,
 	email,
 	hasSecondDeclaration = false,
-	hasTransmittedElements = false,
+	hasSubmittedCseOpinion = false,
 	hasTransmittedJointEvaluation = false,
 }: Props) {
 	return (
@@ -26,7 +26,7 @@ export function ConfirmationPage({
 			documents={buildRemunerationDocuments({
 				dataYear,
 				hasSecondDeclaration,
-				hasTransmittedElements,
+				hasSubmittedCseOpinion,
 				hasTransmittedJointEvaluation,
 				year: declarationYear,
 			})}

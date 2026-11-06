@@ -18,6 +18,7 @@ import { db } from "~/server/db";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { companies, declarations } from "~/server/db/schema";
 import {
+	buildCseOpinionAttachments,
 	buildDeclarationAttachments,
 	buildJointEvaluationAttachments,
 	buildRepresentationAttachments,
@@ -187,6 +188,7 @@ async function buildAttachments(
 	if (kind === "representation") {
 		return buildRepresentationAttachments(siren, year);
 	}
+	if (kind === "cseOpinion") return buildCseOpinionAttachments(siren, year);
 	return [];
 }
 

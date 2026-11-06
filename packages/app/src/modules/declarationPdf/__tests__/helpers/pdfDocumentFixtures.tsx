@@ -8,13 +8,11 @@ import type { CseOpinionRecapData } from "../../buildCseOpinionRecapData";
 import type { JointEvaluationRecapData } from "../../buildJointEvaluationRecapData";
 import type { PrefillPdfData } from "../../buildPrefillPdfData";
 import type { RepresentationPdfData } from "../../buildRepresentationPdfData";
-import type { TransmittedPdfData } from "../../buildTransmittedPdfData";
 import { CseOpinionPdfDocument } from "../../CseOpinionPdfDocument";
 import { DeclarationPdfDocument } from "../../DeclarationPdfDocument";
 import { JointEvaluationPdfDocument } from "../../JointEvaluationPdfDocument";
 import { PrefillPdfDocument } from "../../PrefillPdfDocument";
 import { RepresentationPdfDocument } from "../../RepresentationPdfDocument";
-import { TransmittedPdfDocument } from "../../TransmittedPdfDocument";
 import type { DeclarationPdfData } from "../../types";
 
 const QUARTILES = [
@@ -109,34 +107,6 @@ export const PREFILL_DATA: PrefillPdfData = {
 	step3Data: DECLARATION_DATA.step3Data,
 	step3Gaps: noPayGapReferences(),
 	step4Data: DECLARATION_DATA.step4Data,
-};
-
-export const TRANSMITTED_DATA: TransmittedPdfData = {
-	companyName: "Société Démo",
-	siren: "123456789",
-	dataYear: 2024,
-	year: 2025,
-	generatedAt: "10 mars 2026",
-	opinions: [
-		{
-			declarationNumber: 1,
-			type: "initial",
-			opinion: "favorable",
-			opinionDate: "2026-01-15",
-			gapConsulted: true,
-		},
-	],
-	cseFiles: [
-		{ fileName: "avis-cse-2026.pdf", uploadedAt: new Date(2026, 0, 20) },
-	],
-	jointEvaluationFile: {
-		fileName: "evaluation-conjointe.pdf",
-		uploadedAt: new Date(2026, 2, 1),
-	},
-	formalNoticeJointEvaluationFile: {
-		fileName: "mise-en-demeure.pdf",
-		uploadedAt: new Date(2026, 3, 1),
-	},
 };
 
 export const REPRESENTATION_DATA: RepresentationPdfData = {
@@ -281,11 +251,6 @@ export function pdfDocumentSamples(): PdfDocumentSample[] {
 			element: DeclarationPdfDocument({
 				data: { ...DECLARATION_DATA, isSecondDeclaration: true },
 			}),
-		},
-		{
-			name: "transmitted",
-			title: "Récapitulatif des éléments transmis 2026",
-			element: TransmittedPdfDocument({ data: TRANSMITTED_DATA }),
 		},
 		{
 			name: "prefill",

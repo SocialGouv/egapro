@@ -25,7 +25,7 @@ describe("pdfSizeKey", () => {
 		const data = { siren: "123456789", year: 2026 };
 
 		expect(pdfSizeKey("declaration-pdf", data)).not.toBe(
-			pdfSizeKey("transmitted-pdf", data),
+			pdfSizeKey("cse-opinion-pdf", data),
 		);
 	});
 

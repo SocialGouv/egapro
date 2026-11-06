@@ -1,9 +1,6 @@
 import { getReferenceYearFor } from "~/modules/domain";
 import { DemarcheConfirmation } from "~/modules/shared/DemarcheConfirmation";
-import {
-	buildRemunerationDocuments,
-	offersTransmittedElements,
-} from "~/modules/shared/demarcheDocuments";
+import { buildRemunerationDocuments } from "~/modules/shared/demarcheDocuments";
 import { findTransmittedJointEvaluation } from "~/server/api/routers/declarationHelpers";
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
@@ -26,7 +23,7 @@ export async function ComplianceConfirmation() {
 			documents={buildRemunerationDocuments({
 				dataYear: getReferenceYearFor(currentYear),
 				hasSecondDeclaration: data.hasSubmittedSecondDeclaration,
-				hasTransmittedElements: offersTransmittedElements(data),
+				hasSubmittedCseOpinion: data.hasSubmittedCseOpinion,
 				hasTransmittedJointEvaluation: transmittedJointEvaluation !== null,
 				year: currentYear,
 			})}
