@@ -515,7 +515,8 @@ export function IndicatorTables({
 
 			<section className={styles.section}>
 				<h3 className="fr-h6 fr-mb-0">
-					Proportion de femmes et d&apos;hommes dans chaque quartile salarial
+					Proportion de femmes et d&apos;hommes dans chaque quartile de
+					rémunération
 				</h3>
 				<QuartileDistributionTable
 					caption={`Quartile annuel – ${declarationYear}`}

@@ -15,16 +15,6 @@ import {
 } from "./fixtures";
 
 describe("RecapitulatifPage", () => {
-	it("identifies itself, next to the download, as the accessible version of the PDF (RGAA 13.3)", () => {
-		render(<RecapitulatifPage {...defaultProps()} />);
-		const download = screen.getByRole("link", {
-			name: /Télécharger la déclaration .*\(PDF\)/,
-		});
-		expect(download.parentElement).toHaveTextContent(
-			"Version accessible : cette page reprend l'intégralité du document.",
-		);
-	});
-
 	it("labels the workforce with the reference year (N-1), as the PDF does", () => {
 		render(<RecapitulatifPage {...defaultProps()} />);
 		expect(
@@ -33,6 +23,11 @@ describe("RecapitulatifPage", () => {
 		expect(
 			screen.queryByText("Effectif annuel moyen en 2025"),
 		).not.toBeInTheDocument();
+	});
+
+	it("no longer shows the 'Version accessible' note next to the download", () => {
+		render(<RecapitulatifPage {...defaultProps()} />);
+		expect(screen.queryByText(/Version accessible/)).not.toBeInTheDocument();
 	});
 
 	it("renders h1 with year", () => {
@@ -221,7 +216,7 @@ describe("RecapitulatifPage", () => {
 		expect(
 			screen.getByRole("heading", {
 				level: 3,
-				name: /Proportion de femmes et d.*hommes dans chaque quartile/,
+				name: "Proportion de femmes et d'hommes dans chaque quartile de rémunération",
 			}),
 		).toBeInTheDocument();
 	});
@@ -252,7 +247,7 @@ describe("RecapitulatifPage", () => {
 			name: "Indicateur par catégorie d'emplois",
 		});
 		const categorySource = screen.queryByText(
-			/Source utilisée pour déterminer les catégories d.*emplois/,
+			/Source des catégories d.emplois/,
 		);
 		if (expected) {
 			expect(categoryHeading).toBeInTheDocument();
@@ -584,9 +579,7 @@ describe("RecapitulatifPage", () => {
 			<RecapitulatifPage {...defaultProps()} step5Source="accord-entreprise" />,
 		);
 		expect(
-			screen.getByText(
-				/Source utilisée pour déterminer les catégories d.*emplois/,
-			),
+			screen.getByText("Source des catégories d'emplois :"),
 		).toBeInTheDocument();
 		expect(screen.getByText("Accord d'entreprise")).toBeInTheDocument();
 	});
