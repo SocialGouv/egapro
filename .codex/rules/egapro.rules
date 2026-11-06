@@ -1,0 +1,11 @@
+# Généré par scripts/ai/sync-agent-config.mjs (POLICY) — ne pas éditer.
+
+prefix_rule(pattern = ["git","commit","--no-verify"], decision = "forbidden", justification = "egapro: --no-verify (deny)")
+prefix_rule(pattern = ["git","push","--no-verify"], decision = "forbidden", justification = "egapro: --no-verify (deny)")
+prefix_rule(pattern = ["git","commit","-n"], decision = "forbidden", justification = "egapro: git commit -n (deny)")
+prefix_rule(pattern = ["git","commit","--no-gpg-sign"], decision = "forbidden", justification = "egapro: --no-gpg-sign (deny)")
+prefix_rule(pattern = ["git","-c","commit.gpgsign=false"], decision = "forbidden", justification = "egapro: commit.gpgsign=false (deny)")
+prefix_rule(pattern = ["git","-c","commit.gpgSign=false"], decision = "forbidden", justification = "egapro: commit.gpgsign=false (deny)")
+prefix_rule(pattern = ["git","push","--force"], decision = "prompt", justification = "egapro: git push --force (ask)")
+prefix_rule(pattern = ["git","push","--force-with-lease"], decision = "prompt", justification = "egapro: git push --force (ask)")
+prefix_rule(pattern = ["git","push","-f"], decision = "prompt", justification = "egapro: git push -f (ask)")

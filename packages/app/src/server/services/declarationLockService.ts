@@ -2,7 +2,10 @@ import "server-only";
 
 import { and, eq, gt, inArray, lte, or } from "drizzle-orm";
 
-import { DECLARATION_LOCK_CONFLICT_MESSAGE } from "~/modules/domain";
+import {
+	computeLockTimeoutMinutes,
+	DECLARATION_LOCK_CONFLICT_MESSAGE,
+} from "~/modules/domain";
 import type { DB } from "~/server/db";
 import { resolveCurrentDeclarationId } from "~/server/db/declarationConditions";
 import { declarationLocks, declarations, users } from "~/server/db/schema";
@@ -17,6 +20,7 @@ export type LockHolder = {
 	firstName: string | null;
 	lastName: string | null;
 	expiresAt: Date;
+	lockTimeoutMinutes: number;
 };
 
 const MS_PER_MINUTE = 60_000;
@@ -34,13 +38,14 @@ export async function getActiveLock(
 	db: DbClient,
 	declarationId: string,
 ): Promise<LockHolder | null> {
-	const rows = await db
+	const [row] = await db
 		.select({
 			userId: declarationLocks.lockedByUserId,
 			email: users.email,
 			firstName: users.firstName,
 			lastName: users.lastName,
 			expiresAt: declarationLocks.expiresAt,
+			lastHeartbeatAt: declarationLocks.lastHeartbeatAt,
 		})
 		.from(declarationLocks)
 		.innerJoin(users, eq(declarationLocks.lockedByUserId, users.id))
@@ -52,12 +57,23 @@ export async function getActiveLock(
 		)
 		.limit(1);
 
-	return rows[0] ?? null;
+	if (!row) return null;
+	const { lastHeartbeatAt, ...holder } = row;
+	return {
+		...holder,
+		lockTimeoutMinutes: computeLockTimeoutMinutes(
+			lastHeartbeatAt,
+			holder.expiresAt,
+		),
+	};
 }
 
 export type LockReadState = {
 	isReadOnly: boolean;
-	lockHolder: Pick<LockHolder, "firstName" | "lastName" | "email"> | null;
+	lockHolder: Pick<
+		LockHolder,
+		"firstName" | "lastName" | "email" | "lockTimeoutMinutes"
+	> | null;
 };
 
 /**
@@ -83,6 +99,7 @@ export async function getLockReadState(
 			firstName: activeLock.firstName,
 			lastName: activeLock.lastName,
 			email: activeLock.email,
+			lockTimeoutMinutes: activeLock.lockTimeoutMinutes,
 		},
 	};
 }

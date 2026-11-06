@@ -43,6 +43,7 @@ type LockHolder = {
 	firstName: string | null;
 	lastName: string | null;
 	email: string | null;
+	lockTimeoutMinutes: number;
 };
 
 const BASE_PROPS = {
@@ -426,6 +427,7 @@ describe("DeclarationProcessPanel", () => {
 				firstName: "Alice",
 				lastName: "Martin",
 				email: "alice.martin@example.fr",
+				lockTimeoutMinutes: 30,
 			};
 			const { dialog, panel } = renderPanel("closed", {
 				lockedByOther: true,
@@ -536,6 +538,7 @@ describe("DeclarationProcessPanel", () => {
 			firstName: "Alice",
 			lastName: "Martin",
 			email: "alice.martin@example.fr",
+			lockTimeoutMinutes: 30,
 		};
 
 		it("renders the lock alert naming the current editor", () => {

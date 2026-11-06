@@ -103,31 +103,33 @@ describe("CommonCalendarForm", () => {
 		refetch.mockClear();
 	});
 
-	it("shows the GIP publication date read-only next to the two editable dates", async () => {
+	it("shows only the two editable dates, without the GIP publication date", async () => {
 		await renderLoaded();
-		const gip = screen.getByLabelText(/date de publication des données gip/i);
-		expect(gip).toHaveValue("2027-03-02");
-		expect(gip).toHaveAttribute("readonly");
 		expect(startInput()).toHaveValue("2027-03-15");
 		expect(startInput()).not.toBeDisabled();
+		expect(screen.queryByLabelText(/données gip/i)).toBeNull();
+		expect(document.getElementById("settings-gipPublicationDate")).toBeNull();
 	});
 
-	it("falls back to 'Non disponible' when no GIP file has been imported", () => {
-		queryState.data = { ...configuredYear, gipPublicationDate: null };
-		render(<CommonCalendarForm year={2027} />);
-		expect(
-			screen.getByLabelText(/date de publication des données gip/i),
-		).toHaveValue("Non disponible");
-	});
-
-	it("explains what the start and public release dates drive", () => {
+	it("labels the opening and results publication dates with their hints", () => {
 		render(<CommonCalendarForm year={2027} />);
 		expect(startInput()).toHaveAccessibleName(
-			/n'ouvre ni ne ferme la saisie des déclarations/i,
+			/^Date d'ouverture de la campagne\s*Date à partir de laquelle les entreprises peuvent effectuer leur démarche\.$/,
 		);
 		expect(releaseInput()).toHaveAccessibleName(
-			/indicateurs a à f et les écarts de représentation .* vide : non publiés/i,
+			/^Date de publication des résultats\s*Date à partir de laquelle les indicateurs de rémunération et les indicateurs de représentation de cette campagne sont publiés\. Vide : non publiés\.$/,
 		);
+	});
+
+	it("marks the opening date as required with a visible mention it cites", () => {
+		render(<CommonCalendarForm year={2027} />);
+		const note = screen.getByText(
+			"La date d'ouverture de la campagne est obligatoire.",
+		);
+		expect(startInput()).toBeRequired();
+		expect(startInput()).toHaveAttribute("aria-describedby", note.id);
+		expect(releaseInput()).not.toBeRequired();
+		expect(releaseInput()).not.toHaveAttribute("aria-describedby");
 	});
 
 	it("submits only the year, the start date and the public release date", async () => {
@@ -142,20 +144,29 @@ describe("CommonCalendarForm", () => {
 		});
 	});
 
-	it("submits cleared dates as null", async () => {
-		queryState.data = {
-			...configuredYear,
-			campaignStartDate: null,
-			publicDataReleaseDate: null,
-		};
+	it("submits a cleared public release date as null", async () => {
+		queryState.data = { ...configuredYear, publicDataReleaseDate: null };
 		render(<CommonCalendarForm year={2027} />);
 		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
 		await waitFor(() => expect(updateMutate).toHaveBeenCalled());
 		expect(updateMutate.mock.calls[0]?.[0]).toEqual({
 			year: 2027,
-			campaignStartDate: null,
+			campaignStartDate: "2027-03-15",
 			publicDataReleaseDate: null,
 		});
+	});
+
+	it("blocks submission and flags the opening date when it is empty", async () => {
+		queryState.data = { ...configuredYear, campaignStartDate: null };
+		render(<CommonCalendarForm year={2027} />);
+		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
+		await waitFor(() =>
+			expect(startInput()).toHaveAttribute("aria-invalid", "true"),
+		);
+		expect(startInput().getAttribute("aria-describedby")).toContain(
+			"settings-campaignStartDate-error",
+		);
+		expect(updateMutate).not.toHaveBeenCalled();
 	});
 
 	it("is disabled with an invitation to save the remuneration deadlines when the year has no row", () => {
@@ -253,17 +264,26 @@ describe("CommonCalendarForm", () => {
 		expect(refetch).toHaveBeenCalledTimes(1);
 	});
 
-	it("keeps clearing the dates possible after a successful load", async () => {
+	it("keeps clearing the public release date possible after a successful load", async () => {
 		await renderLoaded();
-		fireEvent.change(startInput(), { target: { value: "" } });
 		fireEvent.change(releaseInput(), { target: { value: "" } });
 		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
 		await waitFor(() => expect(updateMutate).toHaveBeenCalled());
 		expect(updateMutate.mock.calls[0]?.[0]).toEqual({
 			year: 2027,
-			campaignStartDate: null,
+			campaignStartDate: "2027-03-15",
 			publicDataReleaseDate: null,
 		});
+	});
+
+	it("refuses to submit once the opening date is cleared after a successful load", async () => {
+		await renderLoaded();
+		fireEvent.change(startInput(), { target: { value: "" } });
+		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
+		await waitFor(() =>
+			expect(startInput()).toHaveAttribute("aria-invalid", "true"),
+		);
+		expect(updateMutate).not.toHaveBeenCalled();
 	});
 
 	it("does not show the load error while the data is available", () => {

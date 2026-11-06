@@ -56,7 +56,7 @@ export function SettingsDateField({
 type SettingsReadOnlyFieldProps = {
 	id: string;
 	label: string;
-	hint: string;
+	hint?: string;
 	type: "date" | "text";
 	value: string;
 };
@@ -72,7 +72,7 @@ export function SettingsReadOnlyField({
 		<div className="fr-input-group">
 			<label className="fr-label" htmlFor={id}>
 				{label}
-				<span className="fr-hint-text">{hint}</span>
+				{hint && <span className="fr-hint-text">{hint}</span>}
 			</label>
 			<input className="fr-input" id={id} readOnly type={type} value={value} />
 		</div>

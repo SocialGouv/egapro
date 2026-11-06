@@ -25,13 +25,12 @@ function selectDeadlines(data: CampaignDeadlinesByYear) {
 	return {
 		year: data.year,
 		exists: data.exists,
+		gipPublicationDate: data.gipPublicationDate,
 		pathChoiceRound1Deadline: data.pathChoiceRound1Deadline,
 		pathChoiceDeadline: data.pathChoiceDeadline,
 		decl1ModificationDeadline: data.decl1ModificationDeadline,
-		decl1JustificationDeadline: data.decl1JustificationDeadline,
 		decl1JointEvaluationDeadline: data.decl1JointEvaluationDeadline,
 		decl2ModificationDeadline: data.decl2ModificationDeadline,
-		decl2JustificationDeadline: data.decl2JustificationDeadline,
 		decl2JointEvaluationDeadline: data.decl2JointEvaluationDeadline,
 		decl2CseOpinionDeadline: data.decl2CseOpinionDeadline,
 	};
@@ -59,10 +58,8 @@ export function RemunerationDeadlinesForm({ year }: Props) {
 		form.reset({
 			year: data.year,
 			decl1ModificationDeadline: data.decl1ModificationDeadline,
-			decl1JustificationDeadline: data.decl1JustificationDeadline,
 			decl1JointEvaluationDeadline: data.decl1JointEvaluationDeadline,
 			decl2ModificationDeadline: data.decl2ModificationDeadline,
-			decl2JustificationDeadline: data.decl2JustificationDeadline,
 			decl2JointEvaluationDeadline: data.decl2JointEvaluationDeadline,
 			decl2CseOpinionDeadline: data.decl2CseOpinionDeadline,
 		});
@@ -116,6 +113,7 @@ export function RemunerationDeadlinesForm({ year }: Props) {
 				{DEADLINE_GROUPS.map((group) => (
 					<DeadlineFieldset
 						errors={form.formState.errors}
+						gipPublicationDate={data?.gipPublicationDate ?? null}
 						group={group}
 						key={group.legend}
 						pathChoiceValue={
@@ -142,10 +140,8 @@ function buildDefaults(year: number): RemunerationDeadlinesFormInput {
 	return {
 		year,
 		decl1ModificationDeadline: "",
-		decl1JustificationDeadline: "",
 		decl1JointEvaluationDeadline: "",
 		decl2ModificationDeadline: "",
-		decl2JustificationDeadline: "",
 		decl2JointEvaluationDeadline: "",
 		decl2CseOpinionDeadline: "",
 	};

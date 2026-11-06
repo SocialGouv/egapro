@@ -18,10 +18,13 @@ vi.mock("next/navigation", async () => {
 	};
 });
 
-import { COMPANY_SIZE_RANGES, type CompanySizeRange } from "~/modules/domain";
+import {
+	COMPANY_SIZE_RANGES,
+	type CompanySizeRange,
+	DEMARCHE_LIFECYCLE_STATUSES,
+} from "~/modules/domain";
 import { SearchForm } from "../SearchForm";
-import { ADMIN_DECLARATION_STATUS_FILTERS } from "../schemas";
-import { STATUS_LABELS } from "../shared/constants";
+import { DEMARCHE_STATUS_LABELS } from "../shared/constants";
 
 const TEST_YEARS = [2026, 2025, 2024];
 
@@ -51,9 +54,9 @@ describe("SearchForm", () => {
 		).toBeInTheDocument();
 		expect(screen.getByLabelText("Email déclarant")).toBeInTheDocument();
 		expect(screen.getByLabelText("Année")).toBeInTheDocument();
-		expect(screen.getByLabelText("Date de dépôt (du)")).toBeInTheDocument();
-		expect(screen.getByLabelText("Date de dépôt (au)")).toBeInTheDocument();
-		expect(screen.getByLabelText("Statut")).toBeInTheDocument();
+		expect(screen.getByLabelText("Date (du)")).toBeInTheDocument();
+		expect(screen.getByLabelText("Date (au)")).toBeInTheDocument();
+		expect(screen.getByLabelText("Statut de la démarche")).toBeInTheDocument();
 		expect(screen.getByLabelText("Effectif annuel moyen")).toBeInTheDocument();
 		// Regression guard for #3274 — keep these negative assertions next to
 		// their positive counterparts so a future reintroduction is caught here.
@@ -165,25 +168,31 @@ describe("SearchForm", () => {
 		expect(options).toEqual(["", ...TEST_YEARS.map(String)]);
 	});
 
-	it("offers every admin status filter with its label, plus the all-statuses option", () => {
+	it("offers the four démarche statuses with the column labels, plus the all-statuses option", () => {
 		render(<SearchForm years={TEST_YEARS} />);
 
-		const select = screen.getByLabelText<HTMLSelectElement>("Statut");
+		const select = screen.getByLabelText<HTMLSelectElement>(
+			"Statut de la démarche",
+		);
 		const options = Array.from(select.querySelectorAll("option"));
 
 		expect(options.map((option) => option.value)).toEqual([
 			"",
-			...ADMIN_DECLARATION_STATUS_FILTERS,
+			...DEMARCHE_LIFECYCLE_STATUSES,
 		]);
 		expect(options.map((option) => option.textContent)).toEqual([
 			"Tous",
-			...ADMIN_DECLARATION_STATUS_FILTERS.map(
-				(status) => STATUS_LABELS[status],
+			...DEMARCHE_LIFECYCLE_STATUSES.map(
+				(status) => DEMARCHE_STATUS_LABELS[status],
 			),
 		]);
-		expect(options.map((option) => option.textContent)).toContain(
-			"Démarche terminée",
-		);
+		expect(options.map((option) => option.textContent)).toEqual([
+			"Tous",
+			"Brouillon",
+			"En cours",
+			"Finalisée",
+			"Annulée",
+		]);
 	});
 
 	it("restores the year from the URL once its option exists", () => {
@@ -200,14 +209,16 @@ describe("SearchForm", () => {
 
 	it("restores the status from the URL", () => {
 		vi.mocked(useSearchParams).mockReturnValue(
-			new URLSearchParams({ status: "demarche_completed" }) as ReturnType<
+			new URLSearchParams({ status: "completed" }) as ReturnType<
 				typeof useSearchParams
 			>,
 		);
 
 		render(<SearchForm years={TEST_YEARS} />);
 
-		expect(screen.getByLabelText("Statut")).toHaveValue("demarche_completed");
+		expect(screen.getByLabelText("Statut de la démarche")).toHaveValue(
+			"completed",
+		);
 	});
 
 	it("offers the domain size brackets plus the all-sizes option", () => {

@@ -8,9 +8,18 @@ const heartbeatMutateAsync = vi.fn();
 
 vi.mock("~/trpc/react", () => ({
 	api: {
+		useUtils: () => ({
+			declarationLock: {
+				getLockState: { fetch: vi.fn() },
+				getLockAvailability: { reset: vi.fn() },
+			},
+		}),
 		declarationLock: {
 			acquireLock: { useMutation: () => ({ mutateAsync: acquireMutateAsync }) },
 			heartbeat: { useMutation: () => ({ mutateAsync: heartbeatMutateAsync }) },
+			getLockAvailability: {
+				useQuery: () => ({ data: undefined, refetch: vi.fn() }),
+			},
 		},
 	},
 }));
@@ -33,6 +42,7 @@ const lockHolder = {
 	firstName: "Camille",
 	lastName: "Martin",
 	email: "camille.martin@example.fr",
+	lockTimeoutMinutes: 30,
 };
 
 function LockProbe() {

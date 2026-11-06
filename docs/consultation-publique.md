@@ -39,6 +39,36 @@ pnpm db:seed-observatory -- --clean
 
 Les review apps éphémères de branche utilisent l'environnement `dev` : un Job Helm post-déploiement y exécute automatiquement le même seed, de façon idempotente. Le seed reste désactivé par défaut dans les valeurs communes et n'est donc pas exécuté en préproduction ou en production.
 
+## Historique des SIREN de l'audit RGAA
+
+Les dix SIREN `purpose: "rgaa"` de `packages/app/data/dedicated-test-sirens.json` sont de vraies entreprises, créées par l'import GIP du déploiement, qui n'importe que l'année de campagne courante. Sans historique, le sélecteur d'année, les courbes et l'onglet `Représentation` de leur fiche ne sont pas auditables. Le script suivant leur injecte les campagnes passées :
+
+```bash
+pnpm --filter app db:seed-rgaa-history -- --campaign-year=2026
+```
+
+`--campaign-year` est obligatoire et doit être l'année de campagne de l'environnement (celle de `EGAPRO_RECETTE_CAMPAIGN_YEAR` quand elle est épinglée) : un an d'écart écrirait l'historique sur l'année que les auditeurs déclarent. `--years=<N>` (3 par défaut, 10 au plus) fixe la profondeur, des années C-N à C-1. Pour une campagne C :
+
+- une déclaration de rémunération publiée par entreprise et par année, de C-N à C-1, avec l'effectif EMA correspondant ;
+- une déclaration de représentation pour les six entreprises de 1 000 salariés et plus, sur les années de référence C-N à C-2 — la référence C-1 relève de la campagne C, remplie par l'auditeur ;
+- chaque année d'historique reçoit une date de rendu public passée ; une date nulle ou future est ramenée dans le passé, et l'année est listée.
+
+L'année C, la référence C-1 et la table `app_company` ne sont jamais écrites. Le script refuse d'écrire si la base ne porte pas le jeu de démonstration de l'Observatoire (il n'existe qu'en environnement `dev`), ou si l'une des dix entreprises n'a pas encore été créée par l'import GIP. Il ne possède que ses propres lignes : une déclaration, une représentation ou une ligne GIP déjà présente est laissée intacte et listée. Chaque exécution commence par supprimer toutes ses lignes d'un run précédent, quels qu'aient été son année de campagne ou sa profondeur : deux exécutions identiques laissent la base identique, et `--clean` retire uniquement ses lignes. Si un auditeur a rattaché un fichier, un avis CSE ou des catégories d'emploi à une déclaration d'historique, cette suppression échoue et le script s'arrête sans rien écrire.
+
+Effet de bord assumé : dans Mon espace, les années d'historique apparaissent parmi les démarches terminées, avec un récapitulatif téléchargeable, un PDF « données préremplies » limité à l'effectif et une page d'historique vide.
+
+Sur `rgaa-persist`, depuis un poste ayant accès au cluster, la base est jointe par `port-forward` et l'URL reconstruite à partir du secret `pg-app` du namespace, sans jamais l'écrire ailleurs que dans la variable du processus :
+
+```bash
+kubectl -n egapro-rgaa-persist port-forward svc/pg-rw 15432:5432 &
+DATABASE_URL=$(kubectl -n egapro-rgaa-persist get secret pg-app \
+    -o jsonpath='{.data.DATABASE_URL}' | base64 -d \
+    | sed "s|@[^/]*|@localhost:15432|") \
+  pnpm --filter app db:seed-rgaa-history -- --campaign-year=2026
+```
+
+À relancer après chaque remise à zéro de la base `rgaa-persist`.
+
 ## Confidentialité
 
 Pour une entreprise au statut INSEE non diffusible, les champs d'identité, de localisation et d'activité sont remplacés par `Non-diffusible`. Le SIREN, l'effectif EMA et les indicateurs restent affichés. Une entreprise étrangère diffusible affiche son pays à la place de la région et du département.

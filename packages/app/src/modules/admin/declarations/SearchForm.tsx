@@ -2,18 +2,24 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
-
-import type { CompanySizeRange } from "~/modules/domain";
+import {
+	type CompanySizeRange,
+	DEMARCHE_LIFECYCLE_STATUSES,
+} from "~/modules/domain";
 import { ADMIN_DECLARATIONS, routeWithQuery } from "~/modules/routes";
 import { CompanySizeFilter } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import {
-	ADMIN_DECLARATION_STATUS_FILTERS,
 	type SearchDeclarationsFormValues,
 	searchDeclarationsFormSchema,
 	searchDeclarationsSchema,
 } from "./schemas";
-import { STATUS_LABELS, WORKFORCE_LABEL } from "./shared/constants";
+import {
+	DEMARCHE_STATUS_COLUMN_LABEL,
+	DEMARCHE_STATUS_LABELS,
+	STATUS_DATE_COLUMN_LABEL,
+	WORKFORCE_LABEL,
+} from "./shared/constants";
 
 type Props = {
 	years: number[];
@@ -146,7 +152,7 @@ export function SearchForm({ years }: Props) {
 				<div className="fr-col-12 fr-col-md-3">
 					<div className="fr-input-group">
 						<label className="fr-label" htmlFor="search-date-from">
-							Date de dépôt (du)
+							{STATUS_DATE_COLUMN_LABEL} (du)
 						</label>
 						<input
 							className="fr-input"
@@ -159,7 +165,7 @@ export function SearchForm({ years }: Props) {
 				<div className="fr-col-12 fr-col-md-3">
 					<div className="fr-input-group">
 						<label className="fr-label" htmlFor="search-date-to">
-							Date de dépôt (au)
+							{STATUS_DATE_COLUMN_LABEL} (au)
 						</label>
 						<input
 							className="fr-input"
@@ -180,7 +186,7 @@ export function SearchForm({ years }: Props) {
 				<div className="fr-col-12 fr-col-md-3">
 					<div className="fr-select-group">
 						<label className="fr-label" htmlFor="search-status">
-							Statut
+							{DEMARCHE_STATUS_COLUMN_LABEL}
 						</label>
 						<select
 							className="fr-select"
@@ -188,9 +194,9 @@ export function SearchForm({ years }: Props) {
 							{...register("status")}
 						>
 							<option value="">Tous</option>
-							{ADMIN_DECLARATION_STATUS_FILTERS.map((status) => (
+							{DEMARCHE_LIFECYCLE_STATUSES.map((status) => (
 								<option key={status} value={status}>
-									{STATUS_LABELS[status]}
+									{DEMARCHE_STATUS_LABELS[status]}
 								</option>
 							))}
 						</select>

@@ -11,8 +11,8 @@ export async function AdminSettingsPage() {
 		<HydrateClient>
 			<h1 className="fr-h1">Paramètres de la plateforme</h1>
 			<p>
-				Éditez les variables globales utilisées par la plateforme pour encadrer
-				les campagnes de déclaration.
+				Complétez les champs utilisées par la plateforme pour encadrer la
+				campagne des deux démarches.
 			</p>
 
 			<AdminSettingsSections

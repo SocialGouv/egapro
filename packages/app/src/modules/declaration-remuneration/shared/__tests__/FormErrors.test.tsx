@@ -50,6 +50,7 @@ describe("FormErrors", () => {
 					firstName: "Camille",
 					lastName: "Martin",
 					email: "camille.martin@example.fr",
+					lockTimeoutMinutes: 30,
 				}}
 				isReadOnly
 			>
@@ -69,6 +70,7 @@ describe("FormErrors", () => {
 					firstName: "Camille",
 					lastName: "Martin",
 					email: "camille.martin@example.fr",
+					lockTimeoutMinutes: 30,
 				}}
 			>
 				<FormErrors mutationError={DECLARATION_LOCK_CONFLICT_MESSAGE} />
@@ -91,7 +93,12 @@ describe("FormErrors", () => {
 	it("keeps the generic message when the lock holder has no exploitable identity", () => {
 		render(
 			<LockProvider
-				holder={{ firstName: null, lastName: null, email: null }}
+				holder={{
+					firstName: null,
+					lastName: null,
+					email: null,
+					lockTimeoutMinutes: 30,
+				}}
 				isReadOnly
 			>
 				<FormErrors mutationError={DECLARATION_LOCK_CONFLICT_MESSAGE} />

@@ -50,12 +50,18 @@ describe("LockTimeoutForm", () => {
 		);
 	});
 
-	it("states that the timeout does not depend on the campaign year and what it protects", () => {
+	it("names the connection lock and states that it does not depend on the campaign year", () => {
 		render(<LockTimeoutForm initialTimeoutMinutes={30} />);
-		expect(
-			screen.getByLabelText(/délai d'expiration du verrou/i),
-		).toHaveAccessibleName(
-			/indépendant de l'année de campagne sélectionnée\. s'applique aux déclarations de rémunération et aux avis du cse\./i,
+		const input = screen.getByLabelText(/délai d'expiration du verrou/i);
+		expect(input).toHaveAccessibleName(
+			expect.stringMatching(
+				/^Délai d'expiration du verrou de connexion \(en minutes\)/,
+			),
+		);
+		expect(input).toHaveAccessibleName(
+			expect.stringContaining(
+				"Indépendant de l'année de campagne sélectionnée. Cas où plusieurs personnes se connectent à une démarche, ce délai fixe le temps de connexion de la personne qui s'est connectée en premier. Valeur entre 1 et 1440 minutes (24 heures maximum).",
+			),
 		);
 	});
 

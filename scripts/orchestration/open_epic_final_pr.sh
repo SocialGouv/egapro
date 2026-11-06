@@ -12,7 +12,7 @@ fi
 # at the end of an epic. Body lists every sub-ticket with `Closes #N` so they
 # auto-close on the eventual `alpha → master` release.
 #
-# Called by epic_loop.sh once every sub-ticket is in a terminal state
+# Run by /implement <epic> once every sub-ticket is in a terminal state
 # (validated + squash-merged into epic/<N>).
 #
 # Stdout: the PR number
@@ -58,7 +58,7 @@ SUB_LINES=$(gh api graphql -f query="{
 
 BODY="Intégration finale de l'epic #${EPIC} — **${EPIC_TITLE}**.
 
-Cette PR rassemble les commits squashés de chaque sous-ticket validé par la pipeline. Chaque sous-ticket a déjà passé : tests TU + intégration écrits par \`code-dev\`, CI verte, validators IA (validator / structural-auditor / rgaa-auditor / security-auditor / functional-validator), Sonar Quality Gate, et réponse aux review bots. Chaque ticket UI est passé par le gate indépendant \`design-validator\` (mesure DOM + overlay onion-skin contre le node Figma du ticket) ; son verdict est commenté sur le ticket — un écran inatteignable y apparaît en \`VISUAL_DEGRADED\`, jamais en PASS silencieux. La **gate E2E bloquante** est verte : l'agent \`e2e-dev\` a rejoué toute la suite E2E sur la feature intégrée (aucune régression de parcours) et ajouté la couverture E2E Playwright (commit \`test(e2e): …\` sur \`${BRANCH}\`). Cette PR est le **point unique de revue humaine** pour l'epic.
+Cette PR rassemble les commits squashés de chaque sous-ticket validé par la pipeline. Chaque sous-ticket a déjà passé : tests TU + intégration, \`pnpm verify\` (patterns, a11y, lint, format, typecheck, tests), \`/review gates\` (structure, sécurité, accessibilité, fidélité Figma, fonctionnel), CI verte, Sonar Quality Gate, et réponse aux review bots. La **recette E2E** est verte : toute la suite E2E a été rejouée sur la feature intégrée (aucune régression de parcours) et la couverture E2E Playwright ajoutée (commit \`test(e2e): …\` sur \`${BRANCH}\`). Cette PR est le **point unique de revue humaine** pour l'epic.
 
 ## Sous-tickets
 

@@ -215,6 +215,7 @@ function ManagedRepresentationLockProvider({
 								firstName: result.holder.firstName,
 								lastName: result.holder.lastName,
 								email: result.holder.email,
+								lockTimeoutMinutes: result.holder.lockTimeoutMinutes,
 							},
 				);
 				if (reacquired) {

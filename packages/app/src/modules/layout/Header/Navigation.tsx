@@ -4,12 +4,12 @@ import { usePathname } from "next/navigation";
 import { HOME, OBSERVATORY_SEARCH } from "~/modules/routes";
 import { ConsultationNavLink } from "../shared/ConsultationNavLink";
 import { NavLink } from "../shared/NavLink";
-import { isMySpaceRoute } from "../shared/routeUtils";
+import { isDemarcheRoute } from "../shared/routeUtils";
 
-// Renders nothing on Mon espace and its nested routes: the Figma header for that section has no nav row.
+// Renders nothing in the démarche (Mon espace, declaration journeys, avis CSE): the Figma header for those screens has no nav row.
 export function Navigation() {
 	const pathname = usePathname();
-	if (isMySpaceRoute(pathname)) {
+	if (isDemarcheRoute(pathname)) {
 		return null;
 	}
 	return (

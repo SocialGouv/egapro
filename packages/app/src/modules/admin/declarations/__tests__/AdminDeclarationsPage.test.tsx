@@ -43,6 +43,10 @@ vi.mock("~/trpc/react", () => ({
 								declarantEmail: "alice@example.com",
 								declarantFirstName: "Alice",
 								declarantLastName: "Dupont",
+								demarcheStatus: "in_progress",
+								lastTransmittedStep: "Transmission de la déclaration",
+								nextStep: "Choix du parcours de mise en conformité",
+								statusDate: new Date("2024-06-15T10:00:00Z"),
 							},
 						],
 						total: 1,
@@ -93,6 +97,17 @@ describe("AdminDeclarationsPage", () => {
 	it("shows result count", () => {
 		render(<AdminDeclarationsPage />);
 		expect(screen.getByText("1 résultat")).toBeInTheDocument();
+	});
+
+	it("opens on the most recent activity: date descending", () => {
+		render(<AdminDeclarationsPage />);
+
+		expect(api.adminDeclarations.search.useQuery).toHaveBeenLastCalledWith(
+			expect.objectContaining({ sortBy: "statusDate", sortOrder: "desc" }),
+		);
+		expect(
+			screen.getByRole("button", { name: /^Date/ }).closest("th"),
+		).toHaveAttribute("aria-sort", "descending");
 	});
 
 	it("shows a loading state and withholds the search form while years are still loading", () => {

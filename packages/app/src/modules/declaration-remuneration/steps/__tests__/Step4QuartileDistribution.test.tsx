@@ -581,4 +581,78 @@ describe("Step4QuartileDistribution", () => {
 			);
 		}
 	});
+
+	it("shows both table titles without reading-note buttons when the first quartile is empty", () => {
+		render(
+			<Step4QuartileDistribution
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialData={emptyStep4Data()}
+			/>,
+		);
+		expect(
+			screen.getByText("Rémunération annuelle brute moyenne", {
+				selector: "h3",
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole("button", { name: /Note de lecture du tableau/ }),
+		).not.toBeInTheDocument();
+	});
+
+	it("shows the computed reading note for each quartile table's 1st row", () => {
+		render(
+			<Step4QuartileDistribution
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialData={{
+					annual: [
+						{ threshold: "20000", women: 60, men: 30 },
+						{ threshold: "25000", women: 40, men: 30 },
+						{ threshold: "35000", women: 24, men: 31 },
+						{ threshold: undefined, women: 15, men: 26 },
+					],
+					hourly: [
+						{ threshold: "10", women: 20, men: 23 },
+						{ threshold: "12", women: 16, men: 18 },
+						{ threshold: "15", women: 15, men: 18 },
+						{ threshold: undefined, women: 4, men: 9 },
+					],
+				}}
+			/>,
+		);
+
+		const annualButton = screen.getByRole("button", {
+			name: "Note de lecture du tableau « Rémunération annuelle brute moyenne »",
+		});
+		expect(annualButton).toHaveAttribute(
+			"aria-describedby",
+			"tooltip-reading-note-step4-annual",
+		);
+		expect(
+			document.getElementById("tooltip-reading-note-step4-annual"),
+		).toHaveTextContent(
+			"Note de lecture : 66,66 % des femmes du premier quartile ont perçu une rémunération annuelle brute moyenne inférieure à 20 000,00 € contre 33,33 % d'hommes.",
+		);
+
+		const hourlyButton = screen.getByRole("button", {
+			name: "Note de lecture du tableau « Rémunération horaire brute moyenne »",
+		});
+		expect(hourlyButton).toHaveAttribute(
+			"aria-describedby",
+			"tooltip-reading-note-step4-hourly",
+		);
+		expect(
+			document.getElementById("tooltip-reading-note-step4-hourly"),
+		).toHaveTextContent(
+			"Note de lecture : 46,51 % des femmes du premier quartile ont perçu une rémunération horaire brute moyenne inférieure à 10,00 € contre 53,48 % d'hommes.",
+		);
+
+		expect(
+			screen.queryByText(/Interprétation des résultats/),
+		).not.toBeInTheDocument();
+		expect(screen.queryByText(/Écart en défaveur des/)).not.toBeInTheDocument();
+	});
 });

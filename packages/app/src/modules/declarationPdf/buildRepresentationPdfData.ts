@@ -1,17 +1,30 @@
 import "server-only";
 
 import { and, eq } from "drizzle-orm";
+
+import { summarizeRepresentationReview } from "~/modules/declaration-representation/shared/reviewSummary";
+import { representationDraftFromDeclaration } from "~/modules/declaration-representation/shared/submittedDraft";
 import {
-	computeRepresentationVerdict,
-	type ExecutivesCount,
+	type CompanyLocationRow,
+	companyLocationRow,
+	formatOptionalIsoDate,
+	formatShortDate,
+	formatSiren,
+	formatWorkforceForUser,
 	getRepresentationCampaignYear,
 	isRepresentationDeclarationSubmitted,
-	isRepresentationPublicationRequired,
 	type RepresentationComplianceVerdict,
-	toNullableNumber,
 } from "~/modules/domain";
+import { LAST_REPRESENTATION_STEP } from "~/modules/routes";
 import { db } from "~/server/db";
-import { companies, representationDeclarations } from "~/server/db/schema";
+import { getRepresentationWorkforceHistory } from "~/server/db/getRepresentationWorkforceHistory";
+import {
+	companies,
+	representationDeclarations,
+	users,
+} from "~/server/db/schema";
+
+import { formatNaf } from "./formatNaf";
 
 export class RepresentationDeclarationNotFoundError extends Error {
 	constructor() {
@@ -28,35 +41,58 @@ export type RepresentationPdfIndicator = {
 	verdict: RepresentationComplianceVerdict;
 };
 
+export type RepresentationPdfInfoRow = { label: string; value: string };
+
 export type RepresentationPdfData = {
-	companyName: string;
 	siren: string;
 	year: number;
 	campaignYear: number;
-	referencePeriodStart: string | null;
-	referencePeriodEnd: string | null;
+	submittedAt: Date | null;
+	transmittedAt: string | null;
+	referencePeriod: string;
+	declarantRows: RepresentationPdfInfoRow[];
+	company: {
+		name: string;
+		siren: string;
+		location: CompanyLocationRow | null;
+		naf: string;
+		workforceLabel: string;
+		workforceDisplay: string;
+	};
 	indicators: RepresentationPdfIndicator[];
 	publicationApplicable: boolean;
 	publishDate: string | null;
 	hasWebsite: boolean;
 	publishUrl: string | null;
 	publishModalities: string | null;
-	submittedAt: Date | null;
+	// Not rendered: the maquette has no generation date.
 	generatedAt: Date;
 };
 
-const NOT_COMPUTABLE_EXECUTIVES_LABELS: Record<
-	"aucun_cadre_dirigeant" | "un_seul_cadre_dirigeant",
-	string
-> = {
-	aucun_cadre_dirigeant: "Aucun cadre dirigeant",
-	un_seul_cadre_dirigeant: "Un cadre dirigeant",
+type Declarant = {
+	firstName: string | null;
+	lastName: string | null;
+	email: string | null;
+	phone: string | null;
 };
 
-const NOT_COMPUTABLE_MEMBERS_LABEL = "Aucune instance dirigeante";
-
-function toPercent(value: string | null): number | null {
-	return toNullableNumber(value);
+// Same omission rule as the consultation page's local `declarantInfoItems` — a row only when its value is present.
+function buildDeclarantRows(
+	declarant: Declarant | null,
+): RepresentationPdfInfoRow[] {
+	if (!declarant) return [];
+	const rows: RepresentationPdfInfoRow[] = [];
+	const name = [declarant.firstName, declarant.lastName]
+		.filter(Boolean)
+		.join(" ");
+	if (name) rows.push({ label: "Nom Prénom", value: name });
+	if (declarant.email) {
+		rows.push({ label: "Adresse email", value: declarant.email });
+	}
+	if (declarant.phone) {
+		rows.push({ label: "Numéro de téléphone", value: declarant.phone });
+	}
+	return rows;
 }
 
 export async function buildRepresentationPdfData(
@@ -87,67 +123,71 @@ export async function buildRepresentationPdfData(
 
 	const campaignYear = getRepresentationCampaignYear(year);
 
-	const executivesWomenPercent = toPercent(declaration.executiveWomenPercent);
-	const executivesMenPercent = toPercent(declaration.executiveMenPercent);
-	const membersWomenPercent = toPercent(declaration.memberWomenPercent);
-	const membersMenPercent = toPercent(declaration.memberMenPercent);
+	const [[declarant], workforceHistory] = await Promise.all([
+		declaration.declarantId
+			? db
+					.select({
+						firstName: users.firstName,
+						lastName: users.lastName,
+						email: users.email,
+						phone: users.phone,
+					})
+					.from(users)
+					.where(eq(users.id, declaration.declarantId))
+					.limit(1)
+			: Promise.resolve([] as Declarant[]),
+		getRepresentationWorkforceHistory(siren, campaignYear),
+	]);
 
-	const executivesCount: ExecutivesCount =
-		declaration.notComputableReasonExecutives === "aucun_cadre_dirigeant"
-			? "none"
-			: declaration.notComputableReasonExecutives === "un_seul_cadre_dirigeant"
-				? "one"
-				: "two_or_more";
-	const hasManagementBody = declaration.notComputableReasonMembers === null;
+	const workforceEma =
+		workforceHistory.find((entry) => entry.year === campaignYear)
+			?.workforceEma ?? null;
 
-	const indicators: RepresentationPdfIndicator[] = [
-		{
-			title: "Cadres dirigeants",
-			notComputableReason: declaration.notComputableReasonExecutives
-				? NOT_COMPUTABLE_EXECUTIVES_LABELS[
-						declaration.notComputableReasonExecutives
-					]
-				: null,
-			womenPercent: executivesWomenPercent,
-			menPercent: executivesMenPercent,
-			verdict: computeRepresentationVerdict(
-				executivesWomenPercent,
-				executivesMenPercent,
-				campaignYear,
-			),
-		},
-		{
-			title: "Membres des instances dirigeantes",
-			notComputableReason: hasManagementBody
-				? null
-				: NOT_COMPUTABLE_MEMBERS_LABEL,
-			womenPercent: membersWomenPercent,
-			menPercent: membersMenPercent,
-			verdict: computeRepresentationVerdict(
-				membersWomenPercent,
-				membersMenPercent,
-				campaignYear,
-			),
-		},
-	];
+	const draft = representationDraftFromDeclaration(
+		declaration,
+		LAST_REPRESENTATION_STEP,
+	);
+	const summary = summarizeRepresentationReview(draft, campaignYear);
+
+	const indicators: RepresentationPdfIndicator[] = summary.indicators.map(
+		(indicator) => ({
+			title: indicator.title,
+			notComputableReason: indicator.notComputableReason,
+			womenPercent: indicator.womenPercent ?? null,
+			menPercent: indicator.menPercent ?? null,
+			verdict: indicator.verdict,
+		}),
+	);
 
 	return {
-		companyName: company?.name ?? `Entreprise ${siren}`,
 		siren,
 		year,
 		campaignYear,
-		referencePeriodStart: declaration.referencePeriodStart,
-		referencePeriodEnd: declaration.referencePeriodEnd,
-		indicators,
-		publicationApplicable: isRepresentationPublicationRequired(
-			executivesCount,
-			hasManagementBody,
-		),
-		publishDate: declaration.publishDate,
-		hasWebsite: declaration.publishUrl !== null,
-		publishUrl: declaration.publishUrl,
-		publishModalities: declaration.publishModalities,
 		submittedAt: declaration.submittedAt,
+		transmittedAt: declaration.submittedAt
+			? formatShortDate(declaration.submittedAt)
+			: null,
+		referencePeriod: `${formatOptionalIsoDate(draft.referencePeriodStart)} - ${formatOptionalIsoDate(draft.referencePeriodEnd)}`,
+		declarantRows: buildDeclarantRows(declarant ?? null),
+		company: {
+			name: company?.name ?? `Entreprise ${siren}`,
+			siren: formatSiren(siren),
+			location: companyLocationRow({
+				countryCode: company?.countryCode ?? null,
+				countryLabel: company?.countryLabel ?? null,
+				departmentLabel: company?.departmentLabel ?? null,
+				domesticAddress: company?.address ?? "",
+			}),
+			naf: formatNaf(company?.nafCode ?? null, company?.nafLabel ?? null),
+			workforceLabel: `Effectif annuel moyen en ${year}`,
+			workforceDisplay: formatWorkforceForUser(workforceEma),
+		},
+		indicators,
+		publicationApplicable: summary.publicationApplicable,
+		publishDate: draft.publishDate ?? null,
+		hasWebsite: draft.hasWebsite === true,
+		publishUrl: draft.publishUrl ?? null,
+		publishModalities: draft.publishModalities ?? null,
 		generatedAt: now,
 	};
 }

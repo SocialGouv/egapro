@@ -33,6 +33,15 @@ describe("SitemapPage", () => {
 		expect(labels.indexOf("Connexion")).toBe(labels.indexOf("Mon espace") + 1);
 	});
 
+	it("intitules the privacy policy link in the legal pages section", () => {
+		render(<SitemapPage />);
+
+		const privacyPolicy = sectionLinks("Pages légales").find(
+			(link) => link.textContent === "Politique de confidentialité",
+		);
+		expect(privacyPolicy).toHaveAttribute("href", "/donnees-personnelles");
+	});
+
 	it("lists each page once across both sections", () => {
 		render(<SitemapPage />);
 

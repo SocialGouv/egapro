@@ -65,6 +65,7 @@ const LOCK_HOLDER = {
 	firstName: "Camille",
 	lastName: "Démo",
 	email: "email@example.fr",
+	lockTimeoutMinutes: 30,
 };
 
 function mockFormalNotice(
@@ -204,5 +205,8 @@ describe("FormalNoticePage", () => {
 			screen.getByText("Déclaration en cours de modification"),
 		).toBeInTheDocument();
 		expect(screen.getByText(/Camille Démo/)).toBeInTheDocument();
+		expect(screen.getByRole("alert")).toHaveTextContent(
+			"Actualisez la page pour vérifier si elle est de nouveau modifiable.",
+		);
 	});
 });

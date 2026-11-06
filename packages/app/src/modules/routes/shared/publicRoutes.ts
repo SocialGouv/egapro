@@ -148,7 +148,7 @@ export const PUBLIC_PAGES: readonly PublicPage[] = [
 	},
 	{
 		path: PRIVACY,
-		label: "Données personnelles",
+		label: "Politique de confidentialité",
 		group: "legal",
 		indexable: true,
 		changeFrequency: "yearly",

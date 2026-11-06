@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -36,6 +36,10 @@ const baseRow: DeclarationSearchRow = {
 	declarantEmail: "alice@example.com",
 	declarantFirstName: "Alice",
 	declarantLastName: "Dupont",
+	demarcheStatus: "in_progress",
+	lastTransmittedStep: "Transmission de la déclaration",
+	nextStep: "Choix du parcours de mise en conformité",
+	statusDate: new Date("2024-06-20T10:00:00Z"),
 };
 
 const defaultProps = {
@@ -43,9 +47,23 @@ const defaultProps = {
 	total: 1,
 	page: 1,
 	totalPages: 1,
-	sortBy: "createdAt",
+	sortBy: "statusDate",
 	sortOrder: "desc",
 };
+
+const HELP_COLUMNS = [
+	"Statut de la démarche",
+	"Dernière étape transmise",
+	"Prochaine étape",
+	"Date",
+];
+
+function headerTexts(): string[] {
+	return screen.getAllByRole("columnheader").map((header) => {
+		const control = header.querySelector("button:not(.fr-btn--tooltip), span");
+		return control?.textContent?.replace(/[▲▼\s]+$/, "") ?? "";
+	});
+}
 
 describe("DeclarationTable", () => {
 	it("renders rows with company name as link", () => {
@@ -58,37 +76,146 @@ describe("DeclarationTable", () => {
 		);
 	});
 
-	it("shows SIREN, year, workforce, status, email and date", () => {
+	it("shows SIREN, year, workforce, démarche status, both steps, email and the status date", () => {
 		render(<DeclarationTable {...defaultProps} />);
 
-		expect(screen.getByText("123456789")).toBeInTheDocument();
-		expect(screen.getByText("2024")).toBeInTheDocument();
-		expect(screen.getByText("99")).toBeInTheDocument();
-		expect(screen.getByText("Choix parcours conformité")).toBeInTheDocument();
-		expect(screen.getByText("alice@example.com")).toBeInTheDocument();
-		expect(screen.getByText("15/06/2024")).toBeInTheDocument();
+		const cells = screen.getAllByRole("cell").map((cell) => cell.textContent);
+		expect(cells).toEqual([
+			"123456789",
+			"ACME Corp",
+			"2024",
+			"99",
+			"En cours",
+			"Transmission de la déclaration",
+			"Choix du parcours de mise en conformité",
+			"alice@example.com",
+			"20/06/2024",
+		]);
 	});
 
-	it("places the Effectif annuel moyen column between Année and Statut", () => {
+	it("orders the columns with the three démarche columns after the workforce and the date last", () => {
 		render(<DeclarationTable {...defaultProps} />);
 
-		const headers = screen
-			.getAllByRole("columnheader")
-			.map((header) => header.textContent?.replace(/[▲▼\s]+$/, ""));
-		expect(headers).toEqual([
+		expect(headerTexts()).toEqual([
 			"SIREN",
 			"Entreprise",
 			"Année",
 			"Effectif annuel moyen",
-			"Statut",
+			"Statut de la démarche",
+			"Dernière étape transmise",
+			"Prochaine étape",
 			"Email déclarant",
-			"Date de dépôt",
+			"Date",
 		]);
+	});
+
+	it("shows a dash for a step or a date the démarche does not have", () => {
+		render(
+			<DeclarationTable
+				{...defaultProps}
+				rows={[
+					{
+						...baseRow,
+						demarcheStatus: "completed",
+						lastTransmittedStep: null,
+						nextStep: null,
+						statusDate: null,
+					},
+				]}
+			/>,
+		);
 
 		const cells = screen.getAllByRole("cell").map((cell) => cell.textContent);
-		expect(cells[2]).toBe("2024");
-		expect(cells[3]).toBe("99");
-		expect(cells[4]).toBe("Choix parcours conformité");
+		expect(cells[5]).toBe("—");
+		expect(cells[6]).toBe("—");
+		expect(cells[8]).toBe("—");
+	});
+
+	it("puts a single sort button in each sortable header and none in the two step headers", () => {
+		render(<DeclarationTable {...defaultProps} />);
+
+		const headers = screen.getAllByRole("columnheader");
+		const sortButtonCounts = headers.map(
+			(header) =>
+				header.querySelectorAll("button:not(.fr-btn--tooltip)").length,
+		);
+		expect(sortButtonCounts).toEqual([1, 1, 1, 1, 1, 0, 0, 1, 1]);
+		expect(headers[5]).not.toHaveAttribute("aria-sort");
+		expect(headers[6]).not.toHaveAttribute("aria-sort");
+	});
+
+	it.each(
+		HELP_COLUMNS,
+	)("gives the « %s » header its own help button, beside the sort control and never inside it", (label) => {
+		render(<DeclarationTable {...defaultProps} />);
+
+		const help = screen.getByRole("button", {
+			name: `Aide sur la colonne ${label}`,
+		});
+		expect(help.closest("th")).not.toBeNull();
+		expect(help.parentElement?.closest("button")).toBeNull();
+		expect(help.querySelector("button")).toBeNull();
+		const tooltipId = help.getAttribute("aria-describedby");
+		expect(tooltipId).toMatch(/^tooltip-admin-declarations-/);
+		expect(document.getElementById(tooltipId ?? "")).toHaveAttribute(
+			"role",
+			"tooltip",
+		);
+	});
+
+	it("gives help buttons unique tooltip ids and leaves the other headers without one", () => {
+		render(<DeclarationTable {...defaultProps} />);
+
+		const helpButtons = document.querySelectorAll("th .fr-btn--tooltip");
+		const ids = Array.from(helpButtons).map((button) =>
+			button.getAttribute("aria-describedby"),
+		);
+		expect(ids).toHaveLength(HELP_COLUMNS.length);
+		expect(new Set(ids).size).toBe(HELP_COLUMNS.length);
+	});
+
+	it("explains the date rule in the Date tooltip", () => {
+		render(<DeclarationTable {...defaultProps} />);
+
+		const help = screen.getByRole("button", {
+			name: "Aide sur la colonne Date",
+		});
+		const tooltip = document.getElementById(
+			help.getAttribute("aria-describedby") ?? "",
+		);
+		expect(tooltip).toHaveTextContent(
+			"Brouillon : date d'ouverture de la démarche. En cours : date de la dernière étape transmise. Finalisée : date de finalisation. Annulée : date d'annulation.",
+		);
+	});
+
+	it("does not sort when the help button is activated", async () => {
+		const user = userEvent.setup();
+		mockPush.mockClear();
+		render(<DeclarationTable {...defaultProps} />);
+
+		await user.click(
+			screen.getByRole("button", { name: "Aide sur la colonne Date" }),
+		);
+
+		expect(mockPush).not.toHaveBeenCalled();
+	});
+
+	it("sorts by démarche status through the status header button", async () => {
+		const user = userEvent.setup();
+		const scrollTo = vi
+			.spyOn(window, "scrollTo")
+			.mockImplementation(() => undefined);
+		mockPush.mockClear();
+		render(<DeclarationTable {...defaultProps} />);
+
+		await user.click(
+			screen.getByRole("button", { name: /^Statut de la démarche/ }),
+		);
+
+		expect(mockPush).toHaveBeenCalledWith(
+			expect.stringContaining("sortBy=demarcheStatus"),
+		);
+		scrollTo.mockRestore();
 	});
 
 	it("shows a dash when the GIP headcount is unknown", () => {
@@ -115,7 +242,7 @@ describe("DeclarationTable", () => {
 		render(<DeclarationTable {...defaultProps} />);
 
 		const sortedHeader = screen
-			.getByRole("button", { name: /date de dépôt/i })
+			.getByRole("button", { name: /^date/i })
 			.closest("th");
 		expect(sortedHeader).toHaveAttribute("aria-sort", "descending");
 
@@ -187,21 +314,42 @@ describe("DeclarationTable", () => {
 		scrollTo.mockRestore();
 	});
 
-	it("shows cancelled badge when cancelledAt is set", () => {
-		const cancelledRow = { ...baseRow, cancelledAt: new Date("2024-07-01") };
-		render(<DeclarationTable {...defaultProps} rows={[cancelledRow]} />);
+	it.each([
+		{ demarcheStatus: "draft", label: "Brouillon", modifier: null },
+		{
+			demarcheStatus: "in_progress",
+			label: "En cours",
+			modifier: "fr-badge--info",
+		},
+		{
+			demarcheStatus: "completed",
+			label: "Finalisée",
+			modifier: "fr-badge--success",
+		},
+		{
+			demarcheStatus: "cancelled",
+			label: "Annulée",
+			modifier: "fr-badge--warning",
+		},
+	] as const)("shows the $label démarche status as a small badge", ({
+		demarcheStatus,
+		label,
+		modifier,
+	}) => {
+		render(
+			<DeclarationTable
+				{...defaultProps}
+				rows={[{ ...baseRow, demarcheStatus }]}
+			/>,
+		);
 
-		expect(screen.getByText("Annulée")).toBeInTheDocument();
-		expect(
-			screen.queryByText("Choix parcours conformité"),
-		).not.toBeInTheDocument();
-	});
-
-	it("shows status label when cancelledAt is null", () => {
-		render(<DeclarationTable {...defaultProps} />);
-
-		expect(screen.getByText("Choix parcours conformité")).toBeInTheDocument();
-		expect(screen.queryByText("Annulée")).not.toBeInTheDocument();
+		const cell = screen.getAllByRole("cell")[4] as HTMLElement;
+		const badge = within(cell).getByText(label);
+		expect(badge).toHaveClass("fr-badge", "fr-badge--sm", "fr-badge--no-icon");
+		const colorModifiers = Array.from(badge.classList).filter((name) =>
+			/^fr-badge--(info|success|warning|error|new)$/.test(name),
+		);
+		expect(colorModifiers).toEqual(modifier ? [modifier] : []);
 	});
 
 	it("keeps the full company name as the link's accessible name and applies the visual truncation class", () => {

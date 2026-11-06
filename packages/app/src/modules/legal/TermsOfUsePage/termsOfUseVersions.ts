@@ -27,6 +27,12 @@ export function getCurrentTermsOfUseVersion(
 	return current;
 }
 
+export function hasArchivedTermsOfUseVersions(
+	versions: readonly TermsOfUseVersion[] = TERMS_OF_USE_VERSIONS,
+): boolean {
+	return versions.length > 1;
+}
+
 export function resolveTermsOfUseVersion(
 	effectiveDate: string,
 	versions: readonly TermsOfUseVersion[] = TERMS_OF_USE_VERSIONS,

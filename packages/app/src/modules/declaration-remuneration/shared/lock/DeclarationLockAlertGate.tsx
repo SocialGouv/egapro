@@ -1,10 +1,19 @@
 "use client";
 
 import { DeclarationLockAlert } from "./DeclarationLockAlert";
-import { useLockHolderIfLockedOut } from "./LockContext";
+import { useLockHolderIfLockedOut, useReadOnlyContext } from "./LockContext";
+import { LockRetakeStatus } from "./LockRetakeStatus";
+import { isLockReleasedOrRetaking } from "./lockRetakeView";
 
 export function DeclarationLockAlertGate() {
 	const holder = useLockHolderIfLockedOut();
-	if (!holder) return null;
-	return <DeclarationLockAlert holder={holder} />;
+	const { retake } = useReadOnlyContext();
+	return (
+		<>
+			{holder && !isLockReleasedOrRetaking(retake) && (
+				<DeclarationLockAlert followUp="watchThenRetake" holder={holder} />
+			)}
+			<LockRetakeStatus holder={holder} retake={retake} />
+		</>
+	);
 }

@@ -1,5 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 import { urlGlob } from "~/e2e/helpers/routes";
+import { representationPdfFilename } from "~/modules/declarationPdf/representationPdfFilename";
 import {
 	formatPercentage,
 	formatPrecisePercentage,
@@ -33,6 +34,15 @@ import {
 	setPublicDataReleaseDate,
 } from "./helpers/db-campaign";
 import { clickAndExpectDialogOpen, waitForDsfrModal } from "./helpers/dsfr";
+import { fetchAttachment, waitForEmail } from "./helpers/mailpit";
+import {
+	clearNotificationQueue,
+	killWorker,
+	spawnNotificationsWorker,
+	waitForWorkerReady,
+} from "./helpers/notifications-worker";
+import { mailChainAvailable } from "./helpers/receipts";
+import { getTestUserEmail } from "./helpers/testUser";
 
 /**
  * Balanced representation (« représentation équilibrée », loi Rixain) — the
@@ -63,6 +73,8 @@ const DEV_GATEWAY_SHARED_SECRET = "dev-gateway-shared-secret-minimum-32-chars";
 const EXECUTIVE_WOMEN_PERCENT = 30;
 const MEMBER_WOMEN_PERCENT = 20;
 const PUBLISH_URL = "https://example.fr/representation-equilibree";
+const RECEIPT_SUBJECT =
+	"Egapro - Transmission de la déclaration de la représentation équilibrée";
 
 function dayString(offsetDays: number): string {
 	const date = new Date();
@@ -116,11 +128,13 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 	let campaignYear: number;
 	let referenceYear: number;
 	let seededYears: number[] = [];
+	let submittedAt: Date;
 
 	test.beforeAll(async () => {
 		campaignYear = await getCurrentDbYear();
 		referenceYear = getReferenceYearFor(campaignYear);
 		await resetRepresentationDeclaration();
+		await clearNotificationQueue();
 		seededYears = await setRepresentationWorkforceWindow(
 			campaignYear,
 			REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
@@ -351,6 +365,7 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 			await certify.check({ force: true });
 			await expect(certify).toBeChecked();
 			await expect(validate).toBeEnabled();
+			submittedAt = new Date();
 			await validate.click();
 		});
 
@@ -381,6 +396,34 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 		);
 		expect(response.status()).toBe(200);
 		expect(response.headers()["content-type"]).toContain("application/pdf");
+	});
+
+	test("the receipt email carries the PDF récapitulatif as an attachment", async () => {
+		test.skip(
+			!(await mailChainAvailable()),
+			"MAIL_ENABLED off or Mailpit unreachable — no receipt can arrive",
+		);
+		// The worker only runs inside mail specs: the job enqueued at submission waits for it.
+		const worker = spawnNotificationsWorker();
+		try {
+			await waitForWorkerReady(worker);
+			const email = await waitForEmail(
+				getTestUserEmail(),
+				(m) => m.subject === RECEIPT_SUBJECT,
+				{ since: submittedAt },
+			);
+
+			// A failed PDF render is swallowed so the receipt still leaves: only the attachment list shows it.
+			expect(email.attachments.map((a) => a.fileName)).toEqual([
+				representationPdfFilename(TEST_SIREN, campaignYear),
+			]);
+			const [attachment] = email.attachments;
+			expect(attachment?.contentType).toBe("application/pdf");
+			const content = await fetchAttachment(email.id, attachment?.partId ?? "");
+			expect(content.subarray(0, 5).toString("latin1")).toBe("%PDF-");
+		} finally {
+			await killWorker(worker);
+		}
 	});
 
 	test("the public company page shows the declaration only once its campaign is publicly released", async ({

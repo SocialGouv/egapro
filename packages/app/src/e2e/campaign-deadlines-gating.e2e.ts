@@ -59,6 +59,8 @@ const PAST_DEADLINES = {
 	decl2CseOpinionDeadline: "2021-02-01",
 } as const;
 
+const JOINT_EVALUATION_LABEL =
+	"Échéance pour le dépôt du rapport de l'évaluation conjointe";
 const FIRST_DECLARATION_ROW = "Votre déclaration a été transmise";
 const SECOND_DECLARATION_ROW = "Votre seconde déclaration a été transmise";
 const CSE_OPINION_ROW = "Vos avis du CSE ont été transmis";
@@ -117,7 +119,7 @@ async function saveDeadlinesThroughAdmin(
 		});
 		const save = section.getByRole("button", { name: "Enregistrer" });
 		const decl1Modification = declaration.getByLabel(
-			"Échéance de déclaration",
+			"Échéance de la déclaration",
 			{ exact: true },
 		);
 		const decl2Modification = firstRound.getByLabel(
@@ -150,25 +152,17 @@ async function saveDeadlinesThroughAdmin(
 
 		await decl1Modification.fill(dates.decl1ModificationDeadline);
 		await firstRound
-			.getByLabel("Échéance de justification des écarts", { exact: true })
-			.fill(dates.decl1JustificationDeadline);
-		await firstRound
-			.getByLabel("Échéance de dépôt du rapport d'évaluation conjointe", {
-				exact: true,
-			})
+			.getByLabel(JOINT_EVALUATION_LABEL, { exact: true })
 			.fill(dates.decl1JointEvaluationDeadline);
 		await decl2Modification.fill(dates.decl2ModificationDeadline);
 		await secondRound
-			.getByLabel("Échéance de justification des écarts", { exact: true })
-			.fill(dates.decl2JustificationDeadline);
-		await secondRound
-			.getByLabel("Échéance de dépôt du rapport d'évaluation conjointe", {
-				exact: true,
-			})
+			.getByLabel(JOINT_EVALUATION_LABEL, { exact: true })
 			.fill(dates.decl2JointEvaluationDeadline);
 		await section
 			.getByRole("group", { name: "Avis du CSE" })
-			.getByLabel(/^Échéance de dépôt de l'avis du CSE/)
+			.getByLabel("Échéance pour le dépôt de l'avis ou des avis CSE", {
+				exact: true,
+			})
 			.fill(dates.decl2CseOpinionDeadline);
 		await save.click();
 		await expect(
@@ -199,6 +193,7 @@ test.describe("Campaign deadlines are informational; only the last submission is
 		page,
 	}) => {
 		test.setTimeout(420_000);
+		await setCampaignDeadlines(testDeclarationYear, PAST_DEADLINES);
 		await saveDeadlinesThroughAdmin(page, PAST_DEADLINES);
 
 		await test.step("S1 — la 1ʳᵉ déclaration se transmet, échéances passées", async () => {

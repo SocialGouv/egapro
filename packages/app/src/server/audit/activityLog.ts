@@ -120,7 +120,7 @@ function expandIpv6(canonical: string): string[] {
 	);
 }
 
-// Extend only per the "Miroir stdout" section of .claude/rules/audit-logging.md.
+// Extend only per the "Miroir stdout" section of docs/audit-logging-inventaire.md.
 const INPUT_ALLOWED_KEYS = new Set([
 	"year",
 	"siren",

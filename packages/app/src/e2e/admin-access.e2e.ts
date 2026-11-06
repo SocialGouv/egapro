@@ -55,7 +55,9 @@ test.describe("admin access", () => {
 				}),
 			).toBeVisible();
 
-			const yearSelector = page.getByLabel(/^Année de campagne/);
+			const yearSelector = page.getByLabel("Année de la campagne", {
+				exact: true,
+			});
 			const common = page.getByRole("region", { name: "Paramètres communs" });
 			const remuneration = page.getByRole("region", {
 				name: "Démarche Rémunération",
@@ -63,10 +65,18 @@ test.describe("admin access", () => {
 			const deadlines = remuneration.getByRole("region", {
 				name: /^Échéances de la campagne/,
 			});
-			const lock = remuneration.getByRole("region", {
-				name: "Verrou de déclaration",
+			const representation = page.getByRole("region", {
+				name: "Démarche Représentation équilibrée",
 			});
-			const lockInput = lock.getByLabel(/^Délai d'expiration du verrou/);
+			const calendar = common.getByRole("region", {
+				name: /^Calendrier de la campagne/,
+			});
+			const lock = common.getByRole("region", {
+				name: "Verrou de connexion",
+			});
+			const lockInput = lock.getByLabel(
+				/^Délai d'expiration du verrou de connexion/,
+			);
 
 			await test.step("structure — sélecteur unique, communs puis démarches", async () => {
 				await expect(page.getByRole("combobox")).toHaveCount(1);
@@ -87,14 +97,22 @@ test.describe("admin access", () => {
 						level: 3,
 					}),
 				).toBeVisible();
+				await expect(lockInput).toBeEditable();
 				await expect(
-					page
-						.getByRole("region", { name: "Démarche Représentation équilibrée" })
-						.getByRole("heading", {
-							name: `Campagne ${currentYear}`,
-							level: 3,
-						}),
+					representation.getByRole("heading", {
+						name: `Échéances de la campagne ${currentYear}`,
+						level: 3,
+					}),
 				).toBeVisible();
+				await expect(
+					representation.getByLabel("Échéance de la déclaration", {
+						exact: true,
+					}),
+				).toBeEditable();
+				await expect(
+					representation.getByLabel(/^Date de (démarrage|clôture)/),
+				).toHaveCount(0);
+				await expect(common.getByLabel(/données GIP/)).toHaveCount(0);
 			});
 
 			await test.step("Rémunération — quatre groupes, choix du parcours calculés", async () => {
@@ -110,10 +128,18 @@ test.describe("admin access", () => {
 				const secondRound = deadlines.getByRole("group", {
 					name: "Parcours de mise en conformité — 2nd tour",
 				});
+				const declaration = deadlines.getByRole("group", {
+					name: "Déclaration des indicateurs",
+				});
+				const gipPublication = declaration.getByLabel(
+					/^Date de mise à disposition des données GIP/,
+				);
+				await expect(gipPublication).not.toBeEditable();
+				await expect(declaration.locator("input").first()).toHaveId(
+					"settings-gipPublicationDate",
+				);
 				await expect(
-					deadlines
-						.getByRole("group", { name: "Déclaration des indicateurs" })
-						.getByLabel("Échéance de déclaration", { exact: true }),
+					declaration.getByLabel("Échéance de la déclaration", { exact: true }),
 				).toBeEditable();
 				await expect(
 					firstRound.getByLabel(
@@ -124,13 +150,21 @@ test.describe("admin access", () => {
 				await expect(
 					deadlines
 						.getByRole("group", { name: "Avis du CSE" })
-						.getByLabel(/^Échéance de dépôt de l'avis du CSE/),
+						.getByLabel("Échéance pour le dépôt de l'avis ou des avis CSE", {
+							exact: true,
+						}),
 				).toBeEditable();
+				await expect(
+					deadlines.getByLabel(/justification des écarts/),
+				).toHaveCount(0);
 				for (const [round, value] of [
 					[firstRound, `${currentYear}-07-01`],
 					[secondRound, `${currentYear + 1}-01-01`],
 				] as const) {
-					const pathChoice = round.getByLabel(/^Échéance de choix du parcours/);
+					const pathChoice = round.getByLabel(
+						"Échéance pour le choix du parcours",
+						{ exact: true },
+					);
 					await expect(pathChoice).toHaveValue(value);
 					await expect(pathChoice).not.toBeEditable();
 				}
@@ -155,17 +189,17 @@ test.describe("admin access", () => {
 						"Valeurs par défaut — aucune surcharge enregistrée pour cette année",
 					),
 				).toBeVisible();
-				const commonStart = common.getByLabel(
-					/^Date de démarrage de la campagne/,
+				const commonStart = calendar.getByLabel(
+					/^Date d'ouverture de la campagne/,
 				);
 				await expect(
-					common.getByText(
+					calendar.getByText(
 						`Enregistrez d'abord les échéances de la démarche Rémunération pour ${unconfiguredYear}.`,
 					),
 				).toBeVisible();
 				await expect(commonStart).toBeDisabled();
 				await expect(
-					common.getByRole("button", { name: "Enregistrer" }),
+					calendar.getByRole("button", { name: "Enregistrer" }),
 				).toBeDisabled();
 				await expect(lockInput).toHaveValue(lockValue);
 
@@ -177,7 +211,7 @@ test.describe("admin access", () => {
 				).toBeVisible();
 				await expect(commonStart).toBeEnabled();
 				await expect(
-					common.getByRole("button", { name: "Enregistrer" }),
+					calendar.getByRole("button", { name: "Enregistrer" }),
 				).toBeEnabled();
 				await expect(lockInput).toHaveValue(lockValue);
 			});
@@ -424,7 +458,7 @@ test.describe("admin declarations — GIP headcount column and size filter", () 
 		}
 	});
 
-	test("shows the floored GIP headcount between Année and Statut, and — when it is unknown", async ({
+	test("shows the floored GIP headcount between Année and Statut de la démarche, and — when it is unknown", async ({
 		page,
 	}) => {
 		await page.goto(routeWithQuery(ADMIN_DECLARATIONS, "pageSize=100"));
@@ -432,7 +466,9 @@ test.describe("admin declarations — GIP headcount column and size filter", () 
 		const headers = page.locator("thead th");
 		await expect(headers.nth(WORKFORCE_HEADER_INDEX - 1)).toHaveText(/^Année/);
 		await expect(headers.nth(WORKFORCE_HEADER_INDEX)).toHaveText(/^Effectif/);
-		await expect(headers.nth(WORKFORCE_HEADER_INDEX + 1)).toHaveText(/^Statut/);
+		await expect(headers.nth(WORKFORCE_HEADER_INDEX + 1)).toHaveText(
+			/^Statut de la démarche/,
+		);
 
 		await expect(
 			rowForYear(page, FLOORED_YEAR).locator(WORKFORCE_CELL),

@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { createContext, useContext } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
-import type { LockHolderDisplay, ReadOnlyReason } from "./types";
+import type { LockHolderDisplay, LockRetake, ReadOnlyReason } from "./types";
 import { useDeclarationLock } from "./useDeclarationLock";
 
 type LockState = {
@@ -12,6 +12,8 @@ type LockState = {
 	reason: ReadOnlyReason | null;
 	holder: LockHolderDisplay | null;
 	isLoading?: boolean;
+	retake?: LockRetake;
+	editSessionKey?: number;
 };
 
 const LockContext = createContext<LockState>({
@@ -71,14 +73,9 @@ function DynamicLockProvider({
 	declarationId,
 	modificationClosed,
 }: DynamicLockProviderProps) {
-	const { isReadOnly, reason, holder, isLoading } = useDeclarationLock({
-		declarationId,
-		modificationClosed,
-	});
+	const lockState = useDeclarationLock({ declarationId, modificationClosed });
 	return (
-		<LockContext.Provider value={{ isReadOnly, reason, holder, isLoading }}>
-			{children}
-		</LockContext.Provider>
+		<LockContext.Provider value={lockState}>{children}</LockContext.Provider>
 	);
 }
 

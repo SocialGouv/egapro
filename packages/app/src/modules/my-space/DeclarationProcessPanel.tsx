@@ -113,7 +113,10 @@ export function DeclarationProcessPanel({
 							year={year}
 						/>
 						{lockedByOther && lockHolder && (
-							<DeclarationLockAlert holder={lockHolder} />
+							<DeclarationLockAlert
+								followUp="openToWatch"
+								holder={lockHolder}
+							/>
 						)}
 						{indicatorGRequired &&
 							(variant === "start" || variant === "compliance_choice") && (

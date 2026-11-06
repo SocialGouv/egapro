@@ -16,6 +16,7 @@ const lockHolder = {
 	firstName: "Camille",
 	lastName: "Martin",
 	email: "camille.martin@example.fr",
+	lockTimeoutMinutes: 30,
 };
 
 function LockProbe() {
@@ -54,6 +55,9 @@ describe("CseOpinionLayout", () => {
 		expect(
 			screen.getByText(/Camille Martin \(camille\.martin@example\.fr\)/),
 		).toBeInTheDocument();
+		expect(screen.getByRole("alert")).toHaveTextContent(
+			"Actualisez la page pour vérifier si elle est de nouveau modifiable.",
+		);
 	});
 
 	it("does not show the lock alert by default", () => {

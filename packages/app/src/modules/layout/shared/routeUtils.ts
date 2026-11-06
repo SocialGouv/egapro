@@ -1,4 +1,10 @@
-import { ADMIN, MY_SPACE } from "~/modules/routes";
+import {
+	ADMIN,
+	CSE_OPINION,
+	DECLARATION_REMUNERATION,
+	DECLARATION_REPRESENTATION,
+	MY_SPACE,
+} from "~/modules/routes";
 
 // Segment-boundary match: a sibling route merely starting with the same characters (e.g. `/administrator` for root `/admin`) must not match.
 function isUnderRoute(pathname: string | null, root: string): boolean {
@@ -18,6 +24,12 @@ export function isAdminRoute(pathname: string | null): boolean {
 	return isUnderRoute(pathname, ADMIN);
 }
 
-export function isMySpaceRoute(pathname: string | null): boolean {
-	return isUnderRoute(pathname, MY_SPACE);
+// Path-based, not session-based: these journeys already redirect anonymous visitors to login, and gating on session would also hide the menu on help/FAQ/legal pages reached from within them.
+export function isDemarcheRoute(pathname: string | null): boolean {
+	return (
+		isUnderRoute(pathname, MY_SPACE) ||
+		isUnderRoute(pathname, DECLARATION_REMUNERATION) ||
+		isUnderRoute(pathname, DECLARATION_REPRESENTATION) ||
+		isUnderRoute(pathname, CSE_OPINION)
+	);
 }

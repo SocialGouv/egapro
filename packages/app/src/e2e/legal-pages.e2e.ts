@@ -17,7 +17,7 @@ const CURRENT_CGU_DISPLAY_DATE = "12/10/2026";
 test.describe("Legal pages", () => {
 	test.use({ storageState: { cookies: [], origins: [] } });
 
-	test("a visitor reaches the terms of use from the footer and its version history", async ({
+	test("a visitor reaches the terms of use from the footer, without version history while a single version exists", async ({
 		page,
 	}) => {
 		await test.step("the footer link leads to /cgu", async () => {
@@ -44,23 +44,15 @@ test.describe("Legal pages", () => {
 			).toBeVisible();
 		});
 
-		await test.step("the anchor scrolls to the version history", async () => {
-			await page
-				.getByRole("link", { name: "Consulter l'historique des versions" })
-				.click();
-			await page.waitForURL(/#historique-des-versions$/);
-			const historyHeading = page.getByRole("heading", {
-				level: 2,
-				name: "Historique des versions",
-			});
-			await expect(historyHeading).toBeInViewport();
-
-			const entries = page.locator("#historique-des-versions + ul > li");
-			await expect(entries).toHaveCount(1);
-			await expect(entries.first()).toHaveText(
-				`Version du ${CURRENT_CGU_DISPLAY_DATE} (en vigueur)`,
-			);
-			await expect(entries.first().getByRole("link")).toHaveCount(0);
+		await test.step("a single version in force shows no version history", async () => {
+			await expect(
+				page.getByRole("link", {
+					name: "Consulter l'historique des versions",
+				}),
+			).toHaveCount(0);
+			await expect(
+				page.getByRole("heading", { name: "Historique des versions" }),
+			).toHaveCount(0);
 		});
 	});
 
@@ -97,10 +89,15 @@ test.describe("Legal pages", () => {
 		).toHaveAttribute("href", CGU);
 	});
 
-	test("the privacy policy is titled and links to cookie management", async ({
+	test("the footer privacy policy link leads to the titled page that links to cookie management", async ({
 		page,
 	}) => {
-		await page.goto(PRIVACY);
+		await page.goto("/");
+		await page
+			.locator("footer#footer")
+			.getByRole("link", { name: "Politique de confidentialité" })
+			.click();
+		await page.waitForURL(urlPattern(PRIVACY));
 
 		await expect(
 			page.getByRole("heading", {

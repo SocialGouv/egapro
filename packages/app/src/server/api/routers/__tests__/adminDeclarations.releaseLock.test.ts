@@ -32,6 +32,7 @@ type LockRow = {
 	firstName: string | null;
 	lastName: string | null;
 	expiresAt: Date;
+	lastHeartbeatAt: Date;
 };
 
 function buildDb(lock: LockRow | null) {
@@ -57,6 +58,7 @@ const activeLock: LockRow = {
 	firstName: "Bob",
 	lastName: "Martin",
 	expiresAt: new Date("2026-03-20T10:00:00Z"),
+	lastHeartbeatAt: new Date("2026-03-20T09:30:00Z"),
 };
 
 describe("adminDeclarationsRouter — releaseLock", () => {

@@ -177,6 +177,7 @@ describe("MonEspacePage", () => {
 				firstName: "Alice",
 				lastName: "Martin",
 				email: "alice.martin@example.fr",
+				lockTimeoutMinutes: 30,
 			},
 		});
 		const page = await MonEspacePage({
@@ -189,5 +190,9 @@ describe("MonEspacePage", () => {
 		expect(alert).toBeInTheDocument();
 		expect(alert).toHaveTextContent("Déclaration en cours de modification");
 		expect(alert).toHaveTextContent("Alice Martin");
+		expect(alert).toHaveTextContent("au plus tard 30 minutes");
+		expect(alert).toHaveTextContent(
+			"Ouvrez la déclaration pour être prévenu dès qu'elle sera libérée.",
+		);
 	});
 });

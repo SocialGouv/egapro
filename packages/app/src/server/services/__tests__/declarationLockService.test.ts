@@ -30,13 +30,17 @@ const TIMEOUT_MINUTES = 30;
 const NOW = new Date("2025-06-23T10:00:00.000Z");
 const EXPECTED_EXPIRY = new Date(NOW.getTime() + TIMEOUT_MINUTES * 60_000);
 
-const HOLDER = {
+const HOLDER_ROW = {
 	userId: USER_ID,
 	email: "user-1@example.fr",
 	firstName: "Alice",
 	lastName: "Martin",
 	expiresAt: EXPECTED_EXPIRY,
+	lastHeartbeatAt: NOW,
 };
+
+const { lastHeartbeatAt: _heartbeat, ...HOLDER_IDENTITY } = HOLDER_ROW;
+const HOLDER = { ...HOLDER_IDENTITY, lockTimeoutMinutes: TIMEOUT_MINUTES };
 
 function selectChain(rows: unknown[]) {
 	const limit = vi.fn().mockResolvedValue(rows);
@@ -88,12 +92,27 @@ afterEach(() => {
 
 describe("getActiveLock", () => {
 	it("returns the holder row when the join yields an active lock", async () => {
-		const select = selectChain([HOLDER]);
+		const select = selectChain([HOLDER_ROW]);
 		const { getActiveLock } = await service();
 
 		const result = await getActiveLock(select as never, DECLARATION_ID);
 
 		expect(result).toEqual(HOLDER);
+	});
+
+	it("derives the lock timeout from the row's last heartbeat and expiry", async () => {
+		const select = selectChain([
+			{
+				...HOLDER_ROW,
+				expiresAt: new Date(NOW.getTime() + 45 * 60_000),
+			},
+		]);
+		const { getActiveLock } = await service();
+
+		const result = await getActiveLock(select as never, DECLARATION_ID);
+
+		expect(result?.lockTimeoutMinutes).toBe(45);
+		expect(result).not.toHaveProperty("lastHeartbeatAt");
 	});
 
 	it("returns null when no active lock row is returned", async () => {
@@ -128,7 +147,7 @@ describe("assertDeclarationUnlockedForWrite", () => {
 	it("rejects when another co-declarant holds an active lock", async () => {
 		const { resolveCurrentDeclarationId } = await helpers();
 		vi.mocked(resolveCurrentDeclarationId).mockResolvedValue(DECLARATION_ID);
-		const db = lockDb([{ ...HOLDER, userId: "user-2" }]);
+		const db = lockDb([{ ...HOLDER_ROW, userId: "user-2" }]);
 		const {
 			assertDeclarationUnlockedForWrite,
 			DeclarationLockedByOtherUserError,
@@ -161,7 +180,7 @@ describe("assertDeclarationUnlockedForWrite", () => {
 
 		await expect(
 			assertDeclarationUnlockedForWrite(
-				lockDb([HOLDER]) as never,
+				lockDb([HOLDER_ROW]) as never,
 				SIREN,
 				YEAR,
 				USER_ID,
@@ -199,7 +218,7 @@ describe("assertDeclarationUnlockedForWrite", () => {
 
 describe("getLockReadState", () => {
 	it("flags read-only and exposes the holder when another user holds the lock", async () => {
-		const select = selectChain([HOLDER]);
+		const select = selectChain([HOLDER_ROW]);
 		const { getLockReadState } = await service();
 
 		const result = await getLockReadState(
@@ -214,12 +233,13 @@ describe("getLockReadState", () => {
 				firstName: HOLDER.firstName,
 				lastName: HOLDER.lastName,
 				email: HOLDER.email,
+				lockTimeoutMinutes: TIMEOUT_MINUTES,
 			},
 		});
 	});
 
 	it("is not read-only when the current user holds the lock", async () => {
-		const select = selectChain([HOLDER]);
+		const select = selectChain([HOLDER_ROW]);
 		const { getLockReadState } = await service();
 
 		expect(
@@ -240,7 +260,7 @@ describe("getLockReadState", () => {
 describe("acquireOrRefreshLock", () => {
 	it("acquired=true when the upsert returns a row, stamping now + timeout", async () => {
 		const insert = insertChain([{ id: "lock-1" }]);
-		const tx = { ...insert, ...selectChain([HOLDER]) };
+		const tx = { ...insert, ...selectChain([HOLDER_ROW]) };
 		const db = transactionDb(tx);
 		const { acquireOrRefreshLock } = await service();
 
@@ -265,7 +285,7 @@ describe("acquireOrRefreshLock", () => {
 
 	it("acquired=false when the conflict update touches no row", async () => {
 		const insert = insertChain([]);
-		const tx = { ...insert, ...selectChain([HOLDER]) };
+		const tx = { ...insert, ...selectChain([HOLDER_ROW]) };
 		const db = transactionDb(tx);
 		const { acquireOrRefreshLock } = await service();
 

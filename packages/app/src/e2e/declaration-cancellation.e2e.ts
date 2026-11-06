@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { MY_SPACE } from "~/modules/routes";
+import { ADMIN_DECLARATIONS, MY_SPACE, routeWithQuery } from "~/modules/routes";
 import { TEST_SIREN } from "./constants";
 import {
 	cleanCurrentYearDeclarations,
@@ -11,6 +11,10 @@ import {
 } from "./helpers/db";
 import { completeDeclaration } from "./helpers/declaration-flows";
 import { fetchSuitDeclarations } from "./helpers/suit-export";
+
+const DEMARCHE_STATUS_CELL = 4;
+const LAST_STEP_CELL = 5;
+const NEXT_STEP_CELL = 6;
 
 test.describe("Declaration cancellation — full cycle", () => {
 	test.describe.configure({ mode: "serial" });
@@ -38,7 +42,11 @@ test.describe("Declaration cancellation — full cycle", () => {
 	test("submit → cancel → resubmit → cancel → resubmit, then verify admin list and cancelled badge", async ({
 		page,
 	}) => {
-		const adminListUrl = `/admin/declarations?query=${TEST_SIREN}&year=${currentYear}&sortBy=createdAt&sortOrder=desc`;
+		// No sort params: the default order (Date, newest first) is what puts the active row on top.
+		const adminListUrl = routeWithQuery(
+			ADMIN_DECLARATIONS,
+			`query=${TEST_SIREN}&year=${currentYear}`,
+		);
 
 		async function findFirstDeclarationLink() {
 			await page.goto(adminListUrl);
@@ -100,6 +108,26 @@ test.describe("Declaration cancellation — full cycle", () => {
 		const rows = page.locator("table tbody tr");
 		await expect(rows.first()).toBeVisible();
 		expect(await rows.count()).toBe(3);
+		await expect(
+			page.getByRole("columnheader", { name: /^Date/ }),
+		).toHaveAttribute("aria-sort", "descending");
+
+		const activeCells = rows.first().locator("td");
+		await expect(activeCells.nth(DEMARCHE_STATUS_CELL)).toHaveText("Finalisée");
+		await expect(activeCells.nth(LAST_STEP_CELL)).toHaveText(
+			"Transmission de la déclaration",
+		);
+		await expect(activeCells.nth(NEXT_STEP_CELL)).toHaveText("—");
+
+		const cancelledRows = rows.filter({ hasText: "Annulée" });
+		await expect(cancelledRows).toHaveCount(2);
+		for (const cancelled of await cancelledRows.all()) {
+			const cells = cancelled.locator("td");
+			await expect(cells.nth(LAST_STEP_CELL)).toHaveText(
+				"Transmission de la déclaration",
+			);
+			await expect(cells.nth(NEXT_STEP_CELL)).toHaveText("—");
+		}
 
 		// S8 — admin opens a cancelled declaration from the list and sees the badge.
 		// We click directly the first row whose status badge is "Annulée" so the

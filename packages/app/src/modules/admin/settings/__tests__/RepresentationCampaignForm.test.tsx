@@ -79,14 +79,6 @@ const defaultCampaign: CampaignData = {
 	declarationDeadline: "2027-03-01",
 };
 
-const startInput = () =>
-	document.getElementById(
-		"representation-settings-campaignStartDate",
-	) as HTMLInputElement;
-const endInput = () =>
-	document.getElementById(
-		"representation-settings-campaignEndDate",
-	) as HTMLInputElement;
 const deadlineInput = () =>
 	document.getElementById(
 		"representation-settings-declarationDeadline",
@@ -106,20 +98,35 @@ describe("RepresentationCampaignForm", () => {
 		};
 	});
 
-	it("populates the three date fields from the query", async () => {
+	it("populates the declaration deadline from the query", async () => {
 		render(<RepresentationCampaignForm year={2026} />);
 		await waitFor(() => {
-			expect(startInput()).toHaveValue("2026-02-01");
+			expect(deadlineInput()).toHaveValue("2026-04-15");
 		});
-		expect(endInput()).toHaveValue("2026-11-30");
-		expect(deadlineInput()).toHaveValue("2026-04-15");
+	});
+
+	it("shows a single field, the declaration deadline, under the indicators declaration legend", () => {
+		render(<RepresentationCampaignForm year={2026} />);
+		const fieldset = screen
+			.getByText("Déclaration des indicateurs", { selector: "legend" })
+			.closest("fieldset") as HTMLElement;
+		const inputs = fieldset.querySelectorAll("input");
+		expect(inputs).toHaveLength(1);
+		expect(inputs[0]).toBe(deadlineInput());
+		expect(
+			document.getElementById("representation-settings-campaignStartDate"),
+		).toBeNull();
+		expect(
+			document.getElementById("representation-settings-campaignEndDate"),
+		).toBeNull();
+		expect(
+			screen.queryByText(/campagne représentation équilibrée$/i),
+		).toBeNull();
 	});
 
 	it("labels the declaration deadline field as an échéance", () => {
 		render(<RepresentationCampaignForm year={2026} />);
-		expect(
-			screen.getByLabelText(/^échéance de déclaration/i),
-		).toBeInTheDocument();
+		expect(deadlineInput()).toHaveAccessibleName("Échéance de la déclaration");
 		expect(screen.queryByText(/date limite/i)).not.toBeInTheDocument();
 	});
 
@@ -128,20 +135,18 @@ describe("RepresentationCampaignForm", () => {
 		expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
 	});
 
-	it("reloads the fields for the newly selected year", async () => {
+	it("reloads the field for the newly selected year", async () => {
 		const { rerender } = render(<RepresentationCampaignForm year={2026} />);
-		await waitFor(() => expect(startInput()).toHaveValue("2026-02-01"));
+		await waitFor(() => expect(deadlineInput()).toHaveValue("2026-04-15"));
 
 		rerender(<RepresentationCampaignForm year={2027} />);
 
-		await waitFor(() => expect(startInput()).toHaveValue("2027-01-01"));
-		expect(endInput()).toHaveValue("2027-12-31");
-		expect(deadlineInput()).toHaveValue("2027-03-01");
+		await waitFor(() => expect(deadlineInput()).toHaveValue("2027-03-01"));
 	});
 
 	it("shows the default-values badge only when no override is stored", async () => {
 		const { rerender } = render(<RepresentationCampaignForm year={2026} />);
-		await waitFor(() => expect(startInput()).toHaveValue("2026-02-01"));
+		await waitFor(() => expect(deadlineInput()).toHaveValue("2026-04-15"));
 		expect(screen.queryByText(/valeurs par défaut/i)).not.toBeInTheDocument();
 
 		rerender(<RepresentationCampaignForm year={2027} />);
@@ -151,90 +156,64 @@ describe("RepresentationCampaignForm", () => {
 		});
 	});
 
-	it("submits the loaded values on save", async () => {
+	it("submits only the year and the declaration deadline on save", async () => {
 		render(<RepresentationCampaignForm year={2026} />);
-		await waitFor(() => expect(startInput()).toHaveValue("2026-02-01"));
+		await waitFor(() => expect(deadlineInput()).toHaveValue("2026-04-15"));
 
 		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
 
 		await waitFor(() => expect(upsertMutate).toHaveBeenCalled());
-		expect(upsertMutate.mock.calls[0]?.[0]).toMatchObject({
+		expect(upsertMutate.mock.calls[0]?.[0]).toEqual({
 			year: 2026,
-			campaignStartDate: "2026-02-01",
-			campaignEndDate: "2026-11-30",
 			declarationDeadline: "2026-04-15",
 		});
 	});
 
-	it("submits the edited values rather than the loaded ones", async () => {
+	it("submits the edited value rather than the loaded one", async () => {
 		render(<RepresentationCampaignForm year={2026} />);
-		await waitFor(() => expect(startInput()).toHaveValue("2026-02-01"));
+		await waitFor(() => expect(deadlineInput()).toHaveValue("2026-04-15"));
 
-		fireEvent.change(startInput(), { target: { value: "2026-03-10" } });
 		fireEvent.change(deadlineInput(), { target: { value: "2026-05-20" } });
 		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
 
 		await waitFor(() => expect(upsertMutate).toHaveBeenCalled());
-		expect(upsertMutate.mock.calls[0]?.[0]).toMatchObject({
-			campaignStartDate: "2026-03-10",
+		expect(upsertMutate.mock.calls[0]?.[0]).toEqual({
+			year: 2026,
 			declarationDeadline: "2026-05-20",
 		});
 	});
 
 	it("submits under the newly selected year, not the initial one", async () => {
 		const { rerender } = render(<RepresentationCampaignForm year={2026} />);
-		await waitFor(() => expect(startInput()).toHaveValue("2026-02-01"));
+		await waitFor(() => expect(deadlineInput()).toHaveValue("2026-04-15"));
 
 		rerender(<RepresentationCampaignForm year={2027} />);
-		await waitFor(() => expect(startInput()).toHaveValue("2027-01-01"));
-		fireEvent.change(endInput(), { target: { value: "2027-11-30" } });
+		await waitFor(() => expect(deadlineInput()).toHaveValue("2027-03-01"));
 		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
 
 		await waitFor(() => expect(upsertMutate).toHaveBeenCalled());
 		expect(upsertMutate.mock.calls[0]?.[0]).toEqual({
 			year: 2027,
-			campaignStartDate: "2027-01-01",
-			campaignEndDate: "2027-11-30",
 			declarationDeadline: "2027-03-01",
 		});
 	});
 
-	it("blocks submission when the start date is not before the end date", async () => {
+	it("blocks submission when the declaration deadline is cleared", async () => {
 		render(<RepresentationCampaignForm year={2026} />);
-		await waitFor(() => expect(startInput()).toHaveValue("2026-02-01"));
+		await waitFor(() => expect(deadlineInput()).toHaveValue("2026-04-15"));
 
-		fireEvent.change(endInput(), { target: { value: "2026-01-15" } });
+		fireEvent.change(deadlineInput(), { target: { value: "" } });
 		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
 
-		await waitFor(() => {
-			expect(
-				screen.getByText(
-					/la date de démarrage de la campagne doit être antérieure à la date de clôture/i,
-				),
-			).toBeInTheDocument();
-		});
-		expect(upsertMutate).not.toHaveBeenCalled();
-		expect(endInput()).toHaveAttribute("aria-invalid", "true");
-	});
-
-	it("blocks submission when the start and end dates are equal", async () => {
-		render(<RepresentationCampaignForm year={2026} />);
-		await waitFor(() => expect(startInput()).toHaveValue("2026-02-01"));
-
-		fireEvent.change(endInput(), { target: { value: "2026-02-01" } });
-		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
-
-		await waitFor(() => {
-			expect(
-				screen.getByText(/antérieure à la date de clôture/i),
-			).toBeInTheDocument();
-		});
+		await waitFor(() =>
+			expect(deadlineInput()).toHaveAttribute("aria-invalid", "true"),
+		);
 		expect(upsertMutate).not.toHaveBeenCalled();
 	});
 
 	it("shows a success alert and invalidates the query on success", async () => {
 		render(<RepresentationCampaignForm year={2026} />);
-		await waitFor(() => expect(startInput()).toHaveValue("2026-02-01"));
+		await waitFor(() => expect(deadlineInput()).toHaveValue("2026-04-15"));
 
 		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
 		await waitFor(() => expect(upsertMutate).toHaveBeenCalled());
@@ -252,7 +231,7 @@ describe("RepresentationCampaignForm", () => {
 
 	it("surfaces the server error when the mutation fails", async () => {
 		render(<RepresentationCampaignForm year={2026} />);
-		await waitFor(() => expect(startInput()).toHaveValue("2026-02-01"));
+		await waitFor(() => expect(deadlineInput()).toHaveValue("2026-04-15"));
 
 		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
 		await waitFor(() => expect(upsertMutate).toHaveBeenCalled());
@@ -298,27 +277,25 @@ describe("RepresentationCampaignForm", () => {
 		).toBeDisabled();
 	});
 
-	it("shows a visible required-fields mention that every date field cites", () => {
+	it("shows a visible required-fields mention that the date field cites", () => {
 		render(<RepresentationCampaignForm year={2026} />);
 		const note = screen.getByText("Tous les champs sont obligatoires.");
 		expect(note).not.toHaveClass("fr-sr-only");
-		for (const input of [startInput(), endInput(), deadlineInput()]) {
-			expect(input).toBeRequired();
-			expect(input).toHaveAccessibleDescription(
-				"Tous les champs sont obligatoires.",
-			);
-		}
+		expect(deadlineInput()).toBeRequired();
+		expect(deadlineInput()).toHaveAccessibleDescription(
+			"Tous les champs sont obligatoires.",
+		);
 	});
 
 	it("keeps the required-fields mention before the error message in the description", async () => {
 		render(<RepresentationCampaignForm year={2026} />);
-		await waitFor(() => expect(startInput()).toHaveValue("2026-02-01"));
+		await waitFor(() => expect(deadlineInput()).toHaveValue("2026-04-15"));
 
-		fireEvent.change(endInput(), { target: { value: "2026-01-15" } });
+		fireEvent.change(deadlineInput(), { target: { value: "" } });
 		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
 
 		await waitFor(() =>
-			expect(endInput()).toHaveAccessibleDescription(
+			expect(deadlineInput()).toHaveAccessibleDescription(
 				/^Tous les champs sont obligatoires\. .+/,
 			),
 		);

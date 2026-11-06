@@ -639,4 +639,97 @@ describe("Step3VariablePay", () => {
 		const benefMenInput = screen.getByLabelText("Bénéficiaires hommes");
 		expect(benefMenInput).toHaveValue("0");
 	});
+
+	it("shows both table titles without reading-note buttons when no data is entered", () => {
+		render(
+			<Step3VariablePay
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialData={emptyStep3Data()}
+			/>,
+		);
+		expect(
+			screen.getByRole("heading", {
+				level: 2,
+				name: "Rémunération variable ou complémentaire",
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", {
+				level: 2,
+				name: "Proportion de femmes et d'hommes bénéficiaires",
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole("button", { name: /Note de lecture du tableau/ }),
+		).not.toBeInTheDocument();
+	});
+
+	it("shows the pay-gap reading note once the row is filled", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step3VariablePay
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialData={emptyStep3Data()}
+			/>,
+		);
+
+		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
+		const menInput = screen.getByLabelText("Annuelle brute moyenne — Hommes");
+		await user.clear(womenInput);
+		await user.type(womenInput, "99.50");
+		await user.clear(menInput);
+		await user.type(menInput, "100");
+
+		const button = screen.getByRole("button", {
+			name: "Note de lecture du tableau « Rémunération variable ou complémentaire »",
+		});
+		expect(button).toHaveAttribute(
+			"aria-describedby",
+			"tooltip-reading-note-step3-paygap",
+		);
+		expect(
+			document.getElementById("tooltip-reading-note-step3-paygap"),
+		).toHaveTextContent(
+			"Note de lecture : L'écart de rémunération variable ou complémentaire brute moyenne est de 0,50 % en faveur des hommes.",
+		);
+		expect(
+			screen.queryByText(/Interprétation des résultats/),
+		).not.toBeInTheDocument();
+		expect(screen.queryByText(/Écart en défaveur des/)).not.toBeInTheDocument();
+	});
+
+	it("shows the beneficiaries reading note once both counts are filled", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step3VariablePay
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialData={emptyStep3Data()}
+				maxMen={60}
+				maxWomen={120}
+			/>,
+		);
+
+		const womenInput = screen.getByLabelText("Bénéficiaires femmes");
+		await user.clear(womenInput);
+		await user.type(womenInput, "60");
+
+		const button = screen.getByRole("button", {
+			name: "Note de lecture du tableau « Proportion de femmes et d'hommes bénéficiaires »",
+		});
+		expect(button).toHaveAttribute(
+			"aria-describedby",
+			"tooltip-reading-note-step3-beneficiaries",
+		);
+		expect(
+			document.getElementById("tooltip-reading-note-step3-beneficiaries"),
+		).toHaveTextContent(
+			"Note de lecture : Parmi les femmes, 50,00 % ont bénéficié de composantes variables ou complémentaires.",
+		);
+	});
 });

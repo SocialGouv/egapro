@@ -1,5 +1,6 @@
 "use client";
 
+import { TableTitle } from "~/modules/declaration-remuneration/shared/TableTitle";
 import type { QuartileTuple } from "~/modules/declaration-remuneration/types";
 import { computePercentage, sumQuartileWorkforce } from "~/modules/domain";
 import stepStyles from "../Step4QuartileDistribution.module.scss";
@@ -25,7 +26,8 @@ type Props = {
 		QuartileFieldErrors,
 		QuartileFieldErrors,
 	];
-	readingNote?: React.ReactNode;
+	readingNote: string | null;
+	tooltipId: string;
 	sourceNote?: React.ReactNode;
 	/** Rendered below sourceNote — the per-table coherence error alert. */
 	errorNote?: React.ReactNode;
@@ -44,6 +46,7 @@ export function QuartileTable({
 	mins,
 	errors,
 	readingNote,
+	tooltipId,
 	sourceNote,
 	errorNote,
 	onQuartileChange,
@@ -64,9 +67,13 @@ export function QuartileTable({
 
 	return (
 		<div className={stepStyles.tableWrapper}>
-			<h3 className="fr-h6 fr-mb-0">{title}</h3>
+			<TableTitle
+				level="h3"
+				readingNote={readingNote}
+				title={title}
+				tooltipId={tooltipId}
+			/>
 			<div className={stepStyles.tableSection}>
-				{readingNote}
 				<div
 					className={`fr-table fr-table--bordered fr-table--no-scroll fr-table--no-caption fr-mt-0 fr-mb-0 ${stepStyles.quartileTable}`}
 				>

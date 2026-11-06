@@ -6,6 +6,7 @@ export type RepresentationLockHolder = {
 	firstName: string | null;
 	lastName: string | null;
 	email: string | null;
+	lockTimeoutMinutes: number;
 };
 
 export type PendingSaveFlush = () => Promise<void>;

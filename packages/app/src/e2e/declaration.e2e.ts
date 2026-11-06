@@ -200,6 +200,24 @@ test.describe("Declaration workflow", () => {
 		await expect(
 			page.getByRole("table").getByText("6,25 %", { exact: true }),
 		).toBeVisible();
+
+		await test.step("la note de lecture du tableau suit la saisie", async () => {
+			await expect(
+				page.getByRole("heading", { name: "Rémunération", exact: true }),
+			).toBeVisible();
+			const readingNoteButton = page.getByRole("button", {
+				name: "Note de lecture du tableau « Rémunération »",
+			});
+			await expect(readingNoteButton).toHaveAccessibleDescription(
+				"Note de lecture : L'écart de rémunération annuelle brute moyenne est de 6,25 % en faveur des hommes.",
+			);
+			await readingNoteButton.click();
+			await expect(page.locator("#tooltip-reading-note-step2")).toBeVisible();
+			await expect(page.getByText("Interprétation des résultats")).toHaveCount(
+				0,
+			);
+		});
+
 		await checkPayGapAtZoom(page, "Écart de rémunération");
 	});
 
@@ -217,7 +235,20 @@ test.describe("Declaration workflow", () => {
 			.fill("5500");
 
 		// Verify gap is computed
-		await expect(page.getByText("9,09 %")).toBeVisible();
+		await expect(
+			page
+				.getByRole("table", {
+					name: "Écart de rémunération variable ou complémentaire",
+				})
+				.getByText("9,09 %", { exact: true }),
+		).toBeVisible();
+		await expect(
+			page.getByRole("button", {
+				name: "Note de lecture du tableau « Rémunération variable ou complémentaire »",
+			}),
+		).toHaveAccessibleDescription(
+			"Note de lecture : L'écart de rémunération variable ou complémentaire brute moyenne est de 9,09 % en faveur des hommes.",
+		);
 		await checkPayGapAtZoom(
 			page,
 			"Écart de rémunération variable ou complémentaire",

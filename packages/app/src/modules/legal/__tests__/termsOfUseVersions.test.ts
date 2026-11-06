@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
 	getCurrentTermsOfUseVersion,
+	hasArchivedTermsOfUseVersions,
 	resolveTermsOfUseVersion,
 	TERMS_OF_USE_VERSIONS,
 	type TermsOfUseVersion,
@@ -11,8 +12,13 @@ function FakeContent() {
 	return null;
 }
 
+const SINGLE_VERSION: TermsOfUseVersion = {
+	effectiveDate: "2027-03-01",
+	Content: FakeContent,
+};
+
 const FICTIONAL_VERSIONS: readonly TermsOfUseVersion[] = [
-	{ effectiveDate: "2027-03-01", Content: FakeContent },
+	SINGLE_VERSION,
 	{ effectiveDate: "2026-10-12", Content: FakeContent },
 	{ effectiveDate: "2025-01-15", Content: FakeContent },
 ];
@@ -51,6 +57,32 @@ describe("getCurrentTermsOfUseVersion", () => {
 	it("throws if the registry is empty", () => {
 		expect(() => getCurrentTermsOfUseVersion([])).toThrow(
 			"No terms of use version registered.",
+		);
+	});
+});
+
+describe("hasArchivedTermsOfUseVersions", () => {
+	it("is false for an empty registry", () => {
+		expect(hasArchivedTermsOfUseVersions([])).toBe(false);
+	});
+
+	it("is false when only the in-force version is registered", () => {
+		expect(hasArchivedTermsOfUseVersions([SINGLE_VERSION])).toBe(false);
+	});
+
+	it("is true as soon as one archive exists", () => {
+		expect(hasArchivedTermsOfUseVersions(FICTIONAL_VERSIONS.slice(0, 2))).toBe(
+			true,
+		);
+	});
+
+	it("is true with several archives", () => {
+		expect(hasArchivedTermsOfUseVersions(FICTIONAL_VERSIONS)).toBe(true);
+	});
+
+	it("defaults to the real registry when no list is given", () => {
+		expect(hasArchivedTermsOfUseVersions()).toBe(
+			TERMS_OF_USE_VERSIONS.length > 1,
 		);
 	});
 });
