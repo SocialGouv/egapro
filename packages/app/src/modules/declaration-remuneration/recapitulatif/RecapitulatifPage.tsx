@@ -238,7 +238,7 @@ export function RecapitulatifPage({
 					{sourceLabel && (
 						<p className={`fr-mb-3w ${styles.sourceLine}`}>
 							<span className={styles.sourceLabel}>
-								Source des catégories d&apos;emplois
+								Source des catégories d&apos;emplois :
 							</span>{" "}
 							<strong>{sourceLabel}</strong>
 						</p>

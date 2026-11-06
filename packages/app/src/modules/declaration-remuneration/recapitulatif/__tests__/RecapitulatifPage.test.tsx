@@ -25,6 +25,11 @@ describe("RecapitulatifPage", () => {
 		).not.toBeInTheDocument();
 	});
 
+	it("no longer shows the 'Version accessible' note next to the download", () => {
+		render(<RecapitulatifPage {...defaultProps()} />);
+		expect(screen.queryByText(/Version accessible/)).not.toBeInTheDocument();
+	});
+
 	it("renders h1 with year", () => {
 		render(<RecapitulatifPage {...defaultProps()} />);
 		expect(
@@ -211,7 +216,7 @@ describe("RecapitulatifPage", () => {
 		expect(
 			screen.getByRole("heading", {
 				level: 3,
-				name: /Proportion de femmes et d.*hommes dans chaque quartile/,
+				name: "Proportion de femmes et d'hommes dans chaque quartile de rémunération",
 			}),
 		).toBeInTheDocument();
 	});
@@ -574,7 +579,7 @@ describe("RecapitulatifPage", () => {
 			<RecapitulatifPage {...defaultProps()} step5Source="accord-entreprise" />,
 		);
 		expect(
-			screen.getByText(/Source des catégories d.emplois/),
+			screen.getByText("Source des catégories d'emplois :"),
 		).toBeInTheDocument();
 		expect(screen.getByText("Accord d'entreprise")).toBeInTheDocument();
 	});
