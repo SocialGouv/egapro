@@ -5,3 +5,5 @@ import type { adminReferentsRouter } from "~/server/api/routers/adminReferents";
 type AdminReferentsOutputs = inferRouterOutputs<typeof adminReferentsRouter>;
 
 export type ReferentSearchRow = AdminReferentsOutputs["search"]["rows"][number];
+
+export type ReferentExportRow = AdminReferentsOutputs["exportAll"][number];
