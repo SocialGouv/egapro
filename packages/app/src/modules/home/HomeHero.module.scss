@@ -1,5 +1,9 @@
 .hero {
-	background: linear-gradient(-31deg, var(--background-alt-blue-france) 39.44%, #dfd3ff 112.75%);
+	background: linear-gradient(
+		-31deg,
+		var(--background-alt-blue-france) 39.44%,
+		var(--background-action-low-blue-france) 112.75%
+	);
 	padding-block: 3.5rem;
 }
 
