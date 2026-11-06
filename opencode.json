@@ -1,0 +1,63 @@
+{
+	"$schema": "https://opencode.ai/config.json",
+	"instructions": [
+		"packages/app/AGENTS.md"
+	],
+	"plugin": [
+		"./packages/app/node_modules/ultra11y"
+	],
+	"mcp": {
+		"next-devtools": {
+			"type": "local",
+			"command": [
+				"npx",
+				"-y",
+				"next-devtools-mcp@latest"
+			]
+		},
+		"dsfr": {
+			"type": "local",
+			"command": [
+				"npx",
+				"dsfr-mcp"
+			]
+		},
+		"figma": {
+			"type": "remote",
+			"url": "https://mcp.figma.com/mcp"
+		},
+		"playwright": {
+			"type": "local",
+			"command": [
+				"npx",
+				"-y",
+				"@playwright/mcp@latest"
+			]
+		},
+		"ultra11y": {
+			"type": "local",
+			"command": [
+				"pnpm",
+				"--filter",
+				"app",
+				"exec",
+				"ultra11y",
+				"mcp"
+			]
+		}
+	},
+	"permission": {
+		"bash": {
+			"git push* --force*": "ask",
+			"git -* push* --force*": "ask",
+			"git push* -f*": "ask",
+			"git -* push* -f*": "ask",
+			"*--no-verify*": "deny",
+			"git commit* -n*": "deny",
+			"git -* commit* -n*": "deny",
+			"*--no-gpg-sign*": "deny",
+			"*commit.gpgsign=false*": "deny",
+			"*commit.gpgSign=false*": "deny"
+		}
+	}
+}

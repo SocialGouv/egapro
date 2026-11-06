@@ -1,6 +1,6 @@
 # Accessibilité — le dispositif ultra11y en détail
 
-> Complément de `.claude/rules/rgaa.md`, qui porte la règle courte toujours chargée en session.
+> Complément d'`AGENTS.md` § Accessibilité (la règle courte, toujours chargée) et de `.agents/skills/review/references/a11y.md` (la revue).
 > Ici : comment la chaîne CI est câblée, ce qu'elle coûte, les décisions déjà prises et
 > pourquoi — pour ne pas les reprendre à zéro. Rien de ce document n'est une règle à appliquer :
 > c'est de la mémoire d'exploitation.
@@ -135,7 +135,7 @@ instantanés présents, et une page demandée sans instantané n'y est qu'un ave
 le run hebdomadaire, qui garantit par ailleurs que chaque page déclarée est capturable.
 
 **Le filtre de capture** est `src/e2e/helpers/a11y-selection.ts` (sous `helpers/`, le seul
-endroit de `e2e/` où le hook autorise `process.env`). Le sweep ne déclare pas les pages non
+endroit de `e2e/` où `check-patterns.sh` autorise `process.env`). Le sweep ne déclare pas les pages non
 sélectionnées ; les specs à état (`funnels`, `dynamic`, `anonymous`, `backoffice`) les sautent
 **au moment de l'instantané**, jamais avant : dans un `describe` série, la soumission réelle d'un
 test est ce qui ouvre l'écran du suivant. Variable vide = toutes les pages : le run hebdomadaire
@@ -510,11 +510,15 @@ PR ne font qu'avertir. Ce n'est pas de l'hygiène — la suite Playwright ÉCRIT
 avec la devDependency et l'Action les RÉINGÈRE avec son moteur embarqué ; deux versions, deux
 formats, et rien ne lève d'erreur.
 
-Le **plugin Claude Code** est la quatrième surface, hors dépôt, et la seule que rien ici ne peut
-pinner. Le hook `check-ultra11y-plugin.sh` compare hors ligne la version installée au pin
-d'`a11y.yaml` (`@vX.Y.Z` ou `# vX.Y.Z`) au premier prompt de chaque session, et ne touche au réseau qu'en cas d'écart. Il a
-été écrit pour une raison mesurée : le 31/08/2026, le plugin était en **4.5.1** pendant que le
-dépôt tournait en 5.40.1.
+Les **outils IA** n'ont plus de copie à eux : les skills `review-a11y` et `ultra11y` sont des
+symlinks de `.agents/skills/` vers la devDependency (lus par Claude Code, OpenCode et Codex), le
+gate commit / push / PR de Claude Code est un hook de `.claude/settings.json` qui lance le
+`pre-tool-use.mjs` de la devDependency, et le plugin OpenCode (`opencode.json`) se charge depuis
+elle. La version des agents est donc celle de la devDependency, tenue par la CI. C'est la raison
+de l'abandon du plugin marketplace Claude Code, que rien ne pouvait épingler : le 31/08/2026, il
+était en **4.5.1** pendant que le dépôt tournait en 5.40.1. Seul Codex garde une copie en portée
+utilisateur (`ultra11y install --codex`, à relancer après un bump) — le gating, lui, n'en dépend
+pas : pre-commit, `pnpm verify` et la CI tournent sur la devDependency.
 
 À noter si un bump échoue : la publication npm de la 5.3.0 est
 tombée sur la signature de provenance (`CA_CREATE_SIGNING_CERTIFICATE_ERROR`, 403 du CA) alors
