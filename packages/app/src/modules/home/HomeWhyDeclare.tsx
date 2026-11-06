@@ -26,21 +26,26 @@ function WhyDeclareCard({
 	mediaClassName,
 }: WhyDeclareCardProps) {
 	return (
-		<div className="fr-card fr-card--horizontal fr-enlarge-link">
+		<div
+			className={`fr-card fr-card--horizontal fr-enlarge-link fr-card--no-icon ${styles.card}`}
+		>
 			<div className="fr-card__body">
 				<div className="fr-card__content">
-					<h3 className="fr-card__title">
-						<Link href={UNDER_CONSTRUCTION}>{title}</Link>
-					</h3>
-					<p className="fr-card__desc">{description}</p>
 					<div className="fr-card__start">
-						<ul className="fr-tags-group">
+						<ul className={`fr-tags-group ${styles.tags}`}>
 							{tags.map((tag) => (
 								<li key={tag}>
 									<p className="fr-tag">{tag}</p>
 								</li>
 							))}
 						</ul>
+					</div>
+					<h3 className="fr-card__title">
+						<Link href={UNDER_CONSTRUCTION}>{title}</Link>
+					</h3>
+					<p className="fr-card__desc">{description}</p>
+					<div className={`fr-card__end ${styles.actionRow}`}>
+						<span aria-hidden="true" className={styles.actionArrow} />
 					</div>
 				</div>
 			</div>

@@ -48,7 +48,7 @@ export function ResourceBanner() {
 				<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
 					<div className="fr-col-12 fr-col-md-10">
 						<div className="fr-grid-row fr-grid-row--gutters">
-							<div className="fr-col-12 fr-col-md-4">
+							<div className="fr-col-12 fr-col-md-6">
 								<ResourceTile
 									detail="Recherchez et accédez à toutes nos ressources"
 									href={HELP}
@@ -56,7 +56,7 @@ export function ResourceBanner() {
 									title="Centre d'aide"
 								/>
 							</div>
-							<div className="fr-col-12 fr-col-md-4">
+							<div className="fr-col-12 fr-col-md-6">
 								<ResourceTile
 									detail="Réponses aux questions les plus courantes"
 									href={FAQ}
@@ -73,10 +73,10 @@ export function ResourceBanner() {
 						<div className="fr-grid-row fr-grid-row--right">
 							<Image
 								alt=""
-								height={147}
+								height={125}
 								src="/assets/images/home/help-illustration.svg"
 								unoptimized
-								width={210}
+								width={179}
 							/>
 						</div>
 					</div>

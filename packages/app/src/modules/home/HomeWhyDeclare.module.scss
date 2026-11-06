@@ -24,3 +24,42 @@
 	object-fit: contain;
 	width: auto;
 }
+
+.card :global(.fr-card__body),
+.card :global(.fr-card__content) {
+	min-width: 0;
+}
+
+.tags {
+	flex-wrap: wrap;
+
+	li {
+		line-height: 2rem !important;
+		max-width: 100%;
+		min-width: 0;
+	}
+
+	:global(.fr-tag) {
+		max-width: 100%;
+		min-width: 0;
+	}
+}
+
+.actionRow.actionRow {
+	display: flex;
+	flex-direction: row;
+	height: auto;
+	justify-content: flex-end;
+	margin-top: auto;
+	padding-top: 0.5rem;
+}
+
+.actionArrow {
+	background-color: var(--text-action-high-blue-france);
+	height: 1.5rem;
+	mask-image: url("/dsfr/icons/arrows/arrow-right-line.svg");
+	mask-position: center;
+	mask-repeat: no-repeat;
+	mask-size: 1.5rem 1.5rem;
+	width: 1.5rem;
+}

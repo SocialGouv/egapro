@@ -43,16 +43,6 @@ describe("HomePage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("passes the campaign deadlines down to the hero", () => {
-		renderPage();
-		expect(
-			screen.getByText("Rémunération : 1ᵉʳ juin 2026"),
-		).toBeInTheDocument();
-		expect(
-			screen.getByText("Représentation équilibrée : 1ᵉʳ mars 2026"),
-		).toBeInTheDocument();
-	});
-
 	it("renders the sections in the design order", () => {
 		renderPage();
 		expect(

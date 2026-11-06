@@ -17,10 +17,7 @@ export function HomePage({
 	return (
 		<main id="content" tabIndex={-1}>
 			<HomeNotice />
-			<HomeHero
-				remunerationDeadline={remunerationDeadline}
-				representationDeadline={representationDeadline}
-			/>
+			<HomeHero />
 			<HomeWhyDeclare
 				remunerationDeadline={remunerationDeadline}
 				representationDeadline={representationDeadline}
