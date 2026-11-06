@@ -1,4 +1,4 @@
-# SIRET de test — suivi d'attribution
+# SIRET de test — suivi des déclarations
 
 > Inventaire des entreprises mock GIP-MDS utilisables en dev / review / test.
 > Source : `packages/app/data/companies.json` (SIREN) + siège social via [API Recherche d'Entreprises](https://recherche-entreprises.api.gouv.fr/).
@@ -6,61 +6,67 @@
 
 ## Convention
 
-1. **Avant** d'utiliser un SIREN/SIRET (déclaration, impersonation, seed, review app) : cocher la case (`- [ ]` → `- [x]`).
-2. **Après** usage (ou si le ticket est terminé) : décocher la case.
+Le wiki est la référence pour les cases ; cette copie dans le dépôt ne suit pas les actualisations.
+
+1. Lors de la dernière actualisation, une case cochée indique qu’une déclaration existe pour le SIREN dans `rgaa-persist`, y compris à l’état de brouillon. Une case décochée indique qu’aucune déclaration n’y était enregistrée.
+2. Les cases ne constituent pas une réservation : coordonner séparément l’attribution pour les autres usages (impersonation, seed ou review app).
 3. Une ligne = **SIRET siège** du SIREN mock. Les indicateurs GIP sont au SIREN ; ProConnect pousse un SIRET.
 4. Choisir le **bucket** selon le scénario (CSE ≥ 100, triennal 50–99, grand effectif, etc.).
 
 
-## SIREN dédiés aux tests UI et aux audits RGAA (#4724, #4875)
+## SIREN dédiés aux tests utilisateurs et aux audits RGAA (#4724, #4875)
 
 Les **30 SIREN distincts** ci-dessous sont réservés aux tests UI et aux audits RGAA : 20 pour les tests UI (4 dans chacune des cinq tranches d’effectif demandées, [ticket #4724](https://github.com/SocialGouv/egapro/issues/4724)), 4 pour les audits RGAA de plus de 150 salariés ([ticket #4724](https://github.com/SocialGouv/egapro/issues/4724)) et 6 pour les audits RGAA de la représentation équilibrée, à 1 000 salariés et plus ([ticket #4875](https://github.com/SocialGouv/egapro/issues/4875)). Les SIRET indiqués sont ceux du siège, vérifiés avec l’[API Recherche d’Entreprises](https://recherche-entreprises.api.gouv.fr/) les 13 et 14 octobre 2026, puis le 26 octobre 2026 pour les 6 derniers. Les effectifs indiqués sont ceux **simulés dans le GIP mocké**.
 
-Chaque SIREN a une ligne dans le GIP mocké, importée en recette après promotion d’une release qui la contient. Cocher une case lors de l’attribution du SIRET, puis la décocher après usage.
+Chaque SIREN a une ligne dans le GIP mocké, importée en recette après promotion d’une release qui la contient. Les cases suivent les déclarations enregistrées dans `rgaa-persist`.
 
-### Tests UI — 50-99 (4)
+### Tests utilisateurs (UI)
+
+#### Tests UI — 50-99 (4)
 
 - [ ] `91801657700036` — **MENCO SERVICES** · SIREN `918016577` · effectif GIP 70
 - [ ] `82382184800012` — **TBS SERVICES** · SIREN `823821848` · effectif GIP 70
 - [ ] `84118054000137` — **RESIDENCES SERVICES** · SIREN `841180540` · effectif GIP 70
 - [ ] `82317717500010` — **LE SERVICE FUNERAIRE** · SIREN `823177175` · effectif GIP 70
 
-### Tests UI — 100-149 (4)
+#### Tests UI — 100-149 (4)
 
 - [ ] `67850126300019` — **EUROPE SERVICES** · SIREN `678501263` · effectif GIP 120
 - [ ] `84419244300027` — **TOTALENERGIES CHARGING SERVICES** · SIREN `844192443` · effectif GIP 120
 - [ ] `38151585700377` — **MONTRE SERVICE** · SIREN `381515857` · effectif GIP 120
 - [ ] `34038301700050` — **MAUFFREY SERVICES** · SIREN `340383017` · effectif GIP 120
 
-### Tests UI — 150-249 (4)
+#### Tests UI — 150-249 (4)
 
 - [ ] `48073176900083` — **M ENERGIES SERVICE** · SIREN `480731769` · effectif GIP 200
 - [ ] `84197838000027` — **EBRA SERVICES** · SIREN `841978380` · effectif GIP 200
 - [ ] `82114532300050` — **BIOSANTE SERVICES** · SIREN `821145323` · effectif GIP 200
 - [ ] `95039507900078` — **EXPRESSO SERVICE** · SIREN `950395079` · effectif GIP 200
 
-### Tests UI — 250-999 (4)
+#### Tests UI — 250-999 (4)
 
 - [ ] `34841550601311` — **SERVICES ET SANTE** · SIREN `348415506` · effectif GIP 375
 - [ ] `72202372800131` — **GROUPE MORGAN SERVICES (GROUPE MORGAN SERVICES)** · SIREN `722023728` · effectif GIP 375
 - [ ] `30416596200024` — **INTER-SERVICE** · SIREN `304165962` · effectif GIP 375
 - [ ] `33979661700308` — **SD SERVICES** · SIREN `339796617` · effectif GIP 375
 
-### Tests UI — 1 000 et plus (4)
+#### Tests UI — 1 000 et plus (4)
 
 - [ ] `43395769300503` — **SANTE RESTAURATION SERVICES (ANTHEMIS)** · SIREN `433957693` · effectif GIP 1500
 - [ ] `34181023201765` — **TEXA SERVICES** · SIREN `341810232` · effectif GIP 1500
 - [ ] `35327106700087` — **EUROFEU SERVICES (EUROFEU SOLUTIONS)** · SIREN `353271067` · effectif GIP 1500
 - [ ] `41344839000067` — **HOME SERVICES** · SIREN `413448390` · effectif GIP 1500
 
-### Audits RGAA — plus de 150 (4)
+### Audits RGAA
+
+#### Audits RGAA — plus de 150 (4)
 
 - [ ] `98219896200010` — **ALMAVIVA SERVICES** · SIREN `982198962` · effectif GIP 375
 - [ ] `38786776500373` — **ENYGEA SERVICES** · SIREN `387867765` · effectif GIP 375
 - [ ] `34974317900203` — **PRECIA MOLEN SERVICE** · SIREN `349743179` · effectif GIP 375
 - [ ] `79517251900014` — **SAGS SERVICES** · SIREN `795172519` · effectif GIP 375
 
-### Audits RGAA — représentation équilibrée, 1 000 et plus (6)
+#### Audits RGAA — représentation équilibrée, 1 000 et plus (6)
 
 Effectif GIP supérieur ou égal au seuil de 1 000 salariés : ces entreprises sont assujetties à la déclaration de représentation équilibrée.
 
@@ -74,7 +80,7 @@ Effectif GIP supérieur ou égal au seuil de 1 000 salariés : ces entreprises s
 ## Utilisés sur env `rgaa-persist` (snapshot 2026-08-06)
 
 Source : namespace K8s `egapro-rgaa-persist`, tables `app_declaration` ∪ `app_user_company`.
-**23 SIREN** trouvés (20 avec déclaration, 12 présents dans l'inventaire mock ci-dessous cochés `[x]`).
+**23 SIREN** trouvés à cette date (20 avec déclaration, dont 12 présents dans l'inventaire mock ci-dessous et cochés lors de ce snapshot).
 
 ### Hors inventaire mock (non listés plus bas)
 
@@ -90,15 +96,21 @@ Source : namespace K8s `egapro-rgaa-persist`, tables `app_declaration` ∪ `app_
 - `398300285` — **MOULINS DU SUD** · Effectif 27 · (déclaration)
 - `831888318` — **AUCHAN RETAIL SERVICES** · Effectif 2190 · (rattachement user)
 
+## Actualisation automatique des cases
+
+Le wiki conserve la liste des SIRET et les modifications de sa page. Le workflow `Refresh wiki SIRET declarations` relit les deux tables de déclarations de `rgaa-persist` chaque heure et ne modifie que les cases de cette liste. En cas d’échec de lecture, il ne publie pas de nouveaux états. La synchronisation des autres pages reste indépendante.
+
+Le workflow utilise le secret de dépôt `KUBECONFIG`, également utilisé pour le [déploiement réussi de rgaa-persist](https://github.com/SocialGouv/egapro/actions/runs/41868037404). Ses droits de lecture des déclarations depuis GitHub Actions doivent être vérifiés lors de la première exécution ; un échec laisse les cases inchangées. La convention du wiki a été actualisée avant l’activation de ce workflow (révision wiki `e51f7c56a174b2dc406008180029d743690de71a`).
+
 ## Régénération
 
 ```bash
 pnpm --filter app generate:test-siret-wiki
-# Préserver les claims existants :
+# Reprendre les cases existantes (à actualiser depuis la base ensuite) :
 pnpm --filter app generate:test-siret-wiki -- --merge-from=/path/to/SIRET-de-test.md
 ```
 
-_Généré le 2026-08-06 — 200 entreprises, 200 SIRET résolus, 0 échec(s). Libre : 188 · Pris : 12._
+_Bilan historique à la génération du 2026-08-06 — 200 entreprises, 200 SIRET résolus, 0 échec(s). Libre : 188 · Pris : 12._
 
 ## medium-50 (50–99) — 40
 
