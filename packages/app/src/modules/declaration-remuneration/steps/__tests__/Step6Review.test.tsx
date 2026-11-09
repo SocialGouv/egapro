@@ -465,7 +465,12 @@ describe("Step6Review", () => {
 			/>,
 		);
 		expect(
-			screen.getByText("Indicateurs pour l'ensemble de vos salariés"),
+			screen.getByText("Indicateurs pour l'ensemble des salariés"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				"Proportion de femmes et d'hommes dans chaque quartile de rémunération",
+			),
 		).toBeInTheDocument();
 		expect(
 			screen.getByText("Indicateur par catégorie d'emplois"),
