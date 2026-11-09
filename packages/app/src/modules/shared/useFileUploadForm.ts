@@ -22,6 +22,8 @@ type Options = {
 	 * → upload) used by the other upload forms.
 	 */
 	autoUpload?: boolean;
+	// A file already stored server-side lets the user confirm it without picking a new one.
+	hasStoredFile?: boolean;
 };
 
 export function useFileUploadForm({
@@ -29,6 +31,7 @@ export function useFileUploadForm({
 	onUploaded,
 	onAllUploaded,
 	autoUpload = false,
+	hasStoredFile = false,
 }: Options) {
 	const modalRef = useRef<HTMLDialogElement>(null);
 	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -110,7 +113,7 @@ export function useFileUploadForm({
 
 	function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
-		if (selectedFiles.length === 0) {
+		if (selectedFiles.length === 0 && !hasStoredFile) {
 			// Kept out of `uploadError`, which stays the dropzone's per-file line.
 			setHasMissingFile(true);
 			return;
@@ -122,6 +125,10 @@ export function useFileUploadForm({
 
 	async function handleConfirm() {
 		closeModal();
+		if (selectedFiles.length === 0) {
+			if (hasStoredFile) onAllUploaded?.();
+			return;
+		}
 		await uploadFiles(selectedFiles);
 	}
 

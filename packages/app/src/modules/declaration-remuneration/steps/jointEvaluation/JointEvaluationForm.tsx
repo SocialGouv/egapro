@@ -62,8 +62,13 @@ export function JointEvaluationForm({
 		// be triggered explicitly so the `joint_evaluation_submit` event is
 		// recorded and the "Mon espace" panel + table reflect the new step.
 		submitJointEvaluationMutation.mutate(undefined, {
-			onSettled: () => {
+			onSuccess: () => {
 				router.push(getPostComplianceDestination(cseOpinionRequired));
+			},
+			// The report may be stored even though the transition failed: refreshing
+			// surfaces it as already deposited, so the next submit can confirm it.
+			onError: () => {
+				router.refresh();
 			},
 		});
 	}, [clearDraft, cseOpinionRequired, router, submitJointEvaluationMutation]);
@@ -80,6 +85,7 @@ export function JointEvaluationForm({
 		uploadError,
 	} = useFileUploadForm({
 		flowType: "joint_evaluation",
+		hasStoredFile: existingFile !== null,
 		onAllUploaded,
 	});
 
