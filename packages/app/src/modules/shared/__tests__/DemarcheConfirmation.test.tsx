@@ -38,6 +38,7 @@ type Overrides = {
 	documents?: DemarcheDocument[];
 	documentsTitle?: string;
 	documentsTitleHidden?: boolean;
+	publicationException?: string;
 };
 
 function renderConfirmation({ documents = [RECAP], ...rest }: Overrides = {}) {
@@ -195,6 +196,22 @@ describe("DemarcheConfirmation", () => {
 		expect(
 			screen.getByRole("link", { name: /Je donne mon avis/ }),
 		).toBeInTheDocument();
+	});
+
+	it("publishes everything when the démarche supplies no exception", () => {
+		renderConfirmation();
+
+		expect(
+			screen.getByText(new RegExp(`déclarés par ${COMPANY_NAME}`)),
+		).not.toHaveTextContent("à l'exception");
+	});
+
+	it("forwards the démarche's publication exception to the notice", () => {
+		renderConfirmation({ publicationException: "l'indicateur X" });
+
+		expect(
+			screen.getByText(new RegExp(`déclarés par ${COMPANY_NAME}`)),
+		).toHaveTextContent("à l'exception de l'indicateur X.");
 	});
 
 	it("names the company in the publication notice, between the documents and the feedback banner", () => {

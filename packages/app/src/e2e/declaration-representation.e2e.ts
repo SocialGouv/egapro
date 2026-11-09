@@ -13,6 +13,7 @@ import {
 	DECLARATION_REPRESENTATION,
 	MY_SPACE,
 	mySpaceRepresentationHref,
+	OBSERVATORY_SEARCH,
 	observatoryCompanyHref,
 	routeWithQuery,
 } from "~/modules/routes";
@@ -22,6 +23,7 @@ import { SUBMIT_LABEL } from "~/modules/shared/submitLabels";
 import { TEST_SIREN } from "./constants";
 import {
 	getCurrentDbYear,
+	getTestCompanyName,
 	resetGipWorkforce,
 	resetRepresentationDeclaration,
 	setGipWorkforce,
@@ -371,6 +373,7 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 
 		await test.step("confirmation screen", async () => {
 			await page.waitForURL(`**${FUNNEL_ROOT}/confirmation`);
+			const companyName = await getTestCompanyName();
 			await expect(
 				page.getByText(`Votre parcours ${campaignYear} est désormais terminé`),
 			).toBeVisible();
@@ -384,7 +387,24 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 			);
 			await expect(
 				page.getByRole("heading", { name: "Publication des résultats" }),
-			).toHaveCount(0);
+			).toBeVisible();
+			await expect(
+				page.getByText(
+					`Les résultats déclarés par ${companyName} seront rendus publics dans l'onglet « Observatoire » d'Egapro.`,
+				),
+			).toBeVisible();
+			await expect(page.getByText(/à l'exception de l'indicateur/)).toHaveCount(
+				0,
+			);
+			await expect(
+				page.getByRole("link", { name: "Consulter l'observatoire" }),
+			).toHaveAttribute("href", OBSERVATORY_SEARCH);
+			await expect(
+				page.getByText("Comment s'est passée votre démarche ?"),
+			).toBeVisible();
+			await expect(
+				page.getByRole("link", { name: /Je donne mon avis/ }),
+			).toBeVisible();
 		});
 	});
 
