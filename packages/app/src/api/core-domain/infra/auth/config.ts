@@ -262,7 +262,7 @@ export const authConfig: AuthOptions = {
                   }))
               : (rawOrganizations ?? []).filter(orga => !!orga);
 
-          // ProConnect (eidas0) does not return `organizations[]`: the active
+          // ProConnect does not return `organizations[]`: the active
           // organization the user selected in the ProConnect picker comes as a
           // single `siret` claim. Derive the active org from it so the declarant
           // session carries their company (otherwise companies stays empty).
