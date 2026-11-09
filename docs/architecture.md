@@ -284,7 +284,7 @@ sequenceDiagram
     App->>PC: POST /token
     PC-->>App: id_token + access_token
     App->>DB: upsert users (email, firstName, lastName)
-    Note over App: jwt callback enrichit token<br/>avec userId, isAdmin
+    Note over App: signIn vérifie l'acr MFA<br/>jwt callback enrichit le token
     App-->>User: Set-Cookie next-auth.session-token<br/>Redirect /mon-espace
 ```
 
@@ -311,9 +311,11 @@ Deux responsabilités, deux scopes URL :
 
 **Defense in depth** : `src/app/admin/layout.tsx` re-vérifie la session côté Node runtime pour les tokens dépourvus du flag `isAdmin` (fallback de migration).
 
-### 5.5 Double authentification admin (step-up ProConnect)
+### 5.5 Niveaux eIDAS : plancher déclarant et double authentification admin
 
-`isAdmin === true` ouvre la navigation dans `/admin/*`, mais pas les actions sensibles : celles-ci exigent en plus un second facteur récent (`adminMfaAt`, fenêtre de 8h — `ADMIN_MFA_WINDOW_SECONDS`, `src/modules/domain/shared/adminMfa.ts`). Les niveaux acceptés sont `eidas1-mfa`, `eidas2` et `eidas3` (`ADMIN_MFA_ACR_VALUES`) : ProConnect rapporte le niveau du pilier le plus faible, donc `eidas2`/`eidas3` ne sont jamais émis sans second facteur, au même titre que `eidas1-mfa`. Restent refusés `eidas0`, `eidas0-mfa` (identité ou rattachement déclaratif, insuffisant quel que soit le facteur), `eidas1` et `certification-dirigeant`. Bien que la documentation ProConnect recommande `eidas0-mfa` parmi les valeurs de double authentification, cette politique l'exclut : si le fournisseur d'identité d'un admin ne délivre que ce niveau, ProConnect refuse la demande de step-up et l'admin ne peut pas effectuer les actions sensibles.
+Depuis #4961, **toute** connexion ProConnect demande une double authentification : la requête `/authorize` du bouton `/login` porte `claims.id_token.acr` en `essential: true` avec `["eidas0-mfa", "eidas1-mfa", "eidas2", "eidas3"]` (`USER_MFA_ACR_VALUES`, `src/modules/domain/shared/userMfa.ts`). Le niveau retourné est vérifié côté serveur dans `callbacks.signIn` : un `acr` hors de cette liste (`eidas0`, `eidas1`, `certification-dirigeant`, ou l'absence d'`id_token`) ne crée aucune session et renvoie sur `/login`. Un utilisateur sans second facteur est donc pris en charge par ProConnect (configuration d'un facteur, ou OTP mail qui produit `eidas1-mfa`), pas par Egapro.
+
+`/admin` va plus loin. `isAdmin === true` ouvre la navigation dans `/admin/*`, mais pas les actions sensibles : celles-ci exigent en plus une authentification `eidas2` ou `eidas3`, récente (`adminMfaAt`, fenêtre de 8h — `ADMIN_MFA_WINDOW_SECONDS`, `src/modules/domain/shared/adminMfa.ts`, `ADMIN_MFA_ACR_VALUES`). `eidas2`/`eidas3` imposent une identité substantielle, une MFA forte et un lien à l'organisation certifié ; `eidas1-mfa` ne prouve qu'un second facteur sur une identité faible et ne suffit plus. Restent refusés `eidas0`, `eidas0-mfa`, `eidas1` et `certification-dirigeant`. Un agent dont l'identité ProConnect ne peut pas atteindre `eidas2` (FI de niveau 1, OTP mail plafonné à `eidas1-mfa`) ne peut pas entrer dans le backoffice — conséquence assumée de #4961.
 
 Un seul point d'entrée déclenche cette connexion renforcée, `triggerAdminStepUp()` (`src/modules/admin/access/adminStepUp.ts`), appelé par le bouton ProConnect du `/login` quand la destination cible le backoffice, par l'écran de reprise `/acces-backoffice`, et par le menu admin. Il attache deux paramètres à la requête d'autorisation OIDC :
 

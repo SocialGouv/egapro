@@ -50,14 +50,17 @@ describe("LoginPage", () => {
 
 	it("forwards callbackUrl through to ProConnect signIn", () => {
 		// Observable behavior of the prop drill LoginPage → LoginForm →
-		// ProConnectButton: the deepest call receives the propagated URL.
+		// ProConnectButton: the deepest call receives the propagated URL, along
+		// with the declarant MFA claim (#4961).
 		render(<LoginPage callbackUrl="/mon-espace/mes-entreprises" />);
 		screen
 			.getByRole("button", { name: /s'identifier avec\s*proconnect/i })
 			.click();
-		expect(signInMock).toHaveBeenCalledWith("proconnect", {
-			callbackUrl: "/mon-espace/mes-entreprises",
-		});
+		expect(signInMock).toHaveBeenCalledWith(
+			"proconnect",
+			{ callbackUrl: "/mon-espace/mes-entreprises" },
+			expect.objectContaining({ claims: expect.any(String) }),
+		);
 	});
 
 	it("carries the admin step-up requirement end-to-end for a backoffice destination", () => {
@@ -79,8 +82,10 @@ describe("LoginPage", () => {
 		screen
 			.getByRole("button", { name: /s'identifier avec\s*proconnect/i })
 			.click();
-		expect(signInMock).toHaveBeenCalledWith("proconnect", {
-			callbackUrl: "/mon-espace",
-		});
+		expect(signInMock).toHaveBeenCalledWith(
+			"proconnect",
+			{ callbackUrl: "/mon-espace" },
+			expect.objectContaining({ claims: expect.any(String) }),
+		);
 	});
 });

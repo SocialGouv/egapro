@@ -10,6 +10,7 @@ import type { AdminAccessRefusal } from "~/modules/domain";
 import {
 	isAdminMfaAcr,
 	isAdminMfaFresh,
+	isUserMfaAcr,
 	PUBLIC_AGENT_ROLE,
 	parseSiren,
 	resolveAdminGrant,
@@ -268,7 +269,7 @@ const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]", "::1"]);
 
 /**
  * True when the request was addressed to this machine. `EGAPRO_DEV_AUTH`,
- * `EGAPRO_E2E_ADMIN_MFA` and `NODE_ENV` all come from the same configmap and
+ * `EGAPRO_E2E_MFA` and `NODE_ENV` all come from the same configmap and
  * carry the same level of trust, so on their own they are one barrier, not
  * two. This check does not read configuration at all: a request reaching a
  * deployed pod carries that environment's hostname, never a loopback one.
@@ -303,18 +304,19 @@ async function safeRequestHost(): Promise<string | null> {
 }
 
 /**
- * Test-only stand-in for a ProConnect second factor (issue #4467).
+ * Test-only stand-in for a ProConnect MFA level (issues #4467 and #4961).
  *
- * Why it exists. `/admin` demands an `eidas1-mfa` sign-in since #4461.
- * ProConnect's integration platform advertises that level, but its FIA1V2 test
- * identity — the only one the suite has — presents no second factor a headless
- * run can complete, and its fallback one-time code goes to a mailbox the suite
- * cannot read. Without a seam the whole backoffice half of the suite is
- * unreachable, which is worse for the epic than a seam whose absence in
+ * Why it exists. Since #4961 every sign-in demands a second factor:
+ * `eidas0-mfa` or above for the declarant journey, `eidas2` or above for the
+ * backoffice. ProConnect's integration platform advertises those levels, but
+ * its FIA1V2 test identity — the only one the suite has — presents no second
+ * factor a headless run can complete, and its fallback one-time code goes to a
+ * mailbox the suite cannot read. Without a seam every ProConnect sign-in of the
+ * suite would be refused, which is worse than a seam whose absence in
  * production is mechanically checkable.
  *
  * Why it cannot leak. Two independent barriers, deliberately not two variables
- * of one configmap. `EGAPRO_E2E_ADMIN_MFA` is off by default and declared in no
+ * of one configmap. `EGAPRO_E2E_MFA` is off by default and declared in no
  * `.kontinuous` env config — `e2eFlagsAbsentFromDeployConfig.test.ts` fails the
  * build if it ever appears in one. On top of it, the sign-in must have reached
  * the app on a loopback host, which no deployed pod ever sees whatever its
@@ -324,18 +326,18 @@ async function safeRequestHost(): Promise<string | null> {
  *
  * What it does NOT do. It grants no habilitation: `ADMIN_EMAILS` still decides
  * who is an admin, and the freshness window still applies. It replaces the
- * level ProConnect answered with, never the rule that reads it — so the
- * negative half of the epic (no valid second factor, no backoffice) stays live.
+ * level ProConnect answered with, never the rules that read it — so the
+ * negative halves (no MFA, no session; no `eidas2`, no backoffice) stay live.
  *
  * Not locked on `NODE_ENV`: every CI run serves a production build
  * (`next build` then `next start`), so such a lock would make the seam inert in
  * the one environment that needs it. The campaign-clock seam already made and
  * reverted that mistake — see `~/app/api/e2e-clock/route.ts`.
  */
-function grantsTestAdminMfa(host: string | null): boolean {
+function grantsTestMfa(host: string | null): boolean {
 	// Strict `=== true`, never truthiness: with SKIP_ENV_VALIDATION set the env
 	// helper hands back the raw environment, where the string "false" is truthy.
-	return env.EGAPRO_E2E_ADMIN_MFA === true && isLoopbackHost(host);
+	return env.EGAPRO_E2E_MFA === true && isLoopbackHost(host);
 }
 
 /**
@@ -493,6 +495,10 @@ function getProviders(): Provider[] {
 export const authConfig = {
 	pages: {
 		signIn: LOGIN,
+		// A refused sign-in must land back on the login form, not on NextAuth's
+		// bare error page: the same route serves the "insufficient MFA level"
+		// refusal and the interrupted admin step-up.
+		error: LOGIN,
 	},
 	session: {
 		strategy: "jwt",
@@ -500,6 +506,23 @@ export const authConfig = {
 	},
 	providers: getProviders(),
 	callbacks: {
+		// Server-side enforcement of the declarant MFA floor (#4961). The
+		// `essential` claim is binding at ProConnect, but the reply is still
+		// checked here: an issuer that ignores the request must not open a
+		// session below `eidas0-mfa`. Absent is not enough either — a provider
+		// that carries no id_token proves nothing.
+		async signIn({ account }) {
+			// The local provider trusts a loopback request and carries no
+			// id_token; it exists only for development and the browser validators.
+			if (account?.provider === "dev-auth") return true;
+
+			const { acr } = readAuthenticationClaims(account?.id_token);
+			if (isUserMfaAcr(acr)) return true;
+
+			// The FIA1V2 test identity cannot present a second factor; see
+			// `grantsTestMfa` for the two independent barriers.
+			return grantsTestMfa(await safeRequestHost());
+		},
 		redirect({ url, baseUrl }) {
 			return resolveRedirectTarget(url, baseUrl);
 		},
@@ -672,16 +695,17 @@ export const authConfig = {
 				// The marker has exactly two sources, and a client reaches
 				// neither: the id_token of the exchange we just performed
 				// server-to-server, and — off outside a loopback test run, see
-				// `grantsTestAdminMfa` — the E2E seam. Never a query parameter, a
+				// `grantsTestMfa` — the E2E seam. Never a query parameter, a
 				// header, a request body, nor the `trigger === "update"` branch
-				// above, which any signed-in client can reach. A level below MFA
-				// is not an error — the declarant journey never asks for one — so
-				// the sign-in succeeds with the session simply left undated.
+				// above, which any signed-in client can reach. A level below the
+				// admin floor is not an error here — `callbacks.signIn` already
+				// accepted the session at the declarant floor, it simply stays
+				// undated so `/admin` asks for a step-up.
 				const { acr, authTime } = readAuthenticationClaims(account?.id_token);
 				let testSeamGranted = false;
 				if (isAdminMfaAcr(acr)) {
 					token.adminMfaAt = authTime ?? Math.floor(Date.now() / 1000);
-				} else if (grantsTestAdminMfa(await safeRequestHost())) {
+				} else if (grantsTestMfa(await safeRequestHost())) {
 					// Dated from the server clock, never from a claim: the level we
 					// are standing in for was not returned, so no `auth_time` exists.
 					token.adminMfaAt = Math.floor(Date.now() / 1000);

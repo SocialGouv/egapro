@@ -115,17 +115,17 @@ export const env = createEnv({
 		// in NO .kontinuous env config, so the route stays 404 in preproduction
 		// and production regardless of NODE_ENV.
 		EGAPRO_E2E_CLOCK: literalBooleanFlag(),
-		// E2E-only admin two-factor seam (issue #4467). ProConnect's integration
-		// platform advertises `eidas1-mfa`, but the FIA1V2 test identity has no
-		// second factor a headless run can present, so the suite could never obtain
-		// a backoffice session once #4461 started demanding one. With this flag on,
-		// a sign-in that reached the app on a loopback host is dated as if
-		// ProConnect had returned the MFA level.
+		// E2E-only MFA seam (issues #4467 and #4961). Since #4961 every sign-in
+		// demands a second factor (`eidas0-mfa` for declarants, `eidas2` for the
+		// backoffice), but the FIA1V2 test identity has no second factor a
+		// headless run can present. With this flag on, a sign-in that reached the
+		// app on a loopback host is accepted and dated as if ProConnect had
+		// returned the required level.
 		//
 		// Declared in NO .kontinuous env config — `e2eFlagsAbsentFromDeployConfig`
 		// fails the build if that ever changes — and the seam additionally demands
 		// a loopback host, a barrier no configuration can grant a deployed pod.
-		EGAPRO_E2E_ADMIN_MFA: literalBooleanFlag(),
+		EGAPRO_E2E_MFA: literalBooleanFlag(),
 		// Pins the campaign year of a manual recette environment; refused at boot outside dev builds (guard below).
 		EGAPRO_RECETTE_CAMPAIGN_YEAR: z
 			.string()
@@ -254,7 +254,7 @@ export const env = createEnv({
 		MATOMO_API_TOKEN: process.env.MATOMO_API_TOKEN,
 		MATOMO_API_URL: process.env.MATOMO_API_URL,
 		EGAPRO_E2E_CLOCK: process.env.EGAPRO_E2E_CLOCK,
-		EGAPRO_E2E_ADMIN_MFA: process.env.EGAPRO_E2E_ADMIN_MFA,
+		EGAPRO_E2E_MFA: process.env.EGAPRO_E2E_MFA,
 		EGAPRO_RECETTE_CAMPAIGN_YEAR: process.env.EGAPRO_RECETTE_CAMPAIGN_YEAR,
 		ADMIN_EMAILS: process.env.ADMIN_EMAILS,
 		EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT:
