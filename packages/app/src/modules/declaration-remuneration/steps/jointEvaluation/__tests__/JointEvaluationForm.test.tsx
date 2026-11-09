@@ -9,6 +9,7 @@ import userEvent from "@testing-library/user-event";
 import { useSession } from "next-auth/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { consumeJointEvaluationTransmissionSuccess } from "~/modules/declaration-remuneration/shared/declarationSuccessFlash";
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { formatLongDate } from "~/modules/domain";
 import { JointEvaluationForm } from "../JointEvaluationForm";
@@ -363,6 +364,9 @@ describe("JointEvaluationForm", () => {
 		await waitFor(() => {
 			expect(mockPush).toHaveBeenCalledWith(expectedRedirect);
 		});
+		expect(consumeJointEvaluationTransmissionSuccess()).toBe(
+			cseOpinionRequired,
+		);
 	});
 
 	describe("rapport déjà déposé (#4222)", () => {

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { useReadOnlyGuard } from "~/modules/auth";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
+import { markJointEvaluationTransmissionSuccess } from "~/modules/declaration-remuneration/shared/declarationSuccessFlash";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { FormErrors } from "~/modules/declaration-remuneration/shared/FormErrors";
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
@@ -63,6 +64,10 @@ export function JointEvaluationForm({
 		// recorded and the "Mon espace" panel + table reflect the new step.
 		submitJointEvaluationMutation.mutate(undefined, {
 			onSettled: () => {
+				// Only the CSE-opinion destination consumes this signal; marking it otherwise would leave it stranded in sessionStorage.
+				if (cseOpinionRequired) {
+					markJointEvaluationTransmissionSuccess();
+				}
 				router.push(getPostComplianceDestination(cseOpinionRequired));
 			},
 		});
