@@ -14,9 +14,10 @@ import { formatLongDate } from "~/modules/domain";
 import { JointEvaluationForm } from "../JointEvaluationForm";
 
 const mockPush = vi.fn();
+const mockRefresh = vi.fn();
 
 vi.mock("next/navigation", () => ({
-	useRouter: () => ({ push: mockPush }),
+	useRouter: () => ({ push: mockPush, refresh: mockRefresh }),
 	usePathname: () =>
 		"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
 }));
@@ -26,6 +27,7 @@ vi.mock("~/modules/shared/uploadFile", () => ({
 }));
 
 const submitJointEvaluationMock = vi.fn();
+const submitJointEvaluationOutcome = { fails: false };
 
 vi.mock("~/trpc/react", () => ({
 	api: {
@@ -34,10 +36,18 @@ vi.mock("~/trpc/react", () => ({
 				useMutation: () => ({
 					mutate: (
 						_input: undefined,
-						opts?: { onSettled?: () => void; onSuccess?: () => void },
+						opts?: {
+							onError?: () => void;
+							onSettled?: () => void;
+							onSuccess?: () => void;
+						},
 					) => {
 						submitJointEvaluationMock();
-						opts?.onSuccess?.();
+						if (submitJointEvaluationOutcome.fails) {
+							opts?.onError?.();
+						} else {
+							opts?.onSuccess?.();
+						}
 						opts?.onSettled?.();
 					},
 					isPending: false,
@@ -63,6 +73,7 @@ const defaultProps = {
 describe("JointEvaluationForm", () => {
 	beforeEach(() => {
 		uploadFileMock.mockReset();
+		submitJointEvaluationOutcome.fails = false;
 		// jsdom doesn't implement <dialog>; stub showModal/close so the dialog
 		// actually toggles its `open` attribute and its contents become visible
 		// to Testing Library queries.
@@ -365,6 +376,42 @@ describe("JointEvaluationForm", () => {
 		});
 	});
 
+	it("stays on the page and refreshes it when the transmission fails after the upload", async () => {
+		const user = userEvent.setup();
+		submitJointEvaluationOutcome.fails = true;
+		uploadFileMock.mockResolvedValue({
+			ok: true,
+			fileId: "file-1",
+			fileName: "rapport.pdf",
+		});
+
+		const { container } = render(
+			<JointEvaluationForm {...defaultProps} cseOpinionRequired />,
+		);
+
+		const input = container.querySelector(
+			'input[type="file"]',
+		) as HTMLInputElement;
+		fireEvent.change(input, {
+			target: {
+				files: [
+					new File(["pdf-content"], "rapport.pdf", {
+						type: "application/pdf",
+					}),
+				],
+			},
+		});
+		fireEvent.click(screen.getByRole("button", { name: /transmettre/i }));
+		await user.click(screen.getByRole("checkbox"));
+		await user.click(screen.getByRole("button", { name: "Valider" }));
+
+		await waitFor(() => {
+			expect(submitJointEvaluationMock).toHaveBeenCalledTimes(1);
+		});
+		expect(mockRefresh).toHaveBeenCalledTimes(1);
+		expect(mockPush).not.toHaveBeenCalled();
+	});
+
 	describe("rapport déjà déposé (#4222)", () => {
 		const existingFile = {
 			id: "8f14e45f-ea4c-4f0b-9c1d-7a2b3c4d5e6f",
@@ -414,6 +461,34 @@ describe("JointEvaluationForm", () => {
 			expect(
 				screen.getByRole("button", { name: /transmettre/i }),
 			).toBeInTheDocument();
+		});
+
+		it("transmits the stored report without asking for a new file", async () => {
+			const user = userEvent.setup();
+			render(
+				<JointEvaluationForm
+					{...defaultProps}
+					cseOpinionRequired
+					existingFile={existingFile}
+				/>,
+			);
+
+			fireEvent.click(screen.getByRole("button", { name: /transmettre/i }));
+
+			expect(
+				screen.queryByText(
+					/le rapport de l'évaluation conjointe est manquant/i,
+				),
+			).not.toBeInTheDocument();
+
+			await user.click(screen.getByRole("checkbox"));
+			await user.click(screen.getByRole("button", { name: "Valider" }));
+
+			await waitFor(() => {
+				expect(submitJointEvaluationMock).toHaveBeenCalledTimes(1);
+			});
+			expect(uploadFileMock).not.toHaveBeenCalled();
+			expect(mockPush).toHaveBeenCalledWith("/avis-cse");
 		});
 
 		it("renders no deposited-report block when no file exists yet", () => {
