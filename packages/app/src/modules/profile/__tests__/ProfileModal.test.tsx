@@ -168,7 +168,14 @@ describe("ProfileModal — shell", () => {
 
 	it("renders the modal title", () => {
 		render(<ProfileModal />);
-		expect(screen.getByText("Mon profil").id).toBe("profile-modal-title");
+		expect(screen.getByText("Modifier mon profil").id).toBe(
+			"profile-modal-title",
+		);
+	});
+
+	it("renders the e-mail line in the title grey", () => {
+		render(<ProfileModal />);
+		expect(screen.getByText(/^E-mail :/)).toHaveClass("fr-text-title--grey");
 	});
 
 	it("renders the close button", () => {
@@ -541,7 +548,9 @@ describe("ProfileModal — review step", () => {
 		fireEvent.click(screen.getByRole("button", { name: "Revenir aux champs" }));
 
 		expect(queryReviewHeading()).not.toBeInTheDocument();
-		expect(screen.getByRole("heading", { name: "Mon profil" })).toHaveFocus();
+		expect(
+			screen.getByRole("heading", { name: "Modifier mon profil" }),
+		).toHaveFocus();
 		expect(screen.getByLabelText("Prénom")).toBeVisible();
 		expect(screen.getByLabelText("Prénom")).toHaveValue("Camille");
 		expect(mockMutate).not.toHaveBeenCalled();
