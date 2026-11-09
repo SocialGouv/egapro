@@ -63,11 +63,13 @@ export function JointEvaluationForm({
 		// be triggered explicitly so the `joint_evaluation_submit` event is
 		// recorded and the "Mon espace" panel + table reflect the new step.
 		submitJointEvaluationMutation.mutate(undefined, {
-			onSettled: () => {
+			onSuccess: () => {
 				// Only the CSE-opinion destination consumes this signal; marking it otherwise would leave it stranded in sessionStorage.
 				if (cseOpinionRequired) {
 					markJointEvaluationTransmissionSuccess();
 				}
+			},
+			onSettled: () => {
 				router.push(getPostComplianceDestination(cseOpinionRequired));
 			},
 		});

@@ -28,6 +28,10 @@ vi.mock("~/modules/shared/uploadFile", () => ({
 
 const submitJointEvaluationMock = vi.fn();
 
+const { submitJointEvaluationShouldSucceed } = vi.hoisted(() => ({
+	submitJointEvaluationShouldSucceed: { current: true },
+}));
+
 vi.mock("~/trpc/react", () => ({
 	api: {
 		declaration: {
@@ -35,10 +39,18 @@ vi.mock("~/trpc/react", () => ({
 				useMutation: () => ({
 					mutate: (
 						_input: undefined,
-						opts?: { onSettled?: () => void; onSuccess?: () => void },
+						opts?: {
+							onError?: () => void;
+							onSettled?: () => void;
+							onSuccess?: () => void;
+						},
 					) => {
 						submitJointEvaluationMock();
-						opts?.onSuccess?.();
+						if (submitJointEvaluationShouldSucceed.current) {
+							opts?.onSuccess?.();
+						} else {
+							opts?.onError?.();
+						}
 						opts?.onSettled?.();
 					},
 					isPending: false,
@@ -64,6 +76,7 @@ const defaultProps = {
 describe("JointEvaluationForm", () => {
 	beforeEach(() => {
 		uploadFileMock.mockReset();
+		submitJointEvaluationShouldSucceed.current = true;
 		// jsdom doesn't implement <dialog>; stub showModal/close so the dialog
 		// actually toggles its `open` attribute and its contents become visible
 		// to Testing Library queries.
@@ -367,6 +380,41 @@ describe("JointEvaluationForm", () => {
 		expect(consumeJointEvaluationTransmissionSuccess()).toBe(
 			cseOpinionRequired,
 		);
+	});
+
+	it("does not mark the joint evaluation transmission signal when the submission mutation fails", async () => {
+		submitJointEvaluationShouldSucceed.current = false;
+		const user = userEvent.setup();
+		uploadFileMock.mockResolvedValue({
+			ok: true,
+			fileId: "file-1",
+			fileName: "rapport.pdf",
+		});
+
+		const { container } = render(
+			<JointEvaluationForm {...defaultProps} cseOpinionRequired={true} />,
+		);
+
+		const input = container.querySelector(
+			'input[type="file"]',
+		) as HTMLInputElement;
+		const file = new File(["pdf-content"], "rapport.pdf", {
+			type: "application/pdf",
+		});
+		fireEvent.change(input, { target: { files: [file] } });
+
+		fireEvent.click(screen.getByRole("button", { name: /transmettre/i }));
+
+		await user.click(screen.getByRole("checkbox"));
+		await user.click(screen.getByRole("button", { name: "Valider" }));
+
+		await waitFor(() => {
+			expect(submitJointEvaluationMock).toHaveBeenCalledTimes(1);
+		});
+		await waitFor(() => {
+			expect(mockPush).toHaveBeenCalledWith("/avis-cse");
+		});
+		expect(consumeJointEvaluationTransmissionSuccess()).toBe(false);
 	});
 
 	describe("rapport déjà déposé (#4222)", () => {
