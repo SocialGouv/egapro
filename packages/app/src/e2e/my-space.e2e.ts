@@ -405,14 +405,10 @@ test.describe("Mon espace — Ressources cell of the rémunération row", () => 
 	test.setTimeout(90_000);
 
 	const DOCUMENTS_PANEL_ID = `documents-panel-remuneration-${CURRENT_YEAR}`;
-	const PREFILL_TITLE =
-		"Télécharger les données préremplies (issues des données DSN)";
-	const RECAP_INDICATORS_TITLE =
-		"Télécharger le récapitulatif de la déclaration des indicateurs";
-	const RECAP_CSE_OPINION_TITLE =
-		"Télécharger le récapitulatif de la transmission du ou des avis du CSE";
-	const RECAP_JOINT_EVALUATION_TITLE =
-		"Télécharger le récapitulatif de l'évaluation conjointe des rémunérations";
+	const PREFILL_TITLE = `Télécharger les données préremplies : Déclaration des indicateurs de rémunération ${CURRENT_YEAR}`;
+	const RECAP_INDICATORS_TITLE = `Télécharger le récapitulatif : Déclaration des indicateurs de rémunération ${CURRENT_YEAR}`;
+	const RECAP_CSE_OPINION_TITLE = `Télécharger le récapitulatif : Transmission du ou des avis du CSE ${CURRENT_YEAR}`;
+	const RECAP_JOINT_EVALUATION_TITLE = `Télécharger le récapitulatif : Transmission du rapport de l'évaluation conjointe des rémunérations ${CURRENT_YEAR}`;
 
 	test.beforeAll(async () => {
 		await ensureCurrentYearDeclaration();
