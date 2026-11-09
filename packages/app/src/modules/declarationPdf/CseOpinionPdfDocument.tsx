@@ -205,11 +205,11 @@ export function CseOpinionPdfDocument({ data }: Props) {
 
 					<SectionBanner title="Avis CSE" />
 					{data.declarations.map((declaration) => (
-						<View key={declaration.declarationNumber}>
-							<View
-								break={declaration.declarationNumber === 2}
-								minPresenceAhead={60}
-							>
+						<View
+							break={declaration.declarationNumber === 2}
+							key={declaration.declarationNumber}
+						>
+							<View minPresenceAhead={60}>
 								<CategoryBanner title={declaration.title} />
 							</View>
 							{declaration.opinions.map((opinion) => (

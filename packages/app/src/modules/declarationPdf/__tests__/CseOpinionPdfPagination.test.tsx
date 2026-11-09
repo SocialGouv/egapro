@@ -93,10 +93,12 @@ const DATA: CseOpinionRecapData = {
 	})),
 };
 
-async function renderPages(): Promise<string[][]> {
+async function renderPages(
+	data: CseOpinionRecapData = DATA,
+): Promise<string[][]> {
 	let layout: LayoutNode | undefined;
 	const document = cloneElement(
-		CseOpinionPdfDocument({ data: DATA }) as ReactElement<{
+		CseOpinionPdfDocument({ data }) as ReactElement<{
 			onRender?: (props: OnRenderProps) => void;
 		}>,
 		{
@@ -114,6 +116,52 @@ async function renderPages(): Promise<string[][]> {
 		return texts;
 	});
 }
+
+const SPARSE_DATA: CseOpinionRecapData = {
+	...DATA,
+	declarations: [
+		{
+			declarationNumber: 1,
+			title: "Première déclaration",
+			opinions: [
+				{
+					id: "1:accuracy",
+					title: "Exactitude",
+					rows: [{ label: "Avis du CSE", value: "Favorable" }],
+				},
+			],
+		},
+		{
+			declarationNumber: 2,
+			title: "Seconde déclaration",
+			opinions: [
+				{
+					id: "2:accuracy",
+					title: "Exactitude",
+					rows: [{ label: "Avis du CSE", value: "Favorable" }],
+				},
+			],
+		},
+	],
+	fileColumns: [
+		{
+			id: "1:accuracy",
+			label: "Exactitude",
+			declarationLabel: "1re déclaration",
+		},
+		{
+			id: "2:accuracy",
+			label: "Exactitude",
+			declarationLabel: "2e déclaration",
+		},
+	],
+	files: [1, 2].map((index) => ({
+		id: `file-${index}`,
+		name: `avis-cse-${index}.pdf`,
+		detail: "PDF – 17,96 Ko · déposé le 17 août 2026",
+		columnIds: [index === 1 ? "1:accuracy" : "2:accuracy"],
+	})),
+};
 
 describe("CseOpinionPdfDocument pagination", () => {
 	it("spreads a full transmission over several pages, each with its footer and counter", async () => {
@@ -159,5 +207,18 @@ describe("CseOpinionPdfDocument pagination", () => {
 		for (const title of firstDeclarationOpinionTitles) {
 			expect(secondDeclarationPage).not.toContain(title);
 		}
+	}, 30_000);
+
+	it("still forces the second declaration onto its own page when the content is light enough to fit on one", async () => {
+		const pages = await renderPages(SPARSE_DATA);
+
+		expect(pages.length).toBeGreaterThan(1);
+		const firstPage = pages[0] ?? [];
+		expect(firstPage).toContain("Première déclaration");
+		expect(firstPage).not.toContain("Seconde déclaration");
+		const secondDeclarationPage = pages.find((texts) =>
+			texts.includes("Seconde déclaration"),
+		);
+		expect(secondDeclarationPage).toBeDefined();
 	}, 30_000);
 });
