@@ -73,11 +73,13 @@ describe("JointEvaluationPdfDocument", () => {
 
 		expect(
 			screen.getByText(
-				"Récapitulatif : Évaluation conjointe des rémunérations 2027",
+				"Récapitulatif : Transmission du rapport de l’évaluation conjointe des rémunérations 2027",
 			),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText("L’évaluation conjointe a été transmise le 10/12/2027."),
+			screen.getByText(
+				"Le rapport de l’évaluation conjointe a été transmis le 10/12/2027.",
+			),
 		).toBeInTheDocument();
 		expect(mocks.ensurePdfFontsRegistered).toHaveBeenCalledTimes(1);
 	});
@@ -94,7 +96,7 @@ describe("JointEvaluationPdfDocument", () => {
 		].map((heading) =>
 			text.indexOf(
 				heading,
-				text.indexOf("L’évaluation conjointe a été transmise"),
+				text.indexOf("Le rapport de l’évaluation conjointe a été transmis"),
 			),
 		);
 
@@ -125,7 +127,7 @@ describe("JointEvaluationPdfDocument", () => {
 	it("names the deposited file as plain text, with its format, size and deposit date", () => {
 		renderDocument();
 
-		expect(screen.getByText("Fichiers déposés")).toBeInTheDocument();
+		expect(screen.getByText("Fichier déposé")).toBeInTheDocument();
 		const fileName = screen.getByText(/rapport-evaluation\.pdf/);
 		expect(fileName.closest("a")).toBeNull();
 		expect(
