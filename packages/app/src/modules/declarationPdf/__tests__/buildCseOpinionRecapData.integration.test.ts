@@ -185,7 +185,8 @@ describe("CSE opinion recap against a real Postgres", () => {
 		});
 		expect(recap.declarations).toHaveLength(1);
 		expect(recap.declarations[0]?.opinions[1]?.rows).toEqual([
-			{ label: "CSE informé et consulté", value: "Non" },
+			{ label: "Avis du CSE", value: "Non renseigné" },
+			{ label: "Date de l'avis rendu par le CSE", value: "Non renseigné" },
 		]);
 		expect(mocks.getFileSize).toHaveBeenCalledWith("cse/avis-exactitude.pdf");
 	});

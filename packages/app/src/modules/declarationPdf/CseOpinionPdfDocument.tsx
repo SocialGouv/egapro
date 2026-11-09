@@ -171,7 +171,7 @@ export function CseOpinionPdfDocument({ data }: Props) {
 			<Page size="A4" style={styles.page} wrap>
 				<PdfPageHeader />
 				<PdfPageFooter
-					label={`Transmission du ou des avis du CSE ${data.year} - SIREN ${company.siren} - transmise le ${data.transmittedAt}`}
+					label={`Transmission du ou des avis du CSE ${data.year} - SIREN ${company.siren} - transmis le ${data.transmittedAt}`}
 				/>
 
 				<EgaproBanner />
@@ -182,7 +182,7 @@ export function CseOpinionPdfDocument({ data }: Props) {
 							Récapitulatif : Transmission du ou des avis du CSE {data.year}
 						</Text>
 						<Text style={styles.titleDate}>
-							Les éléments ont été transmis le {data.transmittedAt}.
+							Le ou les avis ont été transmis le {data.transmittedAt}.
 						</Text>
 					</View>
 
@@ -206,7 +206,10 @@ export function CseOpinionPdfDocument({ data }: Props) {
 					<SectionBanner title="Avis CSE" />
 					{data.declarations.map((declaration) => (
 						<View key={declaration.declarationNumber}>
-							<View minPresenceAhead={60}>
+							<View
+								break={declaration.declarationNumber === 2}
+								minPresenceAhead={60}
+							>
 								<CategoryBanner title={declaration.title} />
 							</View>
 							{declaration.opinions.map((opinion) => (

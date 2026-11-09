@@ -36,9 +36,6 @@ const opinion = (declarationNumber: 1 | 2, type: "accuracy" | "gap") => ({
 	id: `${declarationNumber}:${type}`,
 	title: `Avis ${type} de la déclaration ${declarationNumber}, dont l'intitulé est assez long pour tenir sur deux lignes dans le récapitulatif`,
 	rows: [
-		...(type === "gap"
-			? [{ label: "CSE informé et consulté", value: "Oui" }]
-			: []),
 		{ label: "Avis du CSE", value: "Favorable" },
 		{ label: "Date de l'avis rendu par le CSE", value: "07/08/2026" },
 	],
@@ -125,7 +122,7 @@ describe("CseOpinionPdfDocument pagination", () => {
 		expect(pages.length).toBeGreaterThan(1);
 		pages.forEach((texts, index) => {
 			expect(texts).toContain(
-				"Transmission du ou des avis du CSE 2027 - SIREN 123 456 789 - transmise le 10/12/2027",
+				"Transmission du ou des avis du CSE 2027 - SIREN 123 456 789 - transmis le 10/12/2027",
 			);
 			expect(texts).toContain(`Page ${index + 1}/${pages.length}`);
 		});
@@ -147,6 +144,20 @@ describe("CseOpinionPdfDocument pagination", () => {
 		for (const file of DATA.files) {
 			const page = pages.find((texts) => texts.includes(file.name)) ?? [];
 			expect(page[page.indexOf(file.name) + 1]).toBe(file.detail);
+		}
+	}, 30_000);
+
+	it("forces the second declaration onto a page of its own, never sharing one with the first", async () => {
+		const pages = await renderPages();
+
+		const secondDeclarationPage = pages.find((texts) =>
+			texts.includes("Seconde déclaration"),
+		);
+		expect(secondDeclarationPage).toBeDefined();
+		const firstDeclarationOpinionTitles =
+			DATA.declarations[0]?.opinions.map((o) => o.title) ?? [];
+		for (const title of firstDeclarationOpinionTitles) {
+			expect(secondDeclarationPage).not.toContain(title);
 		}
 	}, 30_000);
 });

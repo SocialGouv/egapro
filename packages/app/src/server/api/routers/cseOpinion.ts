@@ -32,10 +32,7 @@ import {
 	pruneStaleContentTypeAssociations,
 } from "~/server/services/cseRequiredContentTypes";
 import { deleteFile as deleteS3File, getFileSize } from "~/server/services/s3";
-import {
-	findTransmittedCseOpinions,
-	findTransmittedJointEvaluation,
-} from "./declarationHelpers";
+import { findTransmittedCseOpinions } from "./declarationHelpers";
 import {
 	applyActionOrRefuse,
 	buildHistoryInserts,
@@ -113,11 +110,7 @@ export const cseOpinionRouter = createTRPCRouter({
 				message: "Aucun avis du CSE transmis pour cette déclaration.",
 			});
 		}
-		const [recap, jointEvaluation] = await Promise.all([
-			assembleCseOpinionRecap(transmitted),
-			findTransmittedJointEvaluation(ctx.db, ctx.declarationId),
-		]);
-		return { ...recap, hasSubmittedJointEvaluation: jointEvaluation !== null };
+		return assembleCseOpinionRecap(transmitted);
 	}),
 
 	get: declarationProcedure.query(async ({ ctx }) => {
