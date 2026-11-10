@@ -110,7 +110,7 @@ export function IndicatorSections({
 		<>
 			<div className={stepStyles.group}>
 				<h2 className="fr-h6 fr-mb-0">
-					Indicateurs pour l&apos;ensemble de vos salariés
+					Indicateurs pour l&apos;ensemble des salariés
 				</h2>
 
 				<div className={stepStyles.section}>
@@ -182,8 +182,8 @@ export function IndicatorSections({
 						<CardTitle
 							tooltipId={withTooltips ? "tooltip-quartile" : undefined}
 						>
-							Proportion de femmes et d&apos;hommes dans chaque quartile
-							salarial
+							Proportion de femmes et d&apos;hommes dans chaque quartile de
+							rémunération
 						</CardTitle>
 						{hasStep4Data ? (
 							<>
