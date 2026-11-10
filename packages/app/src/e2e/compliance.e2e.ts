@@ -188,6 +188,21 @@ test.describe("[CAS-06] Path 4: gap + hasCse → joint evaluation → /avis-cse"
 				).toBeVisible();
 			});
 
+			await test.step("le bandeau ne réapparaît pas en revenant sur l'étape 1", async () => {
+				await page.goto(cseOpinionStepHref(1));
+				await expect(
+					page.getByRole("heading", {
+						level: 1,
+						name: "Transmission du ou des avis du CSE",
+					}),
+				).toBeVisible();
+				await expect(
+					page.getByText(
+						"Votre évaluation conjointe des rémunérations a été transmise",
+					),
+				).toHaveCount(0);
+			});
+
 			await fillCseStep1(page);
 
 			await test.step("transmettre sans fichier affiche « Aucun avis déposé »", async () => {
