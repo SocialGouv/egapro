@@ -33,6 +33,8 @@ export const remunerationDeadlinesFormSchema = z
 		decl2ModificationDeadline: isoDateString,
 		decl2JointEvaluationDeadline: isoDateString,
 		decl2CseOpinionDeadline: isoDateString,
+		pathChoiceRound1Deadline: isoDateString,
+		pathChoiceDeadline: isoDateString,
 	})
 	.refine(
 		(data) => data.decl1ModificationDeadline < data.decl2ModificationDeadline,

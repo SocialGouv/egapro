@@ -9,6 +9,8 @@ type DeadlineRow = {
 	decl1JointEval: string | null;
 	decl2: string | null;
 	decl2JointEval: string | null;
+	pathChoiceRound1: string | null;
+	pathChoiceRound2: string | null;
 };
 
 function toIso(civilDate: string | null): string | null {
@@ -22,9 +24,9 @@ function toIso(civilDate: string | null): string | null {
 // app would, and moving a date in the back-office shifts the reminders.
 //
 // Only the milestones a reminder sends on are read (justification deadlines are
-// not surfaced by any reminder today). `pathChoice*` are never stored (the
-// domain derives them), so they are always the computed defaults. Columns are
-// cast to text to receive stable "YYYY-MM-DD" strings regardless of the
+// not surfaced by any reminder today). The `path_choice_*` columns are NULL
+// unless an admin set them, in which case the computed default applies. Columns
+// are cast to text to receive stable "YYYY-MM-DD" strings regardless of the
 // driver's date parsing.
 export async function getCampaignDeadlines(
 	sql: Sql,
@@ -36,7 +38,9 @@ export async function getCampaignDeadlines(
 			decl1_modification_deadline::text AS decl1,
 			decl1_joint_evaluation_deadline::text AS "decl1JointEval",
 			decl2_modification_deadline::text AS decl2,
-			decl2_joint_evaluation_deadline::text AS "decl2JointEval"
+			decl2_joint_evaluation_deadline::text AS "decl2JointEval",
+			path_choice_round1_deadline::text AS "pathChoiceRound1",
+			path_choice_deadline::text AS "pathChoiceRound2"
 		FROM app_campaign_deadline
 		WHERE year = ${year}
 		LIMIT 1
@@ -50,7 +54,7 @@ export async function getCampaignDeadlines(
 		decl2Modification: toIso(row.decl2) ?? defaults.decl2Modification,
 		decl2JointEvaluation:
 			toIso(row.decl2JointEval) ?? defaults.decl2JointEvaluation,
-		pathChoiceRound1: defaults.pathChoiceRound1,
-		pathChoiceRound2: defaults.pathChoiceRound2,
+		pathChoiceRound1: toIso(row.pathChoiceRound1) ?? defaults.pathChoiceRound1,
+		pathChoiceRound2: toIso(row.pathChoiceRound2) ?? defaults.pathChoiceRound2,
 	};
 }
