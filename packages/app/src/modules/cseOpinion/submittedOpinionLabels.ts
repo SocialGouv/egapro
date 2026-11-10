@@ -103,6 +103,10 @@ export function buildSubmittedOpinionRows(
 	];
 }
 
+function hasOpinionToShow(opinion: SubmittedOpinionInput): boolean {
+	return opinion.type !== "gap" || opinion.gapConsulted !== false;
+}
+
 export function buildSubmittedDeclarations(
 	opinions: SubmittedOpinionInput[],
 	hasSubmittedSecondDeclaration: boolean,
@@ -116,7 +120,8 @@ export function buildSubmittedDeclarations(
 		opinions: opinions
 			.flatMap((opinion) =>
 				opinion.declarationNumber === declarationNumber &&
-				isContentType(opinion.type)
+				isContentType(opinion.type) &&
+				hasOpinionToShow(opinion)
 					? [{ ...opinion, declarationNumber, type: opinion.type }]
 					: [],
 			)

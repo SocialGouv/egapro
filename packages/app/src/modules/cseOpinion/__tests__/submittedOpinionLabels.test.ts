@@ -50,7 +50,7 @@ describe("buildSubmittedOpinionRows", () => {
 		]);
 	});
 
-	it("marks a missing opinion and date as not provided when the CSE was not consulted", () => {
+	it("marks a missing opinion and date as not provided", () => {
 		expect(buildSubmittedOpinionRows(gap(1, false))).toEqual([
 			{ label: "Avis du CSE", value: "Non renseigné" },
 			{ label: "Date de l'avis rendu par le CSE", value: "Non renseigné" },
@@ -68,7 +68,7 @@ describe("buildSubmittedOpinionRows", () => {
 });
 
 describe("buildSubmittedDeclarations", () => {
-	const opinions = [gap(1, true), accuracy(2), accuracy(1), gap(2, false)];
+	const opinions = [gap(1, true), accuracy(2), accuracy(1), gap(2, true)];
 
 	it("keeps only the first declaration when no second one was transmitted", () => {
 		const declarations = buildSubmittedDeclarations(opinions, false);
@@ -100,6 +100,20 @@ describe("buildSubmittedDeclarations", () => {
 		);
 
 		expect(declarations[0]?.opinions).toEqual([]);
+	});
+
+	it("omits the justification block when the CSE was not consulted on it", () => {
+		const declarations = buildSubmittedDeclarations(
+			[accuracy(1), gap(1, false), accuracy(2), gap(2, false)],
+			true,
+		);
+
+		expect(declarations[0]?.opinions.map((opinion) => opinion.id)).toEqual([
+			"1:accuracy",
+		]);
+		expect(declarations[1]?.opinions.map((opinion) => opinion.id)).toEqual([
+			"2:accuracy",
+		]);
 	});
 });
 
