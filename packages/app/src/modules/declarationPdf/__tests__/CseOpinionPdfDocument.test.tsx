@@ -20,10 +20,21 @@ vi.mock("@react-pdf/renderer", async () => {
 			),
 		Text: ({ children }: { children: React.ReactNode }) =>
 			React.createElement("span", null, children),
-		View: ({ children, wrap }: { children: React.ReactNode; wrap?: boolean }) =>
+		View: ({
+			children,
+			wrap,
+			break: pageBreak,
+		}: {
+			children: React.ReactNode;
+			wrap?: boolean;
+			break?: boolean;
+		}) =>
 			React.createElement(
 				"div",
-				{ "data-unbreakable": wrap === false ? "true" : undefined },
+				{
+					"data-unbreakable": wrap === false ? "true" : undefined,
+					"data-page-break": pageBreak === true ? "true" : undefined,
+				},
 				children,
 			),
 		Image: ({ src }: { src: string }) =>
@@ -79,7 +90,13 @@ const DATA: CseOpinionRecapData = {
 				{
 					id: "2:gap",
 					title: "Justification des écarts",
-					rows: [{ label: "CSE informé et consulté", value: "Non" }],
+					rows: [
+						{ label: "Avis du CSE", value: "Non renseigné" },
+						{
+							label: "Date de l'avis rendu par le CSE",
+							value: "Non renseigné",
+						},
+					],
 				},
 			],
 		},
@@ -120,7 +137,7 @@ describe("CseOpinionPdfDocument", () => {
 			),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText("Les éléments ont été transmis le 10/12/2027."),
+			screen.getByText("Le ou les avis ont été transmis le 10/12/2027."),
 		).toBeInTheDocument();
 		expect(mocks.ensurePdfFontsRegistered).toHaveBeenCalledTimes(1);
 	});
@@ -128,7 +145,7 @@ describe("CseOpinionPdfDocument", () => {
 	it("lays out the sections in maquette order", () => {
 		const { container } = renderDocument();
 		const text = container.textContent ?? "";
-		const start = text.indexOf("Les éléments ont été transmis");
+		const start = text.indexOf("Le ou les avis ont été transmis");
 		const order = [
 			"Informations",
 			"Déclarant",
@@ -155,8 +172,6 @@ describe("CseOpinionPdfDocument", () => {
 			"Exactitude des données",
 			"Favorable",
 			"07/08/2026",
-			"CSE informé et consulté",
-			"Non",
 		]) {
 			expect(screen.getByText(value)).toBeInTheDocument();
 		}
@@ -167,6 +182,17 @@ describe("CseOpinionPdfDocument", () => {
 
 		const title = screen.getByText("Exactitude des données");
 		expect(title.closest("[data-unbreakable]")).toHaveTextContent("07/08/2026");
+	});
+
+	it("starts the second declaration on a new page but not the first", () => {
+		renderDocument();
+
+		expect(
+			screen.getByText("Première déclaration").closest("[data-page-break]"),
+		).toBeNull();
+		expect(
+			screen.getByText("Seconde déclaration").closest("[data-page-break]"),
+		).not.toBeNull();
 	});
 
 	it("marks each file against the columns it carries with a check or a dash", () => {
@@ -206,7 +232,7 @@ describe("CseOpinionPdfDocument", () => {
 
 		expect(
 			screen.getByText(
-				"Transmission du ou des avis du CSE 2027 - SIREN 123 456 789 - transmise le 10/12/2027",
+				"Transmission du ou des avis du CSE 2027 - SIREN 123 456 789 - transmis le 10/12/2027",
 			),
 		).toBeInTheDocument();
 		expect(screen.getByTestId("pdf-page")).toHaveAttribute("data-size", "A4");

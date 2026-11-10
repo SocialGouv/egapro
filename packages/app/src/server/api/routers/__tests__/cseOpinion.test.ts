@@ -266,30 +266,16 @@ describe("cseOpinionRouter", () => {
 			expect(mockAssembleCseOpinionRecap).not.toHaveBeenCalled();
 		});
 
-		it("returns the shared recap with the joint evaluation flag", async () => {
+		it("returns the shared recap as is", async () => {
 			mockFindTransmittedCseOpinions.mockResolvedValue(transmitted);
 			mockAssembleCseOpinionRecap.mockResolvedValue(recap);
-			mockFindTransmittedJointEvaluation.mockResolvedValue({
-				submission: {},
-				file: {},
-			});
 			const caller = await createCaller(createMockDb());
 
 			const result = await caller.getSubmittedView();
 
 			expect(mockAssembleCseOpinionRecap).toHaveBeenCalledWith(transmitted);
-			expect(result).toEqual({ ...recap, hasSubmittedJointEvaluation: true });
-		});
-
-		it("does not offer a joint report without a transmitted one", async () => {
-			mockFindTransmittedCseOpinions.mockResolvedValue(transmitted);
-			mockAssembleCseOpinionRecap.mockResolvedValue(recap);
-			mockFindTransmittedJointEvaluation.mockResolvedValue(null);
-			const caller = await createCaller(createMockDb());
-
-			const result = await caller.getSubmittedView();
-
-			expect(result.hasSubmittedJointEvaluation).toBe(false);
+			expect(mockFindTransmittedJointEvaluation).not.toHaveBeenCalled();
+			expect(result).toEqual(recap);
 		});
 	});
 

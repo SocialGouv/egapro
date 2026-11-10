@@ -47,7 +47,6 @@ export const SUBMITTED_DECLARATION_TITLES: Record<DeclarationNumber, string> = {
 };
 
 export const SUBMITTED_OPINION_LABELS = {
-	gapConsulted: "CSE informé et consulté",
 	opinion: "Avis du CSE",
 	opinionDate: "Date de l'avis rendu par le CSE",
 } as const;
@@ -87,26 +86,10 @@ export function formatSubmittedOpinion(opinion: string | null): string {
 	return (opinion && OPINION_VALUES[opinion]) || NOT_PROVIDED;
 }
 
-export function formatGapConsulted(gapConsulted: boolean | null): string {
-	if (gapConsulted === null) return NOT_PROVIDED;
-	return gapConsulted ? "Oui" : "Non";
-}
-
 export function buildSubmittedOpinionRows(
-	opinion: Pick<
-		SubmittedOpinionInput,
-		"type" | "gapConsulted" | "opinion" | "opinionDate"
-	>,
+	opinion: Pick<SubmittedOpinionInput, "opinion" | "opinionDate">,
 ): SubmittedInfoRow[] {
-	const rows: SubmittedInfoRow[] = [];
-	if (opinion.type === "gap") {
-		rows.push({
-			label: SUBMITTED_OPINION_LABELS.gapConsulted,
-			value: formatGapConsulted(opinion.gapConsulted),
-		});
-		if (opinion.gapConsulted === false) return rows;
-	}
-	rows.push(
+	return [
 		{
 			label: SUBMITTED_OPINION_LABELS.opinion,
 			value: formatSubmittedOpinion(opinion.opinion),
@@ -117,8 +100,11 @@ export function buildSubmittedOpinionRows(
 				? formatIsoDate(opinion.opinionDate)
 				: NOT_PROVIDED,
 		},
-	);
-	return rows;
+	];
+}
+
+function hasOpinionToShow(opinion: SubmittedOpinionInput): boolean {
+	return opinion.type !== "gap" || opinion.gapConsulted !== false;
 }
 
 export function buildSubmittedDeclarations(
@@ -134,7 +120,8 @@ export function buildSubmittedDeclarations(
 		opinions: opinions
 			.flatMap((opinion) =>
 				opinion.declarationNumber === declarationNumber &&
-				isContentType(opinion.type)
+				isContentType(opinion.type) &&
+				hasOpinionToShow(opinion)
 					? [{ ...opinion, declarationNumber, type: opinion.type }]
 					: [],
 			)
