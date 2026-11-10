@@ -37,6 +37,8 @@ vi.mock("~/server/db/schema", () => ({
 vi.mock("../companyLink", () => ({ syncUserCompanyLink: async () => [] }));
 vi.mock("~/server/audit/log", () => ({ logAction: vi.fn() }));
 
+import { AUDIT_ACTIONS } from "~/modules/audit";
+import { logAction } from "~/server/audit/log";
 import { authConfig } from "../config";
 
 const signInCallback = authConfig.callbacks.signIn as (params: {
@@ -76,6 +78,7 @@ describe("auth config — declarant MFA floor", () => {
 	beforeEach(() => {
 		mockEnv.EGAPRO_E2E_MFA = false;
 		mockHeaders.current = null;
+		vi.mocked(logAction).mockClear();
 	});
 
 	describe("server-side check of the returned acr", () => {
@@ -86,6 +89,7 @@ describe("auth config — declarant MFA floor", () => {
 			"eidas3",
 		])("opens a session when ProConnect reports %s", async (acr) => {
 			await expect(signInWith({ claims: { acr } })).resolves.toBe(true);
+			expect(logAction).not.toHaveBeenCalled();
 		});
 
 		it.each([
@@ -94,14 +98,35 @@ describe("auth config — declarant MFA floor", () => {
 			"https://proconnect.gouv.fr/assurance/certification-dirigeant",
 		])("refuses the session when ProConnect reports %s", async (acr) => {
 			await expect(signInWith({ claims: { acr } })).resolves.toBe(false);
+			expect(logAction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					action: AUDIT_ACTIONS.AUTH_LOGIN_FAILED,
+					status: "failure",
+					errorMessage: expect.stringContaining("SIGNIN_MFA_LEVEL_REFUSED"),
+				}),
+			);
 		});
 
 		it("refuses the session when the id_token carries no acr", async () => {
 			await expect(signInWith({ claims: {} })).resolves.toBe(false);
+			expect(logAction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					action: AUDIT_ACTIONS.AUTH_LOGIN_FAILED,
+					status: "failure",
+					errorMessage: "SIGNIN_MFA_LEVEL_REFUSED: acr=none",
+				}),
+			);
 		});
 
 		it("refuses the session when the account carries no id_token", async () => {
 			await expect(signInWith({ claims: null })).resolves.toBe(false);
+			expect(logAction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					action: AUDIT_ACTIONS.AUTH_LOGIN_FAILED,
+					status: "failure",
+					errorMessage: "SIGNIN_MFA_LEVEL_REFUSED: acr=none",
+				}),
+			);
 		});
 
 		it("refuses the session when the id_token is not decodable", async () => {
@@ -116,6 +141,12 @@ describe("auth config — declarant MFA floor", () => {
 					} as Account,
 				}),
 			).resolves.toBe(false);
+			expect(logAction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					action: AUDIT_ACTIONS.AUTH_LOGIN_FAILED,
+					status: "failure",
+				}),
+			);
 		});
 	});
 
@@ -124,6 +155,7 @@ describe("auth config — declarant MFA floor", () => {
 			await expect(
 				signInWith({ provider: "dev-auth", claims: null }),
 			).resolves.toBe(true);
+			expect(logAction).not.toHaveBeenCalled();
 		});
 	});
 
@@ -146,6 +178,7 @@ describe("auth config — declarant MFA floor", () => {
 					request: { host: "localhost:3000" },
 				}),
 			).resolves.toBe(true);
+			expect(logAction).not.toHaveBeenCalled();
 		});
 
 		it("refuses a non-loopback host even when the flag is on", async () => {
@@ -157,6 +190,12 @@ describe("auth config — declarant MFA floor", () => {
 					request: { host: "egapro.example.gouv.fr" },
 				}),
 			).resolves.toBe(false);
+			expect(logAction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					action: AUDIT_ACTIONS.AUTH_LOGIN_FAILED,
+					status: "failure",
+				}),
+			);
 		});
 
 		it("refuses outside a request scope even when the flag is on", async () => {

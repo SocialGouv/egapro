@@ -521,7 +521,20 @@ export const authConfig = {
 
 			// The FIA1V2 test identity cannot present a second factor; see
 			// `grantsTestMfa` for the two independent barriers.
-			return grantsTestMfa(await safeRequestHost());
+			if (grantsTestMfa(await safeRequestHost())) return true;
+
+			// NextAuth v4 turns a `false` here into an `AccessDenied` redirect
+			// without going through `logger.error`, so this refusal would leave
+			// no `AUTH_LOGIN_FAILED` row unless it is written here.
+			await logAction({
+				action: AUDIT_ACTIONS.AUTH_LOGIN_FAILED,
+				status: "failure",
+				errorMessage: `SIGNIN_MFA_LEVEL_REFUSED: acr=${
+					typeof acr === "string" && acr ? acr : "none"
+				}`,
+				...(await safeRequestContext()),
+			});
+			return false;
 		},
 		redirect({ url, baseUrl }) {
 			return resolveRedirectTarget(url, baseUrl);
