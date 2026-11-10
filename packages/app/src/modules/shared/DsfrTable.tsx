@@ -15,12 +15,12 @@ export function DsfrTable({
 	tableClassName,
 }: Props) {
 	return (
-		<div className={`fr-table ${className}`}>
+		<div className={`fr-table fr-table--no-caption ${className}`}>
 			<div className="fr-table__wrapper">
 				<div className="fr-table__container">
 					<div className="fr-table__content">
 						<table className={tableClassName}>
-							<caption className="fr-sr-only">{caption}</caption>
+							<caption>{caption}</caption>
 							{children}
 						</table>
 					</div>
