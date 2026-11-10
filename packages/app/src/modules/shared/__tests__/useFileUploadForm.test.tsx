@@ -327,6 +327,74 @@ describe("useFileUploadForm", () => {
 		expect(result.current.isPending).toBe(false);
 	});
 
+	describe("with a file already stored", () => {
+		it("opens the confirmation instead of flagging a missing file", () => {
+			const { result } = renderHook(() =>
+				useFileUploadForm({
+					flowType: "joint_evaluation",
+					hasStoredFile: true,
+				}),
+			);
+			const dialog = attachDialog(result);
+
+			act(() => {
+				result.current.handleSubmit(preventSubmit());
+			});
+
+			expect(result.current.hasMissingFile).toBe(false);
+			expect(dialog.showModal).toHaveBeenCalled();
+		});
+
+		it("confirms the stored file without uploading anything", async () => {
+			const onAllUploaded = vi.fn();
+			const { result } = renderHook(() =>
+				useFileUploadForm({
+					flowType: "joint_evaluation",
+					hasStoredFile: true,
+					onAllUploaded,
+				}),
+			);
+			attachDialog(result);
+
+			await act(async () => {
+				await result.current.handleConfirm();
+			});
+
+			expect(uploadFileMock).not.toHaveBeenCalled();
+			expect(onAllUploaded).toHaveBeenCalledTimes(1);
+		});
+
+		it("uploads a newly selected file to replace the stored one", async () => {
+			const onAllUploaded = vi.fn();
+			uploadFileMock.mockResolvedValue({
+				ok: true,
+				fileId: "id-1",
+				fileName: "nouveau.pdf",
+			} satisfies UploadFileResult);
+			const { result } = renderHook(() =>
+				useFileUploadForm({
+					flowType: "joint_evaluation",
+					hasStoredFile: true,
+					onAllUploaded,
+				}),
+			);
+			attachDialog(result);
+			const file = makeFile("nouveau.pdf");
+
+			act(() => {
+				result.current.handleFilesChange([file], null);
+			});
+			await act(async () => {
+				await result.current.handleConfirm();
+			});
+
+			expect(uploadFileMock).toHaveBeenCalledWith(file, {
+				flowType: "joint_evaluation",
+			});
+			expect(onAllUploaded).toHaveBeenCalledTimes(1);
+		});
+	});
+
 	it("formats virus error with the signature when present", async () => {
 		const { result } = renderHook(() =>
 			useFileUploadForm({ flowType: "cse_opinion" }),

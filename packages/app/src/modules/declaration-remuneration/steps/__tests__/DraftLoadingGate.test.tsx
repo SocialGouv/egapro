@@ -29,6 +29,9 @@ import { SecondDeclarationStep2Form } from "../secondDeclaration/SecondDeclarati
 
 vi.mock("~/trpc/react", () => ({
 	api: {
+		useUtils: () => ({
+			jointEvaluation: { transmittedRound: { fetch: vi.fn() } },
+		}),
 		declaration: {
 			updateStep1: {
 				useMutation: () => ({ mutate: vi.fn(), isPending: false }),
@@ -239,6 +242,7 @@ describe("DraftLoadingGate", () => {
 				declarationYear={2026}
 				existingFile={null}
 				jointEvaluationDeadline={new Date("2026-05-01")}
+				jointEvaluationRound={1}
 			/>,
 		);
 		expect(container).toBeTruthy();

@@ -1,9 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useReadOnlyGuard } from "~/modules/auth";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
+import { markJointEvaluationTransmissionSuccess } from "~/modules/declaration-remuneration/shared/declarationSuccessFlash";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { FormErrors } from "~/modules/declaration-remuneration/shared/FormErrors";
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
@@ -30,6 +31,7 @@ type Props = {
 	declarationYear: number;
 	existingFile: JointEvaluationExistingFile | null;
 	jointEvaluationDeadline: Date;
+	jointEvaluationRound: 1 | 2;
 };
 
 export function JointEvaluationForm({
@@ -38,6 +40,7 @@ export function JointEvaluationForm({
 	declarationYear,
 	existingFile,
 	jointEvaluationDeadline,
+	jointEvaluationRound,
 }: Props) {
 	const router = useRouter();
 	const readOnlyGuard = useReadOnlyGuard();
@@ -51,8 +54,33 @@ export function JointEvaluationForm({
 		dbValues: EMPTY_DB_VALUES,
 	});
 
+	const utils = api.useUtils();
 	const submitJointEvaluationMutation =
 		api.declaration.submitJointEvaluation.useMutation();
+	const [uploadedReport, setUploadedReport] =
+		useState<JointEvaluationExistingFile | null>(null);
+	const storedReport = uploadedReport ?? existingFile;
+
+	const onUploaded = useCallback(
+		({ fileId, fileName }: { fileId: string; fileName: string }) => {
+			setUploadedReport({ id: fileId, fileName, uploadedAt: new Date() });
+		},
+		[],
+	);
+
+	const redirectIfAlreadyTransmitted = useCallback(async () => {
+		try {
+			const transmittedRound =
+				await utils.jointEvaluation.transmittedRound.fetch(undefined, {
+					staleTime: 0,
+				});
+			if (transmittedRound === jointEvaluationRound) {
+				router.push(getPostComplianceDestination(cseOpinionRequired));
+			}
+		} catch {
+			return;
+		}
+	}, [cseOpinionRequired, jointEvaluationRound, router, utils]);
 
 	const onAllUploaded = useCallback(() => {
 		clearDraft();
@@ -62,11 +90,25 @@ export function JointEvaluationForm({
 		// be triggered explicitly so the `joint_evaluation_submit` event is
 		// recorded and the "Mon espace" panel + table reflect the new step.
 		submitJointEvaluationMutation.mutate(undefined, {
-			onSettled: () => {
+			onSuccess: () => {
+				// Only the CSE-opinion destination consumes this signal; marking it otherwise would leave it stranded in sessionStorage.
+				if (cseOpinionRequired) {
+					markJointEvaluationTransmissionSuccess();
+				}
 				router.push(getPostComplianceDestination(cseOpinionRequired));
 			},
+			// The transition may have committed before the response was lost.
+			onError: () => {
+				void redirectIfAlreadyTransmitted();
+			},
 		});
-	}, [clearDraft, cseOpinionRequired, router, submitJointEvaluationMutation]);
+	}, [
+		clearDraft,
+		cseOpinionRequired,
+		redirectIfAlreadyTransmitted,
+		router,
+		submitJointEvaluationMutation,
+	]);
 
 	const {
 		closeModal,
@@ -80,8 +122,11 @@ export function JointEvaluationForm({
 		uploadError,
 	} = useFileUploadForm({
 		flowType: "joint_evaluation",
+		hasStoredFile: storedReport !== null,
 		onAllUploaded,
+		onUploaded,
 	});
+	const isSubmitting = isPending || submitJointEvaluationMutation.isPending;
 
 	return (
 		<>
@@ -107,8 +152,8 @@ export function JointEvaluationForm({
 
 					<JointEvaluationTodo title="Rappel : Ce que vous devez faire dans un délai de 2 mois" />
 
-					{existingFile && (
-						<JointEvaluationExistingReport file={existingFile} />
+					{storedReport && (
+						<JointEvaluationExistingReport file={storedReport} />
 					)}
 
 					<JointEvaluationReportUpload
@@ -135,7 +180,7 @@ export function JointEvaluationForm({
 							<button
 								{...readOnlyGuard.buttonProps}
 								className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-								disabled={isPending || isReadOnly}
+								disabled={isSubmitting || isReadOnly}
 								type="submit"
 							>
 								{SUBMIT_LABEL}
