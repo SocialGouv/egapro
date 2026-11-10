@@ -1,4 +1,4 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 import { urlGlob } from "~/e2e/helpers/routes";
 import { getCurrentYear } from "~/modules/domain";
 import {
@@ -22,6 +22,7 @@ import {
 } from "./helpers/compliance-flows";
 import {
 	deleteJointEvaluationFiles,
+	getSecondDeclarationSubmissionState,
 	pushCampaignDeadlinesFarFuture,
 	resetDeclarationToDraft,
 	resetGipWorkforce,
@@ -34,7 +35,11 @@ import {
 	categoryPayInput,
 	completeDeclaration,
 } from "./helpers/declaration-flows";
-import { openPanneauDemarche, transmittedRow } from "./helpers/process-panel";
+import {
+	openPanneauDemarche,
+	PROCESS_PANEL_ID,
+	transmittedRow,
+} from "./helpers/process-panel";
 
 // Match the year that api.declaration.getOrCreate() uses on first login.
 const testDeclarationYear = getCurrentYear();
@@ -64,6 +69,10 @@ const JOINT_EVALUATION_LABEL =
 const FIRST_DECLARATION_ROW = "Votre déclaration a été transmise";
 const SECOND_DECLARATION_ROW = "Votre seconde déclaration a été transmise";
 const CSE_OPINION_ROW = "Vos avis du CSE ont été transmis";
+const SECOND_DECLARATION_PATH_MENTION =
+	"Modifiable jusqu'au choix de votre nouveau parcours";
+const SECOND_DECLARATION_CSE_MENTION =
+	"Modifiable jusqu'à la transmission des avis du CSE";
 const SUPERSEDED_BANNER =
 	/Votre déclaration n'est plus modifiable : une étape suivante de votre démarche a déjà été transmise/;
 const STEP2_EDITED_CELL = "Annuelle brute moyenne — Hommes";
@@ -238,13 +247,13 @@ test.describe("Campaign deadlines are informational; only the last submission is
 			await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 15_000 });
 			await expect(
 				page.getByText(
-					"Vous pouvez modifier votre seconde déclaration jusqu'au choix de votre nouveau parcours de mise en conformité.",
+					"Vous pouvez modifier votre seconde déclaration jusqu'au choix de votre nouveau parcours de mise en conformité ou jusqu'à la transmission de vos avis du CSE.",
 				),
 			).toBeVisible();
 
 			await expectModifiable(page, SECOND_DECLARATION_ROW, {
 				modifiable: true,
-				mention: "Modifiable jusqu'au choix de votre nouveau parcours",
+				mention: SECOND_DECLARATION_PATH_MENTION,
 			});
 			await transmittedRow(page, SECOND_DECLARATION_ROW)
 				.getByRole("link", { name: "Modifier", exact: true })
@@ -396,6 +405,117 @@ test.describe("Campaign deadlines are informational; only the last submission is
 					exact: true,
 				}),
 			).toBeVisible();
+		});
+
+		test("S8 — a resolved second declaration stays modifiable until the CSE opinions are transmitted", async ({
+			page,
+		}) => {
+			test.setTimeout(300_000);
+			const continueCta = (panel: Locator) =>
+				panel.getByRole("link", { name: /^Continuer/ });
+			const resubmitSecondDeclaration = async (hasGap: boolean) => {
+				await openPanneauDemarche(page);
+				await transmittedRow(page, SECOND_DECLARATION_ROW)
+					.getByRole("link", { name: "Modifier", exact: true })
+					.click();
+				await completeSecondDeclaration(page, { hasGap });
+			};
+
+			await test.step("la seconde déclaration résout l'écart : avis du CSE attendus", async () => {
+				await completeDeclaration(page, { hasGap: true });
+				await selectCompliancePath(page, "path-corrective", {
+					gapJustification: "none",
+				});
+				await page.waitForURL(urlGlob(complianceStepHref(1)), {
+					timeout: 15_000,
+				});
+				await completeSecondDeclaration(page, { hasGap: false });
+				await page.waitForURL(urlGlob(cseOpinionStepHref(1)), {
+					timeout: 15_000,
+				});
+				expect(
+					await getSecondDeclarationSubmissionState(testDeclarationYear),
+				).toEqual({ status: "awaiting_cse_opinion", submissions: 1 });
+			});
+
+			await test.step("le panneau propose de modifier la seconde déclaration, l'étape courante reste l'avis du CSE", async () => {
+				await expectModifiable(page, SECOND_DECLARATION_ROW, {
+					modifiable: true,
+					mention: SECOND_DECLARATION_CSE_MENTION,
+				});
+				const panel = page.locator(`#${PROCESS_PANEL_ID}`);
+				await expect(
+					transmittedRow(page, FIRST_DECLARATION_ROW).getByRole("link", {
+						name: "Modifier",
+						exact: true,
+					}),
+				).toHaveCount(0);
+				await expect(continueCta(panel)).toHaveAttribute(
+					"href",
+					new RegExp(`^${CSE_OPINION}`),
+				);
+			});
+
+			await test.step("re-transmise sans écart : statut inchangé, nouvelle transmission enregistrée", async () => {
+				await resubmitSecondDeclaration(false);
+				await page.waitForURL(urlGlob(cseOpinionStepHref(1)), {
+					timeout: 15_000,
+				});
+				expect(
+					await getSecondDeclarationSubmissionState(testDeclarationYear),
+				).toEqual({ status: "awaiting_cse_opinion", submissions: 2 });
+				await expectModifiable(page, SECOND_DECLARATION_ROW, {
+					modifiable: true,
+					mention: SECOND_DECLARATION_CSE_MENTION,
+				});
+			});
+
+			await test.step("re-transmise avec un écart ≥ 5 % : retour au choix du nouveau parcours", async () => {
+				await resubmitSecondDeclaration(true);
+				await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 15_000 });
+				expect(
+					await getSecondDeclarationSubmissionState(testDeclarationYear),
+				).toEqual({ status: "awaiting_revision_choice", submissions: 3 });
+				const panel = await openPanneauDemarche(page);
+				await expect(
+					transmittedRow(page, SECOND_DECLARATION_ROW).getByText(
+						SECOND_DECLARATION_PATH_MENTION,
+						{ exact: true },
+					),
+				).toBeVisible();
+				await expect(continueCta(panel)).toHaveAttribute(
+					"href",
+					new RegExp(`^${COMPLIANCE_PATH}`),
+				);
+			});
+
+			await test.step("les avis du CSE transmis verrouillent la seconde déclaration", async () => {
+				await resubmitSecondDeclaration(false);
+				await page.waitForURL(urlGlob(cseOpinionStepHref(1)), {
+					timeout: 15_000,
+				});
+				await fillCseStep1(page, { hasSecondDeclaration: true });
+				await submitCseStep2(page, {
+					hasSecondDeclaration: true,
+					columns: [
+						{ declarationNumber: 1, type: "accuracy" },
+						{ declarationNumber: 2, type: "accuracy" },
+					],
+				});
+				expect(
+					(await getSecondDeclarationSubmissionState(testDeclarationYear))
+						.status,
+				).toBe("demarche_completed");
+				await expectModifiable(page, SECOND_DECLARATION_ROW, {
+					modifiable: false,
+				});
+				await expect(
+					transmittedRow(page, CSE_OPINION_ROW).getByRole("link", {
+						name: "Modifier",
+						exact: true,
+					}),
+				).toBeVisible();
+			});
 		});
 	});
 });
