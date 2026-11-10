@@ -223,7 +223,9 @@ describe("DraftLoadingGate", () => {
 			<SecondDeclarationStep2Form
 				declarationSiren="123456789"
 				declarationYear={2026}
+				firstDeclarationPathChoice="corrective_action"
 				initialFirstDeclarationCategories={[]}
+				secondDeclarationPathChoice={null}
 				status="corrective_actions_chosen"
 			/>,
 		);
