@@ -9,6 +9,7 @@ import userEvent from "@testing-library/user-event";
 import { useSession } from "next-auth/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { consumeJointEvaluationTransmissionSuccess } from "~/modules/declaration-remuneration/shared/declarationSuccessFlash";
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { formatLongDate } from "~/modules/domain";
 import { JointEvaluationForm } from "../JointEvaluationForm";
@@ -29,6 +30,10 @@ const submitJointEvaluationMock = vi.fn();
 const submitJointEvaluationOutcome = { fails: false, isPending: false };
 const transmittedRoundFetchMock = vi.fn();
 
+const { submitJointEvaluationShouldSucceed } = vi.hoisted(() => ({
+	submitJointEvaluationShouldSucceed: { current: true },
+}));
+
 vi.mock("~/trpc/react", () => ({
 	api: {
 		useUtils: () => ({
@@ -48,10 +53,13 @@ vi.mock("~/trpc/react", () => ({
 						},
 					) => {
 						submitJointEvaluationMock();
-						if (submitJointEvaluationOutcome.fails) {
-							opts?.onError?.();
-						} else {
+						if (
+							submitJointEvaluationShouldSucceed.current &&
+							!submitJointEvaluationOutcome.fails
+						) {
 							opts?.onSuccess?.();
+						} else {
+							opts?.onError?.();
 						}
 						opts?.onSettled?.();
 					},
@@ -79,6 +87,7 @@ const defaultProps = {
 describe("JointEvaluationForm", () => {
 	beforeEach(() => {
 		uploadFileMock.mockReset();
+		submitJointEvaluationShouldSucceed.current = true;
 		submitJointEvaluationOutcome.fails = false;
 		submitJointEvaluationOutcome.isPending = false;
 		transmittedRoundFetchMock.mockReset();
@@ -382,6 +391,42 @@ describe("JointEvaluationForm", () => {
 		await waitFor(() => {
 			expect(mockPush).toHaveBeenCalledWith(expectedRedirect);
 		});
+		expect(consumeJointEvaluationTransmissionSuccess()).toBe(
+			cseOpinionRequired,
+		);
+	});
+
+	it("does not mark the joint evaluation transmission signal when the submission mutation fails", async () => {
+		submitJointEvaluationShouldSucceed.current = false;
+		const user = userEvent.setup();
+		uploadFileMock.mockResolvedValue({
+			ok: true,
+			fileId: "file-1",
+			fileName: "rapport.pdf",
+		});
+
+		const { container } = render(
+			<JointEvaluationForm {...defaultProps} cseOpinionRequired={true} />,
+		);
+
+		const input = container.querySelector(
+			'input[type="file"]',
+		) as HTMLInputElement;
+		const file = new File(["pdf-content"], "rapport.pdf", {
+			type: "application/pdf",
+		});
+		fireEvent.change(input, { target: { files: [file] } });
+
+		fireEvent.click(screen.getByRole("button", { name: /transmettre/i }));
+
+		await user.click(screen.getByRole("checkbox"));
+		await user.click(screen.getByRole("button", { name: "Valider" }));
+
+		await waitFor(() => {
+			expect(submitJointEvaluationMock).toHaveBeenCalledTimes(1);
+		});
+		expect(mockPush).not.toHaveBeenCalled();
+		expect(consumeJointEvaluationTransmissionSuccess()).toBe(false);
 	});
 
 	describe("when the transmission fails after the upload", () => {

@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useIsImpersonating, useReadOnlyGuard } from "~/modules/auth";
+import { consumeJointEvaluationTransmissionSuccess } from "~/modules/declaration-remuneration/shared/declarationSuccessFlash";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { FieldErrorAlert } from "~/modules/declaration-remuneration/shared/formError/FieldErrorAlert";
 import type { FieldError } from "~/modules/declaration-remuneration/shared/formError/types";
@@ -112,6 +113,20 @@ export function Step1Opinions({
 	const isImpersonating = useIsImpersonating();
 	const readOnlyGuard = useReadOnlyGuard();
 	const { isReadOnly } = useLockContext();
+
+	const consumedJointEvaluationSuccess = useRef(false);
+	const [
+		jointEvaluationTransmissionFresh,
+		setJointEvaluationTransmissionFresh,
+	] = useState(false);
+
+	useEffect(() => {
+		if (consumedJointEvaluationSuccess.current) return;
+		consumedJointEvaluationSuccess.current = true;
+		setJointEvaluationTransmissionFresh(
+			consumeJointEvaluationTransmissionSuccess(),
+		);
+	}, []);
 
 	const requirements = useMemo<JustificationRequirements>(
 		() => ({ firstDeclJustificationRequired, secondDeclJustificationRequired }),
@@ -221,7 +236,11 @@ export function Step1Opinions({
 		return <p>Chargement...</p>;
 	}
 
-	const DeclarationHeading = banner ? "h3" : "h2";
+	const showBanner =
+		!!banner &&
+		(banner.variant !== "joint_evaluation" || jointEvaluationTransmissionFresh);
+
+	const DeclarationHeading = showBanner ? "h3" : "h2";
 
 	const renderCard = (
 		declarationNumber: DeclarationNumber,
@@ -275,7 +294,7 @@ export function Step1Opinions({
 				<legend className="fr-sr-only">Avis du CSE</legend>
 				<div className={layoutStyles.titleRow}>
 					<h1 className="fr-h4 fr-mb-0">
-						{banner
+						{showBanner
 							? "Parcours de mise en conformité pour l'indicateur par catégorie d'emplois"
 							: PAGE_TITLE}
 					</h1>
@@ -286,7 +305,7 @@ export function Step1Opinions({
 					/>
 				</div>
 
-				{banner && (
+				{showBanner && banner && (
 					<>
 						<SubmissionBanner
 							deadline={cseDeadline}
