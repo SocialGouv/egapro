@@ -26,6 +26,15 @@ vi.mock("~/server/db/schema", () => ({
 	},
 }));
 
+vi.mock("../declarationHelpers", async (importOriginal) => ({
+	...(await importOriginal<typeof import("../declarationHelpers")>()),
+	findTransmittedJointEvaluation: vi.fn(),
+}));
+
+const { findTransmittedJointEvaluation } = await import(
+	"../declarationHelpers"
+);
+
 const mockSelect = vi.fn();
 
 // Reads in order: the middleware declaration lookup, the latest departure from
@@ -94,6 +103,34 @@ describe("jointEvaluationRouter", () => {
 			await expect(caller.getFile()).rejects.toThrow(
 				"SIRET manquant ou invalide dans la session",
 			);
+		});
+	});
+
+	describe("isTransmitted", () => {
+		it("is true when the stored report was sent by a joint evaluation submission", async () => {
+			vi.mocked(findTransmittedJointEvaluation).mockResolvedValue({
+				submission: { createdAt: new Date("2026-01-16"), round: 1 },
+				file: {
+					id: "file-1",
+					fileName: "evaluation.pdf",
+					uploadedAt: new Date("2026-01-15"),
+				},
+			});
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb);
+
+			await expect(caller.isTransmitted()).resolves.toBe(true);
+			expect(findTransmittedJointEvaluation).toHaveBeenCalledWith(
+				mockDb,
+				"decl-1",
+			);
+		});
+
+		it("is false when the stored report has not been transmitted", async () => {
+			vi.mocked(findTransmittedJointEvaluation).mockResolvedValue(null);
+			const caller = await createCaller(createMockDb());
+
+			await expect(caller.isTransmitted()).resolves.toBe(false);
 		});
 	});
 });

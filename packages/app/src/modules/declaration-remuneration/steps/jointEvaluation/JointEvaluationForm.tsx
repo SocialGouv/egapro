@@ -8,7 +8,6 @@ import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/d
 import { FormErrors } from "~/modules/declaration-remuneration/shared/FormErrors";
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
-import { isJointEvaluationWritable } from "~/modules/domain";
 import { getPostComplianceDestination } from "~/modules/navigation";
 import { SUBMIT_LABEL, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
@@ -68,11 +67,11 @@ export function JointEvaluationForm({
 
 	const redirectIfAlreadyTransmitted = useCallback(async () => {
 		try {
-			const { declaration } = await utils.declaration.getOrCreate.fetch(
+			const isTransmitted = await utils.jointEvaluation.isTransmitted.fetch(
 				undefined,
 				{ staleTime: 0 },
 			);
-			if (!isJointEvaluationWritable(declaration.status)) {
+			if (isTransmitted) {
 				router.push(getPostComplianceDestination(cseOpinionRequired));
 			}
 		} catch {

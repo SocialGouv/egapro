@@ -30,7 +30,7 @@ import { SecondDeclarationStep2Form } from "../secondDeclaration/SecondDeclarati
 vi.mock("~/trpc/react", () => ({
 	api: {
 		useUtils: () => ({
-			declaration: { getOrCreate: { fetch: vi.fn() } },
+			jointEvaluation: { isTransmitted: { fetch: vi.fn() } },
 		}),
 		declaration: {
 			updateStep1: {

@@ -45,6 +45,7 @@ export const AUDIT_ACTIONS = {
 	// ── Joint evaluation ───────────────────────────────────
 	JOINT_EVALUATION_UPLOAD_FILE: "joint_evaluation.upload_file",
 	JOINT_EVALUATION_GET_FILE: "joint_evaluation.get_file",
+	JOINT_EVALUATION_IS_TRANSMITTED: "joint_evaluation.is_transmitted",
 
 	FORMAL_NOTICE_JOINT_EVALUATION_UPLOAD_FILE:
 		"formal_notice_joint_evaluation.upload_file",
@@ -188,6 +189,7 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 
 	[AUDIT_ACTIONS.JOINT_EVALUATION_UPLOAD_FILE]: "mutation",
 	[AUDIT_ACTIONS.JOINT_EVALUATION_GET_FILE]: "read_sensitive",
+	[AUDIT_ACTIONS.JOINT_EVALUATION_IS_TRANSMITTED]: "read_sensitive",
 
 	[AUDIT_ACTIONS.FORMAL_NOTICE_JOINT_EVALUATION_UPLOAD_FILE]: "mutation",
 	[AUDIT_ACTIONS.FORMAL_NOTICE_GET]: "read_sensitive",

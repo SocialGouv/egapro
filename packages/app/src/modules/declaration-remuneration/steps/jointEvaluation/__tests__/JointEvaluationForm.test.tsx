@@ -27,12 +27,12 @@ vi.mock("~/modules/shared/uploadFile", () => ({
 
 const submitJointEvaluationMock = vi.fn();
 const submitJointEvaluationOutcome = { fails: false, isPending: false };
-const getOrCreateFetchMock = vi.fn();
+const isTransmittedFetchMock = vi.fn();
 
 vi.mock("~/trpc/react", () => ({
 	api: {
 		useUtils: () => ({
-			declaration: { getOrCreate: { fetch: getOrCreateFetchMock } },
+			jointEvaluation: { isTransmitted: { fetch: isTransmittedFetchMock } },
 		}),
 		declaration: {
 			submitJointEvaluation: {
@@ -78,7 +78,7 @@ describe("JointEvaluationForm", () => {
 		uploadFileMock.mockReset();
 		submitJointEvaluationOutcome.fails = false;
 		submitJointEvaluationOutcome.isPending = false;
-		getOrCreateFetchMock.mockReset();
+		isTransmittedFetchMock.mockReset();
 		// jsdom doesn't implement <dialog>; stub showModal/close so the dialog
 		// actually toggles its `open` attribute and its contents become visible
 		// to Testing Library queries.
@@ -417,15 +417,13 @@ describe("JointEvaluationForm", () => {
 			submitJointEvaluationOutcome.fails = true;
 		});
 
-		it("stays on the page and lists the just-uploaded report while the démarche still awaits it", async () => {
-			getOrCreateFetchMock.mockResolvedValue({
-				declaration: { status: "joint_evaluation_chosen" },
-			});
+		it("stays on the page and lists the just-uploaded report while it is not transmitted", async () => {
+			isTransmittedFetchMock.mockResolvedValue(false);
 
 			await uploadThenConfirm();
 
 			await waitFor(() => {
-				expect(getOrCreateFetchMock).toHaveBeenCalledWith(undefined, {
+				expect(isTransmittedFetchMock).toHaveBeenCalledWith(undefined, {
 					staleTime: 0,
 				});
 			});
@@ -437,12 +435,10 @@ describe("JointEvaluationForm", () => {
 		});
 
 		it("lets the next submit confirm the just-uploaded report without a new file", async () => {
-			getOrCreateFetchMock.mockResolvedValue({
-				declaration: { status: "joint_evaluation_chosen" },
-			});
+			isTransmittedFetchMock.mockResolvedValue(false);
 			const user = await uploadThenConfirm();
 			await waitFor(() => {
-				expect(getOrCreateFetchMock).toHaveBeenCalledTimes(1);
+				expect(isTransmittedFetchMock).toHaveBeenCalledTimes(1);
 			});
 
 			fireEvent.click(screen.getByRole("button", { name: /transmettre/i }));
@@ -461,9 +457,7 @@ describe("JointEvaluationForm", () => {
 		});
 
 		it("moves on when the transition was committed before the response was lost", async () => {
-			getOrCreateFetchMock.mockResolvedValue({
-				declaration: { status: "awaiting_cse_opinion" },
-			});
+			isTransmittedFetchMock.mockResolvedValue(true);
 
 			await uploadThenConfirm();
 
@@ -473,12 +467,12 @@ describe("JointEvaluationForm", () => {
 		});
 
 		it("stays on the page when the status cannot be re-read", async () => {
-			getOrCreateFetchMock.mockRejectedValue(new Error("network"));
+			isTransmittedFetchMock.mockRejectedValue(new Error("network"));
 
 			await uploadThenConfirm();
 
 			await waitFor(() => {
-				expect(getOrCreateFetchMock).toHaveBeenCalledTimes(1);
+				expect(isTransmittedFetchMock).toHaveBeenCalledTimes(1);
 			});
 			expect(mockPush).not.toHaveBeenCalled();
 		});
