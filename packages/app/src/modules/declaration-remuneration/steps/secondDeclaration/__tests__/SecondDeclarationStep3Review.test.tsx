@@ -733,7 +733,7 @@ describe("SecondDeclarationStep3Review", () => {
 			expect(screen.queryByText(/vous pouvez :/)).not.toBeInTheDocument();
 		});
 
-		it("shows a single help link and no gap section when no gap reaches the threshold", () => {
+		it("hides the help section entirely and keeps the CSE reminder when no gap reaches the threshold (#5122)", () => {
 			renderStep3({
 				cseOpinionRequired: true,
 				secondDeclarationCategories: noGapCategories,
@@ -745,18 +745,25 @@ describe("SecondDeclarationStep3Review", () => {
 			).not.toBeInTheDocument();
 
 			expect(
-				screen.getByRole("heading", { level: 2, name: "Pour vous aider" }),
-			).toBeInTheDocument();
+				screen.queryByRole("heading", { name: "Pour vous aider" }),
+			).not.toBeInTheDocument();
 			expect(
-				screen.getByRole("link", {
+				screen.queryByRole("link", {
 					name: /critères objectifs et non fondés sur le sexe/,
 				}),
-			).toBeInTheDocument();
+			).not.toBeInTheDocument();
 			expect(
 				screen.queryByRole("link", {
 					name: /évaluation conjointe des rémunérations/,
 				}),
 			).not.toBeInTheDocument();
+
+			expect(
+				screen.getByRole("heading", {
+					level: 2,
+					name: "Rappel : Informer et consulter le CSE",
+				}),
+			).toBeInTheDocument();
 		});
 
 		it("adds the joint evaluation help link only when a gap reaches the threshold", () => {
@@ -774,6 +781,45 @@ describe("SecondDeclarationStep3Review", () => {
 
 			expect(
 				screen.queryByText(/actions correctives et seconde déclaration/),
+			).not.toBeInTheDocument();
+		});
+	});
+
+	describe("no empty next steps card when nothing applies (issue #5122)", () => {
+		it("renders nothing when there is no CSE and no remaining gap", () => {
+			renderStep3({
+				cseApplicable: false,
+				cseOpinionRequired: false,
+				secondDeclarationCategories: noGapCategories,
+			});
+
+			expect(
+				screen.queryByRole("heading", { name: "Prochaines étapes" }),
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByRole("heading", { name: "Pour vous aider" }),
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByRole("button", {
+					name: "Mettre à jour l'existence d'un CSE",
+				}),
+			).not.toBeInTheDocument();
+		});
+
+		it("still shows the CSE update trigger when applicable, with no help section, once gaps are gone", () => {
+			renderStep3({
+				cseApplicable: true,
+				cseOpinionRequired: false,
+				secondDeclarationCategories: noGapCategories,
+			});
+
+			expect(
+				screen.getByRole("button", {
+					name: "Mettre à jour l'existence d'un CSE",
+				}),
+			).toBeInTheDocument();
+			expect(
+				screen.queryByRole("heading", { name: "Pour vous aider" }),
 			).not.toBeInTheDocument();
 		});
 	});

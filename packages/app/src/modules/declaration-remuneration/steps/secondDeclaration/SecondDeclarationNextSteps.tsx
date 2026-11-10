@@ -19,6 +19,10 @@ export function SecondDeclarationNextSteps({
 	hasGapsAboveThreshold,
 	siren,
 }: Props) {
+	const hasCseSection = cseOpinionRequired || cseApplicable;
+
+	if (!hasCseSection && !hasGapsAboveThreshold) return null;
+
 	return (
 		<>
 			<div className={styles.nextSteps}>
@@ -49,10 +53,10 @@ export function SecondDeclarationNextSteps({
 					</div>
 				)}
 
-				<hr className={styles.separator} />
-
 				{hasGapsAboveThreshold && (
 					<>
+						<hr className={styles.separator} />
+
 						<div className={styles.section}>
 							<div className={styles.alertHeader}>
 								<p
@@ -92,27 +96,27 @@ export function SecondDeclarationNextSteps({
 						</div>
 
 						<hr className={styles.separator} />
+
+						<div className={styles.section}>
+							<h2 className="fr-text--bold fr-text--md fr-mb-0">
+								Pour vous aider
+							</h2>
+							<ul className="fr-raw-list fr-links-group">
+								<li>
+									<HelpLink trackingId="objective_criteria">
+										Qu&apos;entend-on par critères objectifs et non fondés sur
+										le sexe ?
+									</HelpLink>
+								</li>
+								<li>
+									<HelpLink trackingId="joint_evaluation">
+										En savoir plus sur évaluation conjointe des rémunérations
+									</HelpLink>
+								</li>
+							</ul>
+						</div>
 					</>
 				)}
-
-				<div className={styles.section}>
-					<h2 className="fr-text--bold fr-text--md fr-mb-0">Pour vous aider</h2>
-					<ul className="fr-raw-list fr-links-group">
-						<li>
-							<HelpLink trackingId="objective_criteria">
-								Qu&apos;entend-on par critères objectifs et non fondés sur le
-								sexe ?
-							</HelpLink>
-						</li>
-						{hasGapsAboveThreshold && (
-							<li>
-								<HelpLink trackingId="joint_evaluation">
-									En savoir plus sur évaluation conjointe des rémunérations
-								</HelpLink>
-							</li>
-						)}
-					</ul>
-				</div>
 			</div>
 
 			<UpdateCseModal cseApplicable={cseApplicable} siren={siren} />
