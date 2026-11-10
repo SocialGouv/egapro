@@ -64,9 +64,7 @@ export function JointEvaluationForm({
 		// recorded and the "Mon espace" panel + table reflect the new step.
 		submitJointEvaluationMutation.mutate(undefined, {
 			onSettled: () => {
-				// Destination is /avis-cse only when a CSE opinion is required
-				// (getPostComplianceDestination); the banner flash belongs to that
-				// screen alone (#5124).
+				// Matches getPostComplianceDestination: the flash is for /avis-cse only.
 				if (cseOpinionRequired) markSubmissionBannerFlash();
 				router.push(getPostComplianceDestination(cseOpinionRequired));
 			},

@@ -339,9 +339,7 @@ describe("SecondDeclarationStep3Review", () => {
 		expect(mockConceal.mock.invocationCallOrder[0]).toBeLessThan(
 			mockPush.mock.invocationCallOrder[0] ?? 0,
 		);
-		// Destination is the compliance path, not /avis-cse: the CSE submission
-		// banner flash belongs to that screen alone, even though a CSE opinion
-		// is due further down this path (#5124).
+		// Destination is the compliance path, not /avis-cse, so no flash here.
 		expect(mockMarkSubmissionBannerFlash).not.toHaveBeenCalled();
 	});
 
@@ -583,8 +581,7 @@ describe("SecondDeclarationStep3Review", () => {
 
 		expect(mockMutate).toHaveBeenCalledTimes(1);
 		expect(mockPush).toHaveBeenCalledWith("/avis-cse");
-		// Marks the one-shot flash so /avis-cse shows the success banner on this
-		// arrival only, not on a later revisit (#5124).
+		// Flash marked only when landing on /avis-cse, so its banner is one-shot.
 		expect(mockMarkSubmissionBannerFlash).toHaveBeenCalledTimes(1);
 		expect(
 			mockMarkSubmissionBannerFlash.mock.invocationCallOrder[0],
@@ -603,8 +600,7 @@ describe("SecondDeclarationStep3Review", () => {
 		expect(mockPush).toHaveBeenCalledWith(
 			"/declaration-remuneration/parcours-conformite/confirmation",
 		);
-		// Destination is the confirmation page, not /avis-cse: no CSE banner
-		// to flash (#5124).
+		// Destination is the confirmation page, not /avis-cse, so no flash here.
 		expect(mockMarkSubmissionBannerFlash).not.toHaveBeenCalled();
 	});
 

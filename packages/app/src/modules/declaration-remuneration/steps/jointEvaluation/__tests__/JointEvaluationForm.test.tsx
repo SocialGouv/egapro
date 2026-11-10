@@ -370,9 +370,7 @@ describe("JointEvaluationForm", () => {
 		await waitFor(() => {
 			expect(mockPush).toHaveBeenCalledWith(expectedRedirect);
 		});
-		// Marks the one-shot flash only when landing on /avis-cse, so its
-		// success banner shows on this arrival and not on a later revisit
-		// (#5124).
+		// Flash marked only when landing on /avis-cse, so its banner is one-shot.
 		if (cseOpinionRequired) {
 			expect(mockMarkSubmissionBannerFlash).toHaveBeenCalledTimes(1);
 		} else {

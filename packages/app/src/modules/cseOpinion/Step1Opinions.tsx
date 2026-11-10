@@ -114,11 +114,7 @@ export function Step1Opinions({
 	const readOnlyGuard = useReadOnlyGuard();
 	const { isReadOnly } = useLockContext();
 
-	// The banner is a one-shot success message for the transmission that just
-	// happened, not a standing summary of `banner` (computed from persisted
-	// state, which stays non-null for the entire awaiting_cse_opinion status
-	// and beyond — #5124). It only renders once the flash set by the
-	// second-declaration / joint-evaluation submit has been consumed here.
+	// `banner` alone can't drive visibility: it stays non-null long after the submit that should show it once.
 	const consumedBannerFlash = useRef(false);
 	const [bannerFlashConsumed, setBannerFlashConsumed] = useState(false);
 	useEffect(() => {

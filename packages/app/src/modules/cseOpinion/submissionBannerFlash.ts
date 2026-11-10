@@ -1,15 +1,7 @@
 const STORAGE_KEY = "egapro:cse-submission-banner";
 const MAX_AGE_MS = 30_000;
 
-/**
- * The submission banner (second declaration / joint evaluation transmitted)
- * is a success message for the transmission that just happened — not a
- * standing summary of the declaration's state. `getSubmissionBannerState`
- * stays true for the entire `awaiting_cse_opinion` status and beyond, so its
- * result alone cannot drive visibility (#5124). Same one-shot session flash
- * as `declarationSuccessFlash`, kept separate because it gates a different
- * banner, consumed from a different module, with its own storage key.
- */
+// Gates visibility of a one-time success message; getSubmissionBannerState alone can't, since it stays true for the rest of the démarche.
 export function markSubmissionBannerFlash() {
 	try {
 		window.sessionStorage.setItem(STORAGE_KEY, String(Date.now()));
