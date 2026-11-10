@@ -459,10 +459,35 @@ test.describe("[ANX-03] Path 13.a: no gap → /avis-cse and /etape/6 without Pr�
 		page,
 	}) => {
 		test.slow();
+		const declarationBanner = page.getByText(
+			"Votre déclaration a été transmise",
+			{ exact: true },
+		);
 		await completeDeclaration(page, { hasGap: false });
 		await page.waitForURL(urlGlob(cseOpinionStepHref(1)), { timeout: 10_000 });
 		await expect(page.getByRole("button", { name: "Suivant" })).toBeVisible();
 		await expect(page.getByRole("link", { name: /Précédent/ })).toHaveCount(0);
+
+		await test.step("le cadre de transmission de la déclaration encadre l'étape 1 (#5126)", async () => {
+			await expect(declarationBanner).toBeVisible();
+			await expect(
+				page.getByRole("heading", {
+					level: 2,
+					name: "Transmission du ou des avis du CSE",
+				}),
+			).toBeVisible();
+		});
+
+		await test.step("une nouvelle visite de l'étape 1 n'affiche plus le cadre", async () => {
+			await page.reload();
+			await expect(
+				page.getByRole("heading", {
+					level: 1,
+					name: "Transmission du ou des avis du CSE",
+				}),
+			).toBeVisible();
+			await expect(declarationBanner).toHaveCount(0);
+		});
 
 		await page.goto(remunerationStepHref(6));
 		await page.waitForURL(urlGlob(remunerationStepHref(6)), {

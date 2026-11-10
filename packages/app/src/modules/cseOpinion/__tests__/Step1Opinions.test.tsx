@@ -3,8 +3,12 @@ import userEvent from "@testing-library/user-event";
 import { useSession } from "next-auth/react";
 import type { ComponentProps } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { markJointEvaluationTransmissionSuccess } from "~/modules/declaration-remuneration/shared/declarationSuccessFlash";
+import {
+	markDeclarationTransmissionSuccess,
+	markJointEvaluationTransmissionSuccess,
+} from "~/modules/declaration-remuneration/shared/declarationSuccessFlash";
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
+import { API_DECLARATION_PDF } from "~/modules/routes";
 import { Step1Opinions } from "../Step1Opinions";
 import type { CseOpinionStep1Data } from "../types";
 
@@ -162,6 +166,7 @@ function step1(props: StepProps = {}) {
 	return (
 		<Step1Opinions
 			cseDeadline={cseDeadline}
+			declarationModifiable
 			firstDeclJustificationRequired={false}
 			hasSecondDeclaration={false}
 			secondDeclJustificationRequired={false}
@@ -320,6 +325,79 @@ describe("Step1Opinions", () => {
 			expect(
 				screen.getByRole("heading", { level: 1, name: COMPLIANCE_TITLE }),
 			).toBeInTheDocument();
+		});
+
+		describe("declaration just transmitted, no compliance path (#5126)", () => {
+			const DECLARATION_TRANSMITTED = "Votre déclaration a été transmise";
+
+			beforeEach(() => {
+				window.sessionStorage.clear();
+			});
+
+			it("shows the declaration banner under the declaration title, then the CSE section", () => {
+				markDeclarationTransmissionSuccess();
+				renderStep1({ email: "declarant@example.fr" });
+
+				expect(screen.getByText(DECLARATION_TRANSMITTED)).toBeInTheDocument();
+				expect(
+					screen.getByRole("heading", {
+						level: 1,
+						name: "Déclaration des indicateurs de rémunération 2026",
+					}),
+				).toBeInTheDocument();
+				expect(
+					screen.getByRole("heading", { level: 2, name: PAGE_TITLE }),
+				).toBeInTheDocument();
+				expect(
+					screen.getByRole("link", {
+						name: /Télécharger le récapitulatif de la déclaration des indicateurs/,
+					}),
+				).toHaveAttribute("href", `${API_DECLARATION_PDF}?year=2026`);
+				expect(screen.getByText("declarant@example.fr")).toBeInTheDocument();
+				expect(
+					screen.getByText(/Vous pouvez modifier votre déclaration/),
+				).toBeInTheDocument();
+			});
+
+			it("shows the banner once: a reload within the 30s window brings back the CSE title", () => {
+				markDeclarationTransmissionSuccess();
+				const { unmount } = renderStep1();
+				expect(screen.getByText(DECLARATION_TRANSMITTED)).toBeInTheDocument();
+				unmount();
+
+				renderStep1();
+				expect(
+					screen.queryByText(DECLARATION_TRANSMITTED),
+				).not.toBeInTheDocument();
+				expect(
+					screen.getByRole("heading", { level: 1, name: PAGE_TITLE }),
+				).toBeInTheDocument();
+			});
+
+			it("omits the modification sentence when the declaration is no longer modifiable", () => {
+				markDeclarationTransmissionSuccess();
+				renderStep1({ declarationModifiable: false });
+
+				expect(screen.getByText(DECLARATION_TRANSMITTED)).toBeInTheDocument();
+				expect(
+					screen.queryByText(/Vous pouvez modifier votre déclaration/),
+				).not.toBeInTheDocument();
+			});
+
+			it("keeps the compliance path banner alone when the page already has one", () => {
+				markDeclarationTransmissionSuccess();
+				renderStep1({
+					banner: SECOND_DECLARATION_BANNER,
+					hasSecondDeclaration: true,
+				});
+
+				expect(
+					screen.getByText("Votre seconde déclaration a été transmise"),
+				).toBeInTheDocument();
+				expect(
+					screen.queryByText(DECLARATION_TRANSMITTED),
+				).not.toBeInTheDocument();
+			});
 		});
 
 		it("lays out case 5 with the second declaration banner and one section per declaration", () => {
