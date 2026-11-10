@@ -229,7 +229,7 @@ describe("StepPageClient — navigation", () => {
 		expect(mutateAsync).toHaveBeenCalledWith({
 			year: YEAR,
 			currentStep: 3,
-			draft: { currentStep: 3, ...NO_EXECUTIVES },
+			draft: { currentStep: 3, lastStep: 3, ...NO_EXECUTIVES },
 		});
 		expect(push).toHaveBeenCalledWith(STEP_3_HREF);
 	});
@@ -399,7 +399,7 @@ describe("StepPageClient — publication step skipped (S12)", () => {
 		expect(mutateAsync).toHaveBeenCalledWith({
 			year: YEAR,
 			currentStep: 5,
-			draft: { currentStep: 5, ...NO_COMPUTABLE_GAP },
+			draft: { currentStep: 5, lastStep: 5, ...NO_COMPUTABLE_GAP },
 		});
 		expect(push).toHaveBeenCalledWith(STEP_5_HREF);
 	});

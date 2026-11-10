@@ -115,6 +115,7 @@ export function useRepresentationDraft({
 				...draftRef.current,
 				...values,
 				currentStep: Math.max(draftRef.current.currentStep, step),
+				lastStep: step,
 			};
 			draftRef.current = next;
 			setDraft(next);
@@ -138,7 +139,11 @@ export function useRepresentationDraft({
 			cancelTimers();
 			setIsPendingSave(false);
 			pendingRef.current = null;
-			const next: RepresentationDraft = { ...draftRef.current, currentStep };
+			const next: RepresentationDraft = {
+				...draftRef.current,
+				currentStep,
+				lastStep: currentStep,
+			};
 			draftRef.current = next;
 			setDraft(next);
 			if (!contextRef.current.enabled) return;

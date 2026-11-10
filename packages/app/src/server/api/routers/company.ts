@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, isNull } from "drizzle-orm";
 import type { Session } from "next-auth";
+import { getRepresentationResumeStep } from "~/modules/declaration-representation/resumeStep";
 import {
 	applyDeclarationClosure,
 	COMPANY_SIZE_VOLUNTARY_MAX,
@@ -218,6 +219,7 @@ export const companyRouter = createTRPCRouter({
 					.select({
 						status: representationDeclarations.status,
 						currentStep: representationDeclarations.currentStep,
+						draft: representationDeclarations.draft,
 						updatedAt: representationDeclarations.updatedAt,
 					})
 					.from(representationDeclarations)
@@ -356,7 +358,6 @@ export const companyRouter = createTRPCRouter({
 			});
 
 			if (representationRow) {
-				const representationCurrentStep = representationRow.currentStep ?? 0;
 				mappedDeclarations.push({
 					type: "representation" as const,
 					year,
@@ -365,7 +366,7 @@ export const companyRouter = createTRPCRouter({
 						currentStep: representationRow.currentStep,
 					}),
 					fsmStatus: null,
-					currentStep: representationCurrentStep,
+					currentStep: getRepresentationResumeStep(representationRow),
 					updatedAt: representationRow.updatedAt,
 					firstDeclarationPathChoice: null,
 					secondDeclarationPathChoice: null,

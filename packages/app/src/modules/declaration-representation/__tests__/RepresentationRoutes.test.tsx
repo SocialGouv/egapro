@@ -189,6 +189,18 @@ describe("RepresentationHomePage", () => {
 		expect(screen.getByRole("button", { name: "Suivant" })).toBeInTheDocument();
 	});
 
+	it("resumes on the step last worked on, not the furthest one reached (#4998)", async () => {
+		mockFunnelState({
+			currentStep: 4,
+			draft: { currentStep: 4, lastStep: 2 },
+		});
+
+		await expect(RepresentationHomePage()).rejects.toThrow("NEXT_REDIRECT");
+		expect(mockRedirect).toHaveBeenCalledWith(
+			"/declaration-representation/etape/2",
+		);
+	});
+
 	it("resumes an existing draft at its current step (S21)", async () => {
 		mockFunnelState({ currentStep: 3 });
 
