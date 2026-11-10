@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { useReadOnlyGuard } from "~/modules/auth";
+import { markSubmissionBannerFlash } from "~/modules/cseOpinion";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { FormErrors } from "~/modules/declaration-remuneration/shared/FormErrors";
@@ -63,6 +64,10 @@ export function JointEvaluationForm({
 		// recorded and the "Mon espace" panel + table reflect the new step.
 		submitJointEvaluationMutation.mutate(undefined, {
 			onSettled: () => {
+				// Destination is /avis-cse only when a CSE opinion is required
+				// (getPostComplianceDestination); the banner flash belongs to that
+				// screen alone (#5124).
+				if (cseOpinionRequired) markSubmissionBannerFlash();
 				router.push(getPostComplianceDestination(cseOpinionRequired));
 			},
 		});

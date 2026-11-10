@@ -5,6 +5,7 @@ import type { ComponentProps } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { Step1Opinions } from "../Step1Opinions";
+import { markSubmissionBannerFlash } from "../submissionBannerFlash";
 import type { CseOpinionStep1Data } from "../types";
 
 const mockedUseSession = vi.mocked(useSession);
@@ -229,6 +230,7 @@ describe("Step1Opinions", () => {
 		});
 
 		it("lays out case 3 as compliance title, joint evaluation banner, CSE title, then both cards", () => {
+			markSubmissionBannerFlash();
 			renderStep1({
 				banner: JOINT_EVALUATION_BANNER,
 				firstDeclJustificationRequired: true,
@@ -266,6 +268,7 @@ describe("Step1Opinions", () => {
 		});
 
 		it("lays out case 5 with the second declaration banner and one section per declaration", () => {
+			markSubmissionBannerFlash();
 			renderStep1({
 				banner: SECOND_DECLARATION_BANNER,
 				firstDeclJustificationRequired: true,
@@ -331,6 +334,7 @@ describe("Step1Opinions", () => {
 		});
 
 		it("tells the banner whether the deposit stays modifiable", () => {
+			markSubmissionBannerFlash();
 			renderStep1({
 				banner: { variant: "second_declaration", depositModifiable: true },
 				hasSecondDeclaration: true,
@@ -344,6 +348,7 @@ describe("Step1Opinions", () => {
 		});
 
 		it("gives the banner the declarant email, or a placeholder", () => {
+			markSubmissionBannerFlash();
 			const { unmount } = renderStep1({
 				banner: JOINT_EVALUATION_BANNER,
 				email: "declarant@example.fr",
@@ -351,8 +356,64 @@ describe("Step1Opinions", () => {
 			expect(screen.getByText("declarant@example.fr")).toBeInTheDocument();
 			unmount();
 
+			markSubmissionBannerFlash();
 			renderStep1({ banner: JOINT_EVALUATION_BANNER });
 			expect(screen.getByText("adresse@exemple.fr")).toBeInTheDocument();
+		});
+
+		it("hides the banner on a revisit even though the declaration state still reports it (#5124)", () => {
+			renderStep1({
+				banner: SECOND_DECLARATION_BANNER,
+				hasSecondDeclaration: true,
+			});
+
+			expect(
+				screen.queryByText("Votre seconde déclaration a été transmise"),
+			).not.toBeInTheDocument();
+			expect(
+				screen.getByRole("heading", { level: 1, name: PAGE_TITLE }),
+			).toBeInTheDocument();
+			expect(
+				screen.getByRole("heading", { level: 2, name: "Seconde déclaration" }),
+			).toBeInTheDocument();
+		});
+
+		it("shows the banner only once per transmission, even re-rendered with the same persisted banner state", () => {
+			markSubmissionBannerFlash();
+			const { rerender } = renderStep1({ banner: JOINT_EVALUATION_BANNER });
+
+			expect(
+				screen.getByText(
+					"Votre évaluation conjointe des rémunérations a été transmise",
+				),
+			).toBeInTheDocument();
+
+			rerender(step1({ banner: JOINT_EVALUATION_BANNER }));
+
+			expect(
+				screen.getByText(
+					"Votre évaluation conjointe des rémunérations a été transmise",
+				),
+			).toBeInTheDocument();
+		});
+
+		it("drops the banner once the component remounts without a fresh flash", () => {
+			markSubmissionBannerFlash();
+			const { unmount } = renderStep1({ banner: JOINT_EVALUATION_BANNER });
+			expect(
+				screen.getByText(
+					"Votre évaluation conjointe des rémunérations a été transmise",
+				),
+			).toBeInTheDocument();
+			unmount();
+
+			renderStep1({ banner: JOINT_EVALUATION_BANNER });
+
+			expect(
+				screen.queryByText(
+					"Votre évaluation conjointe des rémunérations a été transmise",
+				),
+			).not.toBeInTheDocument();
 		});
 	});
 

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useIsImpersonating, useReadOnlyGuard } from "~/modules/auth";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
@@ -35,6 +35,7 @@ import { saveOpinionsSchema } from "./schemas";
 import formStyles from "./shared/formActions.module.scss";
 import layoutStyles from "./shared/stepLayout.module.scss";
 import type { SubmissionBannerState } from "./submissionBanner";
+import { consumeSubmissionBannerFlash } from "./submissionBannerFlash";
 import type {
 	ContentType,
 	CseOpinionStep1Data,
@@ -112,6 +113,20 @@ export function Step1Opinions({
 	const isImpersonating = useIsImpersonating();
 	const readOnlyGuard = useReadOnlyGuard();
 	const { isReadOnly } = useLockContext();
+
+	// The banner is a one-shot success message for the transmission that just
+	// happened, not a standing summary of `banner` (computed from persisted
+	// state, which stays non-null for the entire awaiting_cse_opinion status
+	// and beyond — #5124). It only renders once the flash set by the
+	// second-declaration / joint-evaluation submit has been consumed here.
+	const consumedBannerFlash = useRef(false);
+	const [bannerFlashConsumed, setBannerFlashConsumed] = useState(false);
+	useEffect(() => {
+		if (consumedBannerFlash.current) return;
+		consumedBannerFlash.current = true;
+		setBannerFlashConsumed(consumeSubmissionBannerFlash());
+	}, []);
+	const visibleBanner = bannerFlashConsumed ? banner : null;
 
 	const requirements = useMemo<JustificationRequirements>(
 		() => ({ firstDeclJustificationRequired, secondDeclJustificationRequired }),
@@ -221,7 +236,7 @@ export function Step1Opinions({
 		return <p>Chargement...</p>;
 	}
 
-	const DeclarationHeading = banner ? "h3" : "h2";
+	const DeclarationHeading = visibleBanner ? "h3" : "h2";
 
 	const renderCard = (
 		declarationNumber: DeclarationNumber,
@@ -275,7 +290,7 @@ export function Step1Opinions({
 				<legend className="fr-sr-only">Avis du CSE</legend>
 				<div className={layoutStyles.titleRow}>
 					<h1 className="fr-h4 fr-mb-0">
-						{banner
+						{visibleBanner
 							? "Parcours de mise en conformité pour l'indicateur par catégorie d'emplois"
 							: PAGE_TITLE}
 					</h1>
@@ -286,13 +301,13 @@ export function Step1Opinions({
 					/>
 				</div>
 
-				{banner && (
+				{visibleBanner && (
 					<>
 						<SubmissionBanner
 							deadline={cseDeadline}
-							depositModifiable={banner.depositModifiable}
+							depositModifiable={visibleBanner.depositModifiable}
 							email={email ?? "adresse@exemple.fr"}
-							variant={banner.variant}
+							variant={visibleBanner.variant}
 							year={year}
 						/>
 						<h2 className="fr-h6 fr-mb-0">{PAGE_TITLE}</h2>

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
+import { markSubmissionBannerFlash } from "~/modules/cseOpinion";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
@@ -82,6 +83,10 @@ export function SecondDeclarationStep3Review({
 			markDeclarationTransmissionSuccess();
 			router.push(COMPLIANCE_PATH);
 		} else {
+			// Destination is /avis-cse only when a CSE opinion is required
+			// (getPostComplianceDestination); the banner flash belongs to that
+			// screen alone (#5124).
+			if (cseOpinionRequired) markSubmissionBannerFlash();
 			router.push(getPostComplianceDestination(cseOpinionRequired));
 		}
 	}, [closeModal, cseOpinionRequired, gapsExist, router]);

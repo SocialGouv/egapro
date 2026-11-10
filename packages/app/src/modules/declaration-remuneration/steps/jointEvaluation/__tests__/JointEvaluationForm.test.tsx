@@ -14,11 +14,18 @@ import { formatLongDate } from "~/modules/domain";
 import { JointEvaluationForm } from "../JointEvaluationForm";
 
 const mockPush = vi.fn();
+const { mockMarkSubmissionBannerFlash } = vi.hoisted(() => ({
+	mockMarkSubmissionBannerFlash: vi.fn(),
+}));
 
 vi.mock("next/navigation", () => ({
 	useRouter: () => ({ push: mockPush }),
 	usePathname: () =>
 		"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
+}));
+
+vi.mock("~/modules/cseOpinion", () => ({
+	markSubmissionBannerFlash: mockMarkSubmissionBannerFlash,
 }));
 
 vi.mock("~/modules/shared/uploadFile", () => ({
@@ -363,6 +370,14 @@ describe("JointEvaluationForm", () => {
 		await waitFor(() => {
 			expect(mockPush).toHaveBeenCalledWith(expectedRedirect);
 		});
+		// Marks the one-shot flash only when landing on /avis-cse, so its
+		// success banner shows on this arrival and not on a later revisit
+		// (#5124).
+		if (cseOpinionRequired) {
+			expect(mockMarkSubmissionBannerFlash).toHaveBeenCalledTimes(1);
+		} else {
+			expect(mockMarkSubmissionBannerFlash).not.toHaveBeenCalled();
+		}
 	});
 
 	describe("rapport déjà déposé (#4222)", () => {

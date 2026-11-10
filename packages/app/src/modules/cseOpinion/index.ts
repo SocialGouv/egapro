@@ -16,6 +16,7 @@ export {
 	setFileContentTypesSchema,
 } from "./schemas";
 export { getSubmissionBannerState } from "./submissionBanner";
+export { markSubmissionBannerFlash } from "./submissionBannerFlash";
 export type {
 	ContentTypeColumn,
 	CseOpinionStep1Data,
