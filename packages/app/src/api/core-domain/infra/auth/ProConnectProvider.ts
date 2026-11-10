@@ -2,6 +2,8 @@ import { logger } from "@api/utils/pino";
 import { createRemoteJWKSet, jwtVerify, type JWTVerifyGetKey } from "jose";
 import { type OAuthConfig, type OAuthUserConfig } from "next-auth/providers/oauth";
 
+import { MFA_CLAIMS } from "./mfaAcr";
+
 export interface Organization {
   id: number;
   is_collectivite_territoriale: boolean;
@@ -70,11 +72,14 @@ export function ProConnectProvider<P extends ProConnectProfile>(
     name: "Mon Compte Pro",
     wellKnown: `${proconnectDiscoveryUrl}/.well-known/openid-configuration`,
     authorization: {
-      // eidas0 = lowest *authorized* assurance level, i.e. the most permissive
-      // request we can make: the user keeps all their organizations selectable
-      // in the ProConnect picker (a stricter level would filter the list).
+      // eidas0-mfa = declarative identity (not verified) plus a second factor.
+      // The floor is asked through `claims` (`essential: true`), which makes it
+      // binding at ProConnect, rather than through `acr_values` — a mere
+      // preference an issuer may ignore. `callbacks.signIn` re-checks the
+      // returned `acr` besides, so a provider that ignores the request cannot
+      // open a session below the floor either. See `mfaAcr`.
       // https://partenaires.proconnect.gouv.fr/docs/ressources/norme_eidas
-      params: { scope, acr_values: "eidas0" },
+      params: { scope, claims: MFA_CLAIMS },
     },
     checks: ["pkce", "state"],
     userinfo: {
