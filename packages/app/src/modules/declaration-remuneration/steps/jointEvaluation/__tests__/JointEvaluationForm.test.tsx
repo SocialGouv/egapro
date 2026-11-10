@@ -24,7 +24,8 @@ vi.mock("next/navigation", () => ({
 		"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
 }));
 
-vi.mock("~/modules/cseOpinion", () => ({
+vi.mock("~/modules/shared", async (importOriginal) => ({
+	...(await importOriginal<typeof import("~/modules/shared")>()),
 	markSubmissionBannerFlash: mockMarkSubmissionBannerFlash,
 }));
 

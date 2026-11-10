@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
-import { markSubmissionBannerFlash } from "~/modules/cseOpinion";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
@@ -20,7 +19,11 @@ import {
 	getPostComplianceDestination,
 } from "~/modules/navigation";
 import { COMPLIANCE_PATH, complianceStepHref } from "~/modules/routes";
-import { getDsfrModal, SUBMIT_LABEL } from "~/modules/shared";
+import {
+	getDsfrModal,
+	markSubmissionBannerFlash,
+	SUBMIT_LABEL,
+} from "~/modules/shared";
 import { api } from "~/trpc/react";
 import { markDeclarationTransmissionSuccess } from "../../shared/declarationSuccessFlash";
 import { GapBadge } from "../../shared/GapValueBadge";

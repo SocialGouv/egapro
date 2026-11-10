@@ -4,8 +4,8 @@ import { useSession } from "next-auth/react";
 import type { ComponentProps } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
+import { markSubmissionBannerFlash } from "~/modules/shared/submissionBannerFlash";
 import { Step1Opinions } from "../Step1Opinions";
-import { markSubmissionBannerFlash } from "../submissionBannerFlash";
 import type { CseOpinionStep1Data } from "../types";
 
 const mockedUseSession = vi.mocked(useSession);

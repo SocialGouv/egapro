@@ -3,14 +3,17 @@
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { useReadOnlyGuard } from "~/modules/auth";
-import { markSubmissionBannerFlash } from "~/modules/cseOpinion";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { FormErrors } from "~/modules/declaration-remuneration/shared/FormErrors";
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { getPostComplianceDestination } from "~/modules/navigation";
-import { SUBMIT_LABEL, useFileUploadForm } from "~/modules/shared";
+import {
+	markSubmissionBannerFlash,
+	SUBMIT_LABEL,
+	useFileUploadForm,
+} from "~/modules/shared";
 import { api } from "~/trpc/react";
 import {
 	JointEvaluationAfterReport,

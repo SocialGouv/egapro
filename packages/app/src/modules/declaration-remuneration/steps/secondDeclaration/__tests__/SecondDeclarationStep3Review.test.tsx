@@ -14,9 +14,6 @@ const { mockMarkSubmissionBannerFlash } = vi.hoisted(() => ({
 	mockMarkSubmissionBannerFlash: vi.fn(),
 }));
 
-vi.mock("~/modules/cseOpinion", () => ({
-	markSubmissionBannerFlash: mockMarkSubmissionBannerFlash,
-}));
 type MockSubmissionError = {
 	message: string;
 	data?: { code: string };
@@ -36,6 +33,7 @@ vi.mock("next/navigation", () => ({
 vi.mock("~/modules/shared", async (importOriginal) => ({
 	...(await importOriginal<typeof import("~/modules/shared")>()),
 	getDsfrModal: () => ({ disclose: vi.fn(), conceal: mockConceal }),
+	markSubmissionBannerFlash: mockMarkSubmissionBannerFlash,
 }));
 
 vi.mock("~/trpc/react", () => ({

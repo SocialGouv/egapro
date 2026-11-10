@@ -12,6 +12,7 @@ import { findFieldError } from "~/modules/declaration-remuneration/shared/formEr
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { cseOpinionStepHref } from "~/modules/routes";
+import { consumeSubmissionBannerFlash } from "~/modules/shared/submissionBannerFlash";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { CseStepIndicator } from "./components/CseStepIndicator";
@@ -35,7 +36,6 @@ import { saveOpinionsSchema } from "./schemas";
 import formStyles from "./shared/formActions.module.scss";
 import layoutStyles from "./shared/stepLayout.module.scss";
 import type { SubmissionBannerState } from "./submissionBanner";
-import { consumeSubmissionBannerFlash } from "./submissionBannerFlash";
 import type {
 	ContentType,
 	CseOpinionStep1Data,
