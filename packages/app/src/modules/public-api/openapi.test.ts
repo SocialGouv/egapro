@@ -65,12 +65,12 @@ describe("publicOpenApiSpec", () => {
 			expect(operation.description).toContain(
 				"Indicateurs_remuneration_<annee>.csv",
 			);
-			expect(operation.description).toContain("index-egapro-remunerations.csv");
+			expect(operation.description).toContain("indicateurs-remuneration.csv");
 			const csv = operation.responses["200"].content["text/csv"].schema;
 			expect(csv.description).toContain("Annee_declaration");
 			expect(csv.description).toContain("Raison_sociale");
 			expect(csv.description).toContain("Pays");
-			expect(csv.description).toContain("39 colonnes DGT");
+			expect(csv.description).toContain("41 colonnes DGT");
 		});
 
 		it("declares every filter as optional, without pagination or sort", () => {

@@ -349,7 +349,11 @@ export {
 	toStrictInt,
 } from "./shared/number";
 // Percentage & proportion numeric cores
-export { percentageOf, proportionOf } from "./shared/percentage";
+export {
+	percentageOf,
+	proportionOf,
+	ratioToPercentPoints,
+} from "./shared/percentage";
 // Public data release gate
 export {
 	getTodayInParisCivilDate,
