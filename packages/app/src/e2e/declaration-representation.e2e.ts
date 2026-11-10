@@ -302,6 +302,35 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 			await goNext(page);
 		});
 
+		await test.step("resuming lands on the step last edited, the furthest one stays reachable (#4998)", async () => {
+			await expectOnStep(page, 4, "Informations de publication");
+			await page.goto(`${FUNNEL_ROOT}/etape/2`);
+			await expectOnStep(
+				page,
+				2,
+				"Écarts de représentation - Cadres dirigeants",
+			);
+
+			const draftSaved = page.waitForResponse(
+				(response) =>
+					response.url().includes("representationDeclaration.saveDraft") &&
+					response.ok(),
+			);
+			const womenField = page.getByRole("textbox", { name: /^Femmes/ });
+			await womenField.fill(String(100 - EXECUTIVE_WOMEN_PERCENT));
+			await womenField.fill(String(EXECUTIVE_WOMEN_PERCENT));
+			await draftSaved;
+
+			await page.goto(FUNNEL_ROOT);
+			await expectOnStep(
+				page,
+				2,
+				"Écarts de représentation - Cadres dirigeants",
+			);
+
+			await page.goto(`${FUNNEL_ROOT}/etape/4`);
+		});
+
 		await test.step("step 4 — publication details", async () => {
 			await expectOnStep(page, 4, "Informations de publication");
 
