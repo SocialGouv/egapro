@@ -67,12 +67,14 @@ function FilesTable({
 	columns: CseOpinionRecapData["fileColumns"];
 }) {
 	return (
-		<div className="fr-table fr-table--bordered fr-mb-0">
+		<div
+			className={`fr-table fr-table--bordered fr-table--no-caption fr-mb-0 ${styles.filesTable}`}
+		>
 			<div className="fr-table__wrapper">
 				<div className="fr-table__container">
 					<div className="fr-table__content">
 						<table>
-							<caption className="fr-sr-only">
+							<caption>
 								Fichiers déposés et avis du CSE auxquels ils sont associés
 							</caption>
 							<thead>
