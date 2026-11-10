@@ -4,7 +4,6 @@ export type DeadlineKey = Exclude<keyof RemunerationDeadlinesFormInput, "year">;
 
 export type DeadlineGroup = {
 	legend: string;
-	pathChoiceKey?: "pathChoiceRound1Deadline" | "pathChoiceDeadline";
 	showsGipPublicationDate?: true;
 	fields: readonly DeadlineKey[];
 };
@@ -17,13 +16,15 @@ export const DEADLINE_GROUPS: readonly DeadlineGroup[] = [
 	},
 	{
 		legend: "Parcours de mise en conformité — 1er tour",
-		pathChoiceKey: "pathChoiceRound1Deadline",
-		fields: ["decl1JointEvaluationDeadline", "decl2ModificationDeadline"],
+		fields: [
+			"pathChoiceRound1Deadline",
+			"decl1JointEvaluationDeadline",
+			"decl2ModificationDeadline",
+		],
 	},
 	{
 		legend: "Parcours de mise en conformité — 2nd tour",
-		pathChoiceKey: "pathChoiceDeadline",
-		fields: ["decl2JointEvaluationDeadline"],
+		fields: ["pathChoiceDeadline", "decl2JointEvaluationDeadline"],
 	},
 	{
 		legend: "Avis du CSE",
@@ -33,10 +34,12 @@ export const DEADLINE_GROUPS: readonly DeadlineGroup[] = [
 
 export const FIELD_LABELS: Record<DeadlineKey, string> = {
 	decl1ModificationDeadline: "Échéance de la déclaration",
+	pathChoiceRound1Deadline: "Échéance pour le choix du parcours",
 	decl1JointEvaluationDeadline:
 		"Échéance pour le dépôt du rapport de l'évaluation conjointe",
 	decl2ModificationDeadline:
 		"Échéance de la seconde déclaration (actions correctives)",
+	pathChoiceDeadline: "Échéance pour le choix du parcours",
 	decl2JointEvaluationDeadline:
 		"Échéance pour le dépôt du rapport de l'évaluation conjointe",
 	decl2CseOpinionDeadline: "Échéance pour le dépôt de l'avis ou des avis CSE",

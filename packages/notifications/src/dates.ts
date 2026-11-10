@@ -37,15 +37,15 @@ export function civilDateBefore(deadlineIso: string, days: number): string {
 }
 
 // The deadlines a reminder needs, as ISO strings. Mirror of the app's
-// `CampaignDeadlines` for the milestones we send on. `pathChoiceRound1` is
-// worker-only (the app's domain models a single `pathChoiceDeadline`, used
-// here for round 2).
+// `CampaignDeadlines` for the milestones we send on: `pathChoiceRound1` and
+// `pathChoiceRound2` are the domain `pathChoiceRound1Deadline` and
+// `pathChoiceDeadline`.
 export type ReminderDeadlines = {
 	decl1Modification: string; // 1er juin
 	decl1JointEvaluation: string; // 1er septembre
 	decl2Modification: string; // 1er janvier N+1
 	decl2JointEvaluation: string; // 1er janvier N+1
-	pathChoiceRound1: string; // 1er juillet (round 1, not admin-configurable)
+	pathChoiceRound1: string; // 1er juillet (domain `pathChoiceRound1Deadline`)
 	pathChoiceRound2: string; // 1er janvier N+1 (domain `pathChoiceDeadline`)
 };
 
