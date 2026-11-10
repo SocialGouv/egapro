@@ -41,9 +41,9 @@ runs:
           echo "EGAPRO_SUIT_API_URL=https://suit.invalid"
           echo "EGAPRO_GATEWAY_SHARED_SECRET=dev-gateway-shared-secret-minimum-32-chars"
           echo "EGAPRO_E2E_CLOCK=true"
-          # Same test-only admin two-factor seam as e2e.yaml (#4467): the backoffice pages are
-          # behind the MFA guard since #4461.
-          echo "EGAPRO_E2E_ADMIN_MFA=true"
+          # Same test-only MFA seam as e2e.yaml (#4467, #4961): every sign-in now
+          # demands a second factor, and the backoffice demands eidas2 besides.
+          echo "EGAPRO_E2E_MFA=true"
           echo "S3_ENDPOINT=http://localhost:9000"
           echo "S3_REGION=us-east-1"
           echo "S3_ACCESS_KEY_ID=minioadmin"

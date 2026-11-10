@@ -6,7 +6,7 @@ const { mockEnv, mockHeaders } = vi.hoisted(() => ({
 	mockEnv: {
 		ADMIN_EMAILS: "agent@example.fr",
 		EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT: true as boolean,
-		EGAPRO_E2E_ADMIN_MFA: false as boolean,
+		EGAPRO_E2E_MFA: false as boolean,
 		EGAPRO_DEV_AUTH: false as boolean,
 		NODE_ENV: "production" as "development" | "test" | "production",
 	},
@@ -105,11 +105,11 @@ async function signIn({
 	}
 }
 
-describe("auth config — E2E admin two-factor seam", () => {
+describe("auth config — E2E MFA seam", () => {
 	beforeEach(() => {
 		mockFindFirst.mockReset();
 		mockLogAction.mockReset();
-		mockEnv.EGAPRO_E2E_ADMIN_MFA = false;
+		mockEnv.EGAPRO_E2E_MFA = false;
 		mockHeaders.current = null;
 	});
 
@@ -133,7 +133,7 @@ describe("auth config — E2E admin two-factor seam", () => {
 			["a hostname merely ending in localhost", { host: "notlocalhost" }],
 			["no host header at all", {}],
 		])("leaves the session undated with the flag on but %s", async (_label, request) => {
-			mockEnv.EGAPRO_E2E_ADMIN_MFA = true;
+			mockEnv.EGAPRO_E2E_MFA = true;
 
 			const result = await signIn({ request });
 
@@ -141,7 +141,7 @@ describe("auth config — E2E admin two-factor seam", () => {
 		});
 
 		it("leaves the session undated with the flag on but no request scope", async () => {
-			mockEnv.EGAPRO_E2E_ADMIN_MFA = true;
+			mockEnv.EGAPRO_E2E_MFA = true;
 
 			const result = await signIn({ request: null });
 
@@ -151,7 +151,7 @@ describe("auth config — E2E admin two-factor seam", () => {
 		it('treats the string "false" as off, the trap z.coerce.boolean() falls into', async () => {
 			// `env.js` parses the flag as a literal string enum precisely so this
 			// value cannot arrive here as `true`; the seam then compares strictly.
-			mockEnv.EGAPRO_E2E_ADMIN_MFA = "false" as unknown as boolean;
+			mockEnv.EGAPRO_E2E_MFA = "false" as unknown as boolean;
 
 			const result = await signIn();
 
@@ -163,7 +163,7 @@ describe("auth config — E2E admin two-factor seam", () => {
 		it.each([
 			[
 				"a header asking for it",
-				{ host: "egapro.travail.gouv.fr", "x-egapro-e2e-admin-mfa": "true" },
+				{ host: "egapro.travail.gouv.fr", "x-egapro-e2e-mfa": "true" },
 			],
 			[
 				"a forwarded loopback host",
@@ -173,7 +173,7 @@ describe("auth config — E2E admin two-factor seam", () => {
 				},
 			],
 		])("refuses %s", async (_label, request) => {
-			mockEnv.EGAPRO_E2E_ADMIN_MFA = true;
+			mockEnv.EGAPRO_E2E_MFA = true;
 
 			const result = await signIn({ request });
 
@@ -181,7 +181,7 @@ describe("auth config — E2E admin two-factor seam", () => {
 		});
 
 		it("ignores an adminMfaAt pushed through a client session update while the seam is on", async () => {
-			mockEnv.EGAPRO_E2E_ADMIN_MFA = true;
+			mockEnv.EGAPRO_E2E_MFA = true;
 			mockHeaders.current = new Headers({ host: "localhost:3000" });
 
 			const result = await callbacks.jwt({
@@ -196,7 +196,7 @@ describe("auth config — E2E admin two-factor seam", () => {
 
 	describe("with both barriers met", () => {
 		beforeEach(() => {
-			mockEnv.EGAPRO_E2E_ADMIN_MFA = true;
+			mockEnv.EGAPRO_E2E_MFA = true;
 		});
 
 		it.each([
@@ -210,9 +210,9 @@ describe("auth config — E2E admin two-factor seam", () => {
 			expect(result.adminMfaAt).toBe(NOW_SECONDS);
 		});
 
-		it("stands in only for a level below MFA, never overriding a real auth_time", async () => {
+		it("stands in only for a level below the admin floor, never overriding a real auth_time", async () => {
 			const result = await signIn({
-				claims: { acr: "eidas1-mfa", auth_time: 1_772_000_000 },
+				claims: { acr: "eidas2", auth_time: 1_772_000_000 },
 			});
 
 			expect(result.adminMfaAt).toBe(1_772_000_000);
@@ -270,7 +270,7 @@ describe("auth config — E2E admin two-factor seam", () => {
 		});
 
 		it("leaves the audit row unmarked when ProConnect really returned the level", async () => {
-			await signIn({ claims: { acr: "eidas1-mfa", auth_time: 1_772_000_000 } });
+			await signIn({ claims: { acr: "eidas2", auth_time: 1_772_000_000 } });
 
 			const [entry] = mockLogAction.mock.calls[0] as [
 				{ metadata: Record<string, unknown> },

@@ -429,6 +429,8 @@ export {
 	computeRate,
 	roundOneDecimal,
 } from "./shared/submissionRate";
+// Declarant MFA floor — accepted levels for every non-backoffice ProConnect sign-in
+export { isUserMfaAcr, USER_MFA_ACR_VALUES } from "./shared/userMfa";
 // Indicator E — variable pay proportion (beneficiaries over same-sex workforce)
 export {
 	formatVariablePayProportion,

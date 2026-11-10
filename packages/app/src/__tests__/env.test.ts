@@ -26,7 +26,7 @@ const REQUIRED_SERVER_ENV = {
 const BOOLEAN_FLAGS = [
 	"EGAPRO_DEV_AUTH",
 	"EGAPRO_E2E_CLOCK",
-	"EGAPRO_E2E_ADMIN_MFA",
+	"EGAPRO_E2E_MFA",
 ] as const;
 
 async function loadEnvWith(
