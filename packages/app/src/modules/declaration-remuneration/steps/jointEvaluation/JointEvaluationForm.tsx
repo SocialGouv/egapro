@@ -138,7 +138,8 @@ export function JointEvaluationForm({
 					className={`${common.readOnlyFieldset} ${common.flexColumnGap2}`}
 				>
 					<legend className="fr-sr-only">
-						Évaluation conjointe des rémunérations
+						Transmission du rapport de l&apos;évaluation conjointe des
+						rémunérations
 					</legend>
 					<div className={common.flexBetween}>
 						<h1 className="fr-h4 fr-mb-0">
@@ -148,7 +149,7 @@ export function JointEvaluationForm({
 						<SavedIndicator hasData={true} />
 					</div>
 
-					<JointEvaluationHeading title="Évaluation conjointe des rémunérations" />
+					<JointEvaluationHeading title="Transmission du rapport de l'évaluation conjointe des rémunérations" />
 
 					<JointEvaluationTodo title="Rappel : Ce que vous devez faire dans un délai de 2 mois" />
 

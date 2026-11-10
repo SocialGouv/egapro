@@ -117,7 +117,7 @@ describe("JointEvaluationForm", () => {
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole("heading", {
-				name: "Évaluation conjointe des rémunérations",
+				name: "Transmission du rapport de l'évaluation conjointe des rémunérations",
 				level: 2,
 			}),
 		).toBeInTheDocument();
@@ -154,7 +154,7 @@ describe("JointEvaluationForm", () => {
 
 		expect(
 			screen.getByRole("group", {
-				name: "Évaluation conjointe des rémunérations",
+				name: "Transmission du rapport de l'évaluation conjointe des rémunérations",
 			}),
 		).toBeInTheDocument();
 	});
