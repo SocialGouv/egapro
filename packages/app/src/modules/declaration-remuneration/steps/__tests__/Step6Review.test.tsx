@@ -1,6 +1,8 @@
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ComponentProps } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { consumeDeclarationTransmissionSuccess } from "~/modules/declaration-remuneration/shared/declarationSuccessFlash";
 import { SUBMISSION_UNCONFIRMED_MESSAGE } from "~/modules/declaration-remuneration/shared/submissionErrorMessage";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import { noPayGapReferences } from "~/test/gipGapFixtures";
@@ -142,7 +144,10 @@ const emptyStep4Data = () => ({
 	],
 });
 
-function submissionReview(isSubmitted = false) {
+function submissionReview(
+	isSubmitted = false,
+	overrides: Partial<ComponentProps<typeof Step6Review>> = {},
+) {
 	return (
 		<Step6Review
 			companyWorkforce={null}
@@ -150,6 +155,7 @@ function submissionReview(isSubmitted = false) {
 			declarationYear={2025}
 			indicatorGRequired
 			isSubmitted={isSubmitted}
+			{...overrides}
 			step2Data={emptyStep2Data()}
 			step2Gaps={noPayGapReferences()}
 			step3Data={emptyStep3Data()}
@@ -330,6 +336,39 @@ describe("Step6Review", () => {
 		expect(mockConceal.mock.invocationCallOrder[0]).toBeLessThan(
 			mockPush.mock.invocationCallOrder[0] ?? 0,
 		);
+	});
+
+	describe("declaration transmission signal (#5126)", () => {
+		beforeEach(() => {
+			window.sessionStorage.clear();
+		});
+
+		it("leaves the signal for the CSE opinion page when no compliance path follows but a CSE opinion is due", () => {
+			render(
+				submissionReview(false, {
+					companyWorkforce: 120,
+					hasCse: true,
+					indicatorGRequired: false,
+				}),
+			);
+
+			act(() => mockSubmitState.onSuccess?.());
+
+			expect(consumeDeclarationTransmissionSuccess()).toBe(true);
+		});
+
+		it.each([
+			{ companyWorkforce: 120, hasCse: false },
+			{ companyWorkforce: 40, hasCse: true },
+		])("leaves no signal when neither a compliance path nor a CSE opinion follows ($companyWorkforce employees, CSE: $hasCse)", (overrides) => {
+			render(
+				submissionReview(false, { ...overrides, indicatorGRequired: false }),
+			);
+
+			act(() => mockSubmitState.onSuccess?.());
+
+			expect(consumeDeclarationTransmissionSuccess()).toBe(false);
+		});
 	});
 
 	it("still navigates if funnel tracking throws", () => {
