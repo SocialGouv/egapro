@@ -14,10 +14,9 @@ import { formatLongDate } from "~/modules/domain";
 import { JointEvaluationForm } from "../JointEvaluationForm";
 
 const mockPush = vi.fn();
-const mockRefresh = vi.fn();
 
 vi.mock("next/navigation", () => ({
-	useRouter: () => ({ push: mockPush, refresh: mockRefresh }),
+	useRouter: () => ({ push: mockPush }),
 	usePathname: () =>
 		"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
 }));
@@ -27,10 +26,14 @@ vi.mock("~/modules/shared/uploadFile", () => ({
 }));
 
 const submitJointEvaluationMock = vi.fn();
-const submitJointEvaluationOutcome = { fails: false };
+const submitJointEvaluationOutcome = { fails: false, isPending: false };
+const getOrCreateFetchMock = vi.fn();
 
 vi.mock("~/trpc/react", () => ({
 	api: {
+		useUtils: () => ({
+			declaration: { getOrCreate: { fetch: getOrCreateFetchMock } },
+		}),
 		declaration: {
 			submitJointEvaluation: {
 				useMutation: () => ({
@@ -50,7 +53,7 @@ vi.mock("~/trpc/react", () => ({
 						}
 						opts?.onSettled?.();
 					},
-					isPending: false,
+					isPending: submitJointEvaluationOutcome.isPending,
 					error: null,
 				}),
 			},
@@ -74,6 +77,8 @@ describe("JointEvaluationForm", () => {
 	beforeEach(() => {
 		uploadFileMock.mockReset();
 		submitJointEvaluationOutcome.fails = false;
+		submitJointEvaluationOutcome.isPending = false;
+		getOrCreateFetchMock.mockReset();
 		// jsdom doesn't implement <dialog>; stub showModal/close so the dialog
 		// actually toggles its `open` attribute and its contents become visible
 		// to Testing Library queries.
@@ -376,40 +381,115 @@ describe("JointEvaluationForm", () => {
 		});
 	});
 
-	it("stays on the page and refreshes it when the transmission fails after the upload", async () => {
-		const user = userEvent.setup();
-		submitJointEvaluationOutcome.fails = true;
-		uploadFileMock.mockResolvedValue({
-			ok: true,
-			fileId: "file-1",
-			fileName: "rapport.pdf",
+	describe("when the transmission fails after the upload", () => {
+		async function uploadThenConfirm() {
+			const user = userEvent.setup();
+			uploadFileMock.mockResolvedValue({
+				ok: true,
+				fileId: "file-1",
+				fileName: "rapport.pdf",
+			});
+			const { container } = render(
+				<JointEvaluationForm {...defaultProps} cseOpinionRequired />,
+			);
+			const input = container.querySelector(
+				'input[type="file"]',
+			) as HTMLInputElement;
+			fireEvent.change(input, {
+				target: {
+					files: [
+						new File(["pdf-content"], "rapport.pdf", {
+							type: "application/pdf",
+						}),
+					],
+				},
+			});
+			fireEvent.click(screen.getByRole("button", { name: /transmettre/i }));
+			await user.click(screen.getByRole("checkbox"));
+			await user.click(screen.getByRole("button", { name: "Valider" }));
+			await waitFor(() => {
+				expect(submitJointEvaluationMock).toHaveBeenCalledTimes(1);
+			});
+			return user;
+		}
+
+		beforeEach(() => {
+			submitJointEvaluationOutcome.fails = true;
 		});
 
-		const { container } = render(
-			<JointEvaluationForm {...defaultProps} cseOpinionRequired />,
-		);
+		it("stays on the page and lists the just-uploaded report while the démarche still awaits it", async () => {
+			getOrCreateFetchMock.mockResolvedValue({
+				declaration: { status: "joint_evaluation_chosen" },
+			});
 
-		const input = container.querySelector(
-			'input[type="file"]',
-		) as HTMLInputElement;
-		fireEvent.change(input, {
-			target: {
-				files: [
-					new File(["pdf-content"], "rapport.pdf", {
-						type: "application/pdf",
-					}),
-				],
-			},
-		});
-		fireEvent.click(screen.getByRole("button", { name: /transmettre/i }));
-		await user.click(screen.getByRole("checkbox"));
-		await user.click(screen.getByRole("button", { name: "Valider" }));
+			await uploadThenConfirm();
 
-		await waitFor(() => {
-			expect(submitJointEvaluationMock).toHaveBeenCalledTimes(1);
+			await waitFor(() => {
+				expect(getOrCreateFetchMock).toHaveBeenCalledWith(undefined, {
+					staleTime: 0,
+				});
+			});
+			expect(mockPush).not.toHaveBeenCalled();
+			expect(screen.getByText("Rapport déjà déposé")).toBeInTheDocument();
+			expect(
+				screen.getByRole("link", { name: /rapport\.pdf/ }),
+			).toHaveAttribute("href", "/api/v1/files/file-1");
 		});
-		expect(mockRefresh).toHaveBeenCalledTimes(1);
-		expect(mockPush).not.toHaveBeenCalled();
+
+		it("lets the next submit confirm the just-uploaded report without a new file", async () => {
+			getOrCreateFetchMock.mockResolvedValue({
+				declaration: { status: "joint_evaluation_chosen" },
+			});
+			const user = await uploadThenConfirm();
+			await waitFor(() => {
+				expect(getOrCreateFetchMock).toHaveBeenCalledTimes(1);
+			});
+
+			fireEvent.click(screen.getByRole("button", { name: /transmettre/i }));
+			expect(
+				screen.queryByText(
+					/le rapport de l'évaluation conjointe est manquant/i,
+				),
+			).not.toBeInTheDocument();
+			expect(screen.getByRole("checkbox")).toBeChecked();
+			await user.click(screen.getByRole("button", { name: "Valider" }));
+
+			await waitFor(() => {
+				expect(submitJointEvaluationMock).toHaveBeenCalledTimes(2);
+			});
+			expect(uploadFileMock).toHaveBeenCalledTimes(1);
+		});
+
+		it("moves on when the transition was committed before the response was lost", async () => {
+			getOrCreateFetchMock.mockResolvedValue({
+				declaration: { status: "awaiting_cse_opinion" },
+			});
+
+			await uploadThenConfirm();
+
+			await waitFor(() => {
+				expect(mockPush).toHaveBeenCalledWith("/avis-cse");
+			});
+		});
+
+		it("stays on the page when the status cannot be re-read", async () => {
+			getOrCreateFetchMock.mockRejectedValue(new Error("network"));
+
+			await uploadThenConfirm();
+
+			await waitFor(() => {
+				expect(getOrCreateFetchMock).toHaveBeenCalledTimes(1);
+			});
+			expect(mockPush).not.toHaveBeenCalled();
+		});
+	});
+
+	it("disables the submit button while the transmission is pending", () => {
+		submitJointEvaluationOutcome.isPending = true;
+
+		render(<JointEvaluationForm {...defaultProps} />);
+
+		expect(screen.getByRole("button", { name: /transmettre/i })).toBeDisabled();
 	});
 
 	describe("rapport déjà déposé (#4222)", () => {

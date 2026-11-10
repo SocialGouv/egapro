@@ -22,7 +22,6 @@ type Options = {
 	 * → upload) used by the other upload forms.
 	 */
 	autoUpload?: boolean;
-	// A file already stored server-side lets the user confirm it without picking a new one.
 	hasStoredFile?: boolean;
 };
 

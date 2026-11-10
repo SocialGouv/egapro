@@ -29,6 +29,9 @@ import { SecondDeclarationStep2Form } from "../secondDeclaration/SecondDeclarati
 
 vi.mock("~/trpc/react", () => ({
 	api: {
+		useUtils: () => ({
+			declaration: { getOrCreate: { fetch: vi.fn() } },
+		}),
 		declaration: {
 			updateStep1: {
 				useMutation: () => ({ mutate: vi.fn(), isPending: false }),

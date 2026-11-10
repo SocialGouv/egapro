@@ -1,13 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useReadOnlyGuard } from "~/modules/auth";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { FormErrors } from "~/modules/declaration-remuneration/shared/FormErrors";
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
+import { isJointEvaluationWritable } from "~/modules/domain";
 import { getPostComplianceDestination } from "~/modules/navigation";
 import { SUBMIT_LABEL, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
@@ -51,8 +52,33 @@ export function JointEvaluationForm({
 		dbValues: EMPTY_DB_VALUES,
 	});
 
+	const utils = api.useUtils();
 	const submitJointEvaluationMutation =
 		api.declaration.submitJointEvaluation.useMutation();
+	const [uploadedReport, setUploadedReport] =
+		useState<JointEvaluationExistingFile | null>(null);
+	const storedReport = uploadedReport ?? existingFile;
+
+	const onUploaded = useCallback(
+		({ fileId, fileName }: { fileId: string; fileName: string }) => {
+			setUploadedReport({ id: fileId, fileName, uploadedAt: new Date() });
+		},
+		[],
+	);
+
+	const redirectIfAlreadyTransmitted = useCallback(async () => {
+		try {
+			const { declaration } = await utils.declaration.getOrCreate.fetch(
+				undefined,
+				{ staleTime: 0 },
+			);
+			if (!isJointEvaluationWritable(declaration.status)) {
+				router.push(getPostComplianceDestination(cseOpinionRequired));
+			}
+		} catch {
+			return;
+		}
+	}, [cseOpinionRequired, router, utils]);
 
 	const onAllUploaded = useCallback(() => {
 		clearDraft();
@@ -65,13 +91,18 @@ export function JointEvaluationForm({
 			onSuccess: () => {
 				router.push(getPostComplianceDestination(cseOpinionRequired));
 			},
-			// The report may be stored even though the transition failed: refreshing
-			// surfaces it as already deposited, so the next submit can confirm it.
+			// The transition may have committed before the response was lost.
 			onError: () => {
-				router.refresh();
+				void redirectIfAlreadyTransmitted();
 			},
 		});
-	}, [clearDraft, cseOpinionRequired, router, submitJointEvaluationMutation]);
+	}, [
+		clearDraft,
+		cseOpinionRequired,
+		redirectIfAlreadyTransmitted,
+		router,
+		submitJointEvaluationMutation,
+	]);
 
 	const {
 		closeModal,
@@ -85,9 +116,11 @@ export function JointEvaluationForm({
 		uploadError,
 	} = useFileUploadForm({
 		flowType: "joint_evaluation",
-		hasStoredFile: existingFile !== null,
+		hasStoredFile: storedReport !== null,
 		onAllUploaded,
+		onUploaded,
 	});
+	const isSubmitting = isPending || submitJointEvaluationMutation.isPending;
 
 	return (
 		<>
@@ -113,8 +146,8 @@ export function JointEvaluationForm({
 
 					<JointEvaluationTodo title="Rappel : Ce que vous devez faire dans un délai de 2 mois" />
 
-					{existingFile && (
-						<JointEvaluationExistingReport file={existingFile} />
+					{storedReport && (
+						<JointEvaluationExistingReport file={storedReport} />
 					)}
 
 					<JointEvaluationReportUpload
@@ -141,7 +174,7 @@ export function JointEvaluationForm({
 							<button
 								{...readOnlyGuard.buttonProps}
 								className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-								disabled={isPending || isReadOnly}
+								disabled={isSubmitting || isReadOnly}
 								type="submit"
 							>
 								{SUBMIT_LABEL}
