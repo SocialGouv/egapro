@@ -51,11 +51,18 @@ const mockIdp = (userinfoBody: string, jwks: object = { keys: [] }, userinfoStat
 };
 
 describe("ProConnectProvider", () => {
-  it("requests acr_values=eidas0-mfa and keeps the provider id", () => {
+  it("requests the eidas0-mfa floor through essential claims and keeps the provider id", () => {
     const provider = ProConnectProvider({ clientId: "id", clientSecret: "secret" });
     expect(provider.id).toBe("proconnect");
-    const authorization = provider.authorization as { params: { acr_values?: string } };
-    expect(authorization.params.acr_values).toBe("eidas0-mfa");
+    const authorization = provider.authorization as { params: { acr_values?: string; claims?: string } };
+    // `acr_values` is only a preference an issuer may ignore: the floor is asked
+    // through an essential claims request, which ProConnect must enforce.
+    expect(authorization.params.acr_values).toBeUndefined();
+    expect(JSON.parse(authorization.params.claims as string)).toEqual({
+      id_token: {
+        acr: { essential: true, values: ["eidas0-mfa", "eidas1-mfa", "eidas2", "eidas3"] },
+      },
+    });
   });
 
   it("does not allow linking accounts by email", () => {

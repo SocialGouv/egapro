@@ -17,6 +17,7 @@ import { type DefaultJWT, type JWT } from "next-auth/jwt";
 import GithubProvider, { type GithubProfile } from "next-auth/providers/github";
 
 import { egaproNextAuthAdapter } from "./EgaproNextAuthAdapter";
+import { isMfaAcr, readAcr } from "./mfaAcr";
 
 declare module "next-auth" {
   interface Session {
@@ -146,6 +147,24 @@ export const authConfig: AuthOptions = {
   ],
   callbacks: {
     async signIn({ account, profile }) {
+      // Server-side enforcement of the declarant MFA floor (#4962). The
+      // `essential` claim is binding at ProConnect, but the reply is still
+      // checked here: an issuer that ignores the request must not open a
+      // session below `eidas0-mfa`, and a provider that carries no id_token
+      // proves nothing either.
+      if (account?.provider === "proconnect") {
+        const acr = readAcr(account.id_token);
+        if (isMfaAcr(acr)) {
+          return true;
+        }
+
+        // NextAuth v4 turns a `false` here into a bare `AccessDenied`, which the
+        // error page renders as the staff-only message. A dedicated code keeps
+        // the two refusals distinguishable for the user.
+        logger.warn({ acr: acr ?? "none" }, "ProConnect sign-in refused: assurance level below eidas0-mfa");
+        return "/error?source=login&error=MfaRequired";
+      }
+
       if (account?.provider !== "github") {
         return true;
       }

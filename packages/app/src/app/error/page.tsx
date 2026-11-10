@@ -11,6 +11,11 @@ const controlledErrors: Record<string, string | { message: string; source: strin
     source: "login",
     message: "Vous n'êtes pas staff.",
   },
+  MfaRequired: {
+    source: "login",
+    message:
+      "Votre connexion n'a pas fourni le niveau de sécurité exigé. Connectez-vous avec un compte protégé par la double authentification.",
+  },
 };
 
 const ControlledErrorPage = ({ searchParams }: NextServerPageProps<never, "error" | "source">) => {
