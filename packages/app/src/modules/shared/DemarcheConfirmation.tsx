@@ -18,6 +18,7 @@ type Props = {
 	documentsTitle?: string;
 	documentsTitleHidden?: boolean;
 	email: string;
+	publicationException?: string;
 	receiptKind: ResendReceiptInput["kind"];
 	receiptYear: number;
 	successMessage: string;
@@ -31,6 +32,7 @@ export function DemarcheConfirmation({
 	documentsTitle = "Documents récapitulatifs de votre démarche",
 	documentsTitleHidden = false,
 	email,
+	publicationException,
 	receiptKind,
 	receiptYear,
 	successMessage,
@@ -87,7 +89,10 @@ export function DemarcheConfirmation({
 				))}
 			</div>
 
-			<ResultsPublicationNotice companyName={companyName} />
+			<ResultsPublicationNotice
+				companyName={companyName}
+				excludedResults={publicationException}
+			/>
 
 			<FeedbackBanner />
 

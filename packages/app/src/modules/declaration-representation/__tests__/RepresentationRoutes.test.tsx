@@ -24,7 +24,10 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("~/trpc/server", () => ({
-	api: { representationDeclaration: { get: vi.fn() } },
+	api: {
+		company: { get: vi.fn() },
+		representationDeclaration: { get: vi.fn() },
+	},
 }));
 
 vi.mock("~/trpc/react", () => ({
@@ -74,8 +77,11 @@ const STEP_5_HREF = "/declaration-representation/etape/5";
 const DECLARANT_EMAIL = "declarant@example.fr";
 
 const getDeclaration = vi.mocked(api.representationDeclaration.get);
+const getCompany = vi.mocked(api.company.get);
 
 const DECLARATION_DEADLINE = new Date("2026-03-01T00:00:00.000Z");
+const SIREN = "123456789";
+const COMPANY_NAME = "Société Démo";
 
 function mockFunnelState({
 	campaignOpen = true,
@@ -124,6 +130,7 @@ beforeEach(() => {
 	mockNotFound.mockClear();
 	mockAuth.mockReset().mockResolvedValue(null);
 	getDeclaration.mockReset();
+	getCompany.mockReset().mockResolvedValue({ name: COMPANY_NAME } as never);
 });
 
 describe("RepresentationHomePage", () => {
@@ -420,7 +427,7 @@ describe("RepresentationConfirmationPage", () => {
 	function mockSubmittedState(status: "draft" | "submitted") {
 		getDeclaration.mockResolvedValue({
 			campaignOpen: true,
-			declaration: { currentStep: 5, draft: null, status },
+			declaration: { currentStep: 5, draft: null, siren: SIREN, status },
 		} as never);
 	}
 
@@ -435,6 +442,16 @@ describe("RepresentationConfirmationPage", () => {
 			screen.getByText(/Votre parcours .* est désormais terminé/),
 		).toBeInTheDocument();
 		expect(screen.getByText(DECLARANT_EMAIL)).toBeInTheDocument();
+		expect(getCompany).toHaveBeenCalledWith({ siren: SIREN });
+		expect(
+			screen.getByRole("heading", {
+				level: 2,
+				name: "Publication des résultats",
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(new RegExp(`déclarés par ${COMPANY_NAME}`)),
+		).toHaveTextContent("dans l'onglet « Observatoire » d'Egapro.");
 	});
 
 	it("falls back on the account address without a session e-mail", async () => {

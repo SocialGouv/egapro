@@ -1,6 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { ResultsPublicationNotice } from "../ResultsPublicationNotice";
+import {
+	REMUNERATION_PUBLICATION_EXCEPTION,
+	ResultsPublicationNotice,
+} from "../ResultsPublicationNotice";
 
 const COMPANY_NAME = "Société Démo";
 
@@ -17,7 +20,12 @@ describe("ResultsPublicationNotice", () => {
 	});
 
 	it("names the company and excludes the job category indicator", () => {
-		render(<ResultsPublicationNotice companyName={COMPANY_NAME} />);
+		render(
+			<ResultsPublicationNotice
+				companyName={COMPANY_NAME}
+				excludedResults={REMUNERATION_PUBLICATION_EXCEPTION}
+			/>,
+		);
 
 		const notice = screen.getByText(
 			new RegExp(`Les résultats déclarés par ${COMPANY_NAME}`),
@@ -28,6 +36,18 @@ describe("ResultsPublicationNotice", () => {
 		expect(notice).toHaveTextContent(
 			"à l'exception de l'indicateur concernant les écarts de rémunération par catégorie d'emplois.",
 		);
+	});
+
+	it("publishes everything when the démarche has no exception", () => {
+		render(<ResultsPublicationNotice companyName={COMPANY_NAME} />);
+
+		const notice = screen.getByText(
+			new RegExp(`Les résultats déclarés par ${COMPANY_NAME}`),
+		);
+		expect(notice).toHaveTextContent(
+			"seront rendus publics dans l'onglet « Observatoire » d'Egapro.",
+		);
+		expect(notice).not.toHaveTextContent("à l'exception");
 	});
 
 	it("wraps the notice in the DSFR highlight block", () => {
