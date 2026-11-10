@@ -306,6 +306,7 @@ export function submitRepresentationSchema(year: number) {
 
 export const representationDraftSchema = z.object({
 	currentStep: z.number().int().min(0).max(5),
+	lastStep: z.number().int().min(1).max(5).optional(),
 	referencePeriodStart: z.string().optional(),
 	referencePeriodEnd: z.string().optional(),
 	executivesCount: executivesCountSchema.optional(),
