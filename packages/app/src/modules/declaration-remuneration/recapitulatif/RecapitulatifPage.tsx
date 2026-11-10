@@ -196,10 +196,6 @@ export function RecapitulatifPage({
 					<p className="fr-text--xs fr-text-mention--grey fr-mb-0 fr-mt-1v">
 						<FileFormatDetail href={pdfHref} />
 					</p>
-					<p className="fr-text--xs fr-mb-0 fr-mt-1v">
-						Version accessible : cette page reprend l&apos;intégralité du
-						document.
-					</p>
 				</div>
 			</div>
 
@@ -242,7 +238,7 @@ export function RecapitulatifPage({
 					{sourceLabel && (
 						<p className={`fr-mb-3w ${styles.sourceLine}`}>
 							<span className={styles.sourceLabel}>
-								Source utilisée pour déterminer les catégories d&apos;emplois :
+								Source des catégories d&apos;emplois :
 							</span>{" "}
 							<strong>{sourceLabel}</strong>
 						</p>
