@@ -106,10 +106,10 @@ describe("jointEvaluationRouter", () => {
 		});
 	});
 
-	describe("isTransmitted", () => {
-		it("is true when the stored report was sent by a joint evaluation submission", async () => {
+	describe("transmittedRound", () => {
+		it("returns the round of the submission that sent the stored report", async () => {
 			vi.mocked(findTransmittedJointEvaluation).mockResolvedValue({
-				submission: { createdAt: new Date("2026-01-16"), round: 1 },
+				submission: { createdAt: new Date("2026-01-16"), round: 2 },
 				file: {
 					id: "file-1",
 					fileName: "evaluation.pdf",
@@ -119,18 +119,18 @@ describe("jointEvaluationRouter", () => {
 			const mockDb = createMockDb();
 			const caller = await createCaller(mockDb);
 
-			await expect(caller.isTransmitted()).resolves.toBe(true);
+			await expect(caller.transmittedRound()).resolves.toBe(2);
 			expect(findTransmittedJointEvaluation).toHaveBeenCalledWith(
 				mockDb,
 				"decl-1",
 			);
 		});
 
-		it("is false when the stored report has not been transmitted", async () => {
+		it("returns null when the stored report has not been transmitted", async () => {
 			vi.mocked(findTransmittedJointEvaluation).mockResolvedValue(null);
 			const caller = await createCaller(createMockDb());
 
-			await expect(caller.isTransmitted()).resolves.toBe(false);
+			await expect(caller.transmittedRound()).resolves.toBeNull();
 		});
 	});
 });

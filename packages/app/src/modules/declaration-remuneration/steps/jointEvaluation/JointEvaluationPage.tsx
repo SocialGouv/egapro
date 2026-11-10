@@ -42,6 +42,7 @@ export async function JointEvaluationPage() {
 				campaignDeadlines,
 				isRevisedJoint,
 			)}
+			jointEvaluationRound={isRevisedJoint ? 2 : 1}
 		/>
 	);
 }

@@ -30,6 +30,7 @@ type Props = {
 	declarationYear: number;
 	existingFile: JointEvaluationExistingFile | null;
 	jointEvaluationDeadline: Date;
+	jointEvaluationRound: 1 | 2;
 };
 
 export function JointEvaluationForm({
@@ -38,6 +39,7 @@ export function JointEvaluationForm({
 	declarationYear,
 	existingFile,
 	jointEvaluationDeadline,
+	jointEvaluationRound,
 }: Props) {
 	const router = useRouter();
 	const readOnlyGuard = useReadOnlyGuard();
@@ -67,17 +69,17 @@ export function JointEvaluationForm({
 
 	const redirectIfAlreadyTransmitted = useCallback(async () => {
 		try {
-			const isTransmitted = await utils.jointEvaluation.isTransmitted.fetch(
-				undefined,
-				{ staleTime: 0 },
-			);
-			if (isTransmitted) {
+			const transmittedRound =
+				await utils.jointEvaluation.transmittedRound.fetch(undefined, {
+					staleTime: 0,
+				});
+			if (transmittedRound === jointEvaluationRound) {
 				router.push(getPostComplianceDestination(cseOpinionRequired));
 			}
 		} catch {
 			return;
 		}
-	}, [cseOpinionRequired, router, utils]);
+	}, [cseOpinionRequired, jointEvaluationRound, router, utils]);
 
 	const onAllUploaded = useCallback(() => {
 		clearDraft();

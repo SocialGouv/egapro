@@ -27,12 +27,14 @@ vi.mock("~/modules/shared/uploadFile", () => ({
 
 const submitJointEvaluationMock = vi.fn();
 const submitJointEvaluationOutcome = { fails: false, isPending: false };
-const isTransmittedFetchMock = vi.fn();
+const transmittedRoundFetchMock = vi.fn();
 
 vi.mock("~/trpc/react", () => ({
 	api: {
 		useUtils: () => ({
-			jointEvaluation: { isTransmitted: { fetch: isTransmittedFetchMock } },
+			jointEvaluation: {
+				transmittedRound: { fetch: transmittedRoundFetchMock },
+			},
 		}),
 		declaration: {
 			submitJointEvaluation: {
@@ -71,6 +73,7 @@ const defaultProps = {
 	declarationYear: 2026,
 	existingFile: null,
 	jointEvaluationDeadline: new Date("2026-08-01T00:00:00Z"),
+	jointEvaluationRound: 1 as const,
 };
 
 describe("JointEvaluationForm", () => {
@@ -78,7 +81,7 @@ describe("JointEvaluationForm", () => {
 		uploadFileMock.mockReset();
 		submitJointEvaluationOutcome.fails = false;
 		submitJointEvaluationOutcome.isPending = false;
-		isTransmittedFetchMock.mockReset();
+		transmittedRoundFetchMock.mockReset();
 		// jsdom doesn't implement <dialog>; stub showModal/close so the dialog
 		// actually toggles its `open` attribute and its contents become visible
 		// to Testing Library queries.
@@ -382,7 +385,9 @@ describe("JointEvaluationForm", () => {
 	});
 
 	describe("when the transmission fails after the upload", () => {
-		async function uploadThenConfirm() {
+		async function uploadThenConfirm(
+			props: { jointEvaluationRound?: 1 | 2 } = {},
+		) {
 			const user = userEvent.setup();
 			uploadFileMock.mockResolvedValue({
 				ok: true,
@@ -390,7 +395,7 @@ describe("JointEvaluationForm", () => {
 				fileName: "rapport.pdf",
 			});
 			const { container } = render(
-				<JointEvaluationForm {...defaultProps} cseOpinionRequired />,
+				<JointEvaluationForm {...defaultProps} {...props} cseOpinionRequired />,
 			);
 			const input = container.querySelector(
 				'input[type="file"]',
@@ -418,12 +423,12 @@ describe("JointEvaluationForm", () => {
 		});
 
 		it("stays on the page and lists the just-uploaded report while it is not transmitted", async () => {
-			isTransmittedFetchMock.mockResolvedValue(false);
+			transmittedRoundFetchMock.mockResolvedValue(null);
 
 			await uploadThenConfirm();
 
 			await waitFor(() => {
-				expect(isTransmittedFetchMock).toHaveBeenCalledWith(undefined, {
+				expect(transmittedRoundFetchMock).toHaveBeenCalledWith(undefined, {
 					staleTime: 0,
 				});
 			});
@@ -435,10 +440,10 @@ describe("JointEvaluationForm", () => {
 		});
 
 		it("lets the next submit confirm the just-uploaded report without a new file", async () => {
-			isTransmittedFetchMock.mockResolvedValue(false);
+			transmittedRoundFetchMock.mockResolvedValue(null);
 			const user = await uploadThenConfirm();
 			await waitFor(() => {
-				expect(isTransmittedFetchMock).toHaveBeenCalledTimes(1);
+				expect(transmittedRoundFetchMock).toHaveBeenCalledTimes(1);
 			});
 
 			fireEvent.click(screen.getByRole("button", { name: /transmettre/i }));
@@ -456,8 +461,8 @@ describe("JointEvaluationForm", () => {
 			expect(uploadFileMock).toHaveBeenCalledTimes(1);
 		});
 
-		it("moves on when the transition was committed before the response was lost", async () => {
-			isTransmittedFetchMock.mockResolvedValue(true);
+		it("moves on when the transmission of this round was committed before the response was lost", async () => {
+			transmittedRoundFetchMock.mockResolvedValue(1);
 
 			await uploadThenConfirm();
 
@@ -466,13 +471,24 @@ describe("JointEvaluationForm", () => {
 			});
 		});
 
-		it("stays on the page when the status cannot be re-read", async () => {
-			isTransmittedFetchMock.mockRejectedValue(new Error("network"));
+		it("stays on the page when an earlier round was transmitted but this one was not", async () => {
+			transmittedRoundFetchMock.mockResolvedValue(1);
+
+			await uploadThenConfirm({ jointEvaluationRound: 2 });
+
+			await waitFor(() => {
+				expect(transmittedRoundFetchMock).toHaveBeenCalledTimes(1);
+			});
+			expect(mockPush).not.toHaveBeenCalled();
+		});
+
+		it("stays on the page when the transmission state cannot be re-read", async () => {
+			transmittedRoundFetchMock.mockRejectedValue(new Error("network"));
 
 			await uploadThenConfirm();
 
 			await waitFor(() => {
-				expect(isTransmittedFetchMock).toHaveBeenCalledTimes(1);
+				expect(transmittedRoundFetchMock).toHaveBeenCalledTimes(1);
 			});
 			expect(mockPush).not.toHaveBeenCalled();
 		});

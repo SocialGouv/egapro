@@ -8,9 +8,11 @@ export const jointEvaluationRouter = createTRPCRouter({
 	getFile: declarationProcedure.query(({ ctx }) =>
 		findJointEvaluationFile(ctx.db, ctx.declarationId),
 	),
-	isTransmitted: declarationProcedure.query(
-		async ({ ctx }) =>
-			(await findTransmittedJointEvaluation(ctx.db, ctx.declarationId)) !==
-			null,
-	),
+	transmittedRound: declarationProcedure.query(async ({ ctx }) => {
+		const transmitted = await findTransmittedJointEvaluation(
+			ctx.db,
+			ctx.declarationId,
+		);
+		return transmitted?.submission.round ?? null;
+	}),
 });
