@@ -150,20 +150,6 @@ export const env = createEnv({
 			.optional()
 			.default("true")
 			.transform((value) => value === "true"),
-		// Audit log (issue #3174) — retention thresholds (CNIL: 6 months for
-		// access logs, 12 months for security logs). Consumed directly by the
-		// audit-cleanup CronJob (packages/app/scripts/audit-cleanup.ts, issue
-		// #3268) — no HTTP trigger in play anymore.
-		EGAPRO_AUDIT_RETENTION_SHORT_DAYS: z.coerce
-			.number()
-			.int()
-			.positive()
-			.default(180),
-		EGAPRO_AUDIT_RETENTION_LONG_DAYS: z.coerce
-			.number()
-			.int()
-			.positive()
-			.default(365),
 		// Retention (years) for declaration data, consumed by the
 		// declaration-cleanup CronJob (packages/app/scripts/declaration-cleanup.ts,
 		// issue #3134). Default 6 (durée légale retenue). The .max(50) guard catches
@@ -259,10 +245,6 @@ export const env = createEnv({
 		ADMIN_EMAILS: process.env.ADMIN_EMAILS,
 		EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT:
 			process.env.EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT,
-		EGAPRO_AUDIT_RETENTION_SHORT_DAYS:
-			process.env.EGAPRO_AUDIT_RETENTION_SHORT_DAYS,
-		EGAPRO_AUDIT_RETENTION_LONG_DAYS:
-			process.env.EGAPRO_AUDIT_RETENTION_LONG_DAYS,
 		EGAPRO_DECLARATION_RETENTION_YEARS:
 			process.env.EGAPRO_DECLARATION_RETENTION_YEARS,
 		VALKEY_URL: process.env.VALKEY_URL,
