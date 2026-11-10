@@ -24,7 +24,7 @@ describe("getDeclarationProcessStepDeadline", () => {
 		);
 	});
 
-	it("returns null for demarche_completed (Clôturée)", () => {
+	it("returns null for demarche_completed (no deadline applies)", () => {
 		expect(
 			getDeclarationProcessStepDeadline("demarche_completed", deadlines),
 		).toBeNull();

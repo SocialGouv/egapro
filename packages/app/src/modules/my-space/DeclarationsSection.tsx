@@ -15,6 +15,7 @@ import {
 	getDocumentResourceCount,
 	getDocumentsPanelId,
 } from "./DocumentsPanel";
+import { isRepresentationDeclarationTransmitted } from "./declarationProcessState";
 import { RepresentationProcessPanel } from "./RepresentationProcessPanel";
 import { StatusBadge } from "./StatusBadge";
 import type {
@@ -42,11 +43,18 @@ function getDeadlineCell(
 	declaration: DeclarationItem,
 	representationCampaign: RepresentationCampaign,
 ): string {
+	const isCurrentCampaign = declaration.year >= getCurrentYear();
 	if (declaration.type === "representation") {
 		if (declaration.notSubject) return "-";
+		if (
+			isCurrentCampaign &&
+			isRepresentationDeclarationTransmitted(declaration)
+		)
+			return "-";
 		return formatCivilShortDate(representationCampaign.declarationDeadline);
 	}
-	if (declaration.deadline === null) return "Clôturée";
+	if (declaration.deadline === null)
+		return isCurrentCampaign ? "-" : "Clôturée";
 	return formatCivilShortDate(declaration.deadline);
 }
 
