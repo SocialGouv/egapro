@@ -71,6 +71,7 @@ describe("useRepresentationDraft — autosave", () => {
 			currentStep: 2,
 			draft: {
 				currentStep: 2,
+				lastStep: 2,
 				executiveWomenPercent: 60,
 				executiveMenPercent: 40,
 			},
@@ -112,6 +113,20 @@ describe("useRepresentationDraft — autosave", () => {
 		expect(result.current.draft.currentStep).toBe(4);
 	});
 
+	it("records the edited step as the one to resume, without rewinding the progress (#4998)", () => {
+		const { result } = renderDraft({
+			step: 2,
+			initialDraft: { currentStep: 4, lastStep: 4 },
+		});
+
+		act(() => result.current.setDraftValues({ executiveWomenPercent: 60 }));
+
+		expect(result.current.draft).toMatchObject({
+			currentStep: 4,
+			lastStep: 2,
+		});
+	});
+
 	it("saves the pending draft when the step unmounts before the debounce fires", () => {
 		const { result, unmount } = renderDraft();
 
@@ -121,7 +136,7 @@ describe("useRepresentationDraft — autosave", () => {
 		expect(mutateAsync).toHaveBeenCalledTimes(1);
 		expect(mutateAsync).toHaveBeenCalledWith(
 			expect.objectContaining({
-				draft: { currentStep: 2, executiveWomenPercent: 60 },
+				draft: { currentStep: 2, lastStep: 2, executiveWomenPercent: 60 },
 			}),
 		);
 	});
@@ -183,7 +198,7 @@ describe("useRepresentationDraft — saveProgress", () => {
 		expect(mutateAsync).toHaveBeenCalledWith({
 			year: YEAR,
 			currentStep: 3,
-			draft: { currentStep: 3, executiveWomenPercent: 60 },
+			draft: { currentStep: 3, lastStep: 3, executiveWomenPercent: 60 },
 		});
 		expect(result.current.draft.currentStep).toBe(3);
 	});
@@ -229,7 +244,7 @@ describe("useRepresentationDraft — pending save handed to the lock", () => {
 
 		expect(mutateAsync).toHaveBeenCalledWith(
 			expect.objectContaining({
-				draft: { currentStep: 2, executiveWomenPercent: 60 },
+				draft: { currentStep: 2, lastStep: 2, executiveWomenPercent: 60 },
 			}),
 		);
 		await act(async () => {

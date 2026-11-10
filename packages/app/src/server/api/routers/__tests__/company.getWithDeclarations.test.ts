@@ -143,12 +143,14 @@ function makeRepresentationDeclarationRow(
 	overrides: Partial<{
 		status: RepresentationDeclarationStatus;
 		currentStep: number | null;
+		draft: unknown;
 		updatedAt: Date | null;
 	}> = {},
 ) {
 	return {
 		status: "draft" as const,
 		currentStep: 0,
+		draft: null,
 		updatedAt: null,
 		...overrides,
 	};
@@ -354,6 +356,23 @@ describe("companyRouter.getWithDeclarations", () => {
 			hasSubmittedJointEvaluation: false,
 			hasSubmittedCseOpinion: false,
 		});
+	});
+
+	it("points the representation row at the step last worked on (#4998)", async () => {
+		const { caller } = await makeCaller({
+			representationDeclarationRows: [
+				makeRepresentationDeclarationRow({
+					currentStep: 4,
+					draft: { currentStep: 4, lastStep: 2 },
+				}),
+			],
+		});
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(
+			result.declarations.find((d) => d.type === "representation"),
+		).toMatchObject({ currentStep: 2 });
 	});
 
 	it("never flags a submission on the representation row", async () => {

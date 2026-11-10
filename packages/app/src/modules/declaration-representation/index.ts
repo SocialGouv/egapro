@@ -2,6 +2,7 @@ export { Confirmation } from "./Confirmation";
 export { DeclarationLayout } from "./DeclarationLayout";
 export { RepresentationConsultation } from "./RepresentationConsultation";
 export { RepresentationPlayground } from "./RepresentationPlayground";
+export { getRepresentationResumeStep } from "./resumeStep";
 export { StepPageClient } from "./StepPageClient";
 export { Stepper } from "./Stepper";
 export { SubjectionScreen } from "./SubjectionScreen";

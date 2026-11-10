@@ -362,6 +362,7 @@ type WorkforceRowProps = {
 	pos: Props["onPositiveNumberChange"];
 	blur: Props["onHeadcountBlur"];
 	onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+	showTooltip: boolean;
 };
 
 function CategoryWorkforceRow({
@@ -373,6 +374,7 @@ function CategoryWorkforceRow({
 	pos,
 	blur,
 	onKeyDown,
+	showTooltip,
 }: WorkforceRowProps) {
 	const women = Number.parseInt(cat[row.womenField], 10);
 	const men = Number.parseInt(cat[row.menField], 10);
@@ -406,7 +408,11 @@ function CategoryWorkforceRow({
 		<tr className={stepStyles.dataRow}>
 			<WorkforceRowHeader
 				row={row.workforceRow}
-				tooltipId={`tooltip-cat-${catIndex}-${row.workforceRow.basis}`}
+				tooltipId={
+					showTooltip
+						? `tooltip-cat-${catIndex}-${row.workforceRow.basis}`
+						: undefined
+				}
 			/>
 			{countCell(row.womenField, "women")}
 			{countCell(row.menField, "men")}
@@ -505,6 +511,7 @@ export function CategoryDataTable({
 								pos={pos}
 								readOnly={readOnly}
 								row={row}
+								showTooltip={!sameWorkforceByPayBasis}
 							/>
 						))}
 					</tbody>

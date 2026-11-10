@@ -10,7 +10,12 @@ import {
 } from "vitest";
 
 import { env } from "~/env.js";
-import { getDefaultCampaignDeadlineColumns } from "~/modules/domain";
+import {
+	getDefaultCampaignDeadlineColumns,
+	getPathChoiceDeadline,
+	getPathChoiceRound1Deadline,
+	toPersistedIsoDate,
+} from "~/modules/domain";
 import { appRouter } from "~/server/api/root";
 import { db } from "~/server/db";
 
@@ -25,6 +30,8 @@ type CampaignDeadlineRow = {
 	decl2_justification_deadline: string;
 	decl2_joint_evaluation_deadline: string;
 	decl2_cse_opinion_deadline: string;
+	path_choice_round1_deadline: string | null;
+	path_choice_deadline: string | null;
 };
 
 describe("adminSettings — each settings block only writes its own columns (real Postgres)", () => {
@@ -77,7 +84,9 @@ describe("adminSettings — each settings block only writes its own columns (rea
 				decl2_modification_deadline::text,
 				decl2_justification_deadline::text,
 				decl2_joint_evaluation_deadline::text,
-				decl2_cse_opinion_deadline::text
+				decl2_cse_opinion_deadline::text,
+				path_choice_round1_deadline::text,
+				path_choice_deadline::text
 			FROM app_campaign_deadline
 			WHERE year = ${year}
 		`;
@@ -190,6 +199,8 @@ describe("adminSettings — each settings block only writes its own columns (rea
 			decl2ModificationDeadline: STORED_ROW.decl2ModificationDeadline,
 			decl2JointEvaluationDeadline: STORED_ROW.decl2JointEvaluationDeadline,
 			decl2CseOpinionDeadline: STORED_ROW.decl2CseOpinionDeadline,
+			pathChoiceRound1Deadline: "2097-07-15",
+			pathChoiceDeadline: "2098-01-15",
 		});
 
 		expect(await readRow(CONFIGURED_YEAR)).toEqual({
@@ -203,6 +214,8 @@ describe("adminSettings — each settings block only writes its own columns (rea
 			decl2_justification_deadline: STORED_ROW.decl2JustificationDeadline,
 			decl2_joint_evaluation_deadline: STORED_ROW.decl2JointEvaluationDeadline,
 			decl2_cse_opinion_deadline: STORED_ROW.decl2CseOpinionDeadline,
+			path_choice_round1_deadline: "2097-07-15",
+			path_choice_deadline: "2098-01-15",
 		});
 	});
 
@@ -216,6 +229,8 @@ describe("adminSettings — each settings block only writes its own columns (rea
 			decl2ModificationDeadline: STORED_ROW.decl2ModificationDeadline,
 			decl2JointEvaluationDeadline: STORED_ROW.decl2JointEvaluationDeadline,
 			decl2CseOpinionDeadline: STORED_ROW.decl2CseOpinionDeadline,
+			pathChoiceRound1Deadline: "2097-07-01",
+			pathChoiceDeadline: "2098-01-01",
 			decl1JustificationDeadline: "2099-01-01",
 			decl2JustificationDeadline: "2099-02-01",
 		} as never);
@@ -234,6 +249,8 @@ describe("adminSettings — each settings block only writes its own columns (rea
 			decl2ModificationDeadline: "2098-12-01",
 			decl2JointEvaluationDeadline: "2099-01-01",
 			decl2CseOpinionDeadline: "2099-02-01",
+			pathChoiceRound1Deadline: "2098-07-01",
+			pathChoiceDeadline: "2099-01-01",
 		});
 
 		const defaults = getDefaultCampaignDeadlineColumns(UNCONFIGURED_YEAR);
@@ -248,6 +265,8 @@ describe("adminSettings — each settings block only writes its own columns (rea
 			decl2_justification_deadline: defaults.decl2JustificationDeadline,
 			decl2_joint_evaluation_deadline: "2099-01-01",
 			decl2_cse_opinion_deadline: "2099-02-01",
+			path_choice_round1_deadline: "2098-07-01",
+			path_choice_deadline: "2099-01-01",
 		});
 	});
 
@@ -271,7 +290,24 @@ describe("adminSettings — each settings block only writes its own columns (rea
 			decl2_justification_deadline: STORED_ROW.decl2JustificationDeadline,
 			decl2_joint_evaluation_deadline: STORED_ROW.decl2JointEvaluationDeadline,
 			decl2_cse_opinion_deadline: STORED_ROW.decl2CseOpinionDeadline,
+			path_choice_round1_deadline: null,
+			path_choice_deadline: null,
 		});
+	});
+
+	it("reads the computed path choice deadlines for a year saved before they were configurable (#4711)", async () => {
+		await insertConfiguredYear();
+
+		const result = await createCaller().getDeadlinesByYear({
+			year: CONFIGURED_YEAR,
+		});
+
+		expect(result.pathChoiceRound1Deadline).toBe(
+			toPersistedIsoDate(getPathChoiceRound1Deadline(CONFIGURED_YEAR)),
+		);
+		expect(result.pathChoiceDeadline).toBe(
+			toPersistedIsoDate(getPathChoiceDeadline(CONFIGURED_YEAR)),
+		);
 	});
 
 	it("refuses the common calendar of an unconfigured year and creates no row", async () => {

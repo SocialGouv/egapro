@@ -120,13 +120,14 @@ export function Step6Review({
 		} catch {
 			// Tracking is best effort; the declaration is already submitted.
 		}
-		if (complianceProcessRequired) {
+		if (complianceProcessRequired || cseOpinionRequired) {
 			markDeclarationTransmissionSuccess();
 		}
 		finishSubmission();
 	}, [
 		companyWorkforce,
 		complianceProcessRequired,
+		cseOpinionRequired,
 		declarationYear,
 		finishSubmission,
 	]);

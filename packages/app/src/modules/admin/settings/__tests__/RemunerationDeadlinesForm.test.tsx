@@ -154,8 +154,12 @@ describe("RemunerationDeadlinesForm", () => {
 		]);
 	});
 
-	it("populates the five editable deadlines from the query", async () => {
+	it("populates the seven editable deadlines from the query", async () => {
 		await renderLoaded();
+		expect(inputById("settings-pathChoiceRound1Deadline")).toHaveValue(
+			"2027-07-01",
+		);
+		expect(inputById("settings-pathChoiceDeadline")).toHaveValue("2028-01-01");
 		expect(inputById("settings-decl1JointEvaluationDeadline")).toHaveValue(
 			"2027-08-01",
 		);
@@ -181,7 +185,7 @@ describe("RemunerationDeadlinesForm", () => {
 		expect(screen.queryByLabelText(/justification des écarts/i)).toBeNull();
 	});
 
-	it("shows the derived path choice deadlines read-only in each round, without hint", async () => {
+	it("lets the admin edit the path choice deadline of each round, as its first field (#4711)", async () => {
 		await renderLoaded();
 		const round1 = within(
 			fieldsetByLegend("Parcours de mise en conformité — 1er tour"),
@@ -192,11 +196,15 @@ describe("RemunerationDeadlinesForm", () => {
 
 		expect(round1).toHaveValue("2027-07-01");
 		expect(round2).toHaveValue("2028-01-01");
-		for (const field of [round1, round2]) {
-			expect(field).toHaveAttribute("readonly");
+		for (const [field, legend] of [
+			[round1, "Parcours de mise en conformité — 1er tour"],
+			[round2, "Parcours de mise en conformité — 2nd tour"],
+		] as const) {
+			expect(field).not.toHaveAttribute("readonly");
+			expect(field).toBeRequired();
 			expect(field).toHaveAccessibleName("Échéance pour le choix du parcours");
+			expect(fieldsetByLegend(legend).querySelector("input")).toBe(field);
 		}
-		expect(screen.queryByText(/calculée — non paramétrable/i)).toBeNull();
 	});
 
 	it("shows the GIP date read-only as the first field of the declaration group, in French format", async () => {
@@ -289,7 +297,7 @@ describe("RemunerationDeadlinesForm", () => {
 		expect(screen.queryByText(/date limite/i)).not.toBeInTheDocument();
 	});
 
-	it("submits only the year and the five deadlines, never the derived, justification, GIP or common dates", async () => {
+	it("submits only the year and the seven editable deadlines, never the justification, GIP or common dates", async () => {
 		await renderLoaded();
 		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
 		await waitFor(() => expect(upsertMutate).toHaveBeenCalled());
@@ -300,6 +308,20 @@ describe("RemunerationDeadlinesForm", () => {
 			decl2ModificationDeadline: "2027-12-01",
 			decl2JointEvaluationDeadline: "2028-01-01",
 			decl2CseOpinionDeadline: "2028-02-01",
+			pathChoiceRound1Deadline: "2027-07-01",
+			pathChoiceDeadline: "2028-01-01",
+		});
+	});
+
+	it("submits an edited path choice deadline (#4711)", async () => {
+		await renderLoaded();
+		fireEvent.change(inputById("settings-pathChoiceRound1Deadline"), {
+			target: { value: "2027-07-15" },
+		});
+		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
+		await waitFor(() => expect(upsertMutate).toHaveBeenCalled());
+		expect(upsertMutate.mock.calls[0]?.[0]).toMatchObject({
+			pathChoiceRound1Deadline: "2027-07-15",
 		});
 	});
 
@@ -420,13 +442,13 @@ describe("RemunerationDeadlinesForm", () => {
 		const requiredInputs = Array.from(
 			document.querySelectorAll<HTMLInputElement>("input[required]"),
 		);
-		expect(requiredInputs).toHaveLength(5);
+		expect(requiredInputs).toHaveLength(7);
 		for (const input of requiredInputs) {
 			expect(input).toHaveAccessibleDescription(mention);
 		}
 	});
 
-	it("does not cite the mention on the read-only derived deadlines", () => {
+	it("does not cite the mention on the read-only GIP date", () => {
 		render(<RemunerationDeadlinesForm year={2027} />);
 		for (const input of document.querySelectorAll("input[readonly]")) {
 			expect(input).not.toBeRequired();
