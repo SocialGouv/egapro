@@ -77,7 +77,7 @@ export function CompanyInfoBanner({ company }: Props) {
 					)}
 				</div>
 
-				<dl className={`${styles.infoRow} fr-mb-1w`}>
+				<dl className={`${styles.infoRow} fr-mb-1w fr-text-title--grey`}>
 					<div className={styles.datapoint}>
 						<dt>SIREN :</dt>
 						<dd>
@@ -94,7 +94,7 @@ export function CompanyInfoBanner({ company }: Props) {
 					)}
 				</dl>
 
-				<dl className={styles.infoRow}>
+				<dl className={`${styles.infoRow} fr-text-title--grey`}>
 					{company.nafCode && (
 						<div className={styles.datapoint}>
 							<dt>Code NAF :</dt>

@@ -266,30 +266,16 @@ describe("cseOpinionRouter", () => {
 			expect(mockAssembleCseOpinionRecap).not.toHaveBeenCalled();
 		});
 
-		it("returns the shared recap with the joint evaluation flag", async () => {
+		it("returns the shared recap as is", async () => {
 			mockFindTransmittedCseOpinions.mockResolvedValue(transmitted);
 			mockAssembleCseOpinionRecap.mockResolvedValue(recap);
-			mockFindTransmittedJointEvaluation.mockResolvedValue({
-				submission: {},
-				file: {},
-			});
 			const caller = await createCaller(createMockDb());
 
 			const result = await caller.getSubmittedView();
 
 			expect(mockAssembleCseOpinionRecap).toHaveBeenCalledWith(transmitted);
-			expect(result).toEqual({ ...recap, hasSubmittedJointEvaluation: true });
-		});
-
-		it("does not offer a joint report without a transmitted one", async () => {
-			mockFindTransmittedCseOpinions.mockResolvedValue(transmitted);
-			mockAssembleCseOpinionRecap.mockResolvedValue(recap);
-			mockFindTransmittedJointEvaluation.mockResolvedValue(null);
-			const caller = await createCaller(createMockDb());
-
-			const result = await caller.getSubmittedView();
-
-			expect(result.hasSubmittedJointEvaluation).toBe(false);
+			expect(mockFindTransmittedJointEvaluation).not.toHaveBeenCalled();
+			expect(result).toEqual(recap);
 		});
 	});
 
@@ -450,12 +436,72 @@ describe("cseOpinionRouter", () => {
 				expect.objectContaining({ select: mockSelect, delete: mockDelete }),
 				"decl-1",
 			);
-			const [insertOrder] = mockValues.mock.invocationCallOrder;
-			const [pruneOrder] =
-				mockPruneStaleContentTypeAssociations.mock.invocationCallOrder;
-			expect(insertOrder).toBeDefined();
-			expect(pruneOrder).toBeDefined();
-			expect(insertOrder as number).toBeLessThan(pruneOrder as number);
+		});
+
+		it("neither rewrites the opinions nor dates the draft when the submitted values are unchanged", async () => {
+			const mockDb = createMockDb(
+				[],
+				[
+					[{ id: "decl-1" }],
+					[
+						{
+							declarationNumber: 1,
+							type: "accuracy",
+							gapConsulted: null,
+							opinion: "favorable",
+							opinionDate: "2026-01-15",
+						},
+						{
+							declarationNumber: 1,
+							type: "gap",
+							gapConsulted: true,
+							opinion: "unfavorable",
+							opinionDate: "2026-01-16",
+						},
+					],
+				],
+			);
+			const caller = await createCaller(mockDb);
+
+			await caller.saveOpinions(validInput);
+
+			expect(mockUpdate).not.toHaveBeenCalled();
+			expect(mockDelete).not.toHaveBeenCalled();
+			expect(mockInsert).not.toHaveBeenCalled();
+			expect(mockPruneStaleContentTypeAssociations).toHaveBeenCalledTimes(1);
+		});
+
+		it("dates the draft when at least one submitted value changed", async () => {
+			const mockDb = createMockDb(
+				[],
+				[
+					[{ id: "decl-1" }],
+					[
+						{
+							declarationNumber: 1,
+							type: "accuracy",
+							gapConsulted: null,
+							opinion: "unfavorable",
+							opinionDate: "2026-01-15",
+						},
+						{
+							declarationNumber: 1,
+							type: "gap",
+							gapConsulted: true,
+							opinion: "unfavorable",
+							opinionDate: "2026-01-16",
+						},
+					],
+				],
+			);
+			const caller = await createCaller(mockDb);
+
+			await caller.saveOpinions(validInput);
+
+			expect(mockSet).toHaveBeenCalledWith({
+				cseOpinionDraftUpdatedAt: expect.any(Date),
+			});
+			expect(mockInsert).toHaveBeenCalled();
 		});
 
 		it("inserts second declaration opinions when provided", async () => {

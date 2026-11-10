@@ -5,11 +5,13 @@ import type { AuditCategory } from "../types";
  *  - Access logs / sensitive reads (high volume, contains IP)            → 6 months
  *  - Auth events / mutations / exports / system actions (security logs)  → 12 months
  *
- * Values are overridable via environment variables
- * (`EGAPRO_AUDIT_RETENTION_SHORT_DAYS`, `EGAPRO_AUDIT_RETENTION_LONG_DAYS`).
+ * Default values applied by `scripts/audit-cleanup.ts`, which lets
+ * `EGAPRO_AUDIT_RETENTION_SHORT_DAYS`, `EGAPRO_AUDIT_RETENTION_LONG_DAYS` and
+ * `EGAPRO_ADMIN_IMPERSONATION_RETENTION_DAYS` override them.
  */
 export const AUDIT_RETENTION_DAYS_SHORT = 180;
 export const AUDIT_RETENTION_DAYS_LONG = 365;
+export const ADMIN_IMPERSONATION_RETENTION_DAYS = 365;
 
 /**
  * Categories under the short retention policy.

@@ -317,7 +317,9 @@ const VALIDATORS: Record<MetadataField, Validator> = {
 	type: oneOf(RECEIPT_TYPES),
 	kind: oneOf(RECEIPT_KINDS),
 	variant: oneOf(RECEIPT_VARIANTS),
-	acr: oneOf(new Set(["eidas1", "eidas1-mfa", "eidas2", "eidas3"])),
+	acr: oneOf(
+		new Set(["eidas0-mfa", "eidas1", "eidas1-mfa", "eidas2", "eidas3"]),
+	),
 	authTime: boundedInteger(4102444800),
 };
 

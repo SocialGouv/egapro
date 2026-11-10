@@ -6,7 +6,7 @@ const { mockEnv } = vi.hoisted(() => ({
 	mockEnv: {
 		ADMIN_EMAILS: "agent@example.fr",
 		EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT: true as boolean,
-		EGAPRO_E2E_ADMIN_MFA: false as boolean,
+		EGAPRO_E2E_MFA: false as boolean,
 		EGAPRO_DEV_AUTH: false as boolean,
 		NODE_ENV: "production" as "development" | "test" | "production",
 	},
@@ -90,7 +90,7 @@ async function signIn({
 			organizationLabel?: string | null;
 		},
 		account: {
-			id_token: idToken({ acr: "eidas1-mfa", auth_time: AUTH_TIME }),
+			id_token: idToken({ acr: "eidas2", auth_time: AUTH_TIME }),
 		} as Account,
 		trigger: "signIn",
 	} as unknown as Parameters<typeof callbacks.jwt>[0]);

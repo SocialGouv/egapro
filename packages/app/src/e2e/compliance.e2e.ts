@@ -155,10 +155,13 @@ test.describe("[CAS-06] Path 4: gap + hasCse → joint evaluation → /avis-cse"
 			await setCompanyWorkforce(coordinate.workforce);
 		});
 
-		test("joint evaluation banner, then a single accuracy opinion to transmit", async ({
+		test("joint evaluation banner on arrival only, then a single accuracy opinion to transmit", async ({
 			page,
 		}) => {
 			test.slow();
+			const jointEvaluationBanner = page.getByText(
+				"Votre évaluation conjointe des rémunérations a été transmise",
+			);
 			await completeDeclaration(page, { hasGap: true });
 			await selectCompliancePath(page, "path-joint", {
 				gapJustification: "none",
@@ -175,17 +178,24 @@ test.describe("[CAS-06] Path 4: gap + hasCse → joint evaluation → /avis-cse"
 						name: "Parcours de mise en conformité pour l'indicateur par catégorie d'emplois",
 					}),
 				).toBeVisible();
-				await expect(
-					page.getByText(
-						"Votre évaluation conjointe des rémunérations a été transmise",
-					),
-				).toBeVisible();
+				await expect(jointEvaluationBanner).toBeVisible();
 				await expect(
 					page.getByRole("heading", {
 						level: 2,
 						name: "Transmission du ou des avis du CSE",
 					}),
 				).toBeVisible();
+			});
+
+			await test.step("une nouvelle visite de l'étape 1 n'affiche plus le bandeau", async () => {
+				await page.reload();
+				await expect(
+					page.getByRole("heading", {
+						level: 1,
+						name: "Transmission du ou des avis du CSE",
+					}),
+				).toBeVisible();
+				await expect(jointEvaluationBanner).toHaveCount(0);
 			});
 
 			await fillCseStep1(page);

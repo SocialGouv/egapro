@@ -34,9 +34,11 @@ vi.mock("../JointEvaluationForm", () => ({
 	JointEvaluationForm: ({
 		jointEvaluationDeadline,
 		existingFile,
+		jointEvaluationRound,
 	}: {
 		jointEvaluationDeadline: Date;
 		existingFile: { fileName: string } | null;
+		jointEvaluationRound: 1 | 2;
 	}) => (
 		<div>
 			<span data-testid="joint-evaluation-deadline">
@@ -45,6 +47,7 @@ vi.mock("../JointEvaluationForm", () => ({
 			<span data-testid="existing-file">
 				{existingFile?.fileName ?? "none"}
 			</span>
+			<span data-testid="joint-evaluation-round">{jointEvaluationRound}</span>
 		</div>
 	),
 }));
@@ -129,6 +132,23 @@ describe("JointEvaluationPage", () => {
 				"fr-FR",
 			),
 		);
+	});
+
+	it("tells the form which transmission round it is completing", async () => {
+		mockDeclaration({ firstDeclarationPathChoice: "joint_evaluation" }, null);
+		const first = render(await JointEvaluationPage());
+		expect(screen.getByTestId("joint-evaluation-round")).toHaveTextContent("1");
+		first.unmount();
+
+		mockDeclaration(
+			{
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: "joint_evaluation",
+			},
+			null,
+		);
+		render(await JointEvaluationPage());
+		expect(screen.getByTestId("joint-evaluation-round")).toHaveTextContent("2");
 	});
 
 	it("never serves the CSE opinion deadline, which closes a later step", async () => {

@@ -9,6 +9,7 @@ import userEvent from "@testing-library/user-event";
 import { useSession } from "next-auth/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { consumeJointEvaluationTransmissionSuccess } from "~/modules/declaration-remuneration/shared/declarationSuccessFlash";
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { formatLongDate } from "~/modules/domain";
 import { JointEvaluationForm } from "../JointEvaluationForm";
@@ -26,21 +27,43 @@ vi.mock("~/modules/shared/uploadFile", () => ({
 }));
 
 const submitJointEvaluationMock = vi.fn();
+const submitJointEvaluationOutcome = { fails: false, isPending: false };
+const transmittedRoundFetchMock = vi.fn();
+
+const { submitJointEvaluationShouldSucceed } = vi.hoisted(() => ({
+	submitJointEvaluationShouldSucceed: { current: true },
+}));
 
 vi.mock("~/trpc/react", () => ({
 	api: {
+		useUtils: () => ({
+			jointEvaluation: {
+				transmittedRound: { fetch: transmittedRoundFetchMock },
+			},
+		}),
 		declaration: {
 			submitJointEvaluation: {
 				useMutation: () => ({
 					mutate: (
 						_input: undefined,
-						opts?: { onSettled?: () => void; onSuccess?: () => void },
+						opts?: {
+							onError?: () => void;
+							onSettled?: () => void;
+							onSuccess?: () => void;
+						},
 					) => {
 						submitJointEvaluationMock();
-						opts?.onSuccess?.();
+						if (
+							submitJointEvaluationShouldSucceed.current &&
+							!submitJointEvaluationOutcome.fails
+						) {
+							opts?.onSuccess?.();
+						} else {
+							opts?.onError?.();
+						}
 						opts?.onSettled?.();
 					},
-					isPending: false,
+					isPending: submitJointEvaluationOutcome.isPending,
 					error: null,
 				}),
 			},
@@ -58,11 +81,16 @@ const defaultProps = {
 	declarationYear: 2026,
 	existingFile: null,
 	jointEvaluationDeadline: new Date("2026-08-01T00:00:00Z"),
+	jointEvaluationRound: 1 as const,
 };
 
 describe("JointEvaluationForm", () => {
 	beforeEach(() => {
 		uploadFileMock.mockReset();
+		submitJointEvaluationShouldSucceed.current = true;
+		submitJointEvaluationOutcome.fails = false;
+		submitJointEvaluationOutcome.isPending = false;
+		transmittedRoundFetchMock.mockReset();
 		// jsdom doesn't implement <dialog>; stub showModal/close so the dialog
 		// actually toggles its `open` attribute and its contents become visible
 		// to Testing Library queries.
@@ -89,7 +117,7 @@ describe("JointEvaluationForm", () => {
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole("heading", {
-				name: "Évaluation conjointe des rémunérations",
+				name: "Transmission du rapport de l'évaluation conjointe des rémunérations",
 				level: 2,
 			}),
 		).toBeInTheDocument();
@@ -126,7 +154,7 @@ describe("JointEvaluationForm", () => {
 
 		expect(
 			screen.getByRole("group", {
-				name: "Évaluation conjointe des rémunérations",
+				name: "Transmission du rapport de l'évaluation conjointe des rémunérations",
 			}),
 		).toBeInTheDocument();
 	});
@@ -363,6 +391,160 @@ describe("JointEvaluationForm", () => {
 		await waitFor(() => {
 			expect(mockPush).toHaveBeenCalledWith(expectedRedirect);
 		});
+		expect(consumeJointEvaluationTransmissionSuccess()).toBe(
+			cseOpinionRequired,
+		);
+	});
+
+	it("does not mark the joint evaluation transmission signal when the submission mutation fails", async () => {
+		submitJointEvaluationShouldSucceed.current = false;
+		const user = userEvent.setup();
+		uploadFileMock.mockResolvedValue({
+			ok: true,
+			fileId: "file-1",
+			fileName: "rapport.pdf",
+		});
+
+		const { container } = render(
+			<JointEvaluationForm {...defaultProps} cseOpinionRequired={true} />,
+		);
+
+		const input = container.querySelector(
+			'input[type="file"]',
+		) as HTMLInputElement;
+		const file = new File(["pdf-content"], "rapport.pdf", {
+			type: "application/pdf",
+		});
+		fireEvent.change(input, { target: { files: [file] } });
+
+		fireEvent.click(screen.getByRole("button", { name: /transmettre/i }));
+
+		await user.click(screen.getByRole("checkbox"));
+		await user.click(screen.getByRole("button", { name: "Valider" }));
+
+		await waitFor(() => {
+			expect(submitJointEvaluationMock).toHaveBeenCalledTimes(1);
+		});
+		expect(mockPush).not.toHaveBeenCalled();
+		expect(consumeJointEvaluationTransmissionSuccess()).toBe(false);
+	});
+
+	describe("when the transmission fails after the upload", () => {
+		async function uploadThenConfirm(
+			props: { jointEvaluationRound?: 1 | 2 } = {},
+		) {
+			const user = userEvent.setup();
+			uploadFileMock.mockResolvedValue({
+				ok: true,
+				fileId: "file-1",
+				fileName: "rapport.pdf",
+			});
+			const { container } = render(
+				<JointEvaluationForm {...defaultProps} {...props} cseOpinionRequired />,
+			);
+			const input = container.querySelector(
+				'input[type="file"]',
+			) as HTMLInputElement;
+			fireEvent.change(input, {
+				target: {
+					files: [
+						new File(["pdf-content"], "rapport.pdf", {
+							type: "application/pdf",
+						}),
+					],
+				},
+			});
+			fireEvent.click(screen.getByRole("button", { name: /transmettre/i }));
+			await user.click(screen.getByRole("checkbox"));
+			await user.click(screen.getByRole("button", { name: "Valider" }));
+			await waitFor(() => {
+				expect(submitJointEvaluationMock).toHaveBeenCalledTimes(1);
+			});
+			return user;
+		}
+
+		beforeEach(() => {
+			submitJointEvaluationOutcome.fails = true;
+		});
+
+		it("stays on the page and lists the just-uploaded report while it is not transmitted", async () => {
+			transmittedRoundFetchMock.mockResolvedValue(null);
+
+			await uploadThenConfirm();
+
+			await waitFor(() => {
+				expect(transmittedRoundFetchMock).toHaveBeenCalledWith(undefined, {
+					staleTime: 0,
+				});
+			});
+			expect(mockPush).not.toHaveBeenCalled();
+			expect(screen.getByText("Rapport déjà déposé")).toBeInTheDocument();
+			expect(
+				screen.getByRole("link", { name: /rapport\.pdf/ }),
+			).toHaveAttribute("href", "/api/v1/files/file-1");
+		});
+
+		it("lets the next submit confirm the just-uploaded report without a new file", async () => {
+			transmittedRoundFetchMock.mockResolvedValue(null);
+			const user = await uploadThenConfirm();
+			await waitFor(() => {
+				expect(transmittedRoundFetchMock).toHaveBeenCalledTimes(1);
+			});
+
+			fireEvent.click(screen.getByRole("button", { name: /transmettre/i }));
+			expect(
+				screen.queryByText(
+					/le rapport de l'évaluation conjointe est manquant/i,
+				),
+			).not.toBeInTheDocument();
+			expect(screen.getByRole("checkbox")).toBeChecked();
+			await user.click(screen.getByRole("button", { name: "Valider" }));
+
+			await waitFor(() => {
+				expect(submitJointEvaluationMock).toHaveBeenCalledTimes(2);
+			});
+			expect(uploadFileMock).toHaveBeenCalledTimes(1);
+		});
+
+		it("moves on when the transmission of this round was committed before the response was lost", async () => {
+			transmittedRoundFetchMock.mockResolvedValue(1);
+
+			await uploadThenConfirm();
+
+			await waitFor(() => {
+				expect(mockPush).toHaveBeenCalledWith("/avis-cse");
+			});
+		});
+
+		it("stays on the page when an earlier round was transmitted but this one was not", async () => {
+			transmittedRoundFetchMock.mockResolvedValue(1);
+
+			await uploadThenConfirm({ jointEvaluationRound: 2 });
+
+			await waitFor(() => {
+				expect(transmittedRoundFetchMock).toHaveBeenCalledTimes(1);
+			});
+			expect(mockPush).not.toHaveBeenCalled();
+		});
+
+		it("stays on the page when the transmission state cannot be re-read", async () => {
+			transmittedRoundFetchMock.mockRejectedValue(new Error("network"));
+
+			await uploadThenConfirm();
+
+			await waitFor(() => {
+				expect(transmittedRoundFetchMock).toHaveBeenCalledTimes(1);
+			});
+			expect(mockPush).not.toHaveBeenCalled();
+		});
+	});
+
+	it("disables the submit button while the transmission is pending", () => {
+		submitJointEvaluationOutcome.isPending = true;
+
+		render(<JointEvaluationForm {...defaultProps} />);
+
+		expect(screen.getByRole("button", { name: /transmettre/i })).toBeDisabled();
 	});
 
 	describe("rapport déjà déposé (#4222)", () => {
@@ -414,6 +596,34 @@ describe("JointEvaluationForm", () => {
 			expect(
 				screen.getByRole("button", { name: /transmettre/i }),
 			).toBeInTheDocument();
+		});
+
+		it("transmits the stored report without asking for a new file", async () => {
+			const user = userEvent.setup();
+			render(
+				<JointEvaluationForm
+					{...defaultProps}
+					cseOpinionRequired
+					existingFile={existingFile}
+				/>,
+			);
+
+			fireEvent.click(screen.getByRole("button", { name: /transmettre/i }));
+
+			expect(
+				screen.queryByText(
+					/le rapport de l'évaluation conjointe est manquant/i,
+				),
+			).not.toBeInTheDocument();
+
+			await user.click(screen.getByRole("checkbox"));
+			await user.click(screen.getByRole("button", { name: "Valider" }));
+
+			await waitFor(() => {
+				expect(submitJointEvaluationMock).toHaveBeenCalledTimes(1);
+			});
+			expect(uploadFileMock).not.toHaveBeenCalled();
+			expect(mockPush).toHaveBeenCalledWith("/avis-cse");
 		});
 
 		it("renders no deposited-report block when no file exists yet", () => {

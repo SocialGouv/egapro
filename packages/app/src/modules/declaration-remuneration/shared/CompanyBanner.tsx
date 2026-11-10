@@ -38,7 +38,7 @@ export function CompanyBanner({
 					]}
 				/>
 
-				<div className={styles.companyRow}>
+				<div className={`${styles.companyRow} fr-text-title--grey`}>
 					<p className="fr-text--bold fr-mb-0">{company.name}</p>
 
 					<div className={styles.datapoint}>

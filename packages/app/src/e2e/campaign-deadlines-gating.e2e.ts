@@ -325,6 +325,13 @@ test.describe("Campaign deadlines are informational; only the last submission is
 					row.getByRole("link", { name: "Modifier", exact: true }),
 				).toHaveCount(0);
 			}
+
+			await transmittedRow(page, CSE_OPINION_ROW)
+				.getByRole("link", { name: "Modifier", exact: true })
+				.click();
+			await page.waitForURL(urlGlob(cseOpinionStepHref(1)), {
+				timeout: 15_000,
+			});
 		});
 	});
 

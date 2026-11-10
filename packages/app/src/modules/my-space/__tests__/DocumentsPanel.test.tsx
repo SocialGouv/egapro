@@ -23,15 +23,11 @@ import type { DeclarationItem } from "../types";
 const DECLARATION_YEAR = 2026;
 const SUBTITLE = `Année ${DECLARATION_YEAR} au titre des données ${getReferenceYearFor(DECLARATION_YEAR)}`;
 
-const PREFILL_TITLE =
-	"Télécharger les données préremplies (issues des données DSN)";
-const RECAP_TITLE =
-	"Télécharger le récapitulatif de la déclaration des indicateurs";
-const CSE_OPINION_TITLE =
-	"Télécharger le récapitulatif de la transmission du ou des avis du CSE";
-const SECOND_TITLE = "Télécharger le récapitulatif de la seconde déclaration";
-const JOINT_EVALUATION_TITLE =
-	"Télécharger le récapitulatif de l'évaluation conjointe des rémunérations";
+const PREFILL_TITLE = `Télécharger les données préremplies : Déclaration des indicateurs de rémunération ${DECLARATION_YEAR}`;
+const RECAP_TITLE = `Télécharger le récapitulatif : Déclaration des indicateurs de rémunération ${DECLARATION_YEAR}`;
+const CSE_OPINION_TITLE = `Télécharger le récapitulatif : Transmission du ou des avis du CSE ${DECLARATION_YEAR}`;
+const SECOND_TITLE = `Télécharger le récapitulatif : Seconde déclaration des écarts de rémunération par catégorie d'emplois ${DECLARATION_YEAR}`;
+const JOINT_EVALUATION_TITLE = `Télécharger le récapitulatif : Transmission du rapport de l'évaluation conjointe des rémunérations ${DECLARATION_YEAR}`;
 const REPRESENTATION_RECAP_TITLE =
 	"Télécharger le récapitulatif de la déclaration";
 

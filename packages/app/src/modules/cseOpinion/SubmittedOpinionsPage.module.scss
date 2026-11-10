@@ -58,6 +58,17 @@
 	padding: 0;
 }
 
+.filesTable {
+	// DSFR réserve la hauteur de la légende dans `--table-offset` (padding du
+	// tableau et de son conteneur) : même masquée, elle ajoutait 17px et portait
+	// l'écart titre → tableau à 49px au lieu des 32px de la maquette.
+	padding-top: 0;
+
+	:global(.fr-table__container) {
+		padding-top: 0;
+	}
+}
+
 .fileCell {
 	max-width: 20.375rem;
 	font-weight: normal;

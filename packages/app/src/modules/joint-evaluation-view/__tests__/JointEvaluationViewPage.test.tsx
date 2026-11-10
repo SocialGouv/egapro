@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
 	select: vi.fn(),
 	companyGet: vi.fn(),
 	fileGet: vi.fn(),
+	getFileSize: vi.fn(),
 	notFound: vi.fn(() => {
 		throw new Error("NEXT_NOT_FOUND");
 	}),
@@ -17,6 +18,7 @@ vi.mock("~/server/auth/companyAccess", () => ({
 	resolveAuthorizedSiren: mocks.resolveAuthorizedSiren,
 }));
 vi.mock("~/server/db", () => ({ db: { select: mocks.select } }));
+vi.mock("~/server/services/s3", () => ({ getFileSize: mocks.getFileSize }));
 vi.mock("~/trpc/server", () => ({
 	api: {
 		company: { get: mocks.companyGet },
@@ -118,8 +120,30 @@ describe("JointEvaluationViewPage", () => {
 			fileName: "rapport.pdf",
 			uploadedAt: new Date("2027-04-02T10:00:00Z"),
 		});
+		queueSelect([{ filePath: "joint-evaluation/rapport.pdf" }]);
+		mocks.getFileSize.mockResolvedValue(16026);
 		const element = await JointEvaluationViewPage();
 		expect(element.props.referencePeriod).toBe("01/02/2026 - 31/01/2027");
 		expect(element.props.file.id).toBe("file-1");
+		expect(mocks.getFileSize).toHaveBeenCalledWith(
+			"joint-evaluation/rapport.pdf",
+		);
+		expect(element.props.file.sizeBytes).toBe(16026);
+	});
+
+	it("passes a null size when the stored file row cannot be found", async () => {
+		queueSelect([declaration]);
+		queueSelect([{ createdAt: new Date("2027-04-03T12:00:00Z"), round: 1 }]);
+		queueSelect([]);
+		mocks.companyGet.mockResolvedValue({ siren: "123456789" });
+		mocks.fileGet.mockResolvedValue({
+			id: "file-1",
+			fileName: "rapport.pdf",
+			uploadedAt: new Date("2027-04-02T10:00:00Z"),
+		});
+		queueSelect([]);
+		const element = await JointEvaluationViewPage();
+		expect(mocks.getFileSize).not.toHaveBeenCalled();
+		expect(element.props.file.sizeBytes).toBeNull();
 	});
 });

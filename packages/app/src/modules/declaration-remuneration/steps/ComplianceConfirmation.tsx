@@ -1,6 +1,7 @@
 import { getReferenceYearFor } from "~/modules/domain";
 import { DemarcheConfirmation } from "~/modules/shared/DemarcheConfirmation";
 import { buildRemunerationDocuments } from "~/modules/shared/demarcheDocuments";
+import { REMUNERATION_PUBLICATION_EXCEPTION } from "~/modules/shared/ResultsPublicationNotice";
 import { findTransmittedJointEvaluation } from "~/server/api/routers/declarationHelpers";
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
@@ -28,6 +29,7 @@ export async function ComplianceConfirmation() {
 				year: currentYear,
 			})}
 			email={session?.user?.email ?? "adresse@exemple.fr"}
+			publicationException={REMUNERATION_PUBLICATION_EXCEPTION}
 			receiptKind={
 				data.hasSubmittedSecondDeclaration ? "secondDeclaration" : "declaration"
 			}

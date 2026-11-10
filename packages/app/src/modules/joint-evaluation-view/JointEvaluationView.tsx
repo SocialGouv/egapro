@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
 	companyLocationRow,
+	formatLongDate,
 	formatShortDate,
 	formatWorkforceForUser,
 	getObligationWorkforce,
@@ -13,7 +14,11 @@ import {
 	apiV1FileHref,
 	MY_SPACE,
 } from "~/modules/routes";
-import { FileDownloadLink, FileFormatDetail } from "~/modules/shared";
+import {
+	FileDownloadLink,
+	FileFormatDetail,
+	formatFileMeta,
+} from "~/modules/shared";
 import styles from "./JointEvaluationView.module.scss";
 
 type InfoItem = { label: string; value: string };
@@ -37,7 +42,12 @@ type Props = {
 		email: string;
 		phone: string | null;
 	} | null;
-	file: { id: string; fileName: string; uploadedAt: Date };
+	file: {
+		id: string;
+		fileName: string;
+		uploadedAt: Date;
+		sizeBytes: number | null;
+	};
 	referencePeriod: string;
 	submittedAt: Date;
 	year: number;
@@ -142,11 +152,12 @@ export function JointEvaluationView({
 							<div className={styles.headingRow}>
 								<div>
 									<h1 className="fr-h4 fr-mb-2w">
-										Évaluation conjointe des rémunérations {year}
+										Transmission du rapport de l’évaluation conjointe des
+										rémunérations {year}
 									</h1>
 									<p className="fr-mb-0">
-										La déclaration a été transmise le{" "}
-										{formatShortDate(submittedAt)}
+										Le rapport de l’évaluation conjointe a été transmis le{" "}
+										{formatShortDate(submittedAt)}.
 									</p>
 								</div>
 								<div>
@@ -184,20 +195,27 @@ export function JointEvaluationView({
 								<h2 className="fr-h6 fr-mb-3w">
 									Évaluation conjointe des rémunérations
 								</h2>
-								<p className="fr-text--bold fr-mb-2w">Fichiers déposés</p>
-								<a
-									className="fr-link fr-icon-external-link-line fr-link--icon-right"
-									href={apiV1FileHref(file.id)}
-									rel="noopener noreferrer"
-									target="_blank"
-									title={`Visualiser ${file.fileName}`}
-								>
-									{file.fileName}
-									<NewTabNotice />
-								</a>
-								<p className="fr-text--xs fr-text-mention--grey fr-mb-0 fr-mt-1v">
-									Déposé le {formatShortDate(file.uploadedAt)} · PDF
-								</p>
+								<dl className={`fr-raw-list ${styles.infoList}`}>
+									<div className={styles.infoRow}>
+										<dt className={styles.infoLabel}>Fichier déposé</dt>
+										<dd className={styles.infoValue}>
+											<a
+												className="fr-link fr-icon-external-link-line fr-link--icon-right"
+												href={apiV1FileHref(file.id)}
+												rel="noopener noreferrer"
+												target="_blank"
+												title={`Visualiser ${file.fileName}`}
+											>
+												{file.fileName}
+												<NewTabNotice />
+											</a>
+											<p className="fr-text--xs fr-text-mention--grey fr-mb-0 fr-mt-1v">
+												{formatFileMeta("PDF", file.sizeBytes)} · déposé le{" "}
+												{formatLongDate(file.uploadedAt)}
+											</p>
+										</dd>
+									</div>
+								</dl>
 							</section>
 							<Link
 								className={`fr-btn fr-btn--secondary ${styles.bottomAction}`}

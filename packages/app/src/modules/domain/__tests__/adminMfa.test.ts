@@ -23,8 +23,8 @@ describe("ADMIN_MFA_WINDOW_SECONDS", () => {
 });
 
 describe("isAdminMfaAcr", () => {
-	it("accepts eidas1-mfa", () => {
-		expect(isAdminMfaAcr("eidas1-mfa")).toBe(true);
+	it("is exactly the strong backoffice set", () => {
+		expect([...ADMIN_MFA_ACR_VALUES]).toEqual(["eidas2", "eidas3"]);
 	});
 
 	it("accepts every level of the published set", () => {
@@ -33,21 +33,19 @@ describe("isAdminMfaAcr", () => {
 		}
 	});
 
-	it("rejects eidas1, which proves no second factor", () => {
-		expect(isAdminMfaAcr("eidas1")).toBe(false);
-	});
-
 	it.each([
 		"eidas2",
 		"eidas3",
-	])("accepts %s — ProConnect never issues it without a second factor", (acr) => {
+	])("accepts %s — substantial identity and strong MFA", (acr) => {
 		expect(isAdminMfaAcr(acr)).toBe(true);
 	});
 
 	it.each([
 		"eidas0",
 		"eidas0-mfa",
-	])("rejects %s, a declarative identity level regardless of factor", (acr) => {
+		"eidas1",
+		"eidas1-mfa",
+	])("rejects %s, which proves no substantial identity", (acr) => {
 		expect(isAdminMfaAcr(acr)).toBe(false);
 	});
 

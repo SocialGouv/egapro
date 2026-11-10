@@ -38,7 +38,13 @@ const recap: CseOpinionRecapData = {
 				{
 					id: "1:gap",
 					title: "Justification des écarts",
-					rows: [{ label: "CSE informé et consulté", value: "Non" }],
+					rows: [
+						{ label: "Avis du CSE", value: "Non renseigné" },
+						{
+							label: "Date de l'avis rendu par le CSE",
+							value: "Non renseigné",
+						},
+					],
 				},
 			],
 		},
@@ -63,17 +69,8 @@ const recap: CseOpinionRecapData = {
 	],
 };
 
-function renderPage(
-	overrides: Partial<CseOpinionRecapData> = {},
-	hasSubmittedJointEvaluation = true,
-) {
-	return render(
-		<SubmittedOpinionsPage
-			{...recap}
-			{...overrides}
-			hasSubmittedJointEvaluation={hasSubmittedJointEvaluation}
-		/>,
-	);
+function renderPage(overrides: Partial<CseOpinionRecapData> = {}) {
+	return render(<SubmittedOpinionsPage {...recap} {...overrides} />);
 }
 
 describe("SubmittedOpinionsPage", () => {
@@ -87,7 +84,7 @@ describe("SubmittedOpinionsPage", () => {
 			}),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText("La déclaration a été transmise le 10/02/2027."),
+			screen.getByText("Le ou les avis ont été transmis le 10/02/2027."),
 		).toBeInTheDocument();
 		expect(screen.getByRole("main")).toHaveAttribute("id", "content");
 	});
@@ -148,8 +145,10 @@ describe("SubmittedOpinionsPage", () => {
 		expect(
 			screen.getByRole("heading", { level: 4, name: "Exactitude des données" }),
 		).toBeInTheDocument();
-		expect(screen.getByText("CSE informé et consulté")).toBeInTheDocument();
-		expect(screen.getAllByText("Avis du CSE")).toHaveLength(1);
+		expect(
+			screen.queryByText("CSE informé et consulté"),
+		).not.toBeInTheDocument();
+		expect(screen.getAllByText("Avis du CSE")).toHaveLength(2);
 	});
 
 	it("marks each file against the opinions it carries", () => {
@@ -205,16 +204,14 @@ describe("SubmittedOpinionsPage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("links the joint evaluation report only when one was transmitted", () => {
-		const { unmount } = renderPage();
-		expect(
-			screen.getByRole("link", {
-				name: "Consulter le rapport de l’évaluation conjointe",
-			}),
-		).toHaveAttribute("href", "/mon-espace/evaluation-conjointe");
-		unmount();
+	it("no longer shows the joint evaluation section", () => {
+		renderPage();
 
-		renderPage({}, false);
+		expect(
+			screen.queryByRole("heading", {
+				name: "Évaluation conjointe des rémunérations",
+			}),
+		).not.toBeInTheDocument();
 		expect(
 			screen.queryByRole("link", {
 				name: "Consulter le rapport de l’évaluation conjointe",

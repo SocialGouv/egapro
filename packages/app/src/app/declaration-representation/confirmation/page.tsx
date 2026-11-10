@@ -27,13 +27,19 @@ export default async function RepresentationConfirmationPage() {
 		api.representationDeclaration.get({ year }),
 	]);
 
-	if (!isRepresentationDeclarationSubmitted(declaration?.status)) {
+	if (
+		!declaration ||
+		!isRepresentationDeclarationSubmitted(declaration.status)
+	) {
 		redirect(representationStepHref(LAST_REPRESENTATION_STEP));
 	}
+
+	const company = await api.company.get({ siren: declaration.siren });
 
 	return (
 		<Confirmation
 			campaignYear={campaignYear}
+			companyName={company.name}
 			email={session?.user?.email ?? null}
 			referenceYear={year}
 		/>

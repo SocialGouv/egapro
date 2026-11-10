@@ -2,6 +2,12 @@ import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import type { Sql } from "postgres";
 import postgres from "postgres";
+import {
+	ADMIN_IMPERSONATION_RETENTION_DAYS,
+	AUDIT_RETENTION_DAYS_LONG,
+	AUDIT_RETENTION_DAYS_SHORT,
+	SHORT_RETENTION_CATEGORIES,
+} from "~/modules/audit/shared/constants";
 import { cleanupErrorDiagnostic } from "./cleanup-error-diagnostic";
 
 /**
@@ -9,10 +15,10 @@ import { cleanupErrorDiagnostic } from "./cleanup-error-diagnostic";
  *
  * Replaces the former curl-based CronJob (POST /api/audit/cleanup) so the
  * cleanup runs without going through the HTTP layer. Same CNIL-compliant
- * retention buckets as before:
- *  - short retention (180 d by default): categories in SHORT_RETENTION_CATEGORIES
- *    (high-volume access logs containing IP addresses)
- *  - long retention (365 d by default): every other category (security logs)
+ * retention buckets as before, defined in `~/modules/audit/shared/constants`:
+ *  - short retention (AUDIT_RETENTION_DAYS_SHORT): categories in
+ *    SHORT_RETENTION_CATEGORIES (high-volume access logs containing IP addresses)
+ *  - long retention (AUDIT_RETENTION_DAYS_LONG): every other category (security logs)
  *
  * The DELETEs are atomic (single transaction). The success self-audit is
  * appended after the transaction commits — a failure writing the audit row
@@ -22,9 +28,9 @@ import { cleanupErrorDiagnostic } from "./cleanup-error-diagnostic";
  *
  * Env vars:
  *  - DATABASE_URL (or POSTGRES_* fallback, same convention as migrate.ts)
- *  - EGAPRO_AUDIT_RETENTION_SHORT_DAYS (optional, default 180)
- *  - EGAPRO_AUDIT_RETENTION_LONG_DAYS  (optional, default 365)
- *  - EGAPRO_ADMIN_IMPERSONATION_RETENTION_DAYS (optional, default 365)
+ *  - EGAPRO_AUDIT_RETENTION_SHORT_DAYS (optional, default AUDIT_RETENTION_DAYS_SHORT)
+ *  - EGAPRO_AUDIT_RETENTION_LONG_DAYS  (optional, default AUDIT_RETENTION_DAYS_LONG)
+ *  - EGAPRO_ADMIN_IMPERSONATION_RETENTION_DAYS (optional, default ADMIN_IMPERSONATION_RETENTION_DAYS)
  *
  * Issue: #3268 (cleanup jobs use direct DB access instead of HTTP endpoints).
  */
@@ -36,6 +42,12 @@ type CleanupResult = {
 	deletedTotal: number;
 };
 
+type RetentionDays = {
+	shortRetentionDays: number;
+	longRetentionDays: number;
+	impersonationRetentionDays: number;
+};
+
 type RunAuditCleanupArgs = {
 	sql: Sql;
 	shortRetentionDays: number;
@@ -44,14 +56,9 @@ type RunAuditCleanupArgs = {
 	now?: Date;
 };
 
-const SHORT_RETENTION_CATEGORIES = ["read_sensitive", "public_search"];
 const AUDIT_CLEANUP_ACTION = "system.audit_cleanup";
 const AUDIT_CLEANUP_CATEGORY = "system";
 const AUDIT_CLEANUP_FAILURE_CODE = "AUDIT_CLEANUP_FAILED";
-
-const DEFAULT_SHORT_RETENTION_DAYS = 180;
-const DEFAULT_LONG_RETENTION_DAYS = 365;
-const DEFAULT_IMPERSONATION_RETENTION_DAYS = 365;
 
 function getDatabaseUrl(): string {
 	if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
@@ -95,6 +102,25 @@ function toPositiveInt(raw: string | undefined, fallback: number): number {
 	return n;
 }
 
+export function resolveRetentionDays(
+	environment: Readonly<Record<string, string | undefined>>,
+): RetentionDays {
+	return {
+		shortRetentionDays: toPositiveInt(
+			environment.EGAPRO_AUDIT_RETENTION_SHORT_DAYS,
+			AUDIT_RETENTION_DAYS_SHORT,
+		),
+		longRetentionDays: toPositiveInt(
+			environment.EGAPRO_AUDIT_RETENTION_LONG_DAYS,
+			AUDIT_RETENTION_DAYS_LONG,
+		),
+		impersonationRetentionDays: toPositiveInt(
+			environment.EGAPRO_ADMIN_IMPERSONATION_RETENTION_DAYS,
+			ADMIN_IMPERSONATION_RETENTION_DAYS,
+		),
+	};
+}
+
 /**
  * Core cleanup routine. Exported so the integration test can drive it against
  * an ephemeral `postgres` client without spawning a child process.
@@ -103,22 +129,24 @@ export async function runAuditCleanup({
 	sql,
 	shortRetentionDays,
 	longRetentionDays,
-	impersonationRetentionDays = DEFAULT_IMPERSONATION_RETENTION_DAYS,
+	impersonationRetentionDays = ADMIN_IMPERSONATION_RETENTION_DAYS,
 	now = new Date(),
 }: RunAuditCleanupArgs): Promise<CleanupResult> {
 	const shortThreshold = subtractDays(now, shortRetentionDays);
 	const longThreshold = subtractDays(now, longRetentionDays);
 	const impersonationThreshold = subtractDays(now, impersonationRetentionDays);
 
+	const shortRetentionCategories = [...SHORT_RETENTION_CATEGORIES];
+
 	const summary = await sql.begin(async (tx) => {
 		const shortResult = await tx`
 			DELETE FROM audit.action_log
-			WHERE category = ANY(${SHORT_RETENTION_CATEGORIES})
+			WHERE category = ANY(${shortRetentionCategories})
 			AND created_at < ${shortThreshold}
 		`;
 		const longResult = await tx`
 			DELETE FROM audit.action_log
-			WHERE category <> ALL(${SHORT_RETENTION_CATEGORIES})
+			WHERE category <> ALL(${shortRetentionCategories})
 			AND created_at < ${longThreshold}
 		`;
 		const impersonationResult = await tx`
@@ -207,18 +235,8 @@ const isMain = ((): boolean => {
 })();
 
 if (isMain) {
-	const shortRetentionDays = toPositiveInt(
-		process.env.EGAPRO_AUDIT_RETENTION_SHORT_DAYS,
-		DEFAULT_SHORT_RETENTION_DAYS,
-	);
-	const longRetentionDays = toPositiveInt(
-		process.env.EGAPRO_AUDIT_RETENTION_LONG_DAYS,
-		DEFAULT_LONG_RETENTION_DAYS,
-	);
-	const impersonationRetentionDays = toPositiveInt(
-		process.env.EGAPRO_ADMIN_IMPERSONATION_RETENTION_DAYS,
-		DEFAULT_IMPERSONATION_RETENTION_DAYS,
-	);
+	const { shortRetentionDays, longRetentionDays, impersonationRetentionDays } =
+		resolveRetentionDays(process.env);
 
 	const sql = postgres(getDatabaseUrl(), { max: 1 });
 
