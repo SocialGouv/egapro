@@ -63,7 +63,10 @@ function getRemunerationResources(
 
 	if (isDeclarationSubmitted(declaration.fsmStatus)) {
 		resources.push({
-			title: recapDownload("Déclaration des indicateurs de rémunération", declaration.year),
+			title: recapDownload(
+				"Déclaration des indicateurs de rémunération",
+				declaration.year,
+			),
 			subtitle,
 			href: `${API_DECLARATION_PDF}?year=${declaration.year}`,
 		});
@@ -96,7 +99,10 @@ function getRemunerationResources(
 		declaration.hasSubmittedCseOpinion
 	) {
 		resources.push({
-			title: recapDownload("Transmission du ou des avis du CSE", declaration.year),
+			title: recapDownload(
+				"Transmission du ou des avis du CSE",
+				declaration.year,
+			),
 			subtitle,
 			href: `${API_CSE_OPINION_PDF}?year=${declaration.year}`,
 		});
