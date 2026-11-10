@@ -101,7 +101,7 @@ export function Step5Review() {
 		<div className={styles.review}>
 			<p className="fr-text--md fr-mb-0">
 				Vérifiez les informations avant de transmettre votre déclaration aux
-				services du ministère chargé du travail.
+				services du ministre chargé du travail.
 			</p>
 
 			<section className={styles.section}>

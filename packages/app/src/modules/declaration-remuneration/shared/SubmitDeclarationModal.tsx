@@ -30,8 +30,8 @@ export function SubmitDeclarationModal({
 	const [certified, setCertified] = useState(false);
 
 	const description = isSecondDeclaration
-		? `Vous allez transmettre la seconde déclaration de l'indicateur de rémunération par catégorie d'emplois ${year} aux services du ministère chargé du travail.`
-		: `Vous allez transmettre la déclaration des indicateurs de rémunération ${year} aux services du ministère chargé du travail.`;
+		? `Vous allez transmettre la seconde déclaration de l'indicateur de rémunération par catégorie d'emplois ${year} aux services du ministre chargé du travail.`
+		: `Vous allez transmettre la déclaration des indicateurs de rémunération ${year} aux services du ministre chargé du travail.`;
 
 	return (
 		<dialog
