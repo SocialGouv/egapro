@@ -4,12 +4,6 @@ import {
 	API_JOINT_EVALUATION_PDF,
 } from "~/modules/routes";
 
-export const JOINT_EVALUATION_RECAP_TITLE =
-	"Télécharger le récapitulatif de l'évaluation conjointe des rémunérations";
-
-export const CSE_OPINION_RECAP_TITLE =
-	"Télécharger le récapitulatif de la transmission du ou des avis du CSE";
-
 export type DemarcheDocument = {
 	dataYear: number;
 	href: string;
@@ -55,7 +49,8 @@ export function buildRemunerationDocuments({
 		documents.push({
 			dataYear,
 			href: `${API_JOINT_EVALUATION_PDF}?year=${year}`,
-			title: JOINT_EVALUATION_RECAP_TITLE,
+			title:
+				"Télécharger le récapitulatif de l'évaluation conjointe des rémunérations",
 			year,
 		});
 	}
@@ -64,7 +59,8 @@ export function buildRemunerationDocuments({
 		documents.push({
 			dataYear,
 			href: `${API_CSE_OPINION_PDF}?year=${year}`,
-			title: CSE_OPINION_RECAP_TITLE,
+			title:
+				"Télécharger le récapitulatif de la transmission du ou des avis du CSE",
 			year,
 		});
 	}
