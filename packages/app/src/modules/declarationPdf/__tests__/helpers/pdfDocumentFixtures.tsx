@@ -265,7 +265,8 @@ export function pdfDocumentSamples(): PdfDocumentSample[] {
 		},
 		{
 			name: "joint-evaluation",
-			title: "Récapitulatif : Évaluation conjointe des rémunérations 2027",
+			title:
+				"Récapitulatif : Transmission du rapport de l’évaluation conjointe des rémunérations 2027",
 			element: JointEvaluationPdfDocument({ data: JOINT_EVALUATION_DATA }),
 		},
 		{
