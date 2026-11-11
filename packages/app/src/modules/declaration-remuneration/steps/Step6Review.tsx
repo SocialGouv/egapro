@@ -197,7 +197,7 @@ export function Step6Review({
 				<div className={stepStyles.recapBody}>
 					<p className={`fr-mb-0 ${stepStyles.intro}`}>
 						Vérifiez que toutes les informations sont correctes avant de
-						transmettre la déclaration aux services du ministère chargé du
+						transmettre la déclaration aux services du ministre chargé du
 						travail.
 					</p>
 

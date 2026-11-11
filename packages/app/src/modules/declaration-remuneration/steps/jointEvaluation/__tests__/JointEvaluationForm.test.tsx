@@ -343,7 +343,7 @@ describe("JointEvaluationForm", () => {
 		expect(dialog).toBeInTheDocument();
 		expect(
 			screen.getByText(
-				"Vous allez transmettre aux services du ministère chargé du Travail le rapport préalable de l'évaluation conjointe.",
+				"Vous allez transmettre aux services du ministre chargé du travail le rapport préalable de l'évaluation conjointe.",
 			),
 		).toBeInTheDocument();
 		expect(screen.getByText(/je certifie/i)).toBeInTheDocument();

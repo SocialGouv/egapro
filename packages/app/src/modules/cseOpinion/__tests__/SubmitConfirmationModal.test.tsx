@@ -29,7 +29,9 @@ describe("SubmitConfirmationModal", () => {
 		const { dialog } = renderOpenModal();
 
 		expect(
-			within(dialog).getByText(/transmettre aux services du ministère/),
+			within(dialog).getByText(
+				/transmettre aux services du ministre chargé du travail/,
+			),
 		).toBeInTheDocument();
 	});
 

@@ -382,7 +382,7 @@ export const FAQ_SECTIONS: FaqSection[] = [
 					{
 						question: "Que se passe-t-il quand je transmets ?",
 						answer:
-							"Votre déclaration est transmise aux services du ministère chargé du travail, un accusé de réception est envoyé à votre adresse e-mail, et un récapitulatif PDF devient téléchargeable depuis Mon espace. Aucune démarche complémentaire n'est à faire auprès de la DREETS.",
+							"Votre déclaration est transmise aux services du ministre chargé du travail, un accusé de réception est envoyé à votre adresse e-mail, et un récapitulatif PDF devient téléchargeable depuis Mon espace. Aucune démarche complémentaire n'est à faire auprès de la DREETS.",
 					},
 					{
 						question: "Où retrouver mes déclarations passées ?",
@@ -505,7 +505,7 @@ export const FAQ_SECTIONS: FaqSection[] = [
 					{
 						question: "Qui accède à mes données pendant ce temps ?",
 						answer:
-							"Vous, les personnes habilitées pour votre entreprise, et les services du ministère chargé du travail. Les consultations de données sensibles sont journalisées.",
+							"Vous, les personnes habilitées pour votre entreprise, et les services du ministre chargé du travail. Les consultations de données sensibles sont journalisées.",
 					},
 				],
 			},

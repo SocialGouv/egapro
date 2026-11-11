@@ -32,7 +32,7 @@ describe("SubmitModal — description", () => {
 
 		expect(
 			screen.getByText(
-				`Vous allez transmettre la déclaration des indicateurs de représentation ${REPRESENTATION_CAMPAIGN_YEAR} aux services du ministère chargé du travail.`,
+				`Vous allez transmettre la déclaration des indicateurs de représentation ${REPRESENTATION_CAMPAIGN_YEAR} aux services du ministre chargé du travail.`,
 			),
 		).toBeInTheDocument();
 	});
