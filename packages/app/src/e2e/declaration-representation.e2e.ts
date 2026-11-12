@@ -2,19 +2,24 @@ import { expect, type Page, test } from "@playwright/test";
 import { urlGlob } from "~/e2e/helpers/routes";
 import { representationPdfFilename } from "~/modules/declarationPdf/representationPdfFilename";
 import {
+	formatCivilLongDate,
 	formatPercentage,
 	formatPrecisePercentage,
+	getCurrentRepresentationCampaignYear,
 	getReferenceYearFor,
+	getRepresentationCampaignEndDate,
 	getRepresentationTarget,
 	REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
 } from "~/modules/domain";
 import {
 	API_PUBLIC_DECLARATIONS_EXPORT,
 	DECLARATION_REPRESENTATION,
+	FIRST_REPRESENTATION_STEP,
 	MY_SPACE,
 	mySpaceRepresentationHref,
 	OBSERVATORY_SEARCH,
 	observatoryCompanyHref,
+	representationStepHref,
 	routeWithQuery,
 } from "~/modules/routes";
 // Leaf module, not the barrel: the Playwright runner cannot load the CSS
@@ -22,7 +27,6 @@ import {
 import { SUBMIT_LABEL } from "~/modules/shared/submitLabels";
 import { TEST_SIREN } from "./constants";
 import {
-	getCurrentDbYear,
 	getTestCompanyName,
 	resetGipWorkforce,
 	resetRepresentationDeclaration,
@@ -133,7 +137,7 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 	let submittedAt: Date;
 
 	test.beforeAll(async () => {
-		campaignYear = await getCurrentDbYear();
+		campaignYear = getCurrentRepresentationCampaignYear();
 		referenceYear = getReferenceYearFor(campaignYear);
 		await resetRepresentationDeclaration();
 		await clearNotificationQueue();
@@ -622,9 +626,12 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 		);
 		const panel = page.locator(`#${PANEL_ID}`);
 		const consultationHref = mySpaceRepresentationHref(campaignYear);
-		await expect(
-			panel.getByRole("link", { name: "Voir la déclaration" }),
-		).toHaveAttribute("href", consultationHref);
+
+		await test.step("the panel carries no footer CTA: the transmitted row holds both actions", async () => {
+			await expect(
+				panel.getByRole("link", { name: "Voir la déclaration" }),
+			).toHaveCount(0);
+		});
 
 		await test.step("the declaration step announces the transmission instead of the work left to do", async () => {
 			await expect(
@@ -641,16 +648,38 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 			await expect(panel.getByText(/Échéance :/)).toHaveCount(0);
 		});
 
-		await test.step("a transmitted declaration is immutable: a view button, never a modify affordance", async () => {
+		await test.step("a transmitted declaration stays modifiable until the end of the campaign", async () => {
 			await expect(
 				panel.getByRole("link", {
 					name: "Voir le récapitulatif de la déclaration",
 				}),
 			).toHaveAttribute("href", consultationHref);
-			await expect(panel.getByRole("link", { name: "Modifier" })).toHaveCount(
-				0,
+			await expect(
+				panel.getByRole("link", { name: "Modifier" }),
+			).toHaveAttribute(
+				"href",
+				representationStepHref(FIRST_REPRESENTATION_STEP),
 			);
-			await expect(panel.getByText(/Modifiable jusqu'au/)).toHaveCount(0);
+			await expect(
+				panel.getByText(
+					`Modifiable jusqu'au ${formatCivilLongDate(getRepresentationCampaignEndDate(campaignYear))}`,
+				),
+			).toBeVisible();
+		});
+
+		await test.step("the modify button opens the editable funnel on its first step", async () => {
+			await panel.getByRole("link", { name: "Modifier" }).click();
+			await page.waitForURL(
+				urlGlob(representationStepHref(FIRST_REPRESENTATION_STEP)),
+			);
+
+			// A read-only step exposes a "Suivant" link; an editable one a button.
+			await expect(
+				page.getByRole("button", { name: "Suivant", exact: true }),
+			).toBeVisible();
+			await expect(
+				page.getByRole("link", { name: "Suivant", exact: true }),
+			).toHaveCount(0);
 		});
 
 		await test.step("the view button opens the read-only consultation page", async () => {
@@ -730,7 +759,7 @@ test.describe("Représentation équilibrée — écarts non calculables", () => 
 	let seededYears: number[] = [];
 
 	test.beforeAll(async () => {
-		campaignYear = await getCurrentDbYear();
+		campaignYear = getCurrentRepresentationCampaignYear();
 		referenceYear = getReferenceYearFor(campaignYear);
 		await resetRepresentationDeclaration();
 		seededYears = await setRepresentationWorkforceWindow(
@@ -822,7 +851,7 @@ test.describe("Représentation équilibrée — parcours non-assujetti", () => {
 	let seededYears: number[] = [];
 
 	test.beforeAll(async () => {
-		campaignYear = await getCurrentDbYear();
+		campaignYear = getCurrentRepresentationCampaignYear();
 		referenceYear = getReferenceYearFor(campaignYear);
 		await resetRepresentationDeclaration();
 		seededYears = await setRepresentationWorkforceWindow(
