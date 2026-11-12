@@ -5,6 +5,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FileUpload } from "../FileUpload";
 import { FILENAME_ERROR_MESSAGES } from "../fileNameValidation";
+import { FILE_TOO_LARGE_ERROR } from "../uploadConfig";
+import { UPLOAD_ERROR, type UploadError } from "../uploadErrors";
 
 const PDF_MIME = "application/pdf";
 
@@ -29,23 +31,25 @@ function getInput() {
 function ControlledFileUpload({
 	onChange,
 	allowedMimeTypes = [PDF_MIME, "image/png"],
+	acceptLabel,
 	maxFileCount,
 	disabled,
 	fileList,
 }: {
-	onChange?: (files: File[], error: string | null) => void;
+	onChange?: (files: File[], error: UploadError | null) => void;
 	allowedMimeTypes?: string[];
+	acceptLabel?: string;
 	maxFileCount?: number;
 	disabled?: boolean;
 	fileList?: "cards" | "table";
 }) {
 	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-	const [error, setError] = useState<string | null>(null);
+	const [error, setError] = useState<UploadError | null>(null);
 
 	return (
 		<FileUpload
 			accept=".pdf,.png"
-			acceptLabel="pdf, png"
+			acceptLabel={acceptLabel ?? "pdf, png"}
 			allowedMimeTypes={allowedMimeTypes}
 			disabled={disabled}
 			error={error}
@@ -53,6 +57,7 @@ function ControlledFileUpload({
 			inputId="test-upload"
 			labelId="test-upload-label"
 			maxFileCount={maxFileCount}
+			onErrorDismiss={() => setError(null)}
 			onFilesChange={(files, nextError) => {
 				setSelectedFiles(files);
 				setError(nextError);
@@ -78,6 +83,7 @@ describe("FileUpload — accessible name (RGAA 11.2)", () => {
 				<FileUpload
 					{...baseProps}
 					error={null}
+					onErrorDismiss={vi.fn()}
 					onFilesChange={vi.fn()}
 					selectedFiles={[]}
 				/>
@@ -120,6 +126,7 @@ describe("FileUpload", () => {
 			<FileUpload
 				{...baseProps}
 				error={null}
+				onErrorDismiss={vi.fn()}
 				onFilesChange={vi.fn()}
 				selectedFiles={[]}
 			/>,
@@ -131,22 +138,27 @@ describe("FileUpload", () => {
 		expect(screen.getByText("ou glisser-le ici")).toBeInTheDocument();
 	});
 
-	it("exposes upload errors as an atomic alert", () => {
+	it("renders the upload error as an alert with a title, a description and a close button", () => {
 		render(
 			<FileUpload
 				{...baseProps}
-				error="Le format du fichier n'est pas supporté."
+				error={UPLOAD_ERROR.format("pdf")}
+				onErrorDismiss={vi.fn()}
 				onFilesChange={vi.fn()}
 				selectedFiles={[]}
 			/>,
 		);
 
-		const messages = document.querySelector(".fr-messages-group");
-		expect(messages).toHaveAttribute("role", "alert");
-		expect(messages).toHaveAttribute("aria-atomic", "true");
-		expect(messages).toHaveTextContent(
-			"Le format du fichier n'est pas supporté.",
+		const alert = screen.getByRole("alert");
+		expect(alert).toHaveClass("fr-alert", "fr-alert--error");
+		expect(alert).toHaveTextContent("Format non supporté");
+		expect(alert).toHaveTextContent(
+			"Ce fichier ne peut pas être importé. Seuls les fichiers au format PDF sont acceptés.",
 		);
+		expect(
+			within(alert).getByRole("button", { name: "Masquer le message" }),
+		).toBeInTheDocument();
+		expect(getInput()).toHaveAttribute("aria-invalid", "true");
 	});
 
 	it("opens the file dialog when the select button is clicked", async () => {
@@ -155,6 +167,7 @@ describe("FileUpload", () => {
 			<FileUpload
 				{...baseProps}
 				error={null}
+				onErrorDismiss={vi.fn()}
 				onFilesChange={vi.fn()}
 				selectedFiles={[]}
 			/>,
@@ -173,6 +186,7 @@ describe("FileUpload", () => {
 			<FileUpload
 				{...baseProps}
 				error={null}
+				onErrorDismiss={vi.fn()}
 				onFilesChange={vi.fn()}
 				selectedFiles={[makePdf("avis.pdf", 2048)]}
 			/>,
@@ -196,6 +210,7 @@ describe("FileUpload", () => {
 					{...baseProps}
 					error={null}
 					fileList="table"
+					onErrorDismiss={vi.fn()}
 					onFilesChange={vi.fn()}
 					selectedFiles={[makePdf("avis.pdf", 2048)]}
 				/>,
@@ -226,6 +241,7 @@ describe("FileUpload", () => {
 					{...baseProps}
 					error={null}
 					fileList="table"
+					onErrorDismiss={vi.fn()}
 					onFilesChange={onFilesChange}
 					selectedFiles={[makePdf("avis.pdf")]}
 				/>,
@@ -264,6 +280,7 @@ describe("FileUpload", () => {
 					disabled
 					error={null}
 					fileList="table"
+					onErrorDismiss={vi.fn()}
 					onFilesChange={vi.fn()}
 					selectedFiles={[makePdf("avis.pdf")]}
 				/>,
@@ -280,6 +297,7 @@ describe("FileUpload", () => {
 					{...baseProps}
 					error={null}
 					fileList="table"
+					onErrorDismiss={vi.fn()}
 					onFilesChange={vi.fn()}
 					selectedFiles={[]}
 				/>,
@@ -294,6 +312,7 @@ describe("FileUpload", () => {
 			<FileUpload
 				{...baseProps}
 				error={null}
+				onErrorDismiss={vi.fn()}
 				onFilesChange={vi.fn()}
 				selectedFiles={[makePdf("a.pdf"), makePdf("b.pdf")]}
 			/>,
@@ -313,6 +332,7 @@ describe("FileUpload", () => {
 			<FileUpload
 				{...baseProps}
 				error={null}
+				onErrorDismiss={vi.fn()}
 				onFilesChange={vi.fn()}
 				selectedFiles={[makePdf("avis.pdf")]}
 			/>,
@@ -331,6 +351,7 @@ describe("FileUpload", () => {
 				{...baseProps}
 				error={null}
 				maxFileCount={2}
+				onErrorDismiss={vi.fn()}
 				onFilesChange={onFilesChange}
 				selectedFiles={[makePdf("a.pdf"), makePdf("b.pdf")]}
 			/>,
@@ -351,6 +372,7 @@ describe("FileUpload", () => {
 			<FileUpload
 				{...baseProps}
 				error={null}
+				onErrorDismiss={vi.fn()}
 				onFilesChange={vi.fn()}
 				selectedFiles={[makePdf("doc.pdf", size)]}
 			/>,
@@ -367,6 +389,7 @@ describe("FileUpload", () => {
 			<FileUpload
 				{...baseProps}
 				error={null}
+				onErrorDismiss={vi.fn()}
 				onFilesChange={vi.fn()}
 				selectedFiles={[makePdf("noextension", 1024)]}
 			/>,
@@ -384,6 +407,7 @@ describe("FileUpload", () => {
 			<FileUpload
 				{...baseProps}
 				error={null}
+				onErrorDismiss={vi.fn()}
 				onFilesChange={onFilesChange}
 				selectedFiles={[]}
 			/>,
@@ -401,6 +425,7 @@ describe("FileUpload", () => {
 			<FileUpload
 				{...baseProps}
 				error={null}
+				onErrorDismiss={vi.fn()}
 				onFilesChange={onFilesChange}
 				selectedFiles={[]}
 			/>,
@@ -417,6 +442,7 @@ describe("FileUpload", () => {
 			<FileUpload
 				{...baseProps}
 				error={null}
+				onErrorDismiss={vi.fn()}
 				onFilesChange={onFilesChange}
 				selectedFiles={[]}
 			/>,
@@ -427,9 +453,77 @@ describe("FileUpload", () => {
 
 		fireEvent.change(getInput(), { target: { files: [file] } });
 
+		expect(onFilesChange).toHaveBeenCalledWith([], UPLOAD_ERROR.format("pdf"));
+	});
+
+	it("names the accepted formats of the surface in the format error", () => {
+		const onFilesChange = vi.fn();
+		render(
+			<FileUpload
+				{...baseProps}
+				accept=".xlsx,.csv"
+				acceptLabel="xlsx, csv"
+				allowedMimeTypes={["application/pdf"]}
+				error={null}
+				onErrorDismiss={vi.fn()}
+				onFilesChange={onFilesChange}
+				selectedFiles={[]}
+			/>,
+		);
+		const file = new File(["x"], "image.png", { type: "image/png" });
+
+		fireEvent.change(getInput(), { target: { files: [file] } });
+
 		expect(onFilesChange).toHaveBeenCalledWith(
 			[],
-			"Format de fichier non supporté. Formats acceptés : pdf.",
+			expect.objectContaining({
+				title: "Format non supporté",
+				message:
+					"Ce fichier ne peut pas être importé. Seuls les fichiers au format XLSX, CSV sont acceptés.",
+			}),
+		);
+	});
+
+	it("reports the format error for a file whose extension the surface does not accept", () => {
+		const onFilesChange = vi.fn();
+		render(
+			<FileUpload
+				{...baseProps}
+				error={null}
+				onErrorDismiss={vi.fn()}
+				onFilesChange={onFilesChange}
+				selectedFiles={[]}
+			/>,
+		);
+		const file = new File(["docx"], "avis.docx", {
+			type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+		});
+
+		fireEvent.change(getInput(), { target: { files: [file] } });
+
+		expect(onFilesChange).toHaveBeenCalledWith([], UPLOAD_ERROR.format("pdf"));
+	});
+
+	it("keeps the invalid-name error when the declared MIME is accepted", () => {
+		const onFilesChange = vi.fn();
+		render(
+			<FileUpload
+				{...baseProps}
+				error={null}
+				onErrorDismiss={vi.fn()}
+				onFilesChange={onFilesChange}
+				selectedFiles={[]}
+			/>,
+		);
+		const file = new File(["pdf"], "avis-cse", { type: PDF_MIME });
+
+		fireEvent.change(getInput(), { target: { files: [file] } });
+
+		expect(onFilesChange).toHaveBeenCalledWith(
+			[],
+			UPLOAD_ERROR.invalidFileName(
+				FILENAME_ERROR_MESSAGES.extension_mime_mismatch,
+			),
 		);
 	});
 
@@ -439,6 +533,7 @@ describe("FileUpload", () => {
 			<FileUpload
 				{...baseProps}
 				error={null}
+				onErrorDismiss={vi.fn()}
 				onFilesChange={onFilesChange}
 				selectedFiles={[]}
 			/>,
@@ -449,22 +544,83 @@ describe("FileUpload", () => {
 
 		expect(onFilesChange).toHaveBeenCalledWith(
 			[],
-			"La taille du fichier ne doit pas dépasser 10 Mo.",
+			expect.objectContaining({
+				title: "Fichier trop volumineux",
+				message: FILE_TOO_LARGE_ERROR,
+			}),
 		);
 	});
 
-	it("renders the error message and marks the input invalid", () => {
+	it("keeps the valid files of a mixed selection and reports the rejected one", () => {
+		const onFilesChange = vi.fn();
 		render(
 			<FileUpload
 				{...baseProps}
-				error="Une erreur"
+				error={null}
+				maxFileCount={3}
+				onErrorDismiss={vi.fn()}
+				onFilesChange={onFilesChange}
+				selectedFiles={[]}
+			/>,
+		);
+		const valid = makePdf("valide.pdf");
+		const tooBig = makePdf("trop-gros.pdf", 11 * 1024 * 1024);
+
+		fireEvent.change(getInput(), {
+			target: { files: [valid, tooBig] },
+		});
+
+		expect(onFilesChange).toHaveBeenCalledWith(
+			[valid],
+			expect.objectContaining({ title: "Fichier trop volumineux" }),
+		);
+	});
+
+	it("anchors the click handler of the close button on onErrorDismiss", async () => {
+		const user = userEvent.setup();
+		const onErrorDismiss = vi.fn();
+		render(
+			<FileUpload
+				{...baseProps}
+				error={UPLOAD_ERROR.network()}
+				onErrorDismiss={onErrorDismiss}
 				onFilesChange={vi.fn()}
 				selectedFiles={[]}
 			/>,
 		);
 
-		expect(screen.getByText("Une erreur")).toBeInTheDocument();
-		expect(getInput()).toHaveAttribute("aria-invalid", "true");
+		await user.click(
+			screen.getByRole("button", { name: "Masquer le message" }),
+		);
+
+		expect(onErrorDismiss).toHaveBeenCalledTimes(1);
+	});
+
+	it("dismisses the alert and moves focus back to the selection button", async () => {
+		const user = userEvent.setup();
+		const onChange = vi.fn();
+		render(
+			<ControlledFileUpload
+				allowedMimeTypes={[PDF_MIME]}
+				onChange={onChange}
+			/>,
+		);
+
+		await userEvent.upload(
+			getInput(),
+			new File(["x"], "image.png", { type: "image/png" }),
+		);
+		expect(screen.getByRole("alert")).toBeInTheDocument();
+
+		await user.click(
+			screen.getByRole("button", { name: "Masquer le message" }),
+		);
+
+		expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: /Sélectionner un fichier/ }),
+		).toHaveFocus();
+		expect(onChange).toHaveBeenCalledTimes(1);
 	});
 
 	it("accepts a file dropped on the dropzone", () => {
@@ -473,6 +629,7 @@ describe("FileUpload", () => {
 			<FileUpload
 				{...baseProps}
 				error={null}
+				onErrorDismiss={vi.fn()}
 				onFilesChange={onFilesChange}
 				selectedFiles={[]}
 			/>,
@@ -493,6 +650,7 @@ describe("FileUpload", () => {
 			<FileUpload
 				{...baseProps}
 				error={null}
+				onErrorDismiss={vi.fn()}
 				onFilesChange={onFilesChange}
 				selectedFiles={[]}
 			/>,
@@ -509,6 +667,7 @@ describe("FileUpload", () => {
 			<FileUpload
 				{...baseProps}
 				error={null}
+				onErrorDismiss={vi.fn()}
 				onFilesChange={vi.fn()}
 				selectedFiles={[]}
 			/>,
@@ -530,6 +689,7 @@ describe("FileUpload", () => {
 				{...baseProps}
 				error={null}
 				maxFileCount={2}
+				onErrorDismiss={vi.fn()}
 				onFilesChange={onFilesChange}
 				selectedFiles={[makePdf("a.pdf")]}
 			/>,
@@ -550,6 +710,7 @@ describe("FileUpload", () => {
 				{...baseProps}
 				disabled
 				error={null}
+				onErrorDismiss={vi.fn()}
 				onFilesChange={vi.fn()}
 				selectedFiles={[]}
 			/>,
@@ -588,11 +749,12 @@ describe("FileUpload filename validation", () => {
 
 		expect(onChange).toHaveBeenCalledWith(
 			[],
-			FILENAME_ERROR_MESSAGES.forbidden_char,
+			UPLOAD_ERROR.invalidFileName(FILENAME_ERROR_MESSAGES.forbidden_char),
 		);
 		expect(
 			screen.getByText(FILENAME_ERROR_MESSAGES.forbidden_char),
 		).toBeInTheDocument();
+		expect(screen.getByText("Nom de fichier invalide")).toBeInTheDocument();
 		expect(screen.queryByText("avis<cse>.pdf")).not.toBeInTheDocument();
 	});
 
@@ -604,7 +766,10 @@ describe("FileUpload filename validation", () => {
 
 		await userEvent.upload(getInput(), file);
 
-		expect(onChange).toHaveBeenCalledWith([], FILENAME_ERROR_MESSAGES.too_long);
+		expect(onChange).toHaveBeenCalledWith(
+			[],
+			UPLOAD_ERROR.invalidFileName(FILENAME_ERROR_MESSAGES.too_long),
+		);
 		expect(screen.getByText(/200/)).toBeInTheDocument();
 		expect(
 			screen.getByText(FILENAME_ERROR_MESSAGES.too_long),
@@ -620,7 +785,9 @@ describe("FileUpload filename validation", () => {
 
 		expect(onChange).toHaveBeenCalledWith(
 			[],
-			FILENAME_ERROR_MESSAGES.extension_mime_mismatch,
+			UPLOAD_ERROR.invalidFileName(
+				FILENAME_ERROR_MESSAGES.extension_mime_mismatch,
+			),
 		);
 		expect(
 			screen.getByText(FILENAME_ERROR_MESSAGES.extension_mime_mismatch),
@@ -638,7 +805,7 @@ describe("FileUpload filename validation", () => {
 
 		expect(onChange).toHaveBeenCalledWith(
 			[],
-			FILENAME_ERROR_MESSAGES.invisible_char,
+			UPLOAD_ERROR.invalidFileName(FILENAME_ERROR_MESSAGES.invisible_char),
 		);
 		expect(
 			screen.getByText(FILENAME_ERROR_MESSAGES.invisible_char),
@@ -659,7 +826,7 @@ describe("FileUpload filename validation", () => {
 
 		expect(onChange).toHaveBeenCalledWith(
 			[],
-			FILENAME_ERROR_MESSAGES.forbidden_char,
+			UPLOAD_ERROR.invalidFileName(FILENAME_ERROR_MESSAGES.forbidden_char),
 		);
 	});
 });

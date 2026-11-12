@@ -9,7 +9,7 @@ import userEvent from "@testing-library/user-event";
 import { useSession } from "next-auth/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
-import { FILENAME_ERROR_MESSAGES, SUBMIT_LABEL } from "~/modules/shared";
+import { SUBMIT_LABEL, UPLOAD_ERROR } from "~/modules/shared";
 import { computeContentTypeColumns } from "../contentTypeColumns";
 import { Step2Upload } from "../Step2Upload";
 import type {
@@ -267,15 +267,16 @@ describe("Step2Upload", () => {
 		expect(screen.queryByRole("table")).not.toBeInTheDocument();
 	});
 
-	it("shows the extension/MIME error for a .txt file", () => {
+	it("shows the unsupported-format error for a .txt file", () => {
 		renderStep();
 
 		const file = new File(["content"], "test.txt", { type: "text/plain" });
 		fireEvent.change(getFileInput(), { target: { files: [file] } });
 
 		expect(
-			screen.getByText(FILENAME_ERROR_MESSAGES.extension_mime_mismatch),
+			screen.getByText(UPLOAD_ERROR.format("pdf").message),
 		).toBeInTheDocument();
+		expect(screen.getByText("Format non supporté")).toBeInTheDocument();
 	});
 
 	it("shows the unsupported-format error for a valid-named non-PDF file", () => {
@@ -287,10 +288,9 @@ describe("Step2Upload", () => {
 		fireEvent.change(fileInput, { target: { files: [file] } });
 
 		expect(
-			screen.getByText(
-				"Format de fichier non supporté. Formats acceptés : pdf.",
-			),
+			screen.getByText(UPLOAD_ERROR.format("pdf").message),
 		).toBeInTheDocument();
+		expect(screen.getByText("Format non supporté")).toBeInTheDocument();
 	});
 
 	it("shows error for file exceeding 10 MB", () => {
@@ -303,8 +303,9 @@ describe("Step2Upload", () => {
 		fireEvent.change(getFileInput(), { target: { files: [file] } });
 
 		expect(
-			screen.getByText("La taille du fichier ne doit pas dépasser 10 Mo."),
+			screen.getByText(UPLOAD_ERROR.tooLarge().message),
 		).toBeInTheDocument();
+		expect(screen.getByText("Fichier trop volumineux")).toBeInTheDocument();
 	});
 
 	it("keeps the non-blocking upload progress message polite, outside any alert", async () => {

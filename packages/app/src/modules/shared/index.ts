@@ -27,6 +27,7 @@ export { getKpiBadgeRendering, KpiBadge } from "./KpiBadge";
 export { parseSiren } from "./parseSiren";
 export { SubmitModal } from "./SubmitModal";
 export { SUBMIT_LABEL } from "./submitLabels";
+export { UploadAlert } from "./UploadAlert";
 export {
 	FILE_TOO_LARGE_ERROR,
 	formatFileMeta,
@@ -35,6 +36,7 @@ export {
 	S3_PART_MIN_SIZE,
 	SCAN_TIMEOUT_MS,
 } from "./uploadConfig";
+export { UPLOAD_ERROR, type UploadError } from "./uploadErrors";
 export { uploadFile } from "./uploadFile";
 export {
 	type DownloadState,

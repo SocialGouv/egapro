@@ -201,6 +201,7 @@ export function Step2Upload({
 	}, [finalizeMutation, router]);
 
 	const {
+		clearUploadError,
 		closeModal,
 		handleFilesChange,
 		isPending: isUploadingFiles,
@@ -327,6 +328,7 @@ export function Step2Upload({
 						inputId="cse-file-upload"
 						labelId="cse-file-upload-label"
 						maxFileCount={remainingSlots}
+						onErrorDismiss={clearUploadError}
 						onFilesChange={handleFilesChange}
 						selectedFiles={selectedFiles}
 					/>

@@ -2,6 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { formatLongDate } from "~/modules/domain";
+import { UPLOAD_ERROR } from "~/modules/shared";
 import {
 	JointEvaluationAfterReport,
 	JointEvaluationDeadline,
@@ -22,6 +23,7 @@ function renderUpload(
 			error={null}
 			hasMissingFile={false}
 			inputId={INPUT_ID}
+			onErrorDismiss={vi.fn()}
 			onFilesChange={vi.fn()}
 			selectedFiles={[]}
 			{...overrides}
@@ -110,12 +112,12 @@ describe("JointEvaluationReportUpload", () => {
 		).toBeDisabled();
 	});
 
-	it("shows the upload error", () => {
-		renderUpload({ error: "Fichier rejeté par l'antivirus." });
+	it("shows the upload error as an alert", () => {
+		renderUpload({ error: UPLOAD_ERROR.virus(undefined) });
 
-		expect(
-			screen.getByText("Fichier rejeté par l'antivirus."),
-		).toBeInTheDocument();
+		const alert = screen.getByRole("alert");
+		expect(alert).toHaveTextContent("Fichier rejeté par l'antivirus");
+		expect(alert).toHaveTextContent("Fichier rejeté par l'antivirus.");
 	});
 
 	it("announces a missing report with a titled error alert", () => {

@@ -156,6 +156,29 @@ export async function submitCseStep2(
 	await test.step("avis CSE — étape 2 : dépôt des fichiers", async () => {
 		await page.waitForURL(urlGlob(cseOpinionStepHref(2)));
 
+		// An unsupported file is refused before any upload: the alert names the
+		// accepted format, and closing it returns focus to the selection button.
+		await page.locator("#cse-file-upload").setInputFiles({
+			name: "avis.docx",
+			mimeType:
+				"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+			buffer: Buffer.from("not a pdf"),
+		});
+		const uploadAlert = page
+			.locator(".fr-alert")
+			.filter({ hasText: "Format non supporté" });
+		await expect(uploadAlert).toContainText(
+			"Seuls les fichiers au format PDF sont acceptés.",
+		);
+		await uploadAlert
+			.getByRole("button", { name: "Masquer le message" })
+			.click();
+		await expect(uploadAlert).toHaveCount(0);
+		await expect(
+			page.getByRole("button", { name: /Sélectionner (un|des) fichiers?/ }),
+		).toBeFocused();
+		await expect(page.getByRole("table")).toHaveCount(0);
+
 		// Phase A — selecting the file auto-uploads it (no intermediate "Importer"
 		// step), after which the page re-renders with the matrix.
 		await page.locator("#cse-file-upload").setInputFiles(DUMMY_PDF);

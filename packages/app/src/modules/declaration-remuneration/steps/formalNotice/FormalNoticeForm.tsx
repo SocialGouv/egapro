@@ -40,6 +40,7 @@ export function FormalNoticeForm({ existingFile }: Props) {
 	}, [router, submitMutation]);
 
 	const {
+		clearUploadError,
 		closeModal,
 		handleConfirm,
 		handleFilesChange,
@@ -81,6 +82,7 @@ export function FormalNoticeForm({ existingFile }: Props) {
 						error={uploadError}
 						hasMissingFile={hasMissingFile}
 						inputId="formal-notice-joint-evaluation-file-upload"
+						onErrorDismiss={clearUploadError}
 						onFilesChange={handleFilesChange}
 						selectedFiles={selectedFiles}
 					/>

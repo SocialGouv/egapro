@@ -14,6 +14,7 @@ import {
 	FileUpload,
 	formatFileMeta,
 	getDsfrModal,
+	type UploadError,
 } from "~/modules/shared";
 import styles from "./CategoryImportExport.module.scss";
 import {
@@ -47,7 +48,7 @@ export function CategoryImportExport({ onImport, disabled = false }: Props) {
 	const [isImporting, setIsImporting] = useState(false);
 	const [mounted, setMounted] = useState(false);
 	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-	const [fileError, setFileError] = useState<string | null>(null);
+	const [fileError, setFileError] = useState<UploadError | null>(null);
 	useEffect(() => setMounted(true), []);
 
 	const importPanelId = `${baseId}-import-panel`;
@@ -166,6 +167,7 @@ export function CategoryImportExport({ onImport, disabled = false }: Props) {
 												inputId={uploadId}
 												labelId={importTitleId}
 												maxFileCount={1}
+												onErrorDismiss={() => setFileError(null)}
 												onFilesChange={(files, error) => {
 													setSelectedFiles(files);
 													setFileError(error);

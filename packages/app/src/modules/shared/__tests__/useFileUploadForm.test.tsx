@@ -10,6 +10,7 @@ import {
 } from "vitest";
 
 import { FILENAME_ERROR_MESSAGES } from "../fileNameValidation";
+import { UPLOAD_ERROR, type UploadError } from "../uploadErrors";
 import type { UploadFailureReason, UploadFileResult } from "../uploadFile";
 import { useFileUploadForm } from "../useFileUploadForm";
 
@@ -84,16 +85,34 @@ describe("useFileUploadForm", () => {
 		expect(result.current.uploadError).toBeNull();
 	});
 
-	it("propagates an error string from handleFilesChange", () => {
+	it("propagates the error object from handleFilesChange", () => {
 		const { result } = renderHook(() =>
 			useFileUploadForm({ flowType: "cse_opinion" }),
 		);
+		const error = { title: "Titre", message: "Boom" };
 
 		act(() => {
-			result.current.handleFilesChange([], "Boom");
+			result.current.handleFilesChange([], error);
 		});
 
-		expect(result.current.uploadError).toBe("Boom");
+		expect(result.current.uploadError).toEqual(error);
+	});
+
+	it("clears the upload error without touching the selection", () => {
+		const { result } = renderHook(() =>
+			useFileUploadForm({ flowType: "cse_opinion" }),
+		);
+		const file = makeFile();
+
+		act(() => {
+			result.current.handleFilesChange([file], UPLOAD_ERROR.network());
+		});
+		act(() => {
+			result.current.clearUploadError();
+		});
+
+		expect(result.current.uploadError).toBeNull();
+		expect(result.current.selectedFiles).toEqual([file]);
 	});
 
 	it("surfaces a validateFileName rejection in uploadError and keeps no file selected", () => {
@@ -104,12 +123,12 @@ describe("useFileUploadForm", () => {
 		act(() => {
 			result.current.handleFilesChange(
 				[],
-				FILENAME_ERROR_MESSAGES.forbidden_char,
+				UPLOAD_ERROR.invalidFileName(FILENAME_ERROR_MESSAGES.forbidden_char),
 			);
 		});
 
-		expect(result.current.uploadError).toBe(
-			FILENAME_ERROR_MESSAGES.forbidden_char,
+		expect(result.current.uploadError).toEqual(
+			UPLOAD_ERROR.invalidFileName(FILENAME_ERROR_MESSAGES.forbidden_char),
 		);
 		expect(result.current.selectedFiles).toEqual([]);
 	});
@@ -124,7 +143,7 @@ describe("useFileUploadForm", () => {
 		act(() => {
 			result.current.handleFilesChange(
 				[],
-				FILENAME_ERROR_MESSAGES.invisible_char,
+				UPLOAD_ERROR.invalidFileName(FILENAME_ERROR_MESSAGES.invisible_char),
 			);
 		});
 		await act(async () => {
@@ -133,8 +152,8 @@ describe("useFileUploadForm", () => {
 
 		expect(uploadFileMock).not.toHaveBeenCalled();
 		expect(onAllUploaded).not.toHaveBeenCalled();
-		expect(result.current.uploadError).toBe(
-			FILENAME_ERROR_MESSAGES.invisible_char,
+		expect(result.current.uploadError).toEqual(
+			UPLOAD_ERROR.invalidFileName(FILENAME_ERROR_MESSAGES.invisible_char),
 		);
 	});
 
@@ -414,9 +433,7 @@ describe("useFileUploadForm", () => {
 			await result.current.handleConfirm();
 		});
 
-		expect(result.current.uploadError).toBe(
-			"Fichier rejeté par l'antivirus (signature : Eicar).",
-		);
+		expect(result.current.uploadError).toEqual(UPLOAD_ERROR.virus("Eicar"));
 		expect(result.current.isPending).toBe(false);
 	});
 
@@ -438,74 +455,73 @@ describe("useFileUploadForm", () => {
 			await result.current.handleConfirm();
 		});
 
-		expect(result.current.uploadError).toBe("Fichier rejeté par l'antivirus.");
+		expect(result.current.uploadError).toEqual(UPLOAD_ERROR.virus(undefined));
 	});
 
 	const reasonCases: Array<{
 		reason: Exclude<UploadFailureReason, "virus">;
 		serverError: string;
-		expected: string;
+		expected: UploadError;
 	}> = [
 		{
 			reason: "scan_unavailable",
-			serverError: "ignored",
-			expected:
-				"Le service de scan antivirus est temporairement indisponible. Merci de réessayer dans quelques minutes.",
+			serverError: "Service indisponible",
+			expected: UPLOAD_ERROR.scanUnavailable("Service indisponible"),
 		},
 		{
 			reason: "max_files",
 			serverError: "Limite atteinte",
-			expected: "Limite atteinte",
+			expected: UPLOAD_ERROR.maxFiles("Limite atteinte"),
 		},
 		{
 			reason: "unauthorized",
 			serverError: "ignored",
-			expected: "Non authentifié. Merci de vous reconnecter.",
+			expected: UPLOAD_ERROR.unauthorized(),
 		},
 		{
 			reason: "not_found",
 			serverError: "ignored",
-			expected: "Déclaration introuvable pour l'année en cours.",
+			expected: UPLOAD_ERROR.notFound(),
 		},
 		{
 			reason: "too_large",
 			serverError: "Trop gros",
-			expected: "Trop gros",
+			expected: UPLOAD_ERROR.tooLarge(),
 		},
 		{
 			reason: "wrong_type",
 			serverError: "Mauvais type",
-			expected: "Mauvais type",
+			expected: UPLOAD_ERROR.formatRejected("Mauvais type"),
 		},
 		{
 			reason: "empty",
 			serverError: "Vide",
-			expected: "Vide",
+			expected: UPLOAD_ERROR.empty("Vide"),
 		},
 		{
 			reason: "missing_flow",
 			serverError: "Flow manquant",
-			expected: "Flow manquant",
+			expected: UPLOAD_ERROR.invalidRequest("Flow manquant"),
 		},
 		{
 			reason: "missing_filename",
 			serverError: "Nom manquant",
-			expected: "Nom manquant",
+			expected: UPLOAD_ERROR.invalidRequest("Nom manquant"),
 		},
 		{
 			reason: "invalid_filename",
-			serverError: "Nom de fichier invalide",
-			expected: "Nom de fichier invalide",
+			serverError: "Nom refusé",
+			expected: UPLOAD_ERROR.invalidFileName("Nom refusé"),
 		},
 		{
 			reason: "server_error",
 			serverError: "ignored",
-			expected: "Erreur lors de l'upload du fichier. Merci de réessayer.",
+			expected: UPLOAD_ERROR.server(),
 		},
 		{
 			reason: "aborted",
 			serverError: "ignored",
-			expected: "L'upload a été interrompu. Merci de réessayer.",
+			expected: UPLOAD_ERROR.aborted(),
 		},
 	];
 
@@ -528,7 +544,7 @@ describe("useFileUploadForm", () => {
 				await result.current.handleConfirm();
 			});
 
-			expect(result.current.uploadError).toBe(expected);
+			expect(result.current.uploadError).toEqual(expected);
 			expect(result.current.isPending).toBe(false);
 		});
 	}
@@ -570,12 +586,10 @@ describe("useFileUploadForm", () => {
 		expect(uploadFileMock).toHaveBeenCalledTimes(2);
 		expect(onUploaded).toHaveBeenCalledTimes(1);
 		expect(onAllUploaded).not.toHaveBeenCalled();
-		expect(result.current.uploadError).toBe(
-			"Erreur lors de l'upload du fichier. Merci de réessayer.",
-		);
+		expect(result.current.uploadError).toEqual(UPLOAD_ERROR.server());
 	});
 
-	it("falls back to a generic error when uploadFile throws", async () => {
+	it("reports a network failure when uploadFile rejects", async () => {
 		const onAllUploaded = vi.fn();
 		const { result } = renderHook(() =>
 			useFileUploadForm({ flowType: "cse_opinion", onAllUploaded }),
@@ -590,9 +604,7 @@ describe("useFileUploadForm", () => {
 			await result.current.handleConfirm();
 		});
 
-		expect(result.current.uploadError).toBe(
-			"Erreur lors de l'upload du fichier",
-		);
+		expect(result.current.uploadError).toEqual(UPLOAD_ERROR.network());
 		expect(result.current.isPending).toBe(false);
 		expect(onAllUploaded).not.toHaveBeenCalled();
 	});
@@ -644,12 +656,34 @@ describe("useFileUploadForm", () => {
 			);
 
 			act(() => {
-				result.current.handleFilesChange([], "Format non supporté");
+				result.current.handleFilesChange([], UPLOAD_ERROR.format("pdf"));
 			});
 
 			expect(uploadFileMock).not.toHaveBeenCalled();
 			expect(onAllUploaded).not.toHaveBeenCalled();
-			expect(result.current.uploadError).toBe("Format non supporté");
+			expect(result.current.uploadError).toEqual(UPLOAD_ERROR.format("pdf"));
+		});
+
+		it("does not relaunch an upload when the error is dismissed", () => {
+			const onAllUploaded = vi.fn();
+			const { result } = renderHook(() =>
+				useFileUploadForm({
+					flowType: "cse_opinion",
+					onAllUploaded,
+					autoUpload: true,
+				}),
+			);
+
+			act(() => {
+				result.current.handleFilesChange([], UPLOAD_ERROR.format("pdf"));
+			});
+			act(() => {
+				result.current.clearUploadError();
+			});
+
+			expect(uploadFileMock).not.toHaveBeenCalled();
+			expect(onAllUploaded).not.toHaveBeenCalled();
+			expect(result.current.uploadError).toBeNull();
 		});
 	});
 });
