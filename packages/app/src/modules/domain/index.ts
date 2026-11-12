@@ -349,7 +349,11 @@ export {
 	toStrictInt,
 } from "./shared/number";
 // Percentage & proportion numeric cores
-export { percentageOf, proportionOf } from "./shared/percentage";
+export {
+	percentageOf,
+	proportionOf,
+	ratioToPercentPoints,
+} from "./shared/percentage";
 // Public data release gate
 export {
 	getTodayInParisCivilDate,
@@ -429,6 +433,8 @@ export {
 	computeRate,
 	roundOneDecimal,
 } from "./shared/submissionRate";
+// Declarant MFA floor — accepted levels for every non-backoffice ProConnect sign-in
+export { isUserMfaAcr, USER_MFA_ACR_VALUES } from "./shared/userMfa";
 // Indicator E — variable pay proportion (beneficiaries over same-sex workforce)
 export {
 	formatVariablePayProportion,

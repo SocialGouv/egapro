@@ -152,7 +152,9 @@ describe("StepPageClient — rendering", () => {
 		renderStep({ step: SUMMARY_STEP, currentStep: SUMMARY_STEP });
 
 		expect(
-			screen.getByText(/Vérifiez les informations avant de transmettre/),
+			screen.getByText(
+				/Vérifiez que toutes les informations sont correctes avant de transmettre la déclaration aux services du ministre chargé du travail\./,
+			),
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole("button", { name: "Transmettre" }),
@@ -173,7 +175,9 @@ describe("StepPageClient — rendering", () => {
 		});
 
 		expect(
-			screen.getByText(/Vérifiez les informations avant de transmettre/),
+			screen.getByText(
+				/Vérifiez que toutes les informations sont correctes avant de transmettre la déclaration aux services du ministre chargé du travail\./,
+			),
 		).toBeInTheDocument();
 		expect(
 			screen.queryByRole("button", { name: "Transmettre" }),
@@ -225,7 +229,7 @@ describe("StepPageClient — navigation", () => {
 		expect(mutateAsync).toHaveBeenCalledWith({
 			year: YEAR,
 			currentStep: 3,
-			draft: { currentStep: 3, ...NO_EXECUTIVES },
+			draft: { currentStep: 3, lastStep: 3, ...NO_EXECUTIVES },
 		});
 		expect(push).toHaveBeenCalledWith(STEP_3_HREF);
 	});
@@ -395,7 +399,7 @@ describe("StepPageClient — publication step skipped (S12)", () => {
 		expect(mutateAsync).toHaveBeenCalledWith({
 			year: YEAR,
 			currentStep: 5,
-			draft: { currentStep: 5, ...NO_COMPUTABLE_GAP },
+			draft: { currentStep: 5, lastStep: 5, ...NO_COMPUTABLE_GAP },
 		});
 		expect(push).toHaveBeenCalledWith(STEP_5_HREF);
 	});

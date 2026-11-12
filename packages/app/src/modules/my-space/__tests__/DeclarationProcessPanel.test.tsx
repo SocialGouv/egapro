@@ -407,7 +407,7 @@ describe("DeclarationProcessPanel", () => {
 		it("exposes a Modifier link for the CSE opinion step", () => {
 			const { dialog } = renderPanel("closed");
 			const modifyLinks = dialog.querySelectorAll<HTMLAnchorElement>(
-				'a[href*="/avis-cse/etape/2"]',
+				'a[href*="/avis-cse/etape/1"]',
 			);
 			expect(modifyLinks.length).toBeGreaterThan(0);
 			expect(modifyLinks[0]).toHaveTextContent("Modifier");

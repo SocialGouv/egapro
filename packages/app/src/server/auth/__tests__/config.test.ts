@@ -440,5 +440,9 @@ describe("auth config", () => {
 		it("uses /login as the sign-in page", () => {
 			expect(authConfig.pages?.signIn).toBe("/login");
 		});
+
+		it("sends a refused sign-in back to /login rather than NextAuth's error page", () => {
+			expect(authConfig.pages?.error).toBe("/login");
+		});
 	});
 });

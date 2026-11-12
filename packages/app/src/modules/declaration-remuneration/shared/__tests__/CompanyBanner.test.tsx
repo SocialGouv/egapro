@@ -35,6 +35,19 @@ describe("CompanyBanner", () => {
 		expect(screen.getByText(/123 456 789/)).toBeInTheDocument();
 	});
 
+	it("renders the company datapoints in the title grey", () => {
+		render(
+			<CompanyBanner company={defaultCompany} currentPageLabel="Déclaration" />,
+		);
+
+		expect(screen.getByText("SIREN :").closest(".fr-text-title--grey")).toBe(
+			screen.getByText(/123 456 789/).closest(".fr-text-title--grey"),
+		);
+		expect(
+			screen.getByText("SIREN :").closest(".fr-text-title--grey"),
+		).not.toBeNull();
+	});
+
 	it("renders company name as bold paragraph", () => {
 		render(
 			<CompanyBanner company={defaultCompany} currentPageLabel="Déclaration" />,

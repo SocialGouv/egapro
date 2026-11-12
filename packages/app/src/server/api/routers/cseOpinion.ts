@@ -37,7 +37,6 @@ import { deleteFile as deleteS3File, getFileSize } from "~/server/services/s3";
 import {
 	findLatestStatusEvent,
 	findTransmittedCseOpinions,
-	findTransmittedJointEvaluation,
 } from "./declarationHelpers";
 import {
 	applyActionOrRefuse,
@@ -94,6 +93,33 @@ function assertRequiredContentTypesCovered(
 	}
 }
 
+type StoredOpinion = {
+	declarationNumber: number;
+	type: string;
+	gapConsulted?: boolean | null;
+	opinion?: string | null;
+	opinionDate?: string | null;
+};
+
+function opinionFingerprint(row: StoredOpinion): string {
+	return [
+		row.declarationNumber,
+		row.type,
+		row.gapConsulted ?? null,
+		row.opinion ?? null,
+		row.opinionDate ?? null,
+	].join("|");
+}
+
+function sameOpinions(
+	a: readonly StoredOpinion[],
+	b: readonly StoredOpinion[],
+) {
+	if (a.length !== b.length) return false;
+	const fingerprints = new Set(b.map(opinionFingerprint));
+	return a.every((row) => fingerprints.has(opinionFingerprint(row)));
+}
+
 type JustificationOpinionInput = {
 	gapOpinion: "favorable" | "unfavorable" | null;
 	gapDate: string | null;
@@ -131,11 +157,7 @@ export const cseOpinionRouter = createTRPCRouter({
 				message: "Aucun avis du CSE transmis pour cette déclaration.",
 			});
 		}
-		const [recap, jointEvaluation] = await Promise.all([
-			assembleCseOpinionRecap(transmitted),
-			findTransmittedJointEvaluation(ctx.db, ctx.declarationId),
-		]);
-		return { ...recap, hasSubmittedJointEvaluation: jointEvaluation !== null };
+		return assembleCseOpinionRecap(transmitted);
 	}),
 
 	get: declarationProcedure.query(async ({ ctx }) => {
@@ -175,12 +197,16 @@ export const cseOpinionRouter = createTRPCRouter({
 							secondDeclJustificationRequired,
 						)
 					: null;
-				await tx
-					.update(declarations)
-					.set({ cseOpinionDraftUpdatedAt: new Date() })
-					.where(eq(declarations.id, ctx.declarationId));
-				await tx
-					.delete(cseOpinions)
+
+				const existing = await tx
+					.select({
+						declarationNumber: cseOpinions.declarationNumber,
+						type: cseOpinions.type,
+						gapConsulted: cseOpinions.gapConsulted,
+						opinion: cseOpinions.opinion,
+						opinionDate: cseOpinions.opinionDate,
+					})
+					.from(cseOpinions)
 					.where(eq(cseOpinions.declarationId, ctx.declarationId));
 
 				const rows: (typeof cseOpinions.$inferInsert)[] = [];
@@ -217,8 +243,17 @@ export const cseOpinionRouter = createTRPCRouter({
 					});
 				}
 
-				await tx.insert(cseOpinions).values(rows);
 				await pruneStaleContentTypeAssociations(tx, ctx.declarationId);
+				if (sameOpinions(existing, rows)) return;
+
+				await tx
+					.update(declarations)
+					.set({ cseOpinionDraftUpdatedAt: new Date() })
+					.where(eq(declarations.id, ctx.declarationId));
+				await tx
+					.delete(cseOpinions)
+					.where(eq(cseOpinions.declarationId, ctx.declarationId));
+				await tx.insert(cseOpinions).values(rows);
 			});
 
 			return { success: true };

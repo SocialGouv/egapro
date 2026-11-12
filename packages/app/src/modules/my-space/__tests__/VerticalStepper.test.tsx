@@ -83,7 +83,7 @@ const DECL2_MODIFY =
 	'a[href^="/declaration-remuneration/parcours-conformite/etape/1"]';
 const JOINT_EVALUATION_MODIFY =
 	'a[href^="/declaration-remuneration/parcours-conformite/evaluation-conjointe"]';
-const CSE_MODIFY = 'a[href^="/avis-cse/etape/2"]';
+const CSE_MODIFY = 'a[href^="/avis-cse/etape/1"]';
 const DECL1_VIEW = `a[href="${DECLARATION_REMUNERATION_RECAP}"]`;
 const RECAP_VIEW = 'a[title="Voir le récapitulatif de la déclaration"]';
 

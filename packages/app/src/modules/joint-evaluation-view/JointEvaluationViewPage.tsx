@@ -11,8 +11,10 @@ import { db } from "~/server/db";
 import {
 	declarationStatusHistory,
 	declarations,
+	files,
 	users,
 } from "~/server/db/schema";
+import { getFileSize } from "~/server/services/s3";
 import { api } from "~/trpc/server";
 import { JointEvaluationView } from "./JointEvaluationView";
 
@@ -76,12 +78,19 @@ export async function JointEvaluationViewPage() {
 		notFound();
 	}
 
+	const [stored] = await db
+		.select({ filePath: files.filePath })
+		.from(files)
+		.where(eq(files.id, file.id))
+		.limit(1);
+	const sizeBytes = stored ? await getFileSize(stored.filePath) : null;
+
 	const declarant = declarantRows[0];
 	return (
 		<JointEvaluationView
 			company={company}
 			declarant={declarant ?? null}
-			file={file}
+			file={{ ...file, sizeBytes }}
 			referencePeriod={getDeclarationReferencePeriod(
 				declaration.year,
 				submission.round === 2,

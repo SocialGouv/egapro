@@ -71,6 +71,7 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 				<Step1Opinions
 					banner={banner}
 					cseDeadline={campaignDeadlines.decl2CseOpinionDeadline}
+					declarationModifiable={!declarationData.isFirstDeclarationLocked}
 					email={session?.user?.email ?? undefined}
 					firstDeclJustificationRequired={
 						requirements.firstDeclJustificationRequired

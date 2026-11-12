@@ -250,11 +250,11 @@ describe("GET /api/public/declarations/export", () => {
 		const line = csv.split("\n")[1] ?? "";
 
 		const header = csv.split("\n")[0]?.split(";") ?? [];
-		const workforceIndex = header.indexOf('"Effectif_RCD"');
+		const workforceIndex = header.indexOf('"Effectif_annuel_moyen"');
 		expect(line.split(";")[workforceIndex]).toBe('""');
 	});
 
-	it("publishes a negative gap as a number in CSV, without a formula guard", async () => {
+	it("publishes a negative gap as percentage points, without a formula guard", async () => {
 		setRows([buildRow({ globalAnnualMeanGap: "-0.0242" })]);
 
 		const response = await callGet("?format=csv");
@@ -262,8 +262,8 @@ describe("GET /api/public/declarations/export", () => {
 		const header = csv.split("\n")[0]?.split(";") ?? [];
 		const line = csv.split("\n")[1]?.split(";") ?? [];
 
-		expect(line[header.indexOf('"Rem_globale_annuelle_moyenne_ecart"')]).toBe(
-			'"-0.0242"',
+		expect(line[header.indexOf('"Ecart_rem_annuelle_moyenne"')]).toBe(
+			'"-2.42"',
 		);
 	});
 
@@ -293,15 +293,16 @@ describe("GET /api/public/declarations/export", () => {
 
 		expect(response.headers.get("Content-Type")).toContain("text/csv");
 		expect(response.headers.get("Content-Disposition")).toContain(
-			"index-egapro-remunerations.csv",
+			"indicateurs-remuneration.csv",
 		);
 		expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
 
 		const csv = await response.text();
 		const lines = csv.split("\n");
 		expect(lines[0]).toContain('"Adresse";"Region"');
-		expect(lines[0]).toContain('"Libelle_NAF";"Pays"');
-		expect(lines[0]).toContain('"Rem_globale_annuelle_moyenne_ecart"');
+		expect(lines[0]).toContain('"Departement";"Pays"');
+		expect(lines[0]).toContain('"Code_NAF";"Libelle_NAF"');
+		expect(lines[0]).toContain('"Ecart_rem_annuelle_moyenne"');
 		expect(lines).toHaveLength(2);
 		expect(lines[1]).toContain('"111222333"');
 		expect(lines[1]).toContain('"Alpha & Co"');
@@ -327,7 +328,7 @@ describe("GET /api/public/declarations/export", () => {
 		const response = await callGet("?format=csv");
 
 		expect(response.headers.get("Content-Disposition")).toBe(
-			'attachment; filename="index-egapro-remunerations.csv"',
+			'attachment; filename="indicateurs-remuneration.csv"',
 		);
 		const lines = (await response.text()).split("\n");
 		expect(lines).toHaveLength(3);
@@ -336,10 +337,12 @@ describe("GET /api/public/declarations/export", () => {
 	});
 
 	it("emits the complete ordered DGT CSV contract with aligned values", async () => {
+		// Ratios chosen as (index + 1) / 100 so the percent-points conversion
+		// (`ratioToPercentPoints`) round-trips back to the plain index + 1.
 		const indicatorValues = Object.fromEntries(
 			NUMERIC_DECLARATION_FIELDS.map((field, index) => [
 				field,
-				String(index + 1),
+				String((index + 1) / 100),
 			]),
 		);
 		setRows([
@@ -348,6 +351,8 @@ describe("GET /api/public/declarations/export", () => {
 				countryLabel: "Belgique",
 				totalWomen: 41,
 				totalMen: 42,
+				hourlyWomen: 43,
+				hourlyMen: 44,
 			}),
 		]);
 
@@ -365,52 +370,50 @@ describe("GET /api/public/declarations/export", () => {
 				"Region",
 				"Code_departement",
 				"Departement",
+				"Pays",
 				"Code_NAF",
 				"Libelle_NAF",
-				"Pays",
-				"Effectif_RCD",
-				"Effectif_F_rem_annuelle_globale",
-				"Effectif_H_rem_annuelle_globale",
-				"Rem_globale_annuelle_moyenne_ecart",
-				"Rem_globale_annuelle_mediane_ecart",
-				"Taux_horaire_global_moyen_ecart",
-				"Taux_horaire_global_median_ecart",
-				"Rem_variable_annuelle_moyenne_ecart",
-				"Rem_variable_annuelle_mediane_ecart",
-				"Taux_horaire_variable_moyen_ecart",
-				"Taux_horaire_variable_median_ecart",
+				"Effectif_annuel_moyen",
+				"Effectif_F_rem_annuelle",
+				"Effectif_H_rem_annuelle",
+				"Effectif_F_rem_horaire",
+				"Effectif_H_rem_horaire",
+				"Ecart_rem_annuelle_moyenne",
+				"Ecart_rem_annuelle_mediane",
+				"Ecart_rem_horaire_moyenne",
+				"Ecart_rem_horaire_mediane",
+				"Ecart_rem_variable_annuelle_moyenne",
+				"Ecart_rem_variable_annuelle_mediane",
+				"Ecart_rem_variable_horaire_moyenne",
+				"Ecart_rem_variable_horaire_mediane",
 				"Proportion_variable_F",
 				"Proportion_variable_H",
 				...Array.from(
 					{ length: 4 },
-					(_, index) =>
-						`Quartile${index + 1}_Rem_globale_annuelle_proportion_F`,
+					(_, index) => `Quartile${index + 1}_rem_annuelle_proportion_F`,
 				),
 				...Array.from(
 					{ length: 4 },
-					(_, index) =>
-						`Quartile${index + 1}_Rem_globale_annuelle_proportion_H`,
+					(_, index) => `Quartile${index + 1}_rem_annuelle_proportion_H`,
 				),
 				...Array.from(
 					{ length: 4 },
-					(_, index) => `Quartile${index + 1}_Taux_horaire_global_proportion_F`,
+					(_, index) => `Quartile${index + 1}_rem_horaire_proportion_F`,
 				),
 				...Array.from(
 					{ length: 4 },
-					(_, index) => `Quartile${index + 1}_Taux_horaire_global_proportion_H`,
+					(_, index) => `Quartile${index + 1}_rem_horaire_proportion_H`,
 				),
 			].map((header) => `"${header}"`),
 		);
-		expect(headers).toHaveLength(39);
+		expect(headers).toHaveLength(41);
 		expect(values).toHaveLength(headers.length);
 		expect(values[headers.indexOf('"Pays"')]).toBe('"Belgique"');
-		expect(values[headers.indexOf('"Effectif_F_rem_annuelle_globale"')]).toBe(
-			'"41"',
-		);
-		expect(values[headers.indexOf('"Effectif_H_rem_annuelle_globale"')]).toBe(
-			'"42"',
-		);
-		expect(values.slice(13)).toEqual(
+		expect(values[headers.indexOf('"Effectif_F_rem_annuelle"')]).toBe('"41"');
+		expect(values[headers.indexOf('"Effectif_H_rem_annuelle"')]).toBe('"42"');
+		expect(values[headers.indexOf('"Effectif_F_rem_horaire"')]).toBe('"43"');
+		expect(values[headers.indexOf('"Effectif_H_rem_horaire"')]).toBe('"44"');
+		expect(values.slice(15)).toEqual(
 			NUMERIC_DECLARATION_FIELDS.map((_, index) => `"${index + 1}"`),
 		);
 	});

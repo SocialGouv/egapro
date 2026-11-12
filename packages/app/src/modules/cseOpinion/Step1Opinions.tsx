@@ -15,9 +15,13 @@ import { cseOpinionStepHref } from "~/modules/routes";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { CseStepIndicator } from "./components/CseStepIndicator";
+import {
+	FreshTransmissionBanner,
+	getFreshTransmissionTitle,
+	useFreshTransmission,
+} from "./components/FreshTransmissionBanner";
 import { OpinionCard } from "./components/OpinionCard";
 import { StaleOpinionsAlert } from "./components/StaleOpinionsAlert";
-import { SubmissionBanner } from "./components/SubmissionBanner";
 import { DECLARATION_HEADINGS, getOpinionTitle } from "./contentTypeColumns";
 import {
 	getMissingOpinionFieldErrors,
@@ -89,6 +93,7 @@ function opinionCardId(
 type Props = {
 	banner?: SubmissionBannerState;
 	cseDeadline: Date;
+	declarationModifiable: boolean;
 	email?: string;
 	firstDeclJustificationRequired: boolean;
 	hasSecondDeclaration: boolean;
@@ -102,6 +107,7 @@ type Props = {
 export function Step1Opinions({
 	banner = null,
 	cseDeadline,
+	declarationModifiable,
 	email,
 	firstDeclJustificationRequired,
 	hasSecondDeclaration,
@@ -115,6 +121,8 @@ export function Step1Opinions({
 	const isImpersonating = useIsImpersonating();
 	const readOnlyGuard = useReadOnlyGuard();
 	const { isReadOnly } = useLockContext();
+
+	const freshTransmission = useFreshTransmission(banner);
 
 	const requirements = useMemo<JustificationRequirements>(
 		() => ({ firstDeclJustificationRequired, secondDeclJustificationRequired }),
@@ -224,7 +232,7 @@ export function Step1Opinions({
 		return <p>Chargement...</p>;
 	}
 
-	const DeclarationHeading = banner ? "h3" : "h2";
+	const DeclarationHeading = freshTransmission ? "h3" : "h2";
 
 	const renderCard = (
 		declarationNumber: DeclarationNumber,
@@ -278,9 +286,7 @@ export function Step1Opinions({
 				<legend className="fr-sr-only">Avis du CSE</legend>
 				<div className={layoutStyles.titleRow}>
 					<h1 className="fr-h4 fr-mb-0">
-						{banner
-							? "Parcours de mise en conformité pour l'indicateur par catégorie d'emplois"
-							: PAGE_TITLE}
+						{getFreshTransmissionTitle(freshTransmission, year) ?? PAGE_TITLE}
 					</h1>
 					<SavedIndicator
 						hasData={hasDraft || initialData !== undefined}
@@ -289,13 +295,14 @@ export function Step1Opinions({
 					/>
 				</div>
 
-				{banner && (
+				{freshTransmission && (
 					<>
-						<SubmissionBanner
-							deadline={cseDeadline}
-							depositModifiable={banner.depositModifiable}
+						<FreshTransmissionBanner
+							banner={banner}
+							cseDeadline={cseDeadline}
+							declarationModifiable={declarationModifiable}
 							email={email ?? "adresse@exemple.fr"}
-							variant={banner.variant}
+							freshTransmission={freshTransmission}
 							year={year}
 						/>
 						<h2 className="fr-h6 fr-mb-0">{PAGE_TITLE}</h2>

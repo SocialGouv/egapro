@@ -1,7 +1,5 @@
 "use client";
 
-import { signIn } from "next-auth/react";
-
 import { triggerAdminStepUp } from "~/modules/admin/access";
 import {
 	MATOMO_ACTION,
@@ -11,6 +9,7 @@ import {
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { MY_SPACE } from "~/modules/routes";
 import styles from "./ProConnectButton.module.scss";
+import { triggerProConnectSignIn } from "./proConnectSignIn";
 
 type Props = {
 	callbackUrl?: string;
@@ -33,7 +32,7 @@ export function ProConnectButton({ callbackUrl, requiresAdminStepUp }: Props) {
 			triggerAdminStepUp(resolvedCallbackUrl);
 			return;
 		}
-		void signIn("proconnect", { callbackUrl: resolvedCallbackUrl });
+		triggerProConnectSignIn(resolvedCallbackUrl);
 	}
 
 	return (

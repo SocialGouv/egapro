@@ -21,7 +21,7 @@ export const DECLARATION_PROCESS_STEP_LABELS: Record<
  * process, derived from the FSM status.
  *
  * Returns `null` when the démarche is finalised (`demarche_completed`) — no
- * deadline applies, the row should display "Clôturée".
+ * deadline applies, the current campaign's row should display "-".
  *
  * The mapping aligns with the deadlines surfaced by the my-space
  * `VerticalStepper` (kept consistent so the table cell and the panel agree).

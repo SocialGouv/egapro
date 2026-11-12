@@ -29,7 +29,7 @@ const STEP_TITLES: Record<RepresentationStepSlug, string> = {
 	"ecarts-instances-dirigeantes":
 		"Écarts de représentation - Instances dirigeantes",
 	"informations-de-publication": "Informations de publication",
-	recapitulatif: "Récapitulatif",
+	recapitulatif: "Récapitulatif de la déclaration",
 };
 
 const STEP_COMPONENTS: Record<RepresentationStepSlug, ComponentType> = {

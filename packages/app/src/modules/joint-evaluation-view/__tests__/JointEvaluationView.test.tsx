@@ -24,7 +24,8 @@ const baseProps = {
 	file: {
 		id: "report-1",
 		fileName: "rapport.pdf",
-		uploadedAt: new Date("2027-04-01T10:00:00Z"),
+		uploadedAt: new Date("2027-04-05T10:00:00Z"),
+		sizeBytes: 16026,
 	},
 	referencePeriod: "01/01/2026 - 31/12/2026",
 	submittedAt: new Date("2027-04-03T12:00:00Z"),
@@ -42,7 +43,19 @@ describe("JointEvaluationView", () => {
 	it("shows the transmission date, declarant and company details, and active report", () => {
 		render(<JointEvaluationView {...baseProps} />);
 		expect(
-			screen.getByText("La déclaration a été transmise le 03/04/2027"),
+			screen.getByRole("heading", {
+				name: "Transmission du rapport de l’évaluation conjointe des rémunérations 2027",
+				level: 1,
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				"Le rapport de l’évaluation conjointe a été transmis le 03/04/2027.",
+			),
+		).toBeInTheDocument();
+		expect(screen.getByText("Fichier déposé").tagName).toBe("DT");
+		expect(
+			screen.getByText("PDF – 15,65 Ko · déposé le 5 avril 2027"),
 		).toBeInTheDocument();
 		expect(screen.getByText("Marie Dupont")).toBeInTheDocument();
 		expect(screen.getByText("01 02 03 04 05")).toBeInTheDocument();

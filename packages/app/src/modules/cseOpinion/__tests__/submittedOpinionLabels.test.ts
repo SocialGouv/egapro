@@ -4,7 +4,6 @@ import {
 	buildSubmittedDeclarations,
 	buildSubmittedFileColumns,
 	buildSubmittedOpinionRows,
-	formatGapConsulted,
 	formatSubmittedOpinion,
 } from "../submittedOpinionLabels";
 
@@ -36,14 +35,6 @@ describe("formatSubmittedOpinion", () => {
 	});
 });
 
-describe("formatGapConsulted", () => {
-	it("answers yes, no or not provided", () => {
-		expect(formatGapConsulted(true)).toBe("Oui");
-		expect(formatGapConsulted(false)).toBe("Non");
-		expect(formatGapConsulted(null)).toBe("Non renseigné");
-	});
-});
-
 describe("buildSubmittedOpinionRows", () => {
 	it("gives an accuracy opinion its value and date", () => {
 		expect(buildSubmittedOpinionRows(accuracy(1))).toEqual([
@@ -52,17 +43,17 @@ describe("buildSubmittedOpinionRows", () => {
 		]);
 	});
 
-	it("starts a consulted justification with the consultation row", () => {
+	it("gives a justification opinion its value and date, whatever the consultation flag", () => {
 		expect(buildSubmittedOpinionRows(gap(1, true))).toEqual([
-			{ label: "CSE informé et consulté", value: "Oui" },
 			{ label: "Avis du CSE", value: "Défavorable" },
 			{ label: "Date de l'avis rendu par le CSE", value: "08/08/2026" },
 		]);
 	});
 
-	it("stops a justification the CSE was not consulted on", () => {
+	it("marks a missing opinion and date as not provided", () => {
 		expect(buildSubmittedOpinionRows(gap(1, false))).toEqual([
-			{ label: "CSE informé et consulté", value: "Non" },
+			{ label: "Avis du CSE", value: "Non renseigné" },
+			{ label: "Date de l'avis rendu par le CSE", value: "Non renseigné" },
 		]);
 	});
 
@@ -77,7 +68,7 @@ describe("buildSubmittedOpinionRows", () => {
 });
 
 describe("buildSubmittedDeclarations", () => {
-	const opinions = [gap(1, true), accuracy(2), accuracy(1), gap(2, false)];
+	const opinions = [gap(1, true), accuracy(2), accuracy(1), gap(2, true)];
 
 	it("keeps only the first declaration when no second one was transmitted", () => {
 		const declarations = buildSubmittedDeclarations(opinions, false);
@@ -109,6 +100,20 @@ describe("buildSubmittedDeclarations", () => {
 		);
 
 		expect(declarations[0]?.opinions).toEqual([]);
+	});
+
+	it("omits the justification block when the CSE was not consulted on it", () => {
+		const declarations = buildSubmittedDeclarations(
+			[accuracy(1), gap(1, false), accuracy(2), gap(2, false)],
+			true,
+		);
+
+		expect(declarations[0]?.opinions.map((opinion) => opinion.id)).toEqual([
+			"1:accuracy",
+		]);
+		expect(declarations[1]?.opinions.map((opinion) => opinion.id)).toEqual([
+			"2:accuracy",
+		]);
 	});
 });
 

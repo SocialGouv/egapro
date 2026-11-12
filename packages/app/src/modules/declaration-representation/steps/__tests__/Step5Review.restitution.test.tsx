@@ -350,7 +350,7 @@ describe("Step5Review — modale de transmission", () => {
 		).toBeInTheDocument();
 		expect(
 			dialog.getByText(
-				`Vous allez transmettre la déclaration des indicateurs de représentation ${REPRESENTATION_CAMPAIGN_YEAR} aux services du ministère chargé du travail.`,
+				`Vous allez transmettre la déclaration des indicateurs de représentation ${REPRESENTATION_CAMPAIGN_YEAR} aux services du ministre chargé du travail.`,
 			),
 		).toBeInTheDocument();
 		expect(dialog.queryByText(/seuil réglementaire/)).not.toBeInTheDocument();

@@ -33,6 +33,7 @@ function renderItem(
 		payApplicable?: boolean;
 		annualPayApplicable?: boolean;
 		hourlyPayApplicable?: boolean;
+		sameWorkforceByPayBasis?: boolean;
 	} = {},
 ) {
 	const { category: categoryOverride, ...rest } = overrides;
@@ -51,6 +52,7 @@ function TestItem({
 	payApplicable?: boolean;
 	annualPayApplicable?: boolean;
 	hourlyPayApplicable?: boolean;
+	sameWorkforceByPayBasis?: boolean;
 }) {
 	return (
 		<CategoryAccordionItem
@@ -266,5 +268,32 @@ describe("CategoryAccordionItem — Total row gap (#4205)", () => {
 			expect(cell).not.toHaveTextContent("%");
 			expect(within(cell).queryByText("élevé")).toBeNull();
 		}
+	});
+});
+
+describe("CategoryAccordionItem — workforce row headers (#5032)", () => {
+	it("keeps the information button on the annual and hourly rows", () => {
+		renderItem();
+		expect(
+			screen.getByRole("button", {
+				name: "Information sur l'effectif de la rémunération annuelle",
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", {
+				name: "Information sur l'effectif de la rémunération horaire",
+			}),
+		).toBeInTheDocument();
+	});
+
+	it("renders the shared row header without an information button", () => {
+		renderItem({ sameWorkforceByPayBasis: true });
+		const rowHeader = screen.getByRole("rowheader", {
+			name: "Rémunération annuelle et horaire",
+		});
+		expect(within(rowHeader).queryByRole("button")).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole("button", { name: /^Information sur l'effectif/ }),
+		).not.toBeInTheDocument();
 	});
 });

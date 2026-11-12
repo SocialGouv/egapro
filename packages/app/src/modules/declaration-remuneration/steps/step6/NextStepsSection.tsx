@@ -238,7 +238,7 @@ function GapComplianceProcessBlock() {
 
 			<p className="fr-mb-0">
 				À la suite de l&apos;analyse de vos données de l&apos;indicateur par
-				catégorie d&apos;emploi, des <strong>écarts ≥ 5 %</strong> ont été
+				catégorie d&apos;emplois, des <strong>écarts ≥ 5 %</strong> ont été
 				identifiés&nbsp;:
 			</p>
 			<p className="fr-mb-0">

@@ -9,10 +9,6 @@ import {
 	API_REPRESENTATION_PDF,
 } from "~/modules/routes";
 import { DownloadCard, formatDocumentSubtitle } from "~/modules/shared";
-import {
-	CSE_OPINION_RECAP_TITLE,
-	JOINT_EVALUATION_RECAP_TITLE,
-} from "~/modules/shared/demarcheDocuments";
 import styles from "./DeclarationProcessPanel.module.scss";
 import type { DeclarationItem } from "./types";
 
@@ -31,6 +27,10 @@ function resourceSubtitle(declaration: DeclarationItem): string {
 		declaration.year,
 		getReferenceYearFor(declaration.year),
 	);
+}
+
+function recapDownload(name: string, year: number): string {
+	return `Télécharger le récapitulatif : ${name} ${year}`;
 }
 
 function getRepresentationResources(
@@ -55,7 +55,7 @@ function getRemunerationResources(
 
 	if (declaration.hasPrefillData) {
 		resources.push({
-			title: "Télécharger les données préremplies (issues des données DSN)",
+			title: `Télécharger les données préremplies : Déclaration des indicateurs de rémunération ${declaration.year}`,
 			subtitle,
 			href: `${API_PREFILL_PDF}?year=${declaration.year}`,
 		});
@@ -63,7 +63,10 @@ function getRemunerationResources(
 
 	if (isDeclarationSubmitted(declaration.fsmStatus)) {
 		resources.push({
-			title: "Télécharger le récapitulatif de la déclaration des indicateurs",
+			title: recapDownload(
+				"Déclaration des indicateurs de rémunération",
+				declaration.year,
+			),
 			subtitle,
 			href: `${API_DECLARATION_PDF}?year=${declaration.year}`,
 		});
@@ -71,7 +74,10 @@ function getRemunerationResources(
 
 	if (declaration.hasSubmittedSecondDeclaration) {
 		resources.push({
-			title: "Télécharger le récapitulatif de la seconde déclaration",
+			title: recapDownload(
+				"Seconde déclaration des écarts de rémunération par catégorie d'emplois",
+				declaration.year,
+			),
 			subtitle,
 			href: `${API_DECLARATION_PDF}?type=correction&year=${declaration.year}`,
 		});
@@ -79,7 +85,10 @@ function getRemunerationResources(
 
 	if (declaration.jointEvaluationViewAvailable) {
 		resources.push({
-			title: JOINT_EVALUATION_RECAP_TITLE,
+			title: recapDownload(
+				"Transmission du rapport de l'évaluation conjointe des rémunérations",
+				declaration.year,
+			),
 			subtitle,
 			href: `${API_JOINT_EVALUATION_PDF}?year=${declaration.year}`,
 		});
@@ -90,7 +99,10 @@ function getRemunerationResources(
 		declaration.hasSubmittedCseOpinion
 	) {
 		resources.push({
-			title: CSE_OPINION_RECAP_TITLE,
+			title: recapDownload(
+				"Transmission du ou des avis du CSE",
+				declaration.year,
+			),
 			subtitle,
 			href: `${API_CSE_OPINION_PDF}?year=${declaration.year}`,
 		});

@@ -2,12 +2,7 @@ import Link from "next/link";
 import type { CseOpinionRecapData } from "~/modules/declarationPdf/buildCseOpinionRecapData";
 import { Breadcrumb } from "~/modules/layout";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
-import {
-	API_CSE_OPINION_PDF,
-	apiV1FileHref,
-	MY_SPACE,
-	MY_SPACE_JOINT_EVALUATION_VIEW,
-} from "~/modules/routes";
+import { API_CSE_OPINION_PDF, apiV1FileHref, MY_SPACE } from "~/modules/routes";
 import { FileDownloadLink, FileFormatDetail } from "~/modules/shared";
 import styles from "./SubmittedOpinionsPage.module.scss";
 import {
@@ -17,7 +12,7 @@ import {
 	UNASSOCIATED_FILE_LABEL,
 } from "./submittedOpinionLabels";
 
-type Props = CseOpinionRecapData & { hasSubmittedJointEvaluation: boolean };
+type Props = CseOpinionRecapData;
 
 function InfoList({ rows }: { rows: SubmittedInfoRow[] }) {
 	return (
@@ -72,12 +67,14 @@ function FilesTable({
 	columns: CseOpinionRecapData["fileColumns"];
 }) {
 	return (
-		<div className="fr-table fr-table--bordered fr-mb-0">
+		<div
+			className={`fr-table fr-table--bordered fr-table--no-caption fr-mb-0 ${styles.filesTable}`}
+		>
 			<div className="fr-table__wrapper">
 				<div className="fr-table__container">
 					<div className="fr-table__content">
 						<table>
-							<caption className="fr-sr-only">
+							<caption>
 								Fichiers déposés et avis du CSE auxquels ils sont associés
 							</caption>
 							<thead>
@@ -156,7 +153,6 @@ export function SubmittedOpinionsPage({
 	declarations,
 	fileColumns,
 	files,
-	hasSubmittedJointEvaluation,
 }: Props) {
 	const recapHref = `${API_CSE_OPINION_PDF}?year=${year}`;
 	return (
@@ -191,7 +187,7 @@ export function SubmittedOpinionsPage({
 										Transmission du ou des avis du CSE {year}
 									</h1>
 									<p className="fr-mb-0">
-										La déclaration a été transmise le {transmittedAt}.
+										Le ou les avis ont été transmis le {transmittedAt}.
 									</p>
 								</div>
 								<div>
@@ -217,25 +213,6 @@ export function SubmittedOpinionsPage({
 								<InfoGroup rows={declarantRows} title="Déclarant" />
 								<InfoGroup rows={companyRows} title="Entreprise" />
 								<InfoGroup rows={referencePeriods} title="Calcul" />
-							</section>
-
-							<section className={styles.group}>
-								<h2 className="fr-text--lg fr-text--bold fr-mb-0">
-									Évaluation conjointe des rémunérations
-								</h2>
-								<p className="fr-mb-0">
-									{hasSubmittedJointEvaluation ? "Oui" : "Non"}
-								</p>
-								{hasSubmittedJointEvaluation && (
-									<p className="fr-mb-0">
-										<Link
-											className="fr-link"
-											href={MY_SPACE_JOINT_EVALUATION_VIEW}
-										>
-											Consulter le rapport de l’évaluation conjointe
-										</Link>
-									</p>
-								)}
 							</section>
 
 							<section className={styles.section}>

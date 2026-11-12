@@ -22,6 +22,8 @@ vi.mock("~/trpc/react", () => ({
 import { Confirmation } from "../Confirmation";
 import { REPRESENTATION_CAMPAIGN_YEAR, REPRESENTATION_YEAR } from "./fixtures";
 
+const COMPANY_NAME = "Société Démo";
+
 const DECLARANT_EMAIL = "declarant@example.fr";
 
 function renderConfirmation({
@@ -32,6 +34,7 @@ function renderConfirmation({
 	return render(
 		<Confirmation
 			campaignYear={REPRESENTATION_CAMPAIGN_YEAR}
+			companyName={COMPANY_NAME}
 			email={email}
 			referenceYear={REPRESENTATION_YEAR}
 		/>,
@@ -116,6 +119,35 @@ describe("Confirmation — fin de démarche", () => {
 			"href",
 			"/mon-espace",
 		);
+	});
+
+	it("publishes the results notice without the remuneration indicator exception", () => {
+		renderConfirmation();
+
+		expect(
+			screen.getByRole("heading", {
+				level: 2,
+				name: "Publication des résultats",
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(new RegExp(`déclarés par ${COMPANY_NAME}`)),
+		).toHaveTextContent("dans l'onglet « Observatoire » d'Egapro.");
+		expect(
+			screen.getByRole("link", { name: "Consulter l'observatoire" }),
+		).toHaveAttribute("href", "/index-egapro/recherche");
+		expect(screen.queryByText(/à l'exception/)).not.toBeInTheDocument();
+	});
+
+	it("invites the declarant to give feedback before leaving", () => {
+		renderConfirmation();
+
+		expect(
+			screen.getByText("Comment s'est passée votre démarche ?"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("link", { name: /Je donne mon avis/ }),
+		).toBeInTheDocument();
 	});
 });
 

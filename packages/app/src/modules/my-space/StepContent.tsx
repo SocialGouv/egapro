@@ -344,7 +344,7 @@ export function Step3Content({
 				{title}
 				<TransmittedRow
 					label="Vos avis du CSE ont été transmis"
-					modification={{ href: cseOpinionStepHref(2) }}
+					modification={{ href: cseOpinionStepHref(1) }}
 					viewHref={
 						(cseOpinionViewAvailable ?? cseOpinionSubmitted)
 							? MY_SPACE_CSE_OPINION_VIEW

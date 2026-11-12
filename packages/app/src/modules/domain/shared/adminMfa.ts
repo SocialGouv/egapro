@@ -2,8 +2,10 @@
 // busy session does not keep the backoffice open past the window.
 export const ADMIN_MFA_WINDOW_SECONDS = 8 * 60 * 60;
 
-// ProConnect reports the weakest pillar of the two: `eidas2` and `eidas3` are never issued without a second factor, same as `eidas1-mfa`.
-export const ADMIN_MFA_ACR_VALUES = ["eidas1-mfa", "eidas2", "eidas3"] as const;
+// Backoffice floor (issue #4961): substantial identity, strong MFA and a link
+// to the organisation certified by an official source. `eidas1-mfa` only proves
+// a second factor on a weak identity, so it no longer opens `/admin`.
+export const ADMIN_MFA_ACR_VALUES = ["eidas2", "eidas3"] as const;
 
 const ADMIN_MFA_ACR_SET: ReadonlySet<string> = new Set(ADMIN_MFA_ACR_VALUES);
 

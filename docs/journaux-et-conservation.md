@@ -99,7 +99,7 @@ Les lectures publiques restantes (`PUBLIC_REFERENT_SEARCH`, `PUBLIC_REFERENT_VIE
 
 **Quatre points d'écriture** : l'application (`packages/app/src/server/audit/log.ts`), le worker de notifications (`packages/notifications/src/worker/auditLog.ts`), l'auto-audit de la purge quotidienne elle-même (`packages/app/scripts/audit-cleanup.ts`) et la purge des déclarations (`packages/app/scripts/declaration-cleanup.ts`). L'auto-audit quotidien conserve les nombres de lignes supprimées dans chaque journal et leur total, sans identifiant personnel.
 
-**Durée** : 180 jours pour les catégories `read_sensitive` et `public_search`, 365 jours pour les autres. Un CronJob quotidien (`audit-cleanup-daily`, 04:00 UTC) supprime les lignes expirées par une requête SQL directe. Les deux seuils sont surchargeables par les variables d'environnement `EGAPRO_AUDIT_RETENTION_SHORT_DAYS` et `EGAPRO_AUDIT_RETENTION_LONG_DAYS` — la ConfigMap optionnelle `audit-retention` permet de les fixer, mais aucune n'est définie dans le dépôt : ce sont donc les valeurs par défaut (180 / 365) qui s'appliquent.
+**Durée** : 180 jours pour les catégories `read_sensitive` et `public_search`, 365 jours pour les autres. Un CronJob quotidien (`audit-cleanup-daily`, 04:00 UTC) supprime les lignes expirées par une requête SQL directe. Les deux seuils sont surchargeables par les variables d'environnement `EGAPRO_AUDIT_RETENTION_SHORT_DAYS` et `EGAPRO_AUDIT_RETENTION_LONG_DAYS` — la ConfigMap optionnelle `audit-retention` permet de les fixer, mais aucune n'est définie dans le dépôt : ce sont donc les valeurs par défaut (180 / 365) qui s'appliquent. Ces valeurs par défaut et la liste des catégories à conservation courte ont une seule source, `packages/app/src/modules/audit/shared/constants.ts`, que le script `packages/app/scripts/audit-cleanup.ts` importe.
 
 | Catégorie | Durée |
 |---|---|
@@ -181,7 +181,7 @@ Table `app_declaration_status_history` : chaque changement de statut d'une décl
 
 Table `app_admin_impersonation_event` : trace chaque session où un administrateur se connecte « en tant que » une entreprise (identifiant de l'admin, SIREN, début et fin de session).
 
-**Durée** : 365 jours par défaut à partir du début de la session (`started_at`), avec surcharge possible par `EGAPRO_ADMIN_IMPERSONATION_RETENTION_DAYS`. Le cron quotidien `audit-cleanup-daily` supprime les événements plus anciens que le seuil. La liste « récemment incarnées » ne présente que les événements encore conservés.
+**Durée** : 365 jours par défaut (`ADMIN_IMPERSONATION_RETENTION_DAYS` dans `packages/app/src/modules/audit/shared/constants.ts`) à partir du début de la session (`started_at`), avec surcharge possible par `EGAPRO_ADMIN_IMPERSONATION_RETENTION_DAYS`. Le cron quotidien `audit-cleanup-daily` supprime les événements plus anciens que le seuil. La liste « récemment incarnées » ne présente que les événements encore conservés.
 
 **Sources** : `packages/app/src/server/db/schema.ts` · `packages/app/src/server/auth/config.ts` · `packages/app/scripts/audit-cleanup.ts` · `.kontinuous/templates/audit-cleanup-cron.yaml`.
 

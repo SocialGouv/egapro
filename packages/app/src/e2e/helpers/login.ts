@@ -51,6 +51,11 @@ export async function loginWithProConnect(page: Page, retries = 4) {
 				await page
 					.getByLabel("siret", { exact: true })
 					.fill(`${TEST_SIREN}00013`);
+				// The app requests `acr` as essential (#4961); the test IdP defaults
+				// to eidas1, which ProConnect refuses by looping back to the IdP.
+				await page
+					.getByLabel("Niveaux d'authentification (ACR)")
+					.selectOption("eidas1-mfa");
 				await page.getByRole("button", { name: "Se connecter" }).click();
 			}
 
