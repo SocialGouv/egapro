@@ -167,6 +167,7 @@ export function listNextTransitions(
 	const candidates: NextTransition[] = [];
 	for (const transition of rules.transitions) {
 		if (!transition.from.includes(status)) continue;
+		if (transition.advertisable === false) continue;
 
 		const evaluation = evaluateNode(transition.guard, ctx);
 		if (evaluation.value === false) continue;

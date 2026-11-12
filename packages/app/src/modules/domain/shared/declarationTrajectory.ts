@@ -188,3 +188,81 @@ export function hasSubmittedSecondDeclaration(
 ): boolean {
 	return deriveSubsequentSubmissions(events).hasSubmittedSecondDeclaration;
 }
+
+export type LastTransmission =
+	| "first_declaration"
+	| "path_choice_round_1"
+	| "path_choice_round_2"
+	| "second_declaration"
+	| "joint_evaluation"
+	| "cse_opinion";
+
+export type TransmissionHistoryEvent = {
+	eventType: string;
+	round: number | null;
+	createdAt: Date;
+};
+
+// The flow is linear, so the latest event always prevails; precedence only
+// breaks a timestamp tie. Loop-back events and the formal-notice flow are not
+// transmissions.
+const TRANSMISSION_PRECEDENCE: ReadonlyArray<LastTransmission> = [
+	"cse_opinion",
+	"joint_evaluation",
+	"second_declaration",
+	"path_choice_round_2",
+	"path_choice_round_1",
+	"first_declaration",
+];
+
+function toTransmission(
+	event: TransmissionHistoryEvent,
+): LastTransmission | null {
+	switch (event.eventType) {
+		case "submit":
+			return "first_declaration";
+		case "path_choice":
+			return event.round === 2 ? "path_choice_round_2" : "path_choice_round_1";
+		case "second_declaration_submit":
+			return "second_declaration";
+		case "joint_evaluation_submit":
+			return "joint_evaluation";
+		case "cse_opinion_submit":
+			return "cse_opinion";
+		default:
+			return null;
+	}
+}
+
+function precedenceRank(transmission: LastTransmission): number {
+	return TRANSMISSION_PRECEDENCE.indexOf(transmission);
+}
+
+export function getLastTransmission(
+	events: ReadonlyArray<TransmissionHistoryEvent>,
+): LastTransmission | null {
+	let latest: { at: number; transmission: LastTransmission } | null = null;
+	for (const event of events) {
+		const transmission = toTransmission(event);
+		if (transmission === null) continue;
+		const at = event.createdAt.getTime();
+		const isLater =
+			latest === null ||
+			at > latest.at ||
+			(at === latest.at &&
+				precedenceRank(transmission) < precedenceRank(latest.transmission));
+		if (isLater) {
+			latest = { at, transmission };
+		}
+	}
+	return latest?.transmission ?? null;
+}
+
+export function isLastTransmissionPathChoice(
+	lastTransmission: LastTransmission | null,
+): boolean {
+	return (
+		lastTransmission === "path_choice_round_1" ||
+		lastTransmission === "path_choice_round_2"
+	);
+}
