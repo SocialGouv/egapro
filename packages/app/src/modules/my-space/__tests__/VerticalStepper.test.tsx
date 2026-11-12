@@ -7,6 +7,7 @@ import type {
 	CampaignDeadlines,
 	DeclarationDisplayContext,
 	DeclarationFsmStatus,
+	LastTransmission,
 } from "~/modules/domain";
 import { getDefaultCampaignDeadlines } from "~/modules/domain";
 import { civilDate } from "~/modules/domain/shared/civilDate";
@@ -95,6 +96,7 @@ const BASE_PROPS = {
 	hasPrefillData: true,
 	indicatorGRequired: true,
 	lastActionDate: null as string | null,
+	lastTransmission: null as LastTransmission | null,
 	displayContext: makeDisplayContext(),
 	hasSubmittedSecondDeclaration: false,
 	hasSubmittedJointEvaluation: false,
@@ -1120,6 +1122,7 @@ describe("« Modifier » du choix de parcours, dernière étape transmise (#4898
 			isPathChoiceModifiable({
 				declarationFsmStatus: null,
 				displayContext: makeDisplayContext("justify"),
+				lastTransmission: null,
 				submitted: {
 					cseOpinion: false,
 					jointEvaluation: false,
@@ -1127,5 +1130,137 @@ describe("« Modifier » du choix de parcours, dernière étape transmise (#4898
 				},
 			}),
 		).toBe(false);
+	});
+
+	it("keeps the terminal choice modifiable once the démarche is closed (#5164)", () => {
+		expect(
+			isPathChoiceModifiable({
+				declarationFsmStatus: "demarche_completed",
+				displayContext: makeDisplayContext("justify"),
+				lastTransmission: "path_choice_round_1",
+				submitted: {
+					cseOpinion: false,
+					jointEvaluation: false,
+					secondDeclaration: false,
+				},
+			}),
+		).toBe(true);
+	});
+
+	it("locks a closed path choice superseded by a later transmission", () => {
+		expect(
+			isPathChoiceModifiable({
+				declarationFsmStatus: "demarche_completed",
+				displayContext: makeDisplayContext("justify"),
+				lastTransmission: "second_declaration",
+				submitted: {
+					cseOpinion: false,
+					jointEvaluation: false,
+					secondDeclaration: true,
+				},
+			}),
+		).toBe(false);
+	});
+});
+
+describe("démarche close — re-transmission de la dernière étape (#5164)", () => {
+	const CLOSED_MENTION = "Modifiable jusqu'à la nouvelle campagne";
+
+	it("offers Modifier on the report that closed the démarche without a CSE", () => {
+		const { panel, dialog } = renderPanel("closed", {
+			cseOpinionRequired: false,
+			displayContext: makeDisplayContext("joint_evaluation"),
+			hasSubmittedJointEvaluation: true,
+			lastTransmission: "joint_evaluation",
+		});
+
+		expect(
+			panel.getByText(
+				"Cette démarche est terminée. Votre rapport de l'évaluation conjointe reste modifiable.",
+			),
+		).toBeInTheDocument();
+		expect(panel.getByText(CLOSED_MENTION)).toBeInTheDocument();
+		expect(dialog.querySelector(JOINT_EVALUATION_MODIFY)).toHaveTextContent(
+			"Modifier",
+		);
+	});
+
+	it("offers Modifier on the second declaration that closed the démarche", () => {
+		const { panel, dialog } = renderPanel("closed", {
+			cseOpinionRequired: false,
+			displayContext: makeDisplayContext("corrective_action"),
+			hasSubmittedSecondDeclaration: true,
+			lastTransmission: "second_declaration",
+		});
+
+		expect(
+			panel.getByText(
+				"Cette démarche est terminée. Votre seconde déclaration reste modifiable.",
+			),
+		).toBeInTheDocument();
+		expect(panel.getByText(CLOSED_MENTION)).toBeInTheDocument();
+		expect(dialog.querySelector(DECL2_MODIFY)).toHaveTextContent("Modifier");
+	});
+
+	it("offers Modifier on the terminal path choice of a round-1 justification", () => {
+		const { panel, dialog } = renderPanel("closed", {
+			cseOpinionRequired: false,
+			displayContext: makeDisplayContext("justify"),
+			lastTransmission: "path_choice_round_1",
+		});
+
+		expect(
+			panel.getByText(
+				"Cette démarche est terminée. Votre choix de parcours reste modifiable.",
+			),
+		).toBeInTheDocument();
+		expect(panel.getByText(CLOSED_MENTION)).toBeInTheDocument();
+		expect(
+			dialog.querySelector(`a[href="${COMPLIANCE_PATH}"]`),
+		).toHaveTextContent("Modifier");
+	});
+
+	it("keeps only the CSE opinion modifiable when a CSE applies", () => {
+		const { panel, dialog } = renderPanel("closed", {
+			cseOpinionRequired: true,
+			displayContext: makeDisplayContext("joint_evaluation"),
+			hasSubmittedJointEvaluation: true,
+			hasSubmittedSecondDeclaration: true,
+			lastTransmission: "cse_opinion",
+		});
+
+		expect(
+			panel.getByText(
+				"Cette démarche est terminée. Vos avis du CSE restent modifiables.",
+			),
+		).toBeInTheDocument();
+		expect(dialog.querySelector(CSE_MODIFY)).toHaveTextContent("Modifier");
+		expect(dialog.querySelector(JOINT_EVALUATION_MODIFY)).toBeNull();
+		expect(dialog.querySelector(DECL2_MODIFY)).toBeNull();
+	});
+
+	it("withholds Modifier on a report superseded by the second declaration", () => {
+		const { dialog } = renderPanel("closed", {
+			cseOpinionRequired: false,
+			displayContext: makeDisplayContext("joint_evaluation"),
+			hasSubmittedJointEvaluation: true,
+			hasSubmittedSecondDeclaration: true,
+			lastTransmission: "second_declaration",
+		});
+
+		expect(dialog.querySelector(JOINT_EVALUATION_MODIFY)).toBeNull();
+		expect(dialog.querySelector(DECL2_MODIFY)).toHaveTextContent("Modifier");
+	});
+
+	it("keeps the open wording while the démarche is not closed", () => {
+		const { panel } = renderPanel("evaluation", {
+			displayContext: makeDisplayContext("joint_evaluation"),
+		});
+
+		expect(
+			panel.getAllByText("Modifiable jusqu'à votre prochaine transmission")
+				.length,
+		).toBeGreaterThan(0);
+		expect(panel.queryByText(CLOSED_MENTION)).not.toBeInTheDocument();
 	});
 });

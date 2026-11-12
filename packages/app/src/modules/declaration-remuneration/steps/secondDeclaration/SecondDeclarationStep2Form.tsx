@@ -12,6 +12,7 @@ import {
 	type DeclarationFsmStatus,
 	getReferenceYearFor,
 	isSecondDeclarationWritable,
+	type LastTransmission,
 } from "~/modules/domain";
 import { complianceStepHref } from "~/modules/routes";
 import { api } from "~/trpc/react";
@@ -29,6 +30,7 @@ type Props = {
 	initialEndDate?: string;
 	sameWorkforceByPayBasis?: boolean;
 	status: DeclarationFsmStatus | null;
+	lastTransmission: LastTransmission | null;
 };
 
 export function SecondDeclarationStep2Form({
@@ -41,11 +43,12 @@ export function SecondDeclarationStep2Form({
 	initialEndDate = "",
 	sameWorkforceByPayBasis = false,
 	status,
+	lastTransmission,
 }: Props) {
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
 	const { isLoading: isLockLoading, isReadOnly: isLocked } = useLockContext();
-	const isWritable = isSecondDeclarationWritable(status);
+	const isWritable = isSecondDeclarationWritable(status, lastTransmission);
 	const isFormDisabled = isImpersonating || !isWritable;
 	const [startDate, setStartDate] = useState(initialStartDate);
 	const [endDate, setEndDate] = useState(initialEndDate);

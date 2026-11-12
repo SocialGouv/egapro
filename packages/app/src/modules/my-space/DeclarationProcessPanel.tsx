@@ -7,6 +7,7 @@ import type {
 	CampaignDeadlines,
 	DeclarationDisplayContext,
 	DeclarationFsmStatus,
+	LastTransmission,
 } from "~/modules/domain";
 import {
 	FORMAL_NOTICE_JOINT_EVALUATION,
@@ -53,6 +54,7 @@ type Props = {
 	hasSubmittedCseOpinion: boolean;
 	cseOpinionViewAvailable?: boolean;
 	jointEvaluationViewAvailable?: boolean;
+	lastTransmission: LastTransmission | null;
 	formalNoticeAvailable: boolean;
 	siren: string;
 	ctaHref: string;
@@ -76,6 +78,7 @@ export function DeclarationProcessPanel({
 	hasSubmittedCseOpinion,
 	cseOpinionViewAvailable,
 	jointEvaluationViewAvailable,
+	lastTransmission,
 	formalNoticeAvailable,
 	siren,
 	ctaHref,
@@ -134,6 +137,7 @@ export function DeclarationProcessPanel({
 							indicatorGRequired={indicatorGRequired}
 							jointEvaluationSubmitted={hasSubmittedJointEvaluation}
 							jointEvaluationViewAvailable={jointEvaluationViewAvailable}
+							lastTransmission={lastTransmission}
 							secondDeclarationSubmitted={hasSubmittedSecondDeclaration}
 							step1={step1}
 							step2={step2}
@@ -149,6 +153,7 @@ export function DeclarationProcessPanel({
 									jointEvaluation: hasSubmittedJointEvaluation,
 									secondDeclaration: hasSubmittedSecondDeclaration,
 								})}
+								lastTransmission={lastTransmission}
 							/>
 						)}
 						{variant === "closed" && formalNoticeAvailable && (
@@ -266,12 +271,26 @@ function StartAlert() {
 function getClosedMessage({
 	cseOpinionRequired,
 	firstDeclarationModifiable,
+	lastTransmission,
 }: {
 	cseOpinionRequired: boolean;
 	firstDeclarationModifiable: boolean;
+	lastTransmission: LastTransmission | null;
 }): string {
 	if (cseOpinionRequired) {
 		return "Cette démarche est terminée. Vos avis du CSE restent modifiables.";
+	}
+	if (lastTransmission === "joint_evaluation") {
+		return "Cette démarche est terminée. Votre rapport de l'évaluation conjointe reste modifiable.";
+	}
+	if (lastTransmission === "second_declaration") {
+		return "Cette démarche est terminée. Votre seconde déclaration reste modifiable.";
+	}
+	if (
+		lastTransmission === "path_choice_round_1" ||
+		lastTransmission === "path_choice_round_2"
+	) {
+		return "Cette démarche est terminée. Votre choix de parcours reste modifiable.";
 	}
 	return firstDeclarationModifiable
 		? "Cette démarche est terminée. Votre déclaration reste modifiable."
@@ -281,15 +300,21 @@ function getClosedMessage({
 function ClosedMessage({
 	cseOpinionRequired,
 	firstDeclarationModifiable,
+	lastTransmission,
 }: {
 	cseOpinionRequired: boolean;
 	firstDeclarationModifiable: boolean;
+	lastTransmission: LastTransmission | null;
 }) {
 	return (
 		<div className={styles.closedMessage}>
 			<p className="fr-text--bold fr-mb-0">Démarche close</p>
 			<p className="fr-mb-0">
-				{getClosedMessage({ cseOpinionRequired, firstDeclarationModifiable })}
+				{getClosedMessage({
+					cseOpinionRequired,
+					firstDeclarationModifiable,
+					lastTransmission,
+				})}
 			</p>
 		</div>
 	);

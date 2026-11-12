@@ -8,6 +8,7 @@ import {
 	isCseOpinionRequired,
 	isDraft,
 	isSecondDeclarationWritable,
+	type LastTransmission,
 } from "~/modules/domain";
 import { getPostComplianceDestination } from "~/modules/navigation";
 import {
@@ -50,9 +51,10 @@ export function isConcernedDeclarationModifiable(params: {
 	isSecondRound: boolean;
 	status: DeclarationFsmStatus;
 	isFirstDeclarationLocked: boolean;
+	lastTransmission: LastTransmission | null;
 }): boolean {
 	return params.isSecondRound
-		? isSecondDeclarationWritable(params.status)
+		? isSecondDeclarationWritable(params.status, params.lastTransmission)
 		: !params.isFirstDeclarationLocked;
 }
 
@@ -87,11 +89,10 @@ export async function CompliancePathPage() {
 		hasCse: company.hasCse,
 	});
 
-	// Skip the choice page only when the user has nothing to (re-)choose:
-	// no current gap and they never picked a path, or they finalised the
-	// procedure without one. When firstDeclarationPathChoice is set, render
-	// the choice page so the user can review what they picked — the FSM
-	// rejects mutations from demarche_completed, so toggling is harmless.
+	// Skip the page only when there is nothing to (re-)choose: no current gap and
+	// no path recorded. A recorded path always reopens the page, including on a
+	// completed démarche — a terminal choice stays modifiable until the next
+	// campaign (epic #5128).
 	if (
 		!hasChosenPath &&
 		(state.type === "no_gap" ||
@@ -117,12 +118,14 @@ export async function CompliancePathPage() {
 		hasSubmittedSecondDeclaration: data.hasSubmittedSecondDeclaration,
 		hasSubmittedCseOpinion: data.hasSubmittedCseOpinion,
 		hasSubmittedJointEvaluation: data.hasSubmittedJointEvaluation,
+		lastTransmission: data.lastTransmission,
 	});
 
 	const declarationModifiable = isConcernedDeclarationModifiable({
 		isSecondRound,
 		status: data.declaration.status,
 		isFirstDeclarationLocked: data.isFirstDeclarationLocked,
+		lastTransmission: data.lastTransmission,
 	});
 
 	return (

@@ -10,6 +10,7 @@ import type {
 	DeclarationItem,
 	DeclarationStatus,
 	DeclarationType,
+	LastTransmission,
 } from "./types";
 
 type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
@@ -25,6 +26,7 @@ export type DbDeclaration = {
 	secondDeclarationPathChoice: CompliancePath | null;
 	hasSubmittedSecondDeclaration: boolean;
 	secondDeclarationStep: number | null;
+	lastTransmission: LastTransmission | null;
 	hasSubmittedJointEvaluation: boolean;
 	hasSubmittedCseOpinion: boolean;
 	cseOpinionViewAvailable?: boolean;
@@ -68,6 +70,7 @@ export function buildDeclarationList(
 				secondDeclarationPathChoice: existing.secondDeclarationPathChoice,
 				hasSubmittedSecondDeclaration: existing.hasSubmittedSecondDeclaration,
 				secondDeclarationStep: existing.secondDeclarationStep,
+				lastTransmission: existing.lastTransmission,
 				hasSubmittedJointEvaluation: existing.hasSubmittedJointEvaluation,
 				hasSubmittedCseOpinion: existing.hasSubmittedCseOpinion,
 				cseOpinionViewAvailable: existing.cseOpinionViewAvailable,
@@ -94,6 +97,7 @@ export function buildDeclarationList(
 				secondDeclarationPathChoice: null,
 				hasSubmittedSecondDeclaration: false,
 				secondDeclarationStep: null,
+				lastTransmission: null,
 				hasSubmittedJointEvaluation: false,
 				hasSubmittedCseOpinion: false,
 				cseRequired: false,
@@ -128,6 +132,7 @@ export function buildDeclarationList(
 			secondDeclarationPathChoice: d.secondDeclarationPathChoice,
 			hasSubmittedSecondDeclaration: d.hasSubmittedSecondDeclaration,
 			secondDeclarationStep: d.secondDeclarationStep,
+			lastTransmission: d.lastTransmission,
 			hasSubmittedJointEvaluation: d.hasSubmittedJointEvaluation,
 			hasSubmittedCseOpinion: d.hasSubmittedCseOpinion,
 			cseOpinionViewAvailable: d.cseOpinionViewAvailable,

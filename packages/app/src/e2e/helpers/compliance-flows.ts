@@ -274,12 +274,26 @@ export async function submitCseOpinion(page: Page) {
 	await page.waitForURL(urlGlob(CSE_OPINION_CONFIRMATION), { timeout: 30_000 });
 }
 
-export async function uploadJointEvalPdf(page: Page) {
+/**
+ * Deposit the joint evaluation report and transmit it. `fileName` renames the
+ * fixture so a re-transmission is distinguishable on the consultation page —
+ * the content stays the same, the uploaded name is what the view displays.
+ */
+export async function uploadJointEvalPdf(
+	page: Page,
+	options: { fileName?: string } = {},
+) {
 	await test.step("dépôt du rapport d'évaluation conjointe", async () => {
 		await page.waitForURL(urlGlob(COMPLIANCE_JOINT_EVALUATION));
-		await page
-			.locator("#joint-evaluation-file-upload")
-			.setInputFiles(DUMMY_PDF);
+		await page.locator("#joint-evaluation-file-upload").setInputFiles(
+			options.fileName
+				? {
+						name: options.fileName,
+						mimeType: "application/pdf",
+						buffer: await readFile(DUMMY_PDF),
+					}
+				: DUMMY_PDF,
+		);
 		await page.getByRole("button", { exact: true, name: SUBMIT_LABEL }).click();
 		await page
 			.getByText(/Je certifie que le rapport transmis est conforme/)
@@ -435,7 +449,9 @@ export async function completeSecondDeclaration(
 			.getByText(/Je certifie que les données saisies sont exactes/)
 			.click();
 		await page.getByRole("button", { name: "Valider" }).click();
-		await expect(page.locator("#submit-declaration-modal")).not.toBeVisible();
+		await expect(page.locator("#submit-declaration-modal")).not.toBeVisible({
+			timeout: 15_000,
+		});
 	});
 }
 

@@ -238,11 +238,25 @@ describe("listNextTransitions — scénarios normatifs du ruleset 2027.1", () =>
 		).toEqual(["submit_cse_opinion"]);
 	});
 
+	it("demarche_completed : les re-transmissions de la dernière étape ne sont jamais annoncées (#5128)", () => {
+		const ids = listNextTransitions(bundled, "demarche_completed", {
+			cseRequired: false,
+		}).map((transition) => transition.id);
+
+		expect(ids).not.toContain(
+			"resubmit_joint_evaluation_round_1_from_completed",
+		);
+		expect(ids).not.toContain(
+			"resubmit_second_declaration_persistent_gap_from_completed",
+		);
+	});
+
 	it.each(
 		bundled.states.map((state) => state.id),
-	)("sans aucun fait connu, l'état %s conserve toutes ses transitions dans l'ordre du ruleset", (status) => {
-		const expected = bundled.transitions.filter((transition) =>
-			transition.from.includes(status),
+	)("sans aucun fait connu, l'état %s conserve toutes ses transitions annonçables dans l'ordre du ruleset", (status) => {
+		const expected = bundled.transitions.filter(
+			(transition) =>
+				transition.from.includes(status) && transition.advertisable !== false,
 		);
 		const actual = listNextTransitions(bundled, status, {});
 
