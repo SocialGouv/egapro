@@ -16,6 +16,7 @@ const EMPTY_DECLARATION = {
 	secondDeclarationPathChoice: null,
 	hasSubmittedSecondDeclaration: false,
 	secondDeclarationStep: null,
+	lastTransmission: null,
 	hasSubmittedJointEvaluation: false,
 	hasSubmittedCseOpinion: false,
 	cseRequired: false,
@@ -98,6 +99,13 @@ describe("buildDeclarationList", () => {
 			status: "to_complete",
 			fsmStatus: null,
 		});
+	});
+
+	it("forwards the row's last transmission to the panel item (#5164)", () => {
+		const record = makeDbDeclaration({ lastTransmission: "joint_evaluation" });
+		const result = buildDeclarationList(SIREN, [record], 2026);
+
+		expect(result[0]).toMatchObject({ lastTransmission: "joint_evaluation" });
 	});
 
 	it("includes previous year DB records after current year rows", () => {
