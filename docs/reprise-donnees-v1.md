@@ -15,6 +15,12 @@ des dépendances de l'application ni connexion simultanée aux deux productions
 n'est nécessaire. Les deux jeux de données peuvent être exportés et importés
 ensemble ou séparément.
 
+Le kit s'appuie par défaut sur PostgreSQL 17.11, majeure de la V1 de production
+et de la configuration V2 locale. `pg_restore` lit les dumps des majeures
+antérieures ; `MIGRATION_V1_POSTGRES_IMAGE` couvre une source plus récente. Ses
+deux suites de tests sont locales, exécutées par
+`scripts/migration-v1/tests/run.sh`.
+
 Le script historique `pnpm --filter app import:v1-representation`, déjà présent
 sur `alpha`, reste un outil développeur pour une lecture directe de deux bases.
 Il ne constitue pas la procédure de reprise de production.

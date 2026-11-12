@@ -5,7 +5,7 @@ set -Eeuo pipefail
 umask 077
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly POSTGRES_IMAGE="${MIGRATION_V1_POSTGRES_IMAGE:-postgres:14.17}"
+readonly POSTGRES_IMAGE="${MIGRATION_V1_POSTGRES_IMAGE:-postgres:17.11}"
 readonly SNAPSHOT_VERSION="2"
 readonly LEGACY_SNAPSHOT_VERSION="1"
 readonly SNAPSHOT_FILES=(manifest.txt representations.csv referents.csv SHA256SUMS)
@@ -329,6 +329,12 @@ sanitize_plain_dump() {
       if (line == "SET xmloption = content;") next
       if (line == "SET client_min_messages = warning;") next
       if (line == "SET row_security = off;") next
+      # PostgreSQL 17.6 added these two guards and PostgreSQL 17 the timeout GUC.
+      # They are recognized only to be dropped: the sanitized dump never carries
+      # them, so psql never evaluates them.
+      if (line ~ /^\\restrict [A-Za-z0-9+\/=]+$/) next
+      if (line ~ /^\\unrestrict [A-Za-z0-9+\/=]+$/) next
+      if (line == "SET transaction_timeout = 0;") next
 
       reject("instruction hors liste blanche")
     }
