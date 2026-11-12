@@ -59,18 +59,32 @@ const HIGH_GAP_CATEGORY = {
 	annualBaseMen: "35000",
 };
 
+const HIGH_GAP_CORRECTION = {
+	declarationType: "correction",
+	annualBaseWomen: "25000",
+	annualBaseMen: "35000",
+};
+
 function mockPage({
 	gipWorkforce,
 	hasCse,
 	status = "awaiting_compliance_path_choice",
 	employeeCategories = [],
 	firstDeclarationPathChoice = null,
+	secondDeclarationPathChoice = null,
+	hasSubmittedSecondDeclaration = false,
+	isFirstDeclarationLocked = false,
+	lastTransmission = null,
 }: {
 	gipWorkforce: number | null;
 	hasCse: boolean | null;
 	status?: string;
 	employeeCategories?: Array<Record<string, unknown>>;
 	firstDeclarationPathChoice?: string | null;
+	secondDeclarationPathChoice?: string | null;
+	hasSubmittedSecondDeclaration?: boolean;
+	isFirstDeclarationLocked?: boolean;
+	lastTransmission?: string | null;
 }) {
 	mockAuth.mockResolvedValue({ user: { email: "user@example.fr" } });
 	vi.mocked(api.declaration.getOrCreate).mockResolvedValue({
@@ -79,12 +93,14 @@ function mockPage({
 			year: 2026,
 			status,
 			firstDeclarationPathChoice,
-			secondDeclarationPathChoice: null,
+			secondDeclarationPathChoice,
 		},
 		employeeCategories,
-		hasSubmittedSecondDeclaration: false,
+		hasSubmittedSecondDeclaration,
 		hasSubmittedCseOpinion: false,
 		hasSubmittedJointEvaluation: false,
+		isFirstDeclarationLocked,
+		lastTransmission,
 	} as never);
 	vi.mocked(api.company.get).mockResolvedValue({
 		gipWorkforce,
@@ -163,6 +179,75 @@ describe("CompliancePathPage — skipping the choice page", () => {
 
 		expect(mockRedirect).not.toHaveBeenCalled();
 		expect(screen.getByTestId("path-choice")).toBeInTheDocument();
+	});
+});
+
+// Epic #5128 — a démarche closed on its path choice keeps that choice editable
+// until the next campaign; the read-only alert is reserved for a choice a later
+// step actually superseded.
+describe("CompliancePathPage — re-picking the terminal path choice (#5166)", () => {
+	beforeEach(() => {
+		mockRedirect.mockClear();
+		mockAuth.mockReset();
+		vi.mocked(CompliancePathChoice).mockClear();
+	});
+
+	it("opens the round-1 choice with no read-only alert when it closed the démarche", async () => {
+		mockPage({
+			gipWorkforce: 250,
+			hasCse: false,
+			status: "demarche_completed",
+			employeeCategories: [HIGH_GAP_CATEGORY],
+			firstDeclarationPathChoice: "justify",
+			lastTransmission: "path_choice_round_1",
+		});
+
+		render(await CompliancePathPage());
+
+		const props = vi.mocked(CompliancePathChoice).mock.calls[0]?.[0];
+		expect(props?.readOnlyReason).toBeUndefined();
+		expect(props?.declarationModifiable).toBe(true);
+	});
+
+	it("opens the round-2 choice, still without the corrective-action option", async () => {
+		mockPage({
+			gipWorkforce: 250,
+			hasCse: false,
+			status: "demarche_completed",
+			employeeCategories: [HIGH_GAP_CATEGORY, HIGH_GAP_CORRECTION],
+			firstDeclarationPathChoice: "corrective_action",
+			secondDeclarationPathChoice: "justify",
+			hasSubmittedSecondDeclaration: true,
+			lastTransmission: "path_choice_round_2",
+		});
+
+		render(await CompliancePathPage());
+
+		const props = vi.mocked(CompliancePathChoice).mock.calls[0]?.[0];
+		expect(props?.isSecondRound).toBe(true);
+		expect(props?.readOnlyReason).toBeUndefined();
+		// The round-2 choice is editable, but the banner about the second
+		// declaration is not: that one is closed.
+		expect(props?.declarationModifiable).toBe(false);
+	});
+
+	it("keeps the page read-only when the second declaration superseded the choice", async () => {
+		mockPage({
+			gipWorkforce: 250,
+			hasCse: false,
+			status: "demarche_completed",
+			employeeCategories: [HIGH_GAP_CATEGORY],
+			firstDeclarationPathChoice: "corrective_action",
+			hasSubmittedSecondDeclaration: true,
+			isFirstDeclarationLocked: true,
+			lastTransmission: "second_declaration",
+		});
+
+		render(await CompliancePathPage());
+
+		const props = vi.mocked(CompliancePathChoice).mock.calls[0]?.[0];
+		expect(props?.readOnlyReason).toBe("demarche_completed");
+		expect(props?.declarationModifiable).toBe(false);
 	});
 });
 
