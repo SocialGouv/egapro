@@ -281,14 +281,17 @@ export const representationDeclarationRouter = createTRPCRouter({
 			await assertRepresentationCampaignOpen(year);
 
 			const now = new Date();
-			const sharedColumns = {
+			const draftColumns = {
 				draft,
 				draftUpdatedAt: now,
-				currentStep,
 				updatedAt: now,
 			};
 			const columns = {
-				...sharedColumns,
+				...draftColumns,
+				// A transmitted declaration already walked the whole funnel: an edit
+				// must not send its furthest-reached step back behind the recap, or
+				// the re-transmission would become unreachable.
+				currentStep: sql`CASE WHEN ${representationDeclarations.status} = 'submitted' THEN ${TOTAL_REPRESENTATION_STEPS}::integer ELSE ${currentStep} END`,
 				status: sql`CASE WHEN ${representationDeclarations.status} = 'not_subject' THEN 'draft' ELSE ${representationDeclarations.status} END`,
 			};
 
@@ -301,7 +304,8 @@ export const representationDeclarationRouter = createTRPCRouter({
 						year,
 						declarantId: ctx.session.user.id,
 						status: "draft",
-						...sharedColumns,
+						currentStep,
+						...draftColumns,
 					})
 					.onConflictDoUpdate({
 						target: [

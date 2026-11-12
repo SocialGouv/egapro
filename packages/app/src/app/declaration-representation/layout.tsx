@@ -40,7 +40,6 @@ export default async function RepresentationFunnelLayout({
 			campaignOpen={representation.campaignOpen}
 			campaignYear={campaignYear}
 			company={company}
-			isSubmitted={representation.declaration?.status === "submitted"}
 			lockEnabled={getRepresentationDeclaration !== undefined}
 			year={year}
 		>

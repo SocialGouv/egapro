@@ -72,7 +72,6 @@ export default async function RepresentationStepPage({
 			campaignYear={campaignYear}
 			declarationDeadline={declarationDeadline}
 			initialDraft={representationDraftFromDeclaration(declaration, step)}
-			isSubmitted={declaration?.status === "submitted"}
 			step={step}
 			year={year}
 		/>
