@@ -8,7 +8,9 @@ export const sirenInputSchema = z.object({
 
 export const updateHasCseSchema = z.object({
 	siren: z.string().length(9),
-	hasCse: z.boolean(),
+	hasCse: z.boolean({
+		error: "Veuillez indiquer si votre entreprise dispose d'un CSE.",
+	}),
 });
 
 const CSE_RADIO_ERROR = "Veuillez renseigner si un CSE a été mis en place.";

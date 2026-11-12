@@ -113,14 +113,6 @@ describe("CompanyEditModal", () => {
 		expect(container.textContent).not.toContain(company.address);
 	});
 
-	it("renders the requested wording", () => {
-		const { container } = render(<CompanyEditModal company={company} />);
-
-		expect(container.textContent).toContain(
-			"Vérifier les informations affichées et compléter l'information sur l'existence d'un CSE si nécessaire.",
-		);
-	});
-
 	it("renders the modal with company info", () => {
 		const { container } = render(<CompanyEditModal company={company} />);
 
@@ -203,15 +195,15 @@ describe("CompanyEditModal", () => {
 		expect(container.textContent).toContain(GIP_WORKFORCE_VOLUNTARY_DISPLAY);
 	});
 
-	it("disables submit when no CSE is selected", () => {
+	it("keeps submit enabled even without a CSE selection", () => {
 		render(<CompanyEditModal company={company} />);
 
 		expect(
 			screen.getByRole("button", { name: "Enregistrer", hidden: true }),
-		).toBeDisabled();
+		).not.toBeDisabled();
 	});
 
-	it("enables submit after selecting a CSE option", () => {
+	it("keeps submit enabled after selecting a CSE option", () => {
 		render(<CompanyEditModal company={company} />);
 
 		fireEvent.click(screen.getByLabelText("Oui", { exact: true }));
@@ -248,13 +240,89 @@ describe("CompanyEditModal", () => {
 	it("does not fire the mutation when the form is submitted without a CSE selection", async () => {
 		render(<CompanyEditModal company={company} />);
 
-		// Bypass the disabled submit button to hit the guard directly.
 		const form = document.getElementById("company-edit-form");
 		if (form) fireEvent.submit(form);
 
 		await waitFor(() => {
 			expect(mockMutateAsync).not.toHaveBeenCalled();
 		});
+	});
+
+	describe("CSE error state (case 3 — submission without selection)", () => {
+		it("marks the fieldset as errored with the exact message, keeps the warning and the source visible", async () => {
+			const { container } = render(<CompanyEditModal company={company} />);
+
+			const form = document.getElementById("company-edit-form");
+			if (form) fireEvent.submit(form);
+
+			await screen.findByText(
+				"Veuillez indiquer si votre entreprise dispose d'un CSE.",
+			);
+
+			const fieldset = container.querySelector("fieldset");
+			expect(fieldset).toHaveClass("fr-fieldset--error");
+			expect(fieldset).toHaveAttribute("role", "group");
+			expect(container.textContent).toContain(
+				"Compléter l'information sur l'existence d'un CSE.",
+			);
+			expect(container.textContent).toContain("élections professionnelles");
+		});
+
+		it("clears the fieldset error once an option is selected, then submits with that value", async () => {
+			render(<CompanyEditModal company={company} />);
+
+			const form = document.getElementById("company-edit-form");
+			if (form) fireEvent.submit(form);
+			await screen.findByText(
+				"Veuillez indiquer si votre entreprise dispose d'un CSE.",
+			);
+
+			fireEvent.click(screen.getByLabelText("Non", { exact: true }));
+
+			await waitFor(() => {
+				expect(
+					screen.queryByText(
+						"Veuillez indiquer si votre entreprise dispose d'un CSE.",
+					),
+				).not.toBeInTheDocument();
+			});
+
+			if (form) fireEvent.submit(form);
+
+			await waitFor(() => {
+				expect(mockMutateAsync).toHaveBeenCalledWith({
+					siren: "532847196",
+					hasCse: false,
+				});
+			});
+		});
+	});
+
+	it("marks the CSE field as obligatory in its legend without relying on native HTML validation", () => {
+		const { container } = render(<CompanyEditModal company={company} />);
+
+		const yesRadio = screen.getByLabelText("Oui", { exact: true });
+		const noRadio = screen.getByLabelText("Non", { exact: true });
+
+		expect(container.querySelector("legend")).toHaveTextContent(
+			"Existence d'un CSE (obligatoire)",
+		);
+		expect(yesRadio).not.toHaveAttribute("required");
+		expect(noRadio).not.toHaveAttribute("required");
+	});
+
+	it("colors readonly labels and values with the title-grey token", () => {
+		const { container } = render(<CompanyEditModal company={company} />);
+
+		const row = Array.from(container.querySelectorAll(`.${styles.infoRow}`))
+			.map((el) => ({
+				dt: el.querySelector("dt"),
+				dd: el.querySelector("dd"),
+			}))
+			.find((entry) => entry.dt?.textContent === "Raison sociale :");
+
+		expect(row?.dt).toHaveClass(styles.label ?? "");
+		expect(row?.dd).toHaveClass(styles.value ?? "");
 	});
 
 	it("renders an em dash placeholder for a readonly field with no value", () => {
@@ -355,18 +423,18 @@ describe("CompanyEditModal", () => {
 
 		expect(container.textContent).toContain("Source : INSEE");
 		expect(container.textContent).toContain(
-			"Source : DSN (Déclarations Sociales Nominatives).",
+			"Source : DSN (déclarations sociales nominatives).",
 		);
 		expect(container.textContent).toContain("élections professionnelles");
 	});
 
-	it("phrases the CSE intro without the 'manquantes' wording", () => {
+	it("renders no instruction paragraph under the title", () => {
 		const { container } = render(<CompanyEditModal company={company} />);
 
-		expect(container.textContent).toContain(
-			"compléter l'information sur l'existence d'un CSE",
+		expect(container.textContent).not.toContain("Vérifier les informations");
+		expect(container.textContent).not.toContain(
+			"Vérifier les données affichées.",
 		);
-		expect(container.textContent).not.toContain("l'information manquantes");
 	});
 
 	it("points the contact link to the help page in a new tab", () => {
@@ -381,6 +449,50 @@ describe("CompanyEditModal", () => {
 		expect(contactLink).toHaveAttribute("target", "_blank");
 		expect(contactLink).toHaveAttribute("rel", "noopener noreferrer");
 		expect(contactLink).toHaveClass(styles.contactLink ?? "");
+	});
+
+	it("places the contact phrase after the CSE field and outside the form", () => {
+		const { container } = render(<CompanyEditModal company={company} />);
+
+		const form = container.querySelector("form");
+		const contactLink = screen.getByRole("link", {
+			name: /nous contacter\s*\(ouvre une nouvelle fenêtre\)/,
+			hidden: true,
+		});
+
+		expect(form).not.toContainElement(contactLink);
+	});
+
+	describe("CSE warning alert (case 1 — à compléter)", () => {
+		it("shows the warning alert when hasCse is not yet known", () => {
+			const { container } = render(<CompanyEditModal company={company} />);
+
+			expect(container.textContent).toContain(
+				"Compléter l'information sur l'existence d'un CSE.",
+			);
+			expect(
+				container.querySelector(".fr-alert--warning"),
+			).toBeInTheDocument();
+			expect(
+				container.querySelector(".fr-alert--warning"),
+			).not.toHaveAttribute("role", "alert");
+		});
+
+		it("hides the warning alert once hasCse is known", () => {
+			const { container } = render(
+				<CompanyEditModal company={{ ...company, hasCse: true }} />,
+			);
+
+			expect(container.querySelector(".fr-alert--warning")).toBeNull();
+		});
+
+		it("hides the warning alert when the CSE field is not applicable", () => {
+			const { container } = render(
+				<CompanyEditModal company={{ ...company, gipWorkforce: 45 }} />,
+			);
+
+			expect(container.querySelector(".fr-alert--warning")).toBeNull();
+		});
 	});
 
 	it("renders CSE fieldset with legend", () => {
@@ -425,9 +537,6 @@ describe("CompanyEditModal", () => {
 
 			expect(screen.queryByLabelText("Oui", { exact: true })).toBeNull();
 			expect(container.textContent).toContain(GIP_WORKFORCE_VOLUNTARY_DISPLAY);
-			expect(container.textContent).not.toContain(
-				"Vérifier les données affichées et compléter",
-			);
 		});
 	});
 });

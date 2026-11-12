@@ -1,3 +1,7 @@
+.contactParagraph {
+	color: var(--text-title-grey);
+}
+
 .contactLink {
 	// :global(.fr-link) raises specificity to (0,2,0), deterministically outranking
 	// DSFR's `.fr-link` (0,1,0) regardless of stylesheet load order.
@@ -28,7 +32,11 @@
 }
 
 .label {
-	color: var(--text-default-grey);
+	color: var(--text-title-grey);
+}
+
+.value {
+	color: var(--text-title-grey);
 }
 
 .sourceText {
@@ -53,8 +61,11 @@
 	:global(.fr-fieldset__element--inline) {
 		flex: 1 1 10rem;
 	}
+}
 
-	> .sourceText {
-		padding: 0 0.5rem;
-	}
+.cseSourceText {
+	// Kept out of the fieldset so the DSFR error-state vertical bar (legend ->
+	// message) doesn't extend down to the source mention, matching the
+	// refonte mockup. The indent is preserved independently of nesting.
+	padding: 0 0.5rem;
 }
