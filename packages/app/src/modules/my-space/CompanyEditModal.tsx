@@ -123,7 +123,10 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 								</button>
 							</div>
 							<div className="fr-modal__content">
-								<h2 className="fr-modal__title" id={MODAL_TITLE_ID}>
+								<h2
+									className="fr-modal__title fr-mb-4w"
+									id={MODAL_TITLE_ID}
+								>
 									Modifier les informations
 								</h2>
 								{showCseWarning && (
@@ -269,7 +272,7 @@ function CompanyReadonlySection({ company }: CompanyReadonlySectionProps) {
 					/>
 				</dl>
 				<p className={`fr-text--sm fr-mb-0 ${styles.sourceText}`}>
-					Source : DSN (déclarations sociales nominatives).
+					Source : DSN (Déclarations sociales nominatives).
 				</p>
 			</div>
 		</>
@@ -302,7 +305,7 @@ function CseRadioGroup({ error, hasCse, setHasCse }: CseRadioGroupProps) {
 	return (
 		<fieldset
 			aria-labelledby={`${CSE_FIELDSET_LEGEND_ID} ${CSE_FIELDSET_MESSAGES_ID}`}
-			className={`fr-fieldset ${styles.cseFieldset} ${error ? "fr-fieldset--error" : ""}`}
+			className={`fr-fieldset fr-mb-0 ${styles.cseFieldset} ${error ? "fr-fieldset--error" : ""}`}
 			role={error ? "group" : undefined}
 		>
 			<legend

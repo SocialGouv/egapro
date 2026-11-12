@@ -423,7 +423,7 @@ describe("CompanyEditModal", () => {
 
 		expect(container.textContent).toContain("Source : INSEE");
 		expect(container.textContent).toContain(
-			"Source : DSN (déclarations sociales nominatives).",
+			"Source : DSN (Déclarations sociales nominatives).",
 		);
 		expect(container.textContent).toContain("élections professionnelles");
 	});
