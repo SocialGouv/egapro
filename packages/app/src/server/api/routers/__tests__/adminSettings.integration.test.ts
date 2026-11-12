@@ -380,7 +380,7 @@ describe("adminSettings — each settings block only writes its own columns (rea
 		return rows[0];
 	}
 
-	it("saving the representation campaign only rewrites its declaration deadline", async () => {
+	it("saving the representation campaign aligns the window and rewrites the declaration deadline", async () => {
 		await sql`
 			INSERT INTO app_representation_campaign
 				(year, campaign_start_date, campaign_end_date, declaration_deadline)
@@ -395,8 +395,8 @@ describe("adminSettings — each settings block only writes its own columns (rea
 		} as never);
 
 		expect(await readRepresentationRow(CONFIGURED_YEAR)).toEqual({
-			campaign_start_date: "2097-02-01",
-			campaign_end_date: "2097-11-30",
+			campaign_start_date: "2097-03-01",
+			campaign_end_date: "2098-02-28",
 			declaration_deadline: "2097-05-20",
 		});
 	});
@@ -408,8 +408,8 @@ describe("adminSettings — each settings block only writes its own columns (rea
 		});
 
 		expect(await readRepresentationRow(UNCONFIGURED_YEAR)).toEqual({
-			campaign_start_date: "2098-01-01",
-			campaign_end_date: "2098-12-31",
+			campaign_start_date: "2098-03-01",
+			campaign_end_date: "2099-02-28",
 			declaration_deadline: "2098-04-15",
 		});
 	});

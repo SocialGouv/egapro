@@ -46,6 +46,7 @@ function deadlineCellText(declaration: DeclarationItem): string | null {
 			declarations={[declaration]}
 			hasCse={true}
 			representationCampaign={getDefaultRepresentationCampaign(currentYear)}
+			representationCampaignYear={currentYear}
 			userPhone="0122334455"
 		/>,
 	);
