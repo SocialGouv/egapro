@@ -32,6 +32,9 @@ const declarationTransmissionFlash = createTransmissionSuccessFlash(
 const jointEvaluationTransmissionFlash = createTransmissionSuccessFlash(
 	"egapro:joint-evaluation-transmission-success",
 );
+const secondDeclarationTransmissionFlash = createTransmissionSuccessFlash(
+	"egapro:second-declaration-transmission-success",
+);
 
 export const markDeclarationTransmissionSuccess =
 	declarationTransmissionFlash.mark;
@@ -41,3 +44,7 @@ export const markJointEvaluationTransmissionSuccess =
 	jointEvaluationTransmissionFlash.mark;
 export const consumeJointEvaluationTransmissionSuccess =
 	jointEvaluationTransmissionFlash.consume;
+export const markSecondDeclarationTransmissionSuccess =
+	secondDeclarationTransmissionFlash.mark;
+export const consumeSecondDeclarationTransmissionSuccess =
+	secondDeclarationTransmissionFlash.consume;

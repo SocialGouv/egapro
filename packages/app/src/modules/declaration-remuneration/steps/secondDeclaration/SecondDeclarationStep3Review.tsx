@@ -21,7 +21,10 @@ import {
 import { COMPLIANCE_PATH, complianceStepHref } from "~/modules/routes";
 import { getDsfrModal, SUBMIT_LABEL } from "~/modules/shared";
 import { api } from "~/trpc/react";
-import { markDeclarationTransmissionSuccess } from "../../shared/declarationSuccessFlash";
+import {
+	markDeclarationTransmissionSuccess,
+	markSecondDeclarationTransmissionSuccess,
+} from "../../shared/declarationSuccessFlash";
 import { GapBadge } from "../../shared/GapValueBadge";
 import stepStyles from "../Step6Review.module.scss";
 import { CardTitle } from "../step6/CardTitle";
@@ -82,6 +85,7 @@ export function SecondDeclarationStep3Review({
 			markDeclarationTransmissionSuccess();
 			router.push(COMPLIANCE_PATH);
 		} else {
+			if (cseOpinionRequired) markSecondDeclarationTransmissionSuccess();
 			router.push(getPostComplianceDestination(cseOpinionRequired));
 		}
 	}, [closeModal, cseOpinionRequired, gapsExist, router]);
