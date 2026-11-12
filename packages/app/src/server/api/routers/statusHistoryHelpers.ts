@@ -4,7 +4,9 @@ import {
 	DECLARATION_SUPERSEDED_MESSAGE,
 	type DeclarationFsmStatus,
 	deriveSubsequentSubmissions,
+	getLastTransmission,
 	isLockedBySubsequentSubmission,
+	type LastTransmission,
 	SUBSEQUENT_SUBMISSION_EVENT_TYPES,
 	type SubmissionLockTarget,
 	type SubsequentSubmissions,
@@ -61,6 +63,71 @@ export async function loadSubsequentSubmissions(
 			),
 		);
 	return deriveSubsequentSubmissions(rows);
+}
+
+type TransmissionHistoryRow = {
+	eventType: string;
+	round: number | null;
+	createdAt: Date;
+};
+
+// The trajectory projections (flags, last transmission, current round) all read
+// the same rows: one query answers the whole screen rather than one per fact.
+function selectTransmissionHistory(
+	database: StatusHistoryReader,
+	declarationId: string,
+): Promise<TransmissionHistoryRow[]> {
+	return database
+		.select({
+			eventType: declarationStatusHistory.eventType,
+			round: declarationStatusHistory.round,
+			createdAt: declarationStatusHistory.createdAt,
+		})
+		.from(declarationStatusHistory)
+		.where(eq(declarationStatusHistory.declarationId, declarationId));
+}
+
+export type DeclarationTrajectorySnapshot = SubsequentSubmissions & {
+	lastTransmission: LastTransmission | null;
+};
+
+export async function loadDeclarationTrajectory(
+	database: StatusHistoryReader,
+	declarationId: string,
+): Promise<DeclarationTrajectorySnapshot> {
+	const rows = await selectTransmissionHistory(database, declarationId);
+	return {
+		...deriveSubsequentSubmissions(rows),
+		lastTransmission: getLastTransmission(rows),
+	};
+}
+
+export async function loadLastTransmission(
+	database: StatusHistoryReader,
+	declarationId: string,
+): Promise<LastTransmission | null> {
+	return getLastTransmission(
+		await selectTransmissionHistory(database, declarationId),
+	);
+}
+
+export function deriveCurrentRound(
+	events: ReadonlyArray<{ eventType: string }>,
+): 1 | 2 {
+	return events.some((event) => event.eventType === "second_declaration_submit")
+		? 2
+		: 1;
+}
+
+export async function loadTransmissionState(
+	database: StatusHistoryReader,
+	declarationId: string,
+): Promise<{ lastTransmission: LastTransmission | null; round: 1 | 2 }> {
+	const rows = await selectTransmissionHistory(database, declarationId);
+	return {
+		lastTransmission: getLastTransmission(rows),
+		round: deriveCurrentRound(rows),
+	};
 }
 
 export async function isLockedBySubsequentSubmissionFor(
@@ -164,7 +231,7 @@ export async function getCurrentRound(
 			),
 		)
 		.limit(1);
-	return rows.length > 0 ? 2 : 1;
+	return deriveCurrentRound(rows);
 }
 
 export function applyActionOrRefuse(
