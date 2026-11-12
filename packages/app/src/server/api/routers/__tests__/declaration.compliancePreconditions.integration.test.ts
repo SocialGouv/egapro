@@ -363,6 +363,77 @@ describe("compliance submissions re-read the démarche under the declaration loc
 	});
 });
 
+describe("the corrective second declaration stays open while the CSE opinions are pending", () => {
+	async function insertTransmittedSecondDeclaration(
+		secondDeclarationPathChoice: CompliancePathValue | null = null,
+	) {
+		const id = await insertDeclaration({
+			status: "awaiting_cse_opinion",
+			cseRequired: true,
+			firstDeclarationPathChoice: "corrective_action",
+			secondDeclarationPathChoice,
+		});
+		await recordEvent(id, {
+			eventType: "second_declaration_submit",
+			round: 2,
+			minutesAgo: 10,
+		});
+		await insertCategory(id, "correction");
+		return id;
+	}
+
+	function writeCorrection(annualBaseWomen: string) {
+		return createCaller().declaration.updateEmployeeCategories({
+			declarationType: "correction",
+			source: "manual",
+			referencePeriodStart: `${YEAR - 1}-01-01`,
+			referencePeriodEnd: `${YEAR - 1}-12-31`,
+			categories: [
+				{
+					name: "Cadres",
+					data: { ...COMPLETE_CATEGORY_DATA, annualBaseWomen },
+				},
+			],
+		});
+	}
+
+	it("re-transmits it without gap, keeping the CSE opinion step current", async () => {
+		const id = await insertTransmittedSecondDeclaration();
+
+		await expect(writeCorrection("30000")).resolves.toEqual({ success: true });
+		await expect(
+			createCaller().declaration.submitSecondDeclaration(),
+		).resolves.toEqual({ success: true });
+
+		expect(await readStatus(id)).toBe("awaiting_cse_opinion");
+		expect(await countEvents(id, "second_declaration_submit")).toBe(2);
+	});
+
+	it("sends the démarche back to the revision choice when the gap reappears", async () => {
+		const id = await insertTransmittedSecondDeclaration();
+
+		await writeCorrection("20000");
+		await createCaller().declaration.submitSecondDeclaration();
+
+		expect(await readStatus(id)).toBe("awaiting_revision_choice");
+		expect(await countEvents(id, "second_declaration_submit")).toBe(2);
+	});
+
+	it("refuses both the write and the re-transmission once the revised path is justify", async () => {
+		const id = await insertTransmittedSecondDeclaration("justify");
+
+		await expect(writeCorrection("20000")).rejects.toMatchObject({
+			code: "FORBIDDEN",
+		});
+		await expect(
+			createCaller().declaration.submitSecondDeclaration(),
+		).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
+
+		expect(await readStatus(id)).toBe("awaiting_cse_opinion");
+		expect(await countEvents(id, "second_declaration_submit")).toBe(1);
+	});
+});
+
 describe("a joint evaluation report only counts for the choice it was uploaded for", () => {
 	it("does not let a first-round report satisfy the revised joint evaluation", async () => {
 		const id = await insertDeclaration({

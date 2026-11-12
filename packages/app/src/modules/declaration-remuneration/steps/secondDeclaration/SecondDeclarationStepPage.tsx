@@ -93,6 +93,9 @@ export async function SecondDeclarationStepPage({ step: rawStep }: Props) {
 					<SecondDeclarationStep2Form
 						declarationSiren={data.declaration.siren}
 						declarationYear={currentYear}
+						firstDeclarationPathChoice={
+							data.declaration.firstDeclarationPathChoice
+						}
 						initialEndDate={
 							data.declaration.secondDeclReferencePeriodEnd ?? undefined
 						}
@@ -111,6 +114,9 @@ export async function SecondDeclarationStepPage({ step: rawStep }: Props) {
 							data.declaration.totalMen !== null &&
 							data.declaration.hourlyMen !== null &&
 							data.declaration.totalMen === data.declaration.hourlyMen
+						}
+						secondDeclarationPathChoice={
+							data.declaration.secondDeclarationPathChoice
 						}
 						status={data.declaration.status}
 					/>
@@ -133,7 +139,13 @@ export async function SecondDeclarationStepPage({ step: rawStep }: Props) {
 					)}
 					cseOpinionRequired={cseOpinionRequired}
 					declarationYear={currentYear}
+					firstDeclarationPathChoice={
+						data.declaration.firstDeclarationPathChoice
+					}
 					secondDeclarationCategories={reviewCategories}
+					secondDeclarationPathChoice={
+						data.declaration.secondDeclarationPathChoice
+					}
 					secondDeclarationSubmissionCount={
 						data.secondDeclarationSubmissionCount
 					}

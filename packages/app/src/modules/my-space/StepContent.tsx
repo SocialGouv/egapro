@@ -44,6 +44,8 @@ const NEXT_TRANSMISSION_MENTION =
 	"Modifiable jusqu'à votre prochaine transmission";
 const SECOND_DECLARATION_MENTION =
 	"Modifiable jusqu'au choix de votre nouveau parcours";
+const SECOND_DECLARATION_CSE_MENTION =
+	"Modifiable jusqu'à la transmission des avis du CSE";
 
 const PATH_CHOICE_LABEL = "Choix du parcours de mise en conformité";
 
@@ -168,13 +170,19 @@ export function Step2Content({
 		return title;
 	}
 
-	const secondDeclarationModification = isSecondDeclarationWritable(
-		declarationFsmStatus,
-	)
+	const secondDeclarationModification = isSecondDeclarationWritable({
+		status: declarationFsmStatus,
+		firstDeclarationPathChoice: displayContext.firstDeclarationPathChoice,
+		secondDeclarationPathChoice: displayContext.secondDeclarationPathChoice,
+	})
 		? { href: complianceStepHref(1) }
 		: undefined;
+	const secondDeclarationWritableMention =
+		declarationFsmStatus === "awaiting_cse_opinion"
+			? SECOND_DECLARATION_CSE_MENTION
+			: SECOND_DECLARATION_MENTION;
 	const secondDeclarationMention = secondDeclarationModification
-		? SECOND_DECLARATION_MENTION
+		? secondDeclarationWritableMention
 		: undefined;
 	const pathChoiceRow = pathChoiceModifiable ? (
 		<TransmittedRow

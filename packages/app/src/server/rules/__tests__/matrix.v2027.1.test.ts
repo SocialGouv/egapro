@@ -233,6 +233,45 @@ const MATRIX: Case[] = [
 	},
 	{
 		label:
+			"submit_second_declaration re-submit from awaiting_cse_opinion, gap reappears",
+		from: "awaiting_cse_opinion",
+		action: "submit_second_declaration",
+		facts: base("awaiting_cse_opinion", {
+			cseRequired: true,
+			action: { stillHasGap: true },
+		}),
+		expectedTo: "awaiting_revision_choice",
+		expectedEvents: [{ type: "second_declaration_submit", round: 2 }],
+	},
+	{
+		label:
+			"submit_second_declaration re-submit from awaiting_cse_opinion, gap still resolved with CSE",
+		from: "awaiting_cse_opinion",
+		action: "submit_second_declaration",
+		facts: base("awaiting_cse_opinion", {
+			cseRequired: true,
+			action: { stillHasGap: false },
+		}),
+		expectedTo: "awaiting_cse_opinion",
+		expectedEvents: [{ type: "second_declaration_submit", round: 2 }],
+	},
+	{
+		label:
+			"submit_second_declaration re-submit from awaiting_cse_opinion, gap resolved without CSE",
+		from: "awaiting_cse_opinion",
+		action: "submit_second_declaration",
+		facts: base("awaiting_cse_opinion", {
+			cseRequired: false,
+			action: { stillHasGap: false },
+		}),
+		expectedTo: "demarche_completed",
+		expectedEvents: [
+			{ type: "second_declaration_submit", round: 2 },
+			{ type: "demarche_complete" },
+		],
+	},
+	{
+		label:
 			"submit_second_declaration re-submit from awaiting_revision_choice, gap resolved without CSE",
 		from: "awaiting_revision_choice",
 		action: "submit_second_declaration",

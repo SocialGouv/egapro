@@ -468,18 +468,64 @@ describe("isSecondDeclarationWritable", () => {
 	const WRITABLE: DeclarationFsmStatus[] = [
 		"corrective_actions_chosen",
 		"awaiting_revision_choice",
+		"awaiting_cse_opinion",
 	];
+
+	function correctivePath(status: DeclarationFsmStatus | null) {
+		return {
+			status,
+			firstDeclarationPathChoice: "corrective_action" as const,
+			secondDeclarationPathChoice: null,
+		};
+	}
 
 	it.each(
 		WRITABLE,
-	)("returns true for %s, where the engine still exposes submit_second_declaration", (status) => {
-		expect(isSecondDeclarationWritable(status)).toBe(true);
+	)("returns true for %s on the corrective-action path", (status) => {
+		expect(isSecondDeclarationWritable(correctivePath(status))).toBe(true);
 	});
 
 	it.each(
 		allStatusesExcept(WRITABLE),
 	)("returns false for %s, where no submit_second_declaration transition exists", (status) => {
-		expect(isSecondDeclarationWritable(status)).toBe(false);
+		expect(isSecondDeclarationWritable(correctivePath(status))).toBe(false);
+	});
+
+	it.each([
+		["justify", null],
+		["joint_evaluation", null],
+		[null, null],
+	] as const)("returns false in awaiting_cse_opinion when the first path is %s", (firstDeclarationPathChoice, secondDeclarationPathChoice) => {
+		expect(
+			isSecondDeclarationWritable({
+				status: "awaiting_cse_opinion",
+				firstDeclarationPathChoice,
+				secondDeclarationPathChoice,
+			}),
+		).toBe(false);
+	});
+
+	it.each([
+		"justify",
+		"joint_evaluation",
+	] as const)("returns false in awaiting_cse_opinion once the revised path is %s", (secondDeclarationPathChoice) => {
+		expect(
+			isSecondDeclarationWritable({
+				status: "awaiting_cse_opinion",
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice,
+			}),
+		).toBe(false);
+	});
+
+	it("returns false in awaiting_revision_choice when the current path is not corrective", () => {
+		expect(
+			isSecondDeclarationWritable({
+				status: "awaiting_revision_choice",
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: "justify",
+			}),
+		).toBe(false);
 	});
 });
 

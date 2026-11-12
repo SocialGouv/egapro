@@ -434,7 +434,7 @@ export const FAQ_SECTIONS: FaqSection[] = [
 					{
 						question: "Puis-je modifier une déclaration déjà transmise ?",
 						answer:
-							"Oui. Votre déclaration reste modifiable jusqu'à ce que vous transmettiez une seconde déclaration, un rapport d'évaluation conjointe ou un avis du CSE ; votre seconde déclaration, jusqu'au choix de votre nouveau parcours de mise en conformité ; vos avis du CSE, même une fois la démarche close. Les échéances n'y changent rien. Vous rouvrez votre déclaration depuis Mon espace, corrigez, puis transmettez à nouveau : la nouvelle version remplace la précédente et un nouvel accusé de réception vous est envoyé. Une déclaration qui n'est plus modifiable reste consultable.",
+							"Oui. Votre déclaration reste modifiable jusqu'à ce que vous transmettiez une seconde déclaration, un rapport d'évaluation conjointe ou un avis du CSE ; votre seconde déclaration, jusqu'au choix de votre nouveau parcours de mise en conformité ou jusqu'à la transmission de vos avis du CSE ; vos avis du CSE, même une fois la démarche close. Les échéances n'y changent rien. Vous rouvrez votre déclaration depuis Mon espace, corrigez, puis transmettez à nouveau : la nouvelle version remplace la précédente et un nouvel accusé de réception vous est envoyé. Une déclaration qui n'est plus modifiable reste consultable.",
 					},
 					{
 						question:

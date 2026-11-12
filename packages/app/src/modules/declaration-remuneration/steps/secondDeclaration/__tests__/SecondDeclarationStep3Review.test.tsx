@@ -136,7 +136,9 @@ function step3Review(
 			cseApplicable
 			cseOpinionRequired={false}
 			declarationYear={2025}
+			firstDeclarationPathChoice="corrective_action"
 			secondDeclarationCategories={mockCategories}
+			secondDeclarationPathChoice={null}
 			secondDeclarationSubmissionCount={INITIAL_SUBMISSION_COUNT}
 			siren="532847196"
 			status="corrective_actions_chosen"
@@ -625,6 +627,54 @@ describe("SecondDeclarationStep3Review", () => {
 		expect(
 			screen.queryByRole("link", { name: /précédent/i }),
 		).not.toBeInTheDocument();
+	});
+
+	it("keeps Transmettre while the CSE opinions are pending", () => {
+		renderStep3({ status: "awaiting_cse_opinion", cseOpinionRequired: true });
+		expect(
+			screen.getByRole("button", { name: /transmettre/i }),
+		).toBeInTheDocument();
+	});
+
+	it("hides Transmettre in awaiting_cse_opinion once the revised path is justify", () => {
+		renderStep3({
+			status: "awaiting_cse_opinion",
+			cseOpinionRequired: true,
+			secondDeclarationPathChoice: "justify",
+		});
+		expect(
+			screen.queryByRole("button", { name: /transmettre/i }),
+		).not.toBeInTheDocument();
+		expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
+			"href",
+			"/avis-cse",
+		);
+	});
+
+	it("goes back to the CSE opinions after a resubmission without gap from awaiting_cse_opinion", async () => {
+		renderStep3({
+			status: "awaiting_cse_opinion",
+			cseOpinionRequired: true,
+			secondDeclarationCategories: noGapCategories,
+		});
+		await submitDeclaration();
+
+		expect(mockMutate).toHaveBeenCalledTimes(1);
+		expect(mockPush).toHaveBeenCalledWith("/avis-cse");
+	});
+
+	it("goes to the compliance path after a resubmission with a gap from awaiting_cse_opinion", async () => {
+		renderStep3({
+			status: "awaiting_cse_opinion",
+			cseOpinionRequired: true,
+			secondDeclarationCategories: highGapCategories,
+		});
+		await submitDeclaration();
+
+		expect(mockMutate).toHaveBeenCalledTimes(1);
+		expect(mockPush).toHaveBeenCalledWith(
+			"/declaration-remuneration/parcours-conformite",
+		);
 	});
 
 	it("keeps Transmettre while awaiting a revision choice", () => {

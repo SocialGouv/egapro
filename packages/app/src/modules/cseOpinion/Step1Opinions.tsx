@@ -21,6 +21,7 @@ import {
 	useFreshTransmission,
 } from "./components/FreshTransmissionBanner";
 import { OpinionCard } from "./components/OpinionCard";
+import { StaleOpinionsAlert } from "./components/StaleOpinionsAlert";
 import { DECLARATION_HEADINGS, getOpinionTitle } from "./contentTypeColumns";
 import {
 	getMissingOpinionFieldErrors,
@@ -97,6 +98,7 @@ type Props = {
 	firstDeclJustificationRequired: boolean;
 	hasSecondDeclaration: boolean;
 	initialData?: CseOpinionStep1Data;
+	opinionsStale?: boolean;
 	secondDeclJustificationRequired: boolean;
 	siren: string;
 	year: number;
@@ -110,6 +112,7 @@ export function Step1Opinions({
 	firstDeclJustificationRequired,
 	hasSecondDeclaration,
 	initialData,
+	opinionsStale = false,
 	secondDeclJustificationRequired,
 	siren,
 	year,
@@ -307,6 +310,8 @@ export function Step1Opinions({
 				)}
 
 				<CseStepIndicator currentStep={1} />
+
+				{opinionsStale && <StaleOpinionsAlert />}
 
 				<div className={styles.intro}>
 					<p className={`fr-text--md fr-mb-0 ${styles.introText}`}>

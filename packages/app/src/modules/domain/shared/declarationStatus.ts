@@ -134,16 +134,22 @@ export function isCompliancePathStepApplicable(declaration: {
 	}
 }
 
-// The corrective-action second declaration may only be written while its funnel
-// is actually open: right after the corrective-action path choice, or once the
-// declaration has been re-opened for revision. Any other status means round 2
-// never started (or is already resolved), so the write is rejected.
-export function isSecondDeclarationWritable(
-	status: DeclarationFsmStatus | null,
-): boolean {
+const SECOND_DECLARATION_WRITABLE_STATUSES = new Set<DeclarationFsmStatus>([
+	"corrective_actions_chosen",
+	"awaiting_revision_choice",
+	"awaiting_cse_opinion",
+]);
+
+// `awaiting_cse_opinion` is also reached by `justify` and joint evaluation: the current path must stay corrective.
+export function isSecondDeclarationWritable(declaration: {
+	status: DeclarationFsmStatus | null;
+	firstDeclarationPathChoice: CompliancePath | null;
+	secondDeclarationPathChoice: CompliancePath | null;
+}): boolean {
 	return (
-		status === "corrective_actions_chosen" ||
-		status === "awaiting_revision_choice"
+		declaration.status !== null &&
+		SECOND_DECLARATION_WRITABLE_STATUSES.has(declaration.status) &&
+		getCurrentCompliancePath(declaration) === "corrective_action"
 	);
 }
 

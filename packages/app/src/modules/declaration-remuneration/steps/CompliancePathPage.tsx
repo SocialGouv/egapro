@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import {
+	type CompliancePathValue,
 	type DeclarationFsmStatus,
 	getCompliancePathReadOnlyReason,
 	getObligationWorkforce,
@@ -49,10 +50,12 @@ export function getComplianceState(
 export function isConcernedDeclarationModifiable(params: {
 	isSecondRound: boolean;
 	status: DeclarationFsmStatus;
+	firstDeclarationPathChoice: CompliancePathValue | null;
+	secondDeclarationPathChoice: CompliancePathValue | null;
 	isFirstDeclarationLocked: boolean;
 }): boolean {
 	return params.isSecondRound
-		? isSecondDeclarationWritable(params.status)
+		? isSecondDeclarationWritable(params)
 		: !params.isFirstDeclarationLocked;
 }
 
@@ -122,6 +125,8 @@ export async function CompliancePathPage() {
 	const declarationModifiable = isConcernedDeclarationModifiable({
 		isSecondRound,
 		status: data.declaration.status,
+		firstDeclarationPathChoice: data.declaration.firstDeclarationPathChoice,
+		secondDeclarationPathChoice: data.declaration.secondDeclarationPathChoice,
 		isFirstDeclarationLocked: data.isFirstDeclarationLocked,
 	});
 

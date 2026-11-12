@@ -45,11 +45,12 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 	}
 
 	if (step === 1) {
-		const [session, { opinions }, declarationData] = await Promise.all([
-			auth(),
-			api.cseOpinion.get(),
-			api.declaration.getOrCreate(),
-		]);
+		const [session, { opinions, opinionsStale }, declarationData] =
+			await Promise.all([
+				auth(),
+				api.cseOpinion.get(),
+				api.declaration.getOrCreate(),
+			]);
 		const initialData = mapOpinionsFromDb(opinions);
 		const requirements = getJustificationRequirements(declarationData);
 		const banner = getSubmissionBannerState({
@@ -77,6 +78,7 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 					}
 					hasSecondDeclaration={declarationData.hasSubmittedSecondDeclaration}
 					initialData={initialData}
+					opinionsStale={opinionsStale}
 					secondDeclJustificationRequired={
 						requirements.secondDeclJustificationRequired
 					}
@@ -88,11 +90,12 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 	}
 
 	if (step === 2) {
-		const [declarationData, { files }, { associations }] = await Promise.all([
-			api.declaration.getOrCreate(),
-			api.cseOpinion.getFiles(),
-			api.cseOpinion.getFileContentTypes(),
-		]);
+		const [declarationData, { files, opinionsStale }, { associations }] =
+			await Promise.all([
+				api.declaration.getOrCreate(),
+				api.cseOpinion.getFiles(),
+				api.cseOpinion.getFileContentTypes(),
+			]);
 		const columns = computeContentTypeColumns({
 			hasSecondDeclaration: declarationData.hasSubmittedSecondDeclaration,
 			...getJustificationRequirements(declarationData),
@@ -109,6 +112,7 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 					declarationYear={declarationData.declaration.year}
 					existingFiles={files}
 					initialAssociations={associations}
+					opinionsStale={opinionsStale}
 					siren={declarationData.declaration.siren}
 				/>
 			</>
