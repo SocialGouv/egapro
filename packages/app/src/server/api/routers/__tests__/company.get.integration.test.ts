@@ -5,7 +5,7 @@ import { companyRouter } from "~/server/api/routers/company";
 import { db } from "~/server/db";
 
 // company.test.ts mocks the driver, so a column dropped from the select() would pass it silently.
-describe("companyRouter.get country projection (real Postgres)", () => {
+describe("companyRouter.get identity projection (real Postgres)", () => {
 	let sql!: ReturnType<typeof postgres>;
 
 	const SIREN_FOREIGN = "700000010";
@@ -81,5 +81,29 @@ describe("companyRouter.get country projection (real Postgres)", () => {
 
 		expect(result.countryCode).toBeNull();
 		expect(result.countryLabel).toBeNull();
+	});
+
+	it("flags the placeholder row a registry outage leaves behind", async () => {
+		await sql`
+			INSERT INTO app_company (siren, name)
+			VALUES (${SIREN_UNKNOWN}, 'Entreprise 700000012')
+		`;
+		await sql`INSERT INTO app_user_company (user_id, siren) VALUES (${USER_ID}, ${SIREN_UNKNOWN})`;
+
+		const result = await createCaller().get({ siren: SIREN_UNKNOWN });
+
+		expect(result.identityUnavailable).toBe(true);
+	});
+
+	it("keeps a resolved company without the unavailability flag, even with no address", async () => {
+		await sql`
+			INSERT INTO app_company (siren, name, country_label)
+			VALUES (${SIREN_FRENCH}, 'Alpha Solutions', 'FRANCE')
+		`;
+		await sql`INSERT INTO app_user_company (user_id, siren) VALUES (${USER_ID}, ${SIREN_FRENCH})`;
+
+		const result = await createCaller().get({ siren: SIREN_FRENCH });
+
+		expect(result.identityUnavailable).toBe(false);
 	});
 });

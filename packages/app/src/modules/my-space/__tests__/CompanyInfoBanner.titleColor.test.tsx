@@ -15,6 +15,7 @@ const company: CompanyDetail = {
 	departmentLabel: null,
 	gipWorkforce: 250,
 	hasCse: null,
+	identityUnavailable: false,
 };
 
 describe("CompanyInfoBanner — text colour", () => {
