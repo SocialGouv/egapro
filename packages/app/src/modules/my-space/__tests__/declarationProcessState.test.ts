@@ -42,6 +42,7 @@ function makeDeclaration(
 		secondDeclarationPathChoice: null,
 		hasSubmittedSecondDeclaration: false,
 		secondDeclarationStep: null,
+		lastTransmission: null,
 
 		hasSubmittedJointEvaluation: false,
 		hasSubmittedCseOpinion: false,

@@ -1,7 +1,10 @@
 import { render, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import type { DeclarationDisplayContext } from "~/modules/domain";
+import type {
+	DeclarationDisplayContext,
+	LastTransmission,
+} from "~/modules/domain";
 import { getDefaultCampaignDeadlines } from "~/modules/domain";
 import type { PanelVariant } from "../DeclarationProcessPanel";
 import { DeclarationProcessPanel } from "../DeclarationProcessPanel";
@@ -64,6 +67,7 @@ const BASE_PROPS = {
 	ctaHref: "/declaration-remuneration?siren=532847196",
 	lockedByOther: false,
 	lockHolder: null as LockHolder | null,
+	lastTransmission: null as LastTransmission | null,
 };
 
 function renderPanel(
