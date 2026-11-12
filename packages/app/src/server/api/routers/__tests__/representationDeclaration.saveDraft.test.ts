@@ -128,6 +128,18 @@ describe("representationDeclarationRouter.saveDraft", () => {
 		);
 	});
 
+	it("accepts a transmitted declaration and keeps its status via the SQL guard", async () => {
+		const mock = createMockDb([{ status: "submitted" }]);
+
+		await saveDraft(mock);
+
+		expect(insertedValues(mock)).not.toHaveProperty("submittedAt");
+		expect(conflictSet(mock).set.status).not.toBe("draft");
+		expect(compileSql(conflictSet(mock).set.status)).toContain(
+			`ELSE "app_representation_declaration"."status" END`,
+		);
+	});
+
 	it("refuses to save once the campaign is closed (S23)", async () => {
 		mockGetRepresentationCampaign.mockResolvedValue(CLOSED_CAMPAIGN);
 		const mock = createMockDb();
