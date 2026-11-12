@@ -141,7 +141,7 @@ export function ProfileModal() {
 											ref={titleRef}
 											tabIndex={-1}
 										>
-											Mon profil
+											Modifier mon profil
 										</h2>
 									</div>
 									<div className="fr-col-auto">
@@ -209,7 +209,7 @@ export function ProfileModal() {
 											</div>
 										</div>
 										<div className={`fr-mb-4w ${styles.emailBlock}`}>
-											<p className="fr-mb-0">
+											<p className="fr-mb-0 fr-text-title--grey">
 												E-mail :{" "}
 												<strong>{profileQuery.data?.email || "—"}</strong>
 											</p>

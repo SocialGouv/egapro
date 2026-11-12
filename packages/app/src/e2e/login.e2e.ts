@@ -348,7 +348,7 @@ test.describe("Header account entry point", () => {
 		).toHaveCount(0);
 		await page.getByRole("menuitem", { name: "Modifier mon profil" }).click();
 		await expect(
-			page.getByRole("dialog", { name: "Mon profil" }),
+			page.getByRole("dialog", { name: "Modifier mon profil" }),
 		).toBeVisible();
 		await expect(
 			page.getByRole("button", { name: "Mon profil" }),
