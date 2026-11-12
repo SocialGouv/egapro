@@ -667,21 +667,6 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 			).toBeVisible();
 		});
 
-		await test.step("the modify button opens the editable funnel on its first step", async () => {
-			await panel.getByRole("link", { name: "Modifier" }).click();
-			await page.waitForURL(
-				urlGlob(representationStepHref(FIRST_REPRESENTATION_STEP)),
-			);
-
-			// A read-only step exposes a "Suivant" link; an editable one a button.
-			await expect(
-				page.getByRole("button", { name: "Suivant", exact: true }),
-			).toBeVisible();
-			await expect(
-				page.getByRole("link", { name: "Suivant", exact: true }),
-			).toHaveCount(0);
-		});
-
 		await test.step("the view button opens the read-only consultation page", async () => {
 			await panel
 				.getByRole("link", { name: "Voir le récapitulatif de la déclaration" })
@@ -747,6 +732,33 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 
 			await main.getByRole("link", { name: "Mon espace", exact: true }).click();
 			await page.waitForURL(urlGlob(MY_SPACE));
+		});
+
+		// Last, because it leaves Mon espace: the panel's modification entrance
+		// opens the funnel on an editable step.
+		await test.step("the modify button opens the editable funnel on its first step", async () => {
+			await waitForDsfrModal(page, PANEL_ID);
+			await clickAndExpectDialogOpen(
+				page,
+				page.getByRole("button", { name: "Représentation", exact: true }),
+				PANEL_ID,
+			);
+
+			await page
+				.locator(`#${PANEL_ID}`)
+				.getByRole("link", { name: "Modifier" })
+				.click();
+			await page.waitForURL(
+				urlGlob(representationStepHref(FIRST_REPRESENTATION_STEP)),
+			);
+
+			// A read-only step exposes a "Suivant" link; an editable one a button.
+			await expect(
+				page.getByRole("button", { name: "Suivant", exact: true }),
+			).toBeVisible();
+			await expect(
+				page.getByRole("link", { name: "Suivant", exact: true }),
+			).toHaveCount(0);
 		});
 	});
 });
