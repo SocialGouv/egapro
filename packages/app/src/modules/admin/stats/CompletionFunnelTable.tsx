@@ -24,12 +24,12 @@ export function CompletionFunnelTable({ rows, caption }: Props) {
 			<summary className="fr-text--sm">
 				Consulter les données du graphique sous forme de tableau
 			</summary>
-			<div className="fr-table fr-table--bordered fr-mt-2w">
+			<div className="fr-table fr-table--bordered fr-table--no-caption fr-mt-2w">
 				<div className="fr-table__wrapper">
 					<div className="fr-table__container">
 						<div className="fr-table__content">
 							<table>
-								<caption className="fr-sr-only">{caption}</caption>
+								<caption>{caption}</caption>
 								<thead>
 									<tr>
 										<th scope="col">Étape</th>

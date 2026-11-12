@@ -50,12 +50,12 @@ export function ContentTypeMatrix({
 	lockedColumnIds,
 }: Props) {
 	return (
-		<div className={`fr-table ${styles.matrix}`}>
+		<div className={`fr-table fr-table--no-caption ${styles.matrix}`}>
 			<div className="fr-table__wrapper">
 				<div className="fr-table__container">
 					<div className="fr-table__content">
 						<table>
-							<caption className="fr-sr-only">
+							<caption>
 								Associez chaque fichier déposé aux types de contenu requis.
 							</caption>
 							<thead>
