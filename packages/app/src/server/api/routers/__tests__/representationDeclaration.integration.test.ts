@@ -16,6 +16,7 @@ import {
 	VALID_REFERENCE_PERIOD,
 	REPRESENTATION_YEAR as YEAR,
 } from "~/modules/declaration-representation/__tests__/fixtures";
+import { TOTAL_REPRESENTATION_STEPS } from "~/modules/declaration-representation/types";
 import { appRouter } from "~/server/api/root";
 import { db } from "~/server/db";
 
@@ -210,6 +211,9 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 			status: "submitted",
 			submittedAt,
 			draft: DRAFT,
+			// The step guard would otherwise clamp the funnel to step 2 and close
+			// the way back to the recap.
+			currentStep: TOTAL_REPRESENTATION_STEPS,
 		});
 	});
 

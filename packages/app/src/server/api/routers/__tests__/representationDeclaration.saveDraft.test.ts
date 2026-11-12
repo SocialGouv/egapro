@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { REPRESENTATION_YEAR as YEAR } from "~/modules/declaration-representation/__tests__/fixtures";
+import { TOTAL_REPRESENTATION_STEPS } from "~/modules/declaration-representation/types";
 import { writeCampaignYearOverride } from "~/modules/domain";
 import { RepresentationLockConflictError } from "~/server/services/representationDeclarationLockService";
 import {
@@ -19,6 +20,7 @@ import {
 	type MockDb,
 	NOW,
 	SIREN,
+	sqlParams,
 	USER_ID,
 } from "./representationDeclarationHarness";
 
@@ -101,7 +103,7 @@ describe("representationDeclarationRouter.saveDraft", () => {
 		]);
 	});
 
-	it("touches no column beyond the draft, its step and the status guard", async () => {
+	it("touches no column beyond the draft, its step and the SQL guards", async () => {
 		const mock = createMockDb();
 
 		await saveDraft(mock);
@@ -138,6 +140,22 @@ describe("representationDeclarationRouter.saveDraft", () => {
 		expect(compileSql(conflictSet(mock).set.status)).toContain(
 			`ELSE "app_representation_declaration"."status" END`,
 		);
+	});
+
+	// The step guard clamps the funnel to `currentStep`: letting an edit pull a
+	// transmitted declaration back would close the way to the recap and to the
+	// re-transmission.
+	it("pins the furthest reached step of a transmitted declaration to the recap", async () => {
+		const mock = createMockDb([{ status: "submitted" }]);
+
+		await saveDraft(mock);
+		const step = conflictSet(mock).set.currentStep;
+
+		expect(compileSql(step)).toBe(
+			`CASE WHEN "app_representation_declaration"."status" = 'submitted'` +
+				` THEN $1::integer ELSE $2 END`,
+		);
+		expect(sqlParams(step)).toEqual([TOTAL_REPRESENTATION_STEPS, 3]);
 	});
 
 	it("refuses to save once the campaign is closed (S23)", async () => {

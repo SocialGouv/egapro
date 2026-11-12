@@ -3,7 +3,7 @@ import "server-only";
 import { and, eq } from "drizzle-orm";
 
 import { summarizeRepresentationReview } from "~/modules/declaration-representation/shared/reviewSummary";
-import { representationDraftFromDeclaration } from "~/modules/declaration-representation/shared/submittedDraft";
+import { representationTransmittedDraftFromDeclaration } from "~/modules/declaration-representation/shared/submittedDraft";
 import {
 	type CompanyLocationRow,
 	companyLocationRow,
@@ -143,7 +143,7 @@ export async function buildRepresentationPdfData(
 		workforceHistory.find((entry) => entry.year === campaignYear)
 			?.workforceEma ?? null;
 
-	const draft = representationDraftFromDeclaration(
+	const draft = representationTransmittedDraftFromDeclaration(
 		declaration,
 		LAST_REPRESENTATION_STEP,
 	);
