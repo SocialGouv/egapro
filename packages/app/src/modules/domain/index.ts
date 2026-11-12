@@ -49,6 +49,11 @@ export {
 } from "./shared/campaignClock";
 // Civil dates (calendar days held as UTC midnight) vs timestamps
 export { civilDate } from "./shared/civilDate";
+// Company identity
+export {
+	companyPlaceholderName,
+	isCompanyIdentityUnresolved,
+} from "./shared/companyIdentity";
 // Company location display
 export type { CompanyLocationRow } from "./shared/companyLocationDisplay";
 export {

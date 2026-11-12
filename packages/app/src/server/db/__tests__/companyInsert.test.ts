@@ -81,10 +81,24 @@ describe("toCompanyRefreshValues", () => {
 		).toEqual(REFRESHED);
 	});
 
-	it("drops nothing on the placeholder row of an unavailable registry", () => {
+	it("drops every identity column on the placeholder row of an unavailable registry", () => {
 		const placeholder = toCompanyInsertValues("123456789", null);
 
-		expect(toCompanyRefreshValues(placeholder)).toEqual(placeholder);
+		// Nothing to refresh: the stored identity must survive the outage, and the
+		// caller only bumps `updatedAt`.
+		expect(toCompanyRefreshValues(placeholder)).toEqual({});
+	});
+
+	it("keeps refreshing a nameless unit the registry did answer for", () => {
+		const nameless = {
+			siren: "123456789",
+			name: "Entreprise 123456789",
+			address: "1 RUE DE LA DEMO, 75001 PARIS",
+			countryCode: null,
+			countryLabel: "FRANCE",
+		};
+
+		expect(toCompanyRefreshValues(nameless)).toEqual(nameless);
 	});
 
 	it("keeps France so it replaces the stored country", () => {

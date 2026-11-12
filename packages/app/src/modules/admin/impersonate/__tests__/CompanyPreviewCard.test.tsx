@@ -17,6 +17,7 @@ const BASE_COMPANY: PreviewCompany = {
 	nafCode: null,
 	workforce: null,
 	workforceYear: 2026,
+	identityUnavailable: false,
 };
 
 function renderCard(overrides: Partial<PreviewCompany> = {}) {
@@ -92,5 +93,42 @@ describe("CompanyPreviewCard", () => {
 			screen.queryByText(GIP_WORKFORCE_VOLUNTARY_DISPLAY),
 		).not.toBeInTheDocument();
 		expect(screen.queryByText("0")).not.toBeInTheDocument();
+	});
+
+	it("explains an unavailable identity instead of showing the placeholder as a name", () => {
+		renderCard({
+			name: "Entreprise 123456789",
+			countryLabel: null,
+			identityUnavailable: true,
+		});
+
+		expect(
+			screen.getByRole("heading", { level: 2, name: "Entreprise 123 456 789" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				/Les informations d'identification de l'entreprise sont temporairement indisponibles\./,
+			),
+		).toBeInTheDocument();
+		expect(screen.getByText("123456789")).toBeInTheDocument();
+	});
+
+	it("shows no location row rather than an unknown country", () => {
+		renderCard({
+			name: "Entreprise 123456789",
+			countryLabel: null,
+			identityUnavailable: true,
+		});
+
+		expect(screen.queryByText(/Pays/)).not.toBeInTheDocument();
+		expect(screen.queryByText("inconnu")).not.toBeInTheDocument();
+	});
+
+	it("leaves a resolved identity without the notice", () => {
+		renderCard();
+
+		expect(
+			screen.queryByText(/informations d'identification de l'entreprise/i),
+		).not.toBeInTheDocument();
 	});
 });
