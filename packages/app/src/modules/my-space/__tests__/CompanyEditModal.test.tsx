@@ -470,12 +470,11 @@ describe("CompanyEditModal", () => {
 			expect(container.textContent).toContain(
 				"Compléter l'information sur l'existence d'un CSE.",
 			);
-			expect(
-				container.querySelector(".fr-alert--warning"),
-			).toBeInTheDocument();
-			expect(
-				container.querySelector(".fr-alert--warning"),
-			).not.toHaveAttribute("role", "alert");
+			expect(container.querySelector(".fr-alert--warning")).toBeInTheDocument();
+			expect(container.querySelector(".fr-alert--warning")).not.toHaveAttribute(
+				"role",
+				"alert",
+			);
 		});
 
 		it("hides the warning alert once hasCse is known", () => {

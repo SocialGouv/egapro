@@ -25,8 +25,7 @@ export const MODAL_ID = "company-edit-modal";
 const MODAL_TITLE_ID = "company-edit-modal-title";
 const CSE_FIELDSET_LEGEND_ID = "company-edit-modal-cse-legend";
 const CSE_FIELDSET_MESSAGES_ID = "company-edit-modal-cse-messages";
-const CSE_WARNING_MESSAGE =
-	"Compléter l'information sur l'existence d'un CSE.";
+const CSE_WARNING_MESSAGE = "Compléter l'information sur l'existence d'un CSE.";
 
 type Props = {
 	company: {
@@ -123,10 +122,7 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 								</button>
 							</div>
 							<div className="fr-modal__content">
-								<h2
-									className="fr-modal__title fr-mb-4w"
-									id={MODAL_TITLE_ID}
-								>
+								<h2 className="fr-modal__title fr-mb-4w" id={MODAL_TITLE_ID}>
 									Modifier les informations
 								</h2>
 								{showCseWarning && (
