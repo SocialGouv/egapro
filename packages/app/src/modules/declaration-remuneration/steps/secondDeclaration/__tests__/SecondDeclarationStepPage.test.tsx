@@ -33,6 +33,7 @@ const COMPLIANCE_PATH_URL = "/declaration-remuneration/parcours-conformite";
 function mockPathChoice(
 	firstDeclarationPathChoice: string | null,
 	hasSubmittedSecondDeclaration = false,
+	lastTransmission: string | null = null,
 ) {
 	vi.mocked(api.declaration.getOrCreate).mockResolvedValue({
 		declaration: {
@@ -47,8 +48,26 @@ function mockPathChoice(
 		jobCategories: [],
 		employeeCategories: [],
 		hasSubmittedSecondDeclaration,
+		lastTransmission,
 	} as never);
 	vi.mocked(api.company.get).mockResolvedValue({ hasCse: null } as never);
+}
+
+// The page only assembles elements: HydrateClient is mocked as a passthrough,
+// so the form it wraps is a plain element whose props we can read without
+// booting the client funnel.
+function findProp(node: unknown, prop: string): unknown {
+	if (Array.isArray(node)) {
+		for (const child of node) {
+			const found = findProp(child, prop);
+			if (found !== undefined) return found;
+		}
+		return undefined;
+	}
+	if (node === null || typeof node !== "object") return undefined;
+	const element = node as { props?: Record<string, unknown> };
+	if (element.props && prop in element.props) return element.props[prop];
+	return findProp(element.props?.children, prop);
 }
 
 describe("SecondDeclarationStepPage", () => {
@@ -91,5 +110,15 @@ describe("SecondDeclarationStepPage", () => {
 		await expect(SecondDeclarationStepPage({ step })).resolves.toBeDefined();
 
 		expect(redirect).not.toHaveBeenCalled();
+	});
+
+	it.each([
+		2, 3,
+	])("forwards the step %s the démarche's last transmission (#5167)", async (step) => {
+		mockPathChoice("corrective_action", true, "second_declaration");
+
+		const element = await SecondDeclarationStepPage({ step });
+
+		expect(findProp(element, "lastTransmission")).toBe("second_declaration");
 	});
 });

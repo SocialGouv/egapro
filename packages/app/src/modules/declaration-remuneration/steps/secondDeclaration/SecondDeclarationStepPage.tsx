@@ -104,6 +104,7 @@ export async function SecondDeclarationStepPage({ step: rawStep }: Props) {
 						initialStartDate={
 							data.declaration.secondDeclReferencePeriodStart ?? undefined
 						}
+						lastTransmission={data.lastTransmission}
 						sameWorkforceByPayBasis={
 							data.declaration.totalWomen !== null &&
 							data.declaration.hourlyWomen !== null &&
@@ -133,6 +134,7 @@ export async function SecondDeclarationStepPage({ step: rawStep }: Props) {
 					)}
 					cseOpinionRequired={cseOpinionRequired}
 					declarationYear={currentYear}
+					lastTransmission={data.lastTransmission}
 					secondDeclarationCategories={reviewCategories}
 					secondDeclarationSubmissionCount={
 						data.secondDeclarationSubmissionCount
