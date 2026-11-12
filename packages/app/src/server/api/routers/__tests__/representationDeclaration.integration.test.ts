@@ -11,14 +11,12 @@ import {
 
 import { env } from "~/env.js";
 import {
-	COMPUTABLE_EXECUTIVES,
-	COMPUTABLE_MEMBERS,
 	FULL_REPRESENTATION_PAYLOAD,
 	NOT_COMPUTABLE_PAYLOAD,
-	OFFLINE_PUBLICATION,
 	VALID_REFERENCE_PERIOD,
 	REPRESENTATION_YEAR as YEAR,
 } from "~/modules/declaration-representation/__tests__/fixtures";
+import { TOTAL_REPRESENTATION_STEPS } from "~/modules/declaration-representation/types";
 import { appRouter } from "~/server/api/root";
 import { db } from "~/server/db";
 
@@ -177,24 +175,23 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 		const caller = await createCaller();
 
 		await caller.submit({ year: YEAR, payload: FULL_REPRESENTATION_PAYLOAD });
-		await expect(
-			caller.submit({
-				year: YEAR,
-				payload: {
-					...VALID_REFERENCE_PERIOD,
-					...COMPUTABLE_EXECUTIVES,
-					...COMPUTABLE_MEMBERS,
-					...OFFLINE_PUBLICATION,
-				},
-			}),
-		).rejects.toMatchObject({ code: "CONFLICT" });
+		await caller.acquireLock({ year: YEAR });
+		await caller.submit({
+			year: YEAR,
+			payload: {
+				...FULL_REPRESENTATION_PAYLOAD,
+				executiveWomenPercent: 65,
+				executiveMenPercent: 35,
+			},
+		});
 
 		const { declaration } = await caller.get({ year: YEAR });
 
 		expect(await countDeclarations()).toBe(1);
 		expect(declaration).toMatchObject({
 			status: "submitted",
-			publishUrl: FULL_REPRESENTATION_PAYLOAD.publishUrl,
+			executiveWomenPercent: "65.00",
+			executiveMenPercent: "35.00",
 		});
 	});
 
@@ -205,17 +202,28 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 		const submittedAt = (await caller.get({ year: YEAR })).declaration
 			?.submittedAt;
 
-		await expect(
-			caller.saveDraft({ year: YEAR, draft: DRAFT, currentStep: 2 }),
-		).rejects.toMatchObject({ code: "CONFLICT" });
+		await caller.acquireLock({ year: YEAR });
+		await caller.saveDraft({ year: YEAR, draft: DRAFT, currentStep: 2 });
 		const { declaration } = await caller.get({ year: YEAR });
 
 		expect(await countDeclarations()).toBe(1);
 		expect(declaration).toMatchObject({
 			status: "submitted",
 			submittedAt,
-			draft: null,
+			draft: DRAFT,
+			// The step guard would otherwise clamp the funnel to step 2 and close
+			// the way back to the recap.
+			currentStep: TOTAL_REPRESENTATION_STEPS,
 		});
+	});
+
+	it("grants the lock on a transmitted declaration while the campaign is open", async () => {
+		const caller = await createCaller();
+
+		await caller.submit({ year: YEAR, payload: FULL_REPRESENTATION_PAYLOAD });
+		const { acquired } = await caller.acquireLock({ year: YEAR });
+
+		expect(acquired).toBe(true);
 	});
 
 	it("closes the démarche as not subject and wipes the draft it replaces (S1)", async () => {
@@ -260,6 +268,9 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 		const submittedAt = (await caller.get({ year: YEAR })).declaration
 			?.submittedAt;
 
+		// The lock is released by the submission: take it again so the refusal
+		// below can only come from the transmitted status, not from the lock.
+		await caller.acquireLock({ year: YEAR });
 		await expect(
 			caller.declareNotSubject({ year: YEAR }),
 		).rejects.toMatchObject({ code: "CONFLICT" });
@@ -270,6 +281,56 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 			submittedAt,
 			publishUrl: FULL_REPRESENTATION_PAYLOAD.publishUrl,
 		});
+	});
+
+	it("traces the resubmission and refreshes the transmission date (S4)", async () => {
+		const caller = await createCaller();
+
+		await caller.submit({ year: YEAR, payload: FULL_REPRESENTATION_PAYLOAD });
+		await sql`
+			UPDATE app_representation_declaration
+			SET submitted_at = '2020-01-01T00:00:00Z'
+			WHERE siren = ${SIREN} AND year = ${YEAR}
+		`;
+
+		await caller.acquireLock({ year: YEAR });
+		await caller.submit({
+			year: YEAR,
+			payload: {
+				...FULL_REPRESENTATION_PAYLOAD,
+				executiveWomenPercent: 70,
+				executiveMenPercent: 30,
+			},
+		});
+
+		const { declaration } = await caller.get({ year: YEAR });
+		expect(declaration?.submittedAt?.getUTCFullYear()).toBeGreaterThan(2020);
+
+		await vi.waitFor(async () => {
+			const submissions = await sql<{ metadata: { resubmission?: boolean } }[]>`
+				SELECT metadata FROM audit.action_log
+				WHERE user_id = ${USER_ID}
+					AND action = 'representation_declaration.submit'
+				ORDER BY created_at
+			`;
+			expect(submissions.map((row) => row.metadata.resubmission)).toEqual([
+				false,
+				true,
+			]);
+
+			const receipts = await sql<
+				{ metadata: { type?: string; isResend?: boolean } }[]
+			>`
+				SELECT metadata FROM audit.action_log
+				WHERE user_id = ${USER_ID} AND action = 'notification.enqueue'
+				ORDER BY created_at
+			`;
+			expect(
+				receipts
+					.filter((row) => row.metadata.type === "representation_receipt")
+					.map((row) => row.metadata.isResend),
+			).toEqual([false, true]);
+		}, 5_000);
 	});
 
 	// The status guard is a SQL CASE evaluated by Postgres, so only a real driver
@@ -319,6 +380,9 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 		).rejects.toMatchObject({ code: "FORBIDDEN" });
 		await expect(
 			caller.declareNotSubject({ year: CLOSED_YEAR }),
+		).rejects.toMatchObject({ code: "FORBIDDEN" });
+		await expect(
+			caller.acquireLock({ year: CLOSED_YEAR }),
 		).rejects.toMatchObject({ code: "FORBIDDEN" });
 
 		const { declaration, campaignOpen } = await caller.get({

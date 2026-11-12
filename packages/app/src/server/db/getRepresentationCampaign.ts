@@ -10,6 +10,7 @@ import { representationCampaigns } from "./schema";
 
 export const getRepresentationCampaign = cache(
 	async (campaignYear: number): Promise<RepresentationCampaign> => {
+		const defaults = getDefaultRepresentationCampaign(campaignYear);
 		const rows = await db
 			.select()
 			.from(representationCampaigns)
@@ -18,12 +19,14 @@ export const getRepresentationCampaign = cache(
 
 		const row = rows[0];
 		if (!row) {
-			return getDefaultRepresentationCampaign(campaignYear);
+			return defaults;
 		}
 
+		// Only the declaration deadline is configurable from the back-office; the
+		// campaign window is a domain rule (1 March → last day of February), so it
+		// must not be read from a row written under the previous rule.
 		return {
-			campaignStartDate: parseCivilDate(row.campaignStartDate),
-			campaignEndDate: parseCivilDate(row.campaignEndDate),
+			...defaults,
 			declarationDeadline: parseCivilDate(row.declarationDeadline),
 		};
 	},

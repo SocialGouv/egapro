@@ -98,6 +98,7 @@ const BASE_PROPS = {
 	lockedByOther: false,
 	lockHolder: null as LockHolder | null,
 	representationCampaign: getDefaultRepresentationCampaign(currentYear),
+	representationCampaignYear: currentYear,
 	userPhone: "0122334455" as string | null,
 };
 

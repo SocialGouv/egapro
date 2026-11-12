@@ -116,22 +116,6 @@ export const representationDeclarationRouter = createTRPCRouter({
 		.input(getRepresentationDeclarationSchema)
 		.mutation(async ({ ctx, input }) => {
 			await assertRepresentationCampaignOpen(input.year);
-			const [declaration] = await ctx.db
-				.select({ status: representationDeclarations.status })
-				.from(representationDeclarations)
-				.where(
-					and(
-						eq(representationDeclarations.siren, ctx.siren),
-						eq(representationDeclarations.year, input.year),
-					),
-				)
-				.limit(1);
-			if (isRepresentationDeclarationSubmitted(declaration?.status)) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: ALREADY_SUBMITTED_MESSAGE,
-				});
-			}
 			const timeoutMinutes = await readLockTimeoutMinutes(ctx.db);
 			const result = await acquireOrRefreshRepresentationLock(
 				ctx.db,
@@ -297,14 +281,17 @@ export const representationDeclarationRouter = createTRPCRouter({
 			await assertRepresentationCampaignOpen(year);
 
 			const now = new Date();
-			const sharedColumns = {
+			const draftColumns = {
 				draft,
 				draftUpdatedAt: now,
-				currentStep,
 				updatedAt: now,
 			};
 			const columns = {
-				...sharedColumns,
+				...draftColumns,
+				// A transmitted declaration already walked the whole funnel: an edit
+				// must not send its furthest-reached step back behind the recap, or
+				// the re-transmission would become unreachable.
+				currentStep: sql`CASE WHEN ${representationDeclarations.status} = 'submitted' THEN ${TOTAL_REPRESENTATION_STEPS}::integer ELSE ${currentStep} END`,
 				status: sql`CASE WHEN ${representationDeclarations.status} = 'not_subject' THEN 'draft' ELSE ${representationDeclarations.status} END`,
 			};
 
@@ -317,7 +304,8 @@ export const representationDeclarationRouter = createTRPCRouter({
 						year,
 						declarantId: ctx.session.user.id,
 						status: "draft",
-						...sharedColumns,
+						currentStep,
+						...draftColumns,
 					})
 					.onConflictDoUpdate({
 						target: [
@@ -451,8 +439,27 @@ export const representationDeclarationRouter = createTRPCRouter({
 				draftUpdatedAt: null,
 			};
 
+			let resubmission = false;
+
 			await ctx.db.transaction(async (tx) => {
 				await assertWriteLock(tx, siren, year, ctx.session.user.id);
+				// FOR UPDATE closes the TOCTOU race with a concurrent submit() or declareNotSubject() on the same row.
+				const existing = await tx
+					.select({ status: representationDeclarations.status })
+					.from(representationDeclarations)
+					.where(
+						and(
+							eq(representationDeclarations.siren, siren),
+							eq(representationDeclarations.year, year),
+						),
+					)
+					.for("update")
+					.limit(1);
+
+				resubmission = isRepresentationDeclarationSubmitted(
+					existing[0]?.status,
+				);
+
 				await tx
 					.insert(representationDeclarations)
 					.values({
@@ -471,6 +478,19 @@ export const representationDeclarationRouter = createTRPCRouter({
 				await releaseRepresentationLock(tx, siren, year, ctx.session.user.id);
 			});
 
+			const requestContext = buildRequestContext(ctx.headers);
+			void logAction({
+				action: AUDIT_ACTIONS.REPRESENTATION_SUBMIT,
+				status: "success",
+				userId: ctx.session.user.id,
+				userEmail: ctx.session.user.email,
+				siren,
+				resourceType: "representation_declaration",
+				metadata: { year, resubmission },
+				ipAddress: requestContext.ipAddress,
+				userAgent: requestContext.userAgent,
+			});
+
 			const email = ctx.session.user.email;
 			if (email) {
 				const { enqueueReceipt } = await import("~/modules/mail/server");
@@ -480,7 +500,7 @@ export const representationDeclarationRouter = createTRPCRouter({
 					siren,
 					year,
 					userId: ctx.session.user.id,
-					isResend: false,
+					isResend: resubmission,
 				});
 			}
 

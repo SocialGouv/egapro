@@ -9,6 +9,7 @@ import {
 	computeRepresentationDeclarationStatus,
 	deriveSubsequentSubmissions,
 	getCurrentDate,
+	getCurrentRepresentationCampaignYear,
 	getCurrentYear,
 	getDeclarationProcessStepDeadline,
 	getObligationWorkforce,
@@ -144,6 +145,7 @@ export const companyRouter = createTRPCRouter({
 		.query(async ({ ctx, input }) => {
 			const company = await findUserCompany(ctx.db, ctx.session, input.siren);
 			const year = getCurrentYear();
+			const representationCampaignYear = getCurrentRepresentationCampaignYear();
 
 			const [
 				declarationRows,
@@ -214,7 +216,10 @@ export const companyRouter = createTRPCRouter({
 							isNull(declarations.cancelledAt),
 						),
 					),
-				getRepresentationWorkforceHistory(input.siren, year),
+				getRepresentationWorkforceHistory(
+					input.siren,
+					representationCampaignYear,
+				),
 				ctx.db
 					.select({
 						status: representationDeclarations.status,
@@ -227,7 +232,10 @@ export const companyRouter = createTRPCRouter({
 						and(
 							eq(representationDeclarations.siren, input.siren),
 							// The représentation funnel stores the *reference* year, not the campaign year.
-							eq(representationDeclarations.year, getReferenceYearFor(year)),
+							eq(
+								representationDeclarations.year,
+								getReferenceYearFor(representationCampaignYear),
+							),
 						),
 					)
 					.limit(1),
@@ -272,7 +280,7 @@ export const companyRouter = createTRPCRouter({
 					COMPANY_SIZE_VOLUNTARY_MAX &&
 					isPresumedSubjectToRepresentation(
 						representationWorkforceHistory,
-						year,
+						representationCampaignYear,
 					));
 			const mappedDeclarations: DbDeclaration[] = declarationRows.map((d) => {
 				const projectedStatus = computeDeclarationStatus({
@@ -360,7 +368,7 @@ export const companyRouter = createTRPCRouter({
 			if (representationRow) {
 				mappedDeclarations.push({
 					type: "representation" as const,
-					year,
+					year: representationCampaignYear,
 					status: computeRepresentationDeclarationStatus({
 						status: representationRow.status,
 						currentStep: representationRow.currentStep,
@@ -392,6 +400,7 @@ export const companyRouter = createTRPCRouter({
 				yearsWithPrefill,
 				representationVisible,
 				currentYearDeadlines,
+				representationCampaignYear,
 			);
 
 			return { company, declarations: declarationItems };
