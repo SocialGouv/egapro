@@ -10,6 +10,9 @@ const mockPush = vi.fn();
 const mockRefresh = vi.fn();
 const mockReset = vi.fn();
 const mockConceal = vi.fn();
+const { mockMarkSecondDeclarationTransmissionSuccess } = vi.hoisted(() => ({
+	mockMarkSecondDeclarationTransmissionSuccess: vi.fn(),
+}));
 type MockSubmissionError = {
 	message: string;
 	data?: { code: string };
@@ -30,6 +33,17 @@ vi.mock("~/modules/shared", async (importOriginal) => ({
 	...(await importOriginal<typeof import("~/modules/shared")>()),
 	getDsfrModal: () => ({ disclose: vi.fn(), conceal: mockConceal }),
 }));
+
+vi.mock(
+	"~/modules/declaration-remuneration/shared/declarationSuccessFlash",
+	async (importOriginal) => ({
+		...(await importOriginal<
+			typeof import("~/modules/declaration-remuneration/shared/declarationSuccessFlash")
+		>()),
+		markSecondDeclarationTransmissionSuccess:
+			mockMarkSecondDeclarationTransmissionSuccess,
+	}),
+);
 
 vi.mock("~/trpc/react", () => ({
 	api: {
@@ -172,6 +186,7 @@ describe("SecondDeclarationStep3Review", () => {
 		mockRefresh.mockClear();
 		mockReset.mockClear();
 		mockConceal.mockClear();
+		mockMarkSecondDeclarationTransmissionSuccess.mockClear();
 		mockMutationState.error = null;
 		mockMutationState.isPending = false;
 		mockMutationState.networkMode = undefined;
@@ -331,6 +346,7 @@ describe("SecondDeclarationStep3Review", () => {
 		expect(mockConceal.mock.invocationCallOrder[0]).toBeLessThan(
 			mockPush.mock.invocationCallOrder[0] ?? 0,
 		);
+		expect(mockMarkSecondDeclarationTransmissionSuccess).not.toHaveBeenCalled();
 	});
 
 	it("shows a submission error inside the confirmation modal", () => {
@@ -570,6 +586,10 @@ describe("SecondDeclarationStep3Review", () => {
 
 		expect(mockMutate).toHaveBeenCalledTimes(1);
 		expect(mockPush).toHaveBeenCalledWith("/avis-cse");
+		// The /avis-cse banner is one-shot: only a fresh flash may reveal it.
+		expect(mockMarkSecondDeclarationTransmissionSuccess).toHaveBeenCalledTimes(
+			1,
+		);
 	});
 
 	it("navigates to confirmation when no gaps remain and no CSE opinion is due", async () => {
@@ -584,6 +604,7 @@ describe("SecondDeclarationStep3Review", () => {
 		expect(mockPush).toHaveBeenCalledWith(
 			"/declaration-remuneration/parcours-conformite/confirmation",
 		);
+		expect(mockMarkSecondDeclarationTransmissionSuccess).not.toHaveBeenCalled();
 	});
 
 	it("renders empty state when no categories", () => {

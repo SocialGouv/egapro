@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	markDeclarationTransmissionSuccess,
 	markJointEvaluationTransmissionSuccess,
+	markSecondDeclarationTransmissionSuccess,
 } from "~/modules/declaration-remuneration/shared/declarationSuccessFlash";
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { API_DECLARATION_PDF } from "~/modules/routes";
@@ -201,6 +202,10 @@ async function answerCard(
 }
 
 describe("Step1Opinions", () => {
+	beforeEach(() => {
+		window.sessionStorage.clear();
+	});
+
 	it("disables browser autofill on the form", () => {
 		const { container } = renderStep1();
 
@@ -313,7 +318,23 @@ describe("Step1Opinions", () => {
 			).toBeInTheDocument();
 		});
 
-		it("leaves the second declaration banner unaffected by the joint evaluation signal (#5124)", () => {
+		it("hides the second declaration banner without its own signal (#5124)", () => {
+			markJointEvaluationTransmissionSuccess();
+			renderStep1({
+				banner: SECOND_DECLARATION_BANNER,
+				hasSecondDeclaration: true,
+			});
+
+			expect(
+				screen.queryByText("Votre seconde déclaration a été transmise"),
+			).not.toBeInTheDocument();
+			expect(
+				screen.getByRole("heading", { level: 1, name: PAGE_TITLE }),
+			).toBeInTheDocument();
+		});
+
+		it("shows the second declaration banner right after its transmission (#5124)", () => {
+			markSecondDeclarationTransmissionSuccess();
 			renderStep1({
 				banner: SECOND_DECLARATION_BANNER,
 				hasSecondDeclaration: true,
@@ -386,6 +407,7 @@ describe("Step1Opinions", () => {
 
 			it("keeps the compliance path banner alone when the page already has one", () => {
 				markDeclarationTransmissionSuccess();
+				markSecondDeclarationTransmissionSuccess();
 				renderStep1({
 					banner: SECOND_DECLARATION_BANNER,
 					hasSecondDeclaration: true,
@@ -401,6 +423,7 @@ describe("Step1Opinions", () => {
 		});
 
 		it("lays out case 5 with the second declaration banner and one section per declaration", () => {
+			markSecondDeclarationTransmissionSuccess();
 			renderStep1({
 				banner: SECOND_DECLARATION_BANNER,
 				firstDeclJustificationRequired: true,
@@ -466,6 +489,7 @@ describe("Step1Opinions", () => {
 		});
 
 		it("tells the banner whether the deposit stays modifiable", () => {
+			markSecondDeclarationTransmissionSuccess();
 			renderStep1({
 				banner: { variant: "second_declaration", depositModifiable: true },
 				hasSecondDeclaration: true,
