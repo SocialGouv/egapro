@@ -15,8 +15,7 @@ import { registerPdfFonts } from "./helpers/registerPdfFonts";
 registerPdfFonts();
 
 // Banners that must never end up alone at a page bottom.
-const BANNER =
-	/^(Catégorie d'emplois n°\d+|Écart de rémunération par catégorie)/;
+const BANNER = /^(Catégorie d'emplois n°\d+|Indicateurs par catégorie)/;
 
 // A @react-pdf LayoutNode: box.top is parent-relative, only TEXT carries height.
 type LayoutNode = {
