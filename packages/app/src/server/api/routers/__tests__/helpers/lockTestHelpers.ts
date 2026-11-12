@@ -1,5 +1,8 @@
 import { vi } from "vitest";
-import type { SubmissionHistoryEvent } from "~/modules/domain";
+import type {
+	SubmissionHistoryEvent,
+	TransmissionHistoryEvent,
+} from "~/modules/domain";
 
 export const LOCK_HOLDER_USER_ID = "user-1";
 
@@ -39,6 +42,8 @@ type LockOptions = {
 	 * `joint_evaluation_submit`, `cse_opinion_submit`) to exercise it.
 	 */
 	subsequentEvents?: SubmissionHistoryEvent[];
+	/** History rows served to the trajectory projections (last transmission, current round). */
+	transmissionEvents?: TransmissionHistoryEvent[];
 };
 
 export function isGuardHistoryProjection(cols: unknown): boolean {
@@ -46,6 +51,17 @@ export function isGuardHistoryProjection(cols: unknown): boolean {
 	const keys = Object.keys(cols);
 	return (
 		keys.length === 2 && keys.includes("eventType") && keys.includes("round")
+	);
+}
+
+export function isTransmissionStateProjection(cols: unknown): boolean {
+	if (!cols || typeof cols !== "object" || Array.isArray(cols)) return false;
+	const keys = Object.keys(cols);
+	return (
+		keys.length === 3 &&
+		keys.includes("eventType") &&
+		keys.includes("round") &&
+		keys.includes("createdAt")
 	);
 }
 
@@ -78,6 +94,12 @@ export function withLockMiddleware(
 	const select = vi.fn().mockImplementation((...args: unknown[]) => {
 		const callIndex = middlewareSelectIndex;
 		middlewareSelectIndex++;
+
+		if (isTransmissionStateProjection(args[0])) {
+			const where = vi.fn().mockResolvedValue(options.transmissionEvents ?? []);
+			const from = vi.fn().mockReturnValue({ where });
+			return { from };
+		}
 
 		if (callIndex === 0) {
 			// fetchCurrentDeclarationId: plain select → limit(1)
@@ -122,8 +144,14 @@ export function withLockMiddleware(
 export function withTxGuardHistory(
 	innerSelect: (...args: unknown[]) => unknown,
 	subsequentEvents: SubmissionHistoryEvent[] = [],
+	transmissionEvents: TransmissionHistoryEvent[] = [],
 ) {
 	return vi.fn().mockImplementation((...args: unknown[]) => {
+		if (isTransmissionStateProjection(args[0])) {
+			const where = vi.fn().mockResolvedValue(transmissionEvents);
+			const from = vi.fn().mockReturnValue({ where });
+			return { from };
+		}
 		if (isGuardHistoryProjection(args[0])) {
 			const where = vi.fn().mockResolvedValue(subsequentEvents);
 			const from = vi.fn().mockReturnValue({ where });
