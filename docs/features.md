@@ -259,7 +259,7 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 - `representationDeclaration.get` — lecture de la déclaration de l'année + statut d'ouverture de campagne
 - `representationDeclaration.saveDraft` — sauvegarde du brouillon par étape (upsert `ON CONFLICT (siren, year)`) ; si la déclaration était `not_subject`, le statut retombe automatiquement à `draft` (CASE SQL en base) — l'entreprise vient de revenir sur son choix en avançant dans le funnel
 - `representationDeclaration.declareNotSubject` — enregistre la réponse « non concernée » de l'écran d'assujettissement : bascule `status = not_subject`, remet `currentStep` à 0 et efface le brouillon. Une transaction avec un verrou `FOR UPDATE` sur la ligne empêche une course avec un `submit` concurrent sur la même déclaration ; si la déclaration est déjà `submitted`, la mutation échoue en `CONFLICT`
-- `representationDeclaration.submit` — validation finale (re-parse serveur du payload complet), bascule `status = submitted`, envoie le reçu par mail
+- `representationDeclaration.submit` — validation finale (re-parse serveur du payload complet), bascule `status = submitted`, envoie le reçu par mail. Une déclaration déjà transmise reste modifiable jusqu'à la fin de la campagne : un nouvel appel met la ligne à jour en place (pas de versionnement), rafraîchit `submittedAt` et enfile le reçu avec `isResend: true`
 
 **Règles métier-clés** :
 
