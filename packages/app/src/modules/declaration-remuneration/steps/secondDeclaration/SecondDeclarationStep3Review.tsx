@@ -19,11 +19,7 @@ import {
 	getPostComplianceDestination,
 } from "~/modules/navigation";
 import { COMPLIANCE_PATH, complianceStepHref } from "~/modules/routes";
-import {
-	getDsfrModal,
-	markSubmissionBannerFlash,
-	SUBMIT_LABEL,
-} from "~/modules/shared";
+import { getDsfrModal, SUBMIT_LABEL } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import { markDeclarationTransmissionSuccess } from "../../shared/declarationSuccessFlash";
 import { GapBadge } from "../../shared/GapValueBadge";
@@ -86,8 +82,6 @@ export function SecondDeclarationStep3Review({
 			markDeclarationTransmissionSuccess();
 			router.push(COMPLIANCE_PATH);
 		} else {
-			// Matches getPostComplianceDestination: the flash is for /avis-cse only.
-			if (cseOpinionRequired) markSubmissionBannerFlash();
 			router.push(getPostComplianceDestination(cseOpinionRequired));
 		}
 	}, [closeModal, cseOpinionRequired, gapsExist, router]);
@@ -144,7 +138,7 @@ export function SecondDeclarationStep3Review({
 			<p className={`fr-mb-0 ${stepStyles.intro}`}>
 				Vérifiez que toutes les informations sont correctes avant de transmettre
 				votre seconde déclaration de l&apos;indicateur par catégorie
-				d&apos;emplois aux services du ministère chargé du travail.
+				d&apos;emplois aux services du ministre chargé du travail.
 			</p>
 
 			<h2 className="fr-h5 fr-mb-0">Indicateur par catégorie d&apos;emplois</h2>

@@ -32,7 +32,7 @@ describe("REPRESENTATION_STEPS", () => {
 			"Écarts de représentation - Cadres dirigeants",
 			"Écarts de représentation - Instances dirigeantes",
 			"Informations de publication",
-			"Récapitulatif",
+			"Récapitulatif de la déclaration",
 		]);
 	});
 

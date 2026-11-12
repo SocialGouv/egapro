@@ -22,7 +22,7 @@ export function JointEvaluationPdfDocument({ data }: Props) {
 	return (
 		<Document
 			{...pdfDocumentMetadata({
-				title: `Récapitulatif : Évaluation conjointe des rémunérations ${data.year}`,
+				title: `Récapitulatif : Transmission du rapport de l’évaluation conjointe des rémunérations ${data.year}`,
 				subject: "Évaluation conjointe des rémunérations",
 				siren: company.siren,
 			})}
@@ -38,10 +38,12 @@ export function JointEvaluationPdfDocument({ data }: Props) {
 				<View style={styles.content}>
 					<View style={styles.titleBlock}>
 						<Text {...pdfHeading(1)} style={styles.title}>
-							Récapitulatif : Évaluation conjointe des rémunérations {data.year}
+							Récapitulatif : Transmission du rapport de l’évaluation conjointe
+							des rémunérations {data.year}
 						</Text>
 						<Text style={styles.titleDate}>
-							L’évaluation conjointe a été transmise le {data.transmittedAt}.
+							Le rapport de l’évaluation conjointe a été transmis le{" "}
+							{data.transmittedAt}.
 						</Text>
 					</View>
 
@@ -82,7 +84,7 @@ export function JointEvaluationPdfDocument({ data }: Props) {
 					<InfoSection
 						rows={[
 							{
-								label: "Fichiers déposés",
+								label: "Fichier déposé",
 								value: data.file.name,
 								detail: data.file.detail,
 							},

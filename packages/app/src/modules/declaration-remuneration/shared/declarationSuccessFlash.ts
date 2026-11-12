@@ -1,24 +1,43 @@
-const STORAGE_KEY = "egapro:declaration-transmission-success";
 const MAX_AGE_MS = 30_000;
 
-export function markDeclarationTransmissionSuccess() {
-	try {
-		window.sessionStorage.setItem(STORAGE_KEY, String(Date.now()));
-	} catch {
-		// Storage can be disabled; navigation must still work after submission.
+function createTransmissionSuccessFlash(storageKey: string) {
+	function mark() {
+		try {
+			window.sessionStorage.setItem(storageKey, String(Date.now()));
+		} catch {
+			// Storage can be disabled; navigation must still work after submission.
+		}
 	}
+
+	function consume() {
+		try {
+			const storedAt = window.sessionStorage.getItem(storageKey);
+			window.sessionStorage.removeItem(storageKey);
+
+			if (!storedAt) return false;
+
+			const age = Date.now() - Number(storedAt);
+			return Number.isFinite(age) && age >= 0 && age <= MAX_AGE_MS;
+		} catch {
+			return false;
+		}
+	}
+
+	return { mark, consume };
 }
 
-export function consumeDeclarationTransmissionSuccess() {
-	try {
-		const storedAt = window.sessionStorage.getItem(STORAGE_KEY);
-		window.sessionStorage.removeItem(STORAGE_KEY);
+const declarationTransmissionFlash = createTransmissionSuccessFlash(
+	"egapro:declaration-transmission-success",
+);
+const jointEvaluationTransmissionFlash = createTransmissionSuccessFlash(
+	"egapro:joint-evaluation-transmission-success",
+);
 
-		if (!storedAt) return false;
-
-		const age = Date.now() - Number(storedAt);
-		return Number.isFinite(age) && age >= 0 && age <= MAX_AGE_MS;
-	} catch {
-		return false;
-	}
-}
+export const markDeclarationTransmissionSuccess =
+	declarationTransmissionFlash.mark;
+export const consumeDeclarationTransmissionSuccess =
+	declarationTransmissionFlash.consume;
+export const markJointEvaluationTransmissionSuccess =
+	jointEvaluationTransmissionFlash.mark;
+export const consumeJointEvaluationTransmissionSuccess =
+	jointEvaluationTransmissionFlash.consume;

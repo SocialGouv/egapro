@@ -9,7 +9,6 @@ import type { RemunerationDeadlinesFormValues } from "./schemas";
 type Props = {
 	group: DeadlineGroup;
 	gipPublicationDate: string | null;
-	pathChoiceValue: string;
 	requiredNoteId: string;
 	errors: FieldErrors<RemunerationDeadlinesFormValues>;
 	register: UseFormRegister<RemunerationDeadlinesFormValues>;
@@ -18,7 +17,6 @@ type Props = {
 export function DeadlineFieldset({
 	group,
 	gipPublicationDate,
-	pathChoiceValue,
 	requiredNoteId,
 	errors,
 	register,
@@ -39,16 +37,6 @@ export function DeadlineFieldset({
 									? formatIsoDate(gipPublicationDate)
 									: "Non disponible"
 							}
-						/>
-					</div>
-				)}
-				{group.pathChoiceKey && (
-					<div className="fr-col-12 fr-col-md-4">
-						<SettingsReadOnlyField
-							id={`settings-${group.pathChoiceKey}`}
-							label="Échéance pour le choix du parcours"
-							type="date"
-							value={pathChoiceValue}
 						/>
 					</div>
 				)}

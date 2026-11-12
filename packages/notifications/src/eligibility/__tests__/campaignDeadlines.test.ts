@@ -25,6 +25,8 @@ describe("getCampaignDeadlines", () => {
 					decl1JointEval: "2027-08-20",
 					decl2: "2027-12-10",
 					decl2JointEval: "2028-02-05",
+					pathChoiceRound1: "2027-07-15",
+					pathChoiceRound2: "2028-01-15",
 				},
 			]),
 			2027,
@@ -33,10 +35,8 @@ describe("getCampaignDeadlines", () => {
 		expect(result.decl1JointEvaluation).toBe("2027-08-20T00:00:00.000Z");
 		expect(result.decl2Modification).toBe("2027-12-10T00:00:00.000Z");
 		expect(result.decl2JointEvaluation).toBe("2028-02-05T00:00:00.000Z");
-		// Path-choice deadlines are never stored → always the derived defaults.
-		const defaults = getDefaultReminderDeadlines(2027);
-		expect(result.pathChoiceRound1).toBe(defaults.pathChoiceRound1);
-		expect(result.pathChoiceRound2).toBe(defaults.pathChoiceRound2);
+		expect(result.pathChoiceRound1).toBe("2027-07-15T00:00:00.000Z");
+		expect(result.pathChoiceRound2).toBe("2028-01-15T00:00:00.000Z");
 	});
 
 	it("falls back per-field when a column is null", async () => {
@@ -47,6 +47,8 @@ describe("getCampaignDeadlines", () => {
 					decl1JointEval: "2027-08-20",
 					decl2: null,
 					decl2JointEval: null,
+					pathChoiceRound1: null,
+					pathChoiceRound2: null,
 				},
 			]),
 			2027,
@@ -56,5 +58,7 @@ describe("getCampaignDeadlines", () => {
 		expect(result.decl1JointEvaluation).toBe("2027-08-20T00:00:00.000Z");
 		expect(result.decl2Modification).toBe(defaults.decl2Modification);
 		expect(result.decl2JointEvaluation).toBe(defaults.decl2JointEvaluation);
+		expect(result.pathChoiceRound1).toBe(defaults.pathChoiceRound1);
+		expect(result.pathChoiceRound2).toBe(defaults.pathChoiceRound2);
 	});
 });

@@ -53,8 +53,12 @@ export const getCampaignDeadlines = cache(
 				row.decl2JointEvaluationDeadline,
 			),
 			decl2CseOpinionDeadline: parseCivilDate(row.decl2CseOpinionDeadline),
-			pathChoiceDeadline: getPathChoiceDeadline(year),
-			pathChoiceRound1Deadline: getPathChoiceRound1Deadline(year),
+			pathChoiceDeadline:
+				parseNullableDate(row.pathChoiceDeadline) ??
+				getPathChoiceDeadline(year),
+			pathChoiceRound1Deadline:
+				parseNullableDate(row.pathChoiceRound1Deadline) ??
+				getPathChoiceRound1Deadline(year),
 		};
 	},
 );

@@ -608,8 +608,8 @@ Ce bloc n'enregistre que sur une année déjà configurée : tant que `campaign_
 | Groupe | Champs |
 |---|---|
 | Déclaration des indicateurs | `decl1ModificationDeadline` |
-| Parcours de mise en conformité — 1er tour | choix du parcours (calculé, `getPathChoiceRound1Deadline`, lecture seule), `decl1JustificationDeadline`, `decl1JointEvaluationDeadline`, `decl2ModificationDeadline` (seconde déclaration — actions correctives) |
-| Parcours de mise en conformité — 2nd tour | choix du parcours (calculé, `getPathChoiceDeadline`, lecture seule), `decl2JustificationDeadline`, `decl2JointEvaluationDeadline` |
+| Parcours de mise en conformité — 1er tour | `pathChoiceRound1Deadline` (choix du parcours ; vide = calculé par `getPathChoiceRound1Deadline`), `decl1JustificationDeadline`, `decl1JointEvaluationDeadline`, `decl2ModificationDeadline` (seconde déclaration — actions correctives) |
+| Parcours de mise en conformité — 2nd tour | `pathChoiceDeadline` (choix du parcours ; vide = calculé par `getPathChoiceDeadline`), `decl2JustificationDeadline`, `decl2JointEvaluationDeadline` |
 | Avis du CSE | `decl2CseOpinionDeadline` — s'applique à toutes les entreprises soumises à l'avis du CSE, quel que soit le parcours |
 
 Si une année n'a pas de ligne en BDD, le bloc affiche les **valeurs par défaut** de `getDefaultCampaignDeadlines(year)` (`~/modules/domain`) avec un badge « Valeurs par défaut ». L'enregistrement crée ou met à jour la ligne de l'année et ne réécrit que ces sept colonnes : le calendrier commun et la date GIP ne sont jamais touchés.

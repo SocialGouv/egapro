@@ -3,8 +3,12 @@ import userEvent from "@testing-library/user-event";
 import { useSession } from "next-auth/react";
 import type { ComponentProps } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+	markDeclarationTransmissionSuccess,
+	markJointEvaluationTransmissionSuccess,
+} from "~/modules/declaration-remuneration/shared/declarationSuccessFlash";
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
-import { markSubmissionBannerFlash } from "~/modules/shared/submissionBannerFlash";
+import { API_DECLARATION_PDF } from "~/modules/routes";
 import { Step1Opinions } from "../Step1Opinions";
 import type { CseOpinionStep1Data } from "../types";
 
@@ -162,6 +166,7 @@ function step1(props: StepProps = {}) {
 	return (
 		<Step1Opinions
 			cseDeadline={cseDeadline}
+			declarationModifiable
 			firstDeclJustificationRequired={false}
 			hasSecondDeclaration={false}
 			secondDeclJustificationRequired={false}
@@ -230,7 +235,7 @@ describe("Step1Opinions", () => {
 		});
 
 		it("lays out case 3 as compliance title, joint evaluation banner, CSE title, then both cards", () => {
-			markSubmissionBannerFlash();
+			markJointEvaluationTransmissionSuccess();
 			renderStep1({
 				banner: JOINT_EVALUATION_BANNER,
 				firstDeclJustificationRequired: true,
@@ -259,6 +264,7 @@ describe("Step1Opinions", () => {
 		});
 
 		it("shows only the accuracy card for case 4", () => {
+			markJointEvaluationTransmissionSuccess();
 			renderStep1({ banner: JOINT_EVALUATION_BANNER });
 
 			expect(screen.getByText(ACCURACY_1_TITLE)).toBeInTheDocument();
@@ -267,8 +273,134 @@ describe("Step1Opinions", () => {
 			expect(document.getElementById("first-decl-gap-legend")).toBeNull();
 		});
 
+		it("hides the joint evaluation banner and reverts to the CSE title when there is no fresh transmission signal (#5118)", () => {
+			renderStep1({
+				banner: JOINT_EVALUATION_BANNER,
+				firstDeclJustificationRequired: true,
+			});
+
+			expect(
+				screen.getByRole("heading", { level: 1, name: PAGE_TITLE }),
+			).toBeInTheDocument();
+			expect(
+				screen.queryByRole("heading", { name: COMPLIANCE_TITLE }),
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByText(
+					"Votre évaluation conjointe des rémunérations a été transmise",
+				),
+			).not.toBeInTheDocument();
+		});
+
+		it("consumes the joint evaluation signal once: a second render within the 30s window shows no banner", () => {
+			markJointEvaluationTransmissionSuccess();
+			const { unmount } = renderStep1({ banner: JOINT_EVALUATION_BANNER });
+			expect(
+				screen.getByText(
+					"Votre évaluation conjointe des rémunérations a été transmise",
+				),
+			).toBeInTheDocument();
+			unmount();
+
+			renderStep1({ banner: JOINT_EVALUATION_BANNER });
+			expect(
+				screen.queryByText(
+					"Votre évaluation conjointe des rémunérations a été transmise",
+				),
+			).not.toBeInTheDocument();
+			expect(
+				screen.getByRole("heading", { level: 1, name: PAGE_TITLE }),
+			).toBeInTheDocument();
+		});
+
+		it("leaves the second declaration banner unaffected by the joint evaluation signal (#5124)", () => {
+			renderStep1({
+				banner: SECOND_DECLARATION_BANNER,
+				hasSecondDeclaration: true,
+			});
+
+			expect(
+				screen.getByText("Votre seconde déclaration a été transmise"),
+			).toBeInTheDocument();
+			expect(
+				screen.getByRole("heading", { level: 1, name: COMPLIANCE_TITLE }),
+			).toBeInTheDocument();
+		});
+
+		describe("declaration just transmitted, no compliance path (#5126)", () => {
+			const DECLARATION_TRANSMITTED = "Votre déclaration a été transmise";
+
+			beforeEach(() => {
+				window.sessionStorage.clear();
+			});
+
+			it("shows the declaration banner under the declaration title, then the CSE section", () => {
+				markDeclarationTransmissionSuccess();
+				renderStep1({ email: "declarant@example.fr" });
+
+				expect(screen.getByText(DECLARATION_TRANSMITTED)).toBeInTheDocument();
+				expect(
+					screen.getByRole("heading", {
+						level: 1,
+						name: "Déclaration des indicateurs de rémunération 2026",
+					}),
+				).toBeInTheDocument();
+				expect(
+					screen.getByRole("heading", { level: 2, name: PAGE_TITLE }),
+				).toBeInTheDocument();
+				expect(
+					screen.getByRole("link", {
+						name: /Télécharger le récapitulatif de la déclaration des indicateurs/,
+					}),
+				).toHaveAttribute("href", `${API_DECLARATION_PDF}?year=2026`);
+				expect(screen.getByText("declarant@example.fr")).toBeInTheDocument();
+				expect(
+					screen.getByText(/Vous pouvez modifier votre déclaration/),
+				).toBeInTheDocument();
+			});
+
+			it("shows the banner once: a reload within the 30s window brings back the CSE title", () => {
+				markDeclarationTransmissionSuccess();
+				const { unmount } = renderStep1();
+				expect(screen.getByText(DECLARATION_TRANSMITTED)).toBeInTheDocument();
+				unmount();
+
+				renderStep1();
+				expect(
+					screen.queryByText(DECLARATION_TRANSMITTED),
+				).not.toBeInTheDocument();
+				expect(
+					screen.getByRole("heading", { level: 1, name: PAGE_TITLE }),
+				).toBeInTheDocument();
+			});
+
+			it("omits the modification sentence when the declaration is no longer modifiable", () => {
+				markDeclarationTransmissionSuccess();
+				renderStep1({ declarationModifiable: false });
+
+				expect(screen.getByText(DECLARATION_TRANSMITTED)).toBeInTheDocument();
+				expect(
+					screen.queryByText(/Vous pouvez modifier votre déclaration/),
+				).not.toBeInTheDocument();
+			});
+
+			it("keeps the compliance path banner alone when the page already has one", () => {
+				markDeclarationTransmissionSuccess();
+				renderStep1({
+					banner: SECOND_DECLARATION_BANNER,
+					hasSecondDeclaration: true,
+				});
+
+				expect(
+					screen.getByText("Votre seconde déclaration a été transmise"),
+				).toBeInTheDocument();
+				expect(
+					screen.queryByText(DECLARATION_TRANSMITTED),
+				).not.toBeInTheDocument();
+			});
+		});
+
 		it("lays out case 5 with the second declaration banner and one section per declaration", () => {
-			markSubmissionBannerFlash();
 			renderStep1({
 				banner: SECOND_DECLARATION_BANNER,
 				firstDeclJustificationRequired: true,
@@ -334,7 +466,6 @@ describe("Step1Opinions", () => {
 		});
 
 		it("tells the banner whether the deposit stays modifiable", () => {
-			markSubmissionBannerFlash();
 			renderStep1({
 				banner: { variant: "second_declaration", depositModifiable: true },
 				hasSecondDeclaration: true,
@@ -348,7 +479,7 @@ describe("Step1Opinions", () => {
 		});
 
 		it("gives the banner the declarant email, or a placeholder", () => {
-			markSubmissionBannerFlash();
+			markJointEvaluationTransmissionSuccess();
 			const { unmount } = renderStep1({
 				banner: JOINT_EVALUATION_BANNER,
 				email: "declarant@example.fr",
@@ -356,64 +487,9 @@ describe("Step1Opinions", () => {
 			expect(screen.getByText("declarant@example.fr")).toBeInTheDocument();
 			unmount();
 
-			markSubmissionBannerFlash();
+			markJointEvaluationTransmissionSuccess();
 			renderStep1({ banner: JOINT_EVALUATION_BANNER });
 			expect(screen.getByText("adresse@exemple.fr")).toBeInTheDocument();
-		});
-
-		it("hides the banner on a revisit even though the declaration state still reports it (#5124)", () => {
-			renderStep1({
-				banner: SECOND_DECLARATION_BANNER,
-				hasSecondDeclaration: true,
-			});
-
-			expect(
-				screen.queryByText("Votre seconde déclaration a été transmise"),
-			).not.toBeInTheDocument();
-			expect(
-				screen.getByRole("heading", { level: 1, name: PAGE_TITLE }),
-			).toBeInTheDocument();
-			expect(
-				screen.getByRole("heading", { level: 2, name: "Seconde déclaration" }),
-			).toBeInTheDocument();
-		});
-
-		it("shows the banner only once per transmission, even re-rendered with the same persisted banner state", () => {
-			markSubmissionBannerFlash();
-			const { rerender } = renderStep1({ banner: JOINT_EVALUATION_BANNER });
-
-			expect(
-				screen.getByText(
-					"Votre évaluation conjointe des rémunérations a été transmise",
-				),
-			).toBeInTheDocument();
-
-			rerender(step1({ banner: JOINT_EVALUATION_BANNER }));
-
-			expect(
-				screen.getByText(
-					"Votre évaluation conjointe des rémunérations a été transmise",
-				),
-			).toBeInTheDocument();
-		});
-
-		it("drops the banner once the component remounts without a fresh flash", () => {
-			markSubmissionBannerFlash();
-			const { unmount } = renderStep1({ banner: JOINT_EVALUATION_BANNER });
-			expect(
-				screen.getByText(
-					"Votre évaluation conjointe des rémunérations a été transmise",
-				),
-			).toBeInTheDocument();
-			unmount();
-
-			renderStep1({ banner: JOINT_EVALUATION_BANNER });
-
-			expect(
-				screen.queryByText(
-					"Votre évaluation conjointe des rémunérations a été transmise",
-				),
-			).not.toBeInTheDocument();
 		});
 	});
 

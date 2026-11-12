@@ -48,17 +48,14 @@ export function DownloadDataModal({ declarationsHref }: Props) {
 									<h2 className="fr-modal__title" id={`${MODAL_ID}-title`}>
 										Télécharger les données
 									</h2>
-									<p>
-										Téléchargez les données correspondant à votre recherche, au
-										format CSV.
-									</p>
+									<p>Sélectionnez les données à télécharger, au format CSV.</p>
 									<div className={styles.links}>
 										<div>
 											<FileDownloadLink
 												className="fr-link fr-icon-download-line fr-link--icon-right"
 												href={declarationsHref}
 											>
-												Écarts de rémunération
+												Indicateurs de rémunération
 											</FileDownloadLink>
 											<p className={styles.format}>CSV</p>
 										</div>

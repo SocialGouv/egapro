@@ -314,7 +314,7 @@ export const declarationsPaths = {
 			operationId: "exportPublicDeclarations",
 			summary: "Exporter toutes les déclarations publiées",
 			description:
-				"Retourne les déclarations publiées (toutes les années dont la date de rendu public est atteinte) en JSON, CSV ou Excel. Les filtres de la recherche peuvent être repris. Le CSV avec `year` ne contient que cette année et se télécharge sous `Indicateurs_remuneration_<annee>.csv`. Sans `year`, le CSV reste multi-années sous `index-egapro-remunerations.csv`. Seul l'export complet, sans filtre, en JSON ou CSV est mis en cache 1 heure côté serveur.",
+				"Retourne les déclarations publiées (toutes les années dont la date de rendu public est atteinte) en JSON, CSV ou Excel. Les filtres de la recherche peuvent être repris. Le CSV avec `year` ne contient que cette année et se télécharge sous `Indicateurs_remuneration_<annee>.csv`. Sans `year`, le CSV reste multi-années sous `indicateurs-remuneration.csv`. Seul l'export complet, sans filtre, en JSON ou CSV est mis en cache 1 heure côté serveur.",
 			parameters: [
 				{
 					name: "format",
@@ -353,7 +353,7 @@ export const declarationsPaths = {
 							schema: {
 								type: "string",
 								description:
-									"Fichier CSV avec en-tête, séparateur `;` et 39 colonnes DGT ordonnées : `Annee_declaration`, `SIREN`, `Raison_sociale`, `Adresse`, `Region`, `Code_departement`, `Departement`, `Code_NAF`, `Libelle_NAF`, `Pays`, puis `Effectif_RCD`, les effectifs F/H, les écarts, les proportions de rémunération variable et les quartiles. `city`, `regionCode` et `countryCode` restent dans le JSON et le XLSX, mais ne sont pas des colonnes du CSV DGT. Une donnée inconnue donne une cellule vide ; une identité masquée donne `Non-diffusible`.",
+									"Fichier CSV avec en-tête, séparateur `;` et 41 colonnes DGT ordonnées : `Annee_declaration`, `SIREN`, `Raison_sociale`, `Adresse`, `Region`, `Code_departement`, `Departement`, `Pays`, `Code_NAF`, `Libelle_NAF`, puis `Effectif_annuel_moyen`, les effectifs F/H annuels et horaires, les écarts, les proportions de rémunération variable et les quartiles. Les 26 colonnes de ratio (écarts, proportions de rémunération variable, quartiles) sont exprimées en points de pourcentage — tronqués à 2 décimales, point décimal, sans symbole `%` — à la différence du JSON et du XLSX qui restent en ratio brut entre −1 et 1. `city`, `regionCode` et `countryCode` restent dans le JSON et le XLSX, mais ne sont pas des colonnes du CSV DGT. Une donnée inconnue donne une cellule vide ; une identité masquée donne `Non-diffusible`.",
 							},
 						},
 						"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":

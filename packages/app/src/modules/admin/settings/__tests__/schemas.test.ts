@@ -14,6 +14,8 @@ const validDates = {
 	decl2ModificationDeadline: "2026-12-01",
 	decl2JointEvaluationDeadline: "2027-01-01",
 	decl2CseOpinionDeadline: "2027-02-01",
+	pathChoiceRound1Deadline: "2026-07-15",
+	pathChoiceDeadline: "2027-01-15",
 };
 
 describe("remunerationDeadlinesFormSchema", () => {
@@ -57,18 +59,47 @@ describe("remunerationDeadlinesFormSchema", () => {
 		}
 	});
 
-	it("ignores the derived path choice deadlines sent from the client", () => {
+	it("keeps the path choice deadlines set by the admin (#4711)", () => {
 		const result = remunerationDeadlinesFormSchema.safeParse({
 			year: 2026,
-			pathChoiceRound1Deadline: "2026-07-01",
-			pathChoiceDeadline: "2027-01-01",
 			...validDates,
 		});
 		expect(result.success).toBe(true);
 		if (result.success) {
-			const data = result.data as Record<string, unknown>;
-			expect("pathChoiceRound1Deadline" in data).toBe(false);
-			expect("pathChoiceDeadline" in data).toBe(false);
+			expect(result.data.pathChoiceRound1Deadline).toBe("2026-07-15");
+			expect(result.data.pathChoiceDeadline).toBe("2027-01-15");
+		}
+	});
+
+	it.each([
+		"pathChoiceRound1Deadline",
+		"pathChoiceDeadline",
+	] as const)("requires %s", (key) => {
+		const { [key]: _omitted, ...withoutKey } = validDates;
+		const result = remunerationDeadlinesFormSchema.safeParse({
+			year: 2026,
+			...withoutKey,
+		});
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			expect(result.error.issues[0]?.path).toEqual([key]);
+		}
+	});
+
+	it.each([
+		"pathChoiceRound1Deadline",
+		"pathChoiceDeadline",
+	] as const)("rejects an invalid %s format", (key) => {
+		const result = remunerationDeadlinesFormSchema.safeParse({
+			year: 2026,
+			...validDates,
+			[key]: "15/07/2026",
+		});
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			expect(result.error.issues[0]?.message).toBe(
+				"Format de date invalide (AAAA-MM-JJ).",
+			);
 		}
 	});
 

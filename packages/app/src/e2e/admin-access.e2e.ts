@@ -115,7 +115,7 @@ test.describe("admin access", () => {
 				await expect(common.getByLabel(/données GIP/)).toHaveCount(0);
 			});
 
-			await test.step("Rémunération — quatre groupes, choix du parcours calculés", async () => {
+			await test.step("Rémunération — quatre groupes, choix du parcours paramétrables", async () => {
 				await expect(deadlines.getByRole("group")).toHaveText([
 					/^Déclaration des indicateurs/,
 					/^Parcours de mise en conformité — 1er tour/,
@@ -166,7 +166,7 @@ test.describe("admin access", () => {
 						{ exact: true },
 					);
 					await expect(pathChoice).toHaveValue(value);
-					await expect(pathChoice).not.toBeEditable();
+					await expect(pathChoice).toBeEditable();
 				}
 				await expect(deadlines.locator("#lock-timeout-minutes")).toHaveCount(0);
 				await expect(page.getByText(/date limite/i)).toHaveCount(0);

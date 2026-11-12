@@ -10,10 +10,6 @@ const mockPush = vi.fn();
 const mockRefresh = vi.fn();
 const mockReset = vi.fn();
 const mockConceal = vi.fn();
-const { mockMarkSubmissionBannerFlash } = vi.hoisted(() => ({
-	mockMarkSubmissionBannerFlash: vi.fn(),
-}));
-
 type MockSubmissionError = {
 	message: string;
 	data?: { code: string };
@@ -33,7 +29,6 @@ vi.mock("next/navigation", () => ({
 vi.mock("~/modules/shared", async (importOriginal) => ({
 	...(await importOriginal<typeof import("~/modules/shared")>()),
 	getDsfrModal: () => ({ disclose: vi.fn(), conceal: mockConceal }),
-	markSubmissionBannerFlash: mockMarkSubmissionBannerFlash,
 }));
 
 vi.mock("~/trpc/react", () => ({
@@ -177,7 +172,6 @@ describe("SecondDeclarationStep3Review", () => {
 		mockRefresh.mockClear();
 		mockReset.mockClear();
 		mockConceal.mockClear();
-		mockMarkSubmissionBannerFlash.mockClear();
 		mockMutationState.error = null;
 		mockMutationState.isPending = false;
 		mockMutationState.networkMode = undefined;
@@ -337,8 +331,6 @@ describe("SecondDeclarationStep3Review", () => {
 		expect(mockConceal.mock.invocationCallOrder[0]).toBeLessThan(
 			mockPush.mock.invocationCallOrder[0] ?? 0,
 		);
-		// Destination is the compliance path, not /avis-cse, so no flash here.
-		expect(mockMarkSubmissionBannerFlash).not.toHaveBeenCalled();
 	});
 
 	it("shows a submission error inside the confirmation modal", () => {
@@ -423,7 +415,6 @@ describe("SecondDeclarationStep3Review", () => {
 		expect(mockConceal.mock.invocationCallOrder[0]).toBeLessThan(
 			mockPush.mock.invocationCallOrder[0] ?? 0,
 		);
-		expect(mockMarkSubmissionBannerFlash).toHaveBeenCalledTimes(1);
 	});
 
 	it("keeps the modal mounted while a retry is pending when the refreshed status shows the submission", () => {
@@ -579,11 +570,6 @@ describe("SecondDeclarationStep3Review", () => {
 
 		expect(mockMutate).toHaveBeenCalledTimes(1);
 		expect(mockPush).toHaveBeenCalledWith("/avis-cse");
-		// Flash marked only when landing on /avis-cse, so its banner is one-shot.
-		expect(mockMarkSubmissionBannerFlash).toHaveBeenCalledTimes(1);
-		expect(
-			mockMarkSubmissionBannerFlash.mock.invocationCallOrder[0],
-		).toBeLessThan(mockPush.mock.invocationCallOrder[0] ?? 0);
 	});
 
 	it("navigates to confirmation when no gaps remain and no CSE opinion is due", async () => {
@@ -598,8 +584,6 @@ describe("SecondDeclarationStep3Review", () => {
 		expect(mockPush).toHaveBeenCalledWith(
 			"/declaration-remuneration/parcours-conformite/confirmation",
 		);
-		// Destination is the confirmation page, not /avis-cse, so no flash here.
-		expect(mockMarkSubmissionBannerFlash).not.toHaveBeenCalled();
 	});
 
 	it("renders empty state when no categories", () => {

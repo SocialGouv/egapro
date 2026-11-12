@@ -65,20 +65,21 @@ export const adminSettingsRouter = createTRPCRouter({
 				.where(eq(campaignDeadlines.year, input.year))
 				.limit(1);
 
-			const pathChoiceDeadlines = {
-				pathChoiceRound1Deadline: toPersistedIsoDate(
-					getPathChoiceRound1Deadline(input.year),
-				),
-				pathChoiceDeadline: toPersistedIsoDate(
-					getPathChoiceDeadline(input.year),
-				),
-			};
+			const computedPathChoiceRound1Deadline = toPersistedIsoDate(
+				getPathChoiceRound1Deadline(input.year),
+			);
+			const computedPathChoiceDeadline = toPersistedIsoDate(
+				getPathChoiceDeadline(input.year),
+			);
 
 			if (row) {
 				return {
 					year: row.year,
 					exists: true as const,
-					...pathChoiceDeadlines,
+					pathChoiceRound1Deadline:
+						row.pathChoiceRound1Deadline ?? computedPathChoiceRound1Deadline,
+					pathChoiceDeadline:
+						row.pathChoiceDeadline ?? computedPathChoiceDeadline,
 					gipPublicationDate: row.gipPublicationDate,
 					campaignStartDate: row.campaignStartDate,
 					publicDataReleaseDate: row.publicDataReleaseDate,
@@ -96,7 +97,8 @@ export const adminSettingsRouter = createTRPCRouter({
 			return {
 				year: input.year,
 				exists: false as const,
-				...pathChoiceDeadlines,
+				pathChoiceRound1Deadline: computedPathChoiceRound1Deadline,
+				pathChoiceDeadline: computedPathChoiceDeadline,
 				gipPublicationDate: toNullableIsoDate(defaults.gipPublicationDate),
 				campaignStartDate: toNullableIsoDate(defaults.campaignStartDate),
 				publicDataReleaseDate: null,

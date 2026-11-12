@@ -21,6 +21,8 @@ const validInput = {
 	decl2ModificationDeadline: "2026-12-01",
 	decl2JointEvaluationDeadline: "2027-01-01",
 	decl2CseOpinionDeadline: "2027-02-01",
+	pathChoiceRound1Deadline: "2026-07-15",
+	pathChoiceDeadline: "2027-01-15",
 };
 
 const defaultJustificationDeadlines = {
@@ -147,6 +149,8 @@ describe("adminSettingsRouter — getDeadlinesByYear", () => {
 							decl2JustificationDeadline: "2026-12-01",
 							decl2JointEvaluationDeadline: "2027-01-01",
 							decl2CseOpinionDeadline: "2027-02-01",
+							pathChoiceRound1Deadline: null,
+							pathChoiceDeadline: null,
 						},
 					]),
 				}),
@@ -162,6 +166,37 @@ describe("adminSettingsRouter — getDeadlinesByYear", () => {
 		expect(result.decl2CseOpinionDeadline).toBe("2027-02-01");
 		expect(result.pathChoiceRound1Deadline).toBe("2026-07-01");
 		expect(result.pathChoiceDeadline).toBe("2027-01-01");
+	});
+
+	it("returns the path choice deadlines stored for the year (#4711)", async () => {
+		const db = buildDb();
+		db.select.mockReturnValueOnce({
+			from: vi.fn().mockReturnValue({
+				where: vi.fn().mockReturnValue({
+					limit: vi.fn().mockResolvedValue([
+						{
+							year: 2026,
+							gipPublicationDate: null,
+							campaignStartDate: null,
+							publicDataReleaseDate: null,
+							decl1ModificationDeadline: "2026-06-01",
+							decl1JustificationDeadline: "2026-06-01",
+							decl1JointEvaluationDeadline: "2026-08-01",
+							decl2ModificationDeadline: "2026-12-01",
+							decl2JustificationDeadline: "2026-12-01",
+							decl2JointEvaluationDeadline: "2027-01-01",
+							decl2CseOpinionDeadline: "2027-02-01",
+							pathChoiceRound1Deadline: "2026-07-15",
+							pathChoiceDeadline: "2027-01-15",
+						},
+					]),
+				}),
+			}),
+		});
+		const caller = await buildCaller(db);
+		const result = await caller.getDeadlinesByYear({ year: 2026 });
+		expect(result.pathChoiceRound1Deadline).toBe("2026-07-15");
+		expect(result.pathChoiceDeadline).toBe("2027-01-15");
 	});
 
 	it("returns formatted defaults when no row exists", async () => {
@@ -225,7 +260,7 @@ describe("adminSettingsRouter — upsertRemunerationDeadlines", () => {
 		expect(db.__onConflict).toHaveBeenCalled();
 	});
 
-	it("only rewrites the five remuneration deadlines on conflict, never the justification ones", async () => {
+	it("only rewrites the editable remuneration deadlines on conflict, never the justification ones", async () => {
 		const db = buildDb();
 		const caller = await buildCaller(db);
 

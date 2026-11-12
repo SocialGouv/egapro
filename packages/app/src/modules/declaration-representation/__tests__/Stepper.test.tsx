@@ -35,7 +35,7 @@ describe("Stepper", () => {
 		render(<Stepper currentStep={TOTAL_REPRESENTATION_STEPS} />);
 
 		expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent(
-			"Récapitulatif",
+			"Récapitulatif de la déclaration",
 		);
 		expect(screen.getByText("Étape 5 sur 5")).toBeInTheDocument();
 		expect(screen.queryByText("Étape suivante :")).not.toBeInTheDocument();

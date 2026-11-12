@@ -4,8 +4,9 @@ import ExcelJS from "exceljs";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { AUDIT_ACTIONS } from "~/modules/audit";
-import { toCsvField } from "~/modules/domain";
+import { ratioToPercentPoints, toCsvField } from "~/modules/domain";
 import type {
+	CsvColumn,
 	PublicCompanySource,
 	PublicDeclarationDTO,
 	PublicSearchInput,
@@ -206,7 +207,7 @@ function textExportResponse(
 				? {
 						...PUBLIC_API_EXPORT_HEADERS,
 						"Content-Type": "text/csv; charset=utf-8",
-						"Content-Disposition": `attachment; filename="${year === undefined ? "index-egapro-remunerations" : `Indicateurs_remuneration_${year}`}.csv"`,
+						"Content-Disposition": `attachment; filename="${year === undefined ? "indicateurs-remuneration" : `Indicateurs_remuneration_${year}`}.csv"`,
 					}
 				: {
 						...PUBLIC_API_EXPORT_HEADERS,
@@ -215,10 +216,18 @@ function textExportResponse(
 	});
 }
 
+function formatCsvField(row: PublicDeclarationDTO, column: CsvColumn): string {
+	const value = row[column.key];
+	if (!column.percent) return toCsvField(value);
+	return toCsvField(
+		ratioToPercentPoints(typeof value === "number" ? value : null),
+	);
+}
+
 function formatCsv(rows: PublicDeclarationDTO[]): string {
 	const header = CSV_COLUMNS.map(({ header }) => toCsvField(header)).join(";");
 	const dataRows = rows.map((row) =>
-		CSV_COLUMNS.map(({ key }) => toCsvField(row[key])).join(";"),
+		CSV_COLUMNS.map((column) => formatCsvField(row, column)).join(";"),
 	);
 	return [header, ...dataRows].join("\n");
 }

@@ -295,6 +295,7 @@ describe("Step1ReferencePeriod — valid period", () => {
 			currentStep: 2,
 			draft: {
 				currentStep: 2,
+				lastStep: 2,
 				referencePeriodEnd: VALID_END,
 				referencePeriodStart: VALID_START,
 			},
@@ -313,6 +314,7 @@ describe("Step1ReferencePeriod — valid period", () => {
 			currentStep: 1,
 			draft: {
 				currentStep: 1,
+				lastStep: 1,
 				referencePeriodEnd: VALID_END,
 				referencePeriodStart: VALID_START,
 			},

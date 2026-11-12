@@ -1409,7 +1409,7 @@ test.describe("Step 6 — quartile shares are written with a decimal comma (#296
 
 		const quartileCard = page
 			.getByText(
-				"Proportion de femmes et d'hommes dans chaque quartile salarial",
+				"Proportion de femmes et d'hommes dans chaque quartile de rémunération",
 			)
 			.locator("xpath=../..");
 

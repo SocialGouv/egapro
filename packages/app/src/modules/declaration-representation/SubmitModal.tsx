@@ -23,7 +23,7 @@ export function SubmitModal({
 		<SharedSubmitModal
 			certifyInputId="representation-submit-certify"
 			certifyLabel="Je certifie que les données saisies sont exactes et conformes aux informations disponibles dans les systèmes de paie et de gestion des ressources humaines de l'entreprise."
-			description={`Vous allez transmettre la déclaration des indicateurs de représentation ${campaignYear} aux services du ministère chargé du travail.`}
+			description={`Vous allez transmettre la déclaration des indicateurs de représentation ${campaignYear} aux services du ministre chargé du travail.`}
 			isPending={isPending}
 			modalId={MODAL_ID}
 			modalRef={modalRef}

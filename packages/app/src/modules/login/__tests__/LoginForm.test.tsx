@@ -59,26 +59,37 @@ describe("LoginForm", () => {
 		);
 	});
 
-	it("leaves the sign-in request unchanged for any other destination", () => {
+	it("still carries the declarant MFA claim for any other destination", () => {
 		render(<LoginForm callbackUrl="/mon-espace/mes-entreprises" />);
 		screen
 			.getByRole("button", { name: /s'identifier avec\s*proconnect/i })
 			.click();
 
-		expect(mockSignIn).toHaveBeenCalledWith("proconnect", {
-			callbackUrl: "/mon-espace/mes-entreprises",
-		});
+		expect(mockSignIn).toHaveBeenCalledWith(
+			"proconnect",
+			{ callbackUrl: "/mon-espace/mes-entreprises" },
+			expect.objectContaining({ claims: expect.any(String) }),
+		);
+		const params = mockSignIn.mock.calls[0]?.[2] as { claims: string };
+		expect(JSON.parse(params.claims).id_token.acr.values).toEqual([
+			"eidas0-mfa",
+			"eidas1-mfa",
+			"eidas2",
+			"eidas3",
+		]);
 	});
 
-	it("leaves the sign-in request unchanged when no destination is given", () => {
+	it("still carries the declarant MFA claim when no destination is given", () => {
 		render(<LoginForm />);
 		screen
 			.getByRole("button", { name: /s'identifier avec\s*proconnect/i })
 			.click();
 
-		expect(mockSignIn).toHaveBeenCalledWith("proconnect", {
-			callbackUrl: "/mon-espace",
-		});
+		expect(mockSignIn).toHaveBeenCalledWith(
+			"proconnect",
+			{ callbackUrl: "/mon-espace" },
+			expect.objectContaining({ claims: expect.any(String) }),
+		);
 	});
 
 	it("does not mistake /administration for the backoffice", () => {
@@ -87,8 +98,17 @@ describe("LoginForm", () => {
 			.getByRole("button", { name: /s'identifier avec\s*proconnect/i })
 			.click();
 
-		expect(mockSignIn).toHaveBeenCalledWith("proconnect", {
-			callbackUrl: "/administration/secret",
-		});
+		expect(mockSignIn).toHaveBeenCalledWith(
+			"proconnect",
+			{ callbackUrl: "/administration/secret" },
+			expect.objectContaining({ claims: expect.any(String) }),
+		);
+		const params = mockSignIn.mock.calls[0]?.[2] as { claims: string };
+		expect(JSON.parse(params.claims).id_token.acr.values).toEqual([
+			"eidas0-mfa",
+			"eidas1-mfa",
+			"eidas2",
+			"eidas3",
+		]);
 	});
 });

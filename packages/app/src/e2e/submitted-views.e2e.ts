@@ -94,7 +94,7 @@ test.describe("Submitted documents in Mon espace", () => {
 		);
 		await expect(
 			page.getByRole("heading", {
-				name: `Évaluation conjointe des rémunérations ${YEAR}`,
+				name: `Transmission du rapport de l’évaluation conjointe des rémunérations ${YEAR}`,
 				level: 1,
 			}),
 		).toBeVisible();

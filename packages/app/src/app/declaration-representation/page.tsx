@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { SubjectionScreen } from "~/modules/declaration-representation";
+import {
+	getRepresentationResumeStep,
+	SubjectionScreen,
+} from "~/modules/declaration-representation";
 import { getCurrentYear, getReferenceYearFor } from "~/modules/domain";
 import {
 	clampRepresentationStep,
@@ -26,9 +29,9 @@ export default async function RepresentationHomePage() {
 		redirect(representationStepHref(LAST_REPRESENTATION_STEP));
 	}
 
-	const currentStep = declaration?.currentStep ?? 0;
-	if (currentStep >= 1) {
-		redirect(representationStepHref(clampRepresentationStep(currentStep)));
+	const resumeStep = declaration ? getRepresentationResumeStep(declaration) : 0;
+	if (resumeStep >= 1) {
+		redirect(representationStepHref(clampRepresentationStep(resumeStep)));
 	}
 
 	return (

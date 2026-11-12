@@ -189,7 +189,7 @@ describe("NextStepsSection", () => {
 		// "écarts ≥ 5 %" is in a nested <strong>, so the sentence spans two text nodes — assert each fragment.
 		expect(
 			screen.getByText(
-				/À la suite de l'analyse de vos données de l'indicateur par catégorie d'emploi, des/,
+				/À la suite de l'analyse de vos données de l'indicateur par catégorie d'emplois, des/,
 			),
 		).toBeInTheDocument();
 		expect(screen.getByText("écarts ≥ 5 %").tagName).toBe("STRONG");

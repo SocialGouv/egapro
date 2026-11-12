@@ -62,6 +62,8 @@ export function RemunerationDeadlinesForm({ year }: Props) {
 			decl2ModificationDeadline: data.decl2ModificationDeadline,
 			decl2JointEvaluationDeadline: data.decl2JointEvaluationDeadline,
 			decl2CseOpinionDeadline: data.decl2CseOpinionDeadline,
+			pathChoiceRound1Deadline: data.pathChoiceRound1Deadline,
+			pathChoiceDeadline: data.pathChoiceDeadline,
 		});
 	}, [data, form]);
 
@@ -116,9 +118,6 @@ export function RemunerationDeadlinesForm({ year }: Props) {
 						gipPublicationDate={data?.gipPublicationDate ?? null}
 						group={group}
 						key={group.legend}
-						pathChoiceValue={
-							group.pathChoiceKey ? (data?.[group.pathChoiceKey] ?? "") : ""
-						}
 						register={form.register}
 						requiredNoteId={requiredNoteId}
 					/>
@@ -144,5 +143,7 @@ function buildDefaults(year: number): RemunerationDeadlinesFormInput {
 		decl2ModificationDeadline: "",
 		decl2JointEvaluationDeadline: "",
 		decl2CseOpinionDeadline: "",
+		pathChoiceRound1Deadline: "",
+		pathChoiceDeadline: "",
 	};
 }

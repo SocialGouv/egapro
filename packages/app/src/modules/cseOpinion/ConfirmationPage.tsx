@@ -1,5 +1,6 @@
 import { DemarcheConfirmation } from "~/modules/shared/DemarcheConfirmation";
 import { buildRemunerationDocuments } from "~/modules/shared/demarcheDocuments";
+import { REMUNERATION_PUBLICATION_EXCEPTION } from "~/modules/shared/ResultsPublicationNotice";
 
 type Props = {
 	companyName: string;
@@ -31,6 +32,7 @@ export function ConfirmationPage({
 				year: declarationYear,
 			})}
 			email={email ?? "adresse@exemple.fr"}
+			publicationException={REMUNERATION_PUBLICATION_EXCEPTION}
 			receiptKind="cseOpinion"
 			receiptYear={declarationYear}
 			successMessage={`Votre parcours ${declarationYear} est désormais terminé`}

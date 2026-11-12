@@ -92,7 +92,6 @@ describe("auth config — admin two-factor authentication", () => {
 		}
 
 		it.each([
-			"eidas1-mfa",
 			"eidas2",
 			"eidas3",
 		])("dates the session with auth_time when ProConnect reports %s", async (acr) => {
@@ -108,7 +107,7 @@ describe("auth config — admin two-factor authentication", () => {
 			vi.useFakeTimers();
 			vi.setSystemTime(new Date("2026-03-10T08:00:00.000Z"));
 			try {
-				const result = await signInWith({ acr: "eidas1-mfa" });
+				const result = await signInWith({ acr: "eidas2" });
 
 				expect(result.adminMfaAt).toBe(
 					Math.floor(Date.parse("2026-03-10T08:00:00.000Z") / 1000),
@@ -127,7 +126,7 @@ describe("auth config — admin two-factor authentication", () => {
 			vi.setSystemTime(new Date("2026-03-10T08:00:00.000Z"));
 			try {
 				const result = await signInWith({
-					acr: "eidas1-mfa",
+					acr: "eidas2",
 					auth_time: authTime,
 				});
 
@@ -141,7 +140,7 @@ describe("auth config — admin two-factor authentication", () => {
 
 		it("truncates a fractional auth_time to whole seconds", async () => {
 			const result = await signInWith({
-				acr: "eidas1-mfa",
+				acr: "eidas2",
 				auth_time: AUTH_TIME + 0.75,
 			});
 
@@ -149,9 +148,10 @@ describe("auth config — admin two-factor authentication", () => {
 		});
 
 		it.each([
-			"eidas1",
 			"eidas0",
 			"eidas0-mfa",
+			"eidas1",
+			"eidas1-mfa",
 		])("signs the user in and leaves the session undated for %s", async (acr) => {
 			const result = await signInWith({ acr, auth_time: AUTH_TIME });
 
@@ -196,10 +196,7 @@ describe("auth config — admin two-factor authentication", () => {
 		});
 
 		it("records the two-factor passage of an admin account", async () => {
-			await signInWith(
-				{ acr: "eidas1-mfa", auth_time: AUTH_TIME },
-				ADMIN_EMAIL,
-			);
+			await signInWith({ acr: "eidas2", auth_time: AUTH_TIME }, ADMIN_EMAIL);
 
 			expect(mockLogAction).toHaveBeenCalledWith(
 				expect.objectContaining({
@@ -208,7 +205,7 @@ describe("auth config — admin two-factor authentication", () => {
 					userId: "uuid-123",
 					userEmail: ADMIN_EMAIL,
 					metadata: {
-						acr: "eidas1-mfa",
+						acr: "eidas2",
 						authTime: AUTH_TIME,
 						roles: null,
 						granted: false,
@@ -237,10 +234,7 @@ describe("auth config — admin two-factor authentication", () => {
 		});
 
 		it("records a single login with the local user id, including a step-up", async () => {
-			await signInWith(
-				{ acr: "eidas1-mfa", auth_time: AUTH_TIME },
-				ADMIN_EMAIL,
-			);
+			await signInWith({ acr: "eidas2", auth_time: AUTH_TIME }, ADMIN_EMAIL);
 			const loginEntries = mockLogAction.mock.calls
 				.map(([entry]) => entry as Record<string, unknown>)
 				.filter((entry) => entry.action === "auth.login");
@@ -271,7 +265,7 @@ describe("auth config — admin two-factor authentication", () => {
 
 		it("logs the level and the instant, never the token nor the raw claims", async () => {
 			await signInWith(
-				{ acr: "eidas1-mfa", auth_time: AUTH_TIME, sub: "proconnect-sub" },
+				{ acr: "eidas2", auth_time: AUTH_TIME, sub: "proconnect-sub" },
 				ADMIN_EMAIL,
 			);
 
@@ -289,10 +283,7 @@ describe("auth config — admin two-factor authentication", () => {
 		});
 
 		it("attaches the request context to the audit row, as the other auth events do", async () => {
-			await signInWith(
-				{ acr: "eidas1-mfa", auth_time: AUTH_TIME },
-				ADMIN_EMAIL,
-			);
+			await signInWith({ acr: "eidas2", auth_time: AUTH_TIME }, ADMIN_EMAIL);
 
 			const [entry] = mockLogAction.mock.calls[0] as [Record<string, unknown>];
 			expect(entry).toHaveProperty("ipAddress");
