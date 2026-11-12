@@ -73,6 +73,8 @@ export const TransitionSchema = z.object({
 	guard: PredicateSchema.optional(),
 	to: z.enum(DECLARATION_FSM_STATUSES),
 	events: z.array(EventSchema),
+	// `false`: accepted by the engine, never advertised as an expected next step.
+	advertisable: z.boolean().optional(),
 });
 
 export type Transition = z.infer<typeof TransitionSchema>;

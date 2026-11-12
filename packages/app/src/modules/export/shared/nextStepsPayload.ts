@@ -113,7 +113,9 @@ function toNextStepPayload(
  *
  * Both prunings are export-only — `applyAction` still accepts either action.
  * Keep this list at two: a third entry would make it a de facto mirror of the
- * state graph, which `CLAUDE.md` forbids. A third case belongs in the ruleset.
+ * state graph, which `CLAUDE.md` forbids. A third case belongs in the ruleset
+ * (`advertisable: false` marks a transition accepted by the engine but never
+ * an expected next step, e.g. a correction of the last transmission, #5128).
  *
  * Note on `action.stillHasGap`, which stays deliberately undecided. The router
  * derives it from the stored `correction` categories, so it looks like a known

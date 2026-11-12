@@ -40,7 +40,7 @@
 		{ "id": "awaiting_revision_choice", "stage": 4 },
 		{ "id": "revised_joint_evaluation_chosen", "stage": 5 },
 		{ "id": "awaiting_cse_opinion", "stage": 6 },
-		{ "id": "demarche_completed", "stage": 7 }
+		{ "id": "demarche_completed", "stage": 7, "terminal": true }
 	],
 
 	"computations": {
@@ -352,6 +352,95 @@
 			"guard": { "fact": "cseRequired", "op": "==", "value": false },
 			"to": "demarche_completed",
 			"events": [{ "type": "demarche_complete" }]
+		},
+		{
+			"id": "resubmit_joint_evaluation_round_1_from_completed",
+			"advertisable": false,
+			"description": "Sans CSE, un rapport d'évaluation conjointe qui est la dernière transmission reste modifiable jusqu'à la nouvelle campagne. Le round d'origine est préservé (il alimente le verrou du choix de parcours round 1).",
+			"from": ["demarche_completed"],
+			"action": "submit_joint_evaluation",
+			"matchPayload": { "round": 1 },
+			"guard": {
+				"all": [
+					{
+						"fact": "lastTransmission",
+						"op": "==",
+						"value": "joint_evaluation"
+					},
+					{ "fact": "cseRequired", "op": "==", "value": false }
+				]
+			},
+			"to": "demarche_completed",
+			"events": [
+				{ "type": "joint_evaluation_submit", "round": 1 },
+				{ "type": "demarche_complete" }
+			]
+		},
+		{
+			"id": "resubmit_joint_evaluation_round_2_from_completed",
+			"advertisable": false,
+			"description": "Idem pour un rapport d'évaluation conjointe issu d'une révision (round 2).",
+			"from": ["demarche_completed"],
+			"action": "submit_joint_evaluation",
+			"matchPayload": { "round": 2 },
+			"guard": {
+				"all": [
+					{
+						"fact": "lastTransmission",
+						"op": "==",
+						"value": "joint_evaluation"
+					},
+					{ "fact": "cseRequired", "op": "==", "value": false }
+				]
+			},
+			"to": "demarche_completed",
+			"events": [
+				{ "type": "joint_evaluation_submit", "round": 2 },
+				{ "type": "demarche_complete" }
+			]
+		},
+		{
+			"id": "resubmit_second_declaration_persistent_gap_from_completed",
+			"advertisable": false,
+			"description": "Une seconde déclaration qui est la dernière transmission reste modifiable ; un écart encore ≥ 5 % rouvre le choix du parcours de révision, comme dans le flux normal.",
+			"from": ["demarche_completed"],
+			"action": "submit_second_declaration",
+			"guard": {
+				"all": [
+					{
+						"fact": "lastTransmission",
+						"op": "==",
+						"value": "second_declaration"
+					},
+					{ "fact": "cseRequired", "op": "==", "value": false },
+					{ "fact": "action.stillHasGap", "op": "==", "value": true }
+				]
+			},
+			"to": "awaiting_revision_choice",
+			"events": [{ "type": "second_declaration_submit", "round": 2 }]
+		},
+		{
+			"id": "resubmit_second_declaration_resolved_from_completed",
+			"advertisable": false,
+			"description": "Idem quand l'écart est résolu : la démarche reste close, la nouvelle transmission devient la dernière.",
+			"from": ["demarche_completed"],
+			"action": "submit_second_declaration",
+			"guard": {
+				"all": [
+					{
+						"fact": "lastTransmission",
+						"op": "==",
+						"value": "second_declaration"
+					},
+					{ "fact": "cseRequired", "op": "==", "value": false },
+					{ "fact": "action.stillHasGap", "op": "==", "value": false }
+				]
+			},
+			"to": "demarche_completed",
+			"events": [
+				{ "type": "second_declaration_submit", "round": 2 },
+				{ "type": "demarche_complete" }
+			]
 		}
 	],
 
@@ -391,6 +480,30 @@
 				"fact": "secondDeclarationPathChoice",
 				"op": "==",
 				"value": "justify"
+			},
+			"reopens": "awaiting_revision_choice"
+		},
+		{
+			"id": "revise_path_choice_round_1_after_completion",
+			"description": "Sans CSE, un choix de parcours terminal (justifier, round 1) qui est la dernière transmission reste modifiable jusqu'à la nouvelle campagne : le choix repart de awaiting_compliance_path_choice.",
+			"action": "choose_compliance_path",
+			"from": ["demarche_completed"],
+			"guard": {
+				"fact": "lastTransmission",
+				"op": "==",
+				"value": "path_choice_round_1"
+			},
+			"reopens": "awaiting_compliance_path_choice"
+		},
+		{
+			"id": "revise_path_choice_round_2_after_completion",
+			"description": "Idem pour un choix de parcours terminal issu d'une révision (round 2) : le choix repart de awaiting_revision_choice.",
+			"action": "choose_compliance_path",
+			"from": ["demarche_completed"],
+			"guard": {
+				"fact": "lastTransmission",
+				"op": "==",
+				"value": "path_choice_round_2"
 			},
 			"reopens": "awaiting_revision_choice"
 		}

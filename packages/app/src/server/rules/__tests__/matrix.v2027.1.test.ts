@@ -708,3 +708,146 @@ describe("canApplyAction — same verdict as applyAction, without throwing", () 
 		).toBe(true);
 	});
 });
+
+describe("re-transmitting the last deposit of a closed démarche (#5128)", () => {
+	function closed(overrides: Partial<Facts> = {}): Facts {
+		return {
+			...base("demarche_completed"),
+			cseRequired: false,
+			lastTransmission: "joint_evaluation",
+			action: { round: 1, stillHasGap: false },
+			...overrides,
+		};
+	}
+
+	describe("submit_joint_evaluation", () => {
+		it("keeps the démarche closed and preserves the round of a round-1 report", () => {
+			const result = applyAction(closed(), "submit_joint_evaluation", rules);
+
+			expect(result).toEqual({
+				nextStatus: "demarche_completed",
+				events: [
+					{ type: "joint_evaluation_submit", round: 1 },
+					{ type: "demarche_complete" },
+				],
+			});
+		});
+
+		it("preserves the round of a revised report", () => {
+			const result = applyAction(
+				closed({ action: { round: 2, stillHasGap: false } }),
+				"submit_joint_evaluation",
+				rules,
+			);
+
+			expect(result.nextStatus).toBe("demarche_completed");
+			expect(result.events).toEqual([
+				{ type: "joint_evaluation_submit", round: 2 },
+				{ type: "demarche_complete" },
+			]);
+		});
+
+		it.each([
+			["another last transmission", { lastTransmission: "cse_opinion" }],
+			["a CSE still required", { cseRequired: true }],
+		])("refuses the re-transmission with %s", (_label, overrides) => {
+			expect(() =>
+				applyAction(closed(overrides), "submit_joint_evaluation", rules),
+			).toThrow(NoMatchingTransitionError);
+		});
+	});
+
+	describe("submit_second_declaration", () => {
+		it("reopens the revision choice when the gap persists", () => {
+			const result = applyAction(
+				closed({
+					lastTransmission: "second_declaration",
+					action: { round: 2, stillHasGap: true },
+				}),
+				"submit_second_declaration",
+				rules,
+			);
+
+			expect(result).toEqual({
+				nextStatus: "awaiting_revision_choice",
+				events: [{ type: "second_declaration_submit", round: 2 }],
+			});
+		});
+
+		it("keeps the démarche closed when the gap is resolved", () => {
+			const result = applyAction(
+				closed({
+					lastTransmission: "second_declaration",
+					action: { round: 2, stillHasGap: false },
+				}),
+				"submit_second_declaration",
+				rules,
+			);
+
+			expect(result).toEqual({
+				nextStatus: "demarche_completed",
+				events: [
+					{ type: "second_declaration_submit", round: 2 },
+					{ type: "demarche_complete" },
+				],
+			});
+		});
+
+		it("refuses the re-transmission when the report is the last transmission", () => {
+			expect(() =>
+				applyAction(
+					closed({ action: { round: 2, stillHasGap: false } }),
+					"submit_second_declaration",
+					rules,
+				),
+			).toThrow(NoMatchingTransitionError);
+		});
+	});
+
+	describe("choose_compliance_path", () => {
+		it("reopens the initial path choice from a round-1 terminal choice", () => {
+			const result = applyAction(
+				closed({
+					lastTransmission: "path_choice_round_1",
+					action: { path: "joint_evaluation" },
+				}),
+				"choose_compliance_path",
+				rules,
+			);
+
+			expect(result).toEqual({
+				nextStatus: "joint_evaluation_chosen",
+				events: [{ type: "path_choice", value: "joint_evaluation", round: 1 }],
+			});
+		});
+
+		it("reopens the revision choice from a round-2 terminal choice", () => {
+			const result = applyAction(
+				closed({
+					lastTransmission: "path_choice_round_2",
+					action: { path: "joint_evaluation" },
+				}),
+				"choose_compliance_path",
+				rules,
+			);
+
+			expect(result).toEqual({
+				nextStatus: "revised_joint_evaluation_chosen",
+				events: [{ type: "path_choice", value: "joint_evaluation", round: 2 }],
+			});
+		});
+
+		it("refuses a path choice when another step is the last transmission", () => {
+			expect(() =>
+				applyAction(
+					closed({
+						lastTransmission: "joint_evaluation",
+						action: { path: "justify" },
+					}),
+					"choose_compliance_path",
+					rules,
+				),
+			).toThrow(NoMatchingTransitionError);
+		});
+	});
+});
