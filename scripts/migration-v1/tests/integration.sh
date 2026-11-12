@@ -7,7 +7,7 @@ umask 077
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly KIT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 readonly MIGRATE="$KIT_DIR/migrate.sh"
-readonly POSTGRES_IMAGE="${MIGRATION_V1_POSTGRES_IMAGE:-postgres:14.17}"
+readonly POSTGRES_IMAGE="${MIGRATION_V1_POSTGRES_IMAGE:-postgres:17.11}"
 
 WORK=""
 TARGET_CONTAINER=""
@@ -61,13 +61,35 @@ target_sql_for() {
     psql --no-psqlrc --set ON_ERROR_STOP=1 --tuples-only --no-align "$@"
 }
 
+sha256_of() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | awk '{print $1}'
+  else
+    shasum -a 256 "$1" | awk '{print $1}'
+  fi
+}
+
+rewrite_file() {
+  local file=$1
+  shift
+  local temp
+  temp=$(mktemp "${file}.rewrite.XXXXXX")
+  if sed "$@" "$file" >"$temp"; then
+    chmod 600 "$temp"
+    mv "$temp" "$file"
+  else
+    rm -f "$temp"
+    fail "could not rewrite $file"
+  fi
+}
+
 refresh_checksums() {
   local snapshot=$1
   chmod 600 "$snapshot/SHA256SUMS"
   {
-    printf '%s  manifest.txt\n' "$(sha256sum "$snapshot/manifest.txt" | awk '{print $1}')"
-    printf '%s  representations.csv\n' "$(sha256sum "$snapshot/representations.csv" | awk '{print $1}')"
-    printf '%s  referents.csv\n' "$(sha256sum "$snapshot/referents.csv" | awk '{print $1}')"
+    printf '%s  manifest.txt\n' "$(sha256_of "$snapshot/manifest.txt")"
+    printf '%s  representations.csv\n' "$(sha256_of "$snapshot/representations.csv")"
+    printf '%s  referents.csv\n' "$(sha256_of "$snapshot/referents.csv")"
   } >"$snapshot/SHA256SUMS"
 }
 
@@ -222,6 +244,21 @@ printf 'ok - a portable plain data dump is supported\n'
   --dataset referents --out "$WORK/plain referents snapshot" >/dev/null
 printf 'ok - single-dataset portable plain dumps are supported\n'
 
+awk '!/^\\restrict / && !/^\\unrestrict / && $0 != "SET transaction_timeout = 0;"' \
+  "$WORK/v1-data.sql" >"$WORK/v1-data-pre-17.sql"
+"$MIGRATE" export --dump "$WORK/v1-data-pre-17.sql" --format plain \
+  --out "$WORK/pre-17 plain snapshot" >/dev/null
+"$MIGRATE" verify --snapshot "$WORK/pre-17 plain snapshot" >/dev/null
+printf 'ok - plain dumps predating the PostgreSQL 17 guard lines remain accepted\n'
+
+cp "$WORK/v1-data.sql" "$WORK/v1-data-bad-restrict.sql"
+printf '\\restrict not-a-base64-token with spaces\n' >>"$WORK/v1-data-bad-restrict.sql"
+if "$MIGRATE" export --dump "$WORK/v1-data-bad-restrict.sql" --format plain \
+  --out "$WORK/bad restrict snapshot" >/dev/null 2>&1; then
+  fail "plain exports should reject malformed restrict lines"
+fi
+printf 'ok - malformed restrict lines are rejected\n'
+
 cp "$WORK/v1-data.sql" "$WORK/v1-data-with-sql.sql"
 printf '\nSELECT current_user;\n' >>"$WORK/v1-data-with-sql.sql"
 if "$MIGRATE" export --dump "$WORK/v1-data-with-sql.sql" --format plain \
@@ -234,7 +271,7 @@ fi
 printf 'ok - plain exports reject SQL and clean failed partial directories\n'
 
 cp "$WORK/v1-repeq.sql" "$WORK/v1-data-truncated.sql"
-sed -i '/^\\\.$/d' "$WORK/v1-data-truncated.sql"
+rewrite_file "$WORK/v1-data-truncated.sql" '/^\\\.$/d'
 if "$MIGRATE" export --dump "$WORK/v1-data-truncated.sql" --format plain \
   --dataset repeq --out "$WORK/truncated plain snapshot" >/dev/null 2>&1; then
   fail "plain exports should reject truncated COPY blocks"
@@ -287,7 +324,7 @@ printf 'ok - representation row and payload years must agree\n'
 
 cp -R "$WORK/full snapshot" "$WORK/empty substitute snapshot"
 chmod 600 "$WORK/empty substitute snapshot/referents.csv"
-sed -i '$s/,,$/,"",""/' "$WORK/empty substitute snapshot/referents.csv"
+rewrite_file "$WORK/empty substitute snapshot/referents.csv" '$s/,,$/,"",""/'
 grep -q ',"",""$' "$WORK/empty substitute snapshot/referents.csv" ||
   fail "the empty substitute snapshot fixture should contain quoted empty strings"
 refresh_checksums "$WORK/empty substitute snapshot"
@@ -298,18 +335,17 @@ printf 'ok - target loading normalizes empty substitute fields from existing sna
 
 cp -R "$WORK/full snapshot" "$WORK/legacy snapshot"
 chmod 600 "$WORK/legacy snapshot/manifest.txt"
-sed -i \
+rewrite_file "$WORK/legacy snapshot/manifest.txt" \
   -e 's/^format_version=2$/format_version=1/' \
   -e 's/^kit_revision=2$/kit_revision=1/' \
-  -e '/^dataset=/d' \
-  "$WORK/legacy snapshot/manifest.txt"
+  -e '/^dataset=/d'
 refresh_checksums "$WORK/legacy snapshot"
 "$MIGRATE" verify --snapshot "$WORK/legacy snapshot" >/dev/null
 printf 'ok - legacy version 1 snapshots remain valid as combined snapshots\n'
 
 cp -R "$WORK/full snapshot" "$WORK/invalid dataset snapshot"
 chmod 600 "$WORK/invalid dataset snapshot/manifest.txt"
-sed -i 's/^dataset=all$/dataset=invalid/' "$WORK/invalid dataset snapshot/manifest.txt"
+rewrite_file "$WORK/invalid dataset snapshot/manifest.txt" 's/^dataset=all$/dataset=invalid/'
 refresh_checksums "$WORK/invalid dataset snapshot"
 if "$MIGRATE" verify --snapshot "$WORK/invalid dataset snapshot" >/dev/null 2>&1; then
   fail "snapshots should reject invalid dataset metadata"
@@ -344,8 +380,8 @@ printf 'ok - checksum tampering is rejected\n'
 
 cp -R "$WORK/full snapshot" "$WORK/wrong count snapshot"
 chmod 600 "$WORK/wrong count snapshot/manifest.txt"
-sed -i 's/^representations_count=3$/representations_count=4/' \
-  "$WORK/wrong count snapshot/manifest.txt"
+rewrite_file "$WORK/wrong count snapshot/manifest.txt" \
+  's/^representations_count=3$/representations_count=4/'
 refresh_checksums "$WORK/wrong count snapshot"
 if PGSERVICEFILE="$WORK/pg_service.conf" "$MIGRATE" dry-run \
   --snapshot "$WORK/wrong count snapshot" --service target --dataset repeq >/dev/null 2>&1; then
@@ -411,12 +447,8 @@ assert_equal "referent-only rerun is idempotent" "referents.replace=false" \
 
 cp -R "$WORK/full snapshot" "$WORK/invalid snapshot"
 chmod 600 "$WORK/invalid snapshot/referents.csv" "$WORK/invalid snapshot/SHA256SUMS"
-sed -i 's/,11,email,/,99,email,/' "$WORK/invalid snapshot/referents.csv"
-{
-  printf '%s  manifest.txt\n' "$(sha256sum "$WORK/invalid snapshot/manifest.txt" | awk '{print $1}')"
-  printf '%s  representations.csv\n' "$(sha256sum "$WORK/invalid snapshot/representations.csv" | awk '{print $1}')"
-  printf '%s  referents.csv\n' "$(sha256sum "$WORK/invalid snapshot/referents.csv" | awk '{print $1}')"
-} >"$WORK/invalid snapshot/SHA256SUMS"
+rewrite_file "$WORK/invalid snapshot/referents.csv" 's/,11,email,/,99,email,/'
+refresh_checksums "$WORK/invalid snapshot"
 before_state=$(target_sql --command "SELECT count(*) || ':' || (SELECT count(*) FROM app_company) || ':' || (SELECT count(*) FROM app_referent) FROM app_representation_declaration")
 if PGSERVICEFILE="$WORK/pg_service.conf" "$MIGRATE" apply \
   --snapshot "$WORK/invalid snapshot" --service target >/dev/null 2>&1; then

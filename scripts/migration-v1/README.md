@@ -7,7 +7,7 @@ PostgreSQL V1 privé :
 - l'annuaire complet des référents.
 
 L'exploitation ne dépend ni de Node.js, ni de pnpm, ni d'un accès simultané
-aux bases V1 et V2. Le dump est restauré dans un PostgreSQL 14.17 jetable, puis
+aux bases V1 et V2. Le dump est restauré dans un PostgreSQL 17.11 jetable, puis
 transformé en un instantané CSV contrôlé avant toute connexion à la V2.
 
 ## Prérequis
@@ -21,10 +21,15 @@ transformé en un instantané CSV contrôlé avant toute connexion à la V2.
   `app_representation_declaration` pour `repeq`, `app_referent` pour les
   référents.
 
-Le kit est testé avec PostgreSQL 14.17. Un dump créé par une version plus
-récente peut ne pas être lisible par `pg_restore` 14. Les deux tables reprises
-n'utilisent pas d'extension pendant la restauration sélective ; les autres
-objets du dump ne sont pas restaurés.
+Le kit est testé avec PostgreSQL 17.11, l'image `postgres:17.11` que la
+variable `MIGRATION_V1_POSTGRES_IMAGE` permet de remplacer. `pg_restore` lit
+les archives produites par une version antérieure ou égale à la sienne : un
+dump custom produit par PostgreSQL 14 comme par PostgreSQL 17 est donc
+accepté, un dump produit par une majeure plus récente que l'image ne l'est
+pas. Dans ce dernier cas, produire le dump au format plain `--data-only` ou
+pointer `MIGRATION_V1_POSTGRES_IMAGE` sur la majeure du dump. Les deux tables
+reprises n'utilisent pas d'extension pendant la restauration sélective ; les
+autres objets du dump ne sont pas restaurés.
 
 ## Dump accepté
 
@@ -56,6 +61,12 @@ l'intérieur d'un bloc `COPY` restent des données, même si leur texte ressembl
 à du SQL. Cet ordre exact correspond au schéma V1 de `master`; une divergence
 du schéma réel est refusée sans adaptation implicite et doit être détectée lors
 de la répétition sur le dump représentatif.
+
+Un `pg_dump` 17.6 ou plus récent encadre le fichier de `\restrict` et
+`\unrestrict` et émet `SET transaction_timeout = 0;`. Ces lignes sont
+reconnues puis retirées : elles ne sont jamais exécutées ni recopiées dans le
+fichier restauré, et une variante qui ne correspond pas exactement au motif
+attendu reste refusée.
 
 Les dumps `pg_dumpall`, les dumps plain contenant du DDL et les archives
 directory/tar ne sont pas pris en charge. Le format custom reste recommandé,
@@ -371,7 +382,15 @@ dump représentatif, y compris le dry-run, l'import, les compteurs métier et un
 relance idempotente.
 
 La suite Docker dédiée est volontairement locale car ce kit est destiné à une
-exécution unique et ne justifie pas un coût CI à chaque push. L'opérateur qui
-prépare la reprise doit exécuter `tests/cli.test.sh` puis
-`tests/integration.sh` avant la répétition sur le dump représentatif et avant
-la bascule de production.
+exécution unique et ne justifie pas un coût CI à chaque push. macOS et Linux
+sont pris en charge sans outil GNU supplémentaire. Avant la répétition sur le
+dump représentatif et avant la bascule de production, exécuter :
+
+```bash
+./migration-v1/tests/run.sh
+```
+
+La commande enchaîne `cli.test.sh` puis `integration.sh` et s'arrête au premier
+échec. Les deux suites utilisent l'image `postgres:17.11` par défaut ; une
+autre version s'exerce par exemple avec
+`MIGRATION_V1_POSTGRES_IMAGE=postgres:18.0 ./migration-v1/tests/run.sh`.
