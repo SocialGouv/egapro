@@ -212,6 +212,22 @@ describe("Step1Opinions", () => {
 		).toBeInTheDocument();
 	});
 
+	it("warns when saved opinions predate the latest second declaration submission", () => {
+		renderStep1({ hasSecondDeclaration: true, opinionsStale: true });
+
+		expect(
+			screen.getByText("Vérifiez les avis déjà renseignés"),
+		).toBeInTheDocument();
+	});
+
+	it("does not warn when no opinion predates the latest submission", () => {
+		renderStep1({ hasSecondDeclaration: true });
+
+		expect(
+			screen.queryByText("Vérifiez les avis déjà renseignés"),
+		).not.toBeInTheDocument();
+	});
+
 	describe("parcours headers", () => {
 		it.each([
 			["1", false],

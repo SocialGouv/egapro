@@ -14,6 +14,7 @@ vi.mock("~/server/db/schema", () => ({
 		siren: "siren",
 		year: "year",
 		declarantId: "declarantId",
+		cseOpinionDraftUpdatedAt: "cseOpinionDraftUpdatedAt",
 	},
 	companies: { siren: "siren", name: "name" },
 	users: {
@@ -226,7 +227,7 @@ describe("cseOpinionRouter", () => {
 			const result = await caller.get();
 
 			expect(mockSelect).toHaveBeenCalled();
-			expect(result).toEqual({ opinions });
+			expect(result).toEqual({ opinions, opinionsStale: false });
 		});
 
 		it("returns empty opinions when none exist", async () => {
@@ -235,7 +236,25 @@ describe("cseOpinionRouter", () => {
 
 			const result = await caller.get();
 
-			expect(result).toEqual({ opinions: [] });
+			expect(result).toEqual({ opinions: [], opinionsStale: false });
+		});
+
+		it("flags opinions saved before the latest second declaration submission", async () => {
+			const draftUpdatedAt = new Date("2026-03-09T12:00:00Z");
+			const mockDb = createMockDb(
+				[],
+				[
+					[{ id: "decl-1" }],
+					[{ declarationNumber: 2, type: "accuracy" }],
+					[{ draftUpdatedAt }],
+					[{ createdAt: new Date("2026-03-10T12:00:00Z") }],
+				],
+			);
+			const caller = await createCaller(mockDb);
+
+			const result = await caller.get();
+
+			expect(result.opinionsStale).toBe(true);
 		});
 
 		it("throws when siret is missing", async () => {
@@ -529,6 +548,7 @@ describe("cseOpinionRouter", () => {
 						fileSize: 63365,
 					},
 				],
+				opinionsStale: false,
 			});
 		});
 
@@ -538,7 +558,7 @@ describe("cseOpinionRouter", () => {
 
 			const result = await caller.getFiles();
 
-			expect(result).toEqual({ files: [] });
+			expect(result).toEqual({ files: [], opinionsStale: false });
 		});
 
 		it("throws when siret is missing", async () => {
