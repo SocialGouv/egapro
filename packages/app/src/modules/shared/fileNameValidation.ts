@@ -46,6 +46,13 @@ export const FILENAME_ERROR_MESSAGES: Record<FileNameError, string> = {
 		"L'extension du fichier ne correspond pas à son type.",
 };
 
+export function isKnownExtension(fileName: string): boolean {
+	const trimmed = fileName.trim();
+	const lastDot = trimmed.lastIndexOf(".");
+	if (lastDot === -1 || lastDot === trimmed.length - 1) return false;
+	return EXTENSION_MIME_MAP[trimmed.slice(lastDot).toLowerCase()] !== undefined;
+}
+
 export function validateFileName(
 	fileName: string,
 	declaredMimeType: string,

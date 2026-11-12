@@ -3,13 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import styles from "./FileUpload.module.scss";
-import { validateFileName } from "./fileNameValidation";
+import { isKnownExtension, validateFileName } from "./fileNameValidation";
 import { getExtensionLabel, SelectedFilesTable } from "./SelectedFilesTable";
-import {
-	FILE_TOO_LARGE_ERROR,
-	formatFileMeta,
-	MAX_FILE_SIZE,
-} from "./uploadConfig";
+import { UploadAlert } from "./UploadAlert";
+import { formatFileMeta, MAX_FILE_SIZE } from "./uploadConfig";
+import { UPLOAD_ERROR, type UploadError } from "./uploadErrors";
 
 type Props = {
 	inputId: string;
@@ -20,8 +18,10 @@ type Props = {
 	 */
 	labelId: string;
 	selectedFiles: File[];
-	error: string | null;
-	onFilesChange: (files: File[], error: string | null) => void;
+	error: UploadError | null;
+	onFilesChange: (files: File[], error: UploadError | null) => void;
+	/** Clears the displayed error without touching the selected files. */
+	onErrorDismiss: () => void;
 	/** Comma-separated list of accepted file extensions (e.g. ".pdf,.docx,.jpg"). */
 	accept: string;
 	/** Comma-separated list of accepted MIME types for validation (e.g. "application/pdf,image/jpeg"). */
@@ -46,6 +46,7 @@ export function FileUpload({
 	selectedFiles,
 	error,
 	onFilesChange,
+	onErrorDismiss,
 	accept,
 	allowedMimeTypes,
 	acceptLabel,
@@ -71,16 +72,23 @@ export function FileUpload({
 	}, [selectedFiles]);
 
 	const validateFile = useCallback(
-		(file: File): string | null => {
+		(file: File): UploadError | null => {
 			const fileNameResult = validateFileName(file.name, file.type);
 			if (!fileNameResult.ok) {
-				return fileNameResult.message;
+				const isUnsupportedFormat =
+					fileNameResult.reason === "extension_mime_mismatch" &&
+					!isKnownExtension(file.name) &&
+					!allowedMimeTypes.includes(file.type);
+				if (isUnsupportedFormat) {
+					return UPLOAD_ERROR.format(acceptLabel);
+				}
+				return UPLOAD_ERROR.invalidFileName(fileNameResult.message);
 			}
 			if (!allowedMimeTypes.includes(file.type)) {
-				return `Format de fichier non supporté. Formats acceptés : ${acceptLabel}.`;
+				return UPLOAD_ERROR.format(acceptLabel);
 			}
 			if (file.size > MAX_FILE_SIZE) {
-				return FILE_TOO_LARGE_ERROR;
+				return UPLOAD_ERROR.tooLarge();
 			}
 			return null;
 		},
@@ -93,14 +101,18 @@ export function FileUpload({
 			const remainingSlots = maxFileCount - selectedFiles.length;
 			const capped = filesToAdd.slice(0, remainingSlots);
 
+			const accepted: File[] = [];
+			let firstError: UploadError | null = null;
 			for (const file of capped) {
 				const validationError = validateFile(file);
 				if (validationError) {
-					onFilesChange(selectedFiles, validationError);
-					return;
+					firstError ??= validationError;
+					continue;
 				}
+				accepted.push(file);
 			}
-			onFilesChange([...selectedFiles, ...capped], null);
+
+			onFilesChange([...selectedFiles, ...accepted], firstError);
 		},
 		[onFilesChange, validateFile, selectedFiles, maxFileCount],
 	);
@@ -140,6 +152,11 @@ export function FileUpload({
 		setRestoreFocus(true);
 		const updated = selectedFiles.filter((_, i) => i !== index);
 		onFilesChange(updated, null);
+	}
+
+	function handleErrorDismiss() {
+		onErrorDismiss();
+		selectButtonRef.current?.focus();
 	}
 
 	const messagesId = `${inputId}-messages`;
@@ -250,13 +267,8 @@ export function FileUpload({
 				type="file"
 			/>
 
-			<div
-				aria-atomic="true"
-				className={`fr-messages-group ${styles.messagesGroup}`}
-				id={messagesId}
-				role="alert"
-			>
-				{error && <p className="fr-message fr-message--error">{error}</p>}
+			<div className={styles.alertSlot} id={messagesId}>
+				{error && <UploadAlert error={error} onClose={handleErrorDismiss} />}
 			</div>
 		</div>
 	);

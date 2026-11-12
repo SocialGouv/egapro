@@ -4,6 +4,7 @@ import {
 	FILENAME_ERROR_MESSAGES,
 	type FileNameError,
 	fileNameSchema,
+	isKnownExtension,
 	MAX_FILENAME_LENGTH,
 	validateFileName,
 } from "../fileNameValidation";
@@ -270,6 +271,26 @@ describe("validateFileName", () => {
 				message: FILENAME_ERROR_MESSAGES.extension_mime_mismatch,
 			});
 		});
+	});
+});
+
+describe("isKnownExtension", () => {
+	it.each([
+		"avis.pdf",
+		"photo.PNG",
+		"classeur.xlsx",
+		"donnees.csv",
+	])("recognises the known extension of %s", (fileName) => {
+		expect(isKnownExtension(fileName)).toBe(true);
+	});
+
+	it.each([
+		"avis.docx",
+		"test.txt",
+		"monfichier",
+		"monfichier.",
+	])("does not recognise the extension of %s", (fileName) => {
+		expect(isKnownExtension(fileName)).toBe(false);
 	});
 });
 

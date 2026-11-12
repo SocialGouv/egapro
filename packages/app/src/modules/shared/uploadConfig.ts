@@ -7,7 +7,7 @@ export const MAX_FILE_SIZE = 10 * 1024 * 1024;
 export const MAX_FILE_SIZE_LABEL = `${MAX_FILE_SIZE / (1024 * 1024)} Mo`;
 
 /** Error message when file exceeds the size limit. */
-export const FILE_TOO_LARGE_ERROR = `La taille du fichier ne doit pas dépasser ${MAX_FILE_SIZE_LABEL}.`;
+export const FILE_TOO_LARGE_ERROR = `Ce fichier dépasse la taille maximale autorisée. Veuillez importer un fichier de moins de ${MAX_FILE_SIZE_LABEL}.`;
 
 /** MIME types accepted by the upload endpoint. Validated server-side via magic bytes. */
 export const ALLOWED_UPLOAD_MIME_TYPES = [

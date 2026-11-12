@@ -8,6 +8,7 @@ import {
 } from "~/modules/analytics";
 import { getDsfrModal } from "./getDsfrModal";
 import type { FlowType } from "./uploadConfig";
+import { UPLOAD_ERROR, type UploadError } from "./uploadErrors";
 import { type UploadFailureReason, uploadFile } from "./uploadFile";
 
 type Options = {
@@ -34,7 +35,7 @@ export function useFileUploadForm({
 }: Options) {
 	const modalRef = useRef<HTMLDialogElement>(null);
 	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-	const [uploadError, setUploadError] = useState<string | null>(null);
+	const [uploadError, setUploadError] = useState<UploadError | null>(null);
 	const [hasMissingFile, setHasMissingFile] = useState(false);
 	const [isUploading, setIsUploading] = useState(false);
 
@@ -66,14 +67,14 @@ export function useFileUploadForm({
 				setIsUploading(false);
 				onAllUploaded?.();
 			} catch {
-				setUploadError("Erreur lors de l'upload du fichier");
+				setUploadError(UPLOAD_ERROR.network());
 				setIsUploading(false);
 			}
 		},
 		[flowType, onUploaded, onAllUploaded],
 	);
 
-	function handleFilesChange(files: File[], error: string | null) {
+	function handleFilesChange(files: File[], error: UploadError | null) {
 		setHasMissingFile(false);
 		if (error) {
 			setSelectedFiles(files);
@@ -110,6 +111,8 @@ export function useFileUploadForm({
 		}
 	}, []);
 
+	const clearUploadError = useCallback(() => setUploadError(null), []);
+
 	function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
 		if (selectedFiles.length === 0 && !hasStoredFile) {
@@ -132,6 +135,7 @@ export function useFileUploadForm({
 	}
 
 	return {
+		clearUploadError,
 		closeModal,
 		handleConfirm,
 		handleFilesChange,
@@ -145,7 +149,7 @@ export function useFileUploadForm({
 }
 
 /**
- * Map the server's failure reason to the French copy shown to the user.
+ * Map the server's failure reason to the alert shown to the user.
  * Falls back to the server-provided `error` string when the reason is
  * unknown — this keeps the UX informative even if the server adds a new
  * reason the client hasn't been updated for.
@@ -154,31 +158,32 @@ function formatUploadError(
 	reason: UploadFailureReason,
 	serverError: string,
 	virusName: string | undefined,
-): string {
+): UploadError {
 	switch (reason) {
 		case "virus":
-			return virusName
-				? `Fichier rejeté par l'antivirus (signature : ${virusName}).`
-				: "Fichier rejeté par l'antivirus.";
+			return UPLOAD_ERROR.virus(virusName);
 		case "scan_unavailable":
-			return "Le service de scan antivirus est temporairement indisponible. Merci de réessayer dans quelques minutes.";
+			return UPLOAD_ERROR.scanUnavailable(serverError);
 		case "max_files":
-			return serverError;
+			return UPLOAD_ERROR.maxFiles(serverError);
 		case "unauthorized":
-			return "Non authentifié. Merci de vous reconnecter.";
+			return UPLOAD_ERROR.unauthorized();
 		case "not_found":
-			return "Déclaration introuvable pour l'année en cours.";
+			return UPLOAD_ERROR.notFound();
 		case "invalid_filename":
-			return serverError;
+			return UPLOAD_ERROR.invalidFileName(serverError);
 		case "too_large":
+			return UPLOAD_ERROR.tooLarge();
 		case "wrong_type":
+			return UPLOAD_ERROR.formatRejected(serverError);
 		case "empty":
+			return UPLOAD_ERROR.empty(serverError);
 		case "missing_flow":
 		case "missing_filename":
-			return serverError;
+			return UPLOAD_ERROR.invalidRequest(serverError);
 		case "server_error":
-			return "Erreur lors de l'upload du fichier. Merci de réessayer.";
+			return UPLOAD_ERROR.server();
 		case "aborted":
-			return "L'upload a été interrompu. Merci de réessayer.";
+			return UPLOAD_ERROR.aborted();
 	}
 }

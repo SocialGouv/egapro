@@ -111,6 +111,7 @@ export function JointEvaluationForm({
 	]);
 
 	const {
+		clearUploadError,
 		closeModal,
 		handleConfirm,
 		handleFilesChange,
@@ -165,6 +166,7 @@ export function JointEvaluationForm({
 						error={uploadError}
 						hasMissingFile={hasMissingFile}
 						inputId="joint-evaluation-file-upload"
+						onErrorDismiss={clearUploadError}
 						onFilesChange={handleFilesChange}
 						selectedFiles={selectedFiles}
 					/>

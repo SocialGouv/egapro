@@ -4,7 +4,7 @@ import common from "~/modules/declaration-remuneration/shared/common.module.scss
 import { formatCivilLongDate, formatLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { apiV1FileHref } from "~/modules/routes";
-import { FileUpload } from "~/modules/shared";
+import { FileUpload, type UploadError } from "~/modules/shared";
 import styles from "./JointEvaluationReportBlocks.module.scss";
 
 const TELEACCORDS_URL = "https://accords-depot.travail.gouv.fr/accueil";
@@ -79,9 +79,10 @@ type ReportUploadProps = {
 	beforeDropzone?: ReactNode;
 	inputId: string;
 	disabled: boolean;
-	error: string | null;
+	error: UploadError | null;
 	hasMissingFile: boolean;
-	onFilesChange: (files: File[], error: string | null) => void;
+	onErrorDismiss: () => void;
+	onFilesChange: (files: File[], error: UploadError | null) => void;
 	selectedFiles: File[];
 };
 
@@ -91,6 +92,7 @@ export function JointEvaluationReportUpload({
 	disabled,
 	error,
 	hasMissingFile,
+	onErrorDismiss,
 	onFilesChange,
 	selectedFiles,
 }: ReportUploadProps) {
@@ -116,6 +118,7 @@ export function JointEvaluationReportUpload({
 				fileList="table"
 				inputId={inputId}
 				labelId={`${inputId}-label`}
+				onErrorDismiss={onErrorDismiss}
 				onFilesChange={onFilesChange}
 				selectedFiles={selectedFiles}
 			/>
