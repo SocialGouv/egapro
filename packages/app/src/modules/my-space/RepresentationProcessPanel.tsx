@@ -12,7 +12,11 @@ import {
 	REPRESENTATION_TARGET_RAISED,
 	REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR,
 } from "~/modules/domain";
-import { mySpaceRepresentationHref } from "~/modules/routes";
+import {
+	FIRST_REPRESENTATION_STEP,
+	mySpaceRepresentationHref,
+	representationStepHref,
+} from "~/modules/routes";
 import styles from "./DeclarationProcessPanel.module.scss";
 import {
 	computeRepresentationCtaHref,
@@ -20,7 +24,7 @@ import {
 	isRepresentationDeclarationTransmitted,
 	type RepresentationPanelVariant,
 } from "./declarationProcessState";
-import { BulletList, BulletRow, TransmittedRow } from "./StepRows";
+import { TransmittedRow } from "./StepRows";
 import type { DeclarationItem, LockHolderDisplay } from "./types";
 
 export const REPRESENTATION_PROCESS_PANEL_ID = "representation-process-panel";
@@ -55,7 +59,7 @@ function getStepStatuses(
 function getCtaLabel(variant: RepresentationPanelVariant): string {
 	if (variant === "not_subject") return "Modifier";
 	if (variant === "start") return "Commencer";
-	if (variant === "draft") return "Reprendre";
+	if (variant === "draft") return "Continuer";
 	return "Voir la déclaration";
 }
 
@@ -111,13 +115,15 @@ export function RepresentationProcessPanel({
 								holder={lockHolder}
 							/>
 						) : null}
-						{variant !== "not_subject" && <RixainAlert />}
+						{variant === "start" && <RixainAlert />}
 						<div className={`${styles.stepper} fr-mb-4w`}>
 							<Step1Row status={step1} />
 							{step2 !== null && (
 								<Step2Row
+									campaignEndDate={campaign.campaignEndDate}
 									campaignYear={campaignYear}
 									deadline={campaign.declarationDeadline}
+									modifiable={variant === "submitted"}
 									status={step2}
 									transmitted={transmitted}
 								/>
@@ -128,14 +134,18 @@ export function RepresentationProcessPanel({
 					</div>
 					<div>
 						<HelpSection />
+						{/* A transmitted démarche carries its own two actions in the step row:
+						    the footer stays empty so the layout does not collapse. */}
 						<div className={styles.footer}>
-							<a
-								aria-describedby={PANEL_TITLE_ID}
-								className="fr-btn"
-								href={ctaHref}
-							>
-								{lockedByOther ? "Voir la déclaration" : getCtaLabel(variant)}
-							</a>
+							{variant !== "submitted" && (
+								<a
+									aria-describedby={PANEL_TITLE_ID}
+									className="fr-btn"
+									href={ctaHref}
+								>
+									{lockedByOther ? "Voir la déclaration" : getCtaLabel(variant)}
+								</a>
+							)}
 						</div>
 					</div>
 				</div>
@@ -254,20 +264,18 @@ function Step1Row({ status }: { status: StepStatus }) {
 	);
 }
 
-const STEP2_ITEMS = [
-	"Cadres dirigeants",
-	"Instances dirigeantes",
-	"Informations de publication",
-];
-
 function Step2Row({
+	campaignEndDate,
 	campaignYear,
 	deadline,
+	modifiable,
 	status,
 	transmitted,
 }: {
+	campaignEndDate: Date;
 	campaignYear: number;
 	deadline: Date;
+	modifiable: boolean;
 	status: StepStatus;
 	transmitted: boolean;
 }) {
@@ -276,34 +284,33 @@ function Step2Row({
 			<StepCircle number={2} status={status} />
 			<div className={styles.stepContent}>
 				<StepTitle status={status}>
-					{status === "pending"
-						? "Déclaration des écarts de représentation"
-						: "Écarts de représentation"}
+					Déclaration des écarts de représentation
 				</StepTitle>
 				{transmitted ? (
 					<TransmittedRow
 						label="Votre déclaration a été transmise"
+						mention={
+							modifiable
+								? `Modifiable jusqu'au ${formatCivilLongDate(campaignEndDate)}`
+								: undefined
+						}
+						modification={
+							modifiable
+								? { href: representationStepHref(FIRST_REPRESENTATION_STEP) }
+								: undefined
+						}
 						viewHref={mySpaceRepresentationHref(campaignYear)}
 					/>
 				) : (
-					<>
-						{status !== "pending" && (
-							<BulletList>
-								{STEP2_ITEMS.map((item) => (
-									<BulletRow key={item}>{item}</BulletRow>
-								))}
-							</BulletList>
-						)}
-						<div className={styles.deadlineRow}>
-							<span
-								aria-hidden="true"
-								className="fr-icon-calendar-line fr-icon--sm"
-							/>
-							<p className="fr-text--sm fr-text-mention--grey fr-mb-0">
-								Échéance : {formatCivilLongDate(deadline)}
-							</p>
-						</div>
-					</>
+					<div className={styles.deadlineRow}>
+						<span
+							aria-hidden="true"
+							className="fr-icon-calendar-line fr-icon--sm"
+						/>
+						<p className="fr-text--sm fr-text-mention--grey fr-mb-0">
+							Échéance : {formatCivilLongDate(deadline)}
+						</p>
+					</div>
 				)}
 			</div>
 		</div>

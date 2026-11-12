@@ -9,6 +9,7 @@ import {
 } from "~/modules/domain";
 import {
 	DECLARATION_REPRESENTATION,
+	FIRST_REPRESENTATION_STEP,
 	LAST_REPRESENTATION_STEP,
 	mySpaceRepresentationHref,
 	representationStepHref,
@@ -132,6 +133,17 @@ describe("RepresentationProcessPanel", () => {
 		).toBeInTheDocument();
 	});
 
+	// The reminder introduces the obligation; once the démarche is under way it
+	// only takes space (Figma: the card is shown on the "start" state alone).
+	it.each([
+		["a draft", DRAFT, OPEN_CAMPAIGN],
+		["a transmitted démarche", SUBMITTED, OPEN_CAMPAIGN],
+		["a closed campaign", DRAFT, CLOSED_CAMPAIGN],
+	])("hides the Rixain reminder with %s", (_label, declaration, campaign) => {
+		const { panel } = renderPanel({ campaign, declaration });
+		expect(panel.queryByText(/loi Rixain/)).not.toBeInTheDocument();
+	});
+
 	it("renders the campaign deadline on the declaration step", () => {
 		const { panel } = renderPanel();
 		expect(panel.getByText("Échéance : 1ᵉʳ mars 2026")).toBeInTheDocument();
@@ -218,25 +230,23 @@ describe("RepresentationProcessPanel", () => {
 	});
 
 	describe("variant: draft", () => {
-		it('renders a "Reprendre" CTA pointing to the step the draft stopped at', () => {
+		it('renders a "Continuer" CTA pointing to the step the draft stopped at', () => {
 			const { dialog } = renderPanel({ declaration: DRAFT });
 			const cta = getCta(dialog);
-			expect(cta).toHaveTextContent(/^Reprendre$/);
+			expect(cta).toHaveTextContent(/^Continuer$/);
 			expect(cta).toHaveAttribute("href", representationStepHref(3));
 		});
 
-		it("expands the declaration step into its three bullets", () => {
+		it("titles the declaration step without listing the indicators", () => {
 			const { panel } = renderPanel({ declaration: DRAFT });
-			expect(panel.getByText("Écarts de représentation")).toBeInTheDocument();
-			expect(panel.getByText("Cadres dirigeants")).toBeInTheDocument();
-			expect(panel.getByText("Instances dirigeantes")).toBeInTheDocument();
 			expect(
-				panel.getByText("Informations de publication"),
+				panel.getByText("Déclaration des écarts de représentation"),
 			).toBeInTheDocument();
-			const lists = panel.getAllByRole("list", { hidden: true });
-			expect(lists).toHaveLength(1);
-			expect(lists[0]).toHaveAttribute("role", "list");
-			expect(panel.getAllByRole("listitem", { hidden: true })).toHaveLength(3);
+			expect(panel.queryByText("Cadres dirigeants")).not.toBeInTheDocument();
+			expect(
+				panel.queryByText("Instances dirigeantes"),
+			).not.toBeInTheDocument();
+			expect(panel.queryAllByRole("list", { hidden: true })).toHaveLength(0);
 		});
 
 		it("marks the subjection check as done and the declaration as current", () => {
@@ -272,11 +282,10 @@ describe("RepresentationProcessPanel", () => {
 	});
 
 	describe("variant: submitted", () => {
-		it('renders a "Voir la déclaration" CTA pointing to the consultation page', () => {
+		it("carries no footer CTA: the step row holds both actions", () => {
 			const { dialog } = renderPanel({ declaration: SUBMITTED });
-			const cta = getCta(dialog);
-			expect(cta).toHaveTextContent(/^Voir la déclaration$/);
-			expect(cta).toHaveAttribute("href", CONSULTATION_HREF);
+			expect(getCta(dialog)).toBeNull();
+			expect(dialog.querySelector(".footer")).not.toBeNull();
 		});
 
 		it("marks both steps as done", () => {
@@ -305,14 +314,63 @@ describe("RepresentationProcessPanel", () => {
 			expect(panel.queryByText(/^Échéance :/)).not.toBeInTheDocument();
 		});
 
-		it("renders a view button to the consultation page, without a Modifier button or a modifiable-until mention", () => {
+		it("offers the consultation and the modification, with the end of the campaign as the limit", () => {
 			const { panel } = renderPanel({ declaration: SUBMITTED });
 			const viewButton = panel.getByTitle(
 				"Voir le récapitulatif de la déclaration",
 			);
 			expect(viewButton).toHaveAttribute("href", CONSULTATION_HREF);
-			expect(panel.queryByText("Modifier")).not.toBeInTheDocument();
-			expect(panel.queryByText(/Modifiable jusqu'au/)).not.toBeInTheDocument();
+			expect(
+				panel.getByRole("link", { hidden: true, name: "Modifier" }),
+			).toHaveAttribute(
+				"href",
+				representationStepHref(FIRST_REPRESENTATION_STEP),
+			);
+			expect(
+				panel.getByText("Modifiable jusqu'au 31 décembre 2099"),
+			).toBeInTheDocument();
+		});
+
+		it("formats the modification limit as the civil end of the campaign", () => {
+			const { panel } = renderPanel({
+				campaign: {
+					...OPEN_CAMPAIGN,
+					campaignEndDate: civilDate(2028, 1, 29),
+				},
+				declaration: SUBMITTED,
+			});
+			expect(
+				panel.getByText("Modifiable jusqu'au 29 février 2028"),
+			).toBeInTheDocument();
+		});
+
+		it("keeps both actions visible while another user holds the lock", () => {
+			const { container } = render(
+				<RepresentationProcessPanel
+					campaign={OPEN_CAMPAIGN}
+					campaignYear={CAMPAIGN_YEAR}
+					declaration={SUBMITTED}
+					lockedByOther
+					lockHolder={{
+						firstName: "Jeanne",
+						lastName: "Dupont",
+						email: "[EMAIL_REDACTED]",
+						lockTimeoutMinutes: 30,
+					}}
+				/>,
+			);
+			const dialog = container.querySelector("dialog") as HTMLElement;
+			const panel = within(dialog);
+			expect(
+				panel.getByText("Votre déclaration a été transmise"),
+			).toBeInTheDocument();
+			expect(
+				panel.getByRole("link", { hidden: true, name: "Modifier" }),
+			).toBeInTheDocument();
+			expect(
+				panel.getByTitle("Voir le récapitulatif de la déclaration"),
+			).toBeInTheDocument();
+			expect(getCta(dialog)).toBeNull();
 		});
 	});
 
@@ -405,7 +463,7 @@ describe("RepresentationProcessPanel", () => {
 				declaration: DRAFT,
 			});
 			expect(panel.queryByText("Démarche close")).not.toBeInTheDocument();
-			expect(getCta(dialog)).toHaveTextContent(/^Reprendre$/);
+			expect(getCta(dialog)).toHaveTextContent(/^Continuer$/);
 		});
 	});
 
@@ -419,6 +477,19 @@ describe("RepresentationProcessPanel", () => {
 			expect(
 				panel.getByText("Votre déclaration a été transmise"),
 			).toBeInTheDocument();
+		});
+
+		// The campaign window is over: the footer CTA is the only way to the
+		// consultation, and nothing may reopen the funnel.
+		it("keeps the consultation CTA and offers no modification", () => {
+			const { panel, dialog } = renderPanel({
+				campaign: CLOSED_CAMPAIGN,
+				declaration: SUBMITTED,
+			});
+			expect(getCta(dialog)).toHaveTextContent(/^Voir la déclaration$/);
+			expect(getCta(dialog)).toHaveAttribute("href", CONSULTATION_HREF);
+			expect(panel.queryByText("Modifier")).not.toBeInTheDocument();
+			expect(panel.queryByText(/Modifiable jusqu'au/)).not.toBeInTheDocument();
 		});
 
 		// The closed variant renders step 2 "complete" whether or not anything was
