@@ -64,6 +64,7 @@ export function hasStartedSecondDeclaration(declaration: {
 }
 
 const SECOND_DECLARATION_SAVED_STEP = 2;
+const SECOND_DECLARATION_SUBMITTED_STEP = 3;
 
 export function hasSavedSecondDeclarationData(declaration: {
 	secondDeclarationStep: number | null;
@@ -71,6 +72,23 @@ export function hasSavedSecondDeclarationData(declaration: {
 	return (
 		declaration.secondDeclarationStep !== null &&
 		declaration.secondDeclarationStep >= SECOND_DECLARATION_SAVED_STEP
+	);
+}
+
+// A corrective second declaration rewritten after its last transmission: the
+// CSE opinions prepared in the meantime no longer cover the numbers on file, so
+// the démarche must not close on them.
+export function isSecondDeclarationResubmissionPending(declaration: {
+	status: DeclarationFsmStatus | null;
+	firstDeclarationPathChoice: CompliancePath | null;
+	secondDeclarationPathChoice: CompliancePath | null;
+	secondDeclarationStep: number | null;
+}): boolean {
+	return (
+		declaration.status === "awaiting_cse_opinion" &&
+		getCurrentCompliancePath(declaration) === "corrective_action" &&
+		declaration.secondDeclarationStep !== null &&
+		declaration.secondDeclarationStep < SECOND_DECLARATION_SUBMITTED_STEP
 	);
 }
 

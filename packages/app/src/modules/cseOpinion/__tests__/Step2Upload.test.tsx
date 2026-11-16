@@ -715,6 +715,28 @@ describe("Step2Upload", () => {
 		).not.toBeChecked();
 	});
 
+	it("re-reads the server state once an association write settles, so the stale-opinion warning clears", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: ACCURACY_AND_GAP_COLUMNS,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+			initialAssociations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+			],
+		});
+
+		await user.click(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		);
+		refreshMock.mockClear();
+
+		act(() => {
+			setTypesMutationOptions.onSuccess?.(undefined, { associations: [] });
+		});
+
+		expect(refreshMock).toHaveBeenCalled();
+	});
+
 	it("surfaces an error when persisting the association fails", () => {
 		renderStep({
 			columns: SINGLE_COLUMN,

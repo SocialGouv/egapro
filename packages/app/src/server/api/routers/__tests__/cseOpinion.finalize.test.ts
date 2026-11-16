@@ -373,6 +373,57 @@ describe("cseOpinionRouter.finalize", () => {
 		expect(ctx.update).not.toHaveBeenCalled();
 	});
 
+	describe("second declaration rewritten after its last transmission", () => {
+		const RESUBMISSION_REQUIRED =
+			"Votre seconde déclaration a été modifiée : transmettez-la à nouveau avant de transmettre les avis du CSE.";
+
+		it("refuses the CSE transmission while the correction has not been re-submitted", async () => {
+			const ctx = createMockDbForFinalize({
+				declaration: {
+					...DEFAULT_DECLARATION,
+					firstDeclarationPathChoice: "corrective_action",
+					secondDeclarationStep: 2,
+				},
+			});
+			const caller = await createCaller(ctx.db);
+
+			await expect(caller.finalize()).rejects.toMatchObject({
+				code: "PRECONDITION_FAILED",
+				message: RESUBMISSION_REQUIRED,
+			});
+			expect(ctx.insertValues).not.toHaveBeenCalled();
+			expect(ctx.update).not.toHaveBeenCalled();
+			expect(mocks.enqueueReceipt).not.toHaveBeenCalled();
+		});
+
+		it("accepts it once the correction has been re-submitted", async () => {
+			const ctx = createMockDbForFinalize({
+				declaration: {
+					...DEFAULT_DECLARATION,
+					firstDeclarationPathChoice: "corrective_action",
+					secondDeclarationStep: 3,
+				},
+			});
+			const caller = await createCaller(ctx.db);
+
+			await expect(caller.finalize()).resolves.toEqual({ success: true });
+		});
+
+		it("does not block a letter of engagement path with old correction data", async () => {
+			const ctx = createMockDbForFinalize({
+				declaration: {
+					...DEFAULT_DECLARATION,
+					firstDeclarationPathChoice: "corrective_action",
+					secondDeclarationPathChoice: "justify",
+					secondDeclarationStep: 2,
+				},
+			});
+			const caller = await createCaller(ctx.db);
+
+			await expect(caller.finalize()).resolves.toEqual({ success: true });
+		});
+	});
+
 	it("throws PRECONDITION_FAILED when the opinion count query returns no row", async () => {
 		const ctx = createMockDbForFinalize({ emptyOpinionCountRow: true });
 		const caller = await createCaller(ctx.db);

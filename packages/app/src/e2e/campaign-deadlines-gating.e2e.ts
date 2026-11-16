@@ -16,6 +16,7 @@ import { withCampaignYear } from "./helpers/campaign-year";
 import {
 	completeSecondDeclaration,
 	fillCseStep1,
+	saveSecondDeclaration,
 	selectCompliancePath,
 	submitCseStep2,
 	uploadJointEvalPdf,
@@ -474,6 +475,22 @@ test.describe("Campaign deadlines are informational; only the last submission is
 				await expectModifiable(page, SECOND_DECLARATION_ROW, {
 					modifiable: true,
 					mention: SECOND_DECLARATION_CSE_MENTION,
+				});
+			});
+
+			await test.step("une modification non retransmise ramène à la seconde déclaration avant les avis du CSE", async () => {
+				await openPanneauDemarche(page);
+				await transmittedRow(page, SECOND_DECLARATION_ROW)
+					.getByRole("link", { name: "Modifier", exact: true })
+					.click();
+				await saveSecondDeclaration(page, { hasGap: false });
+				expect(
+					await getSecondDeclarationSubmissionState(testDeclarationYear),
+				).toEqual({ status: "awaiting_cse_opinion", submissions: 2 });
+
+				await page.goto(cseOpinionStepHref(1));
+				await page.waitForURL(urlGlob(complianceStepHref(3)), {
+					timeout: 15_000,
 				});
 			});
 

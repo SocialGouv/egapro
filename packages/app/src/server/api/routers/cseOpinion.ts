@@ -12,7 +12,10 @@ import {
 	setFileContentTypesSchema,
 } from "~/modules/cseOpinion/schemas";
 import { assembleCseOpinionRecap } from "~/modules/declarationPdf/buildCseOpinionRecapData";
-import { getCurrentYear } from "~/modules/domain";
+import {
+	getCurrentYear,
+	isSecondDeclarationResubmissionPending,
+} from "~/modules/domain";
 import {
 	createTRPCRouter,
 	declarationProcedure,
@@ -48,6 +51,9 @@ import {
 
 const CSE_OPINION_UNAVAILABLE_ERROR =
 	"Les avis du CSE ne peuvent pas être transmis à cette étape de la démarche.";
+
+const SECOND_DECLARATION_RESUBMISSION_REQUIRED_ERROR =
+	"Votre seconde déclaration a été modifiée : transmettez-la à nouveau avant de transmettre les avis du CSE.";
 
 async function loadOpinionsStale(database: DB, declarationId: string) {
 	const [[declaration], submission] = await Promise.all([
@@ -375,6 +381,11 @@ export const cseOpinionRouter = createTRPCRouter({
 				ctx.siren,
 				getCurrentYear(),
 			);
+			if (isSecondDeclarationResubmissionPending(declaration))
+				throw new TRPCError({
+					code: "PRECONDITION_FAILED",
+					message: SECOND_DECLARATION_RESUBMISSION_REQUIRED_ERROR,
+				});
 			const [opinionCount, fileRows, existingAssociations] = await Promise.all([
 				tx
 					.select({ count: sql<number>`count(*)::int` })

@@ -123,13 +123,14 @@ export function Step2Upload({
 		if (next === null) {
 			isAssociationWriteInFlightRef.current = false;
 			setHasPendingAssociationWrite(false);
+			refreshFileList();
 			return;
 		}
 		queuedAssociationWriteRef.current = null;
 		setTypesMutation.mutate({
 			associations: toAssociationPayload(columns, next),
 		});
-	}, [columns, setTypesMutation]);
+	}, [columns, refreshFileList, setTypesMutation]);
 
 	const handleToggle = useCallback(
 		(columnId: string, fileId: string, checked: boolean) => {
