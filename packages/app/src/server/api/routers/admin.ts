@@ -5,6 +5,7 @@ import { impersonateSearchSchema } from "~/modules/admin/schemas";
 import {
 	floorWorkforce,
 	getCurrentYear,
+	isCompanyIdentityUnresolved,
 	parseGipWorkforce,
 } from "~/modules/domain";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
@@ -13,7 +14,7 @@ import {
 	companies,
 	gipMdsData,
 } from "~/server/db/schema";
-import { fetchCompanyBySiren } from "~/server/services/weez";
+import { type CompanyInfo, fetchCompanyBySiren } from "~/server/services/weez";
 
 const LAST_IMPERSONATED_LIMIT = 5;
 
@@ -32,33 +33,17 @@ export const adminRouter = createTRPCRouter({
 	 * confirms they want to impersonate it. Pure read — no DB mutation.
 	 *
 	 * Identity (name, address, NAF code) comes from Weez, which stays the
-	 * identity source. The headcount comes from the GIP file, the single source
-	 * of the workforce, read on the current campaign year like `findUserCompany`
-	 * does. `floorWorkforce` and not `formatWorkforceForUser`: an agent
-	 * instructing a case needs the exact figure, and a company absent from the
-	 * file must read as an absence rather than as a bracketed tier.
+	 * identity source; when the registry cannot be reached, the stored row is
+	 * served instead so an outage does not block the back-office. The headcount
+	 * comes from the GIP file, the single source of the workforce, read on the
+	 * current campaign year like `findUserCompany` does. `floorWorkforce` and not
+	 * `formatWorkforceForUser`: an agent instructing a case needs the exact
+	 * figure, and a company absent from the file must read as an absence rather
+	 * than as a bracketed tier.
 	 */
 	searchCompany: adminProcedure
 		.input(impersonateSearchSchema)
 		.mutation(async ({ ctx, input }) => {
-			let info: Awaited<ReturnType<typeof fetchCompanyBySiren>>;
-			try {
-				info = await fetchCompanyBySiren(input.siren);
-			} catch (error) {
-				console.error("admin.searchCompany — Weez error", error);
-				throw new TRPCError({
-					code: "INTERNAL_SERVER_ERROR",
-					message: "Erreur lors de la recherche de l'entreprise.",
-				});
-			}
-
-			if (!info) {
-				throw new TRPCError({
-					code: "NOT_FOUND",
-					message: `Aucune entreprise trouvée pour le SIREN ${input.siren}.`,
-				});
-			}
-
 			const workforceYear = getCurrentYear();
 			const gipRows = await ctx.db
 				.select({ workforceEma: gipMdsData.workforceEma })
@@ -70,18 +55,75 @@ export const adminRouter = createTRPCRouter({
 					),
 				)
 				.limit(1);
+			const workforce = floorWorkforce(
+				parseGipWorkforce(gipRows[0]?.workforceEma),
+			);
 
-			return {
-				siren: input.siren,
-				name: info.name,
-				address: info.address,
-				countryCode: info.countryCode,
-				countryLabel: info.countryLabel,
-				departmentLabel: info.departmentLabel,
-				nafCode: info.nafCode,
-				workforce: floorWorkforce(parseGipWorkforce(gipRows[0]?.workforceEma)),
-				workforceYear,
-			};
+			let registryInfo: CompanyInfo | null = null;
+			let registryUnreachable = false;
+			try {
+				registryInfo = await fetchCompanyBySiren(input.siren);
+			} catch (error) {
+				console.error("admin.searchCompany — Weez error", error);
+				registryUnreachable = true;
+			}
+
+			if (registryInfo) {
+				const identity = {
+					siren: input.siren,
+					name: registryInfo.name,
+					address: registryInfo.address,
+					countryCode: registryInfo.countryCode,
+					countryLabel: registryInfo.countryLabel,
+					departmentLabel: registryInfo.departmentLabel,
+					nafCode: registryInfo.nafCode,
+				};
+
+				return {
+					...identity,
+					workforce,
+					workforceYear,
+					identityUnavailable: isCompanyIdentityUnresolved(identity),
+				};
+			}
+
+			if (registryUnreachable) {
+				const stored = (
+					await ctx.db
+						.select({
+							siren: companies.siren,
+							name: companies.name,
+							address: companies.address,
+							countryCode: companies.countryCode,
+							countryLabel: companies.countryLabel,
+							departmentLabel: companies.departmentLabel,
+							nafCode: companies.nafCode,
+						})
+						.from(companies)
+						.where(eq(companies.siren, input.siren))
+						.limit(1)
+				)[0];
+
+				if (stored) {
+					return {
+						...stored,
+						workforce,
+						workforceYear,
+						identityUnavailable: isCompanyIdentityUnresolved(stored),
+					};
+				}
+
+				throw new TRPCError({
+					code: "INTERNAL_SERVER_ERROR",
+					message:
+						"Le registre national des entreprises est momentanément indisponible. Réessayez dans quelques minutes.",
+				});
+			}
+
+			throw new TRPCError({
+				code: "NOT_FOUND",
+				message: `Aucune entreprise trouvée pour le SIREN ${input.siren}.`,
+			});
 		}),
 
 	/**

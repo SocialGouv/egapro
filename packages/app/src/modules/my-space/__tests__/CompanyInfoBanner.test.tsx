@@ -21,6 +21,7 @@ const baseCompany: CompanyDetail = {
 	departmentLabel: null,
 	gipWorkforce: 250,
 	hasCse: null,
+	identityUnavailable: false,
 };
 
 describe("CompanyInfoBanner", () => {
@@ -426,6 +427,61 @@ describe("CompanyInfoBanner", () => {
 			render(<CompanyInfoBanner company={baseCompany} />);
 			expect(screen.queryByText("Pays :")).not.toBeInTheDocument();
 			expect(screen.queryByText("Adresse :")).not.toBeInTheDocument();
+		});
+	});
+
+	describe("unresolved identity", () => {
+		const unresolvedCompany: CompanyDetail = {
+			...baseCompany,
+			name: "Entreprise 532847196",
+			countryLabel: null,
+			identityUnavailable: true,
+		};
+
+		it("explains why the identity is missing and keeps the dependable data", () => {
+			render(<CompanyInfoBanner company={unresolvedCompany} />);
+
+			expect(
+				screen.getByText(
+					/Les informations d'identification de l'entreprise sont temporairement indisponibles\./,
+				),
+			).toBeInTheDocument();
+			expect(
+				screen.getByRole("heading", {
+					level: 1,
+					name: "Entreprise 532 847 196",
+				}),
+			).toBeInTheDocument();
+			expect(screen.getByText("532 847 196")).toBeInTheDocument();
+			expect(screen.getByText("250")).toBeInTheDocument();
+			expect(screen.getByText("Existence d'un CSE :")).toBeInTheDocument();
+		});
+
+		it("never prints the raw placeholder SIREN in the heading", () => {
+			render(<CompanyInfoBanner company={unresolvedCompany} />);
+
+			expect(
+				screen.queryByRole("heading", {
+					level: 1,
+					name: "Entreprise 532847196",
+				}),
+			).not.toBeInTheDocument();
+		});
+
+		it("shows no location row rather than an unknown country", () => {
+			render(<CompanyInfoBanner company={unresolvedCompany} />);
+
+			expect(screen.queryByText("Pays :")).not.toBeInTheDocument();
+			expect(screen.queryByText("Adresse :")).not.toBeInTheDocument();
+			expect(screen.queryByText("inconnu")).not.toBeInTheDocument();
+		});
+
+		it("leaves a resolved identity without the notice", () => {
+			render(<CompanyInfoBanner company={baseCompany} />);
+
+			expect(
+				screen.queryByText(/informations d'identification de l'entreprise/i),
+			).not.toBeInTheDocument();
 		});
 	});
 });

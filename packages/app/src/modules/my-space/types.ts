@@ -24,6 +24,7 @@ export type CompanyDetail = {
 	departmentLabel: string | null;
 	gipWorkforce: number | null;
 	hasCse: boolean | null;
+	identityUnavailable: boolean;
 };
 
 type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";

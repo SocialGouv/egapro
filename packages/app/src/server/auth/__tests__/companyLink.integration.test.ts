@@ -81,6 +81,23 @@ describe("company link re-synced on every ProConnect sign-in (real Postgres)", (
 		}));
 	}
 
+	async function storedCompany() {
+		const rows = await sql<
+			{
+				name: string;
+				address: string | null;
+				naf_code: string | null;
+				naf_label: string | null;
+				country_label: string | null;
+				workforce: number | null;
+			}[]
+		>`
+			SELECT name, address, naf_code, naf_label, country_label, workforce
+			FROM app_company WHERE siren = ${CURRENT_SIREN}
+		`;
+		return rows[0];
+	}
+
 	async function cleanup() {
 		await sql`DELETE FROM audit.action_log WHERE user_id IN (SELECT id FROM app_user WHERE email = ${EMAIL})`;
 		await sql`DELETE FROM app_declaration_lock WHERE locked_by_user_id IN (SELECT id FROM app_user WHERE email = ${EMAIL})`;
@@ -118,6 +135,73 @@ describe("company link re-synced on every ProConnect sign-in (real Postgres)", (
 		await signIn(siretOf(CURRENT_SIREN));
 
 		expect(await linkedSirens()).toEqual([CURRENT_SIREN]);
+	});
+
+	it("never overwrites a stored identity when the registry is unreachable", async () => {
+		await sql`
+			INSERT INTO app_company
+				(siren, name, address, naf_code, naf_label, country_label, workforce)
+			VALUES
+				(${CURRENT_SIREN}, 'Société Démo', '1 RUE DE LA DEMO, 75001 PARIS',
+				 '62.01Z', 'Programmation informatique', 'FRANCE', 250)
+		`;
+		vi.mocked(fetchCompanyBySiren).mockRejectedValue(new Error("Weez down"));
+
+		await signIn(siretOf(CURRENT_SIREN));
+
+		expect(await storedCompany()).toMatchObject({
+			name: "Société Démo",
+			address: "1 RUE DE LA DEMO, 75001 PARIS",
+			naf_code: "62.01Z",
+			naf_label: "Programmation informatique",
+			country_label: "FRANCE",
+			workforce: 250,
+		});
+		expect(await linkedSirens()).toEqual([CURRENT_SIREN]);
+	});
+
+	it("leaves the placeholder untouched when the registry knows no entity", async () => {
+		await sql`
+			INSERT INTO app_company (siren, name)
+			VALUES (${CURRENT_SIREN}, 'Entreprise 700000021')
+		`;
+		vi.mocked(fetchCompanyBySiren).mockResolvedValue(null);
+
+		await signIn(siretOf(CURRENT_SIREN));
+
+		expect(await storedCompany()).toMatchObject({
+			name: "Entreprise 700000021",
+		});
+	});
+
+	it("replaces the placeholder once the registry answers", async () => {
+		await sql`
+			INSERT INTO app_company (siren, name)
+			VALUES (${CURRENT_SIREN}, 'Entreprise 700000021')
+		`;
+		vi.mocked(fetchCompanyBySiren).mockResolvedValue({
+			name: "Société Démo",
+			address: "1 RUE DE LA DEMO, 75001 PARIS",
+			city: "PARIS",
+			nafCode: "62.01Z",
+			nafLabel: "Programmation informatique",
+			regionCode: "11",
+			region: "Île-de-France",
+			departmentCode: "75",
+			departmentLabel: "Paris",
+			countryCode: null,
+			countryLabel: "FRANCE",
+			workforce: 250,
+			statutDiffusion: "O",
+		});
+
+		await signIn(siretOf(CURRENT_SIREN));
+
+		expect(await storedCompany()).toMatchObject({
+			name: "Société Démo",
+			naf_code: "62.01Z",
+			country_label: "FRANCE",
+		});
 	});
 
 	it("keeps the link when the user signs in again with the same SIRET", async () => {
