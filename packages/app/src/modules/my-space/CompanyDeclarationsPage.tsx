@@ -8,9 +8,11 @@ import {
 	getDeclarationDisplayContext,
 	getObligationWorkforce,
 	isCompliancePathStepApplicable,
+	isCseAnswerLocked,
 	isCseOpinionRequired,
 	isCseRequired,
 	isIndicatorGRequiredForGip,
+	resolveCseAnswerForYear,
 } from "~/modules/domain";
 
 import { ArchivesSection } from "./ArchivesSection";
@@ -67,18 +69,23 @@ export function CompanyDeclarationsPage({
 	const currentYear = getCurrentYear();
 	const obligationWorkforce = getObligationWorkforce(company.gipWorkforce);
 	const cseApplicable = isCseRequired(obligationWorkforce);
+	const currentDeclaration = declarations.find(
+		(d) => d.type === "remuneration" && d.year === currentYear,
+	);
+	const cseAnswer = resolveCseAnswerForYear(
+		currentDeclaration?.hasCse ?? null,
+		company.hasCse,
+	);
+	const cseLocked = isCseAnswerLocked(currentDeclaration?.fsmStatus ?? null);
 	const cseOpinionRequired = isCseOpinionRequired({
 		workforce: obligationWorkforce,
-		hasCse: company.hasCse,
+		hasCse: cseAnswer,
 	});
 	const indicatorGRequired = isIndicatorGRequiredForGip(
 		company.gipWorkforce,
 		currentYear,
 	);
 	const lastActionDate = getLastActionDate(declarations, currentYear);
-	const currentDeclaration = declarations.find(
-		(d) => d.type === "remuneration" && d.year === currentYear,
-	);
 	const compliancePathApplicable =
 		cseApplicable &&
 		indicatorGRequired &&
@@ -102,11 +109,11 @@ export function CompanyDeclarationsPage({
 	return (
 		<main id="content" tabIndex={-1}>
 			<WelcomeBanner />
-			<CompanyInfoBanner company={company} />
+			<CompanyInfoBanner company={company} cseLocked={cseLocked} />
 			<DeclarationsSection
 				cseApplicable={cseApplicable}
 				declarations={declarations}
-				hasCse={company.hasCse}
+				hasCse={cseAnswer}
 				representationCampaign={representationCampaign}
 				representationLockedByOther={representationLockedByOther}
 				representationLockHolder={representationLockHolder}
@@ -116,7 +123,8 @@ export function CompanyDeclarationsPage({
 			<CompanyEditModal company={company} />
 			<MissingInfoModal
 				cseApplicable={cseApplicable}
-				hasCse={company.hasCse}
+				cseLocked={cseLocked}
+				hasCse={cseAnswer}
 				siren={company.siren}
 				userPhone={userPhone}
 			/>

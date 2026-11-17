@@ -3,6 +3,7 @@ import "server-only";
 import { and, eq } from "drizzle-orm";
 import {
 	getObligationWorkforce,
+	isCseAnswerLocked,
 	isCseOpinionRequired,
 	parseGipWorkforce,
 	resolveCseReconciliation,
@@ -51,11 +52,16 @@ async function applyOutcome(
 	if (outcome === "none") return false;
 
 	const cseRequired = isCseOpinionRequired(target);
+	// The year's answer follows the live value while the démarche is open; a
+	// completed year keeps the answer it was closed with.
+	const answerUpdate = isCseAnswerLocked(target.status)
+		? {}
+		: { hasCse: target.hasCse };
 
 	if (outcome === "refresh-snapshot") {
 		await db
 			.update(declarations)
-			.set({ cseRequired, updatedAt: new Date() })
+			.set({ cseRequired, ...answerUpdate, updatedAt: new Date() })
 			.where(activeDeclarationFilter(target.siren, year));
 		return true;
 	}
@@ -72,7 +78,12 @@ async function applyOutcome(
 		await tx.insert(declarationStatusHistory).values(historyInserts);
 		await tx
 			.update(declarations)
-			.set({ ...projection, cseRequired, updatedAt: new Date() })
+			.set({
+				...projection,
+				cseRequired,
+				...answerUpdate,
+				updatedAt: new Date(),
+			})
 			.where(activeDeclarationFilter(target.siren, year));
 	});
 	return true;

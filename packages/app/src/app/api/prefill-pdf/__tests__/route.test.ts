@@ -23,7 +23,14 @@ vi.mock("~/modules/declarationPdf/PrefillPdfDocument", () => ({
 vi.mock("~/server/db", () => ({
 	db: {
 		select: () => ({
-			from: () => ({ where: () => ({ limit: mocks.limit }) }),
+			from: () => ({
+				// Both shapes hit the same queue: `.where().limit()` for the GIP and
+				// company rows, `.where().orderBy().limit()` for the declaration lookup.
+				where: () => ({
+					limit: mocks.limit,
+					orderBy: () => ({ limit: mocks.limit }),
+				}),
+			}),
 		}),
 	},
 }));
@@ -38,6 +45,13 @@ vi.mock("~/server/db/schema", () => ({
 		hasCse: "hasCse",
 	},
 	gipMdsData: { siren: "siren", year: "year" },
+	declarations: {
+		id: "id",
+		hasCse: "hasCse",
+		cancelledAt: "cancelledAt",
+		status: "status",
+		createdAt: "createdAt",
+	},
 }));
 
 import { AUDIT_ACTIONS } from "~/modules/audit";
@@ -69,6 +83,8 @@ function auditRow(): Record<string, unknown> {
 function prefilledCompany() {
 	mocks.limit
 		.mockResolvedValueOnce([GIP_ROW])
+		// No démarche for the year: the live company answer is the only one.
+		.mockResolvedValueOnce([])
 		.mockResolvedValueOnce([{ name: "Société Démo" }]);
 }
 
@@ -108,7 +124,10 @@ describe("GET /api/prefill-pdf", () => {
 	});
 
 	it("falls back on the company placeholder name when none is stored", async () => {
-		mocks.limit.mockResolvedValueOnce([GIP_ROW]).mockResolvedValueOnce([]);
+		mocks.limit
+			.mockResolvedValueOnce([GIP_ROW])
+			.mockResolvedValueOnce([])
+			.mockResolvedValueOnce([]);
 
 		await GET(request());
 
@@ -117,11 +136,25 @@ describe("GET /api/prefill-pdf", () => {
 		});
 	});
 
+	it("prefers the year's CSE snapshot over the live company answer", async () => {
+		mocks.limit
+			.mockResolvedValueOnce([{ ...GIP_ROW, workforceEma: "250.00" }])
+			.mockResolvedValueOnce([{ id: "decl-1" }])
+			.mockResolvedValueOnce([{ name: "Société Démo", hasCse: true }])
+			.mockResolvedValueOnce([{ hasCse: false }]);
+		await GET(request());
+
+		expect(mocks.PrefillPdfDocument).toHaveBeenCalledWith({
+			data: expect.objectContaining({ cseDisplay: "Non" }),
+		});
+	});
+
 	it("projects the GIP row and the company details into the document", async () => {
 		mocks.limit
 			.mockResolvedValueOnce([
 				{ ...GIP_ROW, workforceEma: "250.00", womenCountAnnualGlobal: "120" },
 			])
+			.mockResolvedValueOnce([])
 			.mockResolvedValueOnce([
 				{
 					name: "Société Démo",
