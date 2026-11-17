@@ -1,0 +1,32 @@
+{
+	"name": "healthcheck",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "tsc",
+		"start": "node --env-file-if-exists=.env dist/index.js",
+		"dev": "tsx watch --env-file-if-exists=.env src/index.ts",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"test:integration": "vitest run --config vitest.integration.config.ts",
+		"typecheck": "tsc --noEmit",
+		"lint:check": "biome lint src",
+		"format:check": "biome format src"
+	},
+	"dependencies": {
+		"@aws-sdk/client-s3": "^3.1029.0",
+		"postgres": "^3.4.9"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.4.11",
+		"@testcontainers/postgresql": "^11.14.0",
+		"@types/node": "^26.1.1",
+		"drizzle-orm": "^0.45.2",
+		"tsx": "^4.21.0",
+		"typescript": "^6.0.2",
+		"vitest": "^4.1.11"
+	}
+}
