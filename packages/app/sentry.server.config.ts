@@ -3,10 +3,8 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import { SENTRY_DATA_COLLECTION } from "@common/sentryDataCollection";
+import { SENTRY_ENVIRONMENT, SENTRY_IS_PRODUCTION, SENTRY_SAMPLE_RATES } from "@common/sentryConfig";
 import * as Sentry from "@sentry/nextjs";
-
-const ENVIRONMENT = process.env.NEXT_PUBLIC_EGAPRO_ENV || "development";
-const IS_PRODUCTION = ENVIRONMENT === "production";
 
 // Check for Cypress test environment
 const isCypressTest = process.env.CYPRESS === "true";
@@ -14,7 +12,7 @@ const isCypressTest = process.env.CYPRESS === "true";
 Sentry.init({
   // Basic configuration
   dsn: isCypressTest ? undefined : process.env.NEXT_PUBLIC_SENTRY_DSN, // Disable Sentry in Cypress
-  environment: ENVIRONMENT,
+  environment: SENTRY_ENVIRONMENT,
   debug: false,
   dist: process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
 
@@ -23,16 +21,16 @@ Sentry.init({
   // Performance monitoring and source maps
   attachStacktrace: true, // Attach stack traces to all messages
   normalizeDepth: 10, // Increase stack trace depth for better context
-  tracesSampleRate: IS_PRODUCTION ? 0.1 : 1.0, // Sample 10% of traces in prod, all in dev
+  tracesSampleRate: SENTRY_SAMPLE_RATES.traces,
   maxBreadcrumbs: 100, // Increase from default 100 to capture more context
 
   // Error tracking configuration
-  sampleRate: 0.1,
+  sampleRate: SENTRY_SAMPLE_RATES.errors,
   sendClientReports: true, // Enable immediate client reports
 
   beforeSend(event) {
     // Filter out non-error events in production
-    if (IS_PRODUCTION && !event.exception) return null;
+    if (SENTRY_IS_PRODUCTION && !event.exception) return null;
 
     // Filter out known unnecessary errors
     const ignoreErrors = [
