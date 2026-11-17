@@ -166,14 +166,8 @@ export async function submitCseStep2(
 
 		// Phase B — a single column is auto-associated before any listener could
 		// attach, so its save is awaited through the submit button instead.
-		const [onlyColumn] = columns;
-		if (columns.length === 1 && onlyColumn) {
-			const lockedCheckbox = matrix.getByRole("checkbox", {
-				name: cseCheckboxName(onlyColumn, fileName, hasSecondDeclaration),
-			});
-			await expect(matrix.getByRole("checkbox")).toHaveCount(1);
-			await expect(lockedCheckbox).toBeChecked();
-			await expect(lockedCheckbox).toBeDisabled();
+		if (columns.length === 1) {
+			await expect(matrix.getByRole("checkbox")).toHaveCount(0);
 		} else {
 			for (const column of columns) {
 				const persisted = page.waitForResponse((response) =>

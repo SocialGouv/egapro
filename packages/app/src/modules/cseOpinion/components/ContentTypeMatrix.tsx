@@ -17,7 +17,7 @@ type Props = {
 	onDelete: (fileId: string) => void;
 	deletingFileId: string | null;
 	disabled?: boolean;
-	lockedColumnIds?: ReadonlySet<string>;
+	hiddenColumnIds?: ReadonlySet<string>;
 };
 
 function columnHeaderId(column: ContentTypeColumn): string {
@@ -47,8 +47,12 @@ export function ContentTypeMatrix({
 	onDelete,
 	deletingFileId,
 	disabled = false,
-	lockedColumnIds,
+	hiddenColumnIds,
 }: Props) {
+	const visibleColumns = hiddenColumnIds
+		? columns.filter((column) => !hiddenColumnIds.has(column.id))
+		: columns;
+
 	return (
 		<div className={`fr-table fr-table--no-caption ${styles.matrix}`}>
 			<div className="fr-table__wrapper">
@@ -63,7 +67,7 @@ export function ContentTypeMatrix({
 									<th className="fr-cell--fixed fr-cell--multiline" scope="col">
 										Fichier(s) déposé(s)
 									</th>
-									{columns.map((column) => (
+									{visibleColumns.map((column) => (
 										<th
 											className={`fr-cell--multiline ${styles.columnHeader}`}
 											id={columnHeaderId(column)}
@@ -120,11 +124,9 @@ export function ContentTypeMatrix({
 													</span>
 												</span>
 											</th>
-											{columns.map((column) => {
+											{visibleColumns.map((column) => {
 												const associatedFileId =
 													associations[column.id] ?? null;
-												const isLocked =
-													lockedColumnIds?.has(column.id) ?? false;
 												const checked = associatedFileId === file.id;
 												const lockedByOther =
 													associatedFileId !== null &&
@@ -139,7 +141,7 @@ export function ContentTypeMatrix({
 														<div className="fr-checkbox-group fr-checkbox-group--sm">
 															<input
 																checked={checked}
-																disabled={disabled || lockedByOther || isLocked}
+																disabled={disabled || lockedByOther}
 																id={inputId}
 																onChange={(event) =>
 																	onToggle(
