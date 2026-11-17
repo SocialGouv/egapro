@@ -3,7 +3,7 @@
 Inventaire exhaustif des mails envoyés par la plateforme. Deux mécanismes :
 
 1. **Event-driven** (5 mails) — émis depuis une mutation tRPC ou un upload, via le wrapper [`enqueueReceipt`](../packages/app/src/modules/mail/enqueueReceipt.ts) côté `packages/app`.
-2. **Schedule-driven** (7 mails, 8 schedules cron pg-boss) — émis depuis le worker `packages/notifications` à intervalles réguliers (cron natif pg-boss avec `tz=Europe/Paris`). Le handler interroge l'app DB pour trouver les destinataires éligibles, déduplique via `notifications.reminder_sent_log`, puis enqueue un job sur la même queue `email-notification` que les mails event-driven.
+2. **Schedule-driven** (7 mails, 9 schedules cron pg-boss : 8 de relance + 1 de maintenance) — émis depuis le worker `packages/notifications` à intervalles réguliers (cron natif pg-boss avec `tz=Europe/Paris`). Le handler interroge l'app DB pour trouver les destinataires éligibles, déduplique via `notifications.reminder_sent_log`, puis enqueue un job sur la même queue `email-notification` que les mails event-driven.
 
 Tous les jobs transitent par le même pipeline **publisher → pg-boss → worker → SMTP**. La pile de rendu HTML est **React Email** (composants typés DSFR, inline CSS auto, fallback texte produit par `html-to-text`).
 
@@ -11,7 +11,7 @@ Tous les jobs transitent par le même pipeline **publisher → pg-boss → worke
 
 ---
 
-## Vue d'ensemble — 12 types · 8 schedules
+## Vue d'ensemble — 12 types · 9 schedules
 
 Chaque ligne pointe vers la **fiche détaillée** correspondante : sujet exact, corps complet, requête SQL d'éligibilité (pour les schedule-driven), bouton CTA et référence au flowchart BRD.
 
@@ -104,12 +104,12 @@ src/
 ├── eligibility/            # Read-only app DB queries powering the schedule handlers
 │   ├── client.ts           # postgres.js client → DATABASE_URL
 │   ├── queries.ts          # 7 SQL queries (findDraftDeclarations, findCseOpinionPending, …)
-│   └── dedup.ts            # ensureDedupTable / wasSent / markSent (notifications.reminder_sent_log)
+│   └── dedup.ts            # ensureDedupTable / wasSent / markSent / purgeSentLog (notifications.reminder_sent_log)
 ├── schedules/              # pg-boss cron schedules
-│   ├── index.ts            # registerSchedules(boss, sql) — 13 createQueue + work + schedule
-│   ├── definitions.ts      # SCHEDULES const (name, cron, tz, handler) — 8 entries
+│   ├── index.ts            # registerSchedules(boss, sql) — 1 createQueue par schedule + work + schedule
+│   ├── definitions.ts      # SCHEDULES const (name, cron, tz, handler) — 9 entries
 │   ├── dates.ts            # getCurrentYear (Intl.DateTimeFormat) + DEADLINES helpers
-│   ├── handlers.ts         # 7 handlers — one per NotificationType
+│   ├── handlers.ts         # 7 handlers de relance + la purge du journal de dédoublonnage
 │   └── dispatch.ts         # dispatchReminder() — eligibility loop + dedup + enqueue
 └── worker/                 # Sub-modules of the worker entry
     ├── transporter.ts      # SMTP nodemailer (TLS 1.2 min when SMTP auth set)

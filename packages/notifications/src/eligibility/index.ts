@@ -8,6 +8,10 @@ export {
 	__resetDedupForTests,
 	ensureDedupTable,
 	markSent,
+	purgeSentLog,
+	REMINDER_LOG_RETENTION_YEARS,
+	type ReminderLogPurgeSummary,
+	reminderLogCutoffYear,
 	wasSent,
 } from "./dedup.js";
 export {
