@@ -7,6 +7,12 @@ global:
   # `packages/notifications/src/index.ts` exits cleanly when the queue DB URL
   # is absent — so a namespace without pg-notifications just runs an idle pod.
   notificationsEnabled: true
+  # Supervision worker (packages/healthcheck). Runs the life-checks that feed
+  # the back-office "État des services" screen and emits one `health_check`
+  # JSON line per result on stdout. Enabled by default: the worker exits 0 when
+  # DATABASE_URL/POSTGRES_* is absent, so an environment without a database
+  # just leaves an exited pod rather than failing its rollout.
+  healthcheckEnabled: true
   # One-off, idempotent post-deploy repair for location columns added by
   # migration 0047. It only processes incomplete rows and can safely rerun.
   companyLocationBackfillEnabled: true

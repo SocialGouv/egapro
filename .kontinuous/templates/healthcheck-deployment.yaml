@@ -1,0 +1,130 @@
+{{- if .Values.global.healthcheckEnabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: healthcheck
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: healthcheck
+  annotations:
+    # Same gating as the notifications worker: both reference the `pg-app`
+    # secret at pod creation, and review-app namespaces bootstrap Postgres
+    # concurrently. The `pg` build being ready guarantees the secret exists.
+    kontinuous/plugin.needs: "[pg]"
+    # Root-chart template, so no `chartNameTop` is assigned by the `05.0-needs`
+    # patch — set it explicitly or the dependency graph node renders empty.
+    kontinuous/depname.chartNameTop: healthcheck
+spec:
+  # One prober only: two pods would double every partner call and race on the
+  # same `app_health_probe` rows. Horizontal scaling is a separate decision.
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: healthcheck
+  template:
+    metadata:
+      labels:
+        app: healthcheck
+    spec:
+      # Lets the SIGTERM handler abort the in-flight probes short of their
+      # timeout and close the Postgres pool.
+      terminationGracePeriodSeconds: 20
+      securityContext:
+        runAsUser: 1000
+        runAsNonRoot: true
+      initContainers:
+        - name: wait-for-pg
+          image: "{{ .Values.global.registry }}/{{ .Values.global.imageProject }}/{{ .Values.global.imageRepository }}/app:{{ .Values.global.imageTag }}"
+          securityContext:
+            allowPrivilegeEscalation: false
+          command:
+            - node
+            - -e
+            - |
+              const net = require("net");
+              const host = process.env.PGHOST;
+              const port = Number(process.env.PGPORT || "5432");
+              const probe = () => {
+                const socket = net.connect(port, host);
+                socket.once("connect", () => { socket.end(); process.exit(0); });
+                socket.once("error", () => {
+                  console.log(`waiting for ${host}:${port} ...`);
+                  setTimeout(probe, 3000);
+                });
+              };
+              probe();
+          env:
+            - name: PGHOST
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.global.pgSecretName }}"
+                  key: PGHOST
+            - name: PGPORT
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.global.pgSecretName }}"
+                  key: PGPORT
+      containers:
+        - name: healthcheck
+          image: "{{ .Values.global.registry }}/{{ .Values.global.imageProject }}/{{ .Values.global.imageRepository }}/app:{{ .Values.global.imageTag }}"
+          securityContext:
+            allowPrivilegeEscalation: false
+          command:
+            - node
+            - packages/healthcheck/dist/index.js
+          envFrom:
+            # Cadence knobs (HEALTHCHECK_INTERVAL_SECONDS). Optional so a
+            # namespace without the configmap still rolls out.
+            - configMapRef:
+                name: healthcheck
+                optional: true
+            - configMapRef:
+                name: s3
+                optional: true
+            - secretRef:
+                name: s3
+                optional: true
+          env:
+            # The app pod receives the same discrete keys from `pg-app`; the
+            # worker assembles the DSN itself (src/config.ts), exactly like the
+            # notifications worker does.
+            - name: POSTGRES_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.global.pgSecretName }}"
+                  key: PGHOST
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.global.pgSecretName }}"
+                  key: PGDATABASE
+            - name: POSTGRES_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.global.pgSecretName }}"
+                  key: PGPORT
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.global.pgSecretName }}"
+                  key: PGUSER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.global.pgSecretName }}"
+                  key: PGPASSWORD
+            - name: POSTGRES_SSLMODE
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.global.pgSecretName }}"
+                  key: PGSSLMODE
+          resources:
+            requests:
+              cpu: 20m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+{{- end }}
