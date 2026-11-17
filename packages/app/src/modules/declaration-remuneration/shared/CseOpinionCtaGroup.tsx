@@ -3,9 +3,10 @@ import { UpdateCseButton } from "./UpdateCseButton";
 
 type Props = {
 	cseApplicable: boolean;
+	cseLocked: boolean;
 };
 
-export function CseOpinionCtaGroup({ cseApplicable }: Props) {
+export function CseOpinionCtaGroup({ cseApplicable, cseLocked }: Props) {
 	return (
 		<div className={styles.ctaGroup}>
 			<p className="fr-mb-0">
@@ -15,7 +16,7 @@ export function CseOpinionCtaGroup({ cseApplicable }: Props) {
 			<p className="fr-mb-0">
 				Les modèles d&apos;avis du CSE ne sont pas encore disponibles.
 			</p>
-			{cseApplicable && <UpdateCseButton />}
+			{cseApplicable && !cseLocked && <UpdateCseButton />}
 		</div>
 	);
 }

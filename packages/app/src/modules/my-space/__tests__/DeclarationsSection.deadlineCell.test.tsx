@@ -25,6 +25,7 @@ const finalisedRemuneration: DeclarationItem = {
 	lastTransmission: null,
 	hasSubmittedJointEvaluation: false,
 	hasSubmittedCseOpinion: false,
+	hasCse: null,
 	cseRequired: false,
 	hasJointEvaluationFile: false,
 	formalNoticeAvailable: false,

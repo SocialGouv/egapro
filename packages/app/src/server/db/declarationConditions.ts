@@ -9,7 +9,7 @@ import {
 	type TransmissionEventType,
 } from "~/modules/domain";
 import type { DB } from "./index";
-import { declarationStatusHistory, declarations } from "./schema";
+import { companies, declarationStatusHistory, declarations } from "./schema";
 
 type Tx = Parameters<Parameters<DB["transaction"]>[0]>[0];
 type DbOrTx = DB | Tx;
@@ -36,6 +36,14 @@ export function complianceProcessCompletedCondition() {
 /** Drizzle condition mirroring `isCancelled` (negated): the declaration is not cancelled. */
 export function notCancelledCondition() {
 	return isNull(declarations.cancelledAt);
+}
+
+// SQL mirror of `resolveCseAnswerForYear`: a submitted year's snapshot wins over
+// the live company value, which is why `companies` must be joined.
+export function cseAnswerForYear(): SQL<boolean | null> {
+	return sql<
+		boolean | null
+	>`coalesce(${declarations.hasCse}, ${companies.hasCse})`;
 }
 
 // postgres.js hands raw SQL timestamps back as strings: the column type metadata is lost in a subquery or a CASE.

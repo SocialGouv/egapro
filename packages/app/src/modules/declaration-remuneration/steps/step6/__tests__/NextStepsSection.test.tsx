@@ -21,6 +21,7 @@ type Overrides = Partial<{
 	indicatorGRequired: boolean;
 	hasSignificantIndicatorGGap: boolean;
 	cseApplicable: boolean;
+	cseLocked: boolean;
 	cseOpinionRequired: boolean;
 	siren: string;
 }>;
@@ -29,6 +30,7 @@ function renderSection(overrides: Overrides = {}) {
 	return render(
 		<NextStepsSection
 			cseApplicable={false}
+			cseLocked={false}
 			cseOpinionRequired={false}
 			hasSignificantIndicatorGGap={false}
 			indicatorGRequired={false}

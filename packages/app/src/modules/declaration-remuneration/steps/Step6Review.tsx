@@ -9,6 +9,7 @@ import {
 	getObligationWorkforce,
 	hasGapsAboveThreshold,
 	isComplianceProcessRequired,
+	isCseAnswerLocked,
 	isCseOpinionRequired,
 	isCseRequired,
 } from "~/modules/domain";
@@ -217,6 +218,7 @@ export function Step6Review({
 					{declaration.siren && (
 						<NextStepsSection
 							cseApplicable={cseApplicable}
+							cseLocked={isCseAnswerLocked(declaration.status)}
 							cseOpinionRequired={cseOpinionRequired}
 							hasSignificantIndicatorGGap={hasSignificantIndicatorGGap}
 							indicatorGRequired={indicatorGRequired}

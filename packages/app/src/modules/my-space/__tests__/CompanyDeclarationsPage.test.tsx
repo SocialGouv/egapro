@@ -69,6 +69,7 @@ function makeDeclaration(
 		lastTransmission: null,
 		hasSubmittedJointEvaluation: false,
 		hasSubmittedCseOpinion: false,
+		hasCse: null,
 		cseRequired: false,
 		hasJointEvaluationFile: false,
 		formalNoticeAvailable: false,
@@ -120,6 +121,41 @@ describe("CompanyDeclarationsPage", () => {
 		renderPage();
 		expect(
 			screen.getByRole("heading", { level: 1, name: "Alpha Solutions" }),
+		).toBeInTheDocument();
+	});
+
+	it("hides the CSE edit entry point once the year's démarche is completed", () => {
+		renderPage({
+			company: { ...company, gipWorkforce: 250, hasCse: true },
+			declarations: [
+				makeDeclaration("remuneration", {
+					status: "done",
+					fsmStatus: "demarche_completed",
+					hasCse: true,
+				}),
+				makeDeclaration("representation"),
+			],
+		});
+
+		expect(
+			screen.queryByRole("button", { name: "Modifier" }),
+		).not.toBeInTheDocument();
+	});
+
+	it("keeps the CSE edit entry point while the year's démarche is open", () => {
+		renderPage({
+			company: { ...company, gipWorkforce: 250, hasCse: true },
+			declarations: [
+				makeDeclaration("remuneration", {
+					fsmStatus: "awaiting_cse_opinion",
+					hasCse: true,
+				}),
+				makeDeclaration("representation"),
+			],
+		});
+
+		expect(
+			screen.getByRole("button", { name: "Modifier" }),
 		).toBeInTheDocument();
 	});
 

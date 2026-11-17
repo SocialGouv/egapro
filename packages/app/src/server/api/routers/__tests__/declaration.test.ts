@@ -761,6 +761,28 @@ describe("declarationRouter", () => {
 			expect(ctx.set).not.toHaveBeenCalled();
 		});
 
+		it("snapshots the year's CSE answer on submission (#4228)", async () => {
+			const declaration = buildDeclaration({ status: "draft" });
+			const company = buildCompany({ workforce: 120, hasCse: true });
+			const employeeCategories = [
+				{ annualBaseWomen: "100", annualBaseMen: "100" },
+			];
+			const ctx = createSubmitMockDb(
+				declaration,
+				company,
+				employeeCategories,
+				"120.00",
+			);
+			const caller = await createLockedCaller(ctx.db);
+
+			await caller.submit();
+
+			// The answer seen at submission is what the campaign owed; a later
+			// correction must not rewrite it through `companies.has_cse`.
+			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(setCall.hasCse).toBe(true);
+		});
+
 		it("persists computed percentage columns on submit", async () => {
 			const declaration = buildDeclaration({ status: "draft" });
 			const company = buildCompany();

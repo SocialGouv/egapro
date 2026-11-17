@@ -4,6 +4,7 @@ import { and, eq, gte, inArray, lt, or, sql } from "drizzle-orm";
 import type { DB } from "~/server/db";
 import { db } from "~/server/db";
 import {
+	cseAnswerForYear,
 	notCancelledCondition,
 	submittedDeclarationCondition,
 } from "~/server/db/declarationConditions";
@@ -220,7 +221,7 @@ export async function fetchSubmittedDeclarations(
 			workforceEma: gipMdsData.workforceEma,
 			nafCode: companies.nafCode,
 			address: companies.address,
-			hasCse: companies.hasCse,
+			hasCse: cseAnswerForYear(),
 			...statusHistoryProjection,
 			...sharedExportColumns,
 		})

@@ -31,6 +31,7 @@ export type DbDeclaration = {
 	hasSubmittedCseOpinion: boolean;
 	cseOpinionViewAvailable?: boolean;
 	jointEvaluationViewAvailable?: boolean;
+	hasCse: boolean | null;
 	cseRequired: boolean;
 	hasJointEvaluationFile: boolean;
 	formalNoticeAvailable: boolean;
@@ -81,6 +82,7 @@ export function buildDeclarationList(
 				hasSubmittedCseOpinion: existing.hasSubmittedCseOpinion,
 				cseOpinionViewAvailable: existing.cseOpinionViewAvailable,
 				jointEvaluationViewAvailable: existing.jointEvaluationViewAvailable,
+				hasCse: existing.hasCse,
 				cseRequired: existing.cseRequired,
 				hasJointEvaluationFile: existing.hasJointEvaluationFile,
 				formalNoticeAvailable: existing.formalNoticeAvailable,
@@ -106,6 +108,8 @@ export function buildDeclarationList(
 				lastTransmission: null,
 				hasSubmittedJointEvaluation: false,
 				hasSubmittedCseOpinion: false,
+				// No row means no snapshot: the caller falls back to the live answer.
+				hasCse: null,
 				cseRequired: false,
 				hasJointEvaluationFile: false,
 				formalNoticeAvailable: false,
@@ -143,6 +147,7 @@ export function buildDeclarationList(
 			hasSubmittedCseOpinion: d.hasSubmittedCseOpinion,
 			cseOpinionViewAvailable: d.cseOpinionViewAvailable,
 			jointEvaluationViewAvailable: d.jointEvaluationViewAvailable,
+			hasCse: d.hasCse,
 			cseRequired: d.cseRequired,
 			hasJointEvaluationFile: d.hasJointEvaluationFile,
 			formalNoticeAvailable: d.formalNoticeAvailable,

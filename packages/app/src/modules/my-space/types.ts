@@ -48,6 +48,8 @@ export type DeclarationItem = {
 	hasSubmittedCseOpinion: boolean;
 	cseOpinionViewAvailable?: boolean;
 	jointEvaluationViewAvailable?: boolean;
+	// Snapshot taken at submission; `null` when the year was never submitted.
+	hasCse: boolean | null;
 	cseRequired: boolean;
 	hasJointEvaluationFile: boolean;
 	formalNoticeAvailable: boolean;

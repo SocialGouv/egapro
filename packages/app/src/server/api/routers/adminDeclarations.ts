@@ -36,6 +36,7 @@ import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpe
 import { mapToStepData } from "~/server/api/routers/declarationStepMapping";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
 import {
+	cseAnswerForYear,
 	demarcheCompletedAt,
 	demarcheLifecycleSortKey,
 	demarcheLifecycleStatusCondition,
@@ -245,7 +246,7 @@ export const adminDeclarationsRouter = createTRPCRouter({
 					companyAddress: companies.address,
 					companyNafCode: companies.nafCode,
 					companyWorkforceEma: gipMdsData.workforceEma,
-					companyHasCse: companies.hasCse,
+					companyHasCse: cseAnswerForYear(),
 					declarantEmail: users.email,
 					declarantFirstName: users.firstName,
 					declarantLastName: users.lastName,
