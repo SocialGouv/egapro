@@ -1,5 +1,9 @@
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import {
+	DECLARATION_RETENTION_YEARS,
+	USER_ACCOUNT_INACTIVITY_RETENTION_YEARS,
+} from "~/modules/domain";
 
 import { PrivacyPolicyPage } from "../PrivacyPolicyPage";
 
@@ -75,5 +79,63 @@ describe("PrivacyPolicyPage — hosting provider guarantees", () => {
 		expect(pdfLink).toHaveAttribute("target", "_blank");
 		expect(pdfLink).toHaveAccessibleName(/nouvelle fenêtre|nouvel onglet/);
 		expect(pdfLink.closest("p")).toHaveTextContent("format PDF non accessible");
+	});
+});
+
+describe("PrivacyPolicyPage — user account retention", () => {
+	function retentionTable() {
+		return screen.getByRole("table", {
+			name: "Durée de conservation des données personnelles",
+		});
+	}
+
+	it("announces the inactivity window from the domain constant", () => {
+		render(<PrivacyPolicyPage />);
+
+		expect(retentionTable()).toHaveTextContent(
+			`${USER_ACCOUNT_INACTIVITY_RETENTION_YEARS} ans à compter de la dernière démarche ou de l'inactivité du compte`,
+		);
+	});
+
+	it("describes the anonymisation that actually happens", () => {
+		render(<PrivacyPolicyPage />);
+
+		const paragraph = screen
+			.getByText(
+				/Le délai d'inactivité court à compter de la dernière connexion/,
+			)
+			.closest("p");
+
+		expect(paragraph).toHaveTextContent(
+			"le compte est anonymisé : prénom, nom, adresse e-mail, téléphone et rattachement à une entreprise sont effacés",
+		);
+	});
+
+	it("states that declarations outlive the account", () => {
+		render(<PrivacyPolicyPage />);
+
+		const paragraph = screen
+			.getByText(
+				/Le délai d'inactivité court à compter de la dernière connexion/,
+			)
+			.closest("p");
+
+		expect(paragraph).toHaveTextContent(
+			`elles restent conservées ${DECLARATION_RETENTION_YEARS} ans et rattachées à cet identifiant anonyme`,
+		);
+	});
+
+	it("points account deletion requests at the contact address of the rights section", () => {
+		render(<PrivacyPolicyPage />);
+
+		const paragraph = screen
+			.getByText(
+				/Le délai d'inactivité court à compter de la dernière connexion/,
+			)
+			.closest("p");
+
+		expect(paragraph).toHaveTextContent(
+			"Pour supprimer votre compte à votre demande, écrivez à l'adresse indiquée à la rubrique « Quels sont vos droits ? »",
+		);
 	});
 });

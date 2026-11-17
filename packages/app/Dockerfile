@@ -68,6 +68,7 @@ RUN pnpm --filter app exec esbuild \
     scripts/migrate.ts \
     scripts/audit-cleanup.ts \
     scripts/declaration-cleanup.ts \
+    scripts/user-cleanup.ts \
     scripts/backfill-company-naf.ts \
     scripts/backfill-company-region-department.ts \
     scripts/seed-demo-observatory.ts \
@@ -135,6 +136,11 @@ COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/seed-demo-observ
 # in this image. That packaging gap predates the TypeScript migration and is
 # tracked on its own — fixing it here would be a behaviour change out of scope.
 COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/audit-cleanup.bundle.mjs ./packages/app/scripts/audit-cleanup.bundle.mjs
+# Standalone script invoked by the user-cleanup CronJob (#4770 — RGPD account
+# retention sweep). It must be copied here: bundling alone leaves the CronJob
+# without its script, which is exactly the packaging gap tracked for
+# declaration-cleanup in #4773.
+COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/user-cleanup.bundle.mjs ./packages/app/scripts/user-cleanup.bundle.mjs
 
 # Notifications worker — independent workspace, runs as its own K8s
 # Deployment (notifications-deployment.yaml). Source = `pnpm deploy` output

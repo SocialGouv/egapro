@@ -629,22 +629,23 @@ export const authConfig = {
 					}
 					dbUser = inserted;
 				} else {
-					// ProConnect only seeds a name the DB does not have yet.
-					const updates: Record<string, string | null> = {};
+					// ProConnect only seeds a missing name; the activity stamp is
+					// always written — it is the retention clock.
+					const updates: {
+						lastActivityAt: Date;
+						firstName?: string | null;
+						lastName?: string | null;
+					} = { lastActivityAt: new Date() };
 					if (profileData.firstName && !existingUser.firstName)
 						updates.firstName = profileData.firstName;
 					if (profileData.lastName && !existingUser.lastName)
 						updates.lastName = profileData.lastName;
 
-					if (Object.keys(updates).length > 0) {
-						await db
-							.update(users)
-							.set(updates)
-							.where(eq(users.id, existingUser.id));
-						dbUser = { ...existingUser, ...updates } as typeof existingUser;
-					} else {
-						dbUser = existingUser;
-					}
+					await db
+						.update(users)
+						.set(updates)
+						.where(eq(users.id, existingUser.id));
+					dbUser = { ...existingUser, ...updates } as typeof existingUser;
 				}
 
 				// ProConnect is the only source of the link: a user moved elsewhere loses the former company.

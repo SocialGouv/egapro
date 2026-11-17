@@ -424,6 +424,11 @@ export {
 	REPRESENTATION_TARGET_RAISED,
 	REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR,
 } from "./shared/representation";
+// Retention windows announced by the privacy policy (page + purge scripts)
+export {
+	DECLARATION_RETENTION_YEARS,
+	USER_ACCOUNT_INACTIVITY_RETENTION_YEARS,
+} from "./shared/retention";
 // SIREN utilities
 export {
 	extractSiren,

@@ -69,6 +69,12 @@ export const users = createTable("user", (d) => ({
 		.$defaultFn(() => /* @__PURE__ */ new Date()),
 	phone: d.varchar({ length: 20 }),
 	isAdmin: d.boolean().notNull().default(false),
+	// Privacy-policy retention clock: written on sign-in only. The DB
+	// default backfills existing rows, then the backfill migration refines them.
+	lastActivityAt: d.timestamp({ withTimezone: true }).notNull().defaultNow(),
+	// Set by the retention sweep: keeps the row — and every declarant
+	// reference — alive while making the sweep idempotent.
+	anonymizedAt: d.timestamp({ withTimezone: true }),
 }));
 
 export const declarations = createTable(
