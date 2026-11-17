@@ -1,14 +1,14 @@
 /**
- * Durées de conservation annoncées par la politique de confidentialité.
+ * Retention windows announced by the privacy policy.
  *
- * Source unique : la page `/donnees-personnelles` les affiche, et les purges
- * planifiées les appliquent — modifier une valeur ici change les deux à la
- * fois. Les scripts autonomes peuvent les surcharger par variable
- * d'environnement, jamais en divergence silencieuse.
+ * Single source: the `/donnees-personnelles` page displays them and the
+ * scheduled purges apply them — changing a value here changes both at once.
+ * Standalone scripts may override them through environment variables, never by
+ * silent divergence.
  */
 
-/** Inactivité d'un compte utilisateur, à compter de sa dernière connexion. */
+/** Account inactivity, counted from the last successful sign-in. */
 export const USER_ACCOUNT_INACTIVITY_RETENTION_YEARS = 2;
 
-/** Conservation d'une déclaration (index et représentation), par année. */
+/** Declaration retention (index and representation), in years. */
 export const DECLARATION_RETENTION_YEARS = 6;
