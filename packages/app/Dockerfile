@@ -22,16 +22,18 @@ COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY patches/ ./patches/
 COPY packages/app/package.json ./packages/app/
 COPY packages/notifications/package.json ./packages/notifications/
+COPY packages/healthcheck/package.json ./packages/healthcheck/
 
 # Install both the app (Next.js build) and the notifications worker
 # subtree. Both packages are leaves of the workspace graph; listing them
 # explicitly is enough.
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
-    pnpm install --filter app --filter notifications --frozen-lockfile --store-dir=/pnpm/store
+    pnpm install --filter app --filter notifications --filter healthcheck --frozen-lockfile --store-dir=/pnpm/store
 
 # Copy source code (after install to maximize cache hits)
 COPY packages/app/ ./packages/app/
 COPY packages/notifications/ ./packages/notifications/
+COPY packages/healthcheck/ ./packages/healthcheck/
 
 # Build-time env handling
 ENV HUSKY=0
@@ -57,6 +59,7 @@ ENV NEXT_PUBLIC_MATOMO_SITE_ID=$NEXT_PUBLIC_MATOMO_SITE_ID
 # `await import("notifications/publisher")` resolves to ./dist/publisher.js
 # via package.json exports, so the dist must exist when Next.js starts.
 RUN pnpm --filter notifications build
+RUN pnpm --filter healthcheck build
 
 # Bundle the standalone maintenance scripts for the minimal production image.
 # Their sources are TypeScript and some of them import shared modules from src/;
@@ -80,6 +83,10 @@ RUN pnpm --filter app exec esbuild \
 # do NOT ship to the runner. `--legacy` is required since pnpm v10 (we
 # don't use injected workspace packages).
 RUN pnpm --filter notifications deploy --prod --legacy /deploy/notifications
+
+# Same treatment for the healthcheck worker: a flat deploy tree (compiled
+# dist + a real node_modules with the AWS SDK and postgres resolved inline).
+RUN pnpm --filter healthcheck deploy --prod --legacy /deploy/healthcheck
 
 # Build with Next.js cache persisted across builds.
 # The Sentry auth token stays a BuildKit secret: it is a credential and must never
@@ -144,6 +151,13 @@ COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/audit-cleanup.bu
 COPY --from=builder --chown=1000:1000 /deploy/notifications/dist ./packages/notifications/dist
 COPY --from=builder --chown=1000:1000 /deploy/notifications/package.json ./packages/notifications/package.json
 COPY --from=builder --chown=1000:1000 /deploy/notifications/node_modules ./packages/notifications/node_modules
+
+# Healthcheck worker — independent workspace, runs as its own K8s Deployment
+# (healthcheck-deployment.yaml). Same deployed-tree shape as the notifications
+# worker above.
+COPY --from=builder --chown=1000:1000 /deploy/healthcheck/dist ./packages/healthcheck/dist
+COPY --from=builder --chown=1000:1000 /deploy/healthcheck/package.json ./packages/healthcheck/package.json
+COPY --from=builder --chown=1000:1000 /deploy/healthcheck/node_modules ./packages/healthcheck/node_modules
 
 USER 1000
 

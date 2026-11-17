@@ -977,6 +977,68 @@ export const referents = createTable(
 	(t) => [index("referent_region_idx").on(t.region)],
 );
 
+// ── Supervision tables ──────────────────────────────────────────────
+// Written by the `healthcheck` worker (packages/healthcheck), read by the
+// back-office. One row per probe and per observed state change — never one per
+// tick, or ten probes a minute would add ~14 000 rows a day.
+
+export const healthStatusEnum = pgEnum("health_status", [
+	"operational",
+	"degraded",
+	"unavailable",
+	"misconfigured",
+]);
+
+export const healthCriticalityEnum = pgEnum("health_criticality", [
+	"critical",
+	"important",
+	"low",
+]);
+
+export const healthProbeKindEnum = pgEnum("health_probe_kind", [
+	"internal",
+	"partner",
+	"exposed",
+	"job",
+]);
+
+export const healthProbes = createTable("health_probe", (d) => ({
+	key: d.varchar({ length: 100 }).notNull().primaryKey(),
+	label: d.varchar({ length: 255 }).notNull(),
+	criticality: healthCriticalityEnum().notNull(),
+	kind: healthProbeKindEnum().notNull(),
+	status: healthStatusEnum().notNull(),
+	latencyMs: d.integer(),
+	checkedAt: d.timestamp({ withTimezone: true }).notNull(),
+	changedAt: d.timestamp({ withTimezone: true }).notNull(),
+	consecutiveFailures: d.integer().notNull().default(0),
+	lastError: d.varchar({ length: 500 }),
+}));
+
+export const healthIncidents = createTable(
+	"health_incident",
+	(d) => ({
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		probeKey: d
+			.varchar({ length: 100 })
+			.notNull()
+			.references(() => healthProbes.key, { onDelete: "cascade" }),
+		fromStatus: healthStatusEnum("from_status").notNull(),
+		toStatus: healthStatusEnum("to_status").notNull(),
+		startedAt: d.timestamp({ withTimezone: true }).notNull(),
+		endedAt: d.timestamp({ withTimezone: true }),
+		lastError: d.varchar({ length: 500 }),
+	}),
+	(t) => [
+		index("health_incident_started_at_idx").on(t.startedAt),
+		index("health_incident_probe_key_idx").on(t.probeKey, t.startedAt),
+	],
+);
+
 // ── Export tables ───────────────────────────────────────────────────
 
 export const exports = createTable(

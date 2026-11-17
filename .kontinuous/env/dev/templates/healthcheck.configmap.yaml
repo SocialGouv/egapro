@@ -1,0 +1,6 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: healthcheck
+data:
+  HEALTHCHECK_INTERVAL_SECONDS: "60"
