@@ -22,6 +22,7 @@ import {
 	formatPercentInput,
 	PercentagePairFields,
 	parsePercentInput,
+	percentagePairError,
 } from "../shared/PercentagePairFields";
 import styles from "./Step2Executives.module.scss";
 
@@ -127,9 +128,11 @@ export function Step2Executives() {
 		womenPercent: formatPercentInput(draft.executiveWomenPercent),
 		menPercent: formatPercentInput(draft.executiveMenPercent),
 	});
+	const [validationAttempted, setValidationAttempted] = useState(false);
 
 	function handleCountChange(next: ExecutivesCount) {
 		if (next === draft.executivesCount) return;
+		setValidationAttempted(false);
 		setPercentInputs({ womenPercent: "", menPercent: "" });
 		setDraftValues({
 			executivesCount: next,
@@ -158,19 +161,19 @@ export function Step2Executives() {
 	const isStepValid =
 		hasSelection &&
 		(draft.executivesCount !== "two_or_more" || knownVerdict !== null);
-	const [selectionAttempted, setSelectionAttempted] = useState(false);
-	const showSelectionError = selectionAttempted && !hasSelection;
+	const showSelectionError = validationAttempted && !hasSelection;
+	const percentagesMissing =
+		draft.executivesCount === "two_or_more" &&
+		(draft.executiveWomenPercent === undefined ||
+			draft.executiveMenPercent === undefined);
 
 	useEffect(() => {
 		registerStepValidator(() => {
-			if (!hasSelection) {
-				setSelectionAttempted(true);
-				return false;
-			}
+			if (!isStepValid) setValidationAttempted(true);
 			return isStepValid;
 		});
 		return () => registerStepValidator(null);
-	}, [hasSelection, isStepValid, registerStepValidator]);
+	}, [isStepValid, registerStepValidator]);
 
 	return (
 		<div>
@@ -222,11 +225,10 @@ export function Step2Executives() {
 			{draft.executivesCount === "two_or_more" ? (
 				<div className="fr-mt-4w">
 					<PercentagePairFields
-						error={
-							sumError
-								? "La somme des pourcentages doit être égale à 100 %."
-								: undefined
-						}
+						error={percentagePairError({
+							missing: validationAttempted && percentagesMissing,
+							sumError,
+						})}
 						legend="Indiquez le pourcentage de représentation des femmes et des hommes parmi les cadres dirigeants."
 						onChange={handlePercentChange}
 						readOnly={isReadOnly}

@@ -112,26 +112,11 @@ export const subjectionSchema = z
 	});
 
 export function referencePeriodSchema(year: number) {
-	const yearMismatchMessage = `La date sélectionnée ne correspond pas à l'année de référence ${year}.`;
-
 	return z
 		.object({
 			referencePeriodStart: isoDateStringSchema,
 			referencePeriodEnd: isoDateStringSchema,
 		})
-		.refine(
-			(period) => {
-				if (!isValidIsoDate(period.referencePeriodStart)) return true;
-				const startYear = parseIsoDate(
-					period.referencePeriodStart,
-				).getUTCFullYear();
-				return startYear === year || startYear === year - 1;
-			},
-			{
-				message: yearMismatchMessage,
-				path: ["referencePeriodStart"],
-			},
-		)
 		.refine(
 			(period) => {
 				if (!isValidIsoDate(period.referencePeriodEnd)) return true;
@@ -140,7 +125,7 @@ export function referencePeriodSchema(year: number) {
 				);
 			},
 			{
-				message: yearMismatchMessage,
+				message: `La date sélectionnée ne correspond pas à l'année de calcul des indicateurs ${year}.`,
 				path: ["referencePeriodEnd"],
 			},
 		)

@@ -425,6 +425,55 @@ describe("Step2Executives — sélection obligatoire", () => {
 	});
 });
 
+describe("Step2Executives — pourcentages obligatoires (#4994)", () => {
+	const PERCENTAGES_REQUIRED = VALIDATION_MESSAGES.percentagesRequired;
+
+	it("does not flag empty percentages before any attempt to continue", async () => {
+		renderStep();
+
+		await userEvent.click(option(OPTIONS.twoOrMore));
+
+		expect(screen.queryByText(PERCENTAGES_REQUIRED)).not.toBeInTheDocument();
+	});
+
+	it("flags empty percentages after a failed attempt to continue", async () => {
+		const { stepValid } = renderStep();
+		await userEvent.click(option(OPTIONS.twoOrMore));
+
+		act(() => {
+			expect(stepValid()).toBe(false);
+		});
+
+		expect(screen.getByText(PERCENTAGES_REQUIRED)).toBeInTheDocument();
+		expect(percentFields().women).toHaveAttribute("aria-invalid", "true");
+	});
+
+	it("clears the error as soon as a percentage is entered", async () => {
+		const { stepValid } = renderStep();
+		await userEvent.click(option(OPTIONS.twoOrMore));
+		act(() => {
+			stepValid();
+		});
+
+		await userEvent.type(percentFields().women, "40");
+
+		expect(screen.queryByText(PERCENTAGES_REQUIRED)).not.toBeInTheDocument();
+	});
+
+	it("does not carry the error over when the option is changed and picked again", async () => {
+		const { stepValid } = renderStep();
+		await userEvent.click(option(OPTIONS.twoOrMore));
+		act(() => {
+			stepValid();
+		});
+
+		await userEvent.click(option(OPTIONS.none));
+		await userEvent.click(option(OPTIONS.twoOrMore));
+
+		expect(screen.queryByText(PERCENTAGES_REQUIRED)).not.toBeInTheDocument();
+	});
+});
+
 describe("Step2Executives — définition réglementaire", () => {
 	it("offers the definition in a collapsed accordion", () => {
 		renderStep();
