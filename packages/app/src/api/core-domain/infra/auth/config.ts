@@ -10,11 +10,9 @@ import { logger } from "@api/utils/pino";
 import { config } from "@common/config";
 import { assertImpersonatedSession } from "@common/core-domain/helpers/impersonate";
 import { Email } from "@common/shared-domain/domain/valueObjects";
-import { Octokit } from "@octokit/rest";
 import jwt, { sign, verify } from "jsonwebtoken";
 import { type AuthOptions, type Session } from "next-auth";
 import { type DefaultJWT, type JWT } from "next-auth/jwt";
-import GithubProvider, { type GithubProfile } from "next-auth/providers/github";
 
 import { egaproNextAuthAdapter } from "./EgaproNextAuthAdapter";
 import { isMfaAcr, readAcr } from "./mfaAcr";
@@ -54,7 +52,6 @@ declare module "next-auth/jwt" {
 const charonUrl = config.api.security.auth.charonUrl;
 const useCharon = config.env !== "prod" && charonUrl;
 const charonMcpUrl = useCharon ? new URL(`fabriqueKeycloak/`, charonUrl) : null;
-const charonGithubUrl = useCharon ? new URL("github/", charonUrl) : null;
 export const monCompteProProvider = ProConnectProvider({
   ...config.api.security.moncomptepro,
   ...(useCharon && charonMcpUrl
@@ -63,6 +60,12 @@ export const monCompteProProvider = ProConnectProvider({
       }
     : {}),
 });
+
+// The staff list is hand-maintained in a secret; normalising both sides keeps a
+// stray space or capital from silently dropping an admin's access.
+const isStaffEmail = (email: string | null | undefined) =>
+  config.api.staff.includes((email ?? "").trim().toLowerCase());
+
 // Session lifetime, also enforced inside the signed token (`exp`): the cookie's own expiry is only a
 // hint to the browser, a copied cookie would otherwise stay valid until the secret rotates.
 const sessionMaxAge = config.env === "dev" ? 24 * 60 * 60 * 7 : 24 * 60 * 60; // 24 hours in prod and preprod, 7 days in dev
@@ -126,27 +129,9 @@ export const authConfig: AuthOptions = {
     strategy: "jwt",
     maxAge: sessionMaxAge,
   },
-  providers: [
-    GithubProvider({
-      ...config.api.security.github,
-      ...(useCharon && charonGithubUrl
-        ? {
-            authorization: {
-              url: new URL("login/oauth/authorize", charonGithubUrl).toString(),
-              params: { scope: "user:email read:user read:org" },
-            },
-            token: new URL("login/oauth/access_token", charonGithubUrl).toString(),
-          }
-        : {
-            authorization: {
-              params: { scope: "user:email read:user read:org" },
-            },
-          }),
-    }),
-    monCompteProProvider,
-  ],
+  providers: [monCompteProProvider],
   callbacks: {
-    async signIn({ account, profile }) {
+    async signIn({ account }) {
       // Server-side enforcement of the declarant MFA floor (#4962). The
       // `essential` claim is binding at ProConnect, but the reply is still
       // checked here: an issuer that ignores the request must not open a
@@ -165,30 +150,7 @@ export const authConfig: AuthOptions = {
         return "/error?source=login&error=MfaRequired";
       }
 
-      if (account?.provider !== "github") {
-        return true;
-      }
-
-      const githubProfile = profile as unknown as GithubProfile;
-      if (!account.access_token || !githubProfile?.login) {
-        return false;
-      }
-
-      const octokit = new Octokit({
-        auth: account.access_token,
-      });
-
-      try {
-        const membership = await octokit.teams.getMembershipForUserInOrg({
-          org: "SocialGouv",
-          team_slug: "egapro",
-          username: githubProfile.login,
-        });
-
-        return membership.data.state === "active";
-      } catch {
-        return false;
-      }
+      return true;
     },
     // prefill JWT encoded data with staff and ownership on signup
     // by design user always "signup" from our pov because we don't save user accounts
@@ -241,15 +203,8 @@ export const authConfig: AuthOptions = {
           impersonating: false,
           lastImpersonatedHash: "",
         } as Session["staff"];
-        if (account?.provider === "github") {
-          const githubProfile = profile as unknown as GithubProfile;
-          token.user.staff = true;
-          token.user.companiesHash = ""; // Empty hash for no companies
-          const [firstname, lastname] = githubProfile.name?.split(" ") ?? [];
-          token.user.firstname = firstname;
-          token.user.lastname = lastname;
-        } else if (account?.provider === "email") {
-          token.user.staff = config.api.staff.includes(profile?.email ?? "");
+        if (account?.provider === "email") {
+          token.user.staff = isStaffEmail(profile?.email);
           if (token.email && !token.user.staff) {
             const companies = await ownershipRepo.getAllSirenByEmail(new Email(token.email), token.email);
             const companiesList = companies.map(siren => ({ label: "", siren }));
@@ -323,7 +278,7 @@ export const authConfig: AuthOptions = {
           // Create hash and store companies in Redis
           token.user.companiesHash = await companiesUtils.hashCompanies(companiesList);
 
-          token.user.staff = config.api.staff.includes(profile?.email ?? "");
+          token.user.staff = isStaffEmail(profile?.email);
           token.user.firstname = profile?.given_name ?? void 0;
           token.user.lastname = profile?.family_name ?? void 0;
           token.user.phoneNumber = profile?.phone_number ?? void 0;

@@ -47,7 +47,15 @@ export const config = {
     manageOrganisationUrl: ensureNextEnvVar(process.env.EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL, ""),
   },
   api: {
-    staff: ensureApiEnvVar(process.env.EGAPRO_STAFF, envVar => envVar.split(",").filter(v => v), []),
+    staff: ensureApiEnvVar(
+      process.env.EGAPRO_STAFF,
+      envVar =>
+        envVar
+          .split(",")
+          .map(v => v.trim().toLowerCase())
+          .filter(v => v),
+      [],
+    ),
     mailer: {
       enable: ensureApiEnvVar(process.env.MAILER_ENABLE, isTruthy, false),
       host: ensureApiEnvVar(process.env.MAILER_SMTP_HOST, "127.0.0.1"),
@@ -69,10 +77,6 @@ export const config = {
         clientId: ensureApiEnvVar(process.env.SECURITY_MONCOMPTEPRO_CLIENT_ID, ""),
         clientSecret: ensureApiEnvVar(process.env.SECURITY_MONCOMPTEPRO_CLIENT_SECRET, ""),
         appTest: ensureApiEnvVar(process.env.SECURITY_MONCOMPTEPRO_TEST, isTruthy, false),
-      },
-      github: {
-        clientId: ensureApiEnvVar(process.env.SECURITY_GITHUB_CLIENT_ID, ""),
-        clientSecret: ensureApiEnvVar(process.env.SECURITY_GITHUB_CLIENT_SECRET, ""),
       },
       auth: {
         secret: ensureApiEnvVar(process.env.SECURITY_JWT_SECRET, "secret"),
