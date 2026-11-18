@@ -4,3 +4,6 @@ metadata:
   name: healthcheck
 data:
   HEALTHCHECK_INTERVAL_SECONDS: "60"
+  # pg-boss depth thresholds: crossing either turns the queue probe `degraded`.
+  HEALTHCHECK_QUEUE_MAX_PENDING: "100"
+  HEALTHCHECK_QUEUE_MAX_AGE_SECONDS: "900"

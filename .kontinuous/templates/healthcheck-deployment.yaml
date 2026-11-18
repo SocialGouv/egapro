@@ -86,6 +86,18 @@ spec:
             - secretRef:
                 name: s3
                 optional: true
+            # Same sources as the app pod for ClamAV and Valkey, and as the
+            # notifications worker for SMTP: a probe must test the configuration
+            # the application actually uses, not a copy.
+            - configMapRef:
+                name: clamav
+                optional: true
+            - configMapRef:
+                name: valkey
+                optional: true
+            - configMapRef:
+                name: mail
+                optional: true
           env:
             # The app pod receives the same discrete keys from `pg-app`; the
             # worker assembles the DSN itself (src/config.ts), exactly like the
@@ -120,6 +132,78 @@ spec:
                 secretKeyRef:
                   name: "{{ .Values.global.pgSecretName }}"
                   key: PGSSLMODE
+            # pg-boss queue DB — same optional secret as the notifications
+            # worker; when absent the probe falls back to the main DB, exactly
+            # like the worker does.
+            - name: NOTIFICATIONS_POSTGRES_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.notificationsPgSecretName | default "pg-notifications" }}
+                  key: PGHOST
+                  optional: true
+            - name: NOTIFICATIONS_POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.notificationsPgSecretName | default "pg-notifications" }}
+                  key: PGDATABASE
+                  optional: true
+            - name: NOTIFICATIONS_POSTGRES_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.notificationsPgSecretName | default "pg-notifications" }}
+                  key: PGPORT
+                  optional: true
+            - name: NOTIFICATIONS_POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.notificationsPgSecretName | default "pg-notifications" }}
+                  key: PGUSER
+                  optional: true
+            - name: NOTIFICATIONS_POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.notificationsPgSecretName | default "pg-notifications" }}
+                  key: PGPASSWORD
+                  optional: true
+            - name: NOTIFICATIONS_POSTGRES_SSLMODE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.notificationsPgSecretName | default "pg-notifications" }}
+                  key: PGSSLMODE
+                  optional: true
+            # SMTP — the `mail` configmap above only provides the Mailpit
+            # defaults; these keys override it with the real relay on prod,
+            # like on the notifications worker.
+            - name: SMTP_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: smtp-app
+                  key: MAILER_SMTP_HOST
+                  optional: true
+            - name: SMTP_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: smtp-app
+                  key: MAILER_SMTP_PORT
+                  optional: true
+            - name: SMTP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: smtp-app
+                  key: MAILER_SMTP_LOGIN
+                  optional: true
+            - name: SMTP_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: smtp-app
+                  key: MAILER_SMTP_PASSWORD
+                  optional: true
+            - name: SMTP_SECURE
+              valueFrom:
+                secretKeyRef:
+                  name: smtp-app
+                  key: MAILER_SMTP_SSL
+                  optional: true
           resources:
             requests:
               cpu: 20m
