@@ -6,6 +6,17 @@ import { buildProbes } from "../index.js";
 
 const sql = (() => Promise.resolve([])) as unknown as Sql;
 
+const EXPOSED = {
+	HEALTHCHECK_PARTNER_PROBES_ENABLED: "true",
+	HEALTHCHECK_PUBLIC_URL: "https://egapro.travail.gouv.fr",
+	HEALTHCHECK_APISIX_SUIT_URL: "https://api-suit-egapro.travail.gouv.fr",
+	HEALTHCHECK_APISIX_SUIT_API_KEY: "supervision-secret-key",
+};
+
+function keysOf(probes: ReturnType<typeof buildProbes>): string[] {
+	return probes.map((probe) => probe.key);
+}
+
 describe("buildProbes", () => {
 	it("always supervises the application database and the internal services", () => {
 		const probes = buildProbes(
@@ -13,14 +24,12 @@ describe("buildProbes", () => {
 			sql,
 		);
 
-		expect(probes.map((probe) => probe.key)).toEqual([
+		expect(keysOf(probes)).toEqual([
 			"postgres-app",
 			"clamav",
 			"valkey",
 			"smtp",
 			"pgboss-queue",
-			"proconnect",
-			"weez",
 		]);
 		expect(probes[0]?.intervalSeconds).toBe(60);
 	});
@@ -38,24 +47,69 @@ describe("buildProbes", () => {
 			sql,
 		);
 
-		expect(probes.map((probe) => probe.key)).toEqual([
+		expect(keysOf(probes)).toEqual([
 			"postgres-app",
 			"s3",
 			"clamav",
 			"valkey",
 			"smtp",
 			"pgboss-queue",
-			"proconnect",
-			"weez",
 		]);
 	});
 
-	it("gives internal probes and partner probes their own cadence", () => {
+	it("does not schedule partner or exposed probes when they are disabled", () => {
+		const probes = buildProbes(
+			resolveConfig({
+				DATABASE_URL: "postgresql://db:5432/app",
+				...EXPOSED,
+				HEALTHCHECK_PARTNER_PROBES_ENABLED: "false",
+			}),
+			sql,
+		);
+
+		expect(keysOf(probes)).toEqual([
+			"postgres-app",
+			"clamav",
+			"valkey",
+			"smtp",
+			"pgboss-queue",
+		]);
+	});
+
+	it("adds partner and exposed probes when they are enabled", () => {
+		const probes = buildProbes(
+			resolveConfig({
+				DATABASE_URL: "postgresql://db:5432/app",
+				EGAPRO_PROCONNECT_ISSUER: "https://proconnect.test",
+				EGAPRO_WEEZ_API_URL: "https://weez.test",
+				HEALTHCHECK_WEEZ_REFERENCE_SIREN: "130025265",
+				...EXPOSED,
+			}),
+			sql,
+		);
+
+		expect(keysOf(probes)).toEqual([
+			"postgres-app",
+			"clamav",
+			"valkey",
+			"smtp",
+			"pgboss-queue",
+			"proconnect",
+			"weez",
+			"ingress",
+			"public-api",
+			"suit-gateway",
+		]);
+	});
+
+	it("gives each family its own cadence", () => {
 		const probes = buildProbes(
 			resolveConfig({
 				DATABASE_URL: "postgresql://db:5432/app",
 				HEALTHCHECK_INTERVAL_SECONDS: "30",
 				HEALTHCHECK_PARTNER_INTERVAL_SECONDS: "900",
+				HEALTHCHECK_EXPOSED_INTERVAL_SECONDS: "300",
+				...EXPOSED,
 			}),
 			sql,
 		);
@@ -66,6 +120,9 @@ describe("buildProbes", () => {
 		expect(intervalOf("clamav")).toBe(30);
 		expect(intervalOf("proconnect")).toBe(900);
 		expect(intervalOf("weez")).toBe(900);
+		expect(intervalOf("ingress")).toBe(300);
+		expect(intervalOf("public-api")).toBe(300);
+		expect(intervalOf("suit-gateway")).toBe(300);
 	});
 
 	it("keeps the probes of unconfigured services instead of dropping them", () => {
@@ -74,7 +131,7 @@ describe("buildProbes", () => {
 			sql,
 		);
 
-		expect(probes.map((probe) => probe.key)).toContain("clamav");
-		expect(probes.map((probe) => probe.key)).toContain("smtp");
+		expect(keysOf(probes)).toContain("clamav");
+		expect(keysOf(probes)).toContain("smtp");
 	});
 });

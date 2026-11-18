@@ -212,4 +212,71 @@ describe("resolveConfig", () => {
 			referenceSiren: "130025265",
 		});
 	});
+
+	it("keeps partner and exposed probes off unless explicitly enabled", () => {
+		expect(resolveConfig({}).partnerProbesEnabled).toBe(false);
+		expect(
+			resolveConfig({ HEALTHCHECK_PARTNER_PROBES_ENABLED: "false" })
+				.partnerProbesEnabled,
+		).toBe(false);
+		expect(
+			resolveConfig({ HEALTHCHECK_PARTNER_PROBES_ENABLED: "TRUE" })
+				.partnerProbesEnabled,
+		).toBe(true);
+		expect(
+			resolveConfig({ HEALTHCHECK_PARTNER_PROBES_ENABLED: "true" })
+				.partnerProbesEnabled,
+		).toBe(true);
+	});
+
+	it("reads the public entrypoint", () => {
+		expect(
+			resolveConfig({
+				HEALTHCHECK_PUBLIC_URL: "https://egapro.travail.gouv.fr",
+			}).publicUrl,
+		).toBe("https://egapro.travail.gouv.fr");
+		expect(resolveConfig({}).publicUrl).toBeNull();
+	});
+
+	it("configures the SUIT gateway only with both a URL and a key", () => {
+		expect(
+			resolveConfig({ HEALTHCHECK_APISIX_SUIT_URL: "https://api-suit.test" })
+				.suitGateway,
+		).toBeNull();
+		expect(
+			resolveConfig({ HEALTHCHECK_APISIX_SUIT_API_KEY: "secret-key" })
+				.suitGateway,
+		).toBeNull();
+		expect(
+			resolveConfig({
+				HEALTHCHECK_APISIX_SUIT_URL: "https://api-suit.test",
+				HEALTHCHECK_APISIX_SUIT_API_KEY: "secret-key",
+			}).suitGateway,
+		).toEqual({ baseUrl: "https://api-suit.test", apiKey: "secret-key" });
+	});
+
+	it("defaults the exposed cadence to 5 minutes and the certificate warning to 30 days", () => {
+		const config = resolveConfig({});
+
+		expect(config.exposedIntervalSeconds).toBe(300);
+		expect(config.certWarnDays).toBe(30);
+	});
+
+	it("reads the exposed cadence and the certificate warning window", () => {
+		const config = resolveConfig({
+			HEALTHCHECK_EXPOSED_INTERVAL_SECONDS: "120",
+			HEALTHCHECK_CERT_WARN_DAYS: "14",
+		});
+
+		expect(config.exposedIntervalSeconds).toBe(120);
+		expect(config.certWarnDays).toBe(14);
+	});
+
+	it("collects the supervision consumer key that must never reach a message", () => {
+		const config = resolveConfig({
+			HEALTHCHECK_APISIX_SUIT_API_KEY: "supervision-secret-key",
+		});
+
+		expect(config.secrets).toContain("supervision-secret-key");
+	});
 });
