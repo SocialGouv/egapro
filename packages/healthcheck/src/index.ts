@@ -85,6 +85,21 @@ function logDisabledProbes(config: HealthcheckConfig): void {
 			"[healthcheck] EGAPRO_WEEZ_API_URL or HEALTHCHECK_WEEZ_REFERENCE_SIREN missing — WEEZ probe not configured",
 		);
 	}
+	if (!config.partnerProbesEnabled) {
+		console.warn(
+			"[healthcheck] HEALTHCHECK_PARTNER_PROBES_ENABLED is false — partner and exposed probes not scheduled",
+		);
+	}
+	if (!config.publicUrl) {
+		console.warn(
+			"[healthcheck] no HEALTHCHECK_PUBLIC_URL — ingress and public API probes not configured",
+		);
+	}
+	if (!config.suitGateway) {
+		console.warn(
+			"[healthcheck] HEALTHCHECK_APISIX_SUIT_URL or HEALTHCHECK_APISIX_SUIT_API_KEY missing — SUIT gateway probe not configured",
+		);
+	}
 }
 
 function installShutdownHooks(
