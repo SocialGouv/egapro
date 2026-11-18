@@ -21,6 +21,7 @@ import {
 	MATOMO_FUNNEL_ACTION,
 } from "~/modules/analytics/shared/events";
 import { type CompanySizeRange, percentageOf } from "~/modules/domain";
+import { captureDependencyFailure } from "~/server/observability/captureDependency";
 
 const ONE_HOUR = 3_600;
 
@@ -197,9 +198,22 @@ async function callReportingApi(
 		body,
 		signal: AbortSignal.timeout(10_000),
 		next: { revalidate: ONE_HOUR },
+	}).catch((error: unknown) => {
+		console.error("[matomo] reporting API unreachable");
+		captureDependencyFailure("matomo", error);
+		throw error;
 	});
 
 	if (!response.ok) {
+		// tRPC surfaces the failure to the panel, but never to Sentry: report it
+		// here or an unavailable Matomo stays invisible (three funnels load in
+		// parallel, so the fingerprint groups the burst into one issue).
+		console.error(`[matomo] reporting API failed: HTTP ${response.status}`);
+		captureDependencyFailure(
+			"matomo",
+			new Error(`Matomo Reporting API error: ${response.status}`),
+			{ status: response.status },
+		);
 		throw new Error(
 			`Matomo Reporting API error: ${response.status} ${response.statusText}`,
 		);
@@ -211,9 +225,12 @@ async function callReportingApi(
 	const parsed = matomoReportingResponseSchema.safeParse(await response.json());
 	if (!parsed.success) return [];
 	if (!Array.isArray(parsed.data)) {
-		throw new Error(
+		const error = new Error(
 			`Matomo Reporting API error: ${parsed.data.message ?? "unexpected response"}`,
 		);
+		console.error("[matomo] reporting API returned an error payload");
+		captureDependencyFailure("matomo", error);
+		throw error;
 	}
 	return parsed.data;
 }

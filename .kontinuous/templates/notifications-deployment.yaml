@@ -127,6 +127,11 @@ spec:
             - configMapRef:
                 name: notifications
                 optional: true
+            # Public Sentry DSN used by the worker's runtime SDK init (#5199).
+            # Optional: without it the worker simply reports nothing.
+            - configMapRef:
+                name: sentry
+                optional: true
           env:
             # Public URL of the environment (prod / preprod / review app), same
             # host as the app (cf. NEXTAUTH_URL in values.yaml). Injected into
@@ -135,6 +140,10 @@ spec:
             # outside prod.
             - name: EGAPRO_PUBLIC_URL
               value: "https://{{ .Values.global.host }}"
+            - name: SENTRY_ENVIRONMENT
+              value: "{{ .Values.global.env }}"
+            - name: SENTRY_RELEASE
+              value: "{{ .Values.global.imageTag }}"
             # Opt-in health server: without it the worker listens on nothing
             # (local runs and the E2E helper would otherwise fight the app for
             # a port). The probes below consume it.

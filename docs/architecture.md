@@ -809,17 +809,20 @@ Toute l'accessibilité passe par **ultra11y**, en deux surfaces : le skill `revi
 
 ## 12. Observabilité (Sentry)
 
-Trois entrées Sentry, une par runtime :
+Quatre entrées Sentry, une par runtime :
 
 | Fichier | Runtime | Rôle |
 |---|---|---|
 | `src/instrumentation.ts` | Server (Node) | Erreurs SSR, Server Components, tRPC |
 | `src/sentry.edge.config.ts` | Edge | Middleware `src/middleware.ts` |
 | `src/instrumentation-client.ts` | Client (browser) | Erreurs React + global handlers |
+| `packages/notifications/src/worker/sentry.ts` | Worker `notifications` | Connexion à la file, rendu et envoi des e-mails |
 
 `src/app/global-error.tsx` capture les erreurs non gérées de l'arbre React et les remonte à Sentry.
 
-Les trois initialisations étalent les options du module `src/modules/observability`, qui anonymise ce qui part vers Sentry : collecte minimale côté SDK, filtrage des e-mails et SIREN/SIRET dans les erreurs, traces et breadcrumbs, et Session Replay entièrement masqué.
+Les trois initialisations de l'application étalent les options du module `src/modules/observability`, qui anonymise ce qui part vers Sentry : collecte minimale côté SDK, filtrage des e-mails et SIREN/SIRET dans les erreurs, traces et breadcrumbs, et Session Replay entièrement masqué. Les traces sont échantillonnées à 10 % en production et à 100 % ailleurs ; `SENTRY_TRACES_SAMPLE_RATE` règle le taux côté serveur (`src/modules/observability/sampling.ts`).
+
+Les pannes de dépendances avalées par l'appelant (WEEZ, SUIT, S3, Valkey, Matomo, file de messages) passent par `captureDependencyFailure` (`src/server/observability/captureDependency.ts`), qui les regroupe par dépendance et n'ajoute qu'un contexte borné. Le worker ne partage pas ce module : son `beforeSend` supprime la requête, le message libre et la valeur des exceptions, et vide les breadcrumbs.
 
 ---
 

@@ -1,0 +1,11 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: sentry
+data:
+  # Public by design: this DSN ships in every browser bundle. The app inlines it
+  # at build time; the notifications worker reads it at runtime (#5199).
+  SENTRY_DSN: "https://839d6efed11f674ace809a97222156e8@sentry2.fabrique.social.gouv.fr/54"
+  # Server-side traces sampling: 10 % in production, everything elsewhere.
+  # Resolved in ~/modules/observability/sampling.ts.
+  SENTRY_TRACES_SAMPLE_RATE: "0.1"

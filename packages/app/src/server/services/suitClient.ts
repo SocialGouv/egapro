@@ -3,6 +3,7 @@ import "server-only";
 import { Agent, fetch as undiciFetch } from "undici";
 
 import { env } from "~/env";
+import { captureDependencyFailure } from "~/server/observability/captureDependency";
 
 const TIMEOUT_MS = 10_000;
 
@@ -106,5 +107,28 @@ export function suitFetch(path: string): Promise<Response> {
 		headers: { Accept: "application/json" },
 		signal: AbortSignal.timeout(TIMEOUT_MS),
 		redirect: "error",
-	});
+	}).then(
+		(response) => {
+			// A refusal or a gateway failure means the dependency is down: callers
+			// degrade to "unknown" and would otherwise hide it. A plain 404 is a
+			// data answer, not an outage, and stays out of Sentry.
+			if (isDependencyFailureStatus(response.status)) {
+				captureDependencyFailure(
+					"suit",
+					new Error(`SUIT returned HTTP ${response.status}`),
+					{ status: response.status },
+				);
+			}
+			return response;
+		},
+		(error: unknown) => {
+			// Timeout, refused handshake, corrupt client certificate.
+			captureDependencyFailure("suit", error);
+			throw error;
+		},
+	);
+}
+
+function isDependencyFailureStatus(status: number): boolean {
+	return status === 401 || status === 403 || status >= 500;
 }

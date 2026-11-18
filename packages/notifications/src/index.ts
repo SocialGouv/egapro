@@ -13,6 +13,10 @@ import {
 } from "./worker/health.js";
 import { makeJobHandler } from "./worker/jobHandler.js";
 import { installShutdownHooks } from "./worker/lifecycle.js";
+import {
+	captureQueueConnectionFailure,
+	initWorkerSentry,
+} from "./worker/sentry.js";
 import { buildTransporter, getMailEnabled } from "./worker/transporter.js";
 
 /**
@@ -110,6 +114,15 @@ async function startBoss(connectionString: string): Promise<PgBoss> {
 }
 
 async function main(): Promise<void> {
+	// Before anything can fail: the queue connection retries below are exactly
+	// the failures this SDK is here to report.
+	initWorkerSentry({
+		dsn: process.env.SENTRY_DSN,
+		environment:
+			process.env.SENTRY_ENVIRONMENT ?? process.env.NEXT_PUBLIC_EGAPRO_ENV,
+		release: process.env.SENTRY_RELEASE,
+	});
+
 	const notifUrl = resolveNotificationsDbUrl();
 	if (!notifUrl) {
 		throw new Error(
@@ -192,6 +205,9 @@ const isCli = (() => {
 
 if (isCli) {
 	main().catch((error: unknown) => {
+		// Only the final failure reaches here: `startBoss` already swallowed the
+		// retries it will perform.
+		captureQueueConnectionFailure(error, BOOT_MAX_ATTEMPTS);
 		console.error("[notifications] fatal:", error);
 		process.exit(1);
 	});

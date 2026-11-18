@@ -168,6 +168,12 @@ export const env = createEnv({
 		// The handler reads process.env.VALKEY_URL directly (it runs outside
 		// the app module graph), but we declare it here for validation and docs.
 		VALKEY_URL: z.url().optional(),
+		// Traces sampling for the server and edge runtimes (0 = off, 1 = every
+		// transaction). Optional: the default is 0.1 in production and 1
+		// elsewhere, resolved in `~/modules/observability` (#5199). Server-only
+		// on purpose — the browser bundle keeps the same production/non-production
+		// default, and exposing a sampling knob there would buy nothing.
+		SENTRY_TRACES_SAMPLE_RATE: z.coerce.number().min(0).max(1).optional(),
 		// Optional comma-separated API tokens. Recognised tokens receive the
 		// documented higher public-API quota; anonymous access remains available.
 		EGAPRO_PUBLIC_API_TOKENS: z.string().optional().default(""),
@@ -248,6 +254,7 @@ export const env = createEnv({
 		EGAPRO_DECLARATION_RETENTION_YEARS:
 			process.env.EGAPRO_DECLARATION_RETENTION_YEARS,
 		VALKEY_URL: process.env.VALKEY_URL,
+		SENTRY_TRACES_SAMPLE_RATE: process.env.SENTRY_TRACES_SAMPLE_RATE,
 		EGAPRO_PUBLIC_API_TOKENS: process.env.EGAPRO_PUBLIC_API_TOKENS,
 		SUPPORT_JIRA_URL: process.env.SUPPORT_JIRA_URL,
 		NEXT_PUBLIC_EGAPRO_ENV: process.env.NEXT_PUBLIC_EGAPRO_ENV,

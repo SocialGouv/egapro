@@ -138,9 +138,11 @@ L'analyse antivirus des fichiers déposés y écrit une ligne préfixée `[antiv
 
 ### 4.4 Sentry (erreurs, traces et sessions enregistrées)
 
-Sentry capture les erreurs non gérées côté serveur et côté client, avec 100 % des traces échantillonnées. Côté client, l'enregistrement de session (Session Replay) est actif sur 10 % des sessions, et 100 % des sessions qui rencontrent une erreur.
+Sentry capture les erreurs non gérées côté serveur, côté client et dans le worker `notifications`. Les traces sont échantillonnées à 10 % en production, et à 100 % ailleurs (`SENTRY_TRACES_SAMPLE_RATE` permet de régler le taux côté serveur). Côté client, l'enregistrement de session (Session Replay) est actif sur 10 % des sessions, et 100 % des sessions qui rencontrent une erreur.
 
-**Anonymisation à l'émission** : les trois initialisations Sentry étalent les options du module `packages/app/src/modules/observability/`, qui empêchent les données personnelles de partir vers Sentry.
+Les pannes de dépendances qui étaient auparavant avalées dans un `console.error` (WEEZ, SUIT, S3, Valkey, Matomo, file de messages, relais SMTP) remontent désormais comme événements, regroupés par dépendance et accompagnés d'un contexte borné (code HTTP, opération, tentative) qui ne contient ni adresse e-mail ni SIREN.
+
+**Anonymisation à l'émission** : les trois initialisations de l'application étalent les options du module `packages/app/src/modules/observability/`, qui empêchent les données personnelles de partir vers Sentry. Le worker, qui embarque son propre SDK (`@sentry/node`) sans partager ce module, applique le même contrat de façon structurelle : requête, message libre et valeur des exceptions sont supprimés de l'événement, les données des breadcrumbs sont retirées.
 
 - La collecte côté SDK est coupée à la source (`dataCollection`) : informations d'utilisateur automatiques, cookies, en-têtes HTTP, corps de requête et de réponse, paramètres d'URL, variables locales des piles d'appels, paramètres des requêtes SQL et arguments des tâches en file.
 - Avant tout envoi d'erreur ou de span, un filtre parcourt le contenu — message d'erreur, valeurs d'exception, breadcrumbs, `extra`, `contexts`, `tags`, nom et attributs des spans — et remplace les adresses e-mail par `[email]` et les SIREN et SIRET (collés, espacés, encodés dans une URL ou numériques) par `[siren]`. Les chaînes de requête et fragments sont retirés des URL (requête, breadcrumbs de navigation et de `fetch`, spans), ce qui écarte aussi les entrées tRPC et les paramètres de retour ProConnect. L'objet utilisateur, les cookies, l'en-tête `Authorization` et le corps de requête sont supprimés de l'événement. Les piles d'appels et les identifiants de trace ne sont pas modifiés.
@@ -149,7 +151,7 @@ Sentry capture les erreurs non gérées côté serveur et côté client, avec 10
 
 **Durée** : non définie dans le dépôt — c'est un réglage de l'instance Sentry de l'équipe, pas du code applicatif.
 
-**Sources** : `packages/app/src/modules/observability/` · `packages/app/src/sentry.server.config.ts` · `packages/app/src/sentry.edge.config.ts` · `packages/app/src/instrumentation-client.ts`.
+**Sources** : `packages/app/src/modules/observability/` · `packages/app/src/sentry.server.config.ts` · `packages/app/src/sentry.edge.config.ts` · `packages/app/src/instrumentation-client.ts` · `packages/notifications/src/worker/sentry.ts`.
 
 ### 4.5 File de notification par e-mail
 
@@ -291,7 +293,7 @@ Reportés tels quels, sans les atténuer :
 3. **Représentation équilibrée** : aucune purge, alors que des lignes reprises de la V1 contiennent des coordonnées personnelles. Suite : [#4502](https://github.com/SocialGouv/egapro/issues/4502).
 4. **Table jamais purgée** : le journal de dédoublonnage des relances n'a aucun mécanisme de suppression. Suite : [#4769](https://github.com/SocialGouv/egapro/issues/4769).
 5. **Durées d'audit écrites deux fois** : une fois dans les constantes du module (lues uniquement par les tests), une fois en dur dans le script de purge qui les applique réellement. Suite : [#4771](https://github.com/SocialGouv/egapro/issues/4771).
-6. **Sentry** : l'enregistrement de session et l'échantillonnage à 100 % des traces ne sont mentionnés ni dans la page `/donnees-personnelles` ni dans `/gestion-des-cookies`. Le docx fourni par la DGT pour la nouvelle politique de confidentialité ([#3669](https://github.com/SocialGouv/egapro/issues/3669)) ne couvre pas ce point, qui reste à traiter. Suite : [#4772](https://github.com/SocialGouv/egapro/issues/4772).
+6. **Sentry** : l'enregistrement de session et l'échantillonnage des traces (10 % en production) ne sont mentionnés ni dans la page `/donnees-personnelles` ni dans `/gestion-des-cookies`. Le docx fourni par la DGT pour la nouvelle politique de confidentialité ([#3669](https://github.com/SocialGouv/egapro/issues/3669)) ne couvre pas ce point, qui reste à traiter. Suite : [#4772](https://github.com/SocialGouv/egapro/issues/4772).
 
 7. **Préférence de thème** : la page `/gestion-des-cookies` annonce un cookie `fr-theme` d’un an, mais le dépôt ne contient aucun code qui le crée ou applique cette durée. Le thème DSFR est mémorisé dans `localStorage` (`scheme`). Suite : vérifier et corriger la page publique ou implémenter le cookie annoncé.
 

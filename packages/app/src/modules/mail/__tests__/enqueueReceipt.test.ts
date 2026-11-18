@@ -364,6 +364,15 @@ describe("enqueueReceipt", () => {
 				errorMessage: "QUEUE_ERROR:",
 			}),
 		);
+		// The audit row holds a code, so a queue outage would stay invisible
+		// outside Sentry.
+		expect(mocks.captureException).toHaveBeenCalledWith(
+			expect.any(Error),
+			expect.objectContaining({
+				fingerprint: ["dependency", "queue"],
+				tags: { dependency: "queue" },
+			}),
+		);
 	});
 
 	it("logs failure with queue_unavailable when publisher cannot reach the queue", async () => {
@@ -378,6 +387,10 @@ describe("enqueueReceipt", () => {
 				status: "failure",
 				errorMessage: "QUEUE_UNAVAILABLE:",
 			}),
+		);
+		expect(mocks.captureException).toHaveBeenCalledWith(
+			expect.any(Error),
+			expect.objectContaining({ fingerprint: ["dependency", "queue"] }),
 		);
 	});
 

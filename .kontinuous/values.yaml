@@ -92,6 +92,12 @@ app:
         name: "s3"
     - secretRef:
         name: "s3"
+    # Public Sentry DSN and the traces sampling knob (#5199). Optional so a
+    # namespace with no sealed/config state still boots; when absent the app
+    # keeps the environment default (0.1 in production).
+    - configMapRef:
+        name: "sentry"
+        optional: true
     - configMapRef:
         name: "clamav"
     - configMapRef:
