@@ -32,11 +32,24 @@ function tooltipId(column: ContentTypeColumn): string {
 	return `matrix-tooltip-${column.declarationNumber}-${column.type}`;
 }
 
+function columnName(column: ContentTypeColumn): string {
+	return column.declarationLabel
+		? `${column.label} — ${column.declarationLabel}`
+		: column.label;
+}
+
 function checkboxLabel(column: ContentTypeColumn, fileName: string): string {
-	const declarationPart = column.declarationLabel
-		? ` — ${column.declarationLabel}`
-		: "";
-	return `${column.label}${declarationPart} — ${fileName}`;
+	return `${columnName(column)} — ${fileName}`;
+}
+
+function tableCaption(
+	visibleColumns: ContentTypeColumn[],
+	hiddenColumns: ContentTypeColumn[],
+): string {
+	if (visibleColumns.length > 0 || hiddenColumns.length === 0) {
+		return "Associez chaque fichier déposé aux types de contenu requis.";
+	}
+	return `Fichier déposé associé au type d'avis : ${hiddenColumns.map(columnName).join(", ")}.`;
 }
 
 export function ContentTypeMatrix({
@@ -52,6 +65,9 @@ export function ContentTypeMatrix({
 	const visibleColumns = hiddenColumnIds
 		? columns.filter((column) => !hiddenColumnIds.has(column.id))
 		: columns;
+	const hiddenColumns = hiddenColumnIds
+		? columns.filter((column) => hiddenColumnIds.has(column.id))
+		: [];
 
 	return (
 		<div className={`fr-table fr-table--no-caption ${styles.matrix}`}>
@@ -59,9 +75,7 @@ export function ContentTypeMatrix({
 				<div className="fr-table__container">
 					<div className="fr-table__content">
 						<table>
-							<caption>
-								Associez chaque fichier déposé aux types de contenu requis.
-							</caption>
+							<caption>{tableCaption(visibleColumns, hiddenColumns)}</caption>
 							<thead>
 								<tr>
 									<th className="fr-cell--fixed fr-cell--multiline" scope="col">
@@ -78,7 +92,7 @@ export function ContentTypeMatrix({
 												{column.label}
 												<TooltipButton
 													id={tooltipId(column)}
-													label={`Informations sur « ${column.label}${column.declarationLabel ? ` — ${column.declarationLabel}` : ""} »`}
+													label={`Informations sur « ${columnName(column)} »`}
 													text={column.description}
 												/>
 											</span>

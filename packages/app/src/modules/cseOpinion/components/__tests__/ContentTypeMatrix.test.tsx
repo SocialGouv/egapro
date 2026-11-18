@@ -176,6 +176,31 @@ describe("ContentTypeMatrix", () => {
 				"matrix-col-1-accuracy",
 			);
 		}
+		expect(
+			screen.getByRole("table", {
+				name: "Associez chaque fichier déposé aux types de contenu requis.",
+			}),
+		).toBeInTheDocument();
+	});
+
+	it("names the table after the associated type once every column is hidden (#5141)", () => {
+		const accuracyColumn = COLUMNS[0];
+		if (!accuracyColumn) throw new Error("missing accuracy column");
+		const associations = emptyMap();
+		associations[accuracyColumn.id] = "file-1";
+
+		renderMatrix({
+			files: [SINGLE_FILE],
+			columns: [accuracyColumn],
+			associations,
+			hiddenColumnIds: new Set([accuracyColumn.id]),
+		});
+
+		expect(
+			screen.getByRole("table", {
+				name: "Fichier déposé associé au type d'avis : Exactitude — 1re déclaration.",
+			}),
+		).toBeInTheDocument();
 	});
 
 	it("calls onToggle with the column id, file id and the new checked state", async () => {

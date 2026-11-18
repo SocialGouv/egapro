@@ -1209,6 +1209,11 @@ describe("Step2Upload", () => {
 			expect(
 				screen.queryByRole("columnheader", { name: /Exactitude/ }),
 			).not.toBeInTheDocument();
+			expect(
+				screen.getByRole("table", {
+					name: /^Fichier déposé associé au type d'avis : Exactitude/,
+				}),
+			).toBeInTheDocument();
 		});
 
 		it("hides a stored association on return without writing it again", () => {
