@@ -6,7 +6,11 @@ import { buildMail, MAIL_BUILDERS } from "./mails/index.js";
 import { QUEUE_NAME, validateJobData } from "./queue.js";
 import { registerSchedules, SCHEDULES } from "./schedules/index.js";
 import { logAuditMain } from "./worker/auditLog.js";
-import { createQueueDbCheck, startHealthServer } from "./worker/health.js";
+import {
+	createQueueDbCheck,
+	resolveHealthPort,
+	startHealthServer,
+} from "./worker/health.js";
 import { makeJobHandler } from "./worker/jobHandler.js";
 import { installShutdownHooks } from "./worker/lifecycle.js";
 import { buildTransporter, getMailEnabled } from "./worker/transporter.js";
@@ -59,10 +63,7 @@ const BOOT_DELAY_MS = Number.parseInt(
 	process.env.NOTIFICATIONS_BOOT_RETRY_DELAY_MS ?? "5000",
 	10,
 );
-const HEALTH_PORT = Number.parseInt(
-	process.env.NOTIFICATIONS_HEALTH_PORT ?? "3000",
-	10,
-);
+const HEALTH_PORT = resolveHealthPort(process.env.NOTIFICATIONS_HEALTH_PORT);
 
 // On a fresh review app the queue DB (`pg-rw`, the main app Postgres used as
 // fallback when no dedicated pg-notifications secret exists) may not resolve
@@ -122,17 +123,28 @@ async function main(): Promise<void> {
 
 	const mainSql: Sql | null = mainUrl ? postgres(mainUrl, { max: 2 }) : null;
 
-	// Started before pg-boss so liveness answers during the boot retry loop:
-	// the pod stays Running instead of crash-looping on a transient DNS race.
-	const healthSql = postgres(notifUrl, {
-		max: 1,
-		connect_timeout: 2,
-		connection: { statement_timeout: 2000 },
-	});
-	const healthServer = await startHealthServer({
-		port: HEALTH_PORT,
-		checkQueueDb: createQueueDbCheck(healthSql),
-	});
+	// Only when NOTIFICATIONS_HEALTH_PORT is set (the Deployment sets it next to
+	// the probes): a bare local run must not grab a port. Started before pg-boss
+	// so liveness answers during the boot retry loop — the pod stays Running
+	// instead of crash-looping on a transient DNS race.
+	const healthSql =
+		HEALTH_PORT === null
+			? null
+			: postgres(notifUrl, {
+					max: 1,
+					connect_timeout: 2,
+					connection: { statement_timeout: 2000 },
+				});
+	const health =
+		HEALTH_PORT === null || healthSql === null
+			? null
+			: {
+					server: await startHealthServer({
+						port: HEALTH_PORT,
+						checkQueueDb: createQueueDbCheck(healthSql),
+					}),
+					sql: healthSql,
+				};
 
 	const boss = await startBoss(notifUrl);
 	console.log(
@@ -165,7 +177,7 @@ async function main(): Promise<void> {
 
 	await registerSchedules(boss, mainSql);
 
-	installShutdownHooks({ boss, mainSql, healthServer, healthSql });
+	installShutdownHooks({ boss, mainSql, health });
 }
 
 const isCli = (() => {

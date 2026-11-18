@@ -135,6 +135,11 @@ spec:
             # outside prod.
             - name: EGAPRO_PUBLIC_URL
               value: "https://{{ .Values.global.host }}"
+            # Opt-in health server: without it the worker listens on nothing
+            # (local runs and the E2E helper would otherwise fight the app for
+            # a port). The probes below consume it.
+            - name: NOTIFICATIONS_HEALTH_PORT
+              value: "3000"
             # pg-boss queue DB — dedicated infra, isolated from the main app
             # so a crash here does not block business mutations. The secret
             # name is overridable; `optional: true` keeps the pod alive when

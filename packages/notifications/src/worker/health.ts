@@ -18,6 +18,19 @@ export type HealthServerOptions = {
 	host?: string;
 };
 
+/**
+ * Reads `NOTIFICATIONS_HEALTH_PORT`. Absent or invalid → `null`, and the worker
+ * starts without a listener: a bare `node dist/index.js` (local run, E2E
+ * helper) must not compete for a port. Kubernetes deployments set it
+ * explicitly, next to the probes that consume it.
+ */
+export function resolveHealthPort(raw: string | undefined): number | null {
+	if (!raw) return null;
+
+	const port = Number.parseInt(raw, 10);
+	return Number.isInteger(port) && port > 0 && port < 65_536 ? port : null;
+}
+
 export async function startHealthServer({
 	port,
 	checkQueueDb,

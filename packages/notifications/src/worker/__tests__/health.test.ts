@@ -4,12 +4,31 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
 	createQueueDbCheck,
 	type HealthServer,
+	resolveHealthPort,
 	startHealthServer,
 } from "../health.js";
 
 function fakeSql(run: () => Promise<unknown>): Sql {
 	return (() => run()) as unknown as Sql;
 }
+
+describe("resolveHealthPort", () => {
+	it("is opt-in: no variable means no listener", () => {
+		expect(resolveHealthPort(undefined)).toBeNull();
+		expect(resolveHealthPort("")).toBeNull();
+	});
+
+	it("reads a valid port", () => {
+		expect(resolveHealthPort("3000")).toBe(3000);
+	});
+
+	it("refuses a value that is not a usable port", () => {
+		expect(resolveHealthPort("0")).toBeNull();
+		expect(resolveHealthPort("-1")).toBeNull();
+		expect(resolveHealthPort("65536")).toBeNull();
+		expect(resolveHealthPort("http")).toBeNull();
+	});
+});
 
 describe("createQueueDbCheck", () => {
 	it("is ready when the queue database answers", async () => {
