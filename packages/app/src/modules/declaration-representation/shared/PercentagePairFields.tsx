@@ -5,15 +5,13 @@ import { useId, useState } from "react";
 
 import { displayInputDecimal, parseNumber } from "~/modules/domain";
 import { composeDescribedBy } from "~/modules/shared";
+import {
+	PERCENTAGES_REQUIRED_MESSAGE,
+	PERCENTAGES_SUM_MESSAGE,
+} from "../schemas";
 import styles from "./PercentagePairFields.module.scss";
 
 const PERCENTAGE_INPUT_PATTERN = /^\d{0,3}([.,]\d?)?$/;
-
-export const PERCENTAGES_REQUIRED_MESSAGE =
-	"Veuillez renseigner le pourcentage de femmes ou d'hommes.";
-
-export const PERCENTAGES_SUM_MESSAGE =
-	"La somme des pourcentages doit être égale à 100 %.";
 
 export function percentagePairError({
 	missing,
