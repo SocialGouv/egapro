@@ -178,4 +178,38 @@ describe("resolveConfig", () => {
 	it("reports no queue without any database", () => {
 		expect(resolveConfig({}).queue).toBeNull();
 	});
+
+	it("reads the partner cadence, 15 minutes by default", () => {
+		expect(resolveConfig({}).partnerIntervalSeconds).toBe(900);
+		expect(
+			resolveConfig({ HEALTHCHECK_PARTNER_INTERVAL_SECONDS: "60" })
+				.partnerIntervalSeconds,
+		).toBe(60);
+	});
+
+	it("reads the ProConnect issuer", () => {
+		expect(
+			resolveConfig({ EGAPRO_PROCONNECT_ISSUER: "https://proconnect.test" })
+				.proconnectIssuer,
+		).toBe("https://proconnect.test");
+		expect(resolveConfig({}).proconnectIssuer).toBeNull();
+	});
+
+	it("configures WEEZ only with both a base URL and a reference SIREN", () => {
+		expect(
+			resolveConfig({ EGAPRO_WEEZ_API_URL: "https://weez.test" }).weez,
+		).toBeNull();
+		expect(
+			resolveConfig({ HEALTHCHECK_WEEZ_REFERENCE_SIREN: "130025265" }).weez,
+		).toBeNull();
+		expect(
+			resolveConfig({
+				EGAPRO_WEEZ_API_URL: "https://weez.test",
+				HEALTHCHECK_WEEZ_REFERENCE_SIREN: "130025265",
+			}).weez,
+		).toEqual({
+			apiUrl: "https://weez.test",
+			referenceSiren: "130025265",
+		});
+	});
 });

@@ -75,6 +75,16 @@ function logDisabledProbes(config: HealthcheckConfig): void {
 			"[healthcheck] MAIL_ENABLED=false or SMTP_HOST missing — SMTP probe not configured",
 		);
 	}
+	if (!config.proconnectIssuer) {
+		console.warn(
+			"[healthcheck] no EGAPRO_PROCONNECT_ISSUER — ProConnect probe not configured",
+		);
+	}
+	if (!config.weez) {
+		console.warn(
+			"[healthcheck] EGAPRO_WEEZ_API_URL or HEALTHCHECK_WEEZ_REFERENCE_SIREN missing — WEEZ probe not configured",
+		);
+	}
 }
 
 function installShutdownHooks(
