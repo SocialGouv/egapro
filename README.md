@@ -232,6 +232,41 @@ egapro export-indexes /mnt/files/indexes.csv
 egapro export-representation /mnt/files/dgt-export-representation.xlsx
 ```
 
+### Stockage des fichiers
+
+Les exports sont destinés à un stockage objet compatible S3 (#5236). Le générateur
+(API) et le serveur `files` lisent **les mêmes variables**, sans préfixe `EGAPRO_` :
+
+| Variable | Rôle |
+| :-- | :-- |
+| `S3_ENDPOINT` | URL du service de stockage |
+| `S3_REGION` | Région signée des requêtes |
+| `S3_BUCKET_NAME` | Bucket de l'environnement |
+| `S3_PREFIX` | Préfixe optionnel dans le bucket (racine par défaut) |
+| `S3_ACCESS_KEY_ID` | Identifiant d'accès |
+| `S3_SECRET_ACCESS_KEY` | Clé secrète |
+
+Les valeurs publiques vivent dans le ConfigMap `s3` de chaque environnement
+(`.kontinuous/env/<env>/templates/s3.configmap.yaml`), injecté dans `api`, dans le
+scheduler et dans `files`. Les deux identifiants viennent du Secret `s3`, monté en
+optionnel : tant qu'il n'existe pas, les pods démarrent normalement et c'est
+l'usage du stockage qui échoue, en nommant la variable manquante.
+
+Pour sceller les identifiants dans un cluster (le scellement est lié au cluster et
+au namespace : un sealed secret n'est jamais réutilisable d'un environnement à
+l'autre) :
+
+```sh
+kubectl -n <namespace> create secret generic s3 \
+  --from-literal=S3_ACCESS_KEY_ID=<identifiant> \
+  --from-literal=S3_SECRET_ACCESS_KEY=<clé> \
+  --dry-run=client -o yaml \
+  | kubeseal --format yaml > .kontinuous/env/<env>/templates/s3.sealed-secret.yaml
+```
+
+Aucun identifiant n'est jamais écrit en clair dans le dépôt. En local, renseigner
+les mêmes variables dans l'environnement des conteneurs (voir `.env.dist`).
+
 ## Helpers egapro
 
 L'API contient un CLI avec certaines commandes utiles :

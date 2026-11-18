@@ -124,3 +124,54 @@ def test_init_only_reads_settings_from_env(monkeypatch, env_key):
     with pytest.raises(ValueError):
         config.parse_bool("maybe")
     assert config.dev_flavours == {"dev"}
+
+
+def set_storage_env(monkeypatch, **values):
+    for key in config.storage_keys:
+        monkeypatch.setattr(config, key, getattr(config, key))
+        monkeypatch.setenv(key, values.get(key, ""))
+
+
+def test_storage_settings_reads_unprefixed_env_vars(monkeypatch):
+    set_storage_env(
+        monkeypatch,
+        S3_ENDPOINT="https://s3.example",
+        S3_REGION="gra",
+        S3_BUCKET_NAME="a-bucket",
+        S3_ACCESS_KEY_ID="an-access-key",
+        S3_SECRET_ACCESS_KEY="a-secret-key",
+    )
+    config.init()
+    assert config.storage_settings() == config.StorageSettings(
+        endpoint="https://s3.example",
+        region="gra",
+        bucket="a-bucket",
+        prefix="",
+        access_key_id="an-access-key",
+        secret_access_key="a-secret-key",
+    )
+
+
+def test_storage_settings_refuses_partial_configuration(monkeypatch):
+    set_storage_env(monkeypatch, S3_ENDPOINT="https://s3.example", S3_REGION="gra")
+    config.init()
+    with pytest.raises(RuntimeError) as err:
+        config.storage_settings()
+    assert "S3_BUCKET_NAME" in str(err.value)
+    assert "S3_ACCESS_KEY_ID" in str(err.value)
+    assert "S3_SECRET_ACCESS_KEY" in str(err.value)
+    assert "S3_ENDPOINT" not in str(err.value)
+
+
+def test_storage_settings_ignores_egapro_prefixed_vars(monkeypatch):
+    set_storage_env(
+        monkeypatch,
+        S3_REGION="gra",
+        S3_BUCKET_NAME="a-bucket",
+        S3_ACCESS_KEY_ID="an-access-key",
+        S3_SECRET_ACCESS_KEY="a-secret-key",
+    )
+    monkeypatch.setenv("EGAPRO_S3_ENDPOINT", "https://s3.example")
+    config.init()
+    with pytest.raises(RuntimeError, match="S3_ENDPOINT"):
+        config.storage_settings()

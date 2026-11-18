@@ -126,6 +126,13 @@ api:
         name: "staff"
     - secretRef:
         name: "egapro-secret"
+    - configMapRef:
+        name: "s3"
+    # Optional until the storage credentials are sealed in the target cluster:
+    # no pod waits on a secret the DevOps have not provisioned yet.
+    - secretRef:
+        name: "s3"
+        optional: true
   # env:
   #   - name: EGAPRO_SENTRY_DSN
   #     valueFrom:
@@ -176,6 +183,12 @@ files:
   ~needs: [pg]
   # image: ghcr.io/socialgouv/docker/nginx:7.0.1
   imagePackage: files
+  envFrom:
+    - configMapRef:
+        name: "s3"
+    - secretRef:
+        name: "s3"
+        optional: true
   vars:
     WHITELIST_IP: "94.23.250.213,37.187.27.197,37.187.137.149,217.182.225.117,217.182.225.113,217.182.142.112,51.38.59.32,51.254.44.90,212.83.139.156"
     # htpasswd (bcrypt) file mounted from the `basic-auth` Secret (key `auth`), see volumes below
@@ -235,6 +248,11 @@ files:
             name: "staff"
         - secretRef:
             name: "egapro-secret"
+        - configMapRef:
+            name: "s3"
+        - secretRef:
+            name: "s3"
+            optional: true
         env:
         - name: EGAPRO_DBHOST
           value: "$(PGHOST)"
