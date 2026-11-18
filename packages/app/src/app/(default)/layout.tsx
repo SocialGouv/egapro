@@ -17,7 +17,7 @@ const DefaultLayout = async ({ children }: PropsWithChildren) => {
         {children}
       </main>
       <Footer />
-      {config.env === "dev" && <SentryTest />}
+      {(config.env === "dev" || config.env === "preprod") && <SentryTest />}
     </div>
   );
 };
