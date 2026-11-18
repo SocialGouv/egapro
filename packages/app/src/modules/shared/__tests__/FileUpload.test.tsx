@@ -723,6 +723,115 @@ describe("FileUpload", () => {
 	});
 });
 
+describe("FileUpload — fichier déjà déposé (#5187)", () => {
+	const DUPLICATE = UPLOAD_ERROR.duplicate();
+
+	function renderWithDeposited(
+		depositedFiles: { name: string; size: number | null }[],
+		selectedFiles: File[] = [],
+	) {
+		const onFilesChange = vi.fn();
+		render(
+			<FileUpload
+				{...baseProps}
+				depositedFiles={depositedFiles}
+				error={null}
+				maxFileCount={4}
+				onErrorDismiss={vi.fn()}
+				onFilesChange={onFilesChange}
+				selectedFiles={selectedFiles}
+			/>,
+		);
+		return onFilesChange;
+	}
+
+	it("refuses a file already deposited with the same name and size (S6)", () => {
+		const onFilesChange = renderWithDeposited([
+			{ name: "avis.pdf", size: 2048 },
+		]);
+
+		fireEvent.change(getInput(), {
+			target: { files: [makePdf("avis.pdf", 2048)] },
+		});
+
+		expect(onFilesChange).toHaveBeenCalledWith([], DUPLICATE);
+	});
+
+	it("adds a file present twice in the same selection only once (S7)", () => {
+		const onFilesChange = renderWithDeposited([]);
+		const first = makePdf("avis.pdf", 2048);
+		const copy = makePdf("avis.pdf", 2048);
+
+		fireEvent.change(getInput(), { target: { files: [first, copy] } });
+
+		expect(onFilesChange).toHaveBeenCalledWith([first], DUPLICATE);
+	});
+
+	it("refuses a file already in the current selection", () => {
+		const selected = makePdf("avis.pdf", 2048);
+		const onFilesChange = renderWithDeposited([], [selected]);
+
+		fireEvent.change(getInput(), {
+			target: { files: [makePdf("avis.pdf", 2048)] },
+		});
+
+		expect(onFilesChange).toHaveBeenCalledWith([selected], DUPLICATE);
+	});
+
+	it("matches on the name alone when the deposited size is unknown (S8)", () => {
+		const onFilesChange = renderWithDeposited([
+			{ name: "avis.pdf", size: null },
+		]);
+
+		fireEvent.change(getInput(), {
+			target: { files: [makePdf("avis.pdf", 4096)] },
+		});
+
+		expect(onFilesChange).toHaveBeenCalledWith([], DUPLICATE);
+	});
+
+	it("accepts a file with the same name but another size", () => {
+		const onFilesChange = renderWithDeposited([
+			{ name: "avis.pdf", size: 2048 },
+		]);
+		const resized = makePdf("avis.pdf", 4096);
+
+		fireEvent.change(getInput(), { target: { files: [resized] } });
+
+		expect(onFilesChange).toHaveBeenCalledWith([resized], null);
+	});
+
+	it("keeps the other valid files of a selection holding a duplicate", () => {
+		const onFilesChange = renderWithDeposited([
+			{ name: "avis.pdf", size: 2048 },
+		]);
+		const fresh = makePdf("autre-avis.pdf", 2048);
+
+		fireEvent.change(getInput(), {
+			target: { files: [makePdf("avis.pdf", 2048), fresh] },
+		});
+
+		expect(onFilesChange).toHaveBeenCalledWith([fresh], DUPLICATE);
+	});
+
+	it("reports the format error before the duplicate one", () => {
+		const onFilesChange = renderWithDeposited([
+			{ name: "avis.docx", size: 2048 },
+		]);
+		const docx = new File(["doc"], "avis.docx", {
+			type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+		});
+		Object.defineProperty(docx, "size", { value: 2048 });
+
+		fireEvent.change(getInput(), { target: { files: [docx] } });
+
+		expect(onFilesChange).toHaveBeenCalledWith(
+			[],
+			expect.objectContaining({ title: "Format non supporté" }),
+		);
+	});
+});
+
 describe("FileUpload filename validation", () => {
 	it("S1: accepts a valid name with accents and emoji, no error and the file is listed", async () => {
 		const onChange = vi.fn();
