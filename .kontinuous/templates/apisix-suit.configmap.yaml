@@ -12,6 +12,7 @@ data:
       node_listen: 9080
       enable_admin: false
       enable_ipv6: false
+      enable_http2: false
     deployment:
       # Standalone YAML mode = role `data_plane` (no etcd). `traditional`
       # requires an etcd config center and rejects `config_provider: yaml`.
