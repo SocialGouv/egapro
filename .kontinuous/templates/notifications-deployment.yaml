@@ -90,6 +90,29 @@ spec:
           command:
             - node
             - packages/notifications/dist/index.js
+          # Minimal health server of the worker (src/worker/health.ts). It
+          # starts before pg-boss, so liveness answers during the boot retry
+          # loop instead of crash-looping the pod.
+          ports:
+            - name: http
+              containerPort: 3000
+          # Liveness reads nothing: the process answering is enough.
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 6
+          # Readiness checks the queue database only — never SMTP, which would
+          # pull the worker out of service on a relay outage pg-boss retries.
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
           # The worker is the single consumer of MAIL_*/SMTP_* — the app pod
           # no longer mounts these vars (removed from `global.env` once the
           # publisher pattern landed). The `mail` configmap exposes

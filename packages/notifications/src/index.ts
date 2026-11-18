@@ -6,6 +6,7 @@ import { buildMail, MAIL_BUILDERS } from "./mails/index.js";
 import { QUEUE_NAME, validateJobData } from "./queue.js";
 import { registerSchedules, SCHEDULES } from "./schedules/index.js";
 import { logAuditMain } from "./worker/auditLog.js";
+import { createQueueDbCheck, startHealthServer } from "./worker/health.js";
 import { makeJobHandler } from "./worker/jobHandler.js";
 import { installShutdownHooks } from "./worker/lifecycle.js";
 import { buildTransporter, getMailEnabled } from "./worker/transporter.js";
@@ -56,6 +57,10 @@ const BOOT_MAX_ATTEMPTS = Number.parseInt(
 );
 const BOOT_DELAY_MS = Number.parseInt(
 	process.env.NOTIFICATIONS_BOOT_RETRY_DELAY_MS ?? "5000",
+	10,
+);
+const HEALTH_PORT = Number.parseInt(
+	process.env.NOTIFICATIONS_HEALTH_PORT ?? "3000",
 	10,
 );
 
@@ -117,6 +122,18 @@ async function main(): Promise<void> {
 
 	const mainSql: Sql | null = mainUrl ? postgres(mainUrl, { max: 2 }) : null;
 
+	// Started before pg-boss so liveness answers during the boot retry loop:
+	// the pod stays Running instead of crash-looping on a transient DNS race.
+	const healthSql = postgres(notifUrl, {
+		max: 1,
+		connect_timeout: 2,
+		connection: { statement_timeout: 2000 },
+	});
+	const healthServer = await startHealthServer({
+		port: HEALTH_PORT,
+		checkQueueDb: createQueueDbCheck(healthSql),
+	});
+
 	const boss = await startBoss(notifUrl);
 	console.log(
 		`[notifications] pg-boss started (queue=${QUEUE_NAME}, mailEnabled=${mailEnabled})`,
@@ -148,7 +165,7 @@ async function main(): Promise<void> {
 
 	await registerSchedules(boss, mainSql);
 
-	installShutdownHooks({ boss, mainSql });
+	installShutdownHooks({ boss, mainSql, healthServer, healthSql });
 }
 
 const isCli = (() => {
