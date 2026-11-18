@@ -1,4 +1,4 @@
-import { config } from "@common/config";
+import { areCrashTestsEnabled } from "@api/utils/testRoutes";
 import { SentryTest } from "@components/utils/SentryTest";
 import { type PropsWithChildren } from "react";
 
@@ -17,7 +17,7 @@ const DefaultLayout = async ({ children }: PropsWithChildren) => {
         {children}
       </main>
       <Footer />
-      {(config.env === "dev" || config.env === "preprod") && <SentryTest />}
+      {areCrashTestsEnabled() && <SentryTest />}
     </div>
   );
 };
