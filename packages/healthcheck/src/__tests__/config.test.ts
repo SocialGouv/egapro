@@ -86,4 +86,96 @@ describe("resolveConfig", () => {
 	it("ignores credentials that are not configured", () => {
 		expect(resolveConfig({ POSTGRES_PASSWORD: "" }).secrets).toEqual([]);
 	});
+
+	it("collects the SMTP and queue passwords that must never reach a message", () => {
+		const config = resolveConfig({
+			SMTP_PASS: "smtp-secret",
+			NOTIFICATIONS_POSTGRES_PASSWORD: "queue-secret",
+		});
+
+		expect(config.secrets).toEqual(["queue-secret", "smtp-secret"]);
+	});
+
+	it("reads the ClamAV endpoint and defaults its port", () => {
+		expect(resolveConfig({ CLAMAV_HOST: "clamavd" }).clamav).toEqual({
+			host: "clamavd",
+			port: 3310,
+		});
+		expect(
+			resolveConfig({ CLAMAV_HOST: "clamavd", CLAMAV_PORT: "3311" }).clamav,
+		).toEqual({ host: "clamavd", port: 3311 });
+	});
+
+	it("reports no ClamAV without CLAMAV_HOST", () => {
+		expect(resolveConfig({}).clamav).toBeNull();
+	});
+
+	it("reads the Valkey URL", () => {
+		expect(resolveConfig({ VALKEY_URL: "redis://valkey:6379" }).valkeyUrl).toBe(
+			"redis://valkey:6379",
+		);
+		expect(resolveConfig({}).valkeyUrl).toBeNull();
+	});
+
+	it("only configures SMTP when mail is enabled and a host is set", () => {
+		expect(resolveConfig({ SMTP_HOST: "mailpit" }).smtp).toBeNull();
+		expect(resolveConfig({ MAIL_ENABLED: "true" }).smtp).toBeNull();
+
+		expect(
+			resolveConfig({
+				MAIL_ENABLED: "true",
+				SMTP_HOST: "smtp.example.gouv.fr",
+				SMTP_PORT: "587",
+				SMTP_SECURE: "true",
+				SMTP_USER: "relay",
+				SMTP_PASS: "s3cr3t-pass",
+			}).smtp,
+		).toEqual({
+			host: "smtp.example.gouv.fr",
+			port: 587,
+			secure: true,
+			user: "relay",
+			pass: "s3cr3t-pass",
+		});
+	});
+
+	it("falls back to the application database for the pg-boss queue", () => {
+		const config = resolveConfig({
+			DATABASE_URL: "postgresql://db:5432/app",
+		});
+
+		expect(config.queue).toEqual({
+			databaseUrl: "postgresql://db:5432/app",
+			maxPending: 100,
+			maxAgeSeconds: 900,
+		});
+	});
+
+	it("prefers the dedicated queue database over the application one", () => {
+		const config = resolveConfig({
+			DATABASE_URL: "postgresql://db:5432/app",
+			NOTIFICATIONS_POSTGRES_HOST: "pg-queue",
+			NOTIFICATIONS_POSTGRES_USER: "egapro",
+			NOTIFICATIONS_POSTGRES_DB: "notifications",
+		});
+
+		expect(config.queue?.databaseUrl).toBe(
+			"postgresql://egapro@pg-queue:5432/notifications",
+		);
+	});
+
+	it("reads the queue depth thresholds", () => {
+		const config = resolveConfig({
+			DATABASE_URL: "postgresql://db:5432/app",
+			HEALTHCHECK_QUEUE_MAX_PENDING: "25",
+			HEALTHCHECK_QUEUE_MAX_AGE_SECONDS: "120",
+		});
+
+		expect(config.queue?.maxPending).toBe(25);
+		expect(config.queue?.maxAgeSeconds).toBe(120);
+	});
+
+	it("reports no queue without any database", () => {
+		expect(resolveConfig({}).queue).toBeNull();
+	});
 });

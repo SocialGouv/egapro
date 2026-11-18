@@ -2,40 +2,14 @@ import postgres from "postgres";
 
 import { type HealthcheckConfig, resolveConfig } from "./config.js";
 import { persistProbeResult } from "./persistence.js";
-import { createPostgresProbe } from "./probes/postgres.js";
-import { createS3Client, createS3Probe } from "./probes/s3.js";
-import type { Probe } from "./probes/types.js";
+import { buildProbes } from "./probes/index.js";
 import { sanitizeMessage } from "./sanitize.js";
 import { createScheduler, type ProbeScheduler } from "./scheduler.js";
 import { toHealthCheckLine, writeHealthCheckLine } from "./stdout.js";
 
 const STATEMENT_TIMEOUT_MS = 5000;
 
-export function buildProbes(
-	config: HealthcheckConfig,
-	sql: postgres.Sql,
-): Probe[] {
-	const probes: Probe[] = [
-		createPostgresProbe({
-			sql,
-			secrets: config.secrets,
-			intervalSeconds: config.intervalSeconds,
-		}),
-	];
-
-	if (config.s3) {
-		probes.push(
-			createS3Probe({
-				client: createS3Client(config.s3),
-				bucketName: config.s3.bucketName,
-				secrets: config.secrets,
-				intervalSeconds: config.intervalSeconds,
-			}),
-		);
-	}
-
-	return probes;
-}
+export { buildProbes };
 
 export async function main(): Promise<void> {
 	const config = resolveConfig();
@@ -46,18 +20,15 @@ export async function main(): Promise<void> {
 		return;
 	}
 
-	const sql = postgres(config.databaseUrl, {
-		max: 2,
-		connection: { statement_timeout: STATEMENT_TIMEOUT_MS },
-	});
+	const sql = createSqlClient(config.databaseUrl);
+	const queueSql =
+		config.queue && config.queue.databaseUrl !== config.databaseUrl
+			? createSqlClient(config.queue.databaseUrl)
+			: sql;
 
-	if (!config.s3) {
-		console.warn(
-			"[healthcheck] incomplete S3_* configuration — S3 probe disabled",
-		);
-	}
+	logDisabledProbes(config);
 
-	const probes = buildProbes(config, sql);
+	const probes = buildProbes(config, sql, queueSql);
 	const scheduler = createScheduler({
 		probes,
 		async onResult(probe, result, checkedAt) {
@@ -77,12 +48,38 @@ export async function main(): Promise<void> {
 		`[healthcheck] started (probes=${probes.map((probe) => probe.key).join(",")}, interval=${config.intervalSeconds}s)`,
 	);
 	scheduler.start();
-	installShutdownHooks(scheduler, sql);
+	installShutdownHooks(scheduler, [sql, queueSql]);
+}
+
+function createSqlClient(databaseUrl: string): postgres.Sql {
+	return postgres(databaseUrl, {
+		max: 2,
+		connection: { statement_timeout: STATEMENT_TIMEOUT_MS },
+	});
+}
+
+function logDisabledProbes(config: HealthcheckConfig): void {
+	if (!config.s3) {
+		console.warn(
+			"[healthcheck] incomplete S3_* configuration — S3 probe disabled",
+		);
+	}
+	if (!config.clamav) {
+		console.warn("[healthcheck] no CLAMAV_HOST — ClamAV probe not configured");
+	}
+	if (!config.valkeyUrl) {
+		console.warn("[healthcheck] no VALKEY_URL — Valkey probe not configured");
+	}
+	if (!config.smtp) {
+		console.warn(
+			"[healthcheck] MAIL_ENABLED=false or SMTP_HOST missing — SMTP probe not configured",
+		);
+	}
 }
 
 function installShutdownHooks(
 	scheduler: ProbeScheduler,
-	sql: postgres.Sql,
+	clients: readonly postgres.Sql[],
 ): void {
 	let stopping = false;
 
@@ -94,7 +91,11 @@ function installShutdownHooks(
 		console.log(`[healthcheck] ${signal} received, stopping`);
 		scheduler
 			.stop()
-			.then(() => sql.end({ timeout: 5 }))
+			.then(() =>
+				Promise.allSettled(
+					[...new Set(clients)].map((client) => client.end({ timeout: 5 })),
+				),
+			)
 			.then(
 				() => process.exit(0),
 				() => process.exit(1),

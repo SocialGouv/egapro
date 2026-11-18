@@ -1,24 +1,26 @@
 import type { Sql } from "postgres";
 import { describe, expect, it } from "vitest";
 
-import { type HealthcheckConfig, resolveConfig } from "../config.js";
+import { resolveConfig } from "../config.js";
 import { buildProbes } from "../index.js";
 
 const sql = (() => Promise.resolve([])) as unknown as Sql;
 
-const config: HealthcheckConfig = {
-	databaseUrl: "postgresql://db:5432/app",
-	s3: null,
-	intervalSeconds: 30,
-	secrets: [],
-};
-
 describe("buildProbes", () => {
-	it("always supervises the application database", () => {
-		const probes = buildProbes(config, sql);
+	it("always supervises the application database and the internal services", () => {
+		const probes = buildProbes(
+			resolveConfig({ DATABASE_URL: "postgresql://db:5432/app" }),
+			sql,
+		);
 
-		expect(probes.map((probe) => probe.key)).toEqual(["postgres-app"]);
-		expect(probes[0]?.intervalSeconds).toBe(30);
+		expect(probes.map((probe) => probe.key)).toEqual([
+			"postgres-app",
+			"clamav",
+			"valkey",
+			"smtp",
+			"pgboss-queue",
+		]);
+		expect(probes[0]?.intervalSeconds).toBe(60);
 	});
 
 	it("adds the S3 probe when the storage is configured", () => {
@@ -34,6 +36,37 @@ describe("buildProbes", () => {
 			sql,
 		);
 
-		expect(probes.map((probe) => probe.key)).toEqual(["postgres-app", "s3"]);
+		expect(probes.map((probe) => probe.key)).toEqual([
+			"postgres-app",
+			"s3",
+			"clamav",
+			"valkey",
+			"smtp",
+			"pgboss-queue",
+		]);
+	});
+
+	it("applies the configured interval to every probe", () => {
+		const probes = buildProbes(
+			resolveConfig({
+				DATABASE_URL: "postgresql://db:5432/app",
+				HEALTHCHECK_INTERVAL_SECONDS: "30",
+			}),
+			sql,
+		);
+
+		expect(probes.map((probe) => probe.intervalSeconds)).toEqual(
+			probes.map(() => 30),
+		);
+	});
+
+	it("keeps the probes of unconfigured services instead of dropping them", () => {
+		const probes = buildProbes(
+			resolveConfig({ DATABASE_URL: "postgresql://db:5432/app" }),
+			sql,
+		);
+
+		expect(probes.map((probe) => probe.key)).toContain("clamav");
+		expect(probes.map((probe) => probe.key)).toContain("smtp");
 	});
 });
