@@ -1192,6 +1192,57 @@ describe("Step2Upload", () => {
 		}).not.toThrow();
 	});
 
+	describe("already deposited file (#5187)", () => {
+		function makePdfOfSize(name: string, size: number) {
+			const file = new File(["content"], name, { type: "application/pdf" });
+			Object.defineProperty(file, "size", { value: size });
+			return file;
+		}
+
+		it("refuses a file already in the table without uploading it", async () => {
+			renderStep({
+				columns: ACCURACY_AND_GAP_COLUMNS,
+				existingFiles: [makeFile("avis-1.pdf", "file-1")],
+			});
+
+			fireEvent.change(getFileInput(), {
+				target: { files: [makePdfOfSize("avis-1.pdf", 63365)] },
+			});
+
+			expect(alertAnnouncing("Fichier déjà déposé")).toBeDefined();
+			expect(
+				screen.getByText(
+					"Ce fichier a déjà été ajouté. Vérifiez la liste des fichiers déposés.",
+				),
+			).toBeInTheDocument();
+			expect(uploadFileMock).not.toHaveBeenCalled();
+			expect(screen.getAllByRole("link", { name: /avis-1\.pdf/ })).toHaveLength(
+				1,
+			);
+		});
+
+		it("keeps the deposited file associable after a duplicate refusal", async () => {
+			const user = userEvent.setup();
+			renderStep({
+				columns: ACCURACY_AND_GAP_COLUMNS,
+				existingFiles: [makeFile("avis-1.pdf", "file-1")],
+			});
+			fireEvent.change(getFileInput(), {
+				target: { files: [makePdfOfSize("avis-1.pdf", 63365)] },
+			});
+
+			await user.click(
+				screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+			);
+
+			expect(setTypesMutateMock).toHaveBeenCalledWith({
+				associations: [
+					{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+				],
+			});
+		});
+	});
+
 	describe("single possible association (#4731)", () => {
 		it("pre-checks, persists and locks the only content type for the only file", () => {
 			renderStep({

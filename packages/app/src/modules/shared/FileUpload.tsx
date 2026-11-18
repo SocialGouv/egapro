@@ -9,6 +9,22 @@ import { UploadAlert } from "./UploadAlert";
 import { formatFileMeta, MAX_FILE_SIZE } from "./uploadConfig";
 import { UPLOAD_ERROR, type UploadError } from "./uploadErrors";
 
+type DepositedFile = { name: string; size: number | null };
+
+const NO_DEPOSITED_FILES: ReadonlyArray<DepositedFile> = [];
+
+// A stored file whose size is unknown (failed S3 HEAD) can only be matched by name.
+function isDuplicateFile(
+	file: File,
+	knownFiles: ReadonlyArray<DepositedFile>,
+): boolean {
+	return knownFiles.some(
+		(known) =>
+			known.name === file.name &&
+			(known.size === null || known.size === file.size),
+	);
+}
+
 type Props = {
 	inputId: string;
 	/**
@@ -38,6 +54,7 @@ type Props = {
 	 */
 	disabled?: boolean;
 	fileList?: "cards" | "table";
+	depositedFiles?: ReadonlyArray<DepositedFile>;
 };
 
 export function FileUpload({
@@ -53,6 +70,7 @@ export function FileUpload({
 	maxFileCount = 1,
 	disabled = false,
 	fileList = "cards",
+	depositedFiles = NO_DEPOSITED_FILES,
 }: Props) {
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const dropzoneRef = useRef<HTMLElement>(null);
@@ -101,20 +119,27 @@ export function FileUpload({
 			const remainingSlots = maxFileCount - selectedFiles.length;
 			const capped = filesToAdd.slice(0, remainingSlots);
 
+			const knownFiles: DepositedFile[] = [
+				...depositedFiles,
+				...selectedFiles.map(({ name, size }) => ({ name, size })),
+			];
 			const accepted: File[] = [];
 			let firstError: UploadError | null = null;
 			for (const file of capped) {
-				const validationError = validateFile(file);
+				const validationError =
+					validateFile(file) ??
+					(isDuplicateFile(file, knownFiles) ? UPLOAD_ERROR.duplicate() : null);
 				if (validationError) {
 					firstError ??= validationError;
 					continue;
 				}
 				accepted.push(file);
+				knownFiles.push({ name: file.name, size: file.size });
 			}
 
 			onFilesChange([...selectedFiles, ...accepted], firstError);
 		},
-		[onFilesChange, validateFile, selectedFiles, maxFileCount],
+		[onFilesChange, validateFile, selectedFiles, maxFileCount, depositedFiles],
 	);
 
 	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {

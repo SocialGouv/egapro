@@ -18,6 +18,11 @@ export const UPLOAD_ERROR = {
 		title: "Fichier trop volumineux",
 		message: FILE_TOO_LARGE_ERROR,
 	}),
+	duplicate: (): UploadError => ({
+		title: "Fichier déjà déposé",
+		message:
+			"Ce fichier a déjà été ajouté. Vérifiez la liste des fichiers déposés.",
+	}),
 	empty: (message: string): UploadError => ({
 		title: "Fichier vide",
 		message,

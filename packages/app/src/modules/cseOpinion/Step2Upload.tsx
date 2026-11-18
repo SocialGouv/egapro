@@ -214,6 +214,15 @@ export function Step2Upload({
 		autoUpload: true,
 	});
 
+	const depositedFiles = useMemo(
+		() =>
+			existingFiles.map(({ fileName, fileSize }) => ({
+				name: fileName,
+				size: fileSize,
+			})),
+		[existingFiles],
+	);
+
 	const missingColumns = useMemo(
 		() => getMissingColumns(columns, associations),
 		[columns, associations],
@@ -323,6 +332,7 @@ export function Step2Upload({
 						accept=".pdf"
 						acceptLabel="pdf"
 						allowedMimeTypes={["application/pdf"]}
+						depositedFiles={depositedFiles}
 						disabled={isReadOnly || isUploadingFiles || isComplete}
 						error={uploadError}
 						inputId="cse-file-upload"
