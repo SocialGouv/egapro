@@ -7,3 +7,8 @@ data:
   # pg-boss depth thresholds: crossing either turns the queue probe `degraded`.
   HEALTHCHECK_QUEUE_MAX_PENDING: "100"
   HEALTHCHECK_QUEUE_MAX_AGE_SECONDS: "900"
+  # Partner cadence: 15 min is the accepted detection delay for ProConnect and
+  # WEEZ, and it caps the load on their side.
+  HEALTHCHECK_PARTNER_INTERVAL_SECONDS: "900"
+  # Stable public entity used to prove WEEZ answers (DINUM).
+  HEALTHCHECK_WEEZ_REFERENCE_SIREN: "130025265"

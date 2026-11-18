@@ -19,6 +19,8 @@ describe("buildProbes", () => {
 			"valkey",
 			"smtp",
 			"pgboss-queue",
+			"proconnect",
+			"weez",
 		]);
 		expect(probes[0]?.intervalSeconds).toBe(60);
 	});
@@ -43,21 +45,27 @@ describe("buildProbes", () => {
 			"valkey",
 			"smtp",
 			"pgboss-queue",
+			"proconnect",
+			"weez",
 		]);
 	});
 
-	it("applies the configured interval to every probe", () => {
+	it("gives internal probes and partner probes their own cadence", () => {
 		const probes = buildProbes(
 			resolveConfig({
 				DATABASE_URL: "postgresql://db:5432/app",
 				HEALTHCHECK_INTERVAL_SECONDS: "30",
+				HEALTHCHECK_PARTNER_INTERVAL_SECONDS: "900",
 			}),
 			sql,
 		);
+		const intervalOf = (key: string) =>
+			probes.find((probe) => probe.key === key)?.intervalSeconds;
 
-		expect(probes.map((probe) => probe.intervalSeconds)).toEqual(
-			probes.map(() => 30),
-		);
+		expect(intervalOf("postgres-app")).toBe(30);
+		expect(intervalOf("clamav")).toBe(30);
+		expect(intervalOf("proconnect")).toBe(900);
+		expect(intervalOf("weez")).toBe(900);
 	});
 
 	it("keeps the probes of unconfigured services instead of dropping them", () => {

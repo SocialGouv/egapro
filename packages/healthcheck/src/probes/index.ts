@@ -4,10 +4,12 @@ import type { HealthcheckConfig } from "../config.js";
 import { createClamavProbe } from "./clamav.js";
 import { createPgbossProbe } from "./pgboss.js";
 import { createPostgresProbe } from "./postgres.js";
+import { createProconnectProbe } from "./proconnect.js";
 import { createS3Client, createS3Probe } from "./s3.js";
 import { createSmtpProbe, createSmtpTransporter } from "./smtp.js";
 import type { Probe } from "./types.js";
 import { createValkeyProbe } from "./valkey.js";
+import { createWeezProbe } from "./weez.js";
 
 export function buildProbes(
 	config: HealthcheckConfig,
@@ -54,6 +56,16 @@ export function buildProbes(
 			limits: config.queue,
 			secrets: config.secrets,
 			intervalSeconds: config.intervalSeconds,
+		}),
+		createProconnectProbe({
+			issuer: config.proconnectIssuer,
+			secrets: config.secrets,
+			intervalSeconds: config.partnerIntervalSeconds,
+		}),
+		createWeezProbe({
+			connection: config.weez,
+			secrets: config.secrets,
+			intervalSeconds: config.partnerIntervalSeconds,
 		}),
 	);
 
