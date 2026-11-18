@@ -199,7 +199,7 @@ export const Footer = () => (
             </a>
           </li>
           <li className="fr-footer__bottom-item">
-            <a className="fr-footer__bottom-link" href="/politique-de-confidentialite-v2">
+            <a className="fr-footer__bottom-link" href="/politique-de-confidentialite">
               Politique de confidentialité
             </a>
           </li>

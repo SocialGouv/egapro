@@ -1,7 +1,7 @@
 import { Container, Grid, GridCol } from "@design-system";
 import Link from "next/link";
 
-import { FooterConsentManagementItem } from "../../consentManagement";
+import { FooterConsentManagementItem } from "../../../consentManagement";
 
 const title = "Politique de confidentialité";
 
@@ -19,40 +19,34 @@ const PrivacyPolicy = () => {
         <Grid align="center">
           <GridCol md={10} lg={8}>
             <h1>{title}</h1>
-            <h2>Qui est responsable d’Egapro&nbsp;?</h2>
+            <h2>Qui est responsable d’Index Egapro&nbsp;?</h2>
             <p>
-              La plateforme Egapro est sous la responsabilité de la Direction générale du travail, représentée par
-              Monsieur Pierre RAMAIN, directeur général du travail. Egapro permet aux entreprises de déclarer aux
-              services du ministre chargé du travail leurs résultats de l’index de l’égalité professionnelle entre les
-              femmes et les hommes et, si elles sont assujetties, de la représentation équilibrée entre les femmes et
-              les hommes dans les postes de direction.
+              La plateforme Index Egapro est sous la responsabilité de la Direction générale du travail, représentée par
+              Monsieur Pierre RAMAIN, directeur général du travail. Index Egapro met en place deux index conçus pour
+              lutter contre l’inégalité entre les femmes et les hommes.
             </p>
             <h2>Quelles sont les données à caractère personnel que nous traitons&nbsp;?</h2>
-            <p>Egapro traite les données à caractère personnel suivantes&nbsp;:</p>
+            <p>Index Egapro traite les données à caractère personnel suivantes&nbsp;:</p>
             <ul className={"fr-mb-3w"}>
               <li>Nom, prénom, adresse e-mail et numéro de téléphone professionnel des utilisateurs.</li>
             </ul>
             <h2>Pourquoi traitons-nous des données à caractère personnel&nbsp;?</h2>
-            <p>Egapro traite des données à caractère personnel pour&nbsp;:</p>
+            <p>Index Egapro traite des données à caractère personnel pour&nbsp;:</p>
             <ul className={"fr-mb-3w"}>
-              <li>Déclarer les résultats de l’index de l’égalité professionnelle entre les femmes et les hommes;</li>
               <li>
-                Déclarer les écarts éventuels de représentation entre les femmes et les hommes parmi les cadres
-                dirigeants et les membres des instances dirigeantes.
+                Calculer les écarts de rémunération entre les femmes et les hommes au sein des entreprises et réaliser
+                les déclarations qui en sont issues&nbsp;;
+              </li>
+              <li>
+                Calculer les écarts de représentation équilibrée entre les femmes et les hommes dans les services
+                dirigeants.
               </li>
             </ul>
             <h2>Qu’est-ce qui nous autorise à traiter des données à caractère personnel&nbsp;?</h2>
             <p>
-              Egapro traite des données à caractère personnel en se basant sur l’exécution d’une mission d’intérêt
+              Index Egapro traite des données à caractère personnel en se basant sur l’exécution d’une mission d’intérêt
               public ou relevant de l’exercice de l’autorité publique dont est investi le responsable de traitement
               conformément à l’article 6-1 e) du RGPD.
-            </p>
-            <p>
-              Cette mission d’intérêt public est posée par l’arrêté du 17 août 2022 modifié définissant les modèles de
-              présentation et les modalités de transmission à l’administration des indicateurs et du niveau de résultat
-              en matière d’écart de rémunération entre les femmes et les hommes dans l’entreprise ainsi que par l’arrêté
-              du 27 octobre 2022 définissant les modalités de transmission à l’administration des écarts éventuels de
-              représentation entre les femmes et les hommes dans l’entreprise.
             </p>
             <h2>Pendant combien de temps les données à caractère personnel sont conservées&nbsp;?</h2>
             <table className="fr-table fr-table--bordered">
@@ -64,7 +58,7 @@ const PrivacyPolicy = () => {
               </thead>
               <tbody>
                 <tr>
-                  <td>Données des utilisateurs d'Egapro</td>
+                  <td>Données des utilisateurs des Index Egapro</td>
                   <td>
                     À compter de la suppression par l’utilisateur ou 2 ans à compter de la dernière déclaration ou de
                     l’inactivité du compte
@@ -109,8 +103,7 @@ const PrivacyPolicy = () => {
               avoir accès aux données&nbsp;:
             </p>
             <ul className={"fr-mb-3w"}>
-              <li>Les membres de l’équipe d’Egapro;</li>
-              <li>Les agents autorisés au sein de la Direction générale du travail.</li>
+              <li>Les membres de l’équipe d’Index Egapro.</li>
             </ul>
             <h2>Qui nous aide à traiter vos données&nbsp;?</h2>
             <p>
@@ -174,12 +167,12 @@ const PrivacyPolicy = () => {
               légale au sens du RGPD et doit être entendu au sens de l'article 6-1 a) du RGPD.
             </p>
             <p>
-              Egapro utilise notamment la solution de mesure d’audience «&nbsp;Matomo&nbsp;» paramétrée en mode
+              Index Egapro utilise notamment la solution de mesure d’audience «&nbsp;Matomo&nbsp;» paramétrée en mode
               «&nbsp;exempté&nbsp;» et ne nécessitant pas le recueil de votre consentement conformément aux
               recommandations de la CNIL. La durée de vie du cookie n’excède pas 13 mois.
             </p>
             <p>
-              Vous êtes suivis de manière anonyme. Décochez la case pour ne plus être suivis même anonymement&nbsp;:{" "}
+              Vous êtes suivis de manière anonyme. Vous pouvez retirer votre consentement relatif aux cookies&nbsp;:{" "}
               <FooterConsentManagementItem />
             </p>
             <p>
@@ -207,9 +200,6 @@ const PrivacyPolicy = () => {
                 </Link>
               </li>
             </ul>
-            <Link href="/politique-de-confidentialite" target="_blank" rel="noreferrer">
-              Version du 18/12/2023
-            </Link>
           </GridCol>
         </Grid>
       </Container>
