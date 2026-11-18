@@ -52,7 +52,18 @@ app:
     - pg
     - valkey
   imagePackage: app
+  # Liveness only: probesPath feeds both probes when the maps below are absent.
   probesPath: /api/healthz
+  # Readiness reflects the database alone — a partner outage must never pull
+  # every pod out of the rotation. The route caps itself at 2 s, so the
+  # kubelet deadline stays above it; three failures (15 s) take the pod out.
+  readinessProbe:
+    httpGet:
+      path: /api/readyz
+      port: http
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
   containerPort: 3000
   envFrom:
     - secretRef:
