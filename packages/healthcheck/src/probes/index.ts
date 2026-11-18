@@ -2,11 +2,14 @@ import type { Sql } from "postgres";
 
 import type { HealthcheckConfig } from "../config.js";
 import { createClamavProbe } from "./clamav.js";
+import { createIngressProbe } from "./ingress.js";
 import { createPgbossProbe } from "./pgboss.js";
 import { createPostgresProbe } from "./postgres.js";
 import { createProconnectProbe } from "./proconnect.js";
+import { createPublicApiProbe } from "./publicApi.js";
 import { createS3Client, createS3Probe } from "./s3.js";
 import { createSmtpProbe, createSmtpTransporter } from "./smtp.js";
+import { createSuitGatewayProbe } from "./suitGateway.js";
 import type { Probe } from "./types.js";
 import { createValkeyProbe } from "./valkey.js";
 import { createWeezProbe } from "./weez.js";
@@ -57,6 +60,11 @@ export function buildProbes(
 			secrets: config.secrets,
 			intervalSeconds: config.intervalSeconds,
 		}),
+	);
+
+	if (!config.partnerProbesEnabled) return probes;
+
+	probes.push(
 		createProconnectProbe({
 			issuer: config.proconnectIssuer,
 			secrets: config.secrets,
@@ -66,6 +74,22 @@ export function buildProbes(
 			connection: config.weez,
 			secrets: config.secrets,
 			intervalSeconds: config.partnerIntervalSeconds,
+		}),
+		createIngressProbe({
+			publicUrl: config.publicUrl,
+			secrets: config.secrets,
+			certWarnDays: config.certWarnDays,
+			intervalSeconds: config.exposedIntervalSeconds,
+		}),
+		createPublicApiProbe({
+			publicUrl: config.publicUrl,
+			secrets: config.secrets,
+			intervalSeconds: config.exposedIntervalSeconds,
+		}),
+		createSuitGatewayProbe({
+			connection: config.suitGateway,
+			secrets: config.secrets,
+			intervalSeconds: config.exposedIntervalSeconds,
 		}),
 	);
 

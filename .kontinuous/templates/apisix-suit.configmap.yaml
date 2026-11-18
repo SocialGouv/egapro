@@ -35,14 +35,22 @@ data:
           ip: "0.0.0.0"
           port: 9091
   apisix.yaml: |
-    # APISIX reads secrets from env vars via `$ENV://<name>` — both are
-    # populated on the pod via envFrom pointing at the `suit` sealed-secret.
+    # APISIX reads secrets from env vars via `$ENV://<name>` — they are
+    # populated on the pod via envFrom pointing at the `suit` and
+    # `suit-monitoring` sealed-secrets.
     consumers:
       - username: suit
         plugins:
           key-auth:
             key: "$ENV://EGAPRO_SUIT_API_KEY"
-    # Shared plugin bundle applied to all three SUIT routes. Each request:
+      # Dedicated supervision consumer: the healthcheck worker calls
+      # /api/v1/healthz with this key, never a real integrator's one. Revoking
+      # it only silences the monitoring, and the audit log stays untouched.
+      - username: supervision
+        plugins:
+          key-auth:
+            key: "$ENV://HEALTHCHECK_APISIX_SUIT_API_KEY"
+    # Shared plugin bundle applied to every `suit-api` route. Each request:
     #   1. Is normalized in Lua (serverless-pre-function):
     #        a. `Authorization: Bearer <key>` → `apikey: <key>` so the native
     #           `key-auth` plugin (which only looks at `apikey` by default)
@@ -122,9 +130,20 @@ data:
             rejected_code: 429
           prometheus: {}
     # Routes:
-    #   - 4 SUIT API endpoints (Bearer-auth via `suit-api`)
+    #   - 4 SUIT API endpoints + 1 supervision health endpoint (Bearer-auth via `suit-api`)
     #   - 2 docs endpoints + 1 static asset prefix (public via `suit-docs`)
     routes:
+      # Supervision only: constant 200, no read, no audit row. It exists so the
+      # prober can prove ingress → APISIX → app and the `supervision` consumer
+      # key in one call, without polluting the export audit log.
+      - id: suit-health
+        uri: /api/v1/healthz
+        methods: [GET]
+        plugin_config_id: suit-api
+        upstream:
+          type: roundrobin
+          nodes:
+            "app:80": 1
       - id: suit-export-declarations
         uri: /api/v1/export/declarations
         methods: [GET]

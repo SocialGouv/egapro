@@ -107,6 +107,10 @@ spec:
             - secretRef:
                 name: api
                 optional: true
+            # Dedicated supervision consumer key, shared with the APISIX pod.
+            - secretRef:
+                name: suit-monitoring
+                optional: true
           env:
             # The app pod receives the same discrete keys from `pg-app`; the
             # worker assembles the DSN itself (src/config.ts), exactly like the

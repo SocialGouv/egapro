@@ -1,10 +1,13 @@
 import type { ClamavConnectionConfig } from "./probes/clamav.js";
 import type { S3ConnectionConfig } from "./probes/s3.js";
 import type { SmtpConnectionConfig } from "./probes/smtp.js";
+import type { SuitGatewayConfig } from "./probes/suitGateway.js";
 import type { WeezConnectionConfig } from "./probes/weez.js";
 
 const DEFAULT_INTERVAL_SECONDS = 60;
 const DEFAULT_PARTNER_INTERVAL_SECONDS = 900;
+const DEFAULT_EXPOSED_INTERVAL_SECONDS = 300;
+const DEFAULT_CERT_WARN_DAYS = 30;
 const DEFAULT_QUEUE_MAX_PENDING = 100;
 const DEFAULT_QUEUE_MAX_AGE_SECONDS = 900;
 const DEFAULT_CLAMAV_PORT = 3310;
@@ -24,8 +27,13 @@ export type HealthcheckConfig = {
 	queue: QueueConfig | null;
 	proconnectIssuer: string | null;
 	weez: WeezConnectionConfig | null;
+	publicUrl: string | null;
+	suitGateway: SuitGatewayConfig | null;
+	certWarnDays: number;
+	partnerProbesEnabled: boolean;
 	intervalSeconds: number;
 	partnerIntervalSeconds: number;
+	exposedIntervalSeconds: number;
 	secrets: readonly string[];
 };
 
@@ -56,6 +64,15 @@ export function resolveConfig(
 			: null,
 		proconnectIssuer: source.EGAPRO_PROCONNECT_ISSUER || null,
 		weez: resolveWeez(source),
+		publicUrl: source.HEALTHCHECK_PUBLIC_URL || null,
+		suitGateway: resolveSuitGateway(source),
+		certWarnDays: resolvePositiveInteger(
+			source.HEALTHCHECK_CERT_WARN_DAYS,
+			DEFAULT_CERT_WARN_DAYS,
+		),
+		partnerProbesEnabled:
+			(source.HEALTHCHECK_PARTNER_PROBES_ENABLED ?? "false").toLowerCase() ===
+			"true",
 		intervalSeconds: resolveIntervalSeconds(
 			source,
 			"HEALTHCHECK_INTERVAL_SECONDS",
@@ -66,12 +83,18 @@ export function resolveConfig(
 			"HEALTHCHECK_PARTNER_INTERVAL_SECONDS",
 			DEFAULT_PARTNER_INTERVAL_SECONDS,
 		),
+		exposedIntervalSeconds: resolveIntervalSeconds(
+			source,
+			"HEALTHCHECK_EXPOSED_INTERVAL_SECONDS",
+			DEFAULT_EXPOSED_INTERVAL_SECONDS,
+		),
 		secrets: compact([
 			source.S3_ACCESS_KEY_ID,
 			source.S3_SECRET_ACCESS_KEY,
 			source.POSTGRES_PASSWORD,
 			source.NOTIFICATIONS_POSTGRES_PASSWORD,
 			source.SMTP_PASS,
+			source.HEALTHCHECK_APISIX_SUIT_API_KEY,
 		]),
 	};
 }
@@ -159,6 +182,16 @@ function resolveWeez(source: NodeJS.ProcessEnv): WeezConnectionConfig | null {
 	if (!apiUrl || !referenceSiren) return null;
 
 	return { apiUrl, referenceSiren };
+}
+
+function resolveSuitGateway(
+	source: NodeJS.ProcessEnv,
+): SuitGatewayConfig | null {
+	const baseUrl = source.HEALTHCHECK_APISIX_SUIT_URL;
+	const apiKey = source.HEALTHCHECK_APISIX_SUIT_API_KEY;
+	if (!baseUrl || !apiKey) return null;
+
+	return { baseUrl, apiKey };
 }
 
 function resolveIntervalSeconds(
