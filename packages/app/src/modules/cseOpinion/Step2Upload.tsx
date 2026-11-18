@@ -153,7 +153,7 @@ export function Step2Upload({
 		singleChoice && associations[singleChoice.columnId] === singleChoice.fileId
 			? singleChoice.columnId
 			: null;
-	const lockedColumnIds = useMemo(
+	const hiddenColumnIds = useMemo(
 		() => (singleChoiceColumnId ? new Set([singleChoiceColumnId]) : undefined),
 		[singleChoiceColumnId],
 	);
@@ -346,7 +346,7 @@ export function Step2Upload({
 						deletingFileId={deletingFileId}
 						disabled={isReadOnly}
 						files={existingFiles}
-						lockedColumnIds={lockedColumnIds}
+						hiddenColumnIds={hiddenColumnIds}
 						onDelete={(fileId) => {
 							setDeletingFileId(fileId);
 							deleteMutation.mutate({ fileId });
