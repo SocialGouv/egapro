@@ -1,8 +1,10 @@
 import type { ClamavConnectionConfig } from "./probes/clamav.js";
 import type { S3ConnectionConfig } from "./probes/s3.js";
 import type { SmtpConnectionConfig } from "./probes/smtp.js";
+import type { WeezConnectionConfig } from "./probes/weez.js";
 
 const DEFAULT_INTERVAL_SECONDS = 60;
+const DEFAULT_PARTNER_INTERVAL_SECONDS = 900;
 const DEFAULT_QUEUE_MAX_PENDING = 100;
 const DEFAULT_QUEUE_MAX_AGE_SECONDS = 900;
 const DEFAULT_CLAMAV_PORT = 3310;
@@ -20,7 +22,10 @@ export type HealthcheckConfig = {
 	valkeyUrl: string | null;
 	smtp: SmtpConnectionConfig | null;
 	queue: QueueConfig | null;
+	proconnectIssuer: string | null;
+	weez: WeezConnectionConfig | null;
 	intervalSeconds: number;
+	partnerIntervalSeconds: number;
 	secrets: readonly string[];
 };
 
@@ -49,7 +54,18 @@ export function resolveConfig(
 					),
 				}
 			: null,
-		intervalSeconds: resolveIntervalSeconds(source),
+		proconnectIssuer: source.EGAPRO_PROCONNECT_ISSUER || null,
+		weez: resolveWeez(source),
+		intervalSeconds: resolveIntervalSeconds(
+			source,
+			"HEALTHCHECK_INTERVAL_SECONDS",
+			DEFAULT_INTERVAL_SECONDS,
+		),
+		partnerIntervalSeconds: resolveIntervalSeconds(
+			source,
+			"HEALTHCHECK_PARTNER_INTERVAL_SECONDS",
+			DEFAULT_PARTNER_INTERVAL_SECONDS,
+		),
 		secrets: compact([
 			source.S3_ACCESS_KEY_ID,
 			source.S3_SECRET_ACCESS_KEY,
@@ -137,11 +153,20 @@ function resolveSmtp(source: NodeJS.ProcessEnv): SmtpConnectionConfig | null {
 	};
 }
 
-function resolveIntervalSeconds(source: NodeJS.ProcessEnv): number {
-	return resolvePositiveInteger(
-		source.HEALTHCHECK_INTERVAL_SECONDS,
-		DEFAULT_INTERVAL_SECONDS,
-	);
+function resolveWeez(source: NodeJS.ProcessEnv): WeezConnectionConfig | null {
+	const apiUrl = source.EGAPRO_WEEZ_API_URL;
+	const referenceSiren = source.HEALTHCHECK_WEEZ_REFERENCE_SIREN;
+	if (!apiUrl || !referenceSiren) return null;
+
+	return { apiUrl, referenceSiren };
+}
+
+function resolveIntervalSeconds(
+	source: NodeJS.ProcessEnv,
+	variable: string,
+	fallback: number,
+): number {
+	return resolvePositiveInteger(source[variable], fallback);
 }
 
 function resolvePositiveInteger(

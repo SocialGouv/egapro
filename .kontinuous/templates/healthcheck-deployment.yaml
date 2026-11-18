@@ -98,6 +98,15 @@ spec:
             - configMapRef:
                 name: mail
                 optional: true
+            # Partner targets: the issuer comes from the public `proconnect`
+            # configmap, the WEEZ base URL from the `api` sealed secret the app
+            # already mounts. Same values as the app, never a hardcoded copy.
+            - configMapRef:
+                name: proconnect
+                optional: true
+            - secretRef:
+                name: api
+                optional: true
           env:
             # The app pod receives the same discrete keys from `pg-app`; the
             # worker assembles the DSN itself (src/config.ts), exactly like the
