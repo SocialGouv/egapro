@@ -49,7 +49,7 @@ class FakeClock:
 async def test_run_scheduled_exports_waits_for_midnight_then_runs_once(monkeypatch):
     runs = []
 
-    async def run_all_exports():
+    async def run_all_exports(**kwargs):
         runs.append(clock.now())
 
     monkeypatch.setattr(bin, "run_all_exports", run_all_exports)
@@ -62,7 +62,7 @@ async def test_run_scheduled_exports_waits_for_midnight_then_runs_once(monkeypat
 async def test_run_scheduled_exports_never_runs_before_midnight(monkeypatch):
     runs = []
 
-    async def run_all_exports():
+    async def run_all_exports(**kwargs):
         runs.append(clock.now())
 
     monkeypatch.setattr(bin, "run_all_exports", run_all_exports)
@@ -74,12 +74,114 @@ async def test_run_scheduled_exports_never_runs_before_midnight(monkeypatch):
 
 
 async def test_run_scheduled_exports_survives_a_failing_export(monkeypatch):
-    async def run_all_exports():
+    async def run_all_exports(**kwargs):
         raise RuntimeError("boom")
 
     monkeypatch.setattr(bin, "run_all_exports", run_all_exports)
     clock = FakeClock(datetime(2026, 10, 1, 23, 0))
     await bin.run_scheduled_exports(now=clock.now, sleep=clock.sleep)
+
+
+@pytest.mark.parametrize("configured,expected", [(False, [False]), (True, [True])])
+async def test_run_scheduled_exports_publishes_only_once_storage_is_configured(monkeypatch, configured, expected):
+    published = []
+
+    async def run_all_exports(publish=True):
+        published.append(publish)
+
+    monkeypatch.setattr(bin, "run_all_exports", run_all_exports)
+    monkeypatch.setattr(bin.config, "storage_configured", lambda: configured)
+    clock = FakeClock(datetime(2026, 10, 1, 23, 0))
+    await bin.run_scheduled_exports(now=clock.now, sleep=clock.sleep)
+    assert published == expected
+
+
+async def test_run_all_exports_publishes_each_generated_file(monkeypatch, tmp_path):
+    published = []
+
+    async def job(path):
+        path.write_text("content")
+
+    async def publish(path, name):
+        published.append(name)
+
+    monkeypatch.setattr(bin, "EXPORTS", (("a.csv", job), ("b.csv", job)))
+    monkeypatch.setattr(bin.storage, "publish", publish)
+
+    assert await bin.run_all_exports(tmp_path) == []
+    assert published == ["a.csv", "b.csv"]
+
+
+async def test_run_all_exports_reports_a_failed_export_without_publishing_it(monkeypatch, tmp_path):
+    published = []
+
+    async def job(path):
+        raise RuntimeError("boom")
+
+    async def publish(path, name):
+        published.append(name)
+
+    monkeypatch.setattr(bin, "EXPORTS", (("broken.csv", job),))
+    monkeypatch.setattr(bin.storage, "publish", publish)
+
+    assert await bin.run_all_exports(tmp_path) == ["broken.csv"]
+    assert published == []
+
+
+async def test_run_all_exports_can_write_the_volume_without_publishing(monkeypatch, tmp_path):
+    async def job(path):
+        path.write_text("content")
+
+    async def publish(path, name):
+        raise AssertionError("should not publish")
+
+    monkeypatch.setattr(bin, "EXPORTS", (("a.csv", job),))
+    monkeypatch.setattr(bin.storage, "publish", publish)
+
+    assert await bin.run_all_exports(tmp_path, publish=False) == []
+    assert (tmp_path / "a.csv").read_text() == "content"
+
+
+async def test_publish_exports_generates_in_a_temporary_directory_and_cleans_it(monkeypatch):
+    seen = []
+
+    async def run_all_exports(directory, publish=True):
+        seen.append((directory, publish, directory.exists()))
+        return []
+
+    monkeypatch.setattr(bin, "run_all_exports", run_all_exports)
+    monkeypatch.setattr(bin.config, "storage_settings", lambda: object())
+
+    await bin.publish_exports()
+
+    directory, publish, existed = seen[0]
+    assert publish is True
+    assert existed is True
+    assert directory.exists() is False
+
+
+async def test_publish_exports_fails_on_a_partial_run(monkeypatch):
+    async def run_all_exports(directory, publish=True):
+        return ["dgt.xlsx"]
+
+    monkeypatch.setattr(bin, "run_all_exports", run_all_exports)
+    monkeypatch.setattr(bin.config, "storage_settings", lambda: object())
+
+    with pytest.raises(SystemExit) as exit_error:
+        await bin.publish_exports()
+    assert exit_error.value.code == 1
+
+
+async def test_publish_exports_refuses_to_generate_without_storage_configuration(monkeypatch):
+    async def run_all_exports(directory, publish=True):
+        raise AssertionError("should not generate anything")
+
+    monkeypatch.setattr(bin, "run_all_exports", run_all_exports)
+    for key in bin.config.storage_keys:
+        monkeypatch.setattr(bin.config, key, "")
+
+    with pytest.raises(RuntimeError, match="S3_ENDPOINT"):
+        await bin.publish_exports()
 
 
 async def test_scheduler_loops_and_closes_the_database(monkeypatch):

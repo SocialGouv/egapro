@@ -1,5 +1,6 @@
 import os
 import sys
+import tempfile
 import traceback
 import urllib.request
 from collections import Counter
@@ -28,6 +29,7 @@ from egapro import (
     helpers,
     models,
     schema,
+    storage,
     tokens,
     loggers,
 )
@@ -66,8 +68,8 @@ async def run_export_representation(path: Path, max_rows: int = None):
         print("Writing the dgt XLSX to", path)
         wb.save(path)
     except Exception:
-        print(traceback.format_exc())
         cleanup_workbook(wb)
+        raise
 
 
 async def run_dump_dgt(path: Path, max_rows: int = None):
@@ -77,8 +79,8 @@ async def run_dump_dgt(path: Path, max_rows: int = None):
         print("Writing the dgt XLSX to", path)
         wb.save(path)
     except Exception:
-        print(traceback.format_exc())
         cleanup_workbook(wb)
+        raise
 
 
 async def run_dump_dgt_representation(path: Path, max_rows: int = None):
@@ -88,8 +90,8 @@ async def run_dump_dgt_representation(path: Path, max_rows: int = None):
         print("Writing the dgt_representation XLSX to", path)
         wb.save(path)
     except Exception:
-        print(traceback.format_exc())
         cleanup_workbook(wb)
+        raise
 
 
 async def run_export_public_data(path: Path):
@@ -100,53 +102,56 @@ async def run_export_public_data(path: Path):
         wb.save(path)
         print("Done")
     except Exception:
-        print(traceback.format_exc())
         cleanup_workbook(wb)
+        raise
 
 
 async def run_export_indexes(path: Path):
-    try:
-        print("Writing the CSV to", path)
-        with path.open("w") as f:
-            await exporter.indexes(f)
-        print("Done")
-    except Exception:
-        print(traceback.format_exc())
+    print("Writing the CSV to", path)
+    with path.open("w") as f:
+        await exporter.indexes(f)
+    print("Done")
 
 
 async def run_full(path: Path):
     """Create a full JSON export."""
-    try:
-        print("Writing to", path)
-        with path.open("w") as f:
-            await exporter.full(f)
-        print("Done")
-    except Exception:
-        print(traceback.format_exc())
+    print("Writing to", path)
+    with path.open("w") as f:
+        await exporter.full(f)
+    print("Done")
 
 
-async def run_all_exports():
-    """Run all exports sequentially to avoid memory spikes.
+EXPORTS = (
+    ("dgt-export-representation.xlsx", run_export_representation),
+    ("dgt-representation.xlsx", run_dump_dgt_representation),
+    ("indexes.csv", run_export_indexes),
+    ("full.ndjson", run_full),
+    ("index-egalite-fh.xlsx", run_export_public_data),
+    ("dgt.xlsx", run_dump_dgt),
+)
 
-    Lightest exports run first so they complete even if heavier ones fail.
-    Each export handles its own errors and temp file cleanup independently.
+
+async def run_all_exports(directory: Path = Path("/mnt/files"), publish: bool = True):
+    """Generate the six exports sequentially, publishing each complete file.
+
+    Lightest exports run first so they complete even if heavier ones fail. Returns
+    the names of the failed exports: a partial run must be visible rather than
+    silently accepted.
     """
-    jobs = [
-        ("dgt-export-representation", run_export_representation, [Path("/mnt/files/dgt-export-representation.xlsx")]),
-        ("dgt-representation", run_dump_dgt_representation, [Path("/mnt/files/dgt-representation.xlsx")]),
-        ("indexes", run_export_indexes, [Path("/mnt/files/indexes.csv")]),
-        ("full", run_full, [Path("/mnt/files/full.ndjson")]),
-        ("public-data", run_export_public_data, [Path("/mnt/files/index-egalite-fh.xlsx")]),
-        ("dgt", run_dump_dgt, [Path("/mnt/files/dgt.xlsx")]),
-    ]
-    for name, job, args in jobs:
+    failures = []
+    for name, job in EXPORTS:
+        path = directory / name
         print(f"--- Starting export: {name} ---")
         try:
-            await job(*args)
+            await job(path)
+            if publish:
+                await storage.publish(path, name)
             print(f"--- Finished export: {name} ---")
         except Exception:
             print(f"--- FAILED export: {name} ---")
             print(traceback.format_exc())
+            failures.append(name)
+    return failures
 
 
 # Exports run every day at midnight, in the container local time.
@@ -169,9 +174,25 @@ async def run_scheduled_exports(now=datetime.now, sleep=asyncio.sleep):
     while (remaining := (next_run - now()).total_seconds()) > 0:
         await sleep(remaining)
     try:
-        await run_all_exports()
+        # Until the daily job replaces this resident scheduler, the volume stays
+        # the served path: publishing only starts once the storage is configured.
+        await run_all_exports(publish=config.storage_configured())
     except Exception:
         print(traceback.format_exc())
+
+
+@minicli.cli
+async def publish_exports():
+    """Generate the six exports in a temporary directory, then publish them.
+
+    Fail before generating anything when the storage is not configured.
+    """
+    config.storage_settings()
+    with tempfile.TemporaryDirectory() as directory:
+        failures = await run_all_exports(Path(directory))
+    if failures:
+        print(f"CRITICAL: failed exports: {', '.join(failures)}")
+        sys.exit(1)
 
 
 @minicli.cli

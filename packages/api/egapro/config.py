@@ -107,17 +107,25 @@ def allowed_origins():
     return [o.strip().rstrip("/") for o in ALLOW_ORIGIN.split(",") if o.strip() not in ("", "*")]
 
 
+def missing_storage_keys():
+    return [key for key in storage_required_keys if not globals()[key]]
+
+
+def storage_configured():
+    return not missing_storage_keys()
+
+
 def storage_settings():
     """Refuse a partial storage configuration, naming every missing key, instead of
     failing later on an opaque network error."""
-    missing = [key for key in storage_required_keys if not globals()[key]]
+    missing = missing_storage_keys()
     if missing:
         raise RuntimeError(f"Missing storage configuration: {', '.join(missing)}")
     return StorageSettings(
         endpoint=S3_ENDPOINT,
         region=S3_REGION,
         bucket=S3_BUCKET_NAME,
-        prefix=S3_PREFIX,
+        prefix=S3_PREFIX.strip().strip("/"),
         access_key_id=S3_ACCESS_KEY_ID,
         secret_access_key=S3_SECRET_ACCESS_KEY,
     )

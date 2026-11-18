@@ -152,6 +152,21 @@ def test_storage_settings_reads_unprefixed_env_vars(monkeypatch):
     )
 
 
+@pytest.mark.parametrize("prefix,expected", [("/exports/", "exports"), ("exports", "exports"), ("", "")])
+def test_storage_settings_normalizes_the_prefix(monkeypatch, prefix, expected):
+    set_storage_env(
+        monkeypatch,
+        S3_ENDPOINT="https://s3.example",
+        S3_REGION="gra",
+        S3_BUCKET_NAME="a-bucket",
+        S3_PREFIX=prefix,
+        S3_ACCESS_KEY_ID="an-access-key",
+        S3_SECRET_ACCESS_KEY="a-secret-key",
+    )
+    config.init()
+    assert config.storage_settings().prefix == expected
+
+
 def test_storage_settings_refuses_partial_configuration(monkeypatch):
     set_storage_env(monkeypatch, S3_ENDPOINT="https://s3.example", S3_REGION="gra")
     config.init()
