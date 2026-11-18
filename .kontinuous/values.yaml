@@ -61,6 +61,7 @@ app:
     httpGet:
       path: /api/readyz
       port: http
+    periodSeconds: 5
     timeoutSeconds: 3
     failureThreshold: 3
   containerPort: 3000
