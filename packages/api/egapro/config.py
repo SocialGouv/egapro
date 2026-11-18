@@ -1,4 +1,5 @@
 import os
+from typing import NamedTuple
 
 SECRET = "sikretfordevonly"
 JWT_ALGORITHM = "HS256"
@@ -27,6 +28,35 @@ FLAVOUR = "local"
 API_ENTREPRISES = ""
 DOMAIN = "https://egapro.travail.gouv.fr"
 READONLY = False
+S3_ENDPOINT = ""
+S3_REGION = ""
+S3_BUCKET_NAME = ""
+S3_PREFIX = ""
+S3_ACCESS_KEY_ID = ""
+S3_SECRET_ACCESS_KEY = ""
+
+# The storage settings are also read by the Node files server, which has no
+# EGAPRO_ prefix convention: one contract, no per-runtime renaming.
+# Lowercase on purpose: init() would otherwise read EGAPRO_storage_keys.
+storage_keys = (
+    "S3_ENDPOINT",
+    "S3_REGION",
+    "S3_BUCKET_NAME",
+    "S3_PREFIX",
+    "S3_ACCESS_KEY_ID",
+    "S3_SECRET_ACCESS_KEY",
+)
+storage_required_keys = tuple(key for key in storage_keys if key != "S3_PREFIX")
+
+
+class StorageSettings(NamedTuple):
+    endpoint: str
+    region: str
+    bucket: str
+    prefix: str
+    access_key_id: str
+    secret_access_key: str
+
 
 # Development values that must be overridden by env vars in production.
 _dev_defaults = {"SECRET": SECRET, "DBPASS": DBPASS}
@@ -77,10 +107,26 @@ def allowed_origins():
     return [o.strip().rstrip("/") for o in ALLOW_ORIGIN.split(",") if o.strip() not in ("", "*")]
 
 
+def storage_settings():
+    """Refuse a partial storage configuration, naming every missing key, instead of
+    failing later on an opaque network error."""
+    missing = [key for key in storage_required_keys if not globals()[key]]
+    if missing:
+        raise RuntimeError(f"Missing storage configuration: {', '.join(missing)}")
+    return StorageSettings(
+        endpoint=S3_ENDPOINT,
+        region=S3_REGION,
+        bucket=S3_BUCKET_NAME,
+        prefix=S3_PREFIX,
+        access_key_id=S3_ACCESS_KEY_ID,
+        secret_access_key=S3_SECRET_ACCESS_KEY,
+    )
+
+
 def init():
     for key, value in globals().items():
         if key.isupper():
-            env_key = "EGAPRO_" + key
+            env_key = key if key in storage_keys else "EGAPRO_" + key
             typ = type(value)
             if typ is bool:
                 typ = parse_bool
