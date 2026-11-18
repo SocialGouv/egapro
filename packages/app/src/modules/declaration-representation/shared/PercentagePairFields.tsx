@@ -9,6 +9,23 @@ import styles from "./PercentagePairFields.module.scss";
 
 const PERCENTAGE_INPUT_PATTERN = /^\d{0,3}([.,]\d?)?$/;
 
+export const PERCENTAGES_REQUIRED_MESSAGE =
+	"Veuillez renseigner le pourcentage de femmes ou d'hommes.";
+
+export const PERCENTAGES_SUM_MESSAGE =
+	"La somme des pourcentages doit être égale à 100 %.";
+
+export function percentagePairError({
+	missing,
+	sumError,
+}: {
+	missing: boolean;
+	sumError: boolean;
+}): string | undefined {
+	if (missing) return PERCENTAGES_REQUIRED_MESSAGE;
+	return sumError ? PERCENTAGES_SUM_MESSAGE : undefined;
+}
+
 export type PercentagePairValues = {
 	womenPercent: string;
 	menPercent: string;
