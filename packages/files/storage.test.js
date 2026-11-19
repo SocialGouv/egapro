@@ -2,7 +2,7 @@ const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
 const { Readable } = require('node:stream');
 
-const { StorageError, createStorage } = require('./storage');
+const { StorageError, createClient, createStorage } = require('./storage');
 
 const CONFIG = {
   endpoint: 'https://s3.example',
@@ -35,6 +35,12 @@ function httpError(status) {
 }
 
 describe('object storage', () => {
+  it('addresses the bucket in the path, the way a local object storage answers', () => {
+    const client = createClient(CONFIG);
+
+    assert.equal(client.config.forcePathStyle, true);
+  });
+
   it('reads the object under the bucket and the configured prefix', async () => {
     const { client, storage } = storageWith({ ContentLength: 3 }, { ...CONFIG, prefix: 'exports' });
 
