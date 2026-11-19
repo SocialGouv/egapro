@@ -11,11 +11,13 @@ import {
 	formatCurrencyFixedTwo,
 	formatDays,
 	formatDecimal,
+	formatElapsedDuration,
 	formatFileSize,
 	formatFixedPercentage,
 	formatGap,
 	formatGapCompact,
 	formatIsoDate,
+	formatLatency,
 	formatLongDate,
 	formatMinutes,
 	formatMonthDay,
@@ -602,5 +604,39 @@ describe("formatMinutes", () => {
 		expect(formatMinutes(1440)).toBe(
 			`${(1440).toLocaleString("fr-FR")} minutes`,
 		);
+	});
+});
+
+describe("formatElapsedDuration", () => {
+	it("reads minutes under an hour", () => {
+		expect(formatElapsedDuration(0)).toBe("0 min");
+		expect(formatElapsedDuration(90_000)).toBe("1 min");
+		expect(formatElapsedDuration(59 * 60_000)).toBe("59 min");
+	});
+
+	it("reads hours under two days", () => {
+		expect(formatElapsedDuration(60 * 60_000)).toBe("1 h");
+		expect(formatElapsedDuration(47 * 3_600_000)).toBe("47 h");
+	});
+
+	it("reads days past two days", () => {
+		expect(formatElapsedDuration(48 * 3_600_000)).toBe("2 j");
+		expect(formatElapsedDuration(26 * 24 * 3_600_000)).toBe("26 j");
+	});
+
+	it("clamps a negative span to zero", () => {
+		expect(formatElapsedDuration(-60_000)).toBe("0 min");
+	});
+});
+
+describe("formatLatency", () => {
+	it("appends the millisecond unit", () => {
+		expect(formatLatency(42)).toBe("42 ms");
+		expect(formatLatency(1200)).toBe(`${(1200).toLocaleString("fr-FR")} ms`);
+	});
+
+	it("renders a missing value as a dash", () => {
+		expect(formatLatency(null)).toBe(MISSING_VALUE);
+		expect(formatLatency(undefined)).toBe(MISSING_VALUE);
 	});
 });

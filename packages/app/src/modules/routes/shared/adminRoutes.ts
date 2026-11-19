@@ -5,6 +5,7 @@ export const ADMIN_DECLARATIONS = route("/admin/declarations");
 export const ADMIN_IMPERSONATE = route("/admin/impersonate");
 export const ADMIN_REFERENTS = route("/admin/liste-referents");
 export const ADMIN_STATS = route("/admin/stats");
+export const ADMIN_SERVICE_STATUS = route("/admin/etat-des-services");
 export const ADMIN_SETTINGS = route("/admin/parametres");
 export const ADMIN_SITEMAP = route("/admin/plan");
 
@@ -30,5 +31,6 @@ export const ADMIN_NAV_LINKS = [
 	{ href: ADMIN_IMPERSONATE, label: "Mimoquer un Siren" },
 	{ href: ADMIN_REFERENTS, label: "Référents" },
 	{ href: ADMIN_STATS, label: "Statistiques" },
+	{ href: ADMIN_SERVICE_STATUS, label: "État des services" },
 	{ href: ADMIN_SETTINGS, label: "Paramètres" },
 ] as const;

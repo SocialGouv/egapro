@@ -98,6 +98,12 @@ app:
     - configMapRef:
         name: "sentry"
         optional: true
+    # Supervision screen settings (#5200): freshness floor, optional Grafana
+    # dashboard URL. Optional so a namespace with neither still boots on the
+    # environment default.
+    - configMapRef:
+        name: "monitoring"
+        optional: true
     - configMapRef:
         name: "clamav"
     - configMapRef:

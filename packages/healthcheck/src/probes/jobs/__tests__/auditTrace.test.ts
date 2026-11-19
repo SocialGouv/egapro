@@ -75,6 +75,20 @@ describe("audit job probe", () => {
 		expect(result.nextExpectedAt?.toISOString()).toBe(
 			"2026-01-03T03:00:00.000Z",
 		);
+		expect(result.lastSuccessAt?.toISOString()).toBe(
+			ago(3 * HOUR).toISOString(),
+		);
+	});
+
+	it("publishes the last failure alongside the last success", async () => {
+		const result = await probe(
+			traceSql({ lastSuccessAt: ago(2 * HOUR), lastFailureAt: ago(HOUR) }),
+		).probe(new AbortController().signal);
+
+		expect(result.lastSuccessAt?.toISOString()).toBe(
+			ago(2 * HOUR).toISOString(),
+		);
+		expect(result.lastFailureAt?.toISOString()).toBe(ago(HOUR).toISOString());
 	});
 
 	it("is unavailable from the first cycle when the job never succeeded", async () => {
@@ -112,9 +126,10 @@ describe("audit job probe", () => {
 		await probe(sql).probe(new AbortController().signal);
 
 		const call = calls[0];
-		expect(call?.text).toContain("WHERE action = ? AND created_at >= ?");
-		expect(call?.values[0]).toBe("gip_mds.import");
-		expect(call?.values[1]).toEqual(new Date(NOW.getTime() - 26 * HOUR));
+		expect(call?.text).toContain("WHERE action = ?");
+		expect(call?.text).toContain("ORDER BY created_at DESC");
+		expect(call?.text).not.toContain("created_at >= ?");
+		expect(call?.values).toContain("gip_mds.import");
 	});
 
 	it("is unavailable exactly one minute past the window and operational one before", async () => {

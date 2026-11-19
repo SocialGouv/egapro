@@ -23,6 +23,8 @@ export type EmailQueueJobProbeOptions = {
 type QueueRow = {
 	failedInWindow: number;
 	oldestPendingSeconds: number | null;
+	lastSuccessAt: Date | null;
+	lastFailureAt: Date | null;
 };
 
 /**
@@ -70,13 +72,23 @@ export function createEmailQueueJobProbe({
 						)::int AS "failedInWindow",
 						max(extract(epoch FROM (now() - created_on))) FILTER (
 							WHERE state IN ('created', 'retry')
-						)::int AS "oldestPendingSeconds"
+						)::int AS "oldestPendingSeconds",
+						max(completed_on) FILTER (WHERE state = 'completed')
+							AS "lastSuccessAt",
+						max(completed_on) FILTER (WHERE state = 'failed')
+							AS "lastFailureAt"
 					FROM pgboss.job
 					WHERE name = ${QUEUE_NAME}
 				`;
 				const row = rows[0] ?? {
 					failedInWindow: 0,
 					oldestPendingSeconds: null,
+					lastSuccessAt: null,
+					lastFailureAt: null,
+				};
+				const trace = {
+					lastSuccessAt: row.lastSuccessAt ?? undefined,
+					lastFailureAt: row.lastFailureAt ?? undefined,
 				};
 
 				if (
@@ -87,6 +99,7 @@ export function createEmailQueueJobProbe({
 						status: "unavailable",
 						latencyMs: elapsed(),
 						message: `en retard — le plus ancien job attend depuis ${formatDuration(row.oldestPendingSeconds * 1000)}`,
+						...trace,
 					};
 				}
 
@@ -110,10 +123,11 @@ export function createEmailQueueJobProbe({
 						status: "degraded",
 						latencyMs: elapsed(),
 						message: degradations.join(", "),
+						...trace,
 					};
 				}
 
-				return { status: "operational", latencyMs: elapsed() };
+				return { status: "operational", latencyMs: elapsed(), ...trace };
 			} catch (error) {
 				return {
 					status: jobStatusFromError(error),

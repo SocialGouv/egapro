@@ -61,20 +61,23 @@ export async function persistProbeResult(
 
 		await tx`
 			INSERT INTO app_health_probe (
-				key, label, criticality, kind, status, latency_ms,
-				checked_at, changed_at, consecutive_failures, last_error,
-				next_expected_at
+				key, label, criticality, kind, interval_seconds, status,
+				latency_ms, checked_at, changed_at, consecutive_failures,
+				last_error, next_expected_at, last_success_at, last_failure_at
 			)
 			VALUES (
 				${probe.key}, ${probe.label}, ${probe.criticality}, ${probe.kind},
-				${plan.status}, ${result.latencyMs}, ${checkedAt}, ${checkedAt},
+				${probe.intervalSeconds}, ${plan.status}, ${result.latencyMs},
+				${checkedAt}, ${checkedAt},
 				${plan.consecutiveFailures}, ${lastError},
-				${result.nextExpectedAt ?? null}
+				${result.nextExpectedAt ?? null},
+				${result.lastSuccessAt ?? null}, ${result.lastFailureAt ?? null}
 			)
 			ON CONFLICT (key) DO UPDATE SET
 				label = EXCLUDED.label,
 				criticality = EXCLUDED.criticality,
 				kind = EXCLUDED.kind,
+				interval_seconds = EXCLUDED.interval_seconds,
 				status = EXCLUDED.status,
 				latency_ms = EXCLUDED.latency_ms,
 				checked_at = EXCLUDED.checked_at,
@@ -85,7 +88,15 @@ export async function persistProbeResult(
 				END,
 				consecutive_failures = EXCLUDED.consecutive_failures,
 				last_error = EXCLUDED.last_error,
-				next_expected_at = EXCLUDED.next_expected_at
+				next_expected_at = EXCLUDED.next_expected_at,
+				last_success_at = COALESCE(
+					EXCLUDED.last_success_at,
+					app_health_probe.last_success_at
+				),
+				last_failure_at = COALESCE(
+					EXCLUDED.last_failure_at,
+					app_health_probe.last_failure_at
+				)
 		`;
 
 		if (plan.closeOpenIncident) {

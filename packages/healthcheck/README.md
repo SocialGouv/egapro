@@ -119,9 +119,18 @@ schedule:
   `packages/notifications/src/schedules/index.ts`), past pg-boss's 7-day
   default: without it, a monthly reminder would lose its trace weeks before the
   next run and read as a missed job.
-- Requests on `audit.action_log` filter on `action = … AND created_at >= …`,
-  the shape of `action_log_action_idx`, so they read an index range instead of
-  scanning the table.
+- Requests on `audit.action_log` walk `action_log_action_idx (action,
+  created_at)` backwards and stop at the first matching row, so they read the
+  tail of one action's history instead of scanning the table. That is also how
+  the screen gets a real "dernier succès" when the last one sits outside the
+  freshness window.
+- `last_success_at` / `last_failure_at` persist the two trace values the probe
+  already reads, so the back-office prints them without replaying audit or
+  pg-boss queries. A cycle that cannot reach its source leaves them empty and
+  the stored value is kept, rather than erasing history at the worst moment.
+- `interval_seconds` persists each probe's own cycle. The screen widens its
+  freshness threshold to two cycles, so a partner probe checked every 15
+  minutes is not displayed as unknown between two runs.
 
 **Out of scope, on purpose:** no Kubernetes API client and no RBAC. Freshness
 comes from application traces, which covers every job that writes one.
