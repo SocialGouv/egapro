@@ -17,6 +17,7 @@ import {
 	type DeclarationFsmStatus,
 	hasHighGap,
 	isSecondDeclarationWritable,
+	type LastTransmission,
 } from "~/modules/domain";
 import {
 	getCurrentStageHref,
@@ -40,6 +41,7 @@ type Props = {
 	secondDeclarationCategories: EmployeeCategoryRow[];
 	siren: string;
 	status: DeclarationFsmStatus | null;
+	lastTransmission: LastTransmission | null;
 };
 
 export function SecondDeclarationStep3Review({
@@ -50,10 +52,11 @@ export function SecondDeclarationStep3Review({
 	secondDeclarationCategories,
 	siren,
 	status,
+	lastTransmission,
 }: Props) {
 	const router = useRouter();
 	const modalRef = useRef<HTMLDialogElement>(null);
-	const isWritable = isSecondDeclarationWritable(status);
+	const isWritable = isSecondDeclarationWritable(status, lastTransmission);
 	const submissionAttemptFingerprintRef = useRef(
 		secondDeclarationSubmissionCount,
 	);

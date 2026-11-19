@@ -6,7 +6,10 @@ import type {
 } from "../types";
 import { isDeadlinePassed } from "./campaign";
 import { getDeclarationProcessStepDeadline } from "./declarationProcessStep";
-import type { SubsequentSubmissions } from "./declarationTrajectory";
+import type {
+	LastTransmission,
+	SubsequentSubmissions,
+} from "./declarationTrajectory";
 
 export function isDeclarationSubmitted(status: string | null): boolean {
 	return status !== null && status !== "draft";
@@ -25,8 +28,15 @@ export function isComplianceProcessCompleted(status: string | null): boolean {
 export function isDeclarationWritingClosed(
 	status: string | null,
 	isFirstDeclarationSuperseded: boolean,
+	lastTransmission?: LastTransmission | null,
 ): boolean {
-	return isComplianceProcessCompleted(status) && isFirstDeclarationSuperseded;
+	if (!isComplianceProcessCompleted(status) || !isFirstDeclarationSuperseded) {
+		return false;
+	}
+	// With a CSE, the démarche closes on its opinion and every earlier deposit
+	// stays locked. Without one, the last deposit remains writable until the
+	// next campaign.
+	return lastTransmission === undefined || lastTransmission === "cse_opinion";
 }
 
 export function getCurrentCompliancePath(declaration: {
@@ -136,27 +146,40 @@ export function isCompliancePathStepApplicable(declaration: {
 
 // The corrective-action second declaration may only be written while its funnel
 // is actually open: right after the corrective-action path choice, or once the
-// declaration has been re-opened for revision. Any other status means round 2
-// never started (or is already resolved), so the write is rejected.
+// declaration has been re-opened for revision — or, for a démarche closed
+// without a CSE, as long as it is the last transmission (epic #5128).
 export function isSecondDeclarationWritable(
 	status: DeclarationFsmStatus | null,
+	lastTransmission?: LastTransmission | null,
 ): boolean {
-	return (
+	if (
 		status === "corrective_actions_chosen" ||
 		status === "awaiting_revision_choice"
+	) {
+		return true;
+	}
+	return (
+		status === "demarche_completed" && lastTransmission === "second_declaration"
 	);
 }
 
 // The joint-evaluation report may only be written while its funnel is actually
 // open: right after the joint-evaluation path choice, or once the declaration
-// has been re-opened for a revised joint evaluation. Any other status — closed
-// démarche included — has no matching transition, so the write is rejected.
+// has been re-opened for a revised joint evaluation. A démarche closed on that
+// report keeps it writable until the next campaign — but only without a CSE,
+// since with a CSE the démarche closes on the opinion (epic #5128).
 export function isJointEvaluationWritable(
 	status: DeclarationFsmStatus | null,
+	lastTransmission?: LastTransmission | null,
 ): boolean {
-	return (
+	if (
 		status === "joint_evaluation_chosen" ||
 		status === "revised_joint_evaluation_chosen"
+	) {
+		return true;
+	}
+	return (
+		status === "demarche_completed" && lastTransmission === "joint_evaluation"
 	);
 }
 
@@ -234,6 +257,7 @@ export function getCompliancePathReadOnlyReason(params: {
 	hasSubmittedSecondDeclaration: boolean;
 	hasSubmittedCseOpinion: boolean;
 	hasSubmittedJointEvaluation: boolean;
+	lastTransmission?: LastTransmission | null;
 }): CompliancePathReadOnlyReason | null {
 	const {
 		status,
@@ -241,9 +265,21 @@ export function getCompliancePathReadOnlyReason(params: {
 		hasSubmittedSecondDeclaration,
 		hasSubmittedCseOpinion,
 		hasSubmittedJointEvaluation,
+		lastTransmission,
 	} = params;
 
-	if (isComplianceProcessCompleted(status)) return "demarche_completed";
+	// A terminal path choice ("justify" without a CSE) stays writable until the
+	// next campaign as long as nothing superseded it (epic #5128).
+	const keepsTerminalPathChoiceWritable =
+		lastTransmission === "path_choice_round_1" ||
+		lastTransmission === "path_choice_round_2";
+
+	if (
+		isComplianceProcessCompleted(status) &&
+		!keepsTerminalPathChoiceWritable
+	) {
+		return "demarche_completed";
+	}
 	if (pathChoice === "justify" && hasSubmittedCseOpinion)
 		return "cse_opinion_submitted";
 	if (pathChoice === "corrective_action" && hasSubmittedSecondDeclaration)

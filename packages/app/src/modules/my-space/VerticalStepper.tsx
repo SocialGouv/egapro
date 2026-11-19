@@ -2,6 +2,7 @@ import type {
 	CampaignDeadlines,
 	DeclarationDisplayContext,
 	DeclarationFsmStatus,
+	LastTransmission,
 } from "~/modules/domain";
 import {
 	getCompliancePathReadOnlyReason,
@@ -50,10 +51,12 @@ export function isFirstDeclarationModifiable(submitted: {
 export function isPathChoiceModifiable({
 	declarationFsmStatus,
 	displayContext,
+	lastTransmission,
 	submitted,
 }: {
 	declarationFsmStatus: DeclarationFsmStatus | null;
 	displayContext: DeclarationDisplayContext;
+	lastTransmission: LastTransmission | null;
 	submitted: {
 		secondDeclaration: boolean;
 		jointEvaluation: boolean;
@@ -69,6 +72,7 @@ export function isPathChoiceModifiable({
 			hasSubmittedSecondDeclaration: submitted.secondDeclaration,
 			hasSubmittedCseOpinion: submitted.cseOpinion,
 			hasSubmittedJointEvaluation: submitted.jointEvaluation,
+			lastTransmission,
 		}) === null
 	);
 }
@@ -85,6 +89,7 @@ export function VerticalStepper({
 	cseOpinionSubmitted,
 	cseOpinionViewAvailable,
 	jointEvaluationViewAvailable,
+	lastTransmission,
 	secondDeclarationSubmitted,
 	step1,
 	step2,
@@ -103,6 +108,7 @@ export function VerticalStepper({
 	cseOpinionSubmitted: boolean;
 	cseOpinionViewAvailable?: boolean;
 	jointEvaluationViewAvailable?: boolean;
+	lastTransmission: LastTransmission | null;
 	secondDeclarationSubmitted: boolean;
 	step1: StepStatus;
 	step2: StepStatus;
@@ -140,9 +146,11 @@ export function VerticalStepper({
 						displayContext={displayContext}
 						jointEvaluationSubmitted={jointEvaluationSubmitted}
 						jointEvaluationViewAvailable={jointEvaluationViewAvailable}
+						lastTransmission={lastTransmission}
 						pathChoiceModifiable={isPathChoiceModifiable({
 							declarationFsmStatus,
 							displayContext,
+							lastTransmission,
 							submitted,
 						})}
 						secondDeclarationSubmitted={secondDeclarationSubmitted}

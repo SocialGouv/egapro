@@ -9,12 +9,14 @@ import {
 	getDemarcheCompletedAt,
 	getEventTimestamp,
 	getJointEvaluationSubmittedAt,
+	getLastTransmission,
 	getPathChoiceAt,
 	getSecondDeclarationSubmittedAt,
 	getSubmittedAt,
 	hasEvent,
 	hasSubmittedSecondDeclaration,
 	isJointEvaluationFileTransmitted,
+	isLastTransmissionPathChoice,
 } from "../shared/declarationTrajectory";
 
 const at = (iso: string) => new Date(iso);
@@ -351,5 +353,142 @@ describe("isJointEvaluationFileTransmitted", () => {
 				latestDepartureAt: at("2027-03-20T10:00:00Z"),
 			}),
 		).toBe(true);
+	});
+});
+
+describe("getLastTransmission", () => {
+	it("returns null when the trajectory carries no transmission", () => {
+		expect(getLastTransmission([])).toBeNull();
+		expect(
+			getLastTransmission([
+				buildEvent({ eventType: "demarche_complete" }),
+				buildEvent({ eventType: "cancel" }),
+			]),
+		).toBeNull();
+	});
+
+	it("maps each transmission event to its step", () => {
+		expect(getLastTransmission([buildEvent({ eventType: "submit" })])).toBe(
+			"first_declaration",
+		);
+		expect(
+			getLastTransmission([buildEvent({ eventType: "path_choice", round: 1 })]),
+		).toBe("path_choice_round_1");
+		expect(
+			getLastTransmission([buildEvent({ eventType: "path_choice", round: 2 })]),
+		).toBe("path_choice_round_2");
+		expect(
+			getLastTransmission([
+				buildEvent({ eventType: "second_declaration_submit", round: 2 }),
+			]),
+		).toBe("second_declaration");
+		expect(
+			getLastTransmission([
+				buildEvent({ eventType: "joint_evaluation_submit", round: 1 }),
+			]),
+		).toBe("joint_evaluation");
+		expect(
+			getLastTransmission([buildEvent({ eventType: "cse_opinion_submit" })]),
+		).toBe("cse_opinion");
+	});
+
+	it("keeps the latest transmission of a closed démarche", () => {
+		const events: DeclarationStatusEvent[] = [
+			buildEvent({
+				eventType: "submit",
+				createdAt: at("2027-03-01T10:00:00Z"),
+			}),
+			buildEvent({
+				eventType: "path_choice",
+				round: 1,
+				value: "joint_evaluation",
+				createdAt: at("2027-03-02T10:00:00Z"),
+			}),
+			buildEvent({
+				eventType: "joint_evaluation_submit",
+				round: 1,
+				createdAt: at("2027-03-03T10:00:00Z"),
+			}),
+			buildEvent({
+				eventType: "demarche_complete",
+				createdAt: at("2027-03-03T10:00:01Z"),
+			}),
+		];
+
+		expect(getLastTransmission(events)).toBe("joint_evaluation");
+	});
+
+	it("ignores loop-back events and the formal-notice flow", () => {
+		const events: DeclarationStatusEvent[] = [
+			buildEvent({
+				eventType: "second_declaration_submit",
+				round: 2,
+				createdAt: at("2027-03-01T10:00:00Z"),
+			}),
+			buildEvent({
+				eventType: "demarche_complete",
+				createdAt: at("2027-03-01T10:00:01Z"),
+			}),
+			buildEvent({
+				eventType: "formal_notice_joint_evaluation_submit",
+				createdAt: at("2027-03-02T10:00:00Z"),
+			}),
+		];
+
+		expect(getLastTransmission(events)).toBe("second_declaration");
+	});
+
+	it("treats a re-transmission as the new last transmission", () => {
+		const events: DeclarationStatusEvent[] = [
+			buildEvent({
+				eventType: "joint_evaluation_submit",
+				round: 1,
+				createdAt: at("2027-03-03T10:00:00Z"),
+			}),
+			buildEvent({
+				eventType: "demarche_complete",
+				createdAt: at("2027-03-03T10:00:01Z"),
+			}),
+			buildEvent({
+				eventType: "joint_evaluation_submit",
+				round: 1,
+				createdAt: at("2027-04-03T10:00:00Z"),
+			}),
+			buildEvent({
+				eventType: "demarche_complete",
+				createdAt: at("2027-04-03T10:00:01Z"),
+			}),
+		];
+
+		expect(getLastTransmission(events)).toBe("joint_evaluation");
+	});
+
+	it("breaks a timestamp tie with the flow precedence", () => {
+		const sameInstant = at("2027-03-03T10:00:00Z");
+		const events: DeclarationStatusEvent[] = [
+			buildEvent({
+				eventType: "joint_evaluation_submit",
+				round: 1,
+				createdAt: sameInstant,
+			}),
+			buildEvent({ eventType: "cse_opinion_submit", createdAt: sameInstant }),
+		];
+
+		expect(getLastTransmission(events)).toBe("cse_opinion");
+	});
+});
+
+describe("isLastTransmissionPathChoice", () => {
+	it("is true for either path-choice round", () => {
+		expect(isLastTransmissionPathChoice("path_choice_round_1")).toBe(true);
+		expect(isLastTransmissionPathChoice("path_choice_round_2")).toBe(true);
+	});
+
+	it("is false for any other transmission or no transmission", () => {
+		expect(isLastTransmissionPathChoice("first_declaration")).toBe(false);
+		expect(isLastTransmissionPathChoice("second_declaration")).toBe(false);
+		expect(isLastTransmissionPathChoice("joint_evaluation")).toBe(false);
+		expect(isLastTransmissionPathChoice("cse_opinion")).toBe(false);
+		expect(isLastTransmissionPathChoice(null)).toBe(false);
 	});
 });
