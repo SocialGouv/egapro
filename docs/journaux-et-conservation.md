@@ -56,7 +56,7 @@ Le vocabulaire de la colonne **Statut** est défini en [section 3](#3-vocabulair
 | Logs applicatifs stdout/stderr | Diagnostic d'erreur | Messages et traces d'erreur ; e-mail du destinataire si l'envoi réel est désactivé | Non définie dans le dépôt | Non définie dans le dépôt | [4.3](#43-logs-applicatifs-stdout-et-stderr) |
 | Sentry (erreurs, traces, sessions) | Diagnostic d'erreur, rejeu de session | Contexte des erreurs et sessions enregistrées, anonymisés à l'émission (e-mails, SIREN et SIRET filtrés, replay masqué) | Non définie dans le dépôt | Non définie dans le dépôt | [4.4](#44-sentry-erreurs-traces-et-sessions-enregistrées) |
 | File de notification par e-mail | Fiabiliser l'envoi des e-mails transactionnels | E-mail du destinataire, identifiant utilisateur, SIREN, contenu du message, pièces jointes | 14 j à partir de la date de démarrage prévue (jobs non traités), 7 j après traitement | Appliquée par le code | [4.5](#45-file-de-notification-par-e-mail) |
-| Journal de dédoublonnage des relances | Éviter une relance envoyée deux fois | Aucune (type, SIREN, année, variante) | Illimitée de fait | Aucune purge | [4.6](#46-journal-de-dédoublonnage-des-relances) |
+| Journal de dédoublonnage des relances | Éviter une relance envoyée deux fois | Aucune (type, SIREN, année, variante) | 3 ans (années de campagne N, N-1, N-2) | Appliquée par le code | [4.6](#46-journal-de-dédoublonnage-des-relances) |
 | Historique des statuts de déclaration | Traçabilité du parcours de déclaration | Identifiant de l'auteur de l'action | Suit la déclaration (6 ans) | Prévue, non exécutée | [4.7](#47-historique-des-statuts-de-déclaration) |
 | Journal d'impersonation admin | Traçabilité des connexions « en tant que » une entreprise | Identifiant de l'admin, SIREN | 365 j par défaut | Appliquée par le code | [4.8](#48-journal-dimpersonation-admin) |
 | Matomo | Mesure d'audience exemptée CNIL | Logs de visite (IP anonymisée), cookie de mesure d'audience | 750 j (logs), 13 mois (cookie) | Paramétrée hors dépôt | [4.9](#49-matomo) |
@@ -165,9 +165,9 @@ File `pg-boss` nommée `email-notification` : chaque e-mail transactionnel (conf
 
 Table `notifications.reminder_sent_log` : évite d'envoyer deux fois la même relance (identité : type, SIREN, année, variante). Aucune donnée nominative.
 
-**Durée** : aucun mécanisme de suppression dans le dépôt.
+**Durée** : 3 années de campagne. Une tâche planifiée du worker (`reminder-log-purge-daily`, chaque jour à 03:00 Europe/Paris) supprime les lignes dont l'année est antérieure à `année courante − 2`. Les relances ne lisent que l'année courante et la précédente, qui ne sont jamais supprimées. Chaque exécution écrit une ligne d'audit `system.reminder_log_cleanup` avec le nombre de lignes supprimées.
 
-**Sources** : `packages/notifications/src/eligibility/dedup.ts`.
+**Sources** : `packages/notifications/src/eligibility/dedup.ts` · `packages/notifications/src/schedules/definitions.ts` · `packages/notifications/src/worker/auditLog.ts`.
 
 ### 4.7 Historique des statuts de déclaration
 
@@ -289,11 +289,10 @@ Reportés tels quels, sans les atténuer :
 1. **Comptes utilisateurs** : l'engagement public de 2 ans n'est appliqué par aucun mécanisme. Suite : [#4770](https://github.com/SocialGouv/egapro/issues/4770).
 2. **Purge des déclarations** : le script existe mais n'est pas embarqué dans l'image de production, donc jamais exécuté. Suite : [#4773](https://github.com/SocialGouv/egapro/issues/4773).
 3. **Représentation équilibrée** : aucune purge, alors que des lignes reprises de la V1 contiennent des coordonnées personnelles. Suite : [#4502](https://github.com/SocialGouv/egapro/issues/4502).
-4. **Table jamais purgée** : le journal de dédoublonnage des relances n'a aucun mécanisme de suppression. Suite : [#4769](https://github.com/SocialGouv/egapro/issues/4769).
-5. **Durées d'audit écrites deux fois** : une fois dans les constantes du module (lues uniquement par les tests), une fois en dur dans le script de purge qui les applique réellement. Suite : [#4771](https://github.com/SocialGouv/egapro/issues/4771).
-6. **Sentry** : l'enregistrement de session et l'échantillonnage à 100 % des traces ne sont mentionnés ni dans la page `/donnees-personnelles` ni dans `/gestion-des-cookies`. Le docx fourni par la DGT pour la nouvelle politique de confidentialité ([#3669](https://github.com/SocialGouv/egapro/issues/3669)) ne couvre pas ce point, qui reste à traiter. Suite : [#4772](https://github.com/SocialGouv/egapro/issues/4772).
+4. **Durées d'audit écrites deux fois** : une fois dans les constantes du module (lues uniquement par les tests), une fois en dur dans le script de purge qui les applique réellement. Suite : [#4771](https://github.com/SocialGouv/egapro/issues/4771).
+5. **Sentry** : l'enregistrement de session et l'échantillonnage à 100 % des traces ne sont mentionnés ni dans la page `/donnees-personnelles` ni dans `/gestion-des-cookies`. Le docx fourni par la DGT pour la nouvelle politique de confidentialité ([#3669](https://github.com/SocialGouv/egapro/issues/3669)) ne couvre pas ce point, qui reste à traiter. Suite : [#4772](https://github.com/SocialGouv/egapro/issues/4772).
 
-7. **Préférence de thème** : la page `/gestion-des-cookies` annonce un cookie `fr-theme` d’un an, mais le dépôt ne contient aucun code qui le crée ou applique cette durée. Le thème DSFR est mémorisé dans `localStorage` (`scheme`). Suite : vérifier et corriger la page publique ou implémenter le cookie annoncé.
+6. **Préférence de thème** : la page `/gestion-des-cookies` annonce un cookie `fr-theme` d’un an, mais le dépôt ne contient aucun code qui le crée ou applique cette durée. Le thème DSFR est mémorisé dans `localStorage` (`scheme`). Suite : vérifier et corriger la page publique ou implémenter le cookie annoncé.
 
 ## 8. Évolutions en cours
 
@@ -304,7 +303,6 @@ Tickets ouverts qui changeront une ligne de cette page :
 | [#4502](https://github.com/SocialGouv/egapro/issues/4502) | Purge de la représentation équilibrée après 6 ans |
 | [#4549](https://github.com/SocialGouv/egapro/issues/4549) | Journalisation des erreurs internes tRPC hors développement |
 | [#2710](https://github.com/SocialGouv/egapro/issues/2710) | Supervision des traitements planifiés |
-| [#4769](https://github.com/SocialGouv/egapro/issues/4769) | Purge du journal de dédoublonnage des relances |
 | [#4770](https://github.com/SocialGouv/egapro/issues/4770) | Appliquer aux comptes utilisateurs la durée annoncée |
 | [#4771](https://github.com/SocialGouv/egapro/issues/4771) | Une seule source pour les durées de conservation du journal d'audit |
 | [#4772](https://github.com/SocialGouv/egapro/issues/4772) | Sentry : réglage de l'enregistrement de session et de l'échantillonnage |

@@ -1,10 +1,21 @@
 import type { PgBoss } from "pg-boss";
 import type { Sql } from "postgres";
-import { SCHEDULES, type ScheduleDefinition } from "./definitions.js";
+import {
+	SCHEDULES,
+	type ScheduleDefinition,
+	type ScheduleOutcome,
+} from "./definitions.js";
 
 export type { DispatchResult } from "./dispatch.js";
-export type { ScheduleDefinition };
+export type { ScheduleDefinition, ScheduleOutcome };
 export { SCHEDULES };
+
+function formatOutcome(outcome: ScheduleOutcome): string {
+	if ("deletedCount" in outcome) {
+		return `deleted=${outcome.deletedCount}, cutoff=${outcome.cutoffYear}, retention=${outcome.retentionYears}`;
+	}
+	return `enqueued=${outcome.enqueued}, skipped=${outcome.skippedAlreadySent}, scheduled=${outcome.scheduled}, errors=${outcome.enqueueErrors}`;
+}
 
 // pg-boss `schedule()` enqueues a job on the queue named `<schedule.name>`
 // on every cron tick (with a built-in lock so multiple worker replicas
@@ -30,7 +41,7 @@ export async function registerSchedules(
 			try {
 				const result = await schedule.run(appSql);
 				console.log(
-					`[schedules] ${schedule.name} → enqueued=${result.enqueued}, skipped=${result.skippedAlreadySent}, scheduled=${result.scheduled}, errors=${result.enqueueErrors} (${Date.now() - startedAt}ms)`,
+					`[schedules] ${schedule.name} → ${formatOutcome(result)} (${Date.now() - startedAt}ms)`,
 				);
 			} catch (error) {
 				const message = error instanceof Error ? error.message : String(error);

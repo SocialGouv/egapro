@@ -664,6 +664,8 @@ Deux CronJobs Kubernetes assurent la maintenance des données. Ils partagent le 
 
 Ces deux actions sont de catégorie `system` (rétention 365 j). Toute modification de ces scripts → **test d'intégration obligatoire** (`*.integration.test.ts`, cf. §13).
 
+Le journal de dédoublonnage des relances n'est pas purgé par un CronJob : la table appartient au worker de notifications, qui la crée et la purge lui-même (`reminder-log-purge-daily`, `0 3 * * *` Europe/Paris, action `SYSTEM_REMINDER_LOG_CLEANUP` / `system.reminder_log_cleanup`, catégorie `system`). Voir [`docs/journaux-et-conservation.md`](journaux-et-conservation.md) §4.6.
+
 #### Purge RGPD des déclarations (`declaration-cleanup.ts`)
 
 Objectif : supprimer les déclarations (et toutes leurs données rattachées) au-delà de la durée légale de conservation.

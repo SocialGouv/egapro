@@ -148,6 +148,7 @@ export const AUDIT_ACTIONS = {
 	// ── System / cron-triggered ────────────────────────────
 	SYSTEM_AUDIT_CLEANUP: "system.audit_cleanup",
 	SYSTEM_DECLARATION_CLEANUP: "system.declaration_cleanup",
+	SYSTEM_REMINDER_LOG_CLEANUP: "system.reminder_log_cleanup",
 } as const;
 
 export type AuditActionKey = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];
@@ -263,4 +264,5 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 
 	[AUDIT_ACTIONS.SYSTEM_AUDIT_CLEANUP]: "system",
 	[AUDIT_ACTIONS.SYSTEM_DECLARATION_CLEANUP]: "system",
+	[AUDIT_ACTIONS.SYSTEM_REMINDER_LOG_CLEANUP]: "system",
 };
