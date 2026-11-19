@@ -1,6 +1,8 @@
 import postgres from "postgres";
 
 import { type HealthcheckConfig, resolveConfig } from "./config.js";
+import { createMattermostNotifier } from "./notify/mattermost.js";
+import { decideNotification } from "./notify/policy.js";
 import { persistProbeResult } from "./persistence.js";
 import { buildProbes } from "./probes/index.js";
 import { sanitizeMessage } from "./sanitize.js";
@@ -29,6 +31,7 @@ export async function main(): Promise<void> {
 	logDisabledProbes(config);
 	await logReceiptOutboxGap(sql);
 
+	const notifier = createNotifier(config);
 	const probes = buildProbes(config, sql, queueSql);
 	const scheduler = createScheduler({
 		probes,
@@ -36,7 +39,31 @@ export async function main(): Promise<void> {
 			writeHealthCheckLine(
 				toHealthCheckLine({ probeKey: probe.key, result, checkedAt }),
 			);
-			await persistProbeResult(sql, { probe, result, checkedAt });
+			const { plan, previous } = await persistProbeResult(sql, {
+				probe,
+				result,
+				checkedAt,
+			});
+			if (!notifier) return;
+
+			const notification = decideNotification({
+				probe,
+				status: plan.status,
+				consecutiveFailures: plan.consecutiveFailures,
+				latencyMs: result.latencyMs,
+				message: result.message,
+				nextExpectedAt: result.nextExpectedAt,
+				checkedAt,
+				// The outage start, not the last check: a recovery reports how
+				// long it was down, and the threshold alert reports the same.
+				statusSince:
+					previous && previous.status !== "operational"
+						? previous.changedAt
+						: checkedAt,
+				previous,
+				alertAfterFailures: config.alerts.alertAfterFailures,
+			});
+			if (notification) await notifier.notify(notification);
 		},
 		onError(probe, error) {
 			console.error(
@@ -59,7 +86,26 @@ function createSqlClient(databaseUrl: string): postgres.Sql {
 	});
 }
 
+function createNotifier(config: HealthcheckConfig) {
+	const webhookUrl = config.alerts.mattermostWebhookUrl;
+	if (!webhookUrl) return null;
+	return createMattermostNotifier({
+		webhookUrl,
+		adminUrl: config.alerts.adminUrl,
+		secrets: config.secrets,
+	});
+}
+
 function logDisabledProbes(config: HealthcheckConfig): void {
+	if (!config.alerts.mattermostWebhookUrl) {
+		console.warn(
+			"[healthcheck] no HEALTHCHECK_MATTERMOST_WEBHOOK_URL — Mattermost alerts disabled",
+		);
+	} else if (!config.alerts.adminUrl) {
+		console.warn(
+			"[healthcheck] no HEALTHCHECK_ADMIN_URL or HEALTHCHECK_PUBLIC_URL — alert messages will carry no screen link",
+		);
+	}
 	if (!config.s3) {
 		console.warn(
 			"[healthcheck] incomplete S3_* configuration — S3 probe disabled",

@@ -297,3 +297,49 @@ describe("resolveConfig", () => {
 		expect(config.secrets).toContain("supervision-secret-key");
 	});
 });
+
+describe("resolveConfig — alerts", () => {
+	it("disables alerts without a webhook, without inventing a URL", () => {
+		expect(resolveConfig({}).alerts).toEqual({
+			mattermostWebhookUrl: null,
+			adminUrl: null,
+			alertAfterFailures: 3,
+		});
+	});
+
+	it("reads the webhook and the alert threshold", () => {
+		const alerts = resolveConfig({
+			HEALTHCHECK_MATTERMOST_WEBHOOK_URL: "https://mattermost.test/hooks/abc",
+			HEALTHCHECK_ALERT_AFTER_FAILURES: "2",
+		}).alerts;
+
+		expect(alerts.mattermostWebhookUrl).toBe(
+			"https://mattermost.test/hooks/abc",
+		);
+		expect(alerts.alertAfterFailures).toBe(2);
+	});
+
+	it("falls back to the public entrypoint for the screen link", () => {
+		expect(
+			resolveConfig({ HEALTHCHECK_PUBLIC_URL: "https://egapro.test" }).alerts
+				.adminUrl,
+		).toBe("https://egapro.test");
+	});
+
+	it("prefers an explicit admin URL", () => {
+		expect(
+			resolveConfig({
+				HEALTHCHECK_PUBLIC_URL: "https://egapro.test",
+				HEALTHCHECK_ADMIN_URL: "https://back-office.test",
+			}).alerts.adminUrl,
+		).toBe("https://back-office.test");
+	});
+
+	it("keeps the webhook out of every message, as a secret", () => {
+		const webhookUrl = "https://mattermost.test/hooks/secret-token";
+
+		expect(
+			resolveConfig({ HEALTHCHECK_MATTERMOST_WEBHOOK_URL: webhookUrl }).secrets,
+		).toContain(webhookUrl);
+	});
+});

@@ -19,6 +19,17 @@ export type PersistPlan = {
 	openIncident: boolean;
 };
 
+/**
+ * State read before the update. `changedAt` is when the probe last left its
+ * previous status: the start of the outage an alert reports.
+ */
+export type PreviousProbeState = ProbeState & { changedAt: Date };
+
+export type PersistOutcome = {
+	plan: PersistPlan;
+	previous: PreviousProbeState | null;
+};
+
 export type PersistProbeInput = {
 	probe: Probe;
 	result: ProbeResult;
@@ -44,12 +55,17 @@ export function planPersist(
 export async function persistProbeResult(
 	sql: Sql,
 	{ probe, result, checkedAt }: PersistProbeInput,
-): Promise<PersistPlan> {
+): Promise<PersistOutcome> {
 	return sql.begin(async (tx) => {
 		const previousRows = await tx<
-			{ status: ProbeStatus; consecutiveFailures: number }[]
+			{
+				status: ProbeStatus;
+				consecutiveFailures: number;
+				changedAt: Date;
+			}[]
 		>`
-			SELECT status, consecutive_failures AS "consecutiveFailures"
+			SELECT status, consecutive_failures AS "consecutiveFailures",
+				changed_at AS "changedAt"
 			FROM app_health_probe
 			WHERE key = ${probe.key}
 			FOR UPDATE
@@ -119,6 +135,6 @@ export async function persistProbeResult(
 			`;
 		}
 
-		return plan;
+		return { plan, previous };
 	});
 }

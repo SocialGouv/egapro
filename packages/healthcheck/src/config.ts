@@ -12,6 +12,19 @@ const DEFAULT_QUEUE_MAX_PENDING = 100;
 export const DEFAULT_QUEUE_MAX_AGE_SECONDS = 900;
 const DEFAULT_CLAMAV_PORT = 3310;
 const DEFAULT_JOB_STALE_HOURS = 26;
+const DEFAULT_ALERT_AFTER_FAILURES = 3;
+
+export type AlertsConfig = {
+	/** Absent means alerts are disabled: no request is attempted. */
+	mattermostWebhookUrl: string | null;
+	/**
+	 * Base URL of the back-office screen linked from every alert. Falls back to
+	 * the public entrypoint, which is the same host in every namespace.
+	 */
+	adminUrl: string | null;
+	/** Consecutive failures before a `critical` / `important` probe alerts. */
+	alertAfterFailures: number;
+};
 
 export type QueueConfig = {
 	databaseUrl: string;
@@ -41,6 +54,7 @@ export type HealthcheckConfig = {
 	 * period, so a monthly or yearly job is not red for the rest of the year.
 	 */
 	jobStaleHours: number;
+	alerts: AlertsConfig;
 	secrets: readonly string[];
 };
 
@@ -99,6 +113,7 @@ export function resolveConfig(
 			source.HEALTHCHECK_JOB_STALE_HOURS,
 			DEFAULT_JOB_STALE_HOURS,
 		),
+		alerts: resolveAlerts(source),
 		secrets: compact([
 			source.S3_ACCESS_KEY_ID,
 			source.S3_SECRET_ACCESS_KEY,
@@ -106,6 +121,7 @@ export function resolveConfig(
 			source.NOTIFICATIONS_POSTGRES_PASSWORD,
 			source.SMTP_PASS,
 			source.HEALTHCHECK_APISIX_SUIT_API_KEY,
+			source.HEALTHCHECK_MATTERMOST_WEBHOOK_URL,
 		]),
 	};
 }
@@ -203,6 +219,18 @@ function resolveSuitGateway(
 	if (!baseUrl || !apiKey) return null;
 
 	return { baseUrl, apiKey };
+}
+
+function resolveAlerts(source: NodeJS.ProcessEnv): AlertsConfig {
+	return {
+		mattermostWebhookUrl: source.HEALTHCHECK_MATTERMOST_WEBHOOK_URL || null,
+		adminUrl:
+			source.HEALTHCHECK_ADMIN_URL || source.HEALTHCHECK_PUBLIC_URL || null,
+		alertAfterFailures: resolvePositiveInteger(
+			source.HEALTHCHECK_ALERT_AFTER_FAILURES,
+			DEFAULT_ALERT_AFTER_FAILURES,
+		),
+	};
 }
 
 function resolveIntervalSeconds(
