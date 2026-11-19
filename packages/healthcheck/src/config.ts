@@ -9,8 +9,9 @@ const DEFAULT_PARTNER_INTERVAL_SECONDS = 900;
 const DEFAULT_EXPOSED_INTERVAL_SECONDS = 300;
 const DEFAULT_CERT_WARN_DAYS = 30;
 const DEFAULT_QUEUE_MAX_PENDING = 100;
-const DEFAULT_QUEUE_MAX_AGE_SECONDS = 900;
+export const DEFAULT_QUEUE_MAX_AGE_SECONDS = 900;
 const DEFAULT_CLAMAV_PORT = 3310;
+const DEFAULT_JOB_STALE_HOURS = 26;
 
 export type QueueConfig = {
 	databaseUrl: string;
@@ -34,6 +35,12 @@ export type HealthcheckConfig = {
 	intervalSeconds: number;
 	partnerIntervalSeconds: number;
 	exposedIntervalSeconds: number;
+	/**
+	 * Floor of the staleness window for scheduled jobs: 24 h plus 2 h of margin
+	 * absorbs a scheduler delay. A less frequent cron widens it to its own
+	 * period, so a monthly or yearly job is not red for the rest of the year.
+	 */
+	jobStaleHours: number;
 	secrets: readonly string[];
 };
 
@@ -87,6 +94,10 @@ export function resolveConfig(
 			source,
 			"HEALTHCHECK_EXPOSED_INTERVAL_SECONDS",
 			DEFAULT_EXPOSED_INTERVAL_SECONDS,
+		),
+		jobStaleHours: resolvePositiveInteger(
+			source.HEALTHCHECK_JOB_STALE_HOURS,
+			DEFAULT_JOB_STALE_HOURS,
 		),
 		secrets: compact([
 			source.S3_ACCESS_KEY_ID,

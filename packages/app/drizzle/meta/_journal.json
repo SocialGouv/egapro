@@ -449,6 +449,13 @@
 			"when": 1794921740759,
 			"tag": "0063_cloudy_thunderbird",
 			"breakpoints": true
+		},
+		{
+			"idx": 64,
+			"version": "7",
+			"when": 1795080859267,
+			"tag": "0064_glossy_darkhawk",
+			"breakpoints": true
 		}
 	]
 }

@@ -1013,6 +1013,10 @@ export const healthProbes = createTable("health_probe", (d) => ({
 	changedAt: d.timestamp({ withTimezone: true }).notNull(),
 	consecutiveFailures: d.integer().notNull().default(0),
 	lastError: d.varchar({ length: 500 }),
+	// Only `kind: "job"` probes carry it: the next run the worker expects,
+	// derived from the cron definition it owns. The screen prints it as
+	// "prochaine exécution attendue" instead of re-deriving a schedule.
+	nextExpectedAt: d.timestamp({ withTimezone: true }),
 }));
 
 export const healthIncidents = createTable(

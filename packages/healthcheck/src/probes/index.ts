@@ -3,6 +3,7 @@ import type { Sql } from "postgres";
 import type { HealthcheckConfig } from "../config.js";
 import { createClamavProbe } from "./clamav.js";
 import { createIngressProbe } from "./ingress.js";
+import { buildJobProbes } from "./jobs/index.js";
 import { createPgbossProbe } from "./pgboss.js";
 import { createPostgresProbe } from "./postgres.js";
 import { createProconnectProbe } from "./proconnect.js";
@@ -61,6 +62,10 @@ export function buildProbes(
 			intervalSeconds: config.intervalSeconds,
 		}),
 	);
+
+	// Scheduled jobs: freshness from the traces they wrote, so a CronJob that
+	// never started is caught by the absence of a success line.
+	probes.push(...buildJobProbes(config, sql, config.queue ? queueSql : null));
 
 	if (!config.partnerProbesEnabled) return probes;
 

@@ -26,6 +26,13 @@ src/
     types.ts           the probe contract (key, label, criticality, kind, ...)
     postgres.ts        SELECT 1        — critical, 5 s timeout
     s3.ts              HeadBucket      — critical, 10 s timeout
+    jobs/
+      definitions.ts   the four regulatory cron jobs, with their cron
+      freshness.ts     staleness rule and window (pure)
+      auditTrace.ts    last success/failure in audit.action_log
+      exports.ts       app_export corroboration of the export job
+      pgbossSchedules.ts  the eight reminder schedules, cron read from pg-boss
+      emailQueue.ts    failures and oldest pending job of email-notification
 ```
 
 ## Probe contract
@@ -45,6 +52,7 @@ type ProbeResult = {
   status: "operational" | "degraded" | "unavailable" | "misconfigured";
   latencyMs: number;
   message?: string;   // short, sanitised — never a raw response or a stack
+  nextExpectedAt?: Date;  // job probes only: next run their cron expects
 };
 ```
 
@@ -58,7 +66,8 @@ credentials to scrub out of it.
 Two tables, both written here and read by the back-office:
 
 - `app_health_probe` — one row per probe: last status, latency, `checked_at`,
-  `changed_at`, `consecutive_failures`, `last_error`.
+  `changed_at`, `consecutive_failures`, `last_error`, and `next_expected_at`
+  (job probes only — the next run the worker's cron definition expects).
 - `app_health_incident` — one row per **state change** (`from_status` →
   `to_status`, `started_at`, `ended_at`). A return to `operational` closes the
   open incident; a failure that changes shape (down → degraded) closes one and
@@ -68,10 +77,54 @@ Ten probes a minute would write ~14 000 rows a day if every tick were kept, so
 the current state is an `INSERT … ON CONFLICT (key) DO UPDATE` and only
 transitions are appended.
 
-The tables belong to `packages/app` (Drizzle migrations, `drizzle/0063_*`).
-This workspace never imports the Next.js app: it speaks raw SQL through
-`postgres`, and `src/__tests__/persistence.integration.test.ts` runs that SQL
-against a disposable Postgres container with the real migrations applied.
+The tables belong to `packages/app` (Drizzle migrations, `drizzle/0063_*` to
+`drizzle/0064_*`). This workspace never imports the Next.js app: it speaks raw
+SQL through `postgres`, and `src/__tests__/persistence.integration.test.ts` runs
+that SQL against a disposable Postgres container with the real migrations
+applied.
+
+## Scheduled jobs
+
+A CronJob that never starts, whose image cannot be pulled or whose script is
+missing writes **no trace at all**. The only thing that catches it is freshness:
+each scheduled job gets one synthetic probe of `kind: "job"`, and it is red as
+soon as no success line exists inside its window.
+
+| Job | Trace read | Criticality |
+|---|---|---|
+| `export-generate-daily` | `export.generate` success, corroborated by a recent `app_export` row | critical |
+| `gip-mds-import-daily` | `gip_mds.import` success | critical |
+| `declaration-cleanup-daily` | `system.declaration_cleanup` success | critical |
+| `audit-cleanup-daily` | `system.audit_cleanup` success | critical |
+| 8 reminder schedules (pg-boss) | last `completed` job of the queue | important |
+| `email-notification` queue | failures inside the window, oldest pending job | important |
+
+Rules, all in this worker — the screen prints the result and never re-derives a
+schedule:
+
+- The window is `HEALTHCHECK_JOB_STALE_HOURS` (default 26 = 24 h + 2 h of
+  scheduler margin) **or the cron's own period when that is longer**. A monthly
+  or yearly schedule is therefore not red for the rest of the year.
+- No success inside the window → `unavailable`, "en retard". A job that never
+  succeeded is red from the very first cycle: the absence of a trace is the
+  signal, not an exception to it.
+- A failure newer than the last success is **not** an outage while a success
+  stays in the window; it is stored in the message so the screen can show it on
+  its own line.
+- `next_expected_at` comes from the cron definition: the four regulatory jobs
+  are declared in `probes/jobs/definitions.ts` (same `schedule:` as
+  `.kontinuous/templates/*-cron.yaml`), the reminder schedules are read from
+  `pgboss.schedule` so pg-boss stays the single source of their cron.
+- Requests on `audit.action_log` filter on `action = … AND created_at >= …`,
+  the shape of `action_log_action_idx`, so they read an index range instead of
+  scanning the table.
+
+**Out of scope, on purpose:** no Kubernetes API client and no RBAC. Freshness
+comes from application traces, which covers every job that writes one.
+`data-gouv-refresh-daily` (disabled by default) and post-deploy backfill jobs
+write none and stay out until they do. The receipt replay probe (#4546) is not
+scheduled either: its `app_receipt_outbox` table does not exist yet, and the
+worker logs that absence at boot. The supervision runbook records both gaps.
 
 ## Environment
 
@@ -81,6 +134,7 @@ against a disposable Postgres container with the real migrations applied.
 | `POSTGRES_HOST`, `POSTGRES_DB`, `POSTGRES_PORT`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_SSLMODE` | one of the two | discrete keys of the `pg-app` secret |
 | `S3_ENDPOINT`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_BUCKET_NAME` | for the S3 probe | incomplete set → the S3 probe is skipped with a warning |
 | `HEALTHCHECK_INTERVAL_SECONDS` | no (default `60`) | cadence of the internal probes |
+| `HEALTHCHECK_JOB_STALE_HOURS` | no (default `26`) | floor of the staleness window for scheduled jobs (24 h + 2 h of margin) |
 
 Without any database configuration the worker logs a warning and exits **0**,
 so a namespace without a database leaves an exited pod instead of failing its
