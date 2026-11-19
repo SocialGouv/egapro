@@ -2,6 +2,7 @@ import type { PgBoss } from "pg-boss";
 import type { Sql } from "postgres";
 
 import type { HealthServer } from "./health.js";
+import { flushWorkerSentry } from "./sentry.js";
 
 export type ShutdownDeps = {
 	boss: PgBoss;
@@ -20,6 +21,9 @@ export function installShutdownHooks({ boss, mainSql, health }: ShutdownDeps) {
 				await health.sql.end({ timeout: 5 });
 			}
 			if (mainSql) await mainSql.end({ timeout: 5 });
+			// A failure captured during this shutdown is still buffered: without
+			// the flush, the rollout's SIGTERM swallows it.
+			await flushWorkerSentry(2000);
 		} catch (error) {
 			console.error("[notifications] shutdown error:", error);
 		}

@@ -13,6 +13,11 @@ import {
 } from "./worker/health.js";
 import { makeJobHandler } from "./worker/jobHandler.js";
 import { installShutdownHooks } from "./worker/lifecycle.js";
+import {
+	captureQueueConnectionFailure,
+	flushWorkerSentry,
+	initWorkerSentry,
+} from "./worker/sentry.js";
 import { buildTransporter, getMailEnabled } from "./worker/transporter.js";
 
 /**
@@ -110,6 +115,17 @@ async function startBoss(connectionString: string): Promise<PgBoss> {
 }
 
 async function main(): Promise<void> {
+	// Before anything can fail: the queue connection retries below are exactly
+	// the failures this SDK is here to report. The DSN is baked into the image
+	// by the Dockerfile from the same GitHub variable the app bundle uses;
+	// SENTRY_DSN stays the escape hatch for an out-of-image override.
+	initWorkerSentry({
+		dsn: process.env.SENTRY_DSN ?? process.env.NEXT_PUBLIC_SENTRY_DSN,
+		environment:
+			process.env.SENTRY_ENVIRONMENT ?? process.env.NEXT_PUBLIC_EGAPRO_ENV,
+		release: process.env.SENTRY_RELEASE,
+	});
+
 	const notifUrl = resolveNotificationsDbUrl();
 	if (!notifUrl) {
 		throw new Error(
@@ -191,8 +207,14 @@ const isCli = (() => {
 })();
 
 if (isCli) {
-	main().catch((error: unknown) => {
+	main().catch(async (error: unknown) => {
+		// Only the final failure reaches here: `startBoss` already swallowed the
+		// retries it will perform.
+		captureQueueConnectionFailure(error, BOOT_MAX_ATTEMPTS);
 		console.error("[notifications] fatal:", error);
+		// The capture only queued the event: exiting now would drop the one
+		// outage this code exists to report.
+		await flushWorkerSentry(2000);
 		process.exit(1);
 	});
 }

@@ -1,15 +1,23 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockEnv } = vi.hoisted(() => ({
+const { mockEnv, captureDependencyFailure } = vi.hoisted(() => ({
 	mockEnv: {
 		MATOMO_API_TOKEN: "secret-token" as string | undefined,
 		MATOMO_API_URL: "https://matomo.test" as string | undefined,
 		NEXT_PUBLIC_MATOMO_URL: "https://matomo.test" as string | undefined,
 		NEXT_PUBLIC_MATOMO_SITE_ID: "1" as string | undefined,
 	},
+	captureDependencyFailure: vi.fn(),
 }));
 
 vi.mock("~/env", () => ({ env: mockEnv }));
+vi.mock("~/server/observability/captureDependency", () => ({
+	captureDependencyFailure,
+}));
+
+beforeEach(() => {
+	captureDependencyFailure.mockReset();
+});
 
 import {
 	buildFunnelRows,
@@ -193,6 +201,23 @@ describe("fetchMatomoFunnel", () => {
 		await expect(fetchMatomoFunnel({ year: 2024 })).rejects.toThrow(
 			"Matomo Reporting API error: 502 Bad Gateway",
 		);
+		// tRPC shows the failure to the one admin who opened the panel; Sentry is
+		// what tells anyone the dependency is down.
+		expect(captureDependencyFailure).toHaveBeenCalledWith(
+			"matomo",
+			expect.any(Error),
+			{ status: 502 },
+		);
+	});
+
+	it("reports an unreachable API and rethrows", async () => {
+		const failure = new Error("getaddrinfo ENOTFOUND matomo.test");
+		fetchSpy.mockRejectedValue(failure);
+
+		await expect(fetchMatomoFunnel({ year: 2024 })).rejects.toThrow(
+			"getaddrinfo ENOTFOUND",
+		);
+		expect(captureDependencyFailure).toHaveBeenCalledWith("matomo", failure);
 	});
 
 	it("degrades to empty funnels when a response row fails schema validation", async () => {
@@ -361,6 +386,10 @@ describe("fetchMatomoCategoryModel", () => {
 
 		await expect(fetchMatomoCategoryModel({ year: 2024 })).rejects.toThrow(
 			"Matomo Reporting API error: Invalid token",
+		);
+		expect(captureDependencyFailure).toHaveBeenCalledWith(
+			"matomo",
+			expect.any(Error),
 		);
 	});
 });

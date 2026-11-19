@@ -1,3 +1,4 @@
+export { resolveTracesSampleRate } from "./sampling";
 export {
 	replayEventPrivacyIntegration,
 	sentryPrivacyOptions,

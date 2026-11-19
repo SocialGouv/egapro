@@ -4,6 +4,7 @@ const mocks = vi.hoisted(() => ({
 	enqueueNotification: vi.fn(),
 	logAction: vi.fn(),
 	captureException: vi.fn(),
+	captureDependencyFailure: vi.fn(),
 	buildDeclarationAttachments: vi.fn(),
 	buildSecondDeclarationAttachments: vi.fn(),
 	buildJointEvaluationAttachments: vi.fn(),
@@ -20,6 +21,10 @@ vi.mock("notifications/publisher", () => ({
 
 vi.mock("@sentry/nextjs", () => ({
 	captureException: mocks.captureException,
+}));
+
+vi.mock("~/server/observability/captureDependency", () => ({
+	captureDependencyFailure: mocks.captureDependencyFailure,
 }));
 
 vi.mock("~/server/audit/log", () => ({
@@ -364,6 +369,13 @@ describe("enqueueReceipt", () => {
 				errorMessage: "QUEUE_ERROR:",
 			}),
 		);
+		// The audit row holds a code, so a queue outage would stay invisible
+		// outside Sentry.
+		expect(mocks.captureDependencyFailure).toHaveBeenCalledWith(
+			"queue",
+			expect.any(Error),
+			{ kind: "declaration", type: expect.any(String) },
+		);
 	});
 
 	it("logs failure with queue_unavailable when publisher cannot reach the queue", async () => {
@@ -378,6 +390,11 @@ describe("enqueueReceipt", () => {
 				status: "failure",
 				errorMessage: "QUEUE_UNAVAILABLE:",
 			}),
+		);
+		expect(mocks.captureDependencyFailure).toHaveBeenCalledWith(
+			"queue",
+			expect.any(Error),
+			{ kind: "declaration", type: expect.any(String) },
 		);
 	});
 

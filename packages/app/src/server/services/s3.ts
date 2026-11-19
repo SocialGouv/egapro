@@ -15,6 +15,7 @@ import {
 } from "@aws-sdk/client-s3";
 
 import { env } from "~/env";
+import { captureDependencyFailure } from "~/server/observability/captureDependency";
 
 const globalForS3 = globalThis as unknown as {
 	s3Client: S3Client | undefined;
@@ -49,6 +50,10 @@ export async function ensureBucket(): Promise<void> {
 				new CreateBucketCommand({ Bucket: env.S3_BUCKET_NAME }),
 			);
 		} else {
+			// Startup probe: nothing else reports this, and the app boots without
+			// its bucket, so a silent throw would only show in the boot log.
+			console.error("[s3] bucket check failed");
+			captureDependencyFailure("s3", error, { operation: "ensure-bucket" });
 			throw error;
 		}
 	}
@@ -83,7 +88,11 @@ export async function getFileSize(key: string): Promise<number | null> {
 			}),
 		);
 		return response.ContentLength ?? null;
-	} catch {
+	} catch (error) {
+		// Best-effort read: the size is cosmetic (PDF recap), so the failure is
+		// swallowed — and therefore invisible without this capture.
+		console.error("[s3] file size lookup failed");
+		captureDependencyFailure("s3", error, { operation: "get-file-size" });
 		return null;
 	}
 }

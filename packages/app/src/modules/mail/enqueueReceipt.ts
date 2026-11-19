@@ -17,6 +17,7 @@ import { logAction } from "~/server/audit/log";
 import { db } from "~/server/db";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { companies, declarations } from "~/server/db/schema";
+import { captureDependencyFailure } from "~/server/observability/captureDependency";
 import {
 	buildCseOpinionAttachments,
 	buildDeclarationAttachments,
@@ -280,6 +281,20 @@ export async function enqueueReceipt(
 				: result.status === "error"
 					? "QUEUE_ERROR:"
 					: "QUEUE_UNAVAILABLE:";
+
+		// The audit row carries a code, not a signal: a queue outage is invisible
+		// outside Sentry. No recipient, no SIREN — only the bounded envelope.
+		if (result.status !== "enqueued") {
+			captureDependencyFailure(
+				"queue",
+				new Error(
+					result.status === "error"
+						? "notification queue rejected the job"
+						: "notification queue unavailable",
+				),
+				{ kind, type },
+			);
+		}
 
 		void logAction({
 			action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
