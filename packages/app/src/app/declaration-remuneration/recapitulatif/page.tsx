@@ -7,6 +7,7 @@ import {
 	formatShortDate,
 	getDeclarationReferencePeriod,
 	isDraft,
+	resolveCseAnswerForYear,
 } from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout";
 import { MY_SPACE } from "~/modules/routes";
@@ -139,7 +140,7 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 								siren: company.siren,
 								nafCode: company.nafCode,
 								nafLabel: company.nafLabel,
-								hasCse: company.hasCse,
+								hasCse: resolveCseAnswerForYear(d.hasCse, company.hasCse),
 								address: company.address,
 								countryCode: company.countryCode,
 								countryLabel: company.countryLabel,

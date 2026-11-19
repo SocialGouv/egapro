@@ -95,6 +95,7 @@ export async function resetDeclarationToDraft() {
 			    hourly_men = NULL,
 			    draft = NULL,
 			    draft_updated_at = NULL,
+			    has_cse = NULL,
 			    cse_opinion_draft_updated_at = NULL
 			WHERE siren = ${TEST_SIREN}
 		`;
@@ -216,6 +217,11 @@ export async function setCompanyHasCse(hasCse: boolean | null) {
 	try {
 		await sql`
 			UPDATE app_company SET has_cse = ${hasCse} WHERE siren = ${TEST_SIREN}
+		`;
+		// The answer is snapshotted per year too: a fixture that models
+		// "no answer yet" must clear the year's copy too, or it wins over the company.
+		await sql`
+			UPDATE app_declaration SET has_cse = ${hasCse} WHERE siren = ${TEST_SIREN}
 		`;
 	} finally {
 		await sql.end();

@@ -19,6 +19,8 @@ import type { CompanyDetail } from "./types";
 
 type Props = {
 	company: CompanyDetail;
+	// Frozen with the year's completed démarche.
+	cseLocked: boolean;
 };
 
 const INFO_SOURCE_TOOLTIP_ID = "company-info-source-tooltip";
@@ -30,7 +32,7 @@ const INFO_SOURCE_TEXT_BY_SIZE: Partial<Record<CompanySize, string>> = {
 		"Source : INSEE et DSN (Déclarations Sociales Nominatives) pour l'effectif annuel moyen.",
 };
 
-export function CompanyInfoBanner({ company }: Props) {
+export function CompanyInfoBanner({ company, cseLocked }: Props) {
 	const workforceYear = getWorkforceYear();
 	const obligationWorkforce = getObligationWorkforce(company.gipWorkforce);
 	// The CSE field is the only editable datapoint and it starts at 100, so below
@@ -90,7 +92,7 @@ export function CompanyInfoBanner({ company }: Props) {
 								</span>
 							)}
 						</div>
-						{cseApplicable && (
+						{cseApplicable && !cseLocked && (
 							<div className="fr-col-auto">
 								<button
 									aria-controls={COMPANY_EDIT_MODAL_ID}

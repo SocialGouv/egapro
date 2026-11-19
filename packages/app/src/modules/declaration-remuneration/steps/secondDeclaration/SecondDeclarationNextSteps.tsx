@@ -8,6 +8,7 @@ import { UpdateCseModal } from "~/modules/declaration-remuneration/shared/Update
 
 type Props = {
 	cseApplicable: boolean;
+	cseLocked: boolean;
 	cseOpinionRequired: boolean;
 	hasGapsAboveThreshold: boolean;
 	siren: string;
@@ -15,6 +16,7 @@ type Props = {
 
 export function SecondDeclarationNextSteps({
 	cseApplicable,
+	cseLocked,
 	cseOpinionRequired,
 	hasGapsAboveThreshold,
 	siren,
@@ -41,11 +43,14 @@ export function SecondDeclarationNextSteps({
 							</strong>
 						</p>
 
-						<CseOpinionCtaGroup cseApplicable={cseApplicable} />
+						<CseOpinionCtaGroup
+							cseApplicable={cseApplicable}
+							cseLocked={cseLocked}
+						/>
 					</div>
 				)}
 
-				{!cseOpinionRequired && cseApplicable && (
+				{!cseOpinionRequired && cseApplicable && !cseLocked && (
 					<div className={styles.section}>
 						<div className={styles.ctaGroup}>
 							<UpdateCseButton />
@@ -119,7 +124,11 @@ export function SecondDeclarationNextSteps({
 				)}
 			</div>
 
-			<UpdateCseModal cseApplicable={cseApplicable} siren={siren} />
+			<UpdateCseModal
+				cseApplicable={cseApplicable}
+				cseLocked={cseLocked}
+				siren={siren}
+			/>
 		</>
 	);
 }

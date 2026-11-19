@@ -26,6 +26,8 @@ type Props = {
 	userPhone: string | null;
 	hasCse: boolean | null;
 	cseApplicable: boolean;
+	// Frozen with the year's completed démarche.
+	cseLocked: boolean;
 };
 
 function getDescription(needsPhone: boolean, needsCse: boolean): string {
@@ -45,13 +47,14 @@ export function MissingInfoModal({
 	userPhone,
 	hasCse,
 	cseApplicable,
+	cseLocked,
 }: Props) {
 	const isImpersonating = useIsImpersonating();
 	const router = useRouter();
 	const dialogRef = useRef<HTMLDialogElement>(null);
 	const openerTypeRef = useRef<OpenerType>("remuneration");
 	const needsPhone = !userPhone;
-	const needsCse = cseApplicable && hasCse === null;
+	const needsCse = cseApplicable && !cseLocked && hasCse === null;
 
 	const schema = useMemo(
 		() => createMissingInfoSchema(needsPhone, needsCse),

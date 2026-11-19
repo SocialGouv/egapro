@@ -16,6 +16,7 @@ import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/typ
 import {
 	type DeclarationFsmStatus,
 	hasHighGap,
+	isCseAnswerLocked,
 	isSecondDeclarationWritable,
 } from "~/modules/domain";
 import {
@@ -197,6 +198,7 @@ export function SecondDeclarationStep3Review({
 
 			<SecondDeclarationNextSteps
 				cseApplicable={cseApplicable}
+				cseLocked={isCseAnswerLocked(status)}
 				cseOpinionRequired={cseOpinionRequired}
 				hasGapsAboveThreshold={gapsExist}
 				siren={siren}

@@ -32,14 +32,14 @@ describe("UpdateCseModal", () => {
 	// to live in the caller, where it could be forgotten.
 	it("renders nothing when the CSE question does not apply to the company", () => {
 		const { container } = render(
-			<UpdateCseModal cseApplicable={false} siren={SIREN} />,
+			<UpdateCseModal cseApplicable={false} cseLocked={false} siren={SIREN} />,
 		);
 
 		expect(container).toBeEmptyDOMElement();
 	});
 
 	it("renders the dialog when the CSE question applies", () => {
-		render(<UpdateCseModal cseApplicable siren={SIREN} />);
+		render(<UpdateCseModal cseApplicable cseLocked={false} siren={SIREN} />);
 
 		expect(
 			screen.getByRole("heading", {
@@ -49,8 +49,18 @@ describe("UpdateCseModal", () => {
 		).toBeInTheDocument();
 	});
 
+	// Same reasoning as the threshold guard: the server refuses once the year is
+	// completed, so the control must not be reachable at all.
+	it("renders nothing once the year's démarche is completed", () => {
+		const { container } = render(
+			<UpdateCseModal cseApplicable cseLocked siren={SIREN} />,
+		);
+
+		expect(container).toBeEmptyDOMElement();
+	});
+
 	it("keeps the save button disabled until an answer is picked", async () => {
-		render(<UpdateCseModal cseApplicable siren={SIREN} />);
+		render(<UpdateCseModal cseApplicable cseLocked={false} siren={SIREN} />);
 
 		const save = screen.getByRole("button", {
 			hidden: true,
@@ -65,7 +75,7 @@ describe("UpdateCseModal", () => {
 	});
 
 	it("submits the picked answer for the company", async () => {
-		render(<UpdateCseModal cseApplicable siren={SIREN} />);
+		render(<UpdateCseModal cseApplicable cseLocked={false} siren={SIREN} />);
 
 		await userEvent.click(
 			screen.getByRole("button", { hidden: true, name: "Non" }),
