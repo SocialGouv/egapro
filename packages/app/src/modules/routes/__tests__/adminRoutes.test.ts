@@ -5,6 +5,7 @@ import {
 	ADMIN_IMPERSONATE,
 	ADMIN_NAV_LINKS,
 	ADMIN_REFERENTS,
+	ADMIN_SERVICE_STATUS,
 	ADMIN_SETTINGS,
 	ADMIN_SITEMAP,
 	ADMIN_STATS,
@@ -20,6 +21,7 @@ describe("admin routes", () => {
 		expect(ADMIN_IMPERSONATE).toBe("/admin/impersonate");
 		expect(ADMIN_REFERENTS).toBe("/admin/liste-referents");
 		expect(ADMIN_STATS).toBe("/admin/stats");
+		expect(ADMIN_SERVICE_STATUS).toBe("/admin/etat-des-services");
 		expect(ADMIN_SETTINGS).toBe("/admin/parametres");
 		expect(ADMIN_SITEMAP).toBe("/admin/plan");
 	});
@@ -65,6 +67,7 @@ describe("ADMIN_NAV_LINKS", () => {
 			ADMIN_IMPERSONATE,
 			ADMIN_REFERENTS,
 			ADMIN_STATS,
+			ADMIN_SERVICE_STATUS,
 			ADMIN_SETTINGS,
 		]);
 	});

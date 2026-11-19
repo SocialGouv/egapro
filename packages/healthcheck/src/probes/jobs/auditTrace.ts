@@ -35,23 +35,32 @@ export type AuditJobProbeOptions = {
 };
 
 /**
- * Last success and last failure of one audited action, inside the window.
+ * Most recent success and failure of one audited action.
  *
- * `WHERE action = … AND created_at >= …` is the shape of
- * `action_log_action_idx (action, created_at)`: the probe reads an index range,
- * never the table.
+ * Both subqueries walk `action_log_action_idx (action, created_at)` backwards
+ * and stop at the first matching row, so the probe reads the tail of one
+ * action's history, never the table. Looking past the freshness window is
+ * deliberate: the screen prints the real "dernier succès" even when it is old
+ * enough to turn the probe red.
  */
 export async function readAuditTrace(
 	sql: Sql,
 	action: string,
-	since: Date,
 ): Promise<AuditTrace> {
 	const rows = await sql<AuditTrace[]>`
 		SELECT
-			max(created_at) FILTER (WHERE status = 'success') AS "lastSuccessAt",
-			max(created_at) FILTER (WHERE status = 'failure') AS "lastFailureAt"
-		FROM audit.action_log
-		WHERE action = ${action} AND created_at >= ${since}
+			(
+				SELECT created_at FROM audit.action_log
+				WHERE action = ${action} AND status = 'success'
+				ORDER BY created_at DESC
+				LIMIT 1
+			) AS "lastSuccessAt",
+			(
+				SELECT created_at FROM audit.action_log
+				WHERE action = ${action} AND status = 'failure'
+				ORDER BY created_at DESC
+				LIMIT 1
+			) AS "lastFailureAt"
 	`;
 
 	return rows[0] ?? { lastSuccessAt: null, lastFailureAt: null };
@@ -89,14 +98,18 @@ export function createAuditJobProbe({
 					checkedAt,
 				);
 				const since = new Date(checkedAt.getTime() - windowMs);
-				const trace = await readAuditTrace(sql, definition.action, since);
+				const trace = await readAuditTrace(sql, definition.action);
 
-				if (trace.lastSuccessAt && corroborate && !(await corroborate(since))) {
+				const successInWindow =
+					trace.lastSuccessAt !== null && trace.lastSuccessAt >= since;
+				if (successInWindow && corroborate && !(await corroborate(since))) {
 					return {
 						status: "unavailable",
 						latencyMs: elapsed(),
 						message: "en retard — succès annoncé sans archive générée",
 						nextExpectedAt: expectedAt,
+						lastSuccessAt: trace.lastSuccessAt ?? undefined,
+						lastFailureAt: trace.lastFailureAt ?? undefined,
 					};
 				}
 
@@ -114,6 +127,8 @@ export function createAuditJobProbe({
 						? {}
 						: { message: verdict.message }),
 					nextExpectedAt: expectedAt,
+					lastSuccessAt: trace.lastSuccessAt ?? undefined,
+					lastFailureAt: trace.lastFailureAt ?? undefined,
 				};
 			} catch (error) {
 				return {

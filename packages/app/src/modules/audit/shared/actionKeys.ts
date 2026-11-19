@@ -98,6 +98,9 @@ export const AUDIT_ACTIONS = {
 		"admin_stats.get_cse_status_confirmations",
 	ADMIN_STATS_GET_USERS_PER_COMPANY: "admin_stats.get_users_per_company",
 
+	// ── Admin supervision read ────────────────────────────
+	ADMIN_SERVICE_STATUS_VIEW: "admin_service_status.view",
+
 	// ── Declaration draft ─────────────────────────────────
 	DRAFT_READ: "declaration_draft.read",
 	DRAFT_SAVE: "declaration_draft.save",
@@ -224,6 +227,7 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_DEVICE_BREAKDOWN]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_STATS_GET_CSE_STATUS_CONFIRMATIONS]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_STATS_GET_USERS_PER_COMPANY]: "read_sensitive",
+	[AUDIT_ACTIONS.ADMIN_SERVICE_STATUS_VIEW]: "read_sensitive",
 	[AUDIT_ACTIONS.DRAFT_READ]: "read_sensitive",
 	[AUDIT_ACTIONS.DRAFT_SAVE]: "mutation",
 	[AUDIT_ACTIONS.DRAFT_CLEAR]: "mutation",

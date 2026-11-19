@@ -8,8 +8,13 @@ const NOW = new Date("2026-01-02T10:00:00.000Z");
 function queueSql(row: {
 	failedInWindow: number;
 	oldestPendingSeconds: number | null;
+	lastSuccessAt?: Date | null;
+	lastFailureAt?: Date | null;
 }): Sql {
-	return (() => Promise.resolve([row])) as unknown as Sql;
+	return (() =>
+		Promise.resolve([
+			{ lastSuccessAt: null, lastFailureAt: null, ...row },
+		])) as unknown as Sql;
 }
 
 function probe(sql: Sql | null) {
@@ -79,6 +84,23 @@ describe("e-mail queue job probe", () => {
 		expect(result.message).toBe(
 			"en retard — le plus ancien job attend depuis 27 h",
 		);
+	});
+
+	it("publishes the last completed and last failed jobs for the screen", async () => {
+		const lastSuccessAt = new Date("2026-01-02T09:00:00.000Z");
+		const lastFailureAt = new Date("2026-01-02T08:00:00.000Z");
+
+		const result = await probe(
+			queueSql({
+				failedInWindow: 1,
+				oldestPendingSeconds: null,
+				lastSuccessAt,
+				lastFailureAt,
+			}),
+		).probe(new AbortController().signal);
+
+		expect(result.lastSuccessAt).toEqual(lastSuccessAt);
+		expect(result.lastFailureAt).toEqual(lastFailureAt);
 	});
 
 	it("is degraded when the pg-boss schema was never initialised", async () => {

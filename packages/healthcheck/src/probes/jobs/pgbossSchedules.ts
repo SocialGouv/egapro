@@ -86,6 +86,8 @@ type ScheduleRow = {
 
 type CompletedRow = {
 	lastCompletedAt: Date | null;
+	lastSuccessAt: Date | null;
+	lastFailureAt: Date | null;
 };
 
 export function createReminderJobProbe({
@@ -141,17 +143,23 @@ export function createReminderJobProbe({
 				const since = new Date(checkedAt.getTime() - windowMs);
 
 				const completions = await sql<CompletedRow[]>`
-					SELECT max(completed_on) AS "lastCompletedAt"
+					SELECT
+						max(completed_on) FILTER (
+							WHERE state = 'completed' AND completed_on >= ${since}
+						) AS "lastCompletedAt",
+						max(completed_on) FILTER (WHERE state = 'completed')
+							AS "lastSuccessAt",
+						max(completed_on) FILTER (WHERE state = 'failed')
+							AS "lastFailureAt"
 					FROM pgboss.job
 					WHERE name = ${schedule.queue}
-						AND state = 'completed'
-						AND completed_on >= ${since}
 				`;
 
+				const row = completions[0];
 				const verdict = evaluateFreshness({
 					now: checkedAt,
 					windowMs,
-					lastSuccessAt: completions[0]?.lastCompletedAt ?? null,
+					lastSuccessAt: row?.lastCompletedAt ?? null,
 				});
 
 				return {
@@ -161,6 +169,8 @@ export function createReminderJobProbe({
 						? {}
 						: { message: verdict.message }),
 					nextExpectedAt: nextExpectedAt(definition.cron, timeZone, checkedAt),
+					lastSuccessAt: row?.lastSuccessAt ?? undefined,
+					lastFailureAt: row?.lastFailureAt ?? undefined,
 				};
 			} catch (error) {
 				return {

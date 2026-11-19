@@ -111,6 +111,7 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 		AUDIT_ACTIONS.ADMIN_STATS_GET_CSE_STATUS_CONFIRMATIONS,
 	"adminStats.getUsersPerCompany":
 		AUDIT_ACTIONS.ADMIN_STATS_GET_USERS_PER_COMPANY,
+	"adminStatus.getOverview": AUDIT_ACTIONS.ADMIN_SERVICE_STATUS_VIEW,
 
 	// ── gip mds ────────────────────────────────────────────
 	"gipMds.importFromUrl": AUDIT_ACTIONS.GIP_MDS_IMPORT,

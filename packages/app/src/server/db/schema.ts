@@ -1007,6 +1007,10 @@ export const healthProbes = createTable("health_probe", (d) => ({
 	label: d.varchar({ length: 255 }).notNull(),
 	criticality: healthCriticalityEnum().notNull(),
 	kind: healthProbeKindEnum().notNull(),
+	// Cycle the worker runs this probe at. The screen widens its staleness
+	// threshold to two cycles, so a 15-minute partner probe is not flagged
+	// "inconnu" ten minutes out of fifteen (#5200).
+	intervalSeconds: d.integer().notNull().default(60),
 	status: healthStatusEnum().notNull(),
 	latencyMs: d.integer(),
 	checkedAt: d.timestamp({ withTimezone: true }).notNull(),
@@ -1017,6 +1021,11 @@ export const healthProbes = createTable("health_probe", (d) => ({
 	// derived from the cron definition it owns. The screen prints it as
 	// "prochaine exécution attendue" instead of re-deriving a schedule.
 	nextExpectedAt: d.timestamp({ withTimezone: true }),
+	// Last successful and failed run the probe could observe. Written by the
+	// worker from the same trace it uses to grade the probe, so the back-office
+	// prints them without replaying audit or pg-boss queries itself (#5200).
+	lastSuccessAt: d.timestamp({ withTimezone: true }),
+	lastFailureAt: d.timestamp({ withTimezone: true }),
 }));
 
 export const healthIncidents = createTable(

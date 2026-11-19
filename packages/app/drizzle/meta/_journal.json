@@ -463,6 +463,13 @@
 			"when": 1795093463489,
 			"tag": "0065_empty_mac_gargan",
 			"breakpoints": true
+		},
+		{
+			"idx": 66,
+			"version": "7",
+			"when": 1795098525133,
+			"tag": "0066_magenta_molten_man",
+			"breakpoints": true
 		}
 	]
 }

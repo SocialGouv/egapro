@@ -24,6 +24,8 @@ function jobSql(input: {
 	cron?: string | null;
 	timeZone?: string | null;
 	lastCompletedAt: Date | null;
+	lastSuccessAt?: Date | null;
+	lastFailureAt?: Date | null;
 }): Sql {
 	return fakeSql((text) => {
 		if (text.includes("pgboss.schedule")) {
@@ -31,7 +33,13 @@ function jobSql(input: {
 				? [{ cron: input.cron, timeZone: input.timeZone ?? "Europe/Paris" }]
 				: [];
 		}
-		return [{ lastCompletedAt: input.lastCompletedAt }];
+		return [
+			{
+				lastCompletedAt: input.lastCompletedAt,
+				lastSuccessAt: input.lastSuccessAt ?? input.lastCompletedAt,
+				lastFailureAt: input.lastFailureAt ?? null,
+			},
+		];
 	});
 }
 
@@ -72,6 +80,27 @@ describe("reminder job probe", () => {
 		expect(result.status).toBe("operational");
 		expect(result.nextExpectedAt?.toISOString()).toBe(
 			"2026-01-03T07:00:00.000Z",
+		);
+		expect(result.lastSuccessAt?.toISOString()).toBe(
+			ago(3 * HOUR).toISOString(),
+		);
+	});
+
+	it("publishes the last completed and last failed runs for the screen", async () => {
+		const result = await probe(
+			jobSql({
+				cron: "0 8 * * *",
+				lastCompletedAt: ago(5 * HOUR),
+				lastSuccessAt: ago(30 * HOUR),
+				lastFailureAt: ago(2 * HOUR),
+			}),
+		).probe(new AbortController().signal);
+
+		expect(result.lastSuccessAt?.toISOString()).toBe(
+			ago(30 * HOUR).toISOString(),
+		);
+		expect(result.lastFailureAt?.toISOString()).toBe(
+			ago(2 * HOUR).toISOString(),
 		);
 	});
 
