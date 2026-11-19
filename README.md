@@ -248,8 +248,9 @@ Les exports sont destinés à un stockage objet compatible S3 (#5236). Le géné
 
 Les valeurs publiques vivent dans le ConfigMap `s3` de chaque environnement
 (`.kontinuous/env/<env>/templates/s3.configmap.yaml`), injecté dans `api`, dans le
-scheduler et dans `files`. Les deux identifiants viennent du Secret `s3`, monté en
-optionnel : tant qu'il n'existe pas, les pods démarrent normalement et c'est
+CronJob de génération quotidienne et dans `files`. Les deux identifiants viennent
+du Secret `s3`, monté en optionnel : tant qu'il n'existe pas, les pods démarrent
+normalement et c'est
 l'usage du stockage qui échoue, en nommant la variable manquante.
 
 Pour sceller les identifiants dans un cluster (le scellement est lié au cluster et

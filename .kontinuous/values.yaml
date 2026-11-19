@@ -180,7 +180,6 @@ redis:
 
 files:
   ~chart: app
-  ~needs: [pg]
   # image: ghcr.io/socialgouv/docker/nginx:7.0.1
   imagePackage: files
   envFrom:
@@ -208,20 +207,17 @@ files:
       cpu: 1
       memory: 512Mi
   volumes:
-    - name: files
-      persistentVolumeClaim:
-        claimName: files
     - name: nginx-auth
       secret:
         secretName: basic-auth
         items:
         - key: auth
           path: basic-auth.passwd
-  replicas: 1 # mandatory because volume is RWO
-  strategyType: Recreate # idem
-  # files image runs as USER 1000, scheduler sidecar (api image) as USER 1001
+  # The exports are read from the object storage: no shared volume, so the
+  # downloads can be replicated and rolled out progressively (`replicas` follows
+  # the deployment environment, see the env values files).
+  # image runs as USER 1000
   securityContext:
-    fsGroup: 101
     runAsNonRoot: true
   containerSecurityContext:
     allowPrivilegeEscalation: false
@@ -230,68 +226,41 @@ files:
       drop:
         - ALL
   volumeMounts:
-    - name: files
-      # mountPath: /usr/share/nginx/html
-      mountPath: /mnt/files
     - name: nginx-auth
       mountPath: /secrets
       readOnly: true
-  sidecars:
-    - name: scheduler
-      ~tpl~image: "{{ $.Values.global.registry }}/{{ $.Values.global.imageProject }}/{{ $.Values.global.imageRepository }}/api:{{ $.Values.global.imageTag }}"
-      extraSpec:
-        envFrom:
-        - secretRef:
-            ~tpl~name: "{{ .Values.global.pgSecretName }}"
-        - secretRef:
-            name: "staff"
-        - secretRef:
-            name: "egapro-secret"
-        - configMapRef:
-            name: "s3"
-        - secretRef:
-            name: "s3"
-            optional: true
-        env:
-        - name: EGAPRO_DBHOST
-          value: "$(PGHOST)"
-        - name: EGAPRO_DBNAME
-          value: "$(PGDATABASE)"
-        - name: EGAPRO_DBPORT
-          value: "$(PGPORT)"
-        - name: EGAPRO_DBUSER
-          value: "$(PGUSER)"
-        - name: EGAPRO_DBPASS
-          value: "$(PGPASSWORD)"
-        - name: EGAPRO_DBSSL
-          value: "$(PGSSLMODE)"
-        - name: EGAPRO_FLAVOUR
-          ~tpl~value: "{{ $.Values.global.env }}"
-        # - name: EGAPRO_SENTRY_DSN
-        #   valueFrom:
-        #     secretKeyRef:
-        #       name: sentry
-        #       key: API_SENTRY_DSN
-        - name: SCHEDULER
-          value: "True"
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-        resources:
-          requests:
-            cpu: 100m
-            memory: 512Mi
-          limits:
-            cpu: 2
-            memory: 4Gi
-            ephemeral-storage: 5Gi
-        volumeMounts:
-        - name: files
-          mountPath: /mnt/files
 
 project:
+  # Daily generation of the six exports, then publication to the storage bucket.
+  # It runs outside the download pods: one producer, no volume shared with the
+  # readers. Disabled where the `s3` Secret is not provisioned (review apps).
+  exports:
+    enabled: true
+    schedule: "0 0 * * *"
+    # Explicit timezone: the contract is midnight UTC, not the node clock.
+    timeZone: "Etc/UTC"
+    # Same database and bucket as the API. The project chart renders this job and
+    # cannot read the `api` subchart values, so the access list lives here.
+    envFrom:
+      - secretRef:
+          name: "{{ .Values.global.pgSecretName }}"
+      - secretRef:
+          name: "staff"
+      - secretRef:
+          name: "egapro-secret"
+      - configMapRef:
+          name: "s3"
+      - secretRef:
+          name: "s3"
+          optional: true
+    env:
+      EGAPRO_DBHOST: "$(PGHOST)"
+      EGAPRO_DBNAME: "$(PGDATABASE)"
+      EGAPRO_DBPORT: "$(PGPORT)"
+      EGAPRO_DBUSER: "$(PGUSER)"
+      EGAPRO_DBPASS: "$(PGPASSWORD)"
+      EGAPRO_DBSSL: "$(PGSSLMODE)"
+      EGAPRO_FLAVOUR: "{{ .Values.global.env }}"
   # whitelist:
   #   # DigDash dev
   #   - "94.23.250.213"

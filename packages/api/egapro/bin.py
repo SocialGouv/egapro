@@ -4,7 +4,7 @@ import tempfile
 import traceback
 import urllib.request
 from collections import Counter
-from datetime import date, datetime, time, timedelta
+from datetime import date
 from importlib import import_module
 from io import BytesIO
 from pathlib import Path
@@ -15,7 +15,6 @@ import yaml
 from egapro import jsonlib as json
 from openpyxl import load_workbook
 from openpyxl.worksheet._writer import ALL_TEMP_FILES
-import asyncio
 
 from egapro import (
     config,
@@ -44,8 +43,7 @@ def cleanup_workbook(wb):
     When openpyxl write_only worksheets are used, each WorksheetWriter creates
     a temp file in /tmp with delete=False. Normally workbook.save() calls
     writer.cleanup() which removes them. But if the export crashes before save(),
-    these temp files are leaked. The atexit handler only runs when the process
-    exits, which never happens for the long-running scheduler.
+    these temp files are leaked until the process exits.
     """
     if wb is None:
         return
@@ -131,7 +129,7 @@ EXPORTS = (
 )
 
 
-async def run_all_exports(directory: Path = Path("/mnt/files"), publish: bool = True):
+async def run_all_exports(directory: Path):
     """Generate the six exports sequentially, publishing each complete file.
 
     Lightest exports run first so they complete even if heavier ones fail. Returns
@@ -144,41 +142,13 @@ async def run_all_exports(directory: Path = Path("/mnt/files"), publish: bool = 
         print(f"--- Starting export: {name} ---")
         try:
             await job(path)
-            if publish:
-                await storage.publish(path, name)
+            await storage.publish(path, name)
             print(f"--- Finished export: {name} ---")
         except Exception:
             print(f"--- FAILED export: {name} ---")
             print(traceback.format_exc())
             failures.append(name)
     return failures
-
-
-# Exports run every day at midnight, in the container local time.
-EXPORTS_AT = time(0, 0)
-
-
-def seconds_until_next_run(now: datetime, at: time = EXPORTS_AT) -> float:
-    next_run = datetime.combine(now.date(), at)
-    if next_run <= now:
-        next_run += timedelta(days=1)
-    return (next_run - now).total_seconds()
-
-
-async def run_scheduled_exports(now=datetime.now, sleep=asyncio.sleep):
-    """Wait for the next scheduled time, then run all exports once."""
-    start = now()
-    next_run = start + timedelta(seconds=seconds_until_next_run(start))
-    # The event loop clock is not the wall clock: never run before the scheduled
-    # time, or the next iteration would schedule the same run again.
-    while (remaining := (next_run - now()).total_seconds()) > 0:
-        await sleep(remaining)
-    try:
-        # Until the daily job replaces this resident scheduler, the volume stays
-        # the served path: publishing only starts once the storage is configured.
-        await run_all_exports(publish=config.storage_configured())
-    except Exception:
-        print(traceback.format_exc())
 
 
 @minicli.cli
@@ -193,28 +163,6 @@ async def publish_exports():
     if failures:
         print(f"CRITICAL: failed exports: {', '.join(failures)}")
         sys.exit(1)
-
-
-@minicli.cli
-async def scheduler():
-    print("Scheduler started")
-
-    # Initialize database connection when running scheduler directly
-    loggers.init()
-    config.init()
-    try:
-        await db.init()
-        print("Database connection initialized successfully")
-    except RuntimeError as err:
-        print(f"CRITICAL: Database initialization failed: {err}")
-        return
-
-    try:
-        while True:
-            await run_scheduled_exports()
-    finally:
-        # Clean up database connection
-        await db.terminate()
 
 
 @minicli.cli

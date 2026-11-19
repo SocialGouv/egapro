@@ -1,0 +1,82 @@
+{{- if .Values.exports.enabled }}
+# Daily generation of the six application exports, then publication to the
+# storage bucket. The generation is a single job: the download pods no longer
+# share a volume with it and can be replicated.
+#
+# Manual relaunch: create it from the CronJob, so it inherits the job template and
+# belongs to this CronJob — the scheduled run then stays blocked (`Forbid`) as long
+# as the manual job runs. This only guards one direction: before launching it while
+# a scheduled run is in progress, check `kubectl -n <namespace> get jobs`.
+#   kubectl -n {{ .Values.global.namespace }} create job \
+#     --from=cronjob/exports exports-manual-$(date +%s)
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: exports
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    component: exports
+    application: {{ .Values.global.repositoryName }}
+spec:
+  schedule: {{ .Values.exports.schedule | quote }}
+  timeZone: {{ .Values.exports.timeZone | quote }}
+  # Never two generations at once, scheduled or manual.
+  concurrencyPolicy: Forbid
+  # A missed schedule is caught up for one hour, then skipped.
+  startingDeadlineSeconds: 3600
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      # Three attempts at most, then a visible failed job.
+      backoffLimit: 2
+      # A run has no reason to last more than three hours.
+      activeDeadlineSeconds: 10800
+      template:
+        metadata:
+          labels:
+            component: exports
+            application: {{ .Values.global.repositoryName }}
+            namespace: {{ .Values.global.namespace }}
+        spec:
+          restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+          containers:
+            - name: exports
+              image: "{{ .Values.global.registry }}/{{ .Values.global.imageProject }}/{{ .Values.global.imageRepository }}/api:{{ .Values.global.imageTag }}"
+              # One-shot generation: fails before generating anything when the
+              # storage is not configured, and exits non-zero on a partial run.
+              command: ["egapro", "publish-exports"]
+              # Same database and bucket access as the API (see `project.exports`).
+              envFrom:
+                {{- tpl (toYaml .Values.exports.envFrom) . | nindent 16 }}
+              env:
+                {{- range $name, $value := .Values.exports.env }}
+                - name: {{ $name }}
+                  value: {{ tpl $value $ | quote }}
+                {{- end }}
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 512Mi
+                limits:
+                  cpu: 2
+                  memory: 4Gi
+                  ephemeral-storage: 6Gi
+              volumeMounts:
+                # openpyxl writes its worksheets to `tempfile`, i.e. /tmp: size it
+                # for the six exports and their Excel temporaries, without relying
+                # on the node disk or on a persistent volume.
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: tmp
+              emptyDir:
+                sizeLimit: 5Gi
+{{- end }}

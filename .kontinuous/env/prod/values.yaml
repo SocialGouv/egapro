@@ -28,6 +28,18 @@ api:
         name: "egapro-secret"
     - secretRef:
         name: smtp
+    - configMapRef:
+        name: "s3"
+    # Optional until the storage credentials are sealed in the cluster: the API
+    # and the daily exports share this contract (see the `s3` configmap of #5239).
+    - secretRef:
+        name: "s3"
+        optional: true
+
+files:
+  # The exports come from the storage bucket: no shared volume, so the downloads
+  # can be replicated and rolled out progressively.
+  replicas: 2
 
 app:
   env:
