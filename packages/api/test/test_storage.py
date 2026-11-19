@@ -129,7 +129,9 @@ async def test_publish_refuses_to_start_without_storage_configuration(monkeypatc
 
 
 def _xlsx_bytes() -> bytes:
+    # A zip entry carries a DOS timestamp with a 2-second resolution: without a
+    # fixed date, two calls straddling that boundary produce different bytes.
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w") as zf:
-        zf.writestr("xl/workbook.xml", "<workbook/>")
+        zf.writestr(zipfile.ZipInfo("xl/workbook.xml", date_time=(2026, 1, 1, 0, 0, 0)), "<workbook/>")
     return buffer.getvalue()
