@@ -139,6 +139,39 @@ write none and stay out until they do. The receipt replay probe (#4546) is not
 scheduled either: its `app_receipt_outbox` table does not exist yet, and the
 worker logs that absence at boot. The supervision runbook records both gaps.
 
+## Mattermost alerts
+
+The screen is for the day; Mattermost is for the night. Alerts come from the
+worker itself, never from Grafana: an alert must not depend on the platform's
+database or observability tool.
+
+- **Transitions only.** A stable state sends nothing. A run emits at most one
+  alert for the outage and at most one recovery; there is no reminder while the
+  state does not change.
+- **Anti-flapping.** A `critical` or `important` probe alerts on the run that
+  reaches `HEALTHCHECK_ALERT_AFTER_FAILURES` consecutive failures (default 3 —
+  under five minutes at the 60 s cadence). The recovery is sent once, and only
+  if the alert had been sent: the persisted `consecutive_failures` carries that
+  memory across a restart. Two failures followed by a success stay silent.
+- **`misconfigured` alerts immediately**: the worker is the one misconfigured,
+  and waiting three cycles would not make it disappear.
+- **`low` never alerts**: it stays visible on the screen only.
+- **Content**: probe label, state, time since, consecutive failures, latency,
+  the sanitised last message, the next expected run for a scheduled job, and a
+  link to `/admin/etat-des-services`. No secret, signed URL, response header or
+  body leaves the worker — the webhook URL is registered as a secret and the
+  message goes through the same sanitiser as the logs.
+- **No silence window.** Messages go out 24/7; the team handles them during
+  working hours. That is a runbook decision, not a worker one.
+
+The webhook lives in `HEALTHCHECK_MATTERMOST_WEBHOOK_URL`, mounted from an
+optional `healthcheck-alerts` Secret that ops seals per environment (the
+channel and the webhook are created outside this repository). Absent, the
+worker logs `no HEALTHCHECK_MATTERMOST_WEBHOOK_URL — Mattermost alerts
+disabled` at boot and sends nothing: a namespace without the secret still rolls
+out. `HEALTHCHECK_ADMIN_URL` overrides the screen host; unset, it falls back to
+`HEALTHCHECK_PUBLIC_URL`.
+
 ## Environment
 
 | Variable | Required | Role |
@@ -148,6 +181,9 @@ worker logs that absence at boot. The supervision runbook records both gaps.
 | `S3_ENDPOINT`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_BUCKET_NAME` | for the S3 probe | incomplete set → the S3 probe is skipped with a warning |
 | `HEALTHCHECK_INTERVAL_SECONDS` | no (default `60`) | cadence of the internal probes |
 | `HEALTHCHECK_JOB_STALE_HOURS` | no (default `26`) | floor of the staleness window for scheduled jobs (24 h + 2 h of margin) |
+| `HEALTHCHECK_MATTERMOST_WEBHOOK_URL` | no | secret; absent → alerts disabled with a boot warning |
+| `HEALTHCHECK_ALERT_AFTER_FAILURES` | no (default `3`) | consecutive failures before an alert |
+| `HEALTHCHECK_ADMIN_URL` | no | back-office host linked from alerts; falls back to `HEALTHCHECK_PUBLIC_URL` |
 
 Without any database configuration the worker logs a warning and exits **0**,
 so a namespace without a database leaves an exited pod instead of failing its

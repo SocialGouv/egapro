@@ -111,6 +111,13 @@ spec:
             - secretRef:
                 name: suit-monitoring
                 optional: true
+            # Mattermost alert webhook (#5201). Sealed by ops per environment
+            # because the channel and its token are created outside this
+            # repository. Optional: without it the worker logs that alerts are
+            # disabled and keeps probing, so the rollout never depends on it.
+            - secretRef:
+                name: healthcheck-alerts
+                optional: true
           env:
             # The app pod receives the same discrete keys from `pg-app`; the
             # worker assembles the DSN itself (src/config.ts), exactly like the

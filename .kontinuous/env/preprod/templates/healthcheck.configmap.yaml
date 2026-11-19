@@ -23,3 +23,7 @@ data:
   HEALTHCHECK_APISIX_SUIT_URL: "https://api-suit-{{ .Values.global.host }}"
   # The public certificate is watched without a platform API client.
   HEALTHCHECK_CERT_WARN_DAYS: "30"
+  # Anti-flapping: a critical or important probe alerts on the run that reaches
+  # this many consecutive failures (3 x 60 s < 5 min). A misconfigured probe
+  # alerts immediately; `low` never alerts.
+  HEALTHCHECK_ALERT_AFTER_FAILURES: "3"
