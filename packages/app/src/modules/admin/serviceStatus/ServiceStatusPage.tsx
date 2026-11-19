@@ -1,7 +1,7 @@
 "use client";
 
 import { formatTime } from "~/modules/domain";
-import { NewTabNotice } from "~/modules/layout";
+import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { api } from "~/trpc/react";
 
 import { IncidentList } from "./IncidentList";
