@@ -1,0 +1,64 @@
+name: Refresh wiki SIRET declarations
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: wiki-siret-refresh
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Read declarations from the persistent test environment
+        env:
+          # Repository secret used by promote-test-env.yaml (rgaa-persist deployment run 41868037404).
+          KUBE_CONFIG: ${{ secrets.KUBECONFIG }}
+        run: |
+          set -euo pipefail
+          test -n "$KUBE_CONFIG"
+          export KUBECONFIG="$RUNNER_TEMP/egapro-kubeconfig"
+          umask 077
+          trap 'rm -f "$KUBECONFIG"' EXIT
+          printf '%s' "$KUBE_CONFIG" | base64 --decode > "$KUBECONFIG"
+          pod=$(kubectl --context dev -n egapro-rgaa-persist get pods -l cnpg.io/cluster=pg,role=primary -o jsonpath='{.items[0].metadata.name}')
+          test -n "$pod"
+          kubectl --context dev -n egapro-rgaa-persist exec "$pod" -c postgres -- \
+            psql -X -v ON_ERROR_STOP=1 -U postgres -d autodevops_rgaa-persist -Atc \
+            'SELECT siren FROM app_declaration UNION SELECT siren FROM app_representation_declaration ORDER BY siren' \
+            > "$RUNNER_TEMP/declaration-sirens.txt"
+
+      - name: Update the wiki
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          umask 077
+          printf 'machine github.com login x-access-token password %s\n' "$GITHUB_TOKEN" > ~/.netrc
+          trap 'rm -f ~/.netrc' EXIT
+          git clone "https://github.com/${REPOSITORY}.wiki.git" "$RUNNER_TEMP/wiki"
+          git -C "$RUNNER_TEMP/wiki" config user.name 'github-actions[bot]'
+          git -C "$RUNNER_TEMP/wiki" config user.email 'github-actions[bot]@users.noreply.github.com'
+          for attempt in 1 2 3; do
+            git -C "$RUNNER_TEMP/wiki" pull --ff-only origin HEAD
+            python3 scripts/sync-wiki-sirets.py "$RUNNER_TEMP/wiki/SIRET-de-test.md" "$RUNNER_TEMP/declaration-sirens.txt"
+            git -C "$RUNNER_TEMP/wiki" add SIRET-de-test.md
+            if git -C "$RUNNER_TEMP/wiki" diff --cached --quiet; then
+              exit 0
+            fi
+            git -C "$RUNNER_TEMP/wiki" commit -m 'Refresh SIRET declaration status'
+            if git -C "$RUNNER_TEMP/wiki" push origin HEAD; then
+              exit 0
+            fi
+            git -C "$RUNNER_TEMP/wiki" reset --hard HEAD^
+          done
+          exit 1
