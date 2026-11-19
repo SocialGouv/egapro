@@ -6,6 +6,7 @@ import {
 	ADMIN_DECLARATIONS,
 	ADMIN_IMPERSONATE,
 	ADMIN_REFERENTS,
+	ADMIN_SERVICE_STATUS,
 	ADMIN_SETTINGS,
 	ADMIN_STATS,
 	ADMIN_STATS_CAMPAIGN,
@@ -220,6 +221,13 @@ test.describe("admin access", () => {
 		}
 	});
 
+	test("admin can reach /admin/etat-des-services", async ({ page }) => {
+		await page.goto(ADMIN_SERVICE_STATUS);
+		await expect(
+			page.getByRole("heading", { name: "État des services", level: 1 }),
+		).toBeVisible();
+	});
+
 	test("admin can reach /admin/liste-referents", async ({ page }) => {
 		await page.goto(ADMIN_REFERENTS);
 		await expect(
@@ -276,6 +284,7 @@ const ADMIN_SPACING_ROUTES = [
 	{ path: ADMIN_REFERENTS, heading: "Liste des référents Egapro" },
 	{ path: ADMIN_SETTINGS, heading: "Paramètres de la plateforme" },
 	{ path: ADMIN_STATS, heading: "Statistiques" },
+	{ path: ADMIN_SERVICE_STATUS, heading: "État des services" },
 ] as const;
 
 const ADMIN_SPACING_WIDTHS = [1280, 769, 768, 767, 375, 320] as const;
@@ -295,7 +304,7 @@ test.describe("admin navigation with increased text spacing", () => {
 			const nav = page.locator("nav.fr-sidemenu");
 			const main = page.locator("main#content");
 			const links = nav.locator("a.fr-sidemenu__link");
-			await expect(links).toHaveCount(6);
+			await expect(links).toHaveCount(7);
 
 			const computed = await links.first().evaluate((link) => {
 				const style = getComputedStyle(link);
@@ -567,6 +576,19 @@ test.describe("admin stats — routing & access", () => {
 	test("redirect: /admin/stats/plateforme → /admin/stats", async ({ page }) => {
 		await page.goto(ADMIN_STATS_PLATFORM);
 		await expect(page).toHaveURL(urlPattern(ADMIN_STATS));
+	});
+
+	test("non-admin users are redirected away from the status page", async ({
+		browser,
+	}) => {
+		const anonCtx = await browser.newContext({ storageState: undefined });
+		try {
+			const page = await anonCtx.newPage();
+			await page.goto(ADMIN_SERVICE_STATUS);
+			await expect(page).toHaveURL(/\/login/);
+		} finally {
+			await anonCtx.close();
+		}
 	});
 
 	test("non-admin users are redirected away from the stats page", async ({

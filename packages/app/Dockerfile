@@ -96,10 +96,13 @@ RUN pnpm --filter healthcheck deploy --prod --legacy /deploy/healthcheck
 # Auto already built for the same commit and ship the branch name instead of the
 # tag. Declaring them here, right before the build, keeps the dependency layers
 # shared: this layer is already invalidated by the source tree itself.
+# The cache id is versioned: a build that dies during asset emission leaves a
+# Turbopack cache the next build panics on ("generate_source_map was canceled",
+# seconds in, on every retry). Bumping the id starts from a clean cache.
 ARG APP_VERSION
 ARG PR_NUMBER
 ARG SENTRY_RELEASE
-RUN --mount=type=cache,id=next-cache-v2,sharing=locked,target=/app/packages/app/.next/cache \
+RUN --mount=type=cache,id=next-cache-v3,sharing=locked,target=/app/packages/app/.next/cache \
     --mount=type=secret,id=sentry_auth_token \
     SENTRY_AUTH_TOKEN=$(cat /run/secrets/sentry_auth_token 2>/dev/null) \
     NEXT_PUBLIC_SENTRY_RELEASE=$(echo "$SENTRY_RELEASE" | tr '/' '-') \

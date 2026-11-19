@@ -455,10 +455,13 @@ API publique (aucune authentification, OpenAPI documentée) :
 | `/admin/impersonate` | Recherche d'entreprise pour impersonation |
 | `/admin/parametres` | Paramètres de la plateforme sur une année de campagne partagée : **Paramètres communs** (calendrier de la campagne : publication GIP en lecture seule, démarrage, rendu public), **Démarche Rémunération** (échéances de la campagne en quatre groupes — déclaration, 1er tour, 2nd tour, avis du CSE — puis délai d'expiration du verrou, indépendant de l'année), **Démarche Représentation équilibrée** (campagne de l'année) |
 | `/admin/stats` | Tableau de bord statistiques en 3 sections : **Suivi de campagne** (courbes de progression par segment d'effectif, durées et décrochages par étape), **Comptes & engagement CSE** (utilisateurs par entreprise + confirmations de statut CSE), **Funnels de complétion** (Matomo) |
+| `/admin/etat-des-services` | **État des services** : synthèse de la supervision, table des sondes (criticité, état, dernière vérification, latence), table des traitements planifiés (dernier succès, dernier échec, prochaine exécution attendue), incidents des 30 derniers jours. Une sonde que le worker n'a plus relue depuis son délai de fraîcheur s'affiche « Inconnu » ; le délai est élargi à deux cycles de la sonde pour les partenaires relancés toutes les 15 min. Rafraîchissement toutes les 30 s, lien Grafana si `EGAPRO_GRAFANA_URL` est configurée. La home `/admin` affiche un bandeau dès qu'un service critique est indisponible, qu'un traitement planifié est en retard ou que la supervision elle-même a cessé d'écrire |
+
+**Bandeau de supervision** : la home lit directement `readServiceStatusBanner()` (une requête sur `app_health_probe`), sans passer par la query tRPC auditée, pour ne pas écrire une ligne d'audit à chaque visite de l'accueil.
 
 **Modules** : `~/modules/admin/*`.
 
-**Routers tRPC** : `admin`, `adminDeclarations`, `adminReferents`, `adminSettings`, `adminStats`.
+**Routers tRPC** : `admin`, `adminDeclarations`, `adminReferents`, `adminSettings`, `adminStats`, `adminStatus`.
 
 **Règles métier-clés** :
 
@@ -533,7 +536,7 @@ Toutes les **mutations** et les **lectures de données sensibles** (PII, donnée
 | Catégorie | Rétention | Exemples |
 |---|---|---|
 | `mutation` | 365 jours | toutes les écritures (déclaration, CSE, admin, verrous) |
-| `read_sensitive` | 180 jours | `profile.get`, `declaration.getOrCreate`, `declaration.getStatusHistory`, recherche admin, téléchargement PDF, état du verrou |
+| `read_sensitive` | 180 jours | `profile.get`, `declaration.getOrCreate`, `declaration.getStatusHistory`, recherche admin, téléchargement PDF, état du verrou, état des services (`adminStatus.getOverview`) |
 | `public_search` | 180 jours | recherche / vue d'un référent public |
 | `auth` | 365 jours | login OK / login KO / logout |
 | `export` | 365 jours | téléchargements API publique |

@@ -187,6 +187,25 @@ export function formatMinutes(minutes: number): string {
 	return `${formatCount(minutes)} ${unit}`;
 }
 
+/**
+ * Elapsed time in the largest relevant unit, one unit only: `90_000` → `"1 min"`,
+ * `7_200_000` → `"2 h"`, `172_800_000` → `"2 j"`. Negative spans (clock skew)
+ * read as zero.
+ */
+export function formatElapsedDuration(milliseconds: number): string {
+	const minutes = Math.max(0, Math.floor(milliseconds / 60_000));
+	if (minutes < 60) return `${minutes} min`;
+	const hours = Math.floor(minutes / 60);
+	if (hours < 48) return `${hours} h`;
+	return `${Math.floor(hours / 24)} j`;
+}
+
+/** Latency in milliseconds: `42` → `"42 ms"`, nullish → `"—"`. */
+export function formatLatency(milliseconds: number | null | undefined): string {
+	if (milliseconds === null || milliseconds === undefined) return MISSING_VALUE;
+	return `${formatCount(milliseconds)} ms`;
+}
+
 const ONE_KO = 1024;
 const ONE_MO = ONE_KO * 1024;
 

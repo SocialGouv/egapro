@@ -16,12 +16,15 @@ const probe: Probe = {
 
 type ProbeRow = {
 	status: string;
+	intervalSeconds: number;
 	latencyMs: number | null;
 	checkedAt: Date;
 	changedAt: Date;
 	consecutiveFailures: number;
 	lastError: string | null;
 	nextExpectedAt: Date | null;
+	lastSuccessAt: Date | null;
+	lastFailureAt: Date | null;
 };
 
 type IncidentRow = {
@@ -48,9 +51,11 @@ function at(minutes: number): Date {
 
 async function readProbe(): Promise<ProbeRow | undefined> {
 	const rows = await sql<ProbeRow[]>`
-		SELECT status, latency_ms AS "latencyMs", checked_at AS "checkedAt",
+		SELECT status, interval_seconds AS "intervalSeconds",
+			latency_ms AS "latencyMs", checked_at AS "checkedAt",
 			changed_at AS "changedAt", consecutive_failures AS "consecutiveFailures",
-			last_error AS "lastError", next_expected_at AS "nextExpectedAt"
+			last_error AS "lastError", next_expected_at AS "nextExpectedAt",
+			last_success_at AS "lastSuccessAt", last_failure_at AS "lastFailureAt"
 		FROM app_health_probe
 	`;
 	return rows[0];
@@ -127,6 +132,47 @@ describe("persistProbeResult", () => {
 		});
 
 		expect((await readProbe())?.nextExpectedAt).toBeNull();
+	});
+
+	it("stores the probe's own cycle for the staleness rule", async () => {
+		await persistProbeResult(sql, {
+			probe: { ...probe, intervalSeconds: 900 },
+			result: healthy,
+			checkedAt: at(0),
+		});
+
+		expect((await readProbe())?.intervalSeconds).toBe(900);
+	});
+
+	it("stores the last observed success and failure of a job probe", async () => {
+		await persistProbeResult(sql, {
+			probe: { ...probe, key: "job-gip-mds-import", kind: "job" },
+			result: { ...down, lastSuccessAt: at(2), lastFailureAt: at(3) },
+			checkedAt: at(4),
+		});
+
+		const row = await readProbe();
+		expect(row?.lastSuccessAt).toEqual(at(2));
+		expect(row?.lastFailureAt).toEqual(at(3));
+	});
+
+	it("keeps the stored trace when a probe cannot observe it", async () => {
+		const jobProbe = { ...probe, key: "job-gip-mds-import", kind: "job" };
+
+		await persistProbeResult(sql, {
+			probe: jobProbe,
+			result: { ...healthy, lastSuccessAt: at(2), lastFailureAt: at(1) },
+			checkedAt: at(2),
+		});
+		await persistProbeResult(sql, {
+			probe: jobProbe,
+			result: down,
+			checkedAt: at(3),
+		});
+
+		const row = await readProbe();
+		expect(row?.lastSuccessAt).toEqual(at(2));
+		expect(row?.lastFailureAt).toEqual(at(1));
 	});
 
 	it("opens an incident when a healthy probe goes down", async () => {

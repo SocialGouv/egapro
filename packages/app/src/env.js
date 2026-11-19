@@ -184,6 +184,17 @@ export const env = createEnv({
 			.default(
 				"https://jira-mcas.atlassian.net/servicedesk/customer/portal/97",
 			),
+		// Freshness threshold of the back-office supervision screen. A probe
+		// whose last check is older reads "inconnu" instead of a stale colour.
+		// The grace period covers one worker cycle plus its own margin.
+		HEALTHCHECK_STALE_AFTER_SECONDS: z.coerce
+			.number()
+			.int()
+			.positive()
+			.default(300),
+		// Optional: the "Tableaux de bord Grafana" link is hidden when unset, so
+		// an environment without a Grafana instance never shows a dead link.
+		EGAPRO_GRAFANA_URL: z.string().url().optional(),
 	},
 
 	/**
@@ -257,6 +268,9 @@ export const env = createEnv({
 		SENTRY_TRACES_SAMPLE_RATE: process.env.SENTRY_TRACES_SAMPLE_RATE,
 		EGAPRO_PUBLIC_API_TOKENS: process.env.EGAPRO_PUBLIC_API_TOKENS,
 		SUPPORT_JIRA_URL: process.env.SUPPORT_JIRA_URL,
+		HEALTHCHECK_STALE_AFTER_SECONDS:
+			process.env.HEALTHCHECK_STALE_AFTER_SECONDS,
+		EGAPRO_GRAFANA_URL: process.env.EGAPRO_GRAFANA_URL,
 		NEXT_PUBLIC_EGAPRO_ENV: process.env.NEXT_PUBLIC_EGAPRO_ENV,
 		NEXT_PUBLIC_DEV_FILL_ENABLED: process.env.NEXT_PUBLIC_DEV_FILL_ENABLED,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,

@@ -1,0 +1,13 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: monitoring
+data:
+  # Freshness floor of the back-office supervision screen (#5200). A probe the
+  # worker has not refreshed for longer reads "inconnu"; the screen widens the
+  # floor to two of each probe's own cycles, so a 15-minute partner probe is
+  # not flagged between two runs.
+  HEALTHCHECK_STALE_AFTER_SECONDS: "300"
+  # EGAPRO_GRAFANA_URL is deliberately absent: the "Tableaux de bord Grafana"
+  # link only appears once ops sets a real dashboard URL in this ConfigMap for
+  # the namespace. Unset, no dead link is displayed.

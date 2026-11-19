@@ -90,6 +90,8 @@ vi.mock("~/env", () => ({
 		EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT: true,
 		SUPPORT_JIRA_URL:
 			"https://jira-mcas.atlassian.net/servicedesk/customer/portal/97",
+		HEALTHCHECK_STALE_AFTER_SECONDS: 300,
+		EGAPRO_GRAFANA_URL: "https://grafana.example.com",
 	},
 }));
 

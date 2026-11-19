@@ -24,6 +24,14 @@ export type ProbeResult = {
 	 * probes set it; the screen prints it instead of re-deriving a schedule.
 	 */
 	nextExpectedAt?: Date;
+	/**
+	 * Last successful and failed run the probe could observe. Persisted so the
+	 * back-office prints them without replaying the audit or pg-boss queries
+	 * itself. A probe that cannot reach its source leaves them undefined; the
+	 * stored values are then kept rather than erased.
+	 */
+	lastSuccessAt?: Date;
+	lastFailureAt?: Date;
 };
 
 export type Probe = {

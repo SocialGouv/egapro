@@ -4,6 +4,7 @@ import {
 	ADMIN_IMPERSONATE,
 	ADMIN_NAV_LINKS,
 	ADMIN_REFERENTS,
+	ADMIN_SERVICE_STATUS,
 	ADMIN_SETTINGS,
 	ADMIN_STATS,
 } from "~/modules/routes";
@@ -27,6 +28,8 @@ const ADMIN_SECTION_DESCRIPTIONS: Record<AdminSectionHref, string> = {
 	[ADMIN_REFERENTS]: "Consulter, ajouter et importer les référents Egapro.",
 	[ADMIN_STATS]:
 		"Suivre la campagne, la complétion des parcours et l’usage de la plateforme.",
+	[ADMIN_SERVICE_STATUS]:
+		"Vérifier l’état des services et la fraîcheur des traitements planifiés.",
 	[ADMIN_SETTINGS]:
 		"Éditer les variables globales qui encadrent les campagnes de déclaration.",
 };
