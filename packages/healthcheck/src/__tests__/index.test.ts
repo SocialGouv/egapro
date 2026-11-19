@@ -3,8 +3,18 @@ import { describe, expect, it } from "vitest";
 
 import { resolveConfig } from "../config.js";
 import { buildProbes } from "../index.js";
+import { REMINDER_SCHEDULES } from "../probes/jobs/pgbossSchedules.js";
 
 const sql = (() => Promise.resolve([])) as unknown as Sql;
+
+const JOB_PROBE_KEYS = [
+	"job-export-generate",
+	"job-gip-mds-import",
+	"job-declaration-cleanup",
+	"job-audit-cleanup",
+	...REMINDER_SCHEDULES.map((schedule) => schedule.key),
+	"job-email-notification-queue",
+];
 
 const EXPOSED = {
 	HEALTHCHECK_PARTNER_PROBES_ENABLED: "true",
@@ -30,6 +40,7 @@ describe("buildProbes", () => {
 			"valkey",
 			"smtp",
 			"pgboss-queue",
+			...JOB_PROBE_KEYS,
 		]);
 		expect(probes[0]?.intervalSeconds).toBe(60);
 	});
@@ -54,6 +65,7 @@ describe("buildProbes", () => {
 			"valkey",
 			"smtp",
 			"pgboss-queue",
+			...JOB_PROBE_KEYS,
 		]);
 	});
 
@@ -73,6 +85,7 @@ describe("buildProbes", () => {
 			"valkey",
 			"smtp",
 			"pgboss-queue",
+			...JOB_PROBE_KEYS,
 		]);
 	});
 
@@ -94,6 +107,7 @@ describe("buildProbes", () => {
 			"valkey",
 			"smtp",
 			"pgboss-queue",
+			...JOB_PROBE_KEYS,
 			"proconnect",
 			"weez",
 			"ingress",

@@ -19,6 +19,11 @@ export type ProbeResult = {
 	status: ProbeStatus;
 	latencyMs: number;
 	message?: string;
+	/**
+	 * Next run the worker expects, from the cron definition it owns. Only job
+	 * probes set it; the screen prints it instead of re-deriving a schedule.
+	 */
+	nextExpectedAt?: Date;
 };
 
 export type Probe = {

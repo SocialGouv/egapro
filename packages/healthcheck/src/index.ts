@@ -27,6 +27,7 @@ export async function main(): Promise<void> {
 			: sql;
 
 	logDisabledProbes(config);
+	await logReceiptOutboxGap(sql);
 
 	const probes = buildProbes(config, sql, queueSql);
 	const scheduler = createScheduler({
@@ -98,6 +99,28 @@ function logDisabledProbes(config: HealthcheckConfig): void {
 	if (!config.suitGateway) {
 		console.warn(
 			"[healthcheck] HEALTHCHECK_APISIX_SUIT_URL or HEALTHCHECK_APISIX_SUIT_API_KEY missing — SUIT gateway probe not configured",
+		);
+	}
+}
+
+/**
+ * The receipt replay probe (#4546) is out of scope here: its source table does
+ * not exist in the schema at implementation time. Trace the gap at boot so the
+ * absence is a logged decision, not a forgotten probe — the runbook covers it.
+ */
+async function logReceiptOutboxGap(sql: postgres.Sql): Promise<void> {
+	try {
+		const rows = await sql<{ present: boolean }[]>`
+			SELECT to_regclass('public.app_receipt_outbox') IS NOT NULL AS present
+		`;
+		if (!rows[0]?.present) {
+			console.warn(
+				"[healthcheck] app_receipt_outbox absent — sonde de rejeu des accusés non planifiée",
+			);
+		}
+	} catch (error) {
+		console.warn(
+			`[healthcheck] app_receipt_outbox check skipped: ${sanitizeMessage(error)}`,
 		);
 	}
 }

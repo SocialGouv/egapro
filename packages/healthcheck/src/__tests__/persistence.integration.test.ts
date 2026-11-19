@@ -21,6 +21,7 @@ type ProbeRow = {
 	changedAt: Date;
 	consecutiveFailures: number;
 	lastError: string | null;
+	nextExpectedAt: Date | null;
 };
 
 type IncidentRow = {
@@ -49,7 +50,7 @@ async function readProbe(): Promise<ProbeRow | undefined> {
 	const rows = await sql<ProbeRow[]>`
 		SELECT status, latency_ms AS "latencyMs", checked_at AS "checkedAt",
 			changed_at AS "changedAt", consecutive_failures AS "consecutiveFailures",
-			last_error AS "lastError"
+			last_error AS "lastError", next_expected_at AS "nextExpectedAt"
 		FROM app_health_probe
 	`;
 	return rows[0];
@@ -95,6 +96,37 @@ describe("persistProbeResult", () => {
 		expect(row?.checkedAt).toEqual(at(0));
 		expect(row?.changedAt).toEqual(at(0));
 		expect(await readIncidents()).toEqual([]);
+	});
+
+	it("stores the next expected run of a job probe", async () => {
+		const nextExpectedAt = new Date("2026-11-18T03:00:00.000Z");
+
+		await persistProbeResult(sql, {
+			probe: { ...probe, key: "job-gip-mds-import", kind: "job" },
+			result: { ...healthy, nextExpectedAt },
+			checkedAt: at(0),
+		});
+
+		expect((await readProbe())?.nextExpectedAt).toEqual(nextExpectedAt);
+	});
+
+	it("clears the next expected run when a probe no longer publishes one", async () => {
+		await persistProbeResult(sql, {
+			probe: { ...probe, key: "job-gip-mds-import", kind: "job" },
+			result: {
+				...healthy,
+				nextExpectedAt: new Date("2026-11-18T03:00:00.000Z"),
+			},
+			checkedAt: at(0),
+		});
+
+		await persistProbeResult(sql, {
+			probe: { ...probe, key: "job-gip-mds-import", kind: "job" },
+			result: down,
+			checkedAt: at(1),
+		});
+
+		expect((await readProbe())?.nextExpectedAt).toBeNull();
 	});
 
 	it("opens an incident when a healthy probe goes down", async () => {

@@ -180,6 +180,17 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 		created_at:
 			"Timestamp d'émission de l'event (rétention permanente, hors purge CNIL applicable à audit.action_log).",
 	},
+	export: {
+		generated_at:
+			"Horodatage de la dernière génération réussie de l'archive. Rafraîchi à chaque upsert du couple (année, version) — contrairement à created_at, figé à la première génération. Lu par la sonde de fraîcheur du worker `healthcheck` (#5197).",
+	},
+	health_probe: {
+		key: "Identifiant stable de la sonde (une ligne par sonde, jamais une par passage).",
+		next_expected_at:
+			"Prochaine exécution attendue, calculée par le worker `healthcheck` depuis la définition de cron qu'il possède. Renseignée uniquement pour les sondes de traitement (`kind = 'job'`) ; NULL pour les sondes de service et pour les files continues.",
+		last_error:
+			"Dernier message d'erreur assaini (aucun secret, aucune donnée personnelle). NULL quand la sonde est opérationnelle.",
+	},
 	employee_category: {
 		women_count: "SUIT: Indicateurs.G.Effectif_F",
 		men_count: "SUIT: Indicateurs.G.Effectif_H",
