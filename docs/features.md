@@ -549,7 +549,7 @@ Les rétentions sont définies dans `~/modules/audit/shared/constants.ts` (`AUDI
 
 Les nouvelles lignes conservent `user_id` et `siren` lorsqu'ils servent à attribuer une action. Elles n'enregistrent plus `user_email` ni `user_agent` ; l'IP est tronquée, les erreurs sont codées et `metadata` est limité à des valeurs autorisées et validées par action. Les écritures SQL directes du worker de notifications et des crons suivent cette politique. Les journaux restent soumis aux durées de conservation ci-dessus.
 
-**Crons de purge** : deux tâches planifiées de catégorie `system` écrivent leur propre trace d'audit — `SYSTEM_AUDIT_CLEANUP` (`system.audit_cleanup`, purge du log d'audit lui-même, `packages/app/scripts/audit-cleanup.ts`) et `SYSTEM_DECLARATION_CLEANUP` (`system.declaration_cleanup`, purge RGPD des déclarations, voir §13.8).
+**Crons de purge** : trois tâches planifiées de catégorie `system` écrivent leur propre trace d'audit — `SYSTEM_AUDIT_CLEANUP` (`system.audit_cleanup`, purge du log d'audit lui-même, `packages/app/scripts/audit-cleanup.ts`), `SYSTEM_DECLARATION_CLEANUP` (`system.declaration_cleanup`, purge RGPD des déclarations, voir §13.8) et `SYSTEM_USER_CLEANUP` (`system.user_cleanup`, anonymisation RGPD des comptes inactifs, voir §13.10).
 
 Vue d'ensemble de tous les journaux produits par l'application et de leur durée de conservation, y compris celles non définies dans le dépôt : [`journaux-et-conservation.md`](journaux-et-conservation.md).
 
@@ -744,6 +744,24 @@ sequenceDiagram
 
 **Données persistées** : `companies.countryCode` / `companies.countryLabel` (voir [`architecture.md` §7.1](architecture.md#71-schéma)).
 
+### 13.10 Purge RGPD des comptes utilisateurs
+
+**À quoi ça sert** : appliquer la durée de conservation annoncée pour les comptes. `/donnees-personnelles` promet « 2 ans à compter de la dernière démarche ou de l'inactivité du compte » ; sans ce traitement, l'engagement n'avait aucun mécanisme (#4770).
+
+**Déclenchement** : un **CronJob Kubernetes** (`user-cleanup-daily`, tous les jours à 02:00 UTC) exécute le script autonome `packages/app/scripts/user-cleanup.ts`. Aucun écran utilisateur ni procédure tRPC. Détail technique et diagramme : [`architecture.md` §9.6](architecture.md#96-traitements-planifiés-crons-de-maintenance-des-données).
+
+**Horloge** : `app_user.last_activity_at`, réécrit à chaque connexion réussie. Une démarche exige une session : la date de connexion est toujours au moins aussi récente, et couvre donc la formulation « dernière démarche **ou** inactivité du compte ».
+
+**Fenêtre** : `USER_ACCOUNT_INACTIVITY_RETENTION_YEARS` (`~/modules/domain/shared/retention.ts`, **2 ans**) — la même constante que celle affichée par la page publique, surchargeable par `EGAPRO_USER_RETENTION_YEARS` pour le script. Borne **stricte** : un compte dont la dernière activité date d'exactement deux ans est conservé.
+
+**Ce qui est anonymisé** : prénom, nom, téléphone ; l'e-mail devient `compte-supprime-<id>@invalid` (non routable, libère l'adresse d'origine) ; `is_admin` repasse à `false` ; les rattachements à une entreprise et les verrous d'édition résiduels sont supprimés. La ligne `app_user` **reste** : les déclarations conservées 6 ans (§13.8), l'historique des statuts, le journal d'impersonation et les paramètres gardent leur référence et restent valides. Cette purge ne supprime **jamais** une déclaration.
+
+**Suppression à la demande** : pas de bouton dans Mon espace ; la demande passe par l'adresse de contact citée sur la page publique, qui le dit explicitement.
+
+**Traçabilité** : chaque exécution écrit une ligne `SYSTEM_USER_CLEANUP` (`system.user_cleanup`, catégorie `system`) avec les compteurs, la durée, la borne et le mode `dryRun` — jamais d'identifiant ni d'adresse. `EGAPRO_USER_CLEANUP_DRY_RUN=true` compte les candidats sans rien modifier.
+
+**Données concernées** : `app_user`, `app_user_company`, `app_declaration_lock`, `app_representation_declaration_lock`, `audit.action_log`.
+
 ---
 
 ## 14. Annexe : tables Drizzle principales
@@ -752,8 +770,8 @@ Tableau de correspondance feature → tables, pour les développeurs qui débarq
 
 | Table | Features qui y touchent |
 |---|---|
-| `users` | Authentification, profil, admin |
-| `userCompanies` | Authentification (rattachement entreprise), garde d'accès historique |
+| `users` | Authentification, profil, admin ; anonymisation RGPD (§13.10) |
+| `userCompanies` | Authentification (rattachement entreprise), garde d'accès historique ; purgé par l'anonymisation des comptes (§13.10) |
 | `companies` | Authentification, déclaration, admin, mails (raison sociale) |
 | `declarations` | Déclaration index, parcours conformité, mails (contexte variants), purge RGPD (§13.8) |
 | `declarationStatusHistory` | Historique des modifications d'une démarche ; purgé par cascade (§13.8) |

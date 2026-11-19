@@ -655,14 +655,15 @@ Toute nouvelle action audited requiert **3 points** :
 
 ### 9.6 Traitements planifiés (crons de maintenance des données)
 
-Deux CronJobs Kubernetes assurent la maintenance des données. Ils partagent le même modèle de déploiement (`.kontinuous/templates/*-cron.yaml`) : image applicative, `concurrencyPolicy: Forbid`, `backoffLimit: 0`, `restartPolicy: Never`, un `run` par jour.
+Trois CronJobs Kubernetes assurent la maintenance des données. Ils partagent le même modèle de déploiement (`.kontinuous/templates/*-cron.yaml`) : image applicative, `concurrencyPolicy: Forbid`, `backoffLimit: 0`, `restartPolicy: Never`, un `run` par jour.
 
 | CronJob | Script | Horaire (UTC) | Action audit associée | Rôle |
 |---|---|---|---|---|
+| `user-cleanup-daily` | `packages/app/scripts/user-cleanup.ts` | `0 2 * * *` (02:00) | `SYSTEM_USER_CLEANUP` (`system.user_cleanup`) | Anonymise les comptes inactifs au-delà de la durée annoncée |
 | `audit-cleanup-daily` | `packages/app/scripts/audit-cleanup.ts` | `0 4 * * *` (04:00) | `SYSTEM_AUDIT_CLEANUP` (`system.audit_cleanup`) | Purge les lignes d'`audit.action_log` au-delà de leur fenêtre de rétention |
 | `declaration-cleanup-daily` | `packages/app/scripts/declaration-cleanup.ts` | `0 3 * * *` (03:00) | `SYSTEM_DECLARATION_CLEANUP` (`system.declaration_cleanup`) | Purge RGPD des déclarations dont l'année est antérieure au seuil de rétention |
 
-Ces deux actions sont de catégorie `system` (rétention 365 j). Toute modification de ces scripts → **test d'intégration obligatoire** (`*.integration.test.ts`, cf. §13).
+Ces trois actions sont de catégorie `system` (rétention 365 j). Toute modification de ces scripts → **test d'intégration obligatoire** (`*.integration.test.ts`, cf. §13).
 
 #### Purge RGPD des déclarations (`declaration-cleanup.ts`)
 
@@ -703,6 +704,35 @@ flowchart TD
 
 - **Idempotent** : relancé sur le même état, il ne purge rien de plus et écrit une nouvelle ligne d'audit `success` avec des compteurs à zéro.
 - **Connexion directe** : le script se connecte à PostgreSQL (`DATABASE_URL`, ou reconstruit depuis `POSTGRES_*`) et à S3 (`S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET_NAME`, clés) via des variables d'environnement — sans passer par la couche applicative Next.js/tRPC.
+
+#### Purge des comptes utilisateurs (`user-cleanup.ts`)
+
+Objectif : appliquer la durée annoncée par la politique de confidentialité pour les comptes — « 2 ans à compter de la dernière démarche ou de l'inactivité du compte » (#4770). Le texte public et le script lisent la même constante, `USER_ACCOUNT_INACTIVITY_RETENTION_YEARS` (`packages/app/src/modules/domain/shared/retention.ts`) ; `EGAPRO_USER_RETENTION_YEARS` surcharge le défaut côté script.
+
+**Horloge** : `app_user.last_activity_at`, réécrit à chaque connexion réussie par le callback `jwt` de `~/server/auth/config.ts` (jamais sur une lecture de session). Une démarche exigeant une session, cette date est toujours au moins aussi récente que la dernière démarche : elle couvre les deux termes du texte. Les comptes existants sont backfillés au déploiement (migration `0064_backfill-user-last-activity`) avec le signal le plus récent disponible — inscription, dernière connexion encore présente dans `audit.action_log`, dernière déclaration, dernier statut, dernière représentation, dernier rattachement ; un compte sans signal garde la date de migration.
+
+**Seuil** : `last_activity_at < now() − N ans`, calculé par PostgreSQL (`make_interval`, exact les années bissextiles). La borne est **stricte** : un compte dont la dernière activité date d'exactement N ans est conservé.
+
+**Anonymisation, jamais de suppression de ligne** — huit clés étrangères pointent vers `app_user.id`, dont plusieurs `NOT NULL`, et les déclarations conservées 6 ans doivent rester attribuables. Dans une transaction unique :
+
+```mermaid
+flowchart TD
+    A[SELECT id FROM app_user<br/>WHERE anonymized_at IS NULL<br/>AND last_activity_at &lt; cutoff] --> B{ids vides ou dry-run ?}
+    B -->|oui| Z[Rien à modifier]
+    B -->|non| C[DELETE app_user_company]
+    C --> D[DELETE app_declaration_lock]
+    D --> E[DELETE app_representation_declaration_lock]
+    E --> F[UPDATE app_user<br/>données vidées, email @invalid<br/>anonymized_at = now]
+    F --> G[(commit)]
+```
+
+- `first_name`, `last_name`, `phone` → `NULL` ; `email` → `compte-supprime-<id>@invalid` (TLD réservé RFC 2606 : non routable, unique, libère l'adresse d'origine) ; `is_admin` → `false` ; `anonymized_at` → `now()`.
+- Supprimés : rattachements à une entreprise et verrous d'édition résiduels. **Conservés** : `app_declaration`, `app_representation_declaration`, `app_declaration_status_history`, `app_admin_impersonation_event`, `app_global_setting` — tous gardent l'identifiant, donc leurs liens restent valides. **Aucune déclaration n'est supprimée** par cette purge.
+- Aucun effet externe : ni S3, ni file de notification.
+
+**Propriétés** : idempotent (`anonymized_at IS NULL`), compteurs seuls sur stdout (jamais un e-mail ni un identifiant), `EGAPRO_USER_CLEANUP_DRY_RUN=true` pour compter sans modifier, auto-audit hors transaction (`system.user_cleanup`, `metadata = { anonymizedAccounts, retentionYears, cutoff, dryRun }`), échec écrit `USER_CLEANUP_FAILED` et sort en code non nul.
+
+**Embarquement** : le script est dans la liste `esbuild` du builder **et** dans les `COPY` du runner — le CronJob le trouve dans l'image. `declaration-cleanup` reste le contre-exemple, corrigé par #4773.
 
 ---
 

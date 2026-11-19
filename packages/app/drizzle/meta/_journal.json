@@ -442,6 +442,20 @@
 			"when": 1794303994154,
 			"tag": "0062_friendly_night_nurse",
 			"breakpoints": true
+		},
+		{
+			"idx": 63,
+			"version": "7",
+			"when": 1794907954892,
+			"tag": "0063_elite_flatman",
+			"breakpoints": true
+		},
+		{
+			"idx": 64,
+			"version": "7",
+			"when": 1794907963679,
+			"tag": "0064_backfill-user-last-activity",
+			"breakpoints": true
 		}
 	]
 }

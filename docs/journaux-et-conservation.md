@@ -71,7 +71,7 @@ Le vocabulaire de la colonne **Statut** est défini en [section 3](#3-vocabulair
 |---|---|---|---|---|---|
 | Déclarations de rémunération et données rattachées | Obligation légale de déclaration de l'index | Identifiant du déclarant, avis CSE et évaluation conjointe (PDF) | 6 ans | Prévue, non exécutée | [5.1](#51-déclarations-de-rémunération-et-données-rattachées) |
 | Représentation équilibrée | Obligation légale de déclaration | Identifiant du déclarant ; pour la reprise V1, coordonnées du déclarant historique | Illimitée de fait | Aucune purge | [5.2](#52-représentation-équilibrée) |
-| Comptes utilisateurs | Gestion des accès à la plateforme | Prénom, nom, e-mail, téléphone | 2 ans après la dernière déclaration ou l'inactivité du compte (annoncé) | Annoncée, non appliquée | [5.3](#53-comptes-utilisateurs) |
+| Comptes utilisateurs | Gestion des accès à la plateforme | Prénom, nom, e-mail, téléphone | 2 ans après la dernière connexion au compte | Appliquée par le code | [5.3](#53-comptes-utilisateurs) |
 | Cookies | Authentification, préférence d'affichage, mesure d'audience | — | 30 jours pour la session applicative ; 1 an annoncé pour `fr-theme` ; jusqu’à 13 mois pour Matomo | Appliquée par le code (session) ; Annoncée, non appliquée (`fr-theme`) ; Paramétrée hors dépôt (Matomo) | [5.4](#54-cookies) |
 
 ## 3. Vocabulaire de statut
@@ -97,7 +97,7 @@ Table Postgres `audit.action_log`, schéma dédié `audit` (pas de clé étrang�
 
 Les lectures publiques restantes (`PUBLIC_REFERENT_SEARCH`, `PUBLIC_REFERENT_VIEW` et `PUBLIC_DECLARATIONS_EXPORT`) ne créent plus de nouvelle ligne dans cette table. Elles gardent leur ligne d'activité stdout décrite en [4.2](#42-ligne-dactivité-applicative). Les anciennes lignes d'audit restent soumises à la purge ordinaire.
 
-**Quatre points d'écriture** : l'application (`packages/app/src/server/audit/log.ts`), le worker de notifications (`packages/notifications/src/worker/auditLog.ts`), l'auto-audit de la purge quotidienne elle-même (`packages/app/scripts/audit-cleanup.ts`) et la purge des déclarations (`packages/app/scripts/declaration-cleanup.ts`). L'auto-audit quotidien conserve les nombres de lignes supprimées dans chaque journal et leur total, sans identifiant personnel.
+**Cinq points d'écriture** : l'application (`packages/app/src/server/audit/log.ts`), le worker de notifications (`packages/notifications/src/worker/auditLog.ts`), l'auto-audit de la purge quotidienne elle-même (`packages/app/scripts/audit-cleanup.ts`), la purge des déclarations (`packages/app/scripts/declaration-cleanup.ts`) et la purge des comptes utilisateurs (`packages/app/scripts/user-cleanup.ts`). L'auto-audit quotidien conserve les nombres de lignes supprimées ou anonymisées dans chaque journal et leur total, sans identifiant personnel.
 
 **Durée** : 180 jours pour les catégories `read_sensitive` et `public_search`, 365 jours pour les autres. Un CronJob quotidien (`audit-cleanup-daily`, 04:00 UTC) supprime les lignes expirées par une requête SQL directe. Les deux seuils sont surchargeables par les variables d'environnement `EGAPRO_AUDIT_RETENTION_SHORT_DAYS` et `EGAPRO_AUDIT_RETENTION_LONG_DAYS` — la ConfigMap optionnelle `audit-retention` permet de les fixer, mais aucune n'est définie dans le dépôt : ce sont donc les valeurs par défaut (180 / 365) qui s'appliquent. Ces valeurs par défaut et la liste des catégories à conservation courte ont une seule source, `packages/app/src/modules/audit/shared/constants.ts`, que le script `packages/app/scripts/audit-cleanup.ts` importe.
 
@@ -249,9 +249,15 @@ Table `app_user` (prénom, nom, e-mail, téléphone) et ses rattachements à une
 
 > « À compter de la suppression par l'utilisateur ou 2 ans à compter de la dernière démarche ou de l'inactivité du compte »
 
-**Statut : Annoncée, non appliquée.** Aucune purge, aucune suppression de compte à l'initiative de l'utilisateur, et aucune colonne ne trace la date de dernière activité du compte — la durée promise n'a donc aucune donnée à partir de laquelle se calculer. [#4770](https://github.com/SocialGouv/egapro/issues/4770) propose de faire correspondre le code à cet engagement.
+**Durée appliquée** : 2 ans à compter de la **dernière connexion** — une démarche exige une session, donc la date de connexion est toujours au moins aussi récente que la dernière démarche. La valeur est celle de `USER_ACCOUNT_INACTIVITY_RETENTION_YEARS` (`packages/app/src/modules/domain/shared/retention.ts`), la même que celle affichée par la page publique ; `EGAPRO_USER_RETENTION_YEARS` peut la surcharger pour le script.
 
-**Sources** : `packages/app/src/modules/legal/PrivacyPolicyPage/PrivacyRightsAndData.tsx` · `packages/app/src/server/db/schema.ts`.
+**Statut : Appliquée par le code.** `app_user.last_activity_at` est réécrit à chaque connexion réussie (`packages/app/src/server/auth/config.ts`). Le CronJob quotidien `user-cleanup-daily` (02:00 UTC) **anonymise en place** les comptes dont `last_activity_at` est strictement antérieur à la borne : prénom, nom, téléphone vidés, e-mail remplacé par `compte-supprime-<id>@invalid`, `is_admin` retiré, rattachements à une entreprise et verrous résiduels supprimés, `anonymized_at` posé. La ligne `app_user` est **conservée** : les déclarations légalement conservées 6 ans restent rattachées à cet identifiant anonyme, ainsi que l'historique des statuts, le journal d'impersonation et les paramètres. Une purge déjà passée est sans effet (idempotence portée par `anonymized_at`).
+
+**Suppression à la demande de l'utilisateur** : pas de parcours en libre-service ; elle s'exerce par la demande à l'adresse de contact de la page `/donnees-personnelles`, que le texte public mentionne explicitement.
+
+**Réserve d'exploitation** : le `.bundle.mjs` du script est compilé **et** copié dans l'image (`.kontinuous/templates/user-cleanup-cron.yaml`, `packages/app/Dockerfile`) ; ce n'est pas le cas de `declaration-cleanup`, traité par [#4773](https://github.com/SocialGouv/egapro/issues/4773).
+
+**Sources** : `packages/app/src/modules/legal/PrivacyPolicyPage/PrivacyRightsAndData.tsx` · `packages/app/src/modules/domain/shared/retention.ts` · `packages/app/src/server/db/schema.ts` · `packages/app/src/server/auth/config.ts` · `packages/app/scripts/user-cleanup.ts` · `.kontinuous/templates/user-cleanup-cron.yaml` · `packages/app/Dockerfile`.
 
 ### 5.4 Cookies
 
@@ -286,14 +292,13 @@ Reprend `packages/app/src/modules/legal/CookiesPage.tsx`, qui alimente la page p
 
 Reportés tels quels, sans les atténuer :
 
-1. **Comptes utilisateurs** : l'engagement public de 2 ans n'est appliqué par aucun mécanisme. Suite : [#4770](https://github.com/SocialGouv/egapro/issues/4770).
-2. **Purge des déclarations** : le script existe mais n'est pas embarqué dans l'image de production, donc jamais exécuté. Suite : [#4773](https://github.com/SocialGouv/egapro/issues/4773).
-3. **Représentation équilibrée** : aucune purge, alors que des lignes reprises de la V1 contiennent des coordonnées personnelles. Suite : [#4502](https://github.com/SocialGouv/egapro/issues/4502).
-4. **Table jamais purgée** : le journal de dédoublonnage des relances n'a aucun mécanisme de suppression. Suite : [#4769](https://github.com/SocialGouv/egapro/issues/4769).
-5. **Durées d'audit écrites deux fois** : une fois dans les constantes du module (lues uniquement par les tests), une fois en dur dans le script de purge qui les applique réellement. Suite : [#4771](https://github.com/SocialGouv/egapro/issues/4771).
-6. **Sentry** : l'enregistrement de session et l'échantillonnage à 100 % des traces ne sont mentionnés ni dans la page `/donnees-personnelles` ni dans `/gestion-des-cookies`. Le docx fourni par la DGT pour la nouvelle politique de confidentialité ([#3669](https://github.com/SocialGouv/egapro/issues/3669)) ne couvre pas ce point, qui reste à traiter. Suite : [#4772](https://github.com/SocialGouv/egapro/issues/4772).
+1. **Purge des déclarations** : le script existe mais n'est pas embarqué dans l'image de production, donc jamais exécuté. Suite : [#4773](https://github.com/SocialGouv/egapro/issues/4773).
+2. **Représentation équilibrée** : aucune purge, alors que des lignes reprises de la V1 contiennent des coordonnées personnelles. Suite : [#4502](https://github.com/SocialGouv/egapro/issues/4502).
+3. **Table jamais purgée** : le journal de dédoublonnage des relances n'a aucun mécanisme de suppression. Suite : [#4769](https://github.com/SocialGouv/egapro/issues/4769).
+4. **Durées d'audit écrites deux fois** : une fois dans les constantes du module (lues uniquement par les tests), une fois en dur dans le script de purge qui les applique réellement. Suite : [#4771](https://github.com/SocialGouv/egapro/issues/4771).
+5. **Sentry** : l'enregistrement de session et l'échantillonnage à 100 % des traces ne sont mentionnés ni dans la page `/donnees-personnelles` ni dans `/gestion-des-cookies`. Le docx fourni par la DGT pour la nouvelle politique de confidentialité ([#3669](https://github.com/SocialGouv/egapro/issues/3669)) ne couvre pas ce point, qui reste à traiter. Suite : [#4772](https://github.com/SocialGouv/egapro/issues/4772).
 
-7. **Préférence de thème** : la page `/gestion-des-cookies` annonce un cookie `fr-theme` d’un an, mais le dépôt ne contient aucun code qui le crée ou applique cette durée. Le thème DSFR est mémorisé dans `localStorage` (`scheme`). Suite : vérifier et corriger la page publique ou implémenter le cookie annoncé.
+6. **Préférence de thème** : la page `/gestion-des-cookies` annonce un cookie `fr-theme` d’un an, mais le dépôt ne contient aucun code qui le crée ou applique cette durée. Le thème DSFR est mémorisé dans `localStorage` (`scheme`). Suite : vérifier et corriger la page publique ou implémenter le cookie annoncé.
 
 ## 8. Évolutions en cours
 
@@ -305,7 +310,6 @@ Tickets ouverts qui changeront une ligne de cette page :
 | [#4549](https://github.com/SocialGouv/egapro/issues/4549) | Journalisation des erreurs internes tRPC hors développement |
 | [#2710](https://github.com/SocialGouv/egapro/issues/2710) | Supervision des traitements planifiés |
 | [#4769](https://github.com/SocialGouv/egapro/issues/4769) | Purge du journal de dédoublonnage des relances |
-| [#4770](https://github.com/SocialGouv/egapro/issues/4770) | Appliquer aux comptes utilisateurs la durée annoncée |
 | [#4771](https://github.com/SocialGouv/egapro/issues/4771) | Une seule source pour les durées de conservation du journal d'audit |
 | [#4772](https://github.com/SocialGouv/egapro/issues/4772) | Sentry : réglage de l'enregistrement de session et de l'échantillonnage |
 | [#4773](https://github.com/SocialGouv/egapro/issues/4773) | Embarquer le script de purge des déclarations dans l'image de production |
