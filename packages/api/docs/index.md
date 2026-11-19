@@ -1,5 +1,8 @@
 # API Egapro
 
+> Les exports applicatifs (génération quotidienne, stockage, bascule et retour
+> arrière) sont documentés dans [Exports](exports.md).
+
 ## Schéma
 
 - jsonschema : [https://egapro.travail.gouv.fr/api/jsonschema.json](https://egapro.travail.gouv.fr/api/jsonschema.json)

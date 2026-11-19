@@ -39,12 +39,21 @@ function kindOf(error) {
   return 'unavailable';
 }
 
-function createStorage(config, { client } = {}) {
-  const s3 = client || new S3Client({
+// Path-style addressing (`<endpoint>/<bucket>/<key>`) rather than virtual-hosted
+// (`<bucket>.<host>`): it is what the local MinIO answers, and the deployed
+// storage accepts it too. It also matches what boto3 does with a custom endpoint,
+// so the generator and this server address the same URL.
+function createClient(config) {
+  return new S3Client({
     endpoint: config.endpoint,
     region: config.region,
+    forcePathStyle: true,
     credentials: { accessKeyId: config.accessKeyId, secretAccessKey: config.secretAccessKey },
   });
+}
+
+function createStorage(config, { client } = {}) {
+  const s3 = client || createClient(config);
   const key = name => objectKey(name, config.prefix);
 
   async function send(command) {
@@ -110,4 +119,4 @@ function resolveStorage(env) {
   return createStorage(config);
 }
 
-module.exports = { StorageError, createStorage, resolveStorage };
+module.exports = { StorageError, createClient, createStorage, resolveStorage };

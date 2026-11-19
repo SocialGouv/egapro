@@ -210,18 +210,65 @@ Le maildev se trouve alors à `http://localhost:1080`.
 
 ## Fichiers
 
-Certains fichiers sont exposés par le serveur web pour différents acteurs.
+Les six exports sont générés par l'API et servis par le composant `files`.
 
-Le fichier index-egalite-fh.csv est généré tous les jours et accessible sans restriction.
+| Accès | Fichiers |
+| :-- | :-- |
+| Public, sans connexion | `index-egalite-fh.xlsx`, `dgt-export-representation.xlsx` |
+| Authentification basique ou IP autorisée | `dgt.xlsx`, `dgt-representation.xlsx`, `full.ndjson`, `indexes.csv` |
 
-Les fichiers suivants, sont accessibles uniquement si authentifié ou pour certaines adresses IP (voir la liste blanche dans `.kontinuous/values.yaml`).
+En environnement déployé, le CronJob `exports` les régénère chaque jour à
+**00:00 UTC** (voir `.kontinuous/templates/exports-cron.yaml`) et les publie dans
+le stockage objet. `files` les lit depuis ce stockage, en flux, après les contrôles
+d'accès : son pod ne monte plus de volume et peut être répliqué.
 
--   dgt.xlsx
--   dgt-representation.xlsx
--   full.ndjson
--   indexes.csv
+La bascule, le retour arrière et le diagnostic sont décrits dans le
+[runbook des exports](packages/api/docs/exports.md).
 
-### Commandes pour générer les fichiers manuellement
+### Développement local
+
+`docker compose` démarre un MinIO local et crée le bucket `egapro-local-app` au
+premier lancement. Les deux composants (`api` et `files`) reçoivent les mêmes
+variables `S3_*`, avec le préfixe `dev` : rien à configurer.
+
+```sh
+pnpm dev        # ou docker compose up --build
+```
+
+Générer puis publier les six exports (c'est la commande du CronJob) :
+
+```sh
+docker compose exec api egapro publish-exports
+```
+
+- Sans configuration de stockage, la commande échoue **avant** de générer quoi que
+  ce soit ; sur un export en échec (fichier vide, XLSX tronqué), elle sort en code
+  1 et rien n'est publié pour cet export.
+- Sur une base locale vide, `full.ndjson` fait 0 octet et est donc refusé. C'est
+  voulu : créer au moins une déclaration dans l'app pour obtenir les six fichiers.
+- Les journaux tracent chaque export :
+  `--- Starting/Finished/FAILED export: <nom> ---`.
+
+Contrôler le bucket et les objets publiés :
+
+```sh
+docker compose exec minio mc ls --recursive local/egapro-local-app
+```
+
+Télécharger depuis le serveur de fichiers local :
+
+```sh
+curl -fsSI http://127.0.0.1:8080/index-egalite-fh.xlsx
+curl -fsSI http://127.0.0.1:8080/indexes.csv
+```
+
+En local, `FILES_PUBLIC` expose les six fichiers : les contrôles d'accès ne
+s'appliquent qu'en environnement déployé. La console MinIO est sur
+<http://127.0.0.1:9001> (`egapro` / `egapro-dev-password` par défaut).
+
+Les commandes par fichier ci-dessous écrivent un fichier local dans `/mnt/files`
+(volume `./mnt`) **sans le publier** ; pour alimenter le stockage, utiliser
+`publish-exports`.
 
 ```sh
 egapro export-public-data /mnt/files/index-egalite-fh.xlsx
@@ -250,8 +297,8 @@ Les valeurs publiques vivent dans le ConfigMap `s3` de chaque environnement
 (`.kontinuous/env/<env>/templates/s3.configmap.yaml`), injecté dans `api`, dans le
 CronJob de génération quotidienne et dans `files`. Les deux identifiants viennent
 du Secret `s3`, monté en optionnel : tant qu'il n'existe pas, les pods démarrent
-normalement et c'est
-l'usage du stockage qui échoue, en nommant la variable manquante.
+normalement et c'est l'usage du stockage qui échoue, en nommant la variable
+manquante.
 
 Pour sceller les identifiants dans un cluster (le scellement est lié au cluster et
 au namespace : un sealed secret n'est jamais réutilisable d'un environnement à
@@ -265,8 +312,8 @@ kubectl -n <namespace> create secret generic s3 \
   | kubeseal --format yaml > .kontinuous/env/<env>/templates/s3.sealed-secret.yaml
 ```
 
-Aucun identifiant n'est jamais écrit en clair dans le dépôt. En local, renseigner
-les mêmes variables dans l'environnement des conteneurs (voir `.env.dist`).
+Aucun identifiant n'est jamais écrit en clair dans le dépôt. En local, `docker
+compose` fournit les valeurs par défaut (voir `.env.dist` pour les surcharger).
 
 ## Helpers egapro
 
