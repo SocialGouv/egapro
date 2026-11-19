@@ -367,7 +367,7 @@ export async function selectCompliancePath(
  * Step 1 is info-only, step 2 edits correction data, step 3 reviews and submits.
  * @param hasGap Whether the correction data should still have a gap ≥ 5%
  */
-export async function completeSecondDeclaration(
+export async function saveSecondDeclaration(
 	page: Page,
 	options: { hasGap: boolean },
 ) {
@@ -422,7 +422,15 @@ export async function completeSecondDeclaration(
 
 		await page.getByRole("button", { name: "Suivant" }).click();
 		await page.waitForURL(urlGlob(complianceStepHref(3)));
+	});
+}
 
+export async function completeSecondDeclaration(
+	page: Page,
+	options: { hasGap: boolean },
+) {
+	await saveSecondDeclaration(page, options);
+	await test.step("seconde déclaration — transmission", async () => {
 		// Step 3: Review and submit (opens confirmation modal)
 		await page.getByRole("button", { exact: true, name: SUBMIT_LABEL }).click();
 		await page

@@ -154,7 +154,13 @@ function createCategoriesDb(options: {
 	status: string;
 	historyEvents: SubmissionHistoryEvent[];
 }) {
-	const declaration = { id: "decl-1", status: options.status, currentStep: 4 };
+	const declaration = {
+		id: "decl-1",
+		status: options.status,
+		currentStep: 4,
+		firstDeclarationPathChoice: "corrective_action",
+		secondDeclarationPathChoice: null,
+	};
 	const existingJobs = [{ id: "job-1", categoryIndex: 0, name: "Cadres" }];
 	const rowsByTable = new Map<unknown, unknown[]>([
 		[declarations, [declaration]],

@@ -7,7 +7,7 @@ const MODIFIABLE_SENTENCE = {
 	first:
 		"Vous pouvez modifier votre déclaration jusqu'à ce que vous transmettiez une seconde déclaration, un rapport d'évaluation conjointe ou un avis du CSE.",
 	second:
-		"Vous pouvez modifier votre seconde déclaration jusqu'au choix de votre nouveau parcours de mise en conformité.",
+		"Vous pouvez modifier votre seconde déclaration jusqu'au choix de votre nouveau parcours de mise en conformité ou jusqu'à la transmission de vos avis du CSE.",
 } as const;
 
 type Props = {

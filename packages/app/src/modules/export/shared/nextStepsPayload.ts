@@ -105,11 +105,12 @@ function toNextStepPayload(
  *    (see `cseRequirementSync.ts`). Advertising it to a company that owes no
  *    opinion reads as an outstanding obligation.
  *
- * 2. `submit_second_declaration` also fires from `awaiting_revision_choice`, so
- *    a company may resubmit its correction while parked there. But the app
- *    routes that state to the compliance-path screen
- *    (`~/modules/navigation`), never back into the second-declaration
- *    funnel: the expected next step is the path choice, not a resubmission.
+ * 2. `submit_second_declaration` also fires from `awaiting_revision_choice`
+ *    and `awaiting_cse_opinion`, so a company may resubmit its correction while
+ *    parked there. But the app routes those states to the compliance-path and
+ *    CSE-opinion screens (`~/modules/navigation`), never back into the
+ *    second-declaration funnel: the expected next step is the path choice or
+ *    the CSE opinions, not an optional resubmission.
  *
  * Both prunings are export-only — `applyAction` still accepts either action.
  * Keep this list at two: a third entry would make it a de facto mirror of the
@@ -130,7 +131,9 @@ function isAdvertisable(
 ): boolean {
 	if (transition.action === "submit_cse_opinion") return cseRequired;
 	if (transition.action === "submit_second_declaration") {
-		return status !== "awaiting_revision_choice";
+		return (
+			status !== "awaiting_revision_choice" && status !== "awaiting_cse_opinion"
+		);
 	}
 	return true;
 }

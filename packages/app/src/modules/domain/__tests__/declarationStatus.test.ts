@@ -17,6 +17,7 @@ import {
 	isInComplianceProcess,
 	isJointEvaluationWritable,
 	isLockedBySubsequentSubmission,
+	isSecondDeclarationResubmissionPending,
 	isSecondDeclarationWritable,
 	type SubmissionLockTarget,
 } from "../shared/declarationStatus";
@@ -468,18 +469,127 @@ describe("isSecondDeclarationWritable", () => {
 	const WRITABLE: DeclarationFsmStatus[] = [
 		"corrective_actions_chosen",
 		"awaiting_revision_choice",
+		"awaiting_cse_opinion",
 	];
+
+	function correctivePath(status: DeclarationFsmStatus | null) {
+		return {
+			status,
+			firstDeclarationPathChoice: "corrective_action" as const,
+			secondDeclarationPathChoice: null,
+		};
+	}
 
 	it.each(
 		WRITABLE,
-	)("returns true for %s, where the engine still exposes submit_second_declaration", (status) => {
-		expect(isSecondDeclarationWritable(status)).toBe(true);
+	)("returns true for %s on the corrective-action path", (status) => {
+		expect(isSecondDeclarationWritable(correctivePath(status))).toBe(true);
 	});
 
 	it.each(
 		allStatusesExcept(WRITABLE),
 	)("returns false for %s, where no submit_second_declaration transition exists", (status) => {
-		expect(isSecondDeclarationWritable(status)).toBe(false);
+		expect(isSecondDeclarationWritable(correctivePath(status))).toBe(false);
+	});
+
+	it.each([
+		["justify", null],
+		["joint_evaluation", null],
+		[null, null],
+	] as const)("returns false in awaiting_cse_opinion when the first path is %s", (firstDeclarationPathChoice, secondDeclarationPathChoice) => {
+		expect(
+			isSecondDeclarationWritable({
+				status: "awaiting_cse_opinion",
+				firstDeclarationPathChoice,
+				secondDeclarationPathChoice,
+			}),
+		).toBe(false);
+	});
+
+	it.each([
+		"justify",
+		"joint_evaluation",
+	] as const)("returns false in awaiting_cse_opinion once the revised path is %s", (secondDeclarationPathChoice) => {
+		expect(
+			isSecondDeclarationWritable({
+				status: "awaiting_cse_opinion",
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice,
+			}),
+		).toBe(false);
+	});
+
+	it("returns false in awaiting_revision_choice when the current path is not corrective", () => {
+		expect(
+			isSecondDeclarationWritable({
+				status: "awaiting_revision_choice",
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: "justify",
+			}),
+		).toBe(false);
+	});
+});
+
+describe("isSecondDeclarationResubmissionPending", () => {
+	const corrected = {
+		status: "awaiting_cse_opinion" as const,
+		firstDeclarationPathChoice: "corrective_action" as const,
+		secondDeclarationPathChoice: null,
+	};
+
+	it("returns true once the correction is saved at step 2 after its last transmission", () => {
+		expect(
+			isSecondDeclarationResubmissionPending({
+				...corrected,
+				secondDeclarationStep: 2,
+			}),
+		).toBe(true);
+	});
+
+	it("returns false once the correction has been re-transmitted at step 3", () => {
+		expect(
+			isSecondDeclarationResubmissionPending({
+				...corrected,
+				secondDeclarationStep: 3,
+			}),
+		).toBe(false);
+	});
+
+	it("returns false before any correction was saved", () => {
+		expect(
+			isSecondDeclarationResubmissionPending({
+				...corrected,
+				secondDeclarationStep: null,
+			}),
+		).toBe(false);
+	});
+
+	it.each([
+		["justify", null],
+		["joint_evaluation", null],
+		["corrective_action", "justify"],
+		["corrective_action", "joint_evaluation"],
+	] as const)("returns false while the current path is not corrective (%s then %s)", (firstDeclarationPathChoice, secondDeclarationPathChoice) => {
+		expect(
+			isSecondDeclarationResubmissionPending({
+				status: "awaiting_cse_opinion",
+				firstDeclarationPathChoice,
+				secondDeclarationPathChoice,
+				secondDeclarationStep: 2,
+			}),
+		).toBe(false);
+	});
+
+	it.each(
+		allStatusesExcept(["awaiting_cse_opinion"]),
+	)("returns false in %s, where no CSE opinion is being collected", (status) => {
+		expect(
+			isSecondDeclarationResubmissionPending({
+				...corrected,
+				status,
+				secondDeclarationStep: 2,
+			}),
+		).toBe(false);
 	});
 });
 
