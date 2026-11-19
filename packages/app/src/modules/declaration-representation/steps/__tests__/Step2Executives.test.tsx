@@ -472,6 +472,20 @@ describe("Step2Executives — pourcentages obligatoires (#4994)", () => {
 
 		expect(screen.queryByText(PERCENTAGES_REQUIRED)).not.toBeInTheDocument();
 	});
+
+	it("flags the missing percentage when one value is entered and the other cleared", async () => {
+		const { stepValid } = renderStep();
+		await userEvent.click(option(OPTIONS.twoOrMore));
+		await userEvent.type(percentFields().women, "40");
+		await userEvent.clear(percentFields().men);
+
+		act(() => {
+			expect(stepValid()).toBe(false);
+		});
+
+		expect(screen.getByText(PERCENTAGES_REQUIRED)).toBeInTheDocument();
+		expect(screen.queryByText(VALIDATION_MESSAGES.sum)).not.toBeInTheDocument();
+	});
 });
 
 describe("Step2Executives — définition réglementaire", () => {

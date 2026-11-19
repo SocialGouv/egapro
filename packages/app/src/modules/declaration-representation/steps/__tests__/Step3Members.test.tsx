@@ -202,6 +202,20 @@ describe("Step3Members — pourcentages obligatoires (#4994)", () => {
 
 		expect(screen.queryByText(PERCENTAGES_REQUIRED)).not.toBeInTheDocument();
 	});
+
+	it("affiche l'erreur quand un pourcentage est saisi et l'autre vidé", async () => {
+		render(<Harness />);
+		await userEvent.click(someRadio());
+		await userEvent.type(screen.getByLabelText(/Femmes/), "40");
+		await userEvent.clear(screen.getByLabelText(/Hommes/));
+
+		act(() => {
+			expect(stepValid()).toBe(false);
+		});
+
+		expect(screen.getByText(PERCENTAGES_REQUIRED)).toBeInTheDocument();
+		expect(screen.queryByText(VALIDATION_MESSAGES.sum)).not.toBeInTheDocument();
+	});
 });
 
 describe("Step3Members — existence d'instances dirigeantes (S8)", () => {
