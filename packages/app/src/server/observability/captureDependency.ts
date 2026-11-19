@@ -20,6 +20,16 @@ export const DEPENDENCIES = [
 export type Dependency = (typeof DEPENDENCIES)[number];
 
 /**
+ * One event per dependency per window. A dependency that is down fails on every
+ * request that needs it — without this, a Valkey or WEEZ outage would post one
+ * event per request and burn the Sentry quota for the duration of the incident.
+ * The fingerprint already merges them into a single issue, so the first event
+ * carries all the diagnostic value; later ones only add volume.
+ */
+const REPORT_WINDOW_MS = 60_000;
+const lastReportedAt = new Map<Dependency, number>();
+
+/**
  * Reports a dependency failure without duplicating an existing capture.
  *
  * Call it only where the failure would otherwise be lost — swallowed into a
@@ -35,7 +45,18 @@ export function captureDependencyFailure(
 	dependency: Dependency,
 	error: unknown,
 	extra?: Record<string, string | number | boolean>,
+	{ throttleMs = REPORT_WINDOW_MS }: { throttleMs?: number } = {},
 ): void {
+	const now = Date.now();
+	const lastReported = lastReportedAt.get(dependency);
+	if (
+		throttleMs > 0 &&
+		lastReported !== undefined &&
+		now - lastReported < throttleMs
+	)
+		return;
+	lastReportedAt.set(dependency, now);
+
 	const reported =
 		error instanceof Error ? error : new Error(String(error), { cause: error });
 

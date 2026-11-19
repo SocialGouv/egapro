@@ -140,7 +140,7 @@ L'analyse antivirus des fichiers déposés y écrit une ligne préfixée `[antiv
 
 Sentry capture les erreurs non gérées côté serveur, côté client et dans le worker `notifications`. Les traces sont échantillonnées à 10 % en production, et à 100 % ailleurs (`SENTRY_TRACES_SAMPLE_RATE` permet de régler le taux côté serveur). Côté client, l'enregistrement de session (Session Replay) est actif sur 10 % des sessions, et 100 % des sessions qui rencontrent une erreur.
 
-Les pannes de dépendances qui étaient auparavant avalées dans un `console.error` (WEEZ, SUIT, S3, Valkey, Matomo, file de messages, relais SMTP) remontent désormais comme événements, regroupés par dépendance et accompagnés d'un contexte borné (code HTTP, opération, tentative) qui ne contient ni adresse e-mail ni SIREN.
+Les pannes de dépendances qui étaient auparavant avalées dans un `console.error` (WEEZ, SUIT, S3, Valkey, Matomo, file de messages, relais SMTP) remontent désormais comme événements, regroupés par dépendance et accompagnés d'un contexte borné (code HTTP, opération, tentative) qui ne contient ni adresse e-mail ni SIREN. Le volume est borné : au plus un événement par dépendance et par minute, quel que soit le nombre de requêtes qui échouent pendant l'incident.
 
 **Anonymisation à l'émission** : les trois initialisations de l'application étalent les options du module `packages/app/src/modules/observability/`, qui empêchent les données personnelles de partir vers Sentry. Le worker, qui embarque son propre SDK (`@sentry/node`) sans partager ce module, applique le même contrat de façon structurelle : requête, message libre et valeur des exceptions sont supprimés de l'événement, les données des breadcrumbs sont retirées.
 

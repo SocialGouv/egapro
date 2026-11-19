@@ -127,11 +127,6 @@ spec:
             - configMapRef:
                 name: notifications
                 optional: true
-            # Public Sentry DSN used by the worker's runtime SDK init (#5199).
-            # Optional: without it the worker simply reports nothing.
-            - configMapRef:
-                name: sentry
-                optional: true
           env:
             # Public URL of the environment (prod / preprod / review app), same
             # host as the app (cf. NEXTAUTH_URL in values.yaml). Injected into

@@ -822,7 +822,7 @@ Quatre entrées Sentry, une par runtime :
 
 Les trois initialisations de l'application étalent les options du module `src/modules/observability`, qui anonymise ce qui part vers Sentry : collecte minimale côté SDK, filtrage des e-mails et SIREN/SIRET dans les erreurs, traces et breadcrumbs, et Session Replay entièrement masqué. Les traces sont échantillonnées à 10 % en production et à 100 % ailleurs ; `SENTRY_TRACES_SAMPLE_RATE` règle le taux côté serveur (`src/modules/observability/sampling.ts`).
 
-Les pannes de dépendances avalées par l'appelant (WEEZ, SUIT, S3, Valkey, Matomo, file de messages) passent par `captureDependencyFailure` (`src/server/observability/captureDependency.ts`), qui les regroupe par dépendance et n'ajoute qu'un contexte borné. Le worker ne partage pas ce module : son `beforeSend` supprime la requête, le message libre et la valeur des exceptions, et vide les breadcrumbs.
+Les pannes de dépendances avalées par l'appelant (WEEZ, SUIT, S3, Valkey, Matomo, file de messages) passent par `captureDependencyFailure` (`src/server/observability/captureDependency.ts`), qui les regroupe par dépendance, n'ajoute qu'un contexte borné et plafonne à un événement par dépendance et par minute. Le worker ne partage pas ce module : son `beforeSend` supprime la requête, le message libre et la valeur des exceptions, et vide les breadcrumbs.
 
 ---
 

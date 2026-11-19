@@ -32,6 +32,22 @@ export function initWorkerSentry({
 		tracesSampleRate: 0,
 		beforeSend: redactEvent,
 	});
+	// `uncaughtException` and `unhandledRejection` are default integrations of
+	// `@sentry/node` (`getDefaultIntegrations`), so crashes outside the job
+	// handler are captured without a second set of process listeners.
+}
+
+/**
+ * Waits for buffered events to reach Sentry.
+ *
+ * `captureException` only queues the event on the SDK transport; a process that
+ * exits in the same tick never posts it. Both the fatal handler and the
+ * graceful shutdown must flush before ending — bounded, so a wedged network
+ * cannot hold the process past its termination grace period. Resolves `false`
+ * when no client is initialised (no DSN), which is not an error.
+ */
+export function flushWorkerSentry(timeoutMs = 2000): Promise<boolean> {
+	return Sentry.flush(timeoutMs);
 }
 
 export type JobFailureContext = {
