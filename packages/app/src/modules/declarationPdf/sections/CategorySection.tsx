@@ -207,18 +207,16 @@ export function CategorySection({ data }: { data: DeclarationPdfData }) {
 	return (
 		<>
 			<View minPresenceAhead={80} wrap={false}>
-				<SectionBanner title="Écart de rémunération par catégorie d'emplois" />
+				<SectionBanner title="Indicateurs par catégorie d'emplois" />
 				{data.categories.length > 0 ? (
 					<View style={styles.infoBody}>
-						<View
-							style={[styles.infoLabelColumn, styles.categorySourceLabelColumn]}
-						>
-							<Text style={styles.infoLabel}>
-								Source des catégories d'emplois
+						<View style={styles.infoRow}>
+							<Text style={[styles.infoLabelColumn, styles.infoLabel]}>
+								{"Source des catégories\nd'emplois"}
 							</Text>
-						</View>
-						<View style={styles.infoValueColumn}>
-							<Text style={styles.infoValue}>{data.source ?? "-"}</Text>
+							<Text style={[styles.infoValueColumn, styles.infoValue]}>
+								{data.source ?? "-"}
+							</Text>
 						</View>
 					</View>
 				) : (
