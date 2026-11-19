@@ -92,6 +92,12 @@ app:
         name: "s3"
     - secretRef:
         name: "s3"
+    # Server-side traces sampling (#5199). Optional so a namespace with no
+    # ConfigMap still boots on the environment default (0.1 in production).
+    # The Sentry DSN is not here: it is a build argument, baked into the image.
+    - configMapRef:
+        name: "sentry"
+        optional: true
     - configMapRef:
         name: "clamav"
     - configMapRef:

@@ -5,6 +5,7 @@ import type { Sql } from "postgres";
 import { buildMail } from "../mails/index.js";
 import { validateJobData } from "../queue.js";
 import { logAuditMain } from "./auditLog.js";
+import { captureJobFailure } from "./sentry.js";
 
 export type JobHandlerDeps = {
 	transporter: Transporter | null;
@@ -92,6 +93,12 @@ export function makeJobHandler(
 					phase === "render" ? "mail_render_failed" : "mail_transport_failed",
 				metadata: { type, attempt },
 			});
+			// Intermediate attempts are retried by pg-boss: reporting each one would
+			// open an issue per retry for a transient SMTP hiccup. Only the last
+			// attempt means the mail is lost.
+			if (attempt > job.retryLimit) {
+				captureJobFailure(error, { attempt, type, phase });
+			}
 			throw error;
 		}
 	};

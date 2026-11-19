@@ -135,6 +135,10 @@ spec:
             # outside prod.
             - name: EGAPRO_PUBLIC_URL
               value: "https://{{ .Values.global.host }}"
+            - name: SENTRY_ENVIRONMENT
+              value: "{{ .Values.global.env }}"
+            - name: SENTRY_RELEASE
+              value: "{{ .Values.global.imageTag }}"
             # Opt-in health server: without it the worker listens on nothing
             # (local runs and the E2E helper would otherwise fight the app for
             # a port). The probes below consume it.

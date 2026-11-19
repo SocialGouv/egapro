@@ -117,6 +117,14 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
+# Public Sentry DSN, re-declared in this stage: the notifications worker
+# initialises @sentry/node at runtime, whereas the Next.js bundle only inlines
+# the value at build time. Keeping it a build argument — never a file in the
+# repository — keeps one source (the GitHub variable) and no third copy to
+# drift (#5199). The DSN is public by design: it already ships in the browser
+# bundle.
+ARG NEXT_PUBLIC_SENTRY_DSN
+ENV NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN
 
 WORKDIR /app
 

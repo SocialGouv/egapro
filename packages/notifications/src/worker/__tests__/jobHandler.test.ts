@@ -2,12 +2,14 @@ import type { JobWithMetadata } from "pg-boss";
 import type { Transporter } from "nodemailer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { audit, buildMail } = vi.hoisted(() => ({
+const { audit, buildMail, captureJobFailure } = vi.hoisted(() => ({
 	audit: vi.fn(),
 	buildMail: vi.fn(),
+	captureJobFailure: vi.fn(),
 }));
 
 vi.mock("../auditLog.js", () => ({ logAuditMain: audit }));
+vi.mock("../sentry.js", () => ({ captureJobFailure }));
 vi.mock("../../mails/index.js", async (importOriginal) => ({
 	...(await importOriginal<object>()),
 	buildMail,
@@ -28,8 +30,8 @@ const validData = {
 	siren: "552100554",
 };
 
-const job = (data: unknown, retryCount = 0) =>
-	({ id: "job-1", data, retryCount }) as JobWithMetadata<unknown>;
+const job = (data: unknown, retryCount = 0, retryLimit = 5) =>
+	({ id: "job-1", data, retryCount, retryLimit }) as JobWithMetadata<unknown>;
 
 describe("makeJobHandler audit", () => {
 	beforeEach(() => {
@@ -39,6 +41,7 @@ describe("makeJobHandler audit", () => {
 			html: "<p>Body</p>",
 			text: "Body",
 		});
+		captureJobFailure.mockReset();
 	});
 
 	it("records success without email or provider id", async () => {
@@ -134,5 +137,101 @@ describe("makeJobHandler audit", () => {
 			siren: null,
 		});
 		consoleSpy.mockRestore();
+	});
+});
+
+describe("makeJobHandler Sentry reporting", () => {
+	beforeEach(() => {
+		audit.mockReset().mockResolvedValue(undefined);
+		buildMail.mockReset().mockResolvedValue({
+			subject: "Subject",
+			html: "<p>Body</p>",
+			text: "Body",
+		});
+		captureJobFailure.mockReset();
+	});
+
+	function transportHandler(error: unknown) {
+		return makeJobHandler({
+			transporter: {
+				sendMail: vi.fn().mockRejectedValue(error),
+			} as unknown as Transporter,
+			mailFrom: "no-reply@example.test",
+			mailEnabled: true,
+			mainSql: {} as never,
+		});
+	}
+
+	it("stays silent on an attempt pg-boss will retry", async () => {
+		const handler = transportHandler(new Error("relay hiccup"));
+
+		await expect(handler(job(validData, 0, 5))).rejects.toThrow("relay");
+
+		// One issue per retry would bury a transient SMTP outage under its own
+		// duplicates.
+		expect(captureJobFailure).not.toHaveBeenCalled();
+	});
+
+	it("reports the last transport attempt, when the mail is lost", async () => {
+		const error = new Error("relay is gone");
+		const handler = transportHandler(error);
+
+		await expect(handler(job(validData, 5, 5))).rejects.toThrow("relay");
+
+		expect(captureJobFailure).toHaveBeenCalledWith(error, {
+			attempt: 6,
+			type: "joint_evaluation_submitted",
+			phase: "transport",
+		});
+	});
+
+	it("reports a render failure with its own phase", async () => {
+		const error = new Error("template exploded");
+		buildMail.mockRejectedValue(error);
+		const handler = makeJobHandler({
+			transporter: null,
+			mailFrom: "no-reply@example.test",
+			mailEnabled: false,
+			mainSql: {} as never,
+		});
+
+		await expect(handler(job(validData, 5, 5))).rejects.toBe(error);
+
+		expect(captureJobFailure).toHaveBeenCalledWith(
+			error,
+			expect.objectContaining({ phase: "render", attempt: 6 }),
+		);
+	});
+
+	it("reports nothing for a poison pill, which never retries", async () => {
+		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+		const handler = makeJobHandler({
+			transporter: null,
+			mailFrom: "no-reply@example.test",
+			mailEnabled: false,
+			mainSql: {} as never,
+		});
+
+		await handler(job({ ...validData, type: "unknown_type" }, 5, 5));
+
+		// Malformed payloads are already logged with their bounded code; they
+		// are a content bug, not a dependency outage.
+		expect(captureJobFailure).not.toHaveBeenCalled();
+		consoleSpy.mockRestore();
+	});
+
+	it("reports nothing when the mail goes out", async () => {
+		const handler = makeJobHandler({
+			transporter: {
+				sendMail: vi.fn().mockResolvedValue({ messageId: "provider-1" }),
+			} as unknown as Transporter,
+			mailFrom: "no-reply@example.test",
+			mailEnabled: true,
+			mainSql: {} as never,
+		});
+
+		await handler(job(validData, 5, 5));
+
+		expect(captureJobFailure).not.toHaveBeenCalled();
 	});
 });
