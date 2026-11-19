@@ -111,10 +111,6 @@ def missing_storage_keys():
     return [key for key in storage_required_keys if not globals()[key]]
 
 
-def storage_configured():
-    return not missing_storage_keys()
-
-
 def storage_settings():
     """Refuse a partial storage configuration, naming every missing key, instead of
     failing later on an opaque network error."""

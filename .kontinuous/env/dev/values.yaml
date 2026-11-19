@@ -43,6 +43,12 @@ app:
     EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL: "https://identite.proconnect.gouv.fr/manage-organizations"
     EGAPRO_PROCONNECT_PERSONAL_INFORMATION_URL: "https://identite.proconnect.gouv.fr/personal-information"
 
+project:
+  exports:
+    # Review apps have no `s3` Secret: the generation has no bucket to publish to
+    # (the download server already answers 502 there, see #5241).
+    enabled: false
+
 keycloak:
   enabled: false
 

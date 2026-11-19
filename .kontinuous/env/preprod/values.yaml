@@ -14,6 +14,11 @@ api:
       cpu: 500m
       memory: 1G
 
+files:
+  # The exports come from the storage bucket: no shared volume, so the downloads
+  # can be replicated like the application.
+  replicas: 2
+
 app:
   env:
     - name: SECURITY_MONCOMPTEPRO_CLIENT_ID
