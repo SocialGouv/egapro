@@ -19,34 +19,39 @@ const PrivacyPolicy = () => {
         <Grid align="center">
           <GridCol md={10} lg={8}>
             <h1>{title}</h1>
-            <h2>Qui est responsable d’Index Egapro&nbsp;?</h2>
+            <h2>Qui est responsable d’Egapro&nbsp;?</h2>
             <p>
-              La plateforme Index Egapro est sous la responsabilité de la Direction générale du travail, représentée par
-              Monsieur Pierre RAMAIN, directeur général du travail. Index Egapro met en place deux index conçus pour
-              lutter contre l’inégalité entre les femmes et les hommes.
+              La plateforme Egapro est sous la responsabilité de la Direction générale du travail, représentée par
+              monsieur Pierre RAMAIN, en sa qualité de directeur général du travail.
+            </p>
+            <p>
+              Egapro permet aux entreprises de déclarer aux services du ministre chargé du travail leurs résultats de
+              l’index de l’égalité professionnelle entre les femmes et les hommes et, si elles sont assujetties, de la
+              représentation équilibrée entre les femmes et les hommes dans les postes de direction.
             </p>
             <h2>Quelles sont les données à caractère personnel que nous traitons&nbsp;?</h2>
-            <p>Index Egapro traite les données à caractère personnel suivantes&nbsp;:</p>
+            <p>Egapro traite les données à caractère personnel suivantes&nbsp;:</p>
             <ul className={"fr-mb-3w"}>
-              <li>Nom, prénom, adresse e-mail et numéro de téléphone professionnel des utilisateurs.</li>
+              <li>Nom, prénom, adresse mail et numéro de téléphone professionnel des utilisateurs.</li>
             </ul>
             <h2>Pourquoi traitons-nous des données à caractère personnel&nbsp;?</h2>
-            <p>Index Egapro traite des données à caractère personnel pour&nbsp;:</p>
-            <ul className={"fr-mb-3w"}>
-              <li>
-                Calculer les écarts de rémunération entre les femmes et les hommes au sein des entreprises et réaliser
-                les déclarations qui en sont issues&nbsp;;
-              </li>
-              <li>
-                Calculer les écarts de représentation équilibrée entre les femmes et les hommes dans les services
-                dirigeants.
-              </li>
-            </ul>
+            <p>
+              Egapro traite des données à caractère personnel pour gérer les comptes utilisateurs et effectuer la
+              déclaration de l’index de l’égalité professionnelle et de la représentation équilibrée dans les postes de
+              direction.
+            </p>
             <h2>Qu’est-ce qui nous autorise à traiter des données à caractère personnel&nbsp;?</h2>
             <p>
-              Index Egapro traite des données à caractère personnel en se basant sur l’exécution d’une mission d’intérêt
+              Egapro traite des données à caractère personnel en se basant sur l’exécution d’une mission d’intérêt
               public ou relevant de l’exercice de l’autorité publique dont est investi le responsable de traitement
               conformément à l’article 6-1 e) du RGPD.
+            </p>
+            <p>
+              Cette mission d’intérêt public est posée par l’arrêté du 17 août 2022 modifié définissant les modèles de
+              présentation et les modalités de transmission à l’administration des indicateurs et du niveau de résultat
+              en matière d’écart de rémunération entre les femmes et les hommes dans l’entreprise ainsi que par l’arrêté
+              du 27 octobre 2022 définissant les modalités de transmission à l’administration des écarts éventuels de
+              représentation entre les femmes et les hommes dans l’entreprise.
             </p>
             <h2>Pendant combien de temps les données à caractère personnel sont conservées&nbsp;?</h2>
             <table className="fr-table fr-table--bordered">
@@ -58,7 +63,7 @@ const PrivacyPolicy = () => {
               </thead>
               <tbody>
                 <tr>
-                  <td>Données des utilisateurs des Index Egapro</td>
+                  <td>Données des utilisateurs d’Egapro</td>
                   <td>
                     À compter de la suppression par l’utilisateur ou 2 ans à compter de la dernière déclaration ou de
                     l’inactivité du compte
@@ -75,8 +80,7 @@ const PrivacyPolicy = () => {
               <li>D’un droit à la limitation du traitement.</li>
             </ul>
             <p>
-              Pour les exercer, contactez-nous à&nbsp;:{" "}
-              <Link href="mailto:index@travail.gouv.fr">index@travail.gouv.fr</Link>.
+              Pour les exercer, contactez-nous à&nbsp;: <Link href="mailto:[EMAIL_REDACTED]">[EMAIL_REDACTED]</Link>
             </p>
             <p>
               Puisque ce sont des droits personnels, nous ne traiterons votre demande que si nous sommes en mesure de
@@ -103,13 +107,14 @@ const PrivacyPolicy = () => {
               avoir accès aux données&nbsp;:
             </p>
             <ul className={"fr-mb-3w"}>
-              <li>Les membres de l’équipe d’Index Egapro.</li>
+              <li>Les membres de l’équipe d’Egapro&nbsp;;</li>
+              <li>Les agents autorisés au sein de la Direction générale du travail.</li>
             </ul>
             <h2>Qui nous aide à traiter vos données&nbsp;?</h2>
             <p>
               Certaines données sont envoyées à des sous-traitants. Nous nous sommes assurés qu’ils respectent les
-              dispositions du RGPD et qu’ils apportent des garanties suffisantes en matière de sécurité et de
-              confidentialité.
+              dispositions du RGPD notamment l’article 28-3 et qu’ils apportent des garanties suffisantes en matière de
+              sécurité et de confidentialité.
             </p>
             <table className="fr-table fr-table--bordered">
               <thead>
@@ -141,7 +146,7 @@ const PrivacyPolicy = () => {
                 </tr>
               </tbody>
             </table>
-            <h2>Cookies</h2>
+            <h2 id="cookies">Cookies</h2>
             <p>
               Un cookie est un fichier déposé sur votre terminal lors de la visite d’un site. Il a pour but de collecter
               des informations relatives à votre navigation et de vous adresser des services adaptés à votre terminal
@@ -167,12 +172,12 @@ const PrivacyPolicy = () => {
               légale au sens du RGPD et doit être entendu au sens de l'article 6-1 a) du RGPD.
             </p>
             <p>
-              Index Egapro utilise notamment la solution de mesure d’audience «&nbsp;Matomo&nbsp;» paramétrée en mode
+              Egapro utilise notamment la solution de mesure d’audience «&nbsp;Matomo&nbsp;» paramétrée en mode
               «&nbsp;exempté&nbsp;» et ne nécessitant pas le recueil de votre consentement conformément aux
               recommandations de la CNIL. La durée de vie du cookie n’excède pas 13 mois.
             </p>
             <p>
-              Vous êtes suivis de manière anonyme. Vous pouvez retirer votre consentement relatif aux cookies&nbsp;:{" "}
+              Vous êtes suivis de manière anonyme. Décochez la case pour ne plus être suivis même anonymement&nbsp;:{" "}
               <FooterConsentManagementItem />
             </p>
             <p>
@@ -200,6 +205,12 @@ const PrivacyPolicy = () => {
                 </Link>
               </li>
             </ul>
+            <p>
+              <Link href="/politique-de-confidentialite/18122023" target="_blank" rel="noreferrer">
+                Version du 18/12/2023
+              </Link>
+            </p>
+            <p>Version du 24/04/2024</p>
           </GridCol>
         </Grid>
       </Container>

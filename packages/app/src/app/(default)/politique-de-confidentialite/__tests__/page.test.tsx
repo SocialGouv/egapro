@@ -18,40 +18,33 @@ describe("<PrivacyPolicy />", () => {
   it("should render the section headings", () => {
     render(<PrivacyPolicy />);
 
-    const responsibleHeading = screen.getByRole("heading", { name: /Qui est responsable d’Egapro/ });
-    expect(responsibleHeading).toBeInTheDocument();
+    for (const heading of [
+      /Qui est responsable d’Egapro/,
+      /Quelles sont les données à caractère personnel/,
+      /Pourquoi traitons-nous des données/,
+      /Qu’est-ce qui nous autorise à traiter/,
+      /Pendant combien de temps les données/,
+      /Quels sont vos droits/,
+      /Qui va avoir accès aux données/,
+      /Qui nous aide à traiter vos données/,
+      /Cookies/,
+    ]) {
+      expect(screen.getByRole("heading", { name: heading })).toBeInTheDocument();
+    }
+  });
 
-    const dataHeading = screen.getByRole("heading", { name: /Quelles sont les données à caractère personnel/ });
-    expect(dataHeading).toBeInTheDocument();
+  it("should anchor the cookies section", () => {
+    render(<PrivacyPolicy />);
 
-    const whyHeading = screen.getByRole("heading", { name: /Pourquoi traitons-nous des données/ });
-    expect(whyHeading).toBeInTheDocument();
-
-    const authorizeHeading = screen.getByRole("heading", { name: /Qu’est-ce qui nous autorise à traiter/ });
-    expect(authorizeHeading).toBeInTheDocument();
-
-    const retentionHeading = screen.getByRole("heading", { name: /Pendant combien de temps les données/ });
-    expect(retentionHeading).toBeInTheDocument();
-
-    const rightsHeading = screen.getByRole("heading", { name: /Quels sont vos droits/ });
-    expect(rightsHeading).toBeInTheDocument();
-
-    const accessHeading = screen.getByRole("heading", { name: /Qui va avoir accès aux données/ });
-    expect(accessHeading).toBeInTheDocument();
-
-    const helpHeading = screen.getByRole("heading", { name: /Qui nous aide à traiter vos données/ });
-    expect(helpHeading).toBeInTheDocument();
-
-    const cookiesHeading = screen.getByRole("heading", { name: /Cookies/ });
-    expect(cookiesHeading).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Cookies" })).toHaveAttribute("id", "cookies");
   });
 
   it("should render the contact email link", () => {
     render(<PrivacyPolicy />);
 
-    const emailLink = screen.getByRole("link", { name: "index@travail.gouv.fr" });
+    const emailLink = screen.getByRole("link", { name: "[EMAIL_REDACTED]" });
     expect(emailLink).toBeInTheDocument();
-    expect(emailLink).toHaveAttribute("href", "mailto:index@travail.gouv.fr");
+    expect(emailLink).toHaveAttribute("href", "mailto:[EMAIL_REDACTED]");
   });
 
   it("should render the consent management component", () => {
@@ -76,13 +69,15 @@ describe("<PrivacyPolicy />", () => {
     expect(cnilLinks[1]).toHaveAttribute("rel", "noreferrer");
   });
 
-  it("should render the previous version link", () => {
+  it("should render the version in force and link the archived version", () => {
     render(<PrivacyPolicy />);
 
     const previousVersionLink = screen.getByRole("link", { name: "Version du 18/12/2023" });
     expect(previousVersionLink).toBeInTheDocument();
-    expect(previousVersionLink).toHaveAttribute("href", "/politique-de-confidentialite");
+    expect(previousVersionLink).toHaveAttribute("href", "/politique-de-confidentialite/18122023");
     expect(previousVersionLink).toHaveAttribute("target", "_blank");
     expect(previousVersionLink).toHaveAttribute("rel", "noreferrer");
+
+    expect(screen.getByText("Version du 24/04/2024")).toBeInTheDocument();
   });
 });

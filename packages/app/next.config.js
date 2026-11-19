@@ -41,6 +41,15 @@ const nextConfig = {
   },
   //This option requires Next 13.1 or newer, if you can't update you can use this plugin instead: https://github.com/martpie/next-transpile-modules
   transpilePackages: ["@codegouvfr/react-dsfr"],
+  async redirects() {
+    return [
+      {
+        source: "/politique-de-confidentialite-v2",
+        destination: "/politique-de-confidentialite",
+        permanent: true,
+      },
+    ];
+  },
   rewrites: async () => {
     return [
       {
