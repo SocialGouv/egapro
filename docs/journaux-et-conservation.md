@@ -63,6 +63,7 @@ Le vocabulaire de la colonne **Statut** est défini en [section 3](#3-vocabulair
 | Logs de la passerelle API SUIT | Sécurité et diagnostic de l'accès API | IP du client, requêtes | Non définie dans le dépôt | Non définie dans le dépôt | [4.10](#410-logs-de-la-passerelle-api-suit) |
 | Historique des CronJobs | Diagnostic d'exécution des traitements planifiés | Logs des scripts exécutés | 3 exécutions réussies et 3 en échec, par CronJob | Appliquée par le code | [4.11](#411-historique-des-cronjobs) |
 | Compteurs de limitation de débit (API publique) | Protection anti-abus | Empreinte de l'IP ou du jeton d'API | 60 s | Appliquée par le code | [4.12](#412-compteurs-de-limitation-de-débit-de-lapi-publique) |
+| Supervision (état des services, incidents, alertes) | Diagnostic d'exploitation : un service répond-il, un traitement tourne-t-il ? | Aucune (clé de sonde, état, latence, messages d'erreur assainis) | Illimitée de fait pour les incidents ; lignes stdout et canal Mattermost non définis dans le dépôt | Aucune purge pour les incidents ; Non définie dans le dépôt pour les lignes et le canal | [4.14](#414-supervision) |
 | Plateforme et tiers (ingress, logs PostgreSQL, sauvegardes, SMTP, ProConnect) | Exploitation de la plateforme | Variable selon le composant | Non définie dans le dépôt | Non définie dans le dépôt | [4.13](#413-plateforme-et-tiers-non-couverts-par-le-dépôt) |
 
 ### 2.2 Données métier
@@ -96,6 +97,8 @@ Dans la colonne Durée, « Illimitée de fait » accompagne le statut « Aucune 
 Table Postgres `audit.action_log`, schéma dédié `audit` (pas de clé étrangère vers les tables applicatives, pour ne jamais bloquer une suppression RGPD d'utilisateur). Les écritures conservent l'action, la catégorie, le statut, la date et, quand ils sont nécessaires et valides, l'identifiant utilisateur, le SIREN et un identifiant technique de ressource. L'adresse IP est tronquée, le message d'erreur est remplacé par un code contrôlé et les métadonnées sont limitées aux champs autorisés. L'e-mail et l'agent utilisateur ne sont plus enregistrés.
 
 Les lectures publiques restantes (`PUBLIC_REFERENT_SEARCH`, `PUBLIC_REFERENT_VIEW` et `PUBLIC_DECLARATIONS_EXPORT`) ne créent plus de nouvelle ligne dans cette table. Elles gardent leur ligne d'activité stdout décrite en [4.2](#42-ligne-dactivité-applicative). Les anciennes lignes d'audit restent soumises à la purge ordinaire.
+
+Les lectures d'exploitation sont tracées comme les autres lectures sensibles : l'écran `/admin/etat-des-services` écrit une ligne `read_sensitive` à chaque rafraîchissement de sa query `adminStatus.getOverview`, soit une ligne par tranche de 30 secondes tant que l'onglet est au premier plan, conservée 180 jours. Le bandeau de la home `/admin` lit le même service directement et n'écrit **rien**, pour ne pas produire une ligne d'audit à chaque visite de l'accueil.
 
 **Quatre points d'écriture** : l'application (`packages/app/src/server/audit/log.ts`), le worker de notifications (`packages/notifications/src/worker/auditLog.ts`), l'auto-audit de la purge quotidienne elle-même (`packages/app/scripts/audit-cleanup.ts`) et la purge des déclarations (`packages/app/scripts/declaration-cleanup.ts`). L'auto-audit quotidien conserve les nombres de lignes supprimées dans chaque journal et leur total, sans identifiant personnel.
 
@@ -223,6 +226,20 @@ Rien dans `.kontinuous/` ne configure explicitement : les logs d'ingress, les lo
 
 **Durée** : non définie dans le dépôt pour chacun de ces éléments. Voir [section 6](#6-durées-non-définies-dans-le-dépôt) pour l'interlocuteur à solliciter.
 
+### 4.14 Supervision
+
+Trois artefacts distincts, produits par le worker `packages/healthcheck` et l'écran d'état des services :
+
+| Artefact | Contenu | Rétention |
+|---|---|---|
+| Tables `app_health_probe` et `app_health_incident` | une ligne par sonde (état courant) et une ligne par transition d'état ; aucun identifiant personnel, les messages d'erreur sont assainis avant écriture | l'état courant est écrasé à chaque relève ; les incidents ne sont **pas purgés** (aucune durée définie) |
+| Lignes `health_check` sur stdout | clé de sonde, état, latence, horodatage, une ligne par relève | non définie dans le dépôt — collectée par la plateforme d'hébergement, qui fixe la durée |
+| Messages du canal Mattermost | libellé de sonde, état, temps depuis, échecs, latence, message assaini, lien vers l'écran | non définie dans le dépôt — canal tiers, créé hors dépôt |
+
+Les transitions sont conservées sans limite pour que l'écran affiche les incidents des 30 derniers jours ; au-delà, rien ne les supprime. La durée de conservation des incidents est donc **à trancher** (elle relève de la doctrine d'exploitation, pas du code) et à reporter ici une fois fixée.
+
+**Sources** : `packages/healthcheck/src/persistence.ts` · `packages/healthcheck/src/stdout.ts` · `packages/healthcheck/src/notify/mattermost.ts` · `packages/app/src/server/services/serviceStatus.ts` · [`supervision.md`](supervision.md).
+
 ## 5. Données métier
 
 ### 5.1 Déclarations de rémunération et données rattachées
@@ -305,7 +322,6 @@ Tickets ouverts qui changeront une ligne de cette page :
 |---|---|
 | [#4502](https://github.com/SocialGouv/egapro/issues/4502) | Purge de la représentation équilibrée après 6 ans |
 | [#4549](https://github.com/SocialGouv/egapro/issues/4549) | Journalisation des erreurs internes tRPC hors développement |
-| [#2710](https://github.com/SocialGouv/egapro/issues/2710) | Supervision des traitements planifiés |
 | [#4769](https://github.com/SocialGouv/egapro/issues/4769) | Purge du journal de dédoublonnage des relances |
 | [#4770](https://github.com/SocialGouv/egapro/issues/4770) | Appliquer aux comptes utilisateurs la durée annoncée |
 | [#4771](https://github.com/SocialGouv/egapro/issues/4771) | Une seule source pour les durées de conservation du journal d'audit |
