@@ -16,13 +16,13 @@ function recordingSql(rows: unknown[]) {
 
 describe("hasRecentExportArchive", () => {
 	it("accepts a recent archive row", async () => {
-		const { sql } = recordingSql([{ lastCreatedAt: new Date() }]);
+		const { sql } = recordingSql([{ lastGeneratedAt: new Date() }]);
 
 		await expect(hasRecentExportArchive(sql, SINCE)).resolves.toBe(true);
 	});
 
 	it("rejects a success line with no archive in the window", async () => {
-		const { sql } = recordingSql([{ lastCreatedAt: null }]);
+		const { sql } = recordingSql([{ lastGeneratedAt: null }]);
 
 		await expect(hasRecentExportArchive(sql, SINCE)).resolves.toBe(false);
 	});
@@ -34,11 +34,11 @@ describe("hasRecentExportArchive", () => {
 	});
 
 	it("bounds the scan to the freshness window", async () => {
-		const { sql, calls } = recordingSql([{ lastCreatedAt: null }]);
+		const { sql, calls } = recordingSql([{ lastGeneratedAt: null }]);
 
 		await hasRecentExportArchive(sql, SINCE);
 
-		expect(calls[0]?.text).toContain("WHERE created_at >= ?");
+		expect(calls[0]?.text).toContain("WHERE generated_at >= ?");
 		expect(calls[0]?.values[0]).toBe(SINCE);
 	});
 });

@@ -1060,6 +1060,11 @@ export const exports = createTable(
 		s3Key: d.varchar({ length: 500 }).notNull(),
 		rowCount: d.integer().notNull(),
 		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+		// Refreshed on every successful regeneration: the daily CronJob upserts
+		// the same (year, version) row, so `created_at` alone cannot tell whether
+		// the archive was produced today. The supervision freshness probe reads
+		// this column (#5197).
+		generatedAt: d.timestamp({ withTimezone: true }).notNull().defaultNow(),
 	}),
 	(t) => [unique("export_year_version_idx").on(t.year, t.version)],
 );

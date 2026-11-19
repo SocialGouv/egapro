@@ -6,6 +6,18 @@ export type { DispatchResult } from "./dispatch.js";
 export type { ScheduleDefinition };
 export { SCHEDULES };
 
+/**
+ * How long a completed reminder job stays in `pgboss.job`.
+ *
+ * The `healthcheck` worker reads the last `completed` job of each queue to know
+ * a reminder actually ran (`packages/healthcheck/src/probes/jobs/`). pg-boss
+ * deletes completed jobs 7 days after completion by default, which would erase
+ * a monthly or yearly reminder weeks before its next run — the probe would then
+ * report a missing history as a missed job. One year plus margin covers the
+ * longest cron; the volume is one row per tick and per queue.
+ */
+export const COMPLETION_TRACE_RETENTION_SECONDS = 400 * 24 * 60 * 60;
+
 // pg-boss `schedule()` enqueues a job on the queue named `<schedule.name>`
 // on every cron tick (with a built-in lock so multiple worker replicas
 // don't double-fire). We attach a worker on the same queue that runs the
@@ -42,7 +54,10 @@ export async function registerSchedules(
 			schedule.name,
 			schedule.cron,
 			{},
-			{ tz: schedule.timeZone },
+			{
+				tz: schedule.timeZone,
+				deleteAfterSeconds: COMPLETION_TRACE_RETENTION_SECONDS,
+			},
 		);
 	}
 

@@ -114,7 +114,11 @@ schedule:
 - `next_expected_at` comes from the cron definition: the four regulatory jobs
   are declared in `probes/jobs/definitions.ts` (same `schedule:` as
   `.kontinuous/templates/*-cron.yaml`), the reminder schedules are read from
-  `pgboss.schedule` so pg-boss stays the single source of their cron.
+  `pgboss.schedule` so pg-boss stays the single source of their cron. Their
+  completed jobs are kept 400 days (`COMPLETION_TRACE_RETENTION_SECONDS` in
+  `packages/notifications/src/schedules/index.ts`), past pg-boss's 7-day
+  default: without it, a monthly reminder would lose its trace weeks before the
+  next run and read as a missed job.
 - Requests on `audit.action_log` filter on `action = … AND created_at >= …`,
   the shape of `action_log_action_idx`, so they read an index range instead of
   scanning the table.

@@ -132,14 +132,14 @@ describe("audit job probe", () => {
 	it("disbelieves an export success with no archive behind it", async () => {
 		const { sql, calls } = recordingSql((call) =>
 			call.text.includes("app_export")
-				? [{ lastCreatedAt: null }]
+				? [{ lastGeneratedAt: null }]
 				: [{ lastSuccessAt: ago(3 * HOUR), lastFailureAt: null }],
 		);
 		const corroborate = vi.fn(async (since: Date) => {
-			const rows = await sql<{ lastCreatedAt: Date | null }[]>`
-				SELECT max(created_at) AS "lastCreatedAt" FROM app_export WHERE created_at >= ${since}
+			const rows = await sql<{ lastGeneratedAt: Date | null }[]>`
+				SELECT max(generated_at) AS "lastGeneratedAt" FROM app_export WHERE generated_at >= ${since}
 			`;
-			return rows[0]?.lastCreatedAt != null;
+			return rows[0]?.lastGeneratedAt != null;
 		});
 
 		const result = await probe(sql, EXPORT_JOB, { corroborate }).probe(
@@ -160,7 +160,7 @@ describe("audit job probe", () => {
 	it("believes the export when the archive row exists", async () => {
 		const { sql } = recordingSql((call) =>
 			call.text.includes("app_export")
-				? [{ lastCreatedAt: ago(3 * HOUR) }]
+				? [{ lastGeneratedAt: ago(3 * HOUR) }]
 				: [{ lastSuccessAt: ago(3 * HOUR), lastFailureAt: null }],
 		);
 		const corroborate = vi.fn(async () => true);

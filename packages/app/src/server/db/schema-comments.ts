@@ -180,6 +180,10 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 		created_at:
 			"Timestamp d'émission de l'event (rétention permanente, hors purge CNIL applicable à audit.action_log).",
 	},
+	export: {
+		generated_at:
+			"Horodatage de la dernière génération réussie de l'archive. Rafraîchi à chaque upsert du couple (année, version) — contrairement à created_at, figé à la première génération. Lu par la sonde de fraîcheur du worker `healthcheck` (#5197).",
+	},
 	health_probe: {
 		key: "Identifiant stable de la sonde (une ligne par sonde, jamais une par passage).",
 		next_expected_at:

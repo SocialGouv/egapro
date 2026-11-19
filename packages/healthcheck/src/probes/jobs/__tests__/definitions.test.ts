@@ -51,4 +51,18 @@ describe("audit job definitions", () => {
 
 		expect(actionKeys).toContain(`"${definition.action}"`);
 	});
+
+	// The registered key is not enough: the probe reads `audit.action_log`, so
+	// something must actually append the line. A cleanup script that stopped
+	// writing its trace would leave a critical probe red for good.
+	const EMITTER_OF: Record<string, string> = {
+		"system.declaration_cleanup": "packages/app/scripts/declaration-cleanup.ts",
+		"system.audit_cleanup": "packages/app/scripts/audit-cleanup.ts",
+	};
+
+	it.each(
+		Object.entries(EMITTER_OF),
+	)("has an emitter writing %s to audit.action_log", (action, emitterPath) => {
+		expect(read(emitterPath)).toContain(`"${action}"`);
+	});
 });
