@@ -4,6 +4,7 @@ import type {
 	RepresentationDeclarationStatus,
 } from "~/modules/domain";
 import {
+	getCurrentRepresentationCampaignYear,
 	getCurrentYear,
 	getDefaultCampaignDeadlines,
 	getReferenceYearFor,
@@ -647,10 +648,10 @@ describe("companyRouter.getWithDeclarations", () => {
 		// The représentation funnel stores the reference year (N-1), not the
 		// campaign year: filtering on the campaign year never matches a real row.
 		expect(filters.get(representationDeclarations.year)).toBe(
-			getReferenceYearFor(getCurrentYear()),
+			getReferenceYearFor(getCurrentRepresentationCampaignYear()),
 		);
 		expect(filters.get(representationDeclarations.year)).not.toBe(
-			getCurrentYear(),
+			getCurrentRepresentationCampaignYear(),
 		);
 		// Exactly two filters: no status predicate, so a draft counts as much as a
 		// submitted declaration — the line must never disappear once started.
@@ -822,7 +823,9 @@ describe("companyRouter.getWithDeclarations", () => {
 			(d) => d.type === "representation",
 		);
 		expect(representation).toHaveLength(1);
-		expect(representation[0]?.year).toBe(getCurrentYear());
+		expect(representation[0]?.year).toBe(
+			getCurrentRepresentationCampaignYear(),
+		);
 	});
 
 	it("falls back to step 0 when the row carries no current step", async () => {

@@ -48,18 +48,24 @@ export function buildDeclarationList(
 	currentYearDeadlines: CampaignDeadlines = getDefaultCampaignDeadlines(
 		currentYear,
 	),
+	// Representation campaigns open on 1 March, so they carry their own current
+	// year: in January and February the previous campaign is still the current one.
+	representationYear: number = currentYear,
 ): DeclarationItem[] {
 	const rows: DeclarationItem[] = [];
+	const yearFor = (type: DeclarationType) =>
+		type === "representation" ? representationYear : currentYear;
 
 	for (const type of EXPECTED_DECLARATION_TYPES) {
+		const typeYear = yearFor(type);
 		const existing = dbDeclarations.find(
-			(d) => d.year === currentYear && d.type === type,
+			(d) => d.year === typeYear && d.type === type,
 		);
 		if (existing) {
 			rows.push({
 				type,
 				siren,
-				year: currentYear,
+				year: typeYear,
 				status: existing.status,
 				fsmStatus: existing.fsmStatus,
 				currentStep: existing.currentStep,
@@ -85,7 +91,7 @@ export function buildDeclarationList(
 			rows.push({
 				type,
 				siren,
-				year: currentYear,
+				year: typeYear,
 				status: "to_complete",
 				fsmStatus: null,
 				currentStep: 0,
@@ -101,7 +107,7 @@ export function buildDeclarationList(
 				formalNoticeAvailable: false,
 				hasSubmittedFormalNoticeJointEvaluation: false,
 				hasPrefillData:
-					type === "remuneration" && yearsWithPrefill.has(currentYear),
+					type === "remuneration" && yearsWithPrefill.has(typeYear),
 				deadline:
 					type === "remuneration"
 						? getDeclarationProcessStepDeadline(null, currentYearDeadlines)
@@ -112,7 +118,7 @@ export function buildDeclarationList(
 	}
 
 	const previousYears = dbDeclarations
-		.filter((d) => d.year < currentYear)
+		.filter((d) => d.year < yearFor(d.type))
 		.sort((a, b) => b.year - a.year);
 
 	for (const d of previousYears) {

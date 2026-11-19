@@ -130,7 +130,9 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 		AUDIT_ACTIONS.COMPANY_READ_GIP_DATA,
 	"representationDeclaration.saveDraft":
 		AUDIT_ACTIONS.REPRESENTATION_SAVE_DRAFT,
-	"representationDeclaration.submit": AUDIT_ACTIONS.REPRESENTATION_SUBMIT,
+	// `representationDeclaration.submit` is absent on purpose: its `resubmission`
+	// flag is only known after reading the stored row, so `submit` logs the action
+	// itself instead of the middleware double-logging a `year`-only row.
 	"representationDeclaration.declareNotSubject":
 		AUDIT_ACTIONS.REPRESENTATION_DECLARE_NOT_SUBJECT,
 

@@ -126,6 +126,11 @@ export function compileSql(expression: unknown) {
 		.sql;
 }
 
+export function sqlParams(expression: unknown) {
+	return new PgDialect({ casing: "snake_case" }).sqlToQuery(expression as never)
+		.params;
+}
+
 export function installRouterTestEnv(campaignMock: Mock) {
 	beforeEach(() => {
 		// Only `Date` is faked: the tRPC timing middleware awaits a real setTimeout.

@@ -80,6 +80,7 @@ function renderSection(
 	overrides?: Partial<{
 		declarations: DeclarationItem[];
 		representationCampaign: RepresentationCampaign;
+		representationCampaignYear: number;
 	}>,
 ) {
 	return render(
@@ -89,6 +90,9 @@ function renderSection(
 			hasCse={true}
 			representationCampaign={
 				overrides?.representationCampaign ?? representationCampaign
+			}
+			representationCampaignYear={
+				overrides?.representationCampaignYear ?? currentYear
 			}
 			userPhone="0122334455"
 		/>,
@@ -139,6 +143,44 @@ describe("DeclarationsSection", () => {
 		).toBeInTheDocument();
 		expect(screen.getAllByText("À compléter")).toHaveLength(2);
 		expect(screen.getByText("Effectué")).toBeInTheDocument();
+	});
+
+	it("keeps the previous representation campaign under 'Démarche en cours' in January", () => {
+		renderSection({
+			representationCampaignYear: currentYear - 1,
+			declarations: [
+				{
+					type: "remuneration",
+					siren: SIREN,
+					year: currentYear,
+					status: "to_complete",
+					currentStep: 0,
+					updatedAt: null,
+					...NO_COMPLIANCE,
+					deadline: remunerationDeadline(null),
+				},
+				{
+					type: "representation",
+					siren: SIREN,
+					year: currentYear - 1,
+					status: "in_progress",
+					currentStep: 3,
+					updatedAt: new Date("2026-02-10"),
+					...NO_COMPLIANCE,
+					deadline: null,
+				},
+			],
+		});
+		const [currentTable] = screen.getAllByRole("table");
+		expect(
+			within(currentTable as HTMLElement).getByRole("button", {
+				name: "Représentation",
+			}),
+		).toBeInTheDocument();
+		expect(
+			within(currentTable as HTMLElement).getAllByText(String(currentYear - 1))
+				.length,
+		).toBeGreaterThanOrEqual(1);
 	});
 
 	it("renders a previous year's own deadline, not the current year's", () => {

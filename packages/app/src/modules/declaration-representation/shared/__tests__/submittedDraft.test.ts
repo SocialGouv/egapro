@@ -11,7 +11,10 @@ import {
 	WEBSITE_PUBLICATION,
 } from "~/modules/declaration-representation/__tests__/fixtures";
 import type { RepresentationDeclarationSnapshot } from "../submittedDraft";
-import { representationDraftFromDeclaration } from "../submittedDraft";
+import {
+	representationDraftFromDeclaration,
+	representationTransmittedDraftFromDeclaration,
+} from "../submittedDraft";
 
 const STEP = 5;
 
@@ -94,11 +97,26 @@ describe("representationDraftFromDeclaration", () => {
 		});
 	});
 
-	it("prefers the submitted columns over a leftover JSON draft", () => {
-		const leftover = { currentStep: 4, executiveWomenPercent: 1 };
+	it("reloads an edit saved after the transmission instead of the columns", () => {
+		const edited = {
+			currentStep: 2,
+			...VALID_REFERENCE_PERIOD,
+			...COMPUTABLE_EXECUTIVES,
+			executiveWomenPercent: 70,
+			executiveMenPercent: 30,
+		};
+
 		expect(
-			representationDraftFromDeclaration(submitted({ draft: leftover }), STEP)
-				.executiveWomenPercent,
+			representationDraftFromDeclaration(submitted({ draft: edited }), 2),
+		).toEqual(edited);
+	});
+
+	it("rebuilds the transmitted columns when the saved edit cannot be parsed", () => {
+		expect(
+			representationDraftFromDeclaration(
+				submitted({ draft: { currentStep: 99 } }),
+				STEP,
+			).executiveWomenPercent,
 		).toBe(COMPUTABLE_EXECUTIVES.executiveWomenPercent);
 	});
 
@@ -166,6 +184,40 @@ describe("representationDraftFromDeclaration", () => {
 		).toMatchObject({
 			executiveWomenPercent: 20.4,
 			executiveMenPercent: 79.6,
+		});
+	});
+});
+
+describe("representationTransmittedDraftFromDeclaration", () => {
+	it("ignores an edit that was not re-transmitted", () => {
+		const edited = {
+			currentStep: 2,
+			...VALID_REFERENCE_PERIOD,
+			...COMPUTABLE_EXECUTIVES,
+			executiveWomenPercent: 70,
+			executiveMenPercent: 30,
+		};
+
+		expect(
+			representationTransmittedDraftFromDeclaration(
+				submitted({ draft: edited }),
+				STEP,
+			).executiveWomenPercent,
+		).toBe(COMPUTABLE_EXECUTIVES.executiveWomenPercent);
+	});
+
+	it("rebuilds the transmitted columns once the draft was cleared by a re-transmission", () => {
+		expect(
+			representationTransmittedDraftFromDeclaration(
+				submitted({ draft: null }),
+				STEP,
+			),
+		).toEqual(representationDraftFromDeclaration(submitted(), STEP));
+	});
+
+	it("delegates to the funnel loader for a declaration that is not transmitted", () => {
+		expect(representationTransmittedDraftFromDeclaration(null, 2)).toEqual({
+			currentStep: 2,
 		});
 	});
 });

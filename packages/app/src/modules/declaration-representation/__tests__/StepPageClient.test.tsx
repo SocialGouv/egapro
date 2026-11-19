@@ -84,7 +84,6 @@ type RenderStepOptions = {
 	campaignOpen?: boolean;
 	currentStep?: number;
 	initialDraft?: RepresentationDraft;
-	isSubmitted?: boolean;
 	lock?: RepresentationLockState;
 };
 
@@ -93,7 +92,6 @@ function renderStep({
 	campaignOpen = true,
 	currentStep = 2,
 	initialDraft,
-	isSubmitted,
 	lock,
 }: RenderStepOptions = {}) {
 	return render(
@@ -102,7 +100,6 @@ function renderStep({
 			campaignYear={CAMPAIGN_YEAR}
 			declarationDeadline={DECLARATION_DEADLINE}
 			initialDraft={initialDraft ?? { currentStep }}
-			isSubmitted={isSubmitted}
 			step={step}
 			year={YEAR}
 		/>,
@@ -161,11 +158,10 @@ describe("StepPageClient — rendering", () => {
 		).toBeInTheDocument();
 	});
 
-	it("hides submission on a already transmitted declaration", () => {
+	it("offers the transmission again on a declaration already transmitted (S3)", () => {
 		renderStep({
 			step: SUMMARY_STEP,
 			currentStep: SUMMARY_STEP,
-			isSubmitted: true,
 			initialDraft: {
 				currentStep: SUMMARY_STEP,
 				...VALID_REFERENCE_PERIOD,
@@ -180,8 +176,8 @@ describe("StepPageClient — rendering", () => {
 			),
 		).toBeInTheDocument();
 		expect(
-			screen.queryByRole("button", { name: "Transmettre" }),
-		).not.toBeInTheDocument();
+			screen.getByRole("button", { name: "Transmettre" }),
+		).toBeInTheDocument();
 		expect(screen.getByText("01/01/2025 - 31/12/2025")).toBeInTheDocument();
 	});
 
@@ -231,6 +227,29 @@ describe("StepPageClient — navigation", () => {
 			currentStep: 3,
 			draft: { currentStep: 3, lastStep: 3, ...NO_EXECUTIVES },
 		});
+		expect(push).toHaveBeenCalledWith(STEP_3_HREF);
+	});
+
+	it("saves an edit made on a declaration already transmitted (S3)", async () => {
+		renderStep({
+			step: 2,
+			currentStep: SUMMARY_STEP,
+			initialDraft: { currentStep: SUMMARY_STEP, ...COMPUTABLE_EXECUTIVES },
+		});
+
+		await retypeMenPercent("50");
+		await userEvent.click(screen.getByRole("button", { name: "Suivant" }));
+
+		expect(mutateAsync).toHaveBeenCalledWith(
+			expect.objectContaining({
+				year: YEAR,
+				currentStep: 3,
+				draft: expect.objectContaining({
+					executiveWomenPercent: 50,
+					executiveMenPercent: 50,
+				}),
+			}),
+		);
 		expect(push).toHaveBeenCalledWith(STEP_3_HREF);
 	});
 
