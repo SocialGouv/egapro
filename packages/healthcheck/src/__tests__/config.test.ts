@@ -70,6 +70,23 @@ describe("resolveConfig", () => {
 		).toBe(300);
 	});
 
+	it("defaults the job staleness window to 26 hours", () => {
+		expect(resolveConfig({}).jobStaleHours).toBe(26);
+		expect(
+			resolveConfig({ HEALTHCHECK_JOB_STALE_HOURS: "0" }).jobStaleHours,
+		).toBe(26);
+		expect(
+			resolveConfig({ HEALTHCHECK_JOB_STALE_HOURS: "not-a-number" })
+				.jobStaleHours,
+		).toBe(26);
+	});
+
+	it("accepts a per-environment job staleness window", () => {
+		expect(
+			resolveConfig({ HEALTHCHECK_JOB_STALE_HOURS: "30" }).jobStaleHours,
+		).toBe(30);
+	});
+
 	it("collects the credentials that must never reach a stored message", () => {
 		const config = resolveConfig({
 			...S3_ENV,

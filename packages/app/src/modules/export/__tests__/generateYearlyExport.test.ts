@@ -32,9 +32,8 @@ describe("generateYearlyExport", () => {
 	const mockSelect = vi.fn(() => ({ from: mockSelectFrom }));
 	const mockValues = vi.fn();
 	const mockInsert = vi.fn(() => ({ values: mockValues }));
-	const mockUpdate = vi.fn(() => ({
-		set: vi.fn(() => ({ where: mockUpdateWhere })),
-	}));
+	const mockSet = vi.fn(() => ({ where: mockUpdateWhere }));
+	const mockUpdate = vi.fn(() => ({ set: mockSet }));
 
 	const mockDb = {
 		select: mockSelect,
@@ -68,7 +67,9 @@ describe("generateYearlyExport", () => {
 			expect.any(Buffer),
 			"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		);
-		expect(mockInsert).toHaveBeenCalled();
+		expect(mockValues).toHaveBeenCalledWith(
+			expect.objectContaining({ generatedAt: expect.any(Date) }),
+		);
 	});
 
 	it("should update metadata when export already exists for year", async () => {
@@ -81,7 +82,11 @@ describe("generateYearlyExport", () => {
 
 		expect(result.rowCount).toBe(0);
 		expect(mockUploadFile).toHaveBeenCalled();
-		expect(mockUpdate).toHaveBeenCalled();
+		// The supervision probe reads `generated_at`: it must move on every
+		// regeneration, unlike the insert-only `created_at` (#5197).
+		expect(mockSet).toHaveBeenCalledWith(
+			expect.objectContaining({ generatedAt: expect.any(Date) }),
+		);
 		expect(mockInsert).not.toHaveBeenCalled();
 	});
 });

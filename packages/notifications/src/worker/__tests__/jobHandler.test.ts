@@ -1,5 +1,5 @@
-import type { JobWithMetadata } from "pg-boss";
 import type { Transporter } from "nodemailer";
+import type { JobWithMetadata } from "pg-boss";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { audit, buildMail, captureJobFailure } = vi.hoisted(() => ({

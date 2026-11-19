@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { registerSchedules, SCHEDULES } from "../index.js";
+import {
+	COMPLETION_TRACE_RETENTION_SECONDS,
+	registerSchedules,
+	SCHEDULES,
+} from "../index.js";
 
 type BossStub = {
 	createQueue: ReturnType<typeof vi.fn>;
@@ -101,8 +105,19 @@ describe("registerSchedules", () => {
 				schedule.name,
 				schedule.cron,
 				{},
-				{ tz: "Europe/Paris" },
+				{
+					tz: "Europe/Paris",
+					deleteAfterSeconds: COMPLETION_TRACE_RETENTION_SECONDS,
+				},
 			);
 		}
+	});
+
+	it("keeps completed jobs long enough for the freshness probes to read them", () => {
+		// A yearly reminder's completion must survive until the next run, not
+		// disappear 7 days later with pg-boss's default.
+		expect(COMPLETION_TRACE_RETENTION_SECONDS).toBeGreaterThan(
+			366 * 24 * 60 * 60,
+		);
 	});
 });

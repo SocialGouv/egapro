@@ -62,12 +62,14 @@ export async function persistProbeResult(
 		await tx`
 			INSERT INTO app_health_probe (
 				key, label, criticality, kind, status, latency_ms,
-				checked_at, changed_at, consecutive_failures, last_error
+				checked_at, changed_at, consecutive_failures, last_error,
+				next_expected_at
 			)
 			VALUES (
 				${probe.key}, ${probe.label}, ${probe.criticality}, ${probe.kind},
 				${plan.status}, ${result.latencyMs}, ${checkedAt}, ${checkedAt},
-				${plan.consecutiveFailures}, ${lastError}
+				${plan.consecutiveFailures}, ${lastError},
+				${result.nextExpectedAt ?? null}
 			)
 			ON CONFLICT (key) DO UPDATE SET
 				label = EXCLUDED.label,
@@ -82,7 +84,8 @@ export async function persistProbeResult(
 					ELSE app_health_probe.changed_at
 				END,
 				consecutive_failures = EXCLUDED.consecutive_failures,
-				last_error = EXCLUDED.last_error
+				last_error = EXCLUDED.last_error,
+				next_expected_at = EXCLUDED.next_expected_at
 		`;
 
 		if (plan.closeOpenIncident) {
