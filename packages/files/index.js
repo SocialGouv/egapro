@@ -1,13 +1,9 @@
 const express = require('express');
 const basicAuth = require('basic-auth');
 const fs = require('fs');
-const path = require('path');
-const app = express();
-const port = 8080;
 const bcrypt = require('bcryptjs');
-
-app.disable('x-powered-by');
-
+const { StorageError, resolveStorage } = require('./storage');
+const port = 8080;
 
 async function verifyPassword(providedPassword, storedHash) {
     try {
@@ -20,7 +16,6 @@ async function verifyPassword(providedPassword, storedHash) {
 }
 
 
-const rootPath = process.env.ROOT_PATH || process.cwd();
 const trustedProxyIP = process.env.TRUSTED_PROXY_IP;
 // Basic-auth credentials (htpasswd format, bcrypt hashes) are never baked in the
 // image: they are mounted at runtime from the `basic-auth` Kubernetes Secret
@@ -126,50 +121,129 @@ async function basicAuthentication(req, res, next, clientIp) {
   res.status(401).send('Authentication required.');
 }
 
-app.use((req, res, next) => {
-  const filePath = req.path
-  if(filesPublic.includes(filePath)){
-    next();
-    return
-  } else if (filesRestricted.includes(filePath)){
-    const clientIp = getClientIp(req);
-    if (clientIp && whiteListIP.includes(clientIp)) {
-      next();
-    } else {
-      basicAuthentication(req, res, next, clientIp);
+
+function setFileHeaders(res, name, metadata) {
+  res.set('Content-Disposition', `attachment; filename=${name}`);
+  res.set('Content-Type', metadata.contentType);
+  res.set('Accept-Ranges', 'bytes');
+  if (metadata.contentLength !== undefined) {
+    res.set('Content-Length', String(metadata.contentLength));
+  }
+  if (metadata.contentRange) {
+    res.set('Content-Range', metadata.contentRange);
+  }
+  if (metadata.lastModified) {
+    res.set('Last-Modified', metadata.lastModified.toUTCString());
+  }
+  if (metadata.etag) {
+    res.set('ETag', metadata.etag);
+  }
+}
+
+// A storage failure is ours, not the caller's: it must never be answered with the
+// 401/403 of the access control, nor with any storage detail.
+function respondToStorageError(res, error) {
+  if (res.headersSent) {
+    res.destroy();
+    return;
+  }
+  if (error instanceof StorageError) {
+    if (error.kind === 'missing') {
+      res.status(404).send();
+      return;
     }
+    if (error.kind === 'not-modified') {
+      res.status(304).end();
+      return;
+    }
+    if (error.kind === 'range') {
+      res.status(416).send();
+      return;
+    }
+    console.error('Storage error while serving a file:', error.cause || error);
   } else {
-    res.status(404).send()
-    return
+    console.error('Unexpected error while serving a file:', error);
   }
-});
+  res.status(502).send('File storage unavailable.');
+}
 
-const resolvedRootPath = path.resolve(rootPath);
-
-app.use((req, res) => {
-  const filePath = req.path
-  // Defense in depth: only whitelisted names reach this handler, but make sure the
-  // resolved path can never escape the served directory.
-  const absolutePath = path.resolve(resolvedRootPath, '.' + filePath);
-  if (!absolutePath.startsWith(resolvedRootPath + path.sep)) {
-    res.status(404).send()
-    return
+function conditionalHeaders(req) {
+  const conditions = {};
+  if (req.headers['if-none-match']) {
+    conditions.ifNoneMatch = req.headers['if-none-match'];
   }
-  // The attachment header only goes with the file itself: a missing export is a plain 404,
-  // without the server path that Express puts in its default error page.
-  res.sendFile(
-    absolutePath,
-    { headers: { 'Content-Disposition': 'attachment; filename=' + path.basename(absolutePath) } },
-    err => {
-      if (err && !res.headersSent) res.status(404).send();
-    },
-  );
-})
+  if (req.headers['if-modified-since']) {
+    const since = new Date(req.headers['if-modified-since']);
+    if (!Number.isNaN(since.getTime())) {
+      conditions.ifModifiedSince = since;
+    }
+  }
+  return conditions;
+}
+
+function createApp({ storage = resolveStorage(process.env) } = {}) {
+  const app = express();
+
+  app.disable('x-powered-by');
+
+  app.use((req, res, next) => {
+    const filePath = req.path
+    if(filesPublic.includes(filePath)){
+      next();
+      return
+    } else if (filesRestricted.includes(filePath)){
+      const clientIp = getClientIp(req);
+      if (clientIp && whiteListIP.includes(clientIp)) {
+        next();
+      } else {
+        basicAuthentication(req, res, next, clientIp);
+      }
+    } else {
+      res.status(404).send()
+      return
+    }
+  });
+
+  // The exports live in the object storage only: no read path falls back to the
+  // local volume, so that several instances serve the very same files.
+  app.use(async (req, res) => {
+    const name = req.path.slice(1);
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      res.set('Allow', 'GET, HEAD');
+      res.status(405).send();
+      return;
+    }
+    if (!storage) {
+      res.status(502).send('File storage unavailable.');
+      return;
+    }
+    const conditions = conditionalHeaders(req);
+    try {
+      if (req.method === 'HEAD') {
+        setFileHeaders(res, name, await storage.head(name, conditions));
+        res.status(200).end();
+        return;
+      }
+      const object = await storage.get(name, { range: req.headers.range, ...conditions });
+      setFileHeaders(res, name, object);
+      res.status(object.status);
+      // The client may hang up in the middle of a large export: stop reading the
+      // storage instead of finishing a transfer nobody receives.
+      res.on('close', () => object.body.destroy());
+      object.body.on('error', () => res.destroy());
+      object.body.pipe(res);
+    } catch (error) {
+      respondToStorageError(res, error);
+    }
+  });
+
+  return app;
+}
 
 if (require.main === module) {
-  app.listen(port, () => {
+  createApp().listen(port, () => {
     console.log(`Server running at http://localhost:${port}/`);
   });
 }
 
-module.exports = { app };
+module.exports = { createApp };

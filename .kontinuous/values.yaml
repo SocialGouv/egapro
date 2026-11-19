@@ -196,7 +196,6 @@ files:
     TRUSTED_PROXY_IP: "20.74.10.146"
     FILES_PUBLIC: index-egalite-fh.xlsx,dgt-export-representation.xlsx
     FILES_RESTRICTED: dgt.xlsx,dgt-representation.xlsx,full.ndjson,indexes.csv
-    ROOT_PATH: /mnt/files
   containerPort: 8080
   probesPort: 8080
   host: "{{ .Values.global.host }}"

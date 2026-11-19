@@ -6,6 +6,6 @@ COPY pnpm-lock.yaml ./
 RUN pnpm fetch
 COPY package.json ./
 RUN pnpm install --offline --frozen-lockfile
-COPY index.js ./
+COPY index.js storage.js storage-config.js ./
 CMD [ "node", "index.js" ]
 USER 1000
