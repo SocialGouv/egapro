@@ -4,7 +4,6 @@ import { type NextServerPageProps } from "@common/utils/next";
 import { Box, CenteredContainer, Link } from "@design-system";
 import { getServerSession } from "next-auth";
 
-import { GithubLogin } from "./GithubLogin";
 import { ProConnectLogin } from "./ProConnectLogin";
 
 const title = "Connexion";
@@ -102,7 +101,6 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
           />
           <Box className="text-center" mt="2w">
             <ProConnectLogin callbackUrl={callbackUrl} />
-            <GithubLogin callbackUrl={callbackUrl} />
           </Box>
         </>
       )}

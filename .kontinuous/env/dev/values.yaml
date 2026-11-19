@@ -28,8 +28,6 @@ app:
         name: "staff"
     - secretRef:
         name: "egapro-secret"
-    - secretRef:
-        name: github-oauth
     - configMapRef:
         name: egapro
     - secretRef:

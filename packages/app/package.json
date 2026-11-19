@@ -28,7 +28,6 @@
     "@formkit/auto-animate": "^0.8.0",
     "@hookform/resolvers": "^3.1.1",
     "@json2csv/node": "^7.0.1",
-    "@octokit/rest": "^20.0.2",
     "@react-pdf/renderer": "^3.1.12",
     "@sentry/nextjs": "^11.1.0",
     "@socialgouv/matomo-next": "^1.8.0",

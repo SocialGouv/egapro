@@ -193,16 +193,6 @@ declare namespace NodeJS {
          */
         SECURITY_MONCOMPTEPRO_TEST?: string;
         /**
-         * No dist value.  
-         * {@link [Local Env Dist](.env.development)}
-         */
-        SECURITY_GITHUB_CLIENT_ID?: string;
-        /**
-         * No dist value.  
-         * {@link [Local Env Dist](.env.development)}
-         */
-        SECURITY_GITHUB_CLIENT_SECRET?: string;
-        /**
          * Dist: `https://egapro-charon.ovh.fabrique.social.gouv.fr`  
          * {@link [Local Env Dist](.env.development)}
          */
@@ -258,8 +248,6 @@ declare type ProcessEnvCustomKeys =
     | 'SECURITY_MONCOMPTEPRO_CLIENT_ID'
     | 'SECURITY_MONCOMPTEPRO_CLIENT_SECRET'
     | 'SECURITY_MONCOMPTEPRO_TEST'
-    | 'SECURITY_GITHUB_CLIENT_ID'
-    | 'SECURITY_GITHUB_CLIENT_SECRET'
     | 'SECURITY_CHARON_URL'
     | 'SENTRY_DSN'
     | 'SENTRY_ENVIRONMENT';
