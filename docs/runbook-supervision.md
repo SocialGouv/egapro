@@ -77,6 +77,27 @@ Un ajout de sonde ne se fait pas sans son entrée de runbook : une alerte sans m
 
 ---
 
+## SUIT — présence CSE et fichier GIP-MDS
+
+**Symptôme.** `Indisponible — SUIT (présence CSE)` ou `Indisponible — SUIT (fichier GIP-MDS)`, message `SUIT répond 502` / `connexion à SUIT impossible` ; `Mal configuré — SUIT`, message `SUIT refuse le certificat client (HTTP 403)` ou `certificat client SUIT absent`.
+
+**Ce que ça veut dire.** Les appels sortants en mTLS vers SUIT ne passent plus. `suit-cse` couvre la vérification de l'existence d'un CSE au dépôt, `suit-gip-mds` la disponibilité de la métadonnée du fichier GIP-MDS. `misconfigured` désigne **notre** certificat (absent, illisible ou refusé), jamais une panne de SUIT : SUIT répond, il n'accepte pas notre identité. Les deux sondes ne tournent que si `HEALTHCHECK_PARTNER_PROBES_ENABLED` vaut `true` et si `HEALTHCHECK_SUIT_REFERENCE_SIREN` est posé ; sans elles, la sonde `suit-certificate` reste la seule à parler de SUIT localement.
+
+**Diagnostic.** Depuis un pod, avec le bundle monté :
+
+```bash
+curl -sS --cert-type P12 --cert /chemin/bundle.p12:<passphrase> \
+  "$EGAPRO_SUIT_API_URL/suit/api/externe/portail/CSE/$HEALTHCHECK_SUIT_REFERENCE_SIREN" -o /dev/null -w '%{http_code}\n'
+```
+
+Ne **pas** ajouter d'en-tête `Accept` sur la route GIP-MDS : le WAF de SUIT répond alors un 403 HTML (`x-waf-blocked: 1`), et la sonde le classe `misconfigured`. Côté application, chercher `[suit]` dans les logs et les erreurs de poignée de main TLS dans Sentry.
+
+**Action.** Certificat absent : poser le secret optionnel `suit-client-cert` (bundle et phrase de passe). Certificat refusé : demander un nouveau bundle à SUIT, le ré-encoder et resceller `EGAPRO_SUIT_CLIENT_CERT_P12_BASE64` / `EGAPRO_SUIT_CLIENT_CERT_PASSWORD`, puis redémarrer le worker et l'application. 5xx ou réseau : attendre, la déclaration reste possible, c'est la vérification CSE et l'import qui sont dégradés.
+
+**Escalade.** SUIT si le `misconfigured` survit au rescellement (certificat révoqué côté partenaire). Équipe de plateforme pour le scellement. Prévenir la DGT si l'import GIP-MDS est bloqué au-delà d'une journée.
+
+---
+
 ## Application via l'ingress
 
 **Symptôme.** `Indisponible — Application via l'ingress public`, message `l'ingress répond 5xx` ou `connexion à l'ingress impossible`.
@@ -119,6 +140,29 @@ Un ajout de sonde ne se fait pas sans son entrée de runbook : une alerte sans m
 
 ---
 
+## SUIT — fichiers avis CSE (route exposée)
+
+**Symptôme.** `Indisponible — SUIT (fichiers avis CSE)`, message `l'API fichiers répond 503` ; `Mal configuré`, message `clé du consumer de supervision refusée` ; `Dégradé`, message `réponse non JSON`.
+
+**Ce que ça veut dire.** La route `/api/v1/files` que SUIT appelle pour récupérer les avis CSE ne répond plus correctement. La sonde passe par APISIX avec la clé du consumer de supervision : elle prouve la chaîne complète (clé, WAF, routeur, application, JSON), pas seulement l'application. Un 404 n'est pas une panne : c'est une réponse métier valide.
+
+**Diagnostic.** Rejouer la sonde à la main :
+
+```bash
+curl -sS -H "Authorization: Bearer <clé du consumer>" \
+  "$HEALTHCHECK_APISIX_SUIT_URL/api/v1/files?siren=$HEALTHCHECK_SUIT_REFERENCE_SIREN&year=$(date +%Y)" -i | head
+```
+
+Un 200 non JSON est presque toujours une page d'erreur d'un proxy en amont. Vérifier les logs APISIX et le journal d'audit de la route (`EXPORT_API_FILES`), qui enregistre chaque appel authentifié.
+
+**Action.** Clé refusée : resceller `HEALTHCHECK_APISIX_SUIT_API_KEY` à l'identique pour APISIX et pour le worker, redémarrer les deux. 5xx : traiter l'application (entrée PostgreSQL, S3, audit) puis APISIX. Réponse non JSON : chercher le proxy qui répond à la place de l'application.
+
+**Ce que cette sonde ne voit pas.** Elle ne dépose **rien** : un rejet métier de SUIT à l'upload, ou un avis CSE illisible une fois déposé, ne se verrait pas ici. C'est délibéré — une sonde qui déposerait polluerait les données d'une entreprise réelle. Voir [supervision.md](./supervision.md) §7.
+
+**Escalade.** Équipe de plateforme (APISIX) ; SUIT si le partenaire signale des réponses en erreur alors que la sonde est verte.
+
+---
+
 ## Certificat TLS public
 
 **Symptôme.** `Dégradé — Application via l'ingress public`, message `certificat TLS expire le <date>` ; puis `Indisponible`, `certificat TLS expiré le <date>`.
@@ -135,15 +179,15 @@ Un ajout de sonde ne se fait pas sans son entrée de runbook : une alerte sans m
 
 ## Certificat client SUIT (mTLS)
 
-**Pas d'alerte dédiée.** Aucune sonde ne lit l'expiration du certificat client `.p12` : il n'est présenté que par l'application, sur les appels sortants vers SUIT. Son expiration se manifeste par des erreurs TLS dans Sentry, côté application.
+**Symptôme.** `Dégradé — SUIT (certificat client)`, message `certificat client SUIT expire le <date> (dans N j)` ; puis `Indisponible` avec le même message, ou `certificat client SUIT expiré le <date>` ; `Mal configuré`, message `bundle PKCS#12 illisible`.
 
-**Symptôme.** Les échanges avec SUIT (existence d'un CSE, récupération du fichier GIP-MDS) échouent avec une erreur de certificat, alors que la supervision est verte.
+**Ce que ça veut dire.** La sonde lit le `notAfter` du `.p12` monté dans le worker — elle ne fait aucun appel. `degraded` = à moins de `HEALTHCHECK_CERT_WARN_DAYS` (30 j) de l'expiration : le renouvellement doit être lancé maintenant. `unavailable` = expiré ou à moins de 7 jours : les appels mTLS vers SUIT vont échouer ou échouent déjà. `misconfigured` = le bundle ou la phrase de passe est faux : aucune connexion SUIT ne peut aboutir, et les deux sondes mTLS le diront aussi. Sans certificat configuré, la sonde reste verte (`non configuré`) — le mTLS est optionnel hors production.
 
-**Diagnostic.** Chercher `[suit]` dans les logs applicatifs et les erreurs de poignée de main TLS dans Sentry ; vérifier la date d'expiration du certificat chargé depuis `EGAPRO_SUIT_CLIENT_CERT_P12_BASE64`.
+**Diagnostic.** Sur le bundle monté : `openssl pkcs12 -in bundle.p12 -nokeys -clcerts -passin pass:<phrase> | openssl x509 -noout -dates -subject` ; comparer avec le certificat attendu par SUIT. Sur le worker, `Mal configuré` sans expérience d'appel signifie phrase de passe fausse ou bundle tronqué au scellement.
 
-**Action.** Obtenir un nouveau certificat auprès de SUIT, ré-encoder, rescellers `EGAPRO_SUIT_CLIENT_CERT_P12_BASE64` (et le mot de passe associé), redémarrer l'application.
+**Action.** Obtenir un nouveau certificat auprès de SUIT, le ré-encoder, resceller `EGAPRO_SUIT_CLIENT_CERT_P12_BASE64` et `EGAPRO_SUIT_CLIENT_CERT_PASSWORD`, redémarrer le worker **et** l'application (elle charge le même secret). La sonde repasse verte au cycle suivant.
 
-**Escalade.** SUIT pour l'émission ; équipe de plateforme pour le scellement.
+**Escalade.** SUIT pour l'émission ; équipe de plateforme pour le scellement. Dès l'alerte `Dégradé` : un renouvellement de certificat prend des jours, l'attente transforme une maintenance en panne.
 
 ---
 

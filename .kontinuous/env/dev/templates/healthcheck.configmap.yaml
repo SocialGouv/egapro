@@ -12,6 +12,10 @@ data:
   HEALTHCHECK_PARTNER_INTERVAL_SECONDS: "900"
   # Stable public entity used to prove WEEZ answers (DINUM).
   HEALTHCHECK_WEEZ_REFERENCE_SIREN: "130025265"
+  # Stable public SIREN used by the SUIT probes (#5195): its CSE record proves
+  # the mTLS CSE route answers, and the file route is read for it. Never a
+  # client company.
+  HEALTHCHECK_SUIT_REFERENCE_SIREN: "130025265"
   # Exposed chain and partners: off in review apps (dev) so N namespaces do
   # not multiply the calls to ProConnect, WEEZ and the SUIT gateway.
   HEALTHCHECK_PARTNER_PROBES_ENABLED: "false"

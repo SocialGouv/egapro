@@ -32,6 +32,16 @@ export type QueueConfig = {
 	maxAgeSeconds: number;
 };
 
+export type SuitProbeConfig = {
+	/** Base URL of the SUIT API (`suit` ConfigMap). */
+	apiUrl: string | null;
+	/** mTLS bundle and passphrase (`suit-client-cert` secret), or absent. */
+	p12Base64: string | null;
+	passphrase: string | null;
+	/** Stable public SIREN whose CSE record proves the CSE route answers. */
+	referenceSiren: string | null;
+};
+
 export type HealthcheckConfig = {
 	databaseUrl: string | null;
 	s3: S3ConnectionConfig | null;
@@ -43,6 +53,7 @@ export type HealthcheckConfig = {
 	weez: WeezConnectionConfig | null;
 	publicUrl: string | null;
 	suitGateway: SuitGatewayConfig | null;
+	suit: SuitProbeConfig;
 	certWarnDays: number;
 	partnerProbesEnabled: boolean;
 	intervalSeconds: number;
@@ -87,6 +98,7 @@ export function resolveConfig(
 		weez: resolveWeez(source),
 		publicUrl: source.HEALTHCHECK_PUBLIC_URL || null,
 		suitGateway: resolveSuitGateway(source),
+		suit: resolveSuit(source),
 		certWarnDays: resolvePositiveInteger(
 			source.HEALTHCHECK_CERT_WARN_DAYS,
 			DEFAULT_CERT_WARN_DAYS,
@@ -122,6 +134,10 @@ export function resolveConfig(
 			source.SMTP_PASS,
 			source.HEALTHCHECK_APISIX_SUIT_API_KEY,
 			source.HEALTHCHECK_MATTERMOST_WEBHOOK_URL,
+			// A passphrase or a bundle echoed by a TLS/node-forge error must be
+			// scrubbed like any other credential.
+			source.EGAPRO_SUIT_CLIENT_CERT_PASSWORD,
+			source.EGAPRO_SUIT_CLIENT_CERT_P12_BASE64,
 		]),
 	};
 }
@@ -219,6 +235,15 @@ function resolveSuitGateway(
 	if (!baseUrl || !apiKey) return null;
 
 	return { baseUrl, apiKey };
+}
+
+function resolveSuit(source: NodeJS.ProcessEnv): SuitProbeConfig {
+	return {
+		apiUrl: source.EGAPRO_SUIT_API_URL || null,
+		p12Base64: source.EGAPRO_SUIT_CLIENT_CERT_P12_BASE64 || null,
+		passphrase: source.EGAPRO_SUIT_CLIENT_CERT_PASSWORD || null,
+		referenceSiren: source.HEALTHCHECK_SUIT_REFERENCE_SIREN || null,
+	};
 }
 
 function resolveAlerts(source: NodeJS.ProcessEnv): AlertsConfig {

@@ -46,14 +46,19 @@ Une sonde est décrite par sa **cible**, sa **criticité** (`critical`, `importa
 | `smtp` | `verify()` de la connexion SMTP | important | 60 s | 10 s | authentification → `misconfigured`, le reste → `unavailable` |
 | `pgboss-queue` | profondeur et âge de la file `email-notification` | important | 60 s | 5 s | plus de 100 jobs en attente **ou** le plus ancien depuis plus de 15 min → `degraded` |
 
-### 2.2 Partenaires
+### 2.2 Partenaires et certificat client
 
-Ces deux sondes ne sortent que si `HEALTHCHECK_PARTNER_PROBES_ENABLED` vaut `true` (voir [§6](#6-désactiver-les-sondes-partenaires)).
+Les quatre sondes réseau ne sortent que si `HEALTHCHECK_PARTNER_PROBES_ENABLED` vaut `true` (voir [§6](#6-désactiver-les-sondes-partenaires)). La lecture du certificat ne fait aucun appel : elle tourne sur tous les environnements, y compris ceux où les sondes partenaires sont éteintes.
 
 | Sonde (`key`) | Cible | Criticité | Cadence | Timeout | Ce qui la fait changer d'état |
 |---|---|---|---|---|---|
 | `proconnect` | `/.well-known/openid-configuration` chez ProConnect | critique | 15 min | 5 s | 5xx ou réseau → `unavailable`, 4xx ou document sans `authorization_endpoint` / `jwks_uri` → `misconfigured` |
 | `weez` | recherche d'un SIREN de référence (DINUM) dans l'API Sirene | important | 15 min | 10 s | 5xx ou réseau → `unavailable`, 4xx ou réponse sans le SIREN → `misconfigured` |
+| `suit-cse` | `GET /suit/api/externe/portail/CSE/{SIREN de référence}` en mTLS | important | 15 min | 10 s | 401/403 → `misconfigured`, 5xx ou erreur de transport → `unavailable` ; **tout autre statut prouve le handshake** |
+| `suit-gip-mds` | `GET /suit/api/externe/egapro/gipmds/latest/metadata`, **sans en-tête `Accept`** | important | 15 min | 30 s | idem ; le WAF de SUIT répond 403 sur cette route dès qu'un `Accept` est présent |
+| `suit-certificate` | date de fin de validité du `.p12` client | critique | 15 min | — | bundle illisible ou phrase de passe fausse → `misconfigured` ; expiré ou à moins de 7 j → `unavailable` ; à moins de `HEALTHCHECK_CERT_WARN_DAYS` → `degraded` |
+
+Aucune de ces sondes n'écrit chez SUIT : un avis CSE de test polluerait les données d'une entreprise réelle. Le certificat est **lu**, pas essayé — un certificat lisible mais refusé par SUIT ressort en `misconfigured` sur les deux sondes mTLS.
 
 ### 2.3 Chaîne exposée
 
@@ -62,6 +67,7 @@ Ces deux sondes ne sortent que si `HEALTHCHECK_PARTNER_PROBES_ENABLED` vaut `tru
 | `ingress` | `/` de l'URL publique, puis le certificat TLS présenté | critique | 5 min | 10 s (5 s pour le certificat) | 5xx → `unavailable`, 4xx → `degraded`, certificat expiré → `unavailable`, certificat à moins de 30 j → `degraded` |
 | `public-api` | `/api/public/openapi.json` via l'ingress | important | 5 min | 10 s | 5xx → `unavailable`, 4xx → `misconfigured`, réponse non JSON → `degraded` |
 | `suit-gateway` | `/api/v1/healthz` de la passerelle APISIX, avec la clé du consumer de supervision | important | 5 min | 10 s | 5xx → `unavailable`, 4xx (clé refusée) → `misconfigured` |
+| `suit-cse-files` | `/api/v1/files?siren={SIREN de référence}` via la passerelle, avec la clé du consumer | important | 5 min | 10 s | 401/403 → `misconfigured`, 5xx → `unavailable`, 200 non JSON → `degraded` ; tout autre statut prouve la chaîne |
 
 La cadence de ces trois sondes est plus lente que celle des sondes internes : la sonde publique consomme le quota de l'API publique, compté par appelant, et les partenaires n'ont pas à recevoir un appel par minute.
 
@@ -121,7 +127,7 @@ Les variables sont référencées **par nom** ; aucune valeur déployée, aucun 
 | Variable | Défaut du code | Rôle |
 |---|---|---|
 | `HEALTHCHECK_INTERVAL_SECONDS` | 60 | cadence des sondes internes et des traitements |
-| `HEALTHCHECK_PARTNER_INTERVAL_SECONDS` | 900 | cadence des sondes partenaires (ProConnect, WEEZ) |
+| `HEALTHCHECK_PARTNER_INTERVAL_SECONDS` | 900 | cadence des sondes partenaires (ProConnect, WEEZ, SUIT) |
 | `HEALTHCHECK_EXPOSED_INTERVAL_SECONDS` | 300 | cadence des sondes de la chaîne exposée |
 | `HEALTHCHECK_JOB_STALE_HOURS` | 26 | plancher de la fenêtre de fraîcheur des traitements |
 | `HEALTHCHECK_QUEUE_MAX_PENDING` | 100 | profondeur de file au-delà de laquelle `pgboss-queue` est dégradée |
@@ -134,6 +140,9 @@ Les variables sont référencées **par nom** ; aucune valeur déployée, aucun 
 | `EGAPRO_WEEZ_API_URL` | — | base de l'API Sirene |
 | `HEALTHCHECK_APISIX_SUIT_URL` | — | base de la passerelle SUIT |
 | `HEALTHCHECK_APISIX_SUIT_API_KEY` | — | clé du consumer de supervision (secret) |
+| `EGAPRO_SUIT_API_URL` | — | base de l'API SUIT, lue dans la ConfigMap `suit` |
+| `EGAPRO_SUIT_CLIENT_CERT_P12_BASE64`, `EGAPRO_SUIT_CLIENT_CERT_PASSWORD` | — | certificat client mTLS et phrase de passe, lus dans le secret optionnel `suit-client-cert` |
+| `HEALTHCHECK_SUIT_REFERENCE_SIREN` | — | SIREN public stable dont la fiche CSE est lue par les sondes SUIT |
 | `DATABASE_URL` / `POSTGRES_*` | — | base applicative ; DSN reconstruit comme dans l'application |
 | `NOTIFICATIONS_DATABASE_URL` / `NOTIFICATIONS_POSTGRES_*` | — | base de la file pg-boss ; repli sur la base applicative |
 | `S3_*`, `CLAMAV_HOST`, `CLAMAV_PORT`, `VALKEY_URL`, `MAIL_ENABLED`, `SMTP_*` | — | cibles des sondes internes, lues dans les mêmes configmaps que l'application |
@@ -157,7 +166,7 @@ Ces deux variables arrivent par la ConfigMap `monitoring`, montée en `optional:
 
 ## 6. Désactiver les sondes partenaires
 
-Sur les review apps, N espaces de noms ne doivent pas multiplier les appels à ProConnect, WEEZ et à la passerelle. `HEALTHCHECK_PARTNER_PROBES_ENABLED: "false"` dans la ConfigMap `healthcheck` de l'environnement retire les cinq sondes partenaires et exposées ; les sondes internes et les traitements continuent. Le worker journalise alors `HEALTHCHECK_PARTNER_PROBES_ENABLED is false — partner and exposed probes not scheduled`.
+Sur les review apps, N espaces de noms ne doivent pas multiplier les appels à ProConnect, WEEZ et à la passerelle. `HEALTHCHECK_PARTNER_PROBES_ENABLED: "false"` dans la ConfigMap `healthcheck` de l'environnement retire les huit sondes partenaires et exposées ; les sondes internes, la lecture du certificat client SUIT et les traitements continuent. Le worker journalise alors `HEALTHCHECK_PARTNER_PROBES_ENABLED is false — partner and exposed probes not scheduled`.
 
 La ConfigMap est montée en `optional: true` : **absente, le défaut du code s'applique (`false`)**, donc les sondes partenaires sont éteintes. Un environnement de production doit l'armer explicitement.
 
@@ -175,10 +184,9 @@ Chacune est un choix, pas un oubli. Une limite non écrite se lit comme une couv
 
 - **La V1 (`master`) n'est pas supervisée.** Le sondeur ne connaît que la V2 et ses dépendances.
 - **Aucun statut de Job Kubernetes n'est lu** : le worker n'a pas de client d'API ni de RBAC, et n'en veut pas. `data-gouv-refresh-daily`, qui n'écrit aucune trace applicative, et les backfills lancés après un déploiement ne sont donc pas couverts. Les quatre CronJobs qui écrivent une ligne d'audit le sont.
-- **La sonde « avis CSE » ne dépose rien chez SUIT** : `suit-gateway` vérifie la disponibilité de la route, pas un dépôt réel. Un rejet métier de SUIT ne se verrait pas ici.
+- **La sonde « avis CSE » ne dépose rien chez SUIT** : `suit-cse-files` vérifie la passerelle, le WAF, la route et une réponse JSON lisible, jamais un dépôt réel. Un rejet métier de SUIT à l'upload ne se verrait pas ici — et une sonde qui déposerait polluerait les données d'une entreprise.
 - **Le rejeu des accusés (#4546) n'est suivi que si sa table existe** : pas de trace, pas de sonde.
 - **Les alertes n'ont pas de fenêtre de silence** : elles partent 24 h/24. Le traitement aux heures ouvrées est une consigne de runbook, pas un réglage du worker.
-- **Le certificat client SUIT (mTLS) n'est pas surveillé en expiration.** Aucune sonde ne lit ce certificat ; son expiration se manifeste indirectement par un échec des appels sortants vers SUIT, donc côté Sentry et non côté supervision. Voir l'entrée correspondante du runbook.
 - **Hors dépôt** : la création du canal Mattermost, du webhook, et les tableaux de bord Grafana. Le dépôt ne fournit que le contrat (variable, format de ligne) ; voir [§9](#9-ce-qui-reste-à-faire-hors-dépôt).
 
 ## 9. Ce qui reste à faire hors dépôt

@@ -1,0 +1,32 @@
+{
+	"name": "suit-transport",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js",
+			"default": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"build": "tsc",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"typecheck": "tsc --noEmit",
+		"lint:check": "biome lint src",
+		"format:check": "biome format src"
+	},
+	"dependencies": {
+		"undici": "^8.11.2"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.4.11",
+		"@types/node": "^26.1.1",
+		"typescript": "^6.0.2",
+		"vitest": "^4.1.11"
+	}
+}

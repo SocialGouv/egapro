@@ -26,6 +26,8 @@ src/
     types.ts           the probe contract (key, label, criticality, kind, ...)
     postgres.ts        SELECT 1        — critical, 5 s timeout
     s3.ts              HeadBucket      — critical, 10 s timeout
+    suit.ts            four SUIT probes: CSE presence, GIP-MDS metadata,
+                       exposed CSE file route, client certificate expiry
     jobs/
       definitions.ts   the four regulatory cron jobs, with their cron
       freshness.ts     staleness rule and window (pure)
@@ -139,6 +141,30 @@ write none and stay out until they do. The receipt replay probe (#4546) is not
 scheduled either: its `app_receipt_outbox` table does not exist yet, and the
 worker logs that absence at boot. The supervision runbook records both gaps.
 
+## SUIT probes
+
+SUIT is called over mTLS for two things (CSE presence, GIP-MDS file) and exposes
+the CSE file route we serve. Three failures were silent: an expired
+certificate, a WAF refusal, an unavailable partner. Four probes cover them; all
+call `createSuitClient` from the shared `suit-transport` package, which owns the
+mTLS agent and the origin guard.
+
+| Probe | What it proves | Status mapping |
+|---|---|---|
+| `suit-cse` | `GET /suit/api/externe/portail/CSE/<reference SIREN>` answers | any status proves the handshake; `401`/`403` → `misconfigured`, `5xx` → `unavailable`, transport error → `unavailable` |
+| `suit-gip-mds` | `GET /suit/api/externe/egapro/gipmds/latest/metadata` answers | same; **no `Accept` header** — the SUIT WAF answers an HTML 403 as soon as one is present on this route |
+| `suit-cse-files` | the file route SUIT consumes, through APISIX | `401`/`403` → `misconfigured`, `5xx` → `unavailable`, a 200 that is not JSON → `degraded` |
+| `suit-certificate` | `notAfter` of the client certificate | unreadable bundle → `misconfigured`, expired or inside 7 days → `unavailable`, inside `HEALTHCHECK_CERT_WARN_DAYS` → `degraded` |
+
+A probe **never writes** to SUIT: a test CSE opinion would pollute a real
+company's data. The file probe therefore checks the read side only — gateway
+key, WAF, app route, readable JSON — not a real deposit. Missing client
+certificate is `misconfigured` on the two mTLS probes: SUIT is fine, our
+configuration is not.
+
+The reference SIREN comes from `HEALTHCHECK_SUIT_REFERENCE_SIREN` (public and
+stable, never a client company), like the WEEZ one.
+
 ## Mattermost alerts
 
 The screen is for the day; Mattermost is for the night. Alerts come from the
@@ -184,6 +210,9 @@ out. `HEALTHCHECK_ADMIN_URL` overrides the screen host; unset, it falls back to
 | `HEALTHCHECK_MATTERMOST_WEBHOOK_URL` | no | secret; absent → alerts disabled with a boot warning |
 | `HEALTHCHECK_ALERT_AFTER_FAILURES` | no (default `3`) | consecutive failures before an alert |
 | `HEALTHCHECK_ADMIN_URL` | no | back-office host linked from alerts; falls back to `HEALTHCHECK_PUBLIC_URL` |
+| `EGAPRO_SUIT_API_URL` | for the SUIT probes | base URL of the SUIT API (same `suit` ConfigMap as the app) |
+| `EGAPRO_SUIT_CLIENT_CERT_P12_BASE64`, `EGAPRO_SUIT_CLIENT_CERT_PASSWORD` | for mTLS | client certificate and passphrase (optional `suit-client-cert` secret); absent → `suit-cse` and `suit-gip-mds` report `misconfigured` |
+| `HEALTHCHECK_SUIT_REFERENCE_SIREN` | for the SUIT SIREN probes | stable public SIREN whose CSE record is read |
 
 Without any database configuration the worker logs a warning and exits **0**,
 so a namespace without a database leaves an exited pod instead of failing its
