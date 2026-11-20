@@ -343,3 +343,40 @@ describe("resolveConfig — alerts", () => {
 		).toContain(webhookUrl);
 	});
 });
+
+describe("resolveConfig — suit probes", () => {
+	it("reports no SUIT configuration without inventing values", () => {
+		expect(resolveConfig({}).suit).toEqual({
+			apiUrl: null,
+			p12Base64: null,
+			passphrase: null,
+			referenceSiren: null,
+		});
+	});
+
+	it("reads the API URL, the client certificate and the reference SIREN", () => {
+		expect(
+			resolveConfig({
+				EGAPRO_SUIT_API_URL: "https://api.suit.test",
+				EGAPRO_SUIT_CLIENT_CERT_P12_BASE64: "ZmFrZQ==",
+				EGAPRO_SUIT_CLIENT_CERT_PASSWORD: "cert-password",
+				HEALTHCHECK_SUIT_REFERENCE_SIREN: "130025265",
+			}).suit,
+		).toEqual({
+			apiUrl: "https://api.suit.test",
+			p12Base64: "ZmFrZQ==",
+			passphrase: "cert-password",
+			referenceSiren: "130025265",
+		});
+	});
+
+	it("scrubs the certificate passphrase and bundle from stored messages", () => {
+		const secrets = resolveConfig({
+			EGAPRO_SUIT_CLIENT_CERT_PASSWORD: "cert-password",
+			EGAPRO_SUIT_CLIENT_CERT_P12_BASE64: "ZmFrZQ==",
+		}).secrets;
+
+		expect(secrets).toContain("cert-password");
+		expect(secrets).toContain("ZmFrZQ==");
+	});
+});

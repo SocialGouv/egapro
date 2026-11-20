@@ -1,4 +1,5 @@
 import type { Sql } from "postgres";
+import { createSuitClient } from "suit-transport";
 
 import type { HealthcheckConfig } from "../config.js";
 import { createClamavProbe } from "./clamav.js";
@@ -10,6 +11,12 @@ import { createProconnectProbe } from "./proconnect.js";
 import { createPublicApiProbe } from "./publicApi.js";
 import { createS3Client, createS3Probe } from "./s3.js";
 import { createSmtpProbe, createSmtpTransporter } from "./smtp.js";
+import {
+	createSuitCertificateProbe,
+	createSuitCseProbe,
+	createSuitFilesProbe,
+	createSuitGipMdsProbe,
+} from "./suit.js";
 import { createSuitGatewayProbe } from "./suitGateway.js";
 import type { Probe } from "./types.js";
 import { createValkeyProbe } from "./valkey.js";
@@ -65,9 +72,49 @@ export function buildProbes(
 
 	// Scheduled jobs: freshness from the traces they wrote, so a CronJob that
 	// never started is caught by the absence of a success line.
-	probes.push(...buildJobProbes(config, sql, config.queue ? queueSql : null));
+	probes.push(
+		...buildJobProbes(config, sql, config.queue ? queueSql : null),
+		// Local check: reading the bundle makes no call, so it runs even where
+		// the partner probes are disabled.
+		createSuitCertificateProbe({
+			p12Base64: config.suit.p12Base64,
+			passphrase: config.suit.passphrase,
+			certWarnDays: config.certWarnDays,
+			secrets: config.secrets,
+			intervalSeconds: config.partnerIntervalSeconds,
+		}),
+	);
 
 	if (!config.partnerProbesEnabled) return probes;
+
+	const suitApiUrl = config.suit.apiUrl;
+	const suitReferenceSiren = config.suit.referenceSiren;
+
+	if (suitApiUrl && suitReferenceSiren) {
+		const suitClient = createSuitClient({
+			apiUrl: suitApiUrl,
+			p12Base64: config.suit.p12Base64,
+			passphrase: config.suit.passphrase,
+		});
+		const certificateConfigured = Boolean(config.suit.p12Base64);
+
+		probes.push(
+			createSuitCseProbe({
+				client: suitClient,
+				referenceSiren: suitReferenceSiren,
+				certificateConfigured,
+				secrets: config.secrets,
+				intervalSeconds: config.partnerIntervalSeconds,
+			}),
+			createSuitGipMdsProbe({
+				client: suitClient,
+				apiUrl: suitApiUrl,
+				certificateConfigured,
+				secrets: config.secrets,
+				intervalSeconds: config.partnerIntervalSeconds,
+			}),
+		);
+	}
 
 	probes.push(
 		createProconnectProbe({
@@ -88,6 +135,14 @@ export function buildProbes(
 		}),
 		createPublicApiProbe({
 			publicUrl: config.publicUrl,
+			secrets: config.secrets,
+			intervalSeconds: config.exposedIntervalSeconds,
+		}),
+		// Read-only check of the file route SUIT consumes; a probe never
+		// deposits a CSE opinion.
+		createSuitFilesProbe({
+			gateway: config.suitGateway,
+			referenceSiren: config.suit.referenceSiren,
 			secrets: config.secrets,
 			intervalSeconds: config.exposedIntervalSeconds,
 		}),
