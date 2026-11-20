@@ -23,17 +23,19 @@ COPY patches/ ./patches/
 COPY packages/app/package.json ./packages/app/
 COPY packages/notifications/package.json ./packages/notifications/
 COPY packages/healthcheck/package.json ./packages/healthcheck/
+COPY packages/suit-transport/package.json ./packages/suit-transport/
 
 # Install both the app (Next.js build) and the notifications worker
 # subtree. Both packages are leaves of the workspace graph; listing them
 # explicitly is enough.
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
-    pnpm install --filter app --filter notifications --filter healthcheck --frozen-lockfile --store-dir=/pnpm/store
+    pnpm install --filter app --filter notifications --filter healthcheck --filter suit-transport --frozen-lockfile --store-dir=/pnpm/store
 
 # Copy source code (after install to maximize cache hits)
 COPY packages/app/ ./packages/app/
 COPY packages/notifications/ ./packages/notifications/
 COPY packages/healthcheck/ ./packages/healthcheck/
+COPY packages/suit-transport/ ./packages/suit-transport/
 
 # Build-time env handling
 ENV HUSKY=0
@@ -53,6 +55,11 @@ ARG NEXT_PUBLIC_MATOMO_URL
 ENV NEXT_PUBLIC_MATOMO_URL=$NEXT_PUBLIC_MATOMO_URL
 ARG NEXT_PUBLIC_MATOMO_SITE_ID
 ENV NEXT_PUBLIC_MATOMO_SITE_ID=$NEXT_PUBLIC_MATOMO_SITE_ID
+
+# The shared SUIT transport must exist before either consumer compiles: the app
+# imports it by package name (resolved through its dist), and the healthcheck
+# worker's own build imports the same package.
+RUN pnpm --filter suit-transport build
 
 # Compile the notifications worker / publisher TypeScript sources to dist/
 # BEFORE the Next.js build. The app's runtime dynamic import

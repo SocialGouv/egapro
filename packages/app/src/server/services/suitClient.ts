@@ -1,99 +1,47 @@
 import "server-only";
 
-import { Agent, fetch as undiciFetch } from "undici";
+import { createSuitClient, type SuitClient } from "suit-transport";
 
 import { env } from "~/env";
 import { captureDependencyFailure } from "~/server/observability/captureDependency";
 
 const TIMEOUT_MS = 10_000;
 
-// Three-state memo: `undefined` = not resolved yet, `null` = no certificate
-// configured, `Agent` = certificate loaded. Avoids decoding the .p12 on every
-// request while still distinguishing "not computed" from "nothing to compute".
-let dispatcher: Agent | null | undefined;
+// One transport per process: it builds the mTLS agent once and reuses it.
+let client: SuitClient | undefined;
 
-function getDispatcher(): Agent | undefined {
-	if (dispatcher !== undefined) return dispatcher ?? undefined;
-
-	const p12 = env.EGAPRO_SUIT_CLIENT_CERT_P12_BASE64;
-	if (!p12) {
-		dispatcher = null;
-		return undefined;
-	}
-
-	dispatcher = new Agent({
-		// Undici 8 enables HTTP/2 by default; keep the existing SUIT transport.
-		allowH2: false,
-		connect: {
-			pfx: Buffer.from(p12, "base64"),
+function getClient(): SuitClient {
+	if (!client) {
+		client = createSuitClient({
+			apiUrl: env.EGAPRO_SUIT_API_URL,
+			p12Base64: env.EGAPRO_SUIT_CLIENT_CERT_P12_BASE64,
 			passphrase: env.EGAPRO_SUIT_CLIENT_CERT_PASSWORD,
-		},
-	});
-
-	return dispatcher;
-}
-
-function isSuitOrigin(url: string): boolean {
-	try {
-		return new URL(url).origin === new URL(env.EGAPRO_SUIT_API_URL).origin;
-	} catch {
-		return false;
+			timeoutMs: TIMEOUT_MS,
+		});
 	}
-}
-
-function fetchSuit(url: string, init: RequestInit): Promise<Response> {
-	const agent = getDispatcher();
-	if (!agent) return fetch(url, init);
-
-	// Node's built-in fetch and Undici 8 use different dispatcher interfaces.
-	return undiciFetch(url, {
-		...init,
-		dispatcher: agent,
-	} as Parameters<typeof undiciFetch>[1]) as unknown as Promise<Response>;
+	return client;
 }
 
 /**
  * Fetch an absolute URL that may or may not belong to SUIT, presenting the
  * client certificate only when it does.
  *
- * The GIP-MDS import target is configurable and points at an internal mock
- * outside production, so the certificate cannot be attached unconditionally —
- * the origin check is what keeps it from reaching a non-SUIT host. It trusts
- * `EGAPRO_SUIT_API_URL` as ground truth, which is sound because both URLs live
- * in ConfigMaps under the same CODEOWNERS gate as the certificate itself.
- *
- * The non-SUIT branch deliberately keeps the default redirect behaviour: it
- * carries no certificate to leak, and a file-download source may legitimately
- * redirect (pre-signed storage URL, CDN).
+ * The origin check and the redirect policy live in `suit-transport`, with the
+ * mTLS agent they protect. This adapter only reads `~/env` and delegates.
  */
 export function suitAwareFetch(
 	url: string,
 	init: RequestInit = {},
 ): Promise<Response> {
-	if (!isSuitOrigin(url)) return fetch(url, init);
-
-	return fetchSuit(url, {
-		...init,
-		redirect: "error",
-	});
+	return getClient().fetchRaw(url, init);
 }
 
 /**
- * Single entry point for every outgoing SUIT call.
+ * Single entry point for the outgoing JSON calls to SUIT.
  *
- * The mTLS dispatcher is deliberately never exported: tying it to a URL built
- * from `EGAPRO_SUIT_API_URL` is what guarantees the client certificate can only
- * ever be presented to SUIT, and never to another host.
- *
- * `redirect: "error"` closes the remaining escape route. A followed redirect
- * re-uses the same dispatcher, so a 3xx pointing elsewhere would hand our
- * client certificate to that host — verified, not theoretical. SUIT's JSON API
- * never redirects, so refusing one turns a silent credential leak into a
- * logged failure.
- *
- * TLS options are applied when the socket opens, so a corrupt bundle or a wrong
- * passphrase surfaces as a rejected promise here rather than at startup —
- * callers must log their failures.
+ * A refusal or a gateway failure means the dependency is down: callers degrade
+ * to "unknown" and would otherwise hide it. A plain 404 is a data answer, not
+ * an outage, and stays out of Sentry.
  *
  * Only for the JSON endpoints. A WAF sits in front of SUIT and rejects an
  * explicit `Accept` header on the GIP-MDS file route with an HTML 403
@@ -101,32 +49,25 @@ export function suitAwareFetch(
  * going through `suitAwareFetch`, which sends no `Accept`.
  */
 export function suitFetch(path: string): Promise<Response> {
-	const baseUrl = env.EGAPRO_SUIT_API_URL.replace(/\/$/, "");
-
-	return fetchSuit(`${baseUrl}${path}`, {
-		headers: { Accept: "application/json" },
-		signal: AbortSignal.timeout(TIMEOUT_MS),
-		redirect: "error",
-	}).then(
-		(response) => {
-			// A refusal or a gateway failure means the dependency is down: callers
-			// degrade to "unknown" and would otherwise hide it. A plain 404 is a
-			// data answer, not an outage, and stays out of Sentry.
-			if (isDependencyFailureStatus(response.status)) {
-				captureDependencyFailure(
-					"suit",
-					new Error(`SUIT returned HTTP ${response.status}`),
-					{ status: response.status },
-				);
-			}
-			return response;
-		},
-		(error: unknown) => {
-			// Timeout, refused handshake, corrupt client certificate.
-			captureDependencyFailure("suit", error);
-			throw error;
-		},
-	);
+	return getClient()
+		.fetchJson(path)
+		.then(
+			(response) => {
+				if (isDependencyFailureStatus(response.status)) {
+					captureDependencyFailure(
+						"suit",
+						new Error(`SUIT returned HTTP ${response.status}`),
+						{ status: response.status },
+					);
+				}
+				return response;
+			},
+			(error: unknown) => {
+				// Timeout, refused handshake, corrupt client certificate.
+				captureDependencyFailure("suit", error);
+				throw error;
+			},
+		);
 }
 
 function isDependencyFailureStatus(status: number): boolean {

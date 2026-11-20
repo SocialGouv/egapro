@@ -118,6 +118,16 @@ spec:
             - secretRef:
                 name: healthcheck-alerts
                 optional: true
+            # SUIT probes (#5195): the API URL from the same ConfigMap the app
+            # mounts, the mTLS client certificate from its own optional Secret.
+            # Without the certificate the two SUIT probes report a missing
+            # certificate instead of pretending the partner is down.
+            - configMapRef:
+                name: suit
+                optional: true
+            - secretRef:
+                name: suit-client-cert
+                optional: true
           env:
             # The app pod receives the same discrete keys from `pg-app`; the
             # worker assembles the DSN itself (src/config.ts), exactly like the

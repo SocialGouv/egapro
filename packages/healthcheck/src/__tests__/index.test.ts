@@ -41,6 +41,7 @@ describe("buildProbes", () => {
 			"smtp",
 			"pgboss-queue",
 			...JOB_PROBE_KEYS,
+			"suit-certificate",
 		]);
 		expect(probes[0]?.intervalSeconds).toBe(60);
 	});
@@ -66,6 +67,7 @@ describe("buildProbes", () => {
 			"smtp",
 			"pgboss-queue",
 			...JOB_PROBE_KEYS,
+			"suit-certificate",
 		]);
 	});
 
@@ -86,6 +88,7 @@ describe("buildProbes", () => {
 			"smtp",
 			"pgboss-queue",
 			...JOB_PROBE_KEYS,
+			"suit-certificate",
 		]);
 	});
 
@@ -108,10 +111,12 @@ describe("buildProbes", () => {
 			"smtp",
 			"pgboss-queue",
 			...JOB_PROBE_KEYS,
+			"suit-certificate",
 			"proconnect",
 			"weez",
 			"ingress",
 			"public-api",
+			"suit-cse-files",
 			"suit-gateway",
 		]);
 	});
@@ -137,6 +142,27 @@ describe("buildProbes", () => {
 		expect(intervalOf("ingress")).toBe(300);
 		expect(intervalOf("public-api")).toBe(300);
 		expect(intervalOf("suit-gateway")).toBe(300);
+		expect(intervalOf("suit-cse-files")).toBe(300);
+	});
+
+	it("adds the mTLS SUIT probes when the certificate and the SIREN are configured", () => {
+		const probes = buildProbes(
+			resolveConfig({
+				DATABASE_URL: "postgresql://db:5432/app",
+				EGAPRO_SUIT_API_URL: "https://api.suit.test",
+				EGAPRO_SUIT_CLIENT_CERT_P12_BASE64: "ZmFrZQ==",
+				HEALTHCHECK_SUIT_REFERENCE_SIREN: "130025265",
+				...EXPOSED,
+			}),
+			sql,
+		);
+		const keys = keysOf(probes);
+
+		expect(keys).toContain("suit-cse");
+		expect(keys).toContain("suit-gip-mds");
+		expect(keys.indexOf("suit-cse")).toBeLessThan(
+			keys.indexOf("suit-cse-files"),
+		);
 	});
 
 	it("keeps the probes of unconfigured services instead of dropping them", () => {
