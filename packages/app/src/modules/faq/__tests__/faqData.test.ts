@@ -226,10 +226,10 @@ describe("FAQ states no deadline the campaign settings can move", () => {
 			"jusqu'à ce que vous transmettiez une seconde déclaration, un rapport d'évaluation conjointe ou un avis du CSE",
 		);
 		expect(calendar).toContain(
-			"jusqu'au choix de votre nouveau parcours de mise en conformité",
+			"se ferme, elle, au choix de votre nouveau parcours de mise en conformité",
 		);
 		expect(calendar).toContain(
-			"vos avis du CSE, même une fois la démarche close",
+			"Vos avis du CSE restent modifiables même une fois la démarche close",
 		);
 	});
 

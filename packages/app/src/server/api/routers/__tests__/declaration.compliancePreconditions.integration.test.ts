@@ -1,10 +1,24 @@
 import postgres from "postgres";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import {
+	afterAll,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+} from "vitest";
 import { env } from "~/env.js";
 import { getCurrentYear } from "~/modules/domain";
 import { appRouter } from "~/server/api/root";
 import { db } from "~/server/db";
 import { runWhileDeclarationLockHeld } from "./helpers/declarationLockRace";
+
+const enqueueReceiptMock = vi.hoisted(() => vi.fn());
+
+vi.mock("~/modules/mail/server", () => ({
+	enqueueReceipt: enqueueReceiptMock,
+}));
 
 const SIREN = "555666788";
 const USER_ID = "compliance-preconditions-integration-user";
@@ -141,6 +155,7 @@ async function readStatus(declarationId: string) {
 async function cleanup() {
 	await sql`DELETE FROM audit.action_log WHERE user_id = ${USER_ID}`;
 	await sql`DELETE FROM app_declaration_lock WHERE locked_by_user_id = ${USER_ID}`;
+	await sql`DELETE FROM app_gip_mds_data WHERE siren = ${SIREN}`;
 	await sql`
 		DELETE FROM app_file WHERE declaration_id IN (
 			SELECT id FROM app_declaration WHERE siren = ${SIREN}
@@ -226,13 +241,18 @@ describe("compliance submissions re-read the démarche under the declaration loc
 		expect(await countEvents(id, "submit")).toBe(1);
 	});
 
-	it("refuses a corrected category write once the second declaration closed the démarche", async () => {
+	it("refuses a corrected category write once the CSE opinion closed the démarche", async () => {
 		const id = await insertDeclaration({
-			status: "corrective_actions_chosen",
-			cseRequired: false,
+			status: "awaiting_cse_opinion",
+			cseRequired: true,
 			firstDeclarationPathChoice: "corrective_action",
 		});
 		await insertCategory(id, "correction");
+		await recordEvent(id, {
+			eventType: "second_declaration_submit",
+			round: 2,
+			minutesAgo: 30,
+		});
 
 		const { blocked, outcome } = await runWhileDeclarationLockHeld({
 			observer: sql,
@@ -241,7 +261,7 @@ describe("compliance submissions re-read the démarche under the declaration loc
 			underLock: async (tx) => {
 				await recordEvent(
 					id,
-					{ eventType: "second_declaration_submit", round: 2, minutesAgo: 0 },
+					{ eventType: "cse_opinion_submit", minutesAgo: 0 },
 					tx,
 				);
 				await tx`UPDATE app_declaration SET status = 'demarche_completed' WHERE id = ${id}`;
@@ -301,12 +321,23 @@ describe("compliance submissions re-read the démarche under the declaration loc
 		expect(await countEvents(id, "path_choice")).toBe(0);
 	});
 
-	it("refuses a joint evaluation already transmitted by a concurrent request", async () => {
+	it("refuses a joint evaluation re-transmission once the CSE opinion closed the démarche", async () => {
 		const id = await insertDeclaration({
-			status: "joint_evaluation_chosen",
+			status: "awaiting_cse_opinion",
 			firstDeclarationPathChoice: "joint_evaluation",
 		});
-		await uploadJointEvaluationReport(id, 1);
+		await recordEvent(id, {
+			eventType: "path_choice",
+			value: "joint_evaluation",
+			round: 1,
+			minutesAgo: 60,
+		});
+		await recordEvent(id, {
+			eventType: "joint_evaluation_submit",
+			round: 1,
+			minutesAgo: 40,
+		});
+		await uploadJointEvaluationReport(id, 30);
 
 		const { blocked, outcome } = await runWhileDeclarationLockHeld({
 			observer: sql,
@@ -315,10 +346,10 @@ describe("compliance submissions re-read the démarche under the declaration loc
 			underLock: async (tx) => {
 				await recordEvent(
 					id,
-					{ eventType: "joint_evaluation_submit", round: 1, minutesAgo: 0 },
+					{ eventType: "cse_opinion_submit", minutesAgo: 0 },
 					tx,
 				);
-				await tx`UPDATE app_declaration SET status = 'awaiting_cse_opinion' WHERE id = ${id}`;
+				await tx`UPDATE app_declaration SET status = 'demarche_completed' WHERE id = ${id}`;
 			},
 			request: () => createCaller().declaration.submitJointEvaluation(),
 		});
@@ -331,13 +362,18 @@ describe("compliance submissions re-read the démarche under the declaration loc
 		expect(await countEvents(id, "joint_evaluation_submit")).toBe(1);
 	});
 
-	it("refuses a second declaration already transmitted by a concurrent request", async () => {
+	it("refuses a second declaration re-transmission once the CSE opinion closed the démarche", async () => {
 		const id = await insertDeclaration({
-			status: "corrective_actions_chosen",
-			cseRequired: false,
+			status: "awaiting_cse_opinion",
+			cseRequired: true,
 			firstDeclarationPathChoice: "corrective_action",
 		});
 		await insertCategory(id, "correction");
+		await recordEvent(id, {
+			eventType: "second_declaration_submit",
+			round: 2,
+			minutesAgo: 30,
+		});
 
 		const { blocked, outcome } = await runWhileDeclarationLockHeld({
 			observer: sql,
@@ -346,7 +382,7 @@ describe("compliance submissions re-read the démarche under the declaration loc
 			underLock: async (tx) => {
 				await recordEvent(
 					id,
-					{ eventType: "second_declaration_submit", round: 2, minutesAgo: 0 },
+					{ eventType: "cse_opinion_submit", minutesAgo: 0 },
 					tx,
 				);
 				await tx`UPDATE app_declaration SET status = 'demarche_completed' WHERE id = ${id}`;
@@ -469,5 +505,190 @@ describe("a joint evaluation report only counts for the choice it was uploaded f
 		});
 		await createCaller().declaration.submitJointEvaluation();
 		expect(await readStatus(id)).toBe("awaiting_cse_opinion");
+	});
+});
+
+describe("the last deposit stays re-transmittable until the CSE opinion lands (#4982)", () => {
+	beforeEach(() => {
+		enqueueReceiptMock.mockClear();
+	});
+
+	async function makeCompanySubjectToCse() {
+		await sql`UPDATE app_company SET has_cse = true WHERE siren = ${SIREN}`;
+		await sql`
+			INSERT INTO app_gip_mds_data (siren, year, workforce_ema)
+			VALUES (${SIREN}, ${YEAR}, 300)
+			ON CONFLICT (siren, year) DO UPDATE SET workforce_ema = 300
+		`;
+	}
+
+	async function closeOnCseOpinion(declarationId: string) {
+		await recordEvent(declarationId, {
+			eventType: "cse_opinion_submit",
+			minutesAgo: 1,
+		});
+		await sql`
+			UPDATE app_declaration SET status = 'demarche_completed'
+			WHERE id = ${declarationId}
+		`;
+	}
+
+	it("re-transmits the first-round joint evaluation report", async () => {
+		const id = await insertDeclaration({
+			status: "awaiting_cse_opinion",
+			firstDeclarationPathChoice: "joint_evaluation",
+		});
+		await recordEvent(id, {
+			eventType: "path_choice",
+			value: "joint_evaluation",
+			round: 1,
+			minutesAgo: 60,
+		});
+		await recordEvent(id, {
+			eventType: "joint_evaluation_submit",
+			round: 1,
+			minutesAgo: 40,
+		});
+		await uploadJointEvaluationReport(id, 30);
+
+		await createCaller().declaration.submitJointEvaluation();
+
+		expect(await readStatus(id)).toBe("awaiting_cse_opinion");
+		expect(await countEvents(id, "joint_evaluation_submit")).toBe(2);
+		expect(enqueueReceiptMock).toHaveBeenCalledWith(
+			expect.objectContaining({ kind: "jointEvaluation", isResend: false }),
+		);
+
+		await closeOnCseOpinion(id);
+
+		await expect(
+			createCaller().declaration.submitJointEvaluation(),
+		).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
+		expect(await countEvents(id, "joint_evaluation_submit")).toBe(2);
+	});
+
+	it("re-transmits the revised joint evaluation report", async () => {
+		const id = await insertDeclaration({
+			status: "awaiting_cse_opinion",
+			firstDeclarationPathChoice: "corrective_action",
+			secondDeclarationPathChoice: "joint_evaluation",
+		});
+		await recordEvent(id, {
+			eventType: "path_choice",
+			value: "corrective_action",
+			round: 1,
+			minutesAgo: 90,
+		});
+		await recordEvent(id, {
+			eventType: "second_declaration_submit",
+			round: 2,
+			minutesAgo: 80,
+		});
+		await recordEvent(id, {
+			eventType: "path_choice",
+			value: "joint_evaluation",
+			round: 2,
+			minutesAgo: 70,
+		});
+		await recordEvent(id, {
+			eventType: "joint_evaluation_submit",
+			round: 2,
+			minutesAgo: 40,
+		});
+		await uploadJointEvaluationReport(id, 30);
+
+		await createCaller().declaration.submitJointEvaluation();
+
+		expect(await readStatus(id)).toBe("awaiting_cse_opinion");
+		expect(await countEvents(id, "joint_evaluation_submit")).toBe(2);
+
+		await closeOnCseOpinion(id);
+
+		await expect(
+			createCaller().declaration.submitJointEvaluation(),
+		).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
+	});
+
+	it("re-transmits the second declaration that closed the gap", async () => {
+		const id = await insertDeclaration({
+			status: "awaiting_cse_opinion",
+			firstDeclarationPathChoice: "corrective_action",
+		});
+		await insertCategory(id, "correction");
+		await recordEvent(id, {
+			eventType: "path_choice",
+			value: "corrective_action",
+			round: 1,
+			minutesAgo: 60,
+		});
+		await recordEvent(id, {
+			eventType: "second_declaration_submit",
+			round: 2,
+			minutesAgo: 30,
+		});
+
+		await createCaller().declaration.submitSecondDeclaration();
+
+		expect(await readStatus(id)).toBe("awaiting_cse_opinion");
+		expect(await countEvents(id, "second_declaration_submit")).toBe(2);
+		expect(enqueueReceiptMock).toHaveBeenCalledWith(
+			expect.objectContaining({ kind: "secondDeclaration", isResend: false }),
+		);
+
+		await closeOnCseOpinion(id);
+
+		await expect(
+			createCaller().declaration.submitSecondDeclaration(),
+		).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
+		expect(await countEvents(id, "second_declaration_submit")).toBe(2);
+	});
+
+	it("re-transmits the first declaration of the direct path and records the event", async () => {
+		await makeCompanySubjectToCse();
+		const id = await insertDeclaration({
+			status: "awaiting_cse_opinion",
+		});
+		await insertCategory(id, "initial");
+		await recordEvent(id, { eventType: "submit", minutesAgo: 30 });
+
+		await createCaller().declaration.submit();
+
+		expect(await readStatus(id)).toBe("awaiting_cse_opinion");
+		expect(await countEvents(id, "submit")).toBe(2);
+		expect(enqueueReceiptMock).toHaveBeenCalledWith(
+			expect.objectContaining({ kind: "declaration", isResend: false }),
+		);
+
+		await closeOnCseOpinion(id);
+
+		await expect(createCaller().declaration.submit()).rejects.toMatchObject({
+			code: "FORBIDDEN",
+		});
+		expect(await countEvents(id, "submit")).toBe(2);
+	});
+
+	it("keeps the second declaration closed once the revision chose to justify", async () => {
+		const id = await insertDeclaration({
+			status: "awaiting_cse_opinion",
+			firstDeclarationPathChoice: "corrective_action",
+			secondDeclarationPathChoice: "justify",
+		});
+		await insertCategory(id, "correction");
+		await recordEvent(id, {
+			eventType: "second_declaration_submit",
+			round: 2,
+			minutesAgo: 60,
+		});
+		await recordEvent(id, {
+			eventType: "path_choice",
+			value: "justify",
+			round: 2,
+			minutesAgo: 30,
+		});
+
+		await expect(
+			createCaller().declaration.submitSecondDeclaration(),
+		).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
+		expect(await countEvents(id, "second_declaration_submit")).toBe(1);
 	});
 });

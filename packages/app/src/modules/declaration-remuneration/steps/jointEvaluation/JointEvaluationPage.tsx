@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import {
 	getObligationWorkforce,
 	isCseOpinionRequired,
+	isJointEvaluationWritable,
 	selectJointEvaluationDeadline,
 } from "~/modules/domain";
 import { COMPLIANCE_PATH } from "~/modules/routes";
@@ -43,6 +44,10 @@ export async function JointEvaluationPage() {
 				isRevisedJoint,
 			)}
 			jointEvaluationRound={isRevisedJoint ? 2 : 1}
+			writable={isJointEvaluationWritable(
+				data.declaration.status,
+				data.lastTransmission,
+			)}
 		/>
 	);
 }

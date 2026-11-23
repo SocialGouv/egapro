@@ -244,6 +244,7 @@ describe("DraftLoadingGate", () => {
 				existingFile={null}
 				jointEvaluationDeadline={new Date("2026-05-01")}
 				jointEvaluationRound={1}
+				writable
 			/>,
 		);
 		expect(container).toBeTruthy();

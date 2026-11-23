@@ -189,13 +189,16 @@ export function hasSubmittedSecondDeclaration(
 	return deriveSubsequentSubmissions(events).hasSubmittedSecondDeclaration;
 }
 
-export type LastTransmission =
-	| "first_declaration"
-	| "path_choice_round_1"
-	| "path_choice_round_2"
-	| "second_declaration"
-	| "joint_evaluation"
-	| "cse_opinion";
+export const LAST_TRANSMISSIONS = [
+	"first_declaration",
+	"path_choice_round_1",
+	"path_choice_round_2",
+	"second_declaration",
+	"joint_evaluation",
+	"cse_opinion",
+] as const;
+
+export type LastTransmission = (typeof LAST_TRANSMISSIONS)[number];
 
 export type TransmissionHistoryEvent = {
 	eventType: string;

@@ -355,6 +355,142 @@ describe("matrix v2027.1 — all 22 transitions (incl. every from-state)", () =>
 	});
 });
 
+describe("choice revisions — the last deposit stays re-transmittable before the CSE opinion (#4982)", () => {
+	const REVISIONS = [
+		{
+			label: "the first declaration of the direct path",
+			action: "submit",
+			lastTransmission: "first_declaration",
+			facts: {},
+			expectedTo: "awaiting_cse_opinion",
+			expectedEvents: [{ type: "submit" }],
+		},
+		{
+			label: "the first-round joint evaluation report",
+			action: "submit_joint_evaluation",
+			lastTransmission: "joint_evaluation",
+			facts: { action: { round: 1 } },
+			expectedTo: "awaiting_cse_opinion",
+			expectedEvents: [{ type: "joint_evaluation_submit", round: 1 }],
+		},
+		{
+			label: "the second-round joint evaluation report",
+			action: "submit_joint_evaluation",
+			lastTransmission: "joint_evaluation",
+			facts: { action: { round: 2 } },
+			expectedTo: "awaiting_cse_opinion",
+			expectedEvents: [{ type: "joint_evaluation_submit", round: 2 }],
+		},
+		{
+			label: "the second declaration without a remaining gap",
+			action: "submit_second_declaration",
+			lastTransmission: "second_declaration",
+			facts: { action: { stillHasGap: false } },
+			expectedTo: "awaiting_cse_opinion",
+			expectedEvents: [{ type: "second_declaration_submit", round: 2 }],
+		},
+	] as const;
+
+	it.each(
+		REVISIONS,
+	)("re-accepts $label from awaiting_cse_opinion when it is the last transmission", ({
+		action,
+		lastTransmission,
+		facts,
+		expectedTo,
+		expectedEvents,
+	}) => {
+		const result = applyAction(
+			base("awaiting_cse_opinion", {
+				workforce: 120,
+				gap: 2,
+				indicatorGCalculated: false,
+				cseRequired: true,
+				lastTransmission,
+				...facts,
+			}),
+			action,
+			rules,
+		);
+
+		expect(result.nextStatus).toBe(expectedTo);
+		expect(result.events).toEqual(expectedEvents);
+	});
+
+	it("sends a re-transmitted first declaration back to the path choice when a gap appears", () => {
+		const facts = base("awaiting_cse_opinion", {
+			workforce: 300,
+			gap: 10,
+			indicatorGCalculated: true,
+			lastTransmission: "first_declaration",
+		});
+
+		expect(applyAction(facts, "submit", rules).nextStatus).toBe(
+			"awaiting_compliance_path_choice",
+		);
+	});
+
+	it("reopens the revision choice when a re-transmitted second declaration still shows a gap", () => {
+		const facts = base("awaiting_cse_opinion", {
+			lastTransmission: "second_declaration",
+			action: { stillHasGap: true },
+		});
+
+		expect(
+			applyAction(facts, "submit_second_declaration", rules).nextStatus,
+		).toBe("awaiting_revision_choice");
+	});
+
+	it.each(
+		REVISIONS.filter((revision) => revision.action !== "submit"),
+	)("refuses $label once the CSE opinion is the last transmission", ({
+		action,
+		facts,
+	}) => {
+		expect(() =>
+			applyAction(
+				base("awaiting_cse_opinion", {
+					cseRequired: true,
+					lastTransmission: "cse_opinion",
+					...facts,
+				}),
+				action,
+				rules,
+			),
+		).toThrow(NoMatchingTransitionError);
+	});
+
+	it("keeps the second declaration closed once the revision chose to justify", () => {
+		const facts = base("awaiting_cse_opinion", {
+			lastTransmission: "path_choice_round_2",
+			action: { stillHasGap: false },
+		});
+
+		expect(() =>
+			applyAction(facts, "submit_second_declaration", rules),
+		).toThrow(NoMatchingTransitionError);
+	});
+
+	it("discriminates the joint evaluation rounds, not only the last transmission", () => {
+		const roundOne = base("awaiting_cse_opinion", {
+			cseRequired: true,
+			lastTransmission: "joint_evaluation",
+			action: { round: 1 },
+		});
+
+		expect(canApplyAction(roundOne, "submit_joint_evaluation", rules)).toBe(
+			true,
+		);
+		expect(
+			canApplyAction(
+				{ ...roundOne, action: { round: 3 } },
+				"submit_joint_evaluation",
+				rules,
+			),
+		).toBe(false);
+	});
+});
+
 describe("submit_cse_opinion is re-entrant from demarche_completed", () => {
 	it("re-accepts the action once the démarche is completed, staying completed", () => {
 		// The CSE deposit form stays editable and re-submittable after completion,

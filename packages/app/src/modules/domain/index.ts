@@ -216,6 +216,7 @@ export {
 	hasSubmittedSecondDeclaration,
 	isJointEvaluationFileTransmitted,
 	isLastTransmissionPathChoice,
+	LAST_TRANSMISSIONS,
 	SUBSEQUENT_SUBMISSION_EVENT_TYPES,
 } from "./shared/declarationTrajectory";
 // Démarche lifecycle — admin-facing 4-value status, its date, and the transmission events

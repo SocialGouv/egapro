@@ -484,6 +484,72 @@
 			"reopens": "awaiting_revision_choice"
 		},
 		{
+			"id": "revise_first_declaration_before_cse_opinion",
+			"description": "Une 1re déclaration transmise directement à l'avis CSE reste re-transmissible tant que l'avis n'est pas transmis : le renvoi repart de draft pour réévaluer l'écart et l'obligation CSE sur les données corrigées.",
+			"action": "submit",
+			"from": ["awaiting_cse_opinion"],
+			"guard": {
+				"fact": "lastTransmission",
+				"op": "==",
+				"value": "first_declaration"
+			},
+			"reopens": "draft"
+		},
+		{
+			"id": "revise_joint_evaluation_before_cse_opinion",
+			"description": "Le rapport d'évaluation conjointe du 1er tour reste modifiable tant que l'avis du CSE n'est pas transmis : le renvoi repart de joint_evaluation_chosen.",
+			"action": "submit_joint_evaluation",
+			"from": ["awaiting_cse_opinion"],
+			"guard": {
+				"all": [
+					{
+						"fact": "lastTransmission",
+						"op": "==",
+						"value": "joint_evaluation"
+					},
+					{
+						"fact": "action.round",
+						"op": "==",
+						"value": 1
+					}
+				]
+			},
+			"reopens": "joint_evaluation_chosen"
+		},
+		{
+			"id": "revise_revised_joint_evaluation_before_cse_opinion",
+			"description": "Idem pour le rapport d'évaluation conjointe du 2e tour : le renvoi repart de revised_joint_evaluation_chosen et conserve son round.",
+			"action": "submit_joint_evaluation",
+			"from": ["awaiting_cse_opinion"],
+			"guard": {
+				"all": [
+					{
+						"fact": "lastTransmission",
+						"op": "==",
+						"value": "joint_evaluation"
+					},
+					{
+						"fact": "action.round",
+						"op": "==",
+						"value": 2
+					}
+				]
+			},
+			"reopens": "revised_joint_evaluation_chosen"
+		},
+		{
+			"id": "revise_second_declaration_before_cse_opinion",
+			"description": "Une seconde déclaration transmise sans écart reste modifiable tant que l'avis du CSE n'est pas transmis : le renvoi repart de corrective_actions_chosen.",
+			"action": "submit_second_declaration",
+			"from": ["awaiting_cse_opinion"],
+			"guard": {
+				"fact": "lastTransmission",
+				"op": "==",
+				"value": "second_declaration"
+			},
+			"reopens": "corrective_actions_chosen"
+		},
+		{
 			"id": "revise_path_choice_round_1_after_completion",
 			"description": "Sans CSE, un choix de parcours terminal (justifier, round 1) qui est la dernière transmission reste modifiable jusqu'à la nouvelle campagne : le choix repart de awaiting_compliance_path_choice.",
 			"action": "choose_compliance_path",

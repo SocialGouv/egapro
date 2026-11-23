@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { DeclarationFsmStatus, LastTransmission } from "~/modules/domain";
 
 const mocks = vi.hoisted(() => ({
 	handleStreamingUpload: vi.fn(),
@@ -7,10 +8,15 @@ const mocks = vi.hoisted(() => ({
 	dbTransaction: vi.fn(),
 	getRequiredContentTypes: vi.fn(),
 	isFormalNoticeAvailableFor: vi.fn(),
+	loadLastTransmission: vi.fn(),
 }));
 
 vi.mock("../fileUpload", () => ({
 	handleStreamingUpload: mocks.handleStreamingUpload,
+}));
+
+vi.mock("~/server/api/routers/statusHistoryHelpers", () => ({
+	loadLastTransmission: mocks.loadLastTransmission,
 }));
 
 vi.mock("../cseRequiredContentTypes", () => ({
@@ -67,12 +73,13 @@ function createStream(): ReadableStream<Uint8Array> {
 }
 
 /**
- * Mocks the fluent select chain used by `findCurrentDeclaration` and
- * `countFilesByType`. Declaration look-up is called once (returns a single
- * row). CSE count is called zero or one time and returns a row `{ value: N }`.
+ * Mocks the fluent select chain used by `findCurrentDeclaration`,
+ * `readDeclarationStatus` and `countFilesByType`. Each `db.select()` call
+ * consumes one step, in call order.
  */
 type Step =
 	| { kind: "declaration"; id?: string }
+	| { kind: "status"; value: DeclarationFsmStatus }
 	| { kind: "count"; value: number };
 
 function primeDbSelect(steps: Step[]) {
@@ -85,6 +92,9 @@ function primeDbSelect(steps: Step[]) {
 					// `count()` path is awaited directly from `.where()` (no `.limit()`)
 					if (step?.kind === "count") {
 						return Promise.resolve([{ value: step.value }]);
+					}
+					if (step?.kind === "status") {
+						return { limit: () => Promise.resolve([{ status: step.value }]) };
 					}
 					// Declaration lookup path chains `.orderBy().limit(1)` before
 					// await. `.limit()` is deliberately unreachable without
@@ -103,6 +113,55 @@ function primeDbSelect(steps: Step[]) {
 	});
 }
 
+/**
+ * Mocks `commitFileRow`'s transaction for the joint-evaluation flow: the
+ * declaration row lock, the deposit-window re-read (status), then the existing
+ * report lookup feeding the upsert. Returns the write spies for assertions.
+ */
+function primeJointEvaluationTx(options: {
+	status: DeclarationFsmStatus;
+	existingRow?: { id: string; filePath: string }[];
+}) {
+	const insertValues = vi.fn().mockResolvedValue(undefined);
+	const insert = vi.fn().mockReturnValue({ values: insertValues });
+	const deleteWhere = vi.fn().mockResolvedValue(undefined);
+	const del = vi.fn().mockReturnValue({ where: deleteWhere });
+	const existingRow = options.existingRow ?? [];
+	const txSelect = vi
+		.fn()
+		.mockImplementation((selection: Record<string, unknown>) => {
+			if ("status" in selection) {
+				return {
+					from: () => ({
+						where: () => ({
+							limit: () => Promise.resolve([{ status: options.status }]),
+						}),
+					}),
+				};
+			}
+			if (selection.id === "declarations.id") {
+				return {
+					from: () => ({
+						where: () => ({
+							for: () => ({ limit: () => Promise.resolve([{ id: "decl-1" }]) }),
+						}),
+					}),
+				};
+			}
+			return {
+				from: () => ({
+					where: () => ({
+						limit: () => Promise.resolve(existingRow),
+					}),
+				}),
+			};
+		});
+	mocks.dbTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+		fn({ select: txSelect, insert, delete: del }),
+	);
+	return { insertValues, del };
+}
+
 describe("runUploadPipeline", () => {
 	beforeEach(() => {
 		// Four required content types: the quota then matches MAX_CSE_FILES,
@@ -114,6 +173,7 @@ describe("runUploadPipeline", () => {
 			{ declarationNumber: 2, type: "gap" },
 		]);
 		vi.clearAllMocks();
+		mocks.loadLastTransmission.mockResolvedValue(null);
 	});
 
 	const baseInput = {
@@ -219,6 +279,7 @@ describe("runUploadPipeline", () => {
 	it("propagates scan_unavailable without DB write or S3 cleanup", async () => {
 		primeDbSelect([
 			{ kind: "declaration", id: "decl-1" },
+			{ kind: "status", value: "joint_evaluation_chosen" },
 			{ kind: "count", value: 0 },
 		]);
 		mocks.handleStreamingUpload.mockResolvedValue({
@@ -318,48 +379,23 @@ describe("runUploadPipeline", () => {
 	});
 
 	it("replaces an existing joint_evaluation file and best-effort deletes the old S3 object", async () => {
-		primeDbSelect([{ kind: "declaration", id: "decl-1" }]);
+		primeDbSelect([
+			{ kind: "declaration", id: "decl-1" },
+			{ kind: "status", value: "joint_evaluation_chosen" },
+		]);
 		mocks.handleStreamingUpload.mockResolvedValue({
 			ok: true,
 			key: "123456789/2027/new-file.pdf",
 			fileId: "new-file",
 		});
 
-		const insertValues = vi.fn().mockResolvedValue(undefined);
-		const insert = vi.fn().mockReturnValue({ values: insertValues });
-		const deleteWhere = vi.fn().mockResolvedValue(undefined);
-		const del = vi.fn().mockReturnValue({ where: deleteWhere });
-		const existingRow = [
-			{ id: "old-file", filePath: "123456789/2027/old-file.pdf" },
-		];
-		// First tx.select() locks the declaration row via `.for("update").limit(1)`.
-		// Second tx.select() looks up the existing joint_evaluation file.
-		let txSelectCallCount = 0;
-		const txSelect = vi.fn().mockImplementation(() => {
-			txSelectCallCount++;
-			if (txSelectCallCount === 1) {
-				return {
-					from: () => ({
-						where: () => ({
-							for: () => ({ limit: () => Promise.resolve([{ id: "decl-1" }]) }),
-						}),
-					}),
-				};
-			}
-			return {
-				from: () => ({
-					where: () => ({
-						limit: () => Promise.resolve(existingRow),
-					}),
-				}),
-			};
+		const { insertValues, del } = primeJointEvaluationTx({
+			status: "joint_evaluation_chosen",
+			existingRow: [
+				{ id: "old-file", filePath: "123456789/2027/old-file.pdf" },
+			],
 		});
-		mocks.dbTransaction.mockImplementation(
-			async (fn: (tx: unknown) => unknown) =>
-				fn({ select: txSelect, insert, delete: del }),
-		);
 		mocks.deleteFile.mockResolvedValue(undefined);
-
 		const { runUploadPipeline } = await import("../uploadPipeline");
 		const result = await runUploadPipeline({
 			...baseInput,
@@ -376,6 +412,44 @@ describe("runUploadPipeline", () => {
 		await new Promise<void>((resolve) => setImmediate(resolve));
 		expect(mocks.deleteFile).toHaveBeenCalledWith(
 			"123456789/2027/old-file.pdf",
+		);
+	});
+
+	it("refuses the joint evaluation deposit when the CSE opinion landed during the stream", async () => {
+		primeDbSelect([
+			{ kind: "declaration", id: "decl-1" },
+			{ kind: "status", value: "joint_evaluation_chosen" },
+		]);
+		mocks.handleStreamingUpload.mockResolvedValue({
+			ok: true,
+			key: "123456789/2027/new-file.pdf",
+			fileId: "new-file",
+		});
+		// Open before the stream, closed once the transaction re-reads it.
+		mocks.loadLastTransmission
+			.mockResolvedValueOnce("joint_evaluation")
+			.mockResolvedValueOnce("cse_opinion");
+		const { insertValues } = primeJointEvaluationTx({
+			status: "demarche_completed",
+		});
+		mocks.deleteFile.mockResolvedValue(undefined);
+
+		const { runUploadPipeline } = await import("../uploadPipeline");
+		const result = await runUploadPipeline({
+			...baseInput,
+			stream: createStream(),
+			flowType: "joint_evaluation",
+		});
+
+		expect(result).toEqual({
+			ok: false,
+			reason: "joint_evaluation_unavailable",
+			error: expect.stringContaining("n'est pas ouvert"),
+			s3Cleanup: "ok",
+		});
+		expect(insertValues).not.toHaveBeenCalled();
+		expect(mocks.deleteFile).toHaveBeenCalledWith(
+			"123456789/2027/new-file.pdf",
 		);
 	});
 
@@ -747,7 +821,10 @@ describe("runUploadPipeline", () => {
 		});
 
 		it("never checks the formal notice exposure for the other flows", async () => {
-			primeDbSelect([{ kind: "declaration", id: "decl-1" }]);
+			primeDbSelect([
+				{ kind: "declaration", id: "decl-1" },
+				{ kind: "status", value: "joint_evaluation_chosen" },
+			]);
 			mocks.handleStreamingUpload.mockResolvedValue({
 				ok: false,
 				reason: "scan_unavailable",
@@ -762,6 +839,105 @@ describe("runUploadPipeline", () => {
 			});
 
 			expect(mocks.isFormalNoticeAvailableFor).not.toHaveBeenCalled();
+		});
+	});
+
+	describe("joint evaluation deposit tied to the FSM (#4982)", () => {
+		beforeEach(() => {
+			mocks.handleStreamingUpload.mockResolvedValue({
+				ok: false,
+				reason: "scan_unavailable",
+				error: "Antivirus indisponible",
+			});
+		});
+
+		it.each<{
+			status: DeclarationFsmStatus;
+			lastTransmission: LastTransmission | null;
+			open: boolean;
+		}>([
+			{
+				status: "joint_evaluation_chosen",
+				lastTransmission: "path_choice_round_1",
+				open: true,
+			},
+			{
+				status: "revised_joint_evaluation_chosen",
+				lastTransmission: "path_choice_round_2",
+				open: true,
+			},
+			{
+				status: "awaiting_cse_opinion",
+				lastTransmission: "joint_evaluation",
+				open: true,
+			},
+			{
+				status: "awaiting_cse_opinion",
+				lastTransmission: "path_choice_round_2",
+				open: false,
+			},
+			{
+				status: "awaiting_cse_opinion",
+				lastTransmission: "cse_opinion",
+				open: false,
+			},
+			{
+				status: "demarche_completed",
+				lastTransmission: "joint_evaluation",
+				open: true,
+			},
+			{
+				status: "awaiting_compliance_path_choice",
+				lastTransmission: "first_declaration",
+				open: false,
+			},
+		])("$status / $lastTransmission: deposit $open", async ({
+			status,
+			lastTransmission,
+			open,
+		}) => {
+			primeDbSelect([
+				{ kind: "declaration", id: "decl-1" },
+				{ kind: "status", value: status },
+			]);
+			mocks.loadLastTransmission.mockResolvedValue(lastTransmission);
+
+			const { runUploadPipeline } = await import("../uploadPipeline");
+			const result = await runUploadPipeline({
+				...baseInput,
+				stream: createStream(),
+				flowType: "joint_evaluation",
+			});
+
+			if (open) {
+				// The guard let it through: the stream (mocked to fail) ran.
+				expect(result).toMatchObject({ reason: "scan_unavailable" });
+				expect(mocks.handleStreamingUpload).toHaveBeenCalledTimes(1);
+				return;
+			}
+
+			expect(result).toEqual({
+				ok: false,
+				reason: "joint_evaluation_unavailable",
+				error: expect.stringContaining("n'est pas ouvert"),
+			});
+			expect(mocks.handleStreamingUpload).not.toHaveBeenCalled();
+		});
+
+		it("leaves the formal notice flow untouched by the deposit guard", async () => {
+			primeDbSelect([{ kind: "declaration", id: "decl-1" }]);
+			mocks.isFormalNoticeAvailableFor.mockResolvedValue(true);
+			mocks.loadLastTransmission.mockResolvedValue("cse_opinion");
+
+			const { runUploadPipeline } = await import("../uploadPipeline");
+			const result = await runUploadPipeline({
+				...baseInput,
+				stream: createStream(),
+				flowType: "formal_notice_joint_evaluation",
+			});
+
+			expect(result).toMatchObject({ reason: "scan_unavailable" });
+			expect(mocks.loadLastTransmission).not.toHaveBeenCalled();
 		});
 	});
 });

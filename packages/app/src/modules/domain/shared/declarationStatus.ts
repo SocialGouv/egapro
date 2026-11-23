@@ -146,8 +146,9 @@ export function isCompliancePathStepApplicable(declaration: {
 
 // The corrective-action second declaration may only be written while its funnel
 // is actually open: right after the corrective-action path choice, or once the
-// declaration has been re-opened for revision — or, for a démarche closed
-// without a CSE, as long as it is the last transmission (epic #5128).
+// declaration has been re-opened for revision. It also stays writable while it
+// is the last transmission — until the CSE opinion lands, and, without a CSE,
+// until the next campaign (epic #5128).
 export function isSecondDeclarationWritable(
 	status: DeclarationFsmStatus | null,
 	lastTransmission?: LastTransmission | null,
@@ -159,15 +160,16 @@ export function isSecondDeclarationWritable(
 		return true;
 	}
 	return (
-		status === "demarche_completed" && lastTransmission === "second_declaration"
+		(status === "awaiting_cse_opinion" || status === "demarche_completed") &&
+		lastTransmission === "second_declaration"
 	);
 }
 
 // The joint-evaluation report may only be written while its funnel is actually
 // open: right after the joint-evaluation path choice, or once the declaration
-// has been re-opened for a revised joint evaluation. A démarche closed on that
-// report keeps it writable until the next campaign — but only without a CSE,
-// since with a CSE the démarche closes on the opinion (epic #5128).
+// has been re-opened for a revised joint evaluation. It also stays writable
+// while it is the last transmission — until the CSE opinion lands, and, without
+// a CSE, until the next campaign (epic #5128).
 export function isJointEvaluationWritable(
 	status: DeclarationFsmStatus | null,
 	lastTransmission?: LastTransmission | null,
@@ -179,7 +181,8 @@ export function isJointEvaluationWritable(
 		return true;
 	}
 	return (
-		status === "demarche_completed" && lastTransmission === "joint_evaluation"
+		(status === "awaiting_cse_opinion" || status === "demarche_completed") &&
+		lastTransmission === "joint_evaluation"
 	);
 }
 

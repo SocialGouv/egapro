@@ -32,6 +32,7 @@ type Props = {
 	existingFile: JointEvaluationExistingFile | null;
 	jointEvaluationDeadline: Date;
 	jointEvaluationRound: 1 | 2;
+	writable: boolean;
 };
 
 export function JointEvaluationForm({
@@ -41,10 +42,12 @@ export function JointEvaluationForm({
 	existingFile,
 	jointEvaluationDeadline,
 	jointEvaluationRound,
+	writable,
 }: Props) {
 	const router = useRouter();
 	const readOnlyGuard = useReadOnlyGuard();
 	const { isReadOnly } = useLockContext();
+	const isDepositDisabled = isReadOnly || !writable;
 
 	const { clearDraft } = useDeclarationDraft({
 		siren: declarationSiren,
@@ -133,7 +136,9 @@ export function JointEvaluationForm({
 			<form autoComplete="off" onSubmit={handleSubmit}>
 				{/* Read-only mode is enforced per control (disabled upload and submit
 				    button): a fieldset-level `disabled` would hide the content from
-				    some assistive technologies (#3803). */}
+				    some assistive technologies (#3803). The deposit also closes once
+				    the CSE opinion is transmitted (#4982) — the already-deposited
+				    report stays visible either way. */}
 				<fieldset
 					className={`${common.readOnlyFieldset} ${common.flexColumnGap2}`}
 				>
@@ -161,7 +166,7 @@ export function JointEvaluationForm({
 						beforeDropzone={
 							<JointEvaluationDeadline deadline={jointEvaluationDeadline} />
 						}
-						disabled={isReadOnly}
+						disabled={isDepositDisabled}
 						error={uploadError}
 						hasMissingFile={hasMissingFile}
 						inputId="joint-evaluation-file-upload"
@@ -181,7 +186,7 @@ export function JointEvaluationForm({
 							<button
 								{...readOnlyGuard.buttonProps}
 								className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-								disabled={isSubmitting || isReadOnly}
+								disabled={isSubmitting || isDepositDisabled}
 								type="submit"
 							>
 								{SUBMIT_LABEL}

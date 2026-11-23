@@ -549,8 +549,23 @@ describe("isJointEvaluationWritable", () => {
 		expect(
 			isJointEvaluationWritable("demarche_completed", "second_declaration"),
 		).toBe(false);
+	});
+
+	it("keeps the report writable while the CSE opinion is still owed", () => {
 		expect(
 			isJointEvaluationWritable("awaiting_cse_opinion", "joint_evaluation"),
+		).toBe(true);
+	});
+
+	it("stays closed in awaiting_cse_opinion when another step is the last transmission", () => {
+		expect(
+			isJointEvaluationWritable("awaiting_cse_opinion", "cse_opinion"),
+		).toBe(false);
+		expect(
+			isJointEvaluationWritable("awaiting_cse_opinion", "second_declaration"),
+		).toBe(false);
+		expect(
+			isJointEvaluationWritable("awaiting_cse_opinion", "path_choice_round_2"),
 		).toBe(false);
 	});
 });
@@ -569,8 +584,26 @@ describe("isSecondDeclarationWritable — last transmission context", () => {
 		expect(
 			isSecondDeclarationWritable("demarche_completed", "joint_evaluation"),
 		).toBe(false);
+	});
+
+	it("keeps the second declaration writable while the CSE opinion is still owed", () => {
 		expect(
 			isSecondDeclarationWritable("awaiting_cse_opinion", "second_declaration"),
+		).toBe(true);
+	});
+
+	it("stays closed in awaiting_cse_opinion when the revision chose to justify", () => {
+		expect(
+			isSecondDeclarationWritable(
+				"awaiting_cse_opinion",
+				"path_choice_round_2",
+			),
+		).toBe(false);
+		expect(
+			isSecondDeclarationWritable("awaiting_cse_opinion", "joint_evaluation"),
+		).toBe(false);
+		expect(
+			isSecondDeclarationWritable("awaiting_cse_opinion", "cse_opinion"),
 		).toBe(false);
 	});
 });

@@ -82,6 +82,7 @@ const defaultProps = {
 	existingFile: null,
 	jointEvaluationDeadline: new Date("2026-08-01T00:00:00Z"),
 	jointEvaluationRound: 1 as const,
+	writable: true,
 };
 
 describe("JointEvaluationForm", () => {
@@ -635,6 +636,37 @@ describe("JointEvaluationForm", () => {
 					name: /rapport-evaluation-conjointe\.pdf/,
 				}),
 			).not.toBeInTheDocument();
+		});
+	});
+
+	describe("deposit closed until the CSE opinion lands (#4982)", () => {
+		const existingFile = {
+			id: "8f14e45f-ea4c-4f0b-9c1d-7a2b3c4d5e6f",
+			fileName: "rapport-evaluation-conjointe.pdf",
+			uploadedAt: new Date("2026-06-20T00:00:00Z"),
+		};
+
+		it("disables the upload zone and the submit button, keeping the report readable", () => {
+			const { container } = render(
+				<JointEvaluationForm
+					{...defaultProps}
+					existingFile={existingFile}
+					writable={false}
+				/>,
+			);
+
+			expect(container.querySelector("fieldset")).not.toBeDisabled();
+			expect(
+				screen.getByRole("button", { name: /Sélectionner un fichier/ }),
+			).toBeDisabled();
+			expect(
+				screen.getByRole("button", { name: /transmettre/i }),
+			).toBeDisabled();
+			expect(
+				screen.getByRole("link", {
+					name: /rapport-evaluation-conjointe\.pdf/,
+				}),
+			).toBeInTheDocument();
 		});
 	});
 

@@ -812,12 +812,22 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			).toBeInTheDocument();
 		});
 
-		it("gives the joint evaluation row a Modifier but no mention", () => {
+		it("ties the joint evaluation mention to the FSM state, not to the variant", () => {
 			const { panel } = renderPanel("cse", {
 				...SUBMITTED_ROWS,
 				declarationFsmStatus: "joint_evaluation_chosen",
+				lastTransmission: "joint_evaluation",
 			});
-			expect(panel.queryByText(/Modifiable jusqu'au choix/)).toBeNull();
+
+			const row = panel.getByText(
+				"Votre rapport de l'évaluation conjointe a été transmis",
+			).parentElement as HTMLElement;
+			expect(row).toHaveTextContent(
+				"Modifiable jusqu'à votre prochaine transmission",
+			);
+			expect(row).not.toHaveTextContent(
+				"Modifiable jusqu'à la transmission de vos avis du CSE",
+			);
 		});
 
 		it.each<DeclarationFsmStatus>([
@@ -845,6 +855,63 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			).not.toBeInTheDocument();
 		});
 	});
+	describe("un dépôt reste modifiable jusqu'à l'avis du CSE (#4982)", () => {
+		const CSE_MENTION = "Modifiable jusqu'à la transmission de vos avis du CSE";
+		const SUBMITTED_ROWS: PanelOverrides = {
+			displayContext: makeDisplayContext("joint_evaluation"),
+			hasSubmittedSecondDeclaration: true,
+		};
+
+		it("offers Modifier and the CSE mention on the joint evaluation row", () => {
+			const { panel, dialog } = renderPanel("cse", {
+				...SUBMITTED_ROWS,
+				declarationFsmStatus: "awaiting_cse_opinion",
+				lastTransmission: "joint_evaluation",
+			});
+
+			expect(dialog.querySelector(JOINT_EVALUATION_MODIFY)).toBeInTheDocument();
+			expect(panel.getByText(CSE_MENTION)).toBeInTheDocument();
+		});
+
+		it("offers Modifier and the CSE mention on the second declaration row", () => {
+			const { panel, dialog } = renderPanel("cse", {
+				...SUBMITTED_ROWS,
+				declarationFsmStatus: "awaiting_cse_opinion",
+				lastTransmission: "second_declaration",
+			});
+
+			expect(dialog.querySelector(DECL2_MODIFY)).toBeInTheDocument();
+			expect(panel.getByText(CSE_MENTION)).toBeInTheDocument();
+		});
+
+		it("withholds both Modifier links once the CSE opinion is the last transmission", () => {
+			const { panel, dialog } = renderPanel("cse", {
+				...SUBMITTED_ROWS,
+				declarationFsmStatus: "awaiting_cse_opinion",
+				lastTransmission: "cse_opinion",
+			});
+
+			expect(dialog.querySelector(DECL2_MODIFY)).not.toBeInTheDocument();
+			expect(
+				dialog.querySelector(JOINT_EVALUATION_MODIFY),
+			).not.toBeInTheDocument();
+			expect(panel.queryByText(CSE_MENTION)).not.toBeInTheDocument();
+		});
+
+		it("keeps the closed mention when the démarche is completed on that report", () => {
+			const { panel, dialog } = renderPanel("closed", {
+				...SUBMITTED_ROWS,
+				declarationFsmStatus: "demarche_completed",
+				lastTransmission: "joint_evaluation",
+			});
+
+			expect(dialog.querySelector(JOINT_EVALUATION_MODIFY)).toBeInTheDocument();
+			expect(
+				panel.getByText("Modifiable jusqu'à la nouvelle campagne"),
+			).toBeInTheDocument();
+		});
+	});
+
 	describe("« Modifier » de la 1ʳᵉ déclaration : supersédée ou non, dans toutes les variantes", () => {
 		const VARIANTS: PanelVariant[] = [
 			"compliance_choice",
