@@ -4,6 +4,7 @@ import {
 	replayEventPrivacyIntegration,
 	sentryPrivacyOptions,
 	sentryReplayPrivacyOptions,
+	sentryTracesSampleRate,
 } from "~/modules/observability";
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
@@ -16,8 +17,7 @@ Sentry.init({
 	release: process.env.NEXT_PUBLIC_SENTRY_RELEASE,
 	environment: process.env.NEXT_PUBLIC_EGAPRO_ENV,
 
-	// Capture 100% of traces in dev, adjust in production (e.g., 0.1 for 10%)
-	tracesSampleRate: 1.0,
+	tracesSampleRate: sentryTracesSampleRate(process.env.NEXT_PUBLIC_EGAPRO_ENV),
 
 	// Session Replay: sample 10% of sessions, 100% on error
 	replaysSessionSampleRate: 0.1,

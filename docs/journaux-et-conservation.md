@@ -138,7 +138,7 @@ L'analyse antivirus des fichiers déposés y écrit une ligne préfixée `[antiv
 
 ### 4.4 Sentry (erreurs, traces et sessions enregistrées)
 
-Sentry capture les erreurs non gérées côté serveur et côté client, avec 100 % des traces échantillonnées. Côté client, l'enregistrement de session (Session Replay) est actif sur 10 % des sessions, et 100 % des sessions qui rencontrent une erreur.
+Sentry capture les erreurs non gérées côté serveur et côté client, avec un échantillonnage des traces de 100 % en développement et en preprod et de 10 % en production, choisi selon `NEXT_PUBLIC_EGAPRO_ENV`. Côté client, l'enregistrement de session (Session Replay) est actif sur 10 % des sessions, et 100 % des sessions qui rencontrent une erreur.
 
 **Anonymisation à l'émission** : les trois initialisations Sentry étalent les options du module `packages/app/src/modules/observability/`, qui empêchent les données personnelles de partir vers Sentry.
 
@@ -291,7 +291,7 @@ Reportés tels quels, sans les atténuer :
 3. **Représentation équilibrée** : aucune purge, alors que des lignes reprises de la V1 contiennent des coordonnées personnelles. Suite : [#4502](https://github.com/SocialGouv/egapro/issues/4502).
 4. **Table jamais purgée** : le journal de dédoublonnage des relances n'a aucun mécanisme de suppression. Suite : [#4769](https://github.com/SocialGouv/egapro/issues/4769).
 5. **Durées d'audit écrites deux fois** : une fois dans les constantes du module (lues uniquement par les tests), une fois en dur dans le script de purge qui les applique réellement. Suite : [#4771](https://github.com/SocialGouv/egapro/issues/4771).
-6. **Sentry** : l'enregistrement de session et l'échantillonnage à 100 % des traces ne sont mentionnés ni dans la page `/donnees-personnelles` ni dans `/gestion-des-cookies`. Le docx fourni par la DGT pour la nouvelle politique de confidentialité ([#3669](https://github.com/SocialGouv/egapro/issues/3669)) ne couvre pas ce point, qui reste à traiter. Suite : [#4772](https://github.com/SocialGouv/egapro/issues/4772).
+6. **Sentry** : l'enregistrement de session et les traces ne sont mentionnés ni dans la page `/donnees-personnelles` ni dans `/gestion-des-cookies`. L'échantillonnage des traces est passé de 100 % à 10 % en production ([#4772](https://github.com/SocialGouv/egapro/issues/4772)), mais la mention de ces traitements reste à écrire : le docx fourni par la DGT pour la nouvelle politique de confidentialité ([#3669](https://github.com/SocialGouv/egapro/issues/3669)) ne couvre pas ce point. Suite : [#3669](https://github.com/SocialGouv/egapro/issues/3669).
 
 7. **Préférence de thème** : la page `/gestion-des-cookies` annonce un cookie `fr-theme` d’un an, mais le dépôt ne contient aucun code qui le crée ou applique cette durée. Le thème DSFR est mémorisé dans `localStorage` (`scheme`). Suite : vérifier et corriger la page publique ou implémenter le cookie annoncé.
 
@@ -307,7 +307,6 @@ Tickets ouverts qui changeront une ligne de cette page :
 | [#4769](https://github.com/SocialGouv/egapro/issues/4769) | Purge du journal de dédoublonnage des relances |
 | [#4770](https://github.com/SocialGouv/egapro/issues/4770) | Appliquer aux comptes utilisateurs la durée annoncée |
 | [#4771](https://github.com/SocialGouv/egapro/issues/4771) | Une seule source pour les durées de conservation du journal d'audit |
-| [#4772](https://github.com/SocialGouv/egapro/issues/4772) | Sentry : réglage de l'enregistrement de session et de l'échantillonnage |
 | [#4773](https://github.com/SocialGouv/egapro/issues/4773) | Embarquer le script de purge des déclarations dans l'image de production |
 
 La règle [`audit-logging.md`](../.agents/skills/implement/references/conventions/audit-logging.md) demande de mettre cette page à jour lors de toute modification du contenu ou de la durée d'`audit.action_log`.
