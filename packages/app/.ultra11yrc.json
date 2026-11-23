@@ -534,6 +534,17 @@
 				],
 				"auth": true,
 				"notes": "Requiert un compte listé dans ADMIN_EMAILS. Déclaration de l'entreprise de test, capturée une fois la déclaration et son récapitulatif chargés : son identifiant vient de la base, l'adresse déclarée n'est pas visitée."
+			},
+			{
+				"id": "admin-etat-des-services",
+				"name": "Backoffice — état des services",
+				"url": "http://localhost:3000/admin/etat-des-services",
+				"sources": [
+					"src/app/admin/etat-des-services/page.tsx",
+					"src/modules/admin/serviceStatus/ServiceStatusPage.tsx"
+				],
+				"auth": true,
+				"notes": "Requiert un compte listé dans ADMIN_EMAILS. Écran de lecture : sondes et incidents vides sur un build frais, rien à préparer."
 			}
 		],
 		"transverse": [
