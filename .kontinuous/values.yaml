@@ -24,6 +24,11 @@ global:
   # Deterministic Observatoire fixtures. Kept off by default and enabled only
   # by the dev overlay used for ephemeral branch review apps.
   observatoryDemoSeedEnabled: false
+  # Daily RGPD purge of declarations older than the retention window (#4773).
+  # The script now ships in the image, but production keeps the CronJob
+  # suspended until PO and DPO validate the volume the first real run would
+  # delete (see `.kontinuous/env/prod/values.yaml`).
+  declarationCleanupSuspended: false
   # Daily refresh of the remote data.gouv.fr resource. Enable once the dataset,
   # resource and sealed API key have been provisioned by the publisher account.
   dataGouv:

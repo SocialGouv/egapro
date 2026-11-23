@@ -57,7 +57,7 @@ Le vocabulaire de la colonne **Statut** est défini en [section 3](#3-vocabulair
 | Sentry (erreurs, traces, sessions) | Diagnostic d'erreur, rejeu de session | Contexte des erreurs et sessions enregistrées, anonymisés à l'émission (e-mails, SIREN et SIRET filtrés, replay masqué) | Non définie dans le dépôt | Non définie dans le dépôt | [4.4](#44-sentry-erreurs-traces-et-sessions-enregistrées) |
 | File de notification par e-mail | Fiabiliser l'envoi des e-mails transactionnels | E-mail du destinataire, identifiant utilisateur, SIREN, contenu du message, pièces jointes | 14 j à partir de la date de démarrage prévue (jobs non traités), 7 j après traitement | Appliquée par le code | [4.5](#45-file-de-notification-par-e-mail) |
 | Journal de dédoublonnage des relances | Éviter une relance envoyée deux fois | Aucune (type, SIREN, année, variante) | Illimitée de fait | Aucune purge | [4.6](#46-journal-de-dédoublonnage-des-relances) |
-| Historique des statuts de déclaration | Traçabilité du parcours de déclaration | Identifiant de l'auteur de l'action | Suit la déclaration (6 ans) | Prévue, non exécutée | [4.7](#47-historique-des-statuts-de-déclaration) |
+| Historique des statuts de déclaration | Traçabilité du parcours de déclaration | Identifiant de l'auteur de l'action | Suit la déclaration (6 ans) | Appliquée par le code | [4.7](#47-historique-des-statuts-de-déclaration) |
 | Journal d'impersonation admin | Traçabilité des connexions « en tant que » une entreprise | Identifiant de l'admin, SIREN | 365 j par défaut | Appliquée par le code | [4.8](#48-journal-dimpersonation-admin) |
 | Matomo | Mesure d'audience exemptée CNIL | Logs de visite (IP anonymisée), cookie de mesure d'audience | 750 j (logs), 13 mois (cookie) | Paramétrée hors dépôt | [4.9](#49-matomo) |
 | Logs de la passerelle API SUIT | Sécurité et diagnostic de l'accès API | IP du client, requêtes | Non définie dans le dépôt | Non définie dans le dépôt | [4.10](#410-logs-de-la-passerelle-api-suit) |
@@ -69,7 +69,7 @@ Le vocabulaire de la colonne **Statut** est défini en [section 3](#3-vocabulair
 
 | Élément | Finalité | Données personnelles | Durée | Statut | Détail |
 |---|---|---|---|---|---|
-| Déclarations de rémunération et données rattachées | Obligation légale de déclaration de l'index | Identifiant du déclarant, avis CSE et évaluation conjointe (PDF) | 6 ans | Prévue, non exécutée | [5.1](#51-déclarations-de-rémunération-et-données-rattachées) |
+| Déclarations de rémunération et données rattachées | Obligation légale de déclaration de l'index | Identifiant du déclarant, avis CSE et évaluation conjointe (PDF) | 6 ans | Appliquée par le code | [5.1](#51-déclarations-de-rémunération-et-données-rattachées) |
 | Représentation équilibrée | Obligation légale de déclaration | Identifiant du déclarant ; pour la reprise V1, coordonnées du déclarant historique | Illimitée de fait | Aucune purge | [5.2](#52-représentation-équilibrée) |
 | Comptes utilisateurs | Gestion des accès à la plateforme | Prénom, nom, e-mail, téléphone | 2 ans après la dernière déclaration ou l'inactivité du compte (annoncé) | Annoncée, non appliquée | [5.3](#53-comptes-utilisateurs) |
 | Cookies | Authentification, préférence d'affichage, mesure d'audience | — | 30 jours pour la session applicative ; 1 an annoncé pour `fr-theme` ; jusqu’à 13 mois pour Matomo | Appliquée par le code (session) ; Annoncée, non appliquée (`fr-theme`) ; Paramétrée hors dépôt (Matomo) | [5.4](#54-cookies) |
@@ -173,7 +173,7 @@ Table `notifications.reminder_sent_log` : évite d'envoyer deux fois la même re
 
 Table `app_declaration_status_history` : chaque changement de statut d'une déclaration, avec l'identifiant de l'auteur de l'action et la date.
 
-**Durée** : liée au cycle de vie de la déclaration à laquelle elle se rattache (suppression en cascade). La durée de vie d'une déclaration est de 6 ans — voir [5.1](#51-déclarations-de-rémunération-et-données-rattachées) — mais ce mécanisme n'est pas exécuté en production : voir le même statut.
+**Durée** : liée au cycle de vie de la déclaration à laquelle elle se rattache (suppression en cascade). La durée de vie d'une déclaration est de 6 ans — voir [5.1](#51-déclarations-de-rémunération-et-données-rattachées) — et le CronJob qui l'applique part avec l'image ; il reste suspendu en production tant que la validation PO/DPO n'a pas eu lieu : voir le même statut.
 
 **Sources** : `packages/app/src/server/db/schema.ts`.
 
@@ -229,7 +229,7 @@ Couvre la déclaration elle-même, les catégories d'emploi et de salariés, les
 
 **Durée annoncée** : 6 ans — une déclaration est éligible à la purge si son année est strictement inférieure à l'année courante moins 6 (variable d'environnement `EGAPRO_DECLARATION_RETENTION_YEARS`, valeur par défaut 6). Une ConfigMap optionnelle (`declaration-retention`) permettrait de la surcharger, mais aucune n'est définie dans le dépôt : c'est donc la valeur par défaut (6 ans) qui s'applique.
 
-**Statut : Prévue, non exécutée.** Le CronJob quotidien `declaration-cleanup-daily` est configuré et son script (`packages/app/scripts/declaration-cleanup.ts`) est fonctionnel, mais le fichier compilé qu'il invoque n'est pas copié dans l'image de production — le CronJob ne trouve donc jamais le script qu'il doit exécuter. [#2710](https://github.com/SocialGouv/egapro/issues/2710) constate l'effet (absence de preuve d'exécution) ; [#4773](https://github.com/SocialGouv/egapro/issues/4773) corrige la cause.
+**Statut : Appliquée par le code.** Le CronJob quotidien `declaration-cleanup-daily` (03:00 UTC) exécute `packages/app/scripts/declaration-cleanup.bundle.mjs`, désormais embarqué dans l'image : ce bundle porte sa propre copie de `postgres` et de `@aws-sdk/client-s3`, donc il ne résout rien dans le `node_modules` du conteneur. Il reste **suspendu en production** (`global.declarationCleanupSuspended`, `.kontinuous/env/prod/values.yaml`) tant que le PO et le DPO n'ont pas validé le volume que la première exécution réelle supprimerait ; il est planifié en développement et en préproduction, et la levée de la suspension est un changement d'une valeur. [#2710](https://github.com/SocialGouv/egapro/issues/2710) constate l'absence de preuve d'exécution ; [#4773](https://github.com/SocialGouv/egapro/issues/4773) corrige l'empaquetage et pose la suspension.
 
 **Sources** : `packages/app/scripts/declaration-cleanup.ts` · `.kontinuous/templates/declaration-cleanup-cron.yaml` · `packages/app/Dockerfile`.
 
@@ -287,7 +287,7 @@ Reprend `packages/app/src/modules/legal/CookiesPage.tsx`, qui alimente la page p
 Reportés tels quels, sans les atténuer :
 
 1. **Comptes utilisateurs** : l'engagement public de 2 ans n'est appliqué par aucun mécanisme. Suite : [#4770](https://github.com/SocialGouv/egapro/issues/4770).
-2. **Purge des déclarations** : le script existe mais n'est pas embarqué dans l'image de production, donc jamais exécuté. Suite : [#4773](https://github.com/SocialGouv/egapro/issues/4773).
+2. **Purge des déclarations** : le script part désormais avec l'image, mais la production garde le CronJob suspendu tant que PO et DPO n'ont pas validé le volume de la première exécution : les déclarations de plus de 6 ans y sont donc encore conservées. Suite : [#4773](https://github.com/SocialGouv/egapro/issues/4773).
 3. **Représentation équilibrée** : aucune purge, alors que des lignes reprises de la V1 contiennent des coordonnées personnelles. Suite : [#4502](https://github.com/SocialGouv/egapro/issues/4502).
 4. **Table jamais purgée** : le journal de dédoublonnage des relances n'a aucun mécanisme de suppression. Suite : [#4769](https://github.com/SocialGouv/egapro/issues/4769).
 5. **Durées d'audit écrites deux fois** : une fois dans les constantes du module (lues uniquement par les tests), une fois en dur dans le script de purge qui les applique réellement. Suite : [#4771](https://github.com/SocialGouv/egapro/issues/4771).
