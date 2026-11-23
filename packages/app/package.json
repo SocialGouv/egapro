@@ -30,7 +30,7 @@
 		"docs:suit-values": "vitest run src/modules/export/shared/__tests__/suitValueTables.test.ts --update",
 		"predocs:suit-values": "pnpm --filter notifications build",
 		"dev": "tsx scripts/copy-dsfr.ts && tsx scripts/copy-swagger-ui.ts && sh scripts/dev.sh",
-		"predev": "pnpm --filter notifications build",
+		"predev": "pnpm --filter suit-transport build && pnpm --filter notifications build",
 		"preview": "next build && next start",
 		"start": "next start",
 		"test": "vitest run",

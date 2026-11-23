@@ -9,6 +9,7 @@
 		"prebuild": "pnpm --filter suit-transport build",
 		"build": "tsc",
 		"start": "node --env-file-if-exists=.env dist/index.js",
+		"predev": "pnpm --filter suit-transport build",
 		"dev": "tsx watch --env-file-if-exists=.env src/index.ts",
 		"pretest": "pnpm --filter suit-transport build",
 		"test": "vitest run",
