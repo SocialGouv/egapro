@@ -2,7 +2,10 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import { env } from "~/env.js";
 import { formatCount } from "~/modules/domain";
-import { API_PUBLIC_DECLARATIONS_EXPORT } from "~/modules/routes";
+import {
+	API_PUBLIC_DECLARATIONS_EXPORT,
+	API_PUBLIC_REPRESENTATIONS_EXPORT,
+} from "~/modules/routes";
 import { JsonLd } from "~/modules/shared/JsonLd";
 import { searchPublicDeclarations } from "~/server/services/publicDeclarationsService";
 import styles from "./ConsultationSearchPage.module.scss";
@@ -86,6 +89,10 @@ export async function ConsultationSearchPage({ searchParams }: Props) {
 					<DownloadDataModal
 						declarationsHref={exportHref(
 							API_PUBLIC_DECLARATIONS_EXPORT,
+							params,
+						)}
+						representationsHref={exportHref(
+							API_PUBLIC_REPRESENTATIONS_EXPORT,
 							params,
 						)}
 					/>

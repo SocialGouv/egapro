@@ -21,9 +21,16 @@ vi.mock("~/server/services/publicDeclarationsService", () => ({
 import { declarationFixture } from "./__fixtures__/declaration";
 import { ConsultationSearchPage } from "./ConsultationSearchPage";
 
-async function renderPage(result: PublicSearchResultDTO) {
+async function renderPage(
+	result: PublicSearchResultDTO,
+	searchParams: Record<string, string> = {},
+) {
 	mocks.searchPublicDeclarations.mockResolvedValue(result);
-	render(await ConsultationSearchPage({ searchParams: Promise.resolve({}) }));
+	render(
+		await ConsultationSearchPage({
+			searchParams: Promise.resolve(searchParams),
+		}),
+	);
 }
 
 beforeEach(() => {
@@ -75,6 +82,24 @@ describe("ConsultationSearchPage", () => {
 		});
 
 		expect(screen.getByRole("list")).toHaveClass("fr-raw-list");
+	});
+
+	it("offers both CSV files in the download modal, carrying the current filters", async () => {
+		await renderPage(
+			{ count: 1, data: [declarationFixture({ name: "Alpha" })] },
+			{ region: "11" },
+		);
+
+		// The dialog is closed, so jsdom hides it from role queries: the links are read by text.
+		expect(screen.getByText("Indicateurs de rémunération")).toHaveAttribute(
+			"href",
+			"/api/public/declarations/export?format=csv&region=11",
+		);
+		expect(screen.getByText("Indicateurs de représentation")).toHaveAttribute(
+			"href",
+			"/api/public/representations/export?format=csv&region=11",
+		);
+		expect(screen.getAllByText("CSV")).toHaveLength(2);
 	});
 
 	it("renders no list when no company matches", async () => {
