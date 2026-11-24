@@ -14,6 +14,7 @@ const DECLARANT_ID = "representation-export-declarant";
 const DIFFUSIBLE_SIREN = "810000101";
 const NON_DIFFUSIBLE_SIREN = "810000102";
 const CAMPAIGNS = 11;
+const UNRELEASED_CAMPAIGN = 2120;
 
 function campaignYear(index: number) {
 	return 2100 + index;
@@ -38,6 +39,7 @@ async function cleanup(sql: ReturnType<typeof postgres>) {
 	await sql`DELETE FROM app_representation_declaration WHERE siren IN (${DIFFUSIBLE_SIREN}, ${NON_DIFFUSIBLE_SIREN})`;
 	await sql`DELETE FROM app_gip_mds_data WHERE siren IN (${DIFFUSIBLE_SIREN}, ${NON_DIFFUSIBLE_SIREN})`;
 	await sql`DELETE FROM app_campaign_deadline WHERE year BETWEEN ${campaignYear(0)} AND ${campaignYear(CAMPAIGNS)}`;
+	await sql`DELETE FROM app_campaign_deadline WHERE year = ${UNRELEASED_CAMPAIGN}`;
 	await sql`DELETE FROM app_company WHERE siren IN (${DIFFUSIBLE_SIREN}, ${NON_DIFFUSIBLE_SIREN})`;
 	await sql`DELETE FROM app_user WHERE id = ${DECLARANT_ID}`;
 }
@@ -134,6 +136,22 @@ describe("GET /api/public/representations/export (real Postgres)", () => {
 			},
 		]);
 
+		await db.insert(campaignDeadlines).values({
+			...deadlineRow(UNRELEASED_CAMPAIGN),
+			publicDataReleaseDate: null,
+		});
+		await db.insert(representationDeclarations).values({
+			id: "representation-export-unreleased",
+			siren: DIFFUSIBLE_SIREN,
+			year: UNRELEASED_CAMPAIGN - 1,
+			declarantId: DECLARANT_ID,
+			status: "submitted",
+			executiveWomenPercent: "30.00",
+			executiveMenPercent: "70.00",
+			memberWomenPercent: "40.00",
+			memberMenPercent: "60.00",
+		});
+
 		await db.insert(gipMdsData).values([
 			{
 				siren: DIFFUSIBLE_SIREN,
@@ -220,6 +238,33 @@ describe("GET /api/public/representations/export (real Postgres)", () => {
 		);
 
 		expect((await response.text()).split("\n")).toHaveLength(1);
+	});
+
+	it("never publishes a submitted declaration whose campaign is not released (S7)", async () => {
+		const response = await callGet(
+			`?format=csv&year=${UNRELEASED_CAMPAIGN}&q=${DIFFUSIBLE_SIREN}`,
+		);
+
+		expect((await response.text()).split("\n")).toHaveLength(1);
+	});
+
+	it("narrows the file with the observatory facets (NAF, departement, workforce)", async () => {
+		const year = campaignYear(CAMPAIGNS - 1);
+		const sirenOf = async (search: string) => {
+			const response = await callGet(`?format=csv&year=${year}${search}`);
+			const { header, lines } = csvRows(await response.text());
+			return lines.map((line) =>
+				line[header.indexOf('"SIREN"')]?.replaceAll('"', ""),
+			);
+		};
+
+		expect(await sirenOf("&naf=7022Z")).toEqual([DIFFUSIBLE_SIREN]);
+		expect(await sirenOf("&naf=6202A")).toEqual([]);
+		expect(await sirenOf("&departement=75")).toEqual([DIFFUSIBLE_SIREN]);
+		expect(await sirenOf("&departement=69")).toEqual([]);
+		expect(await sirenOf("&workforceMin=200&workforceMax=300")).toEqual([
+			DIFFUSIBLE_SIREN,
+		]);
 	});
 
 	it("builds an Excel workbook for the same filtered set", async () => {
