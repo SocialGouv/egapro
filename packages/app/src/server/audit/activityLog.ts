@@ -131,6 +131,7 @@ const INPUT_ALLOWED_KEYS = new Set([
 	"currentStep",
 	"kind",
 	"type",
+	"format",
 	"slice",
 	"declarationNumber",
 	"page",
