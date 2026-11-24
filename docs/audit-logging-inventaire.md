@@ -126,7 +126,7 @@ pour l'action sont persistés par `logAction` et `logActionInTransaction`.
 ## Miroir stdout (#3705)
 
 En complément de `audit.action_log` pour les actions protégées, et comme seule
-trace applicative pour les trois actions publiques listées ci-dessus, `logAction`
+trace applicative pour les quatre actions publiques listées ci-dessus, `logAction`
 et `auditMiddleware` (branche « chemin non mappé ») émettent chacun une ligne
 JSON sur stdout via `~/server/audit/activityLog::emitActivityLog`, collectée
 par la plateforme d'hébergement et affichée dans Grafana. Deux points d'appel
