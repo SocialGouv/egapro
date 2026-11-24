@@ -32,4 +32,7 @@ export function apiV1FileHref(fileId: string) {
 export const API_PUBLIC_DECLARATIONS_EXPORT = route(
 	"/api/public/declarations/export",
 );
+export const API_PUBLIC_REPRESENTATIONS_EXPORT = route(
+	"/api/public/representations/export",
+);
 export const API_PUBLIC_OPENAPI = route("/api/public/openapi.json");

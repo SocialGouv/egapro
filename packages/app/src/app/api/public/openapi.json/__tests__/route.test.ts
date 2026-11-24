@@ -12,6 +12,7 @@ describe("GET /api/public/openapi.json", () => {
 		expect(body.info.title).toBe("EGAPRO — API publique");
 		expect(Object.keys(body.paths)).toEqual([
 			"/api/public/declarations/export",
+			"/api/public/representations/export",
 		]);
 	});
 
@@ -25,7 +26,6 @@ describe("GET /api/public/openapi.json", () => {
 			"/api/public/representations",
 			"/api/public/representations/{siren}",
 			"/api/public/representations/{siren}/{year}",
-			"/api/public/representations/export",
 		]) {
 			expect(body.paths[path]).toBeUndefined();
 		}

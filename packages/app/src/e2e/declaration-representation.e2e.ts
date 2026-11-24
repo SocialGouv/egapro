@@ -10,6 +10,7 @@ import {
 } from "~/modules/domain";
 import {
 	API_PUBLIC_DECLARATIONS_EXPORT,
+	API_PUBLIC_REPRESENTATIONS_EXPORT,
 	DECLARATION_REPRESENTATION,
 	MY_SPACE,
 	mySpaceRepresentationHref,
@@ -541,7 +542,7 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 				await expect(panel.getByText(/conforme|objectif/i)).toHaveCount(0);
 			});
 
-			await test.step("no public API serves the representation, only the remuneration export remains", async () => {
+			await test.step("the retired representation endpoints keep answering 404", async () => {
 				const retiredUrls = [
 					"/api/public/declarations",
 					`/api/public/declarations/${TEST_SIREN}`,
@@ -549,19 +550,67 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 					"/api/public/representations",
 					`/api/public/representations/${TEST_SIREN}`,
 					`/api/public/representations/${TEST_SIREN}/${referenceYear}`,
-					"/api/public/representations/export?format=csv",
 					"/api/search?q=Demo",
 				];
 				for (const url of retiredUrls) {
 					const response = await anonCtx.request.get(url, { maxRedirects: 0 });
 					expect(response.status(), url).toBe(404);
 				}
+			});
 
-				const exportResponse = await anonCtx.request.get(
+			await test.step("both public exports answer a DGT CSV", async () => {
+				const declarationsResponse = await anonCtx.request.get(
 					routeWithQuery(API_PUBLIC_DECLARATIONS_EXPORT, "format=csv"),
 				);
-				expect(exportResponse.status()).toBe(200);
-				expect(exportResponse.headers()["content-type"]).toContain("text/csv");
+				expect(declarationsResponse.status()).toBe(200);
+				expect(declarationsResponse.headers()["content-type"]).toContain(
+					"text/csv",
+				);
+
+				const representationsResponse = await anonCtx.request.get(
+					routeWithQuery(API_PUBLIC_REPRESENTATIONS_EXPORT, "format=csv"),
+				);
+				expect(representationsResponse.status()).toBe(200);
+				expect(representationsResponse.headers()["content-type"]).toContain(
+					"text/csv",
+				);
+				const [header] = (await representationsResponse.text()).split("\n");
+				expect(header).toBe(
+					'"Annee_declaration";"SIREN";"Raison_sociale";"Adresse";"Region";"Code_departement";"Departement";"Pays";"Code_NAF";"Libelle_NAF";"Effectif_annuel_moyen";"Cadres_pourcentage_F";"Cadres_pourcentage_H";"Membres_pourcentage_F";"Membres_pourcentage_H"',
+				);
+			});
+
+			await test.step("the download modal offers both CSV files", async () => {
+				await anonPage.goto(
+					routeWithQuery(OBSERVATORY_SEARCH, `region=11&q=${TEST_SIREN}`),
+				);
+				const dialog = anonPage
+					.getByRole("dialog", { name: "Télécharger les données" })
+					.first();
+				// A freshly loaded results page mounts a second copy of the section
+				// while it hydrates: a click landing on the doomed copy opens a
+				// dialog React then discards. Retry until the live dialog holds.
+				await expect(async () => {
+					if (!(await dialog.isVisible())) {
+						await anonPage
+							.getByRole("button", { name: "Télécharger les données" })
+							.first()
+							.click();
+					}
+					await expect(dialog).toBeVisible({ timeout: 2_000 });
+				}).toPass({ timeout: 20_000 });
+				await expect(
+					dialog.getByRole("link", { name: "Indicateurs de rémunération" }),
+				).toHaveAttribute(
+					"href",
+					`${API_PUBLIC_DECLARATIONS_EXPORT}?format=csv&q=${TEST_SIREN}&region=11`,
+				);
+				await expect(
+					dialog.getByRole("link", { name: "Indicateurs de représentation" }),
+				).toHaveAttribute(
+					"href",
+					`${API_PUBLIC_REPRESENTATIONS_EXPORT}?format=csv&q=${TEST_SIREN}&region=11`,
+				);
 			});
 		} finally {
 			if (baseline.exists) {

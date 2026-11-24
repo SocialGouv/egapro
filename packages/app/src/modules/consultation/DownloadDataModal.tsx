@@ -6,11 +6,15 @@ import styles from "./DownloadDataModal.module.scss";
 const MODAL_ID = "consultation-download-modal";
 
 type Props = {
-	/** Export URL already carrying the criteria applied to the result list. */
+	/** Export URLs already carrying the criteria applied to the result list. */
 	declarationsHref: string;
+	representationsHref: string;
 };
 
-export function DownloadDataModal({ declarationsHref }: Props) {
+export function DownloadDataModal({
+	declarationsHref,
+	representationsHref,
+}: Props) {
 	const { modalRef, open, close } = useDsfrModal();
 
 	return (
@@ -56,6 +60,15 @@ export function DownloadDataModal({ declarationsHref }: Props) {
 												href={declarationsHref}
 											>
 												Indicateurs de rémunération
+											</FileDownloadLink>
+											<p className={styles.format}>CSV</p>
+										</div>
+										<div>
+											<FileDownloadLink
+												className="fr-link fr-icon-download-line fr-link--icon-right"
+												href={representationsHref}
+											>
+												Indicateurs de représentation
 											</FileDownloadLink>
 											<p className={styles.format}>CSV</p>
 										</div>
