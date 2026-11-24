@@ -324,6 +324,47 @@ export function mapToEmployeeCategoryRows(
 		});
 }
 
+export async function purgePreparedCseOpinions(
+	tx: Tx,
+	declarationId: string,
+	siren: string,
+	year: number,
+): Promise<string[]> {
+	const preparedFiles = await tx
+		.select({ filePath: files.filePath })
+		.from(files)
+		.where(
+			and(
+				eq(files.declarationId, declarationId),
+				eq(files.type, "cse_opinion"),
+			),
+		);
+
+	await tx
+		.delete(cseOpinionFiles)
+		.where(eq(cseOpinionFiles.declarationId, declarationId));
+	await tx
+		.delete(files)
+		.where(
+			and(
+				eq(files.declarationId, declarationId),
+				eq(files.type, "cse_opinion"),
+			),
+		);
+	await tx
+		.delete(cseOpinions)
+		.where(eq(cseOpinions.declarationId, declarationId));
+	await tx
+		.update(declarations)
+		.set({ cseOpinionDraftUpdatedAt: null })
+		.where(eq(declarations.id, declarationId));
+
+	// The CSE form rehydrates from this draft slice, not from the rows above.
+	await purgeDraftSlice(tx, siren, year, "cse");
+
+	return preparedFiles.map((file) => file.filePath);
+}
+
 export async function purgeDraftSlice(
 	tx: DraftPurgeTx,
 	siren: string,

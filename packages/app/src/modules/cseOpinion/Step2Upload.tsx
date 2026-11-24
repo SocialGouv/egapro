@@ -19,7 +19,6 @@ import { api } from "~/trpc/react";
 import { ContentTypeMatrix } from "./components/ContentTypeMatrix";
 import { CseStepIndicator } from "./components/CseStepIndicator";
 import { OpinionSummaryBox } from "./components/OpinionSummaryBox";
-import { StaleOpinionsAlert } from "./components/StaleOpinionsAlert";
 import {
 	type SubmissionAlertSnapshot,
 	SubmissionAlerts,
@@ -49,7 +48,6 @@ type Props = {
 	existingFiles?: UploadedFile[];
 	columns: ContentTypeColumn[];
 	initialAssociations?: StoredFileContentType[];
-	opinionsStale?: boolean;
 };
 
 export function Step2Upload({
@@ -58,7 +56,6 @@ export function Step2Upload({
 	existingFiles = [],
 	columns,
 	initialAssociations = [],
-	opinionsStale = false,
 }: Props) {
 	const router = useRouter();
 	const utils = api.useUtils();
@@ -306,8 +303,6 @@ export function Step2Upload({
 				</div>
 
 				<CseStepIndicator currentStep={2} />
-
-				{opinionsStale && <StaleOpinionsAlert />}
 
 				<div>
 					<label

@@ -49,6 +49,7 @@ import {
 	users,
 } from "~/server/db/schema";
 import { loadRules } from "~/server/rules/engine";
+import { deleteFile as deleteS3File } from "~/server/services/s3";
 import {
 	activeDeclarationFilter,
 	applyPercentagesAfterUpdate,
@@ -59,6 +60,7 @@ import {
 	fetchPreviousYearJobCategories,
 	findJointEvaluationFile,
 	purgeDraftSlice,
+	purgePreparedCseOpinions,
 } from "./declarationHelpers";
 import {
 	applyActionOrRefuse,
@@ -929,6 +931,7 @@ export const declarationRouter = createTRPCRouter({
 		async ({ ctx }) => {
 			const siren = ctx.siren;
 			const year = getCurrentYear();
+			let purgedCseFilePaths: string[] = [];
 
 			await ctx.db.transaction(async (tx) => {
 				const declaration = await lockAndReadDeclaration(
@@ -966,6 +969,15 @@ export const declarationRouter = createTRPCRouter({
 					});
 				}
 
+				if (declaration.status === "awaiting_cse_opinion") {
+					purgedCseFilePaths = await purgePreparedCseOpinions(
+						tx,
+						declaration.id,
+						siren,
+						year,
+					);
+				}
+
 				await tx
 					.insert(declarationStatusHistory)
 					.values(
@@ -981,6 +993,15 @@ export const declarationRouter = createTRPCRouter({
 					.where(activeDeclarationFilter(siren, year));
 				await purgeDraftSlice(tx, siren, year, "second");
 			});
+
+			for (const filePath of purgedCseFilePaths) {
+				void deleteS3File(filePath).catch((err) => {
+					console.error(
+						"[declaration] best-effort delete of purged CSE opinion file failed",
+						{ filePath, err },
+					);
+				});
+			}
 
 			const email = ctx.session.user.email;
 			if (email) {

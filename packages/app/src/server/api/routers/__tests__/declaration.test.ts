@@ -34,6 +34,14 @@ vi.mock("~/server/db", () => ({
 	db: {},
 }));
 
+const { mockDeleteS3File } = vi.hoisted(() => ({
+	mockDeleteS3File: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock("~/server/services/s3", () => ({
+	deleteFile: (...args: unknown[]) => mockDeleteS3File(...args),
+}));
+
 const { mockEnqueueReceipt } = vi.hoisted(() => ({
 	mockEnqueueReceipt: vi.fn().mockResolvedValue(undefined),
 }));
@@ -294,6 +302,8 @@ function createUnderLockDb(
 	const updateWhere = vi.fn().mockResolvedValue(undefined);
 	const set = vi.fn().mockReturnValue({ where: updateWhere });
 	const update = vi.fn().mockReturnValue({ set });
+	const deleteWhere = vi.fn().mockResolvedValue(undefined);
+	const deleteFrom = vi.fn().mockReturnValue({ where: deleteWhere });
 	const insertValues = vi.fn().mockResolvedValue(undefined);
 	const insert = vi.fn().mockReturnValue({ values: insertValues });
 	const execute = vi.fn().mockImplementation(async () => {
@@ -303,7 +313,13 @@ function createUnderLockDb(
 	const transaction = vi
 		.fn()
 		.mockImplementation(async (fn: (tx: unknown) => unknown) =>
-			fn({ execute, select: txSelect, insert, update, delete: vi.fn() }),
+			fn({
+				execute,
+				select: txSelect,
+				insert,
+				update,
+				delete: deleteFrom,
+			}),
 		);
 
 	return {
@@ -315,6 +331,8 @@ function createUnderLockDb(
 		} as unknown,
 		set,
 		insertValues,
+		deleteFrom,
+		deleteWhere,
 		steps,
 	};
 }
@@ -1106,9 +1124,11 @@ describe("declarationRouter", () => {
 			const result = await caller.submitSecondDeclaration();
 
 			expect(result).toEqual({ success: true });
-			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
-			expect(setCall.status).toBe("awaiting_cse_opinion");
-			expect(setCall.secondDeclarationStep).toBe(3);
+			const setCall = ctx.set.mock.calls
+				.map((c) => c[0] as Record<string, unknown>)
+				.find((c) => "status" in c);
+			expect(setCall?.status).toBe("awaiting_cse_opinion");
+			expect(setCall?.secondDeclarationStep).toBe(3);
 			const insertedEvents = ctx.insertValues.mock.calls[0]?.[0] as Array<{
 				eventType: string;
 				round: number | null;
@@ -1138,8 +1158,10 @@ describe("declarationRouter", () => {
 
 			await caller.submitSecondDeclaration();
 
-			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
-			expect(setCall.status).toBe("awaiting_revision_choice");
+			const setCall = ctx.set.mock.calls
+				.map((c) => c[0] as Record<string, unknown>)
+				.find((c) => "status" in c);
+			expect(setCall?.status).toBe("awaiting_revision_choice");
 		});
 
 		it.each([
@@ -1281,6 +1303,146 @@ describe("declarationRouter", () => {
 			expect(purgeCall).toBeDefined();
 			expect(purgeCall?.draft).toBeNull();
 			expect(purgeCall?.draftUpdatedAt).toBeNull();
+		});
+
+		describe("CSE opinion purge on resubmission (issue #5162)", () => {
+			function awaitingCseDb(
+				overrides: Parameters<typeof buildDeclaration>[0] = {},
+			) {
+				const declaration = buildDeclaration({
+					status: "awaiting_cse_opinion",
+					firstDeclarationPathChoice: "corrective_action",
+					cseRequired: true,
+					draft: { cse: { opinions: [] }, second: { step1: {} } },
+					...overrides,
+				});
+				return createUnderLockDb([
+					[declaration],
+					[GAP_FREE_CATEGORY].map((ec) => ({ employee_category: ec })),
+					[
+						{ filePath: "339787277/2027/avis-1.pdf" },
+						{ filePath: "339787277/2027/avis-2.pdf" },
+					],
+					[declaration],
+					[{ draft: { second: { step1: {} } } }],
+				]);
+			}
+
+			beforeEach(() => {
+				mockDeleteS3File.mockReset();
+				mockDeleteS3File.mockResolvedValue(undefined);
+			});
+
+			it("deletes opinions, associations and cse_opinion files, then clears the CSE draft", async () => {
+				const ctx = awaitingCseDb();
+				const caller = await createLockedCaller(ctx.db);
+
+				const result = await caller.submitSecondDeclaration();
+
+				expect(result).toEqual({ success: true });
+				expect(ctx.deleteFrom).toHaveBeenCalledTimes(3);
+				const setCalls = ctx.set.mock.calls.map(
+					(c) => c[0] as Record<string, unknown>,
+				);
+				expect(setCalls).toContainEqual(
+					expect.objectContaining({ cseOpinionDraftUpdatedAt: null }),
+				);
+				const purgeCall = setCalls.find((c) => "draft" in c);
+				expect(purgeCall?.draft).toEqual({ second: { step1: {} } });
+			});
+
+			it("stays awaiting_cse_opinion when the gap is resolved and CSE is required", async () => {
+				const ctx = awaitingCseDb();
+				const caller = await createLockedCaller(ctx.db);
+
+				await caller.submitSecondDeclaration();
+
+				const projectionCall = ctx.set.mock.calls
+					.map((c) => c[0] as Record<string, unknown>)
+					.find((c) => "status" in c);
+				expect(projectionCall?.status).toBe("awaiting_cse_opinion");
+			});
+
+			it("deletes the purged PDF objects from S3 after the transaction commits", async () => {
+				const ctx = awaitingCseDb();
+				const caller = await createLockedCaller(ctx.db);
+
+				await caller.submitSecondDeclaration();
+
+				expect(mockDeleteS3File.mock.calls.map((c) => c[0])).toEqual([
+					"339787277/2027/avis-1.pdf",
+					"339787277/2027/avis-2.pdf",
+				]);
+			});
+
+			it("still succeeds when the S3 deletion fails", async () => {
+				mockDeleteS3File.mockRejectedValueOnce(new Error("S3 down"));
+				const ctx = awaitingCseDb();
+				const caller = await createLockedCaller(ctx.db);
+
+				const result = await caller.submitSecondDeclaration();
+
+				expect(result).toEqual({ success: true });
+				expect(ctx.deleteFrom).toHaveBeenCalledTimes(3);
+			});
+
+			it("purges when the resubmission leaves a gap and moves to the revision choice", async () => {
+				const declaration = buildDeclaration({
+					status: "awaiting_cse_opinion",
+					firstDeclarationPathChoice: "corrective_action",
+					cseRequired: true,
+				});
+				const ctx = createUnderLockDb([
+					[declaration],
+					[{ annualBaseWomen: "80", annualBaseMen: "100" }].map((ec) => ({
+						employee_category: ec,
+					})),
+					[{ filePath: "339787277/2027/avis-1.pdf" }],
+					[declaration],
+					[],
+				]);
+				const caller = await createLockedCaller(ctx.db);
+
+				await caller.submitSecondDeclaration();
+
+				const projectionCall = ctx.set.mock.calls
+					.map((c) => c[0] as Record<string, unknown>)
+					.find((c) => "status" in c);
+				expect(projectionCall?.status).toBe("awaiting_revision_choice");
+				expect(ctx.deleteFrom).toHaveBeenCalledTimes(3);
+			});
+
+			it("keeps the CSE rows when the status is not awaiting_cse_opinion", async () => {
+				const declaration = buildDeclaration({
+					status: "corrective_actions_chosen",
+					firstDeclarationPathChoice: "corrective_action",
+					cseRequired: true,
+				});
+				const ctx = createOneRowSelectDb(
+					declaration,
+					[GAP_FREE_CATEGORY],
+					[declaration],
+				);
+				const caller = await createLockedCaller(ctx.db);
+
+				await caller.submitSecondDeclaration();
+
+				expect(ctx.deleteFrom).not.toHaveBeenCalled();
+				expect(mockDeleteS3File).not.toHaveBeenCalled();
+			});
+
+			it("refuses the resubmission on a justify path without purging", async () => {
+				const ctx = awaitingCseDb({ secondDeclarationPathChoice: "justify" });
+				const caller = await createLockedCaller(ctx.db);
+
+				await expect(caller.submitSecondDeclaration()).rejects.toMatchObject({
+					code: "PRECONDITION_FAILED",
+					message:
+						"La seconde déclaration ne peut pas être transmise à cette étape de la démarche.",
+				});
+				expect(ctx.deleteFrom).not.toHaveBeenCalled();
+				expect(mockDeleteS3File).not.toHaveBeenCalled();
+			});
 		});
 	});
 

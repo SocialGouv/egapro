@@ -85,15 +85,27 @@ export function SecondDeclarationStep3Review({
 			getDsfrModal(modalRef.current)?.conceal();
 		}
 	}, []);
+	const utils = api.useUtils();
 	const completeSubmission = useCallback(() => {
 		closeModal();
+		// The server purges the CSE draft slice on a resubmission; the cached
+		// copy would otherwise rehydrate the next step with deleted values.
+		utils.declarationDraft.get.setData({ siren, year: declarationYear }, null);
 		if (gapsExist) {
 			markDeclarationTransmissionSuccess();
 			router.push(COMPLIANCE_PATH);
 		} else {
 			router.push(getPostComplianceDestination(cseOpinionRequired));
 		}
-	}, [closeModal, cseOpinionRequired, gapsExist, router]);
+	}, [
+		closeModal,
+		cseOpinionRequired,
+		declarationYear,
+		gapsExist,
+		router,
+		siren,
+		utils,
+	]);
 	const refreshAfterSubmissionError = useRefreshAfterSubmissionError();
 	const mutation = api.declaration.submitSecondDeclaration.useMutation({
 		networkMode: "always",
@@ -206,6 +218,17 @@ export function SecondDeclarationStep3Review({
 				hasGapsAboveThreshold={gapsExist}
 				siren={siren}
 			/>
+
+			{isWritable && status === "awaiting_cse_opinion" ? (
+				<div className="fr-alert fr-alert--warning">
+					<h2 className="fr-alert__title">Les avis du CSE seront supprimés</h2>
+					<p>
+						En transmettant cette nouvelle version de votre seconde déclaration,
+						vous supprimez les avis et les fichiers du CSE déjà préparés. Vous
+						devrez les saisir à nouveau sur ces données.
+					</p>
+				</div>
+			) : null}
 
 			<FormActions
 				className="fr-mt-0"

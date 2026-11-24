@@ -433,9 +433,14 @@ export async function saveSecondDeclaration(
 
 export async function completeSecondDeclaration(
 	page: Page,
-	options: { hasGap: boolean },
+	options: { hasGap: boolean; expectCsePurgeWarning?: boolean },
 ) {
 	await saveSecondDeclaration(page, options);
+	if (options.expectCsePurgeWarning) {
+		await expect(
+			page.getByText("Les avis du CSE seront supprimés"),
+		).toBeVisible();
+	}
 	await test.step("seconde déclaration — transmission", async () => {
 		// Step 3: Review and submit (opens confirmation modal)
 		await page.getByRole("button", { exact: true, name: SUBMIT_LABEL }).click();

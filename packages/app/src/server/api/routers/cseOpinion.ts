@@ -5,7 +5,6 @@ import {
 	NO_FILE_ALERT,
 	UNASSOCIATED_FILE_ALERT,
 } from "~/modules/cseOpinion/contentTypeColumns";
-import { opinionsSavedBeforeSecondDeclaration } from "~/modules/cseOpinion/opinionsStaleness";
 import {
 	deleteFileSchema,
 	saveOpinionsSchema,
@@ -21,7 +20,6 @@ import {
 	declarationProcedure,
 	declarationWriteProcedure,
 } from "~/server/api/trpc";
-import type { DB } from "~/server/db";
 import {
 	cseOpinionFiles,
 	cseOpinions,
@@ -37,10 +35,7 @@ import {
 	pruneStaleContentTypeAssociations,
 } from "~/server/services/cseRequiredContentTypes";
 import { deleteFile as deleteS3File, getFileSize } from "~/server/services/s3";
-import {
-	findLatestStatusEvent,
-	findTransmittedCseOpinions,
-} from "./declarationHelpers";
+import { findTransmittedCseOpinions } from "./declarationHelpers";
 import {
 	applyActionOrRefuse,
 	buildHistoryInserts,
@@ -54,21 +49,6 @@ const CSE_OPINION_UNAVAILABLE_ERROR =
 
 const SECOND_DECLARATION_RESUBMISSION_REQUIRED_ERROR =
 	"Votre seconde déclaration a été modifiée : transmettez-la à nouveau avant de transmettre les avis du CSE.";
-
-async function loadOpinionsStale(database: DB, declarationId: string) {
-	const [[declaration], submission] = await Promise.all([
-		database
-			.select({ draftUpdatedAt: declarations.cseOpinionDraftUpdatedAt })
-			.from(declarations)
-			.where(eq(declarations.id, declarationId))
-			.limit(1),
-		findLatestStatusEvent(database, declarationId, "second_declaration_submit"),
-	]);
-	return opinionsSavedBeforeSecondDeclaration({
-		draftUpdatedAt: declaration?.draftUpdatedAt ?? null,
-		secondDeclarationSubmittedAt: submission?.createdAt ?? null,
-	});
-}
 
 const JUSTIFICATION_OPINION_MISSING_ERROR =
 	"L'avis du CSE sur la justification des écarts et sa date doivent être renseignés.";
@@ -167,21 +147,18 @@ export const cseOpinionRouter = createTRPCRouter({
 	}),
 
 	get: declarationProcedure.query(async ({ ctx }) => {
-		const [rows, opinionsStale] = await Promise.all([
-			ctx.db
-				.select({
-					declarationNumber: cseOpinions.declarationNumber,
-					type: cseOpinions.type,
-					opinion: cseOpinions.opinion,
-					opinionDate: cseOpinions.opinionDate,
-					gapConsulted: cseOpinions.gapConsulted,
-				})
-				.from(cseOpinions)
-				.where(eq(cseOpinions.declarationId, ctx.declarationId)),
-			loadOpinionsStale(ctx.db, ctx.declarationId),
-		]);
+		const rows = await ctx.db
+			.select({
+				declarationNumber: cseOpinions.declarationNumber,
+				type: cseOpinions.type,
+				opinion: cseOpinions.opinion,
+				opinionDate: cseOpinions.opinionDate,
+				gapConsulted: cseOpinions.gapConsulted,
+			})
+			.from(cseOpinions)
+			.where(eq(cseOpinions.declarationId, ctx.declarationId));
 
-		return { opinions: rows, opinionsStale };
+		return { opinions: rows };
 	}),
 
 	saveOpinions: declarationWriteProcedure
@@ -283,17 +260,14 @@ export const cseOpinionRouter = createTRPCRouter({
 
 		// Object size is not persisted on the file row; read it from S3 (best
 		// effort, in parallel). A failed HEAD yields a null size, never a 500.
-		const [filesWithSize, opinionsStale] = await Promise.all([
-			Promise.all(
-				rows.map(async ({ filePath, ...file }) => ({
-					...file,
-					fileSize: await getFileSize(filePath),
-				})),
-			),
-			loadOpinionsStale(ctx.db, ctx.declarationId),
-		]);
+		const filesWithSize = await Promise.all(
+			rows.map(async ({ filePath, ...file }) => ({
+				...file,
+				fileSize: await getFileSize(filePath),
+			})),
+		);
 
-		return { files: filesWithSize, opinionsStale };
+		return { files: filesWithSize };
 	}),
 
 	getFileContentTypes: declarationProcedure.query(async ({ ctx }) => {
