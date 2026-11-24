@@ -29,6 +29,11 @@ export {
 } from "./projection";
 export type { CsvColumn } from "./publicCsvExport";
 export { toPublicCsv } from "./publicCsvExport";
+export type { RepresentationExportRow } from "./representationExportColumns";
+export {
+	REPRESENTATION_EXPORT_COLUMNS,
+	REPRESENTATION_XLSX_HEADERS,
+} from "./representationExportColumns";
 export type {
 	PublicRepresentationCompanySource,
 	PublicRepresentationSource,

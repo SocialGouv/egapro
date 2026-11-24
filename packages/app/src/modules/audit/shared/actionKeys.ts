@@ -144,6 +144,7 @@ export const AUDIT_ACTIONS = {
 	PUBLIC_REFERENT_VIEW: "public_referents.view",
 
 	PUBLIC_DECLARATIONS_EXPORT: "public_declarations.export",
+	PUBLIC_REPRESENTATIONS_EXPORT: "public_representations.export",
 
 	// ── System / cron-triggered ────────────────────────────
 	SYSTEM_AUDIT_CLEANUP: "system.audit_cleanup",
@@ -260,6 +261,7 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW]: "public_search",
 
 	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_EXPORT]: "export",
+	[AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_EXPORT]: "export",
 
 	[AUDIT_ACTIONS.SYSTEM_AUDIT_CLEANUP]: "system",
 	[AUDIT_ACTIONS.SYSTEM_DECLARATION_CLEANUP]: "system",
