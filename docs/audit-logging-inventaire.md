@@ -20,7 +20,7 @@ listed as a named exemption. The only third state this table accepts is a route
 whose wiring is in flight in a named open PR, and it is listed apart from the
 counts — never inside them.
 
-### Instrumented through `withAuditedRoute` (15)
+### Instrumented through `withAuditedRoute` (16)
 
 | Route | Action key |
 |---|---|
@@ -33,13 +33,14 @@ counts — never inside them.
 | `joint-evaluation-pdf` | `PDF_JOINT_EVALUATION_DOWNLOAD` |
 | `prefill-pdf` | `PDF_PREFILL_DOWNLOAD` |
 | `public/declarations/export` | `PUBLIC_DECLARATIONS_EXPORT` |
+| `public/representations/export` | `PUBLIC_REPRESENTATIONS_EXPORT` |
 | `public/referents-egalite-professionnelle` | `PUBLIC_REFERENT_SEARCH` |
 | `representation-pdf` | `PDF_REPRESENTATION_DOWNLOAD` |
 | `v1/export/declarations` | `EXPORT_API_DECLARATIONS` |
 | `v1/export/representations` | `EXPORT_API_REPRESENTATIONS` |
 | `v1/files` | `EXPORT_API_FILES` |
 
-The two `public/*` rows above emit stdout only. The other routes still write
+The three `public/*` rows above emit stdout only. The other routes still write
 `audit.action_log` as well as stdout.
 
 The gap on `public/referents-egalite-professionnelle`, whose action key
@@ -97,8 +98,8 @@ qu'un UUID technique associé à un de ces types. Le verrou de représentation,
 porté par le couple SIREN + année, n'a pas d'UUID : son année passe par
 `metadata.year`.
 
-Les actions `PUBLIC_REFERENT_SEARCH`, `PUBLIC_REFERENT_VIEW` et
-`PUBLIC_DECLARATIONS_EXPORT` s'arrêtent après l'émission stdout de `logAction` :
+Les actions `PUBLIC_REFERENT_SEARCH`, `PUBLIC_REFERENT_VIEW`,
+`PUBLIC_DECLARATIONS_EXPORT` et `PUBLIC_REPRESENTATIONS_EXPORT` s'arrêtent après l'émission stdout de `logAction` :
 aucune nouvelle ligne n'est insérée dans `audit.action_log`. Les lignes
 historiques restent soumises à la purge ordinaire.
 
@@ -125,7 +126,7 @@ pour l'action sont persistés par `logAction` et `logActionInTransaction`.
 ## Miroir stdout (#3705)
 
 En complément de `audit.action_log` pour les actions protégées, et comme seule
-trace applicative pour les trois actions publiques listées ci-dessus, `logAction`
+trace applicative pour les quatre actions publiques listées ci-dessus, `logAction`
 et `auditMiddleware` (branche « chemin non mappé ») émettent chacun une ligne
 JSON sur stdout via `~/server/audit/activityLog::emitActivityLog`, collectée
 par la plateforme d'hébergement et affichée dans Grafana. Deux points d'appel
@@ -174,7 +175,7 @@ Sur une ligne `source: "route"` ou un appel direct à `logAction`
 les clés d'une liste blanche fixe
 (`~/server/audit/activityLog::INPUT_ALLOWED_KEYS` — clés techniques : `year`,
 `siren`, `id`, `declarationId`, `fileId`, `step`, `currentStep`, `kind`,
-`type`, `slice`, `declarationNumber`, `page`, `pageSize`, `limit`, `offset`,
+`type`, `format`, `slice`, `declarationNumber`, `page`, `pageSize`, `limit`, `offset`,
 `sortBy`, `sortOrder`, `sizeRange`, `region`, `county`, `hasCse`) **et** dont
 la valeur est un nombre fini, un booléen, ou une chaîne courte
 `^[A-Za-z0-9_.:-]{1,64}$` — jamais un objet, un tableau ou une Date, même sous

@@ -333,6 +333,20 @@ describe("emitActivityLog", () => {
 		expect(parseLastLine().input).toEqual({ year: 2026 });
 	});
 
+	it("keeps the closed format of a public export in a route input", () => {
+		emitActivityLog(
+			buildParams({
+				source: "route",
+				action: "public_representations.export",
+				route: "/api/public/representations/export",
+				operation: "GET",
+				rawInput: { format: "csv", year: 2027 },
+			}),
+		);
+
+		expect(parseLastLine().input).toEqual({ format: "csv", year: 2027 });
+	});
+
 	it("keeps booleans and short identifiers but drops free text and non-finite numbers from a route input", () => {
 		emitActivityLog(
 			buildParams({

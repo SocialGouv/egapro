@@ -28,6 +28,8 @@ export type PublicRepresentationCompanySource = Pick<
 	| "region"
 	| "departmentCode"
 	| "departmentLabel"
+	| "countryCode"
+	| "countryLabel"
 	| "nafCode"
 	| "nafLabel"
 	| "statutDiffusion"
@@ -52,10 +54,12 @@ export const publicRepresentationColumns = {
 
 type RepresentationIdentity = {
 	name: string | null;
-	address?: string | null;
+	address: string | null;
 	region: string | null;
 	departmentCode: string | null;
 	departmentLabel: string | null;
+	countryCode: string | null;
+	countryLabel: string | null;
 	nafCode: string | null;
 	nafLabel: string | null;
 	publishUrl: string | null;
@@ -64,14 +68,17 @@ type RepresentationIdentity = {
 
 const NON_DIFFUSIBLE_IDENTITY = {
 	name: NON_DIFFUSIBLE_LABEL,
+	address: NON_DIFFUSIBLE_LABEL,
 	region: NON_DIFFUSIBLE_LABEL,
 	departmentCode: NON_DIFFUSIBLE_LABEL,
 	departmentLabel: NON_DIFFUSIBLE_LABEL,
+	countryCode: NON_DIFFUSIBLE_LABEL,
+	countryLabel: NON_DIFFUSIBLE_LABEL,
 	nafCode: NON_DIFFUSIBLE_LABEL,
 	nafLabel: NON_DIFFUSIBLE_LABEL,
 	publishUrl: null,
 	publishModalities: null,
-} satisfies Omit<Required<RepresentationIdentity>, "address">;
+} satisfies RepresentationIdentity;
 
 export function maskNonDiffusibleRepresentation<
 	T extends RepresentationIdentity,
@@ -80,8 +87,6 @@ export function maskNonDiffusibleRepresentation<
 	return {
 		...representation,
 		...NON_DIFFUSIBLE_IDENTITY,
-		// The public export has no address column: masking must not add one.
-		...("address" in representation && { address: NON_DIFFUSIBLE_LABEL }),
 	};
 }
 
@@ -98,6 +103,8 @@ export function toPublicRepresentation(
 			region: company.region,
 			departmentCode: company.departmentCode,
 			departmentLabel: company.departmentLabel,
+			countryCode: company.countryCode,
+			countryLabel: company.countryLabel,
 			nafCode: company.nafCode,
 			nafLabel: company.nafLabel,
 			referencePeriodStart: declaration.referencePeriodStart,
