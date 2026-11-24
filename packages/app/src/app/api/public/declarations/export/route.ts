@@ -4,9 +4,7 @@ import ExcelJS from "exceljs";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { AUDIT_ACTIONS } from "~/modules/audit";
-import { ratioToPercentPoints, toCsvField } from "~/modules/domain";
 import type {
-	CsvColumn,
 	PublicCompanySource,
 	PublicDeclarationDTO,
 	PublicSearchInput,
@@ -17,6 +15,7 @@ import {
 	PUBLIC_API_EXPORT_HEADERS,
 	parsePublicSearchInput,
 	publicDeclarationColumns,
+	toPublicCsv,
 	toPublicDeclaration,
 } from "~/modules/public-api";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
@@ -216,22 +215,6 @@ function textExportResponse(
 	});
 }
 
-function formatCsvField(row: PublicDeclarationDTO, column: CsvColumn): string {
-	const value = row[column.key];
-	if (!column.percent) return toCsvField(value);
-	return toCsvField(
-		ratioToPercentPoints(typeof value === "number" ? value : null),
-	);
-}
-
-function formatCsv(rows: PublicDeclarationDTO[]): string {
-	const header = CSV_COLUMNS.map(({ header }) => toCsvField(header)).join(";");
-	const dataRows = rows.map((row) =>
-		CSV_COLUMNS.map((column) => formatCsvField(row, column)).join(";"),
-	);
-	return [header, ...dataRows].join("\n");
-}
-
 async function formatWorkbook(
 	rows: PublicDeclarationDTO[],
 ): Promise<Uint8Array<ArrayBuffer>> {
@@ -330,7 +313,7 @@ export const GET = withAuditedRoute(
 					if (rows instanceof Response) return rows;
 					const data = rows.map(toPublicDTO);
 					return format === "csv"
-						? formatCsv(data)
+						? toPublicCsv(CSV_COLUMNS, data)
 						: JSON.stringify({ data, count: data.length });
 				},
 			);
