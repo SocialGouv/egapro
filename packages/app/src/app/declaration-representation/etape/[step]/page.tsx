@@ -5,6 +5,7 @@ import {
 	getStepDefinition,
 	parseStepParam,
 	representationDraftFromDeclaration,
+	representationTransmittedDraftFromDeclaration,
 	StepPageClient,
 	TOTAL_REPRESENTATION_STEPS,
 } from "~/modules/declaration-representation";
@@ -71,7 +72,11 @@ export default async function RepresentationStepPage({
 			campaignOpen={campaignOpen}
 			campaignYear={campaignYear}
 			declarationDeadline={declarationDeadline}
-			initialDraft={representationDraftFromDeclaration(declaration, step)}
+			initialDraft={
+				campaignOpen
+					? representationDraftFromDeclaration(declaration, step)
+					: representationTransmittedDraftFromDeclaration(declaration, step)
+			}
 			step={step}
 			year={year}
 		/>

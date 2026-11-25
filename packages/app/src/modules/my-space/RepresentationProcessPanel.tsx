@@ -123,7 +123,7 @@ export function RepresentationProcessPanel({
 									campaignEndDate={campaign.campaignEndDate}
 									campaignYear={campaignYear}
 									deadline={campaign.declarationDeadline}
-									modifiable={variant === "submitted"}
+									modifiable={variant === "submitted" && !lockedByOther}
 									status={step2}
 									transmitted={transmitted}
 								/>

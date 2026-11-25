@@ -344,7 +344,7 @@ describe("RepresentationProcessPanel", () => {
 			).toBeInTheDocument();
 		});
 
-		it("keeps both actions visible while another user holds the lock", () => {
+		it("shows the read-only actions while another user holds the lock", () => {
 			const { container } = render(
 				<RepresentationProcessPanel
 					campaign={OPEN_CAMPAIGN}
@@ -365,8 +365,9 @@ describe("RepresentationProcessPanel", () => {
 				panel.getByText("Votre déclaration a été transmise"),
 			).toBeInTheDocument();
 			expect(
-				panel.getByRole("link", { hidden: true, name: "Modifier" }),
-			).toBeInTheDocument();
+				panel.queryByRole("link", { hidden: true, name: "Modifier" }),
+			).not.toBeInTheDocument();
+			expect(panel.queryByText(/Modifiable jusqu'au/)).not.toBeInTheDocument();
 			expect(
 				panel.getByTitle("Voir le récapitulatif de la déclaration"),
 			).toBeInTheDocument();
