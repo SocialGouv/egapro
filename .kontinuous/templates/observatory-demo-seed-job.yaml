@@ -1,4 +1,4 @@
-{{- if .Values.global.observatoryDemoSeedEnabled }}
+{{- if and .Values.global.observatoryDemoSeedEnabled (eq (toString .Values.global.env) "dev") }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -34,6 +34,8 @@ spec:
           env:
             - name: OBSERVATORY_SEED_WAIT_FOR_SCHEMA_SECONDS
               value: "120"
+            - name: NEXT_PUBLIC_EGAPRO_ENV
+              value: "dev"
           command:
             - node
             - packages/app/scripts/seed-demo-observatory.bundle.mjs

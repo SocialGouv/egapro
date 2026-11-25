@@ -128,7 +128,14 @@ COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/migrate.bundle.m
 COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/backfill-company-region-department.bundle.mjs ./packages/app/scripts/backfill-company-region-department.bundle.mjs
 COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/backfill-company-naf.bundle.mjs ./packages/app/scripts/backfill-company-naf.bundle.mjs
 # Development/review-app fixture loaded by the optional post-deploy hook.
-COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/seed-demo-observatory.bundle.mjs ./packages/app/scripts/seed-demo-observatory.bundle.mjs
+# The bundle is bound from the builder inside the RUN so it never enters a
+# preprod/prod layer; only dev images (review apps, *-persist) carry it.
+ARG NEXT_PUBLIC_EGAPRO_ENV
+RUN --mount=type=bind,from=builder,source=/app/packages/app/scripts/seed-demo-observatory.bundle.mjs,target=/tmp/seed-demo-observatory.bundle.mjs \
+    if [ "$NEXT_PUBLIC_EGAPRO_ENV" = "dev" ]; then \
+        cp /tmp/seed-demo-observatory.bundle.mjs ./packages/app/scripts/seed-demo-observatory.bundle.mjs && \
+        chown 1000:1000 ./packages/app/scripts/seed-demo-observatory.bundle.mjs; \
+    fi
 # Standalone script invoked by the audit-cleanup CronJob (issue #3268 — direct
 # DB access replaces the former curl → /api/audit/cleanup HTTP trigger).
 # declaration-cleanup is deliberately NOT copied: its CronJob has never found it
