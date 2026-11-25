@@ -242,7 +242,7 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 			await goNext(page);
 			await expect(
 				page.getByText(
-					/La date sélectionnée ne correspond pas à l'année de référence/,
+					/La date sélectionnée ne correspond pas à l'année de calcul des indicateurs/,
 				),
 			).toBeVisible();
 

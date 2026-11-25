@@ -738,7 +738,9 @@ sequenceDiagram
 3. sinon, si un code postal est présent → **France** ;
 4. sinon → un second appel au registre (siège social) tranche, faute de quoi le pays reste **inconnu**.
 
-**Garde-fou** : une résolution qui échoue ou ne renvoie rien au login **n'écrase jamais** un pays déjà connu en base (`toCompanyRefreshValues`, `~/server/db/companyInsert.ts`) — seul un résultat positif remplace la valeur précédente.
+**Garde-fou** : une résolution qui échoue ou ne renvoie aucune entité au login **n'écrase jamais** une identité déjà connue en base (`toCompanyRefreshValues`, `~/server/db/companyInsert.ts`) — nom, adresse, NAF, région, département, pays, effectif et statut de diffusion ne sont rafraîchis que par une réponse positive du registre.
+
+**Résilience** : quand l'identité n'a jamais pu être résolue — nom de secours `Entreprise <SIREN>` et aucune autre donnée d'identité (`isCompanyIdentityUnresolved`, `~/modules/domain`) — le cartouche de Mon espace affiche une mention d'indisponibilité avec le SIREN et l'effectif DSN, et la saisie reste possible. Côté back-office, `admin.searchCompany` retombe sur la ligne stockée pendant une panne du registre au lieu de rendre une erreur.
 
 **Données persistées** : `companies.countryCode` / `companies.countryLabel` (voir [`architecture.md` §7.1](architecture.md#71-schéma)).
 

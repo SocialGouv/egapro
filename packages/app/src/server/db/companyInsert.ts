@@ -1,4 +1,8 @@
-import { isUnknownCountry } from "~/modules/domain";
+import {
+	companyPlaceholderName,
+	isCompanyIdentityUnresolved,
+	isUnknownCountry,
+} from "~/modules/domain";
 import type { companies } from "~/server/db/schema";
 import type { CompanyInfo } from "~/server/services/weez";
 
@@ -14,7 +18,7 @@ export function toCompanyInsertValues(
 	siren: string,
 	info: CompanyInfo | null,
 ): typeof companies.$inferInsert {
-	if (!info) return { siren, name: `Entreprise ${siren}` };
+	if (!info) return { siren, name: companyPlaceholderName(siren) };
 
 	return {
 		siren,
@@ -38,7 +42,10 @@ type CompanyInsertValues = typeof companies.$inferInsert;
 
 export function toCompanyRefreshValues(
 	values: CompanyInsertValues,
-): CompanyInsertValues {
+): Partial<CompanyInsertValues> {
+	// An unanswered lookup must never overwrite an identity already stored: only
+	// a positive registry response refreshes it (same guard as the country below).
+	if (isCompanyIdentityUnresolved(values)) return {};
 	if (!isUnknownCountry(values)) return values;
 	const { countryCode: _code, countryLabel: _label, ...rest } = values;
 	return rest;

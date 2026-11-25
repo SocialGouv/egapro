@@ -165,6 +165,59 @@ describe("Step3Members — sélection obligatoire", () => {
 	});
 });
 
+describe("Step3Members — pourcentages obligatoires (#4994)", () => {
+	const PERCENTAGES_REQUIRED = VALIDATION_MESSAGES.percentagesRequired;
+
+	it("n'affiche pas l'erreur avant une tentative de continuer", async () => {
+		render(<Harness />);
+
+		await userEvent.click(someRadio());
+
+		expect(screen.queryByText(PERCENTAGES_REQUIRED)).not.toBeInTheDocument();
+	});
+
+	it("affiche l'erreur après une tentative de continuer sans pourcentage", async () => {
+		render(<Harness />);
+		await userEvent.click(someRadio());
+
+		act(() => {
+			expect(stepValid()).toBe(false);
+		});
+
+		expect(screen.getByText(PERCENTAGES_REQUIRED)).toBeInTheDocument();
+		expect(screen.getByLabelText(/Femmes/)).toHaveAttribute(
+			"aria-invalid",
+			"true",
+		);
+	});
+
+	it("efface l'erreur dès qu'un pourcentage est saisi", async () => {
+		render(<Harness />);
+		await userEvent.click(someRadio());
+		act(() => {
+			stepValid();
+		});
+
+		await userEvent.type(screen.getByLabelText(/Femmes/), "40");
+
+		expect(screen.queryByText(PERCENTAGES_REQUIRED)).not.toBeInTheDocument();
+	});
+
+	it("affiche l'erreur quand un pourcentage est saisi et l'autre vidé", async () => {
+		render(<Harness />);
+		await userEvent.click(someRadio());
+		await userEvent.type(screen.getByLabelText(/Femmes/), "40");
+		await userEvent.clear(screen.getByLabelText(/Hommes/));
+
+		act(() => {
+			expect(stepValid()).toBe(false);
+		});
+
+		expect(screen.getByText(PERCENTAGES_REQUIRED)).toBeInTheDocument();
+		expect(screen.queryByText(VALIDATION_MESSAGES.sum)).not.toBeInTheDocument();
+	});
+});
+
 describe("Step3Members — existence d'instances dirigeantes (S8)", () => {
 	it("n'affiche ni champ de pourcentage ni badge tant qu'aucun choix n'est fait", () => {
 		render(<Harness />);

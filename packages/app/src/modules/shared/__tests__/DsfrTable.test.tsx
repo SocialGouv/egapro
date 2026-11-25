@@ -4,8 +4,8 @@ import { describe, expect, it } from "vitest";
 import { DsfrTable } from "~/modules/shared/DsfrTable";
 
 describe("DsfrTable", () => {
-	it("renders table with sr-only caption", () => {
-		render(
+	it("hides the caption through the DSFR no-caption table", () => {
+		const { container } = render(
 			<DsfrTable caption="Test caption">
 				<tbody>
 					<tr>
@@ -16,7 +16,9 @@ describe("DsfrTable", () => {
 		);
 
 		expect(screen.getByText("Test caption")).toBeInTheDocument();
-		expect(screen.getByText("Test caption")).toHaveClass("fr-sr-only");
+		expect(container.querySelector(".fr-table")).toHaveClass(
+			"fr-table--no-caption",
+		);
 		expect(screen.getByText("Content")).toBeInTheDocument();
 	});
 
