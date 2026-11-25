@@ -6,6 +6,12 @@ import { cloneElement, type ReactElement } from "react";
 import { describe, expect, it } from "vitest";
 
 import { PrefillPdfDocument } from "../PrefillPdfDocument";
+import {
+	collectPdfPageTexts,
+	type PdfLayoutNode as LayoutNode,
+	type PdfPageText as PageText,
+	readPdfLayout,
+} from "./helpers/pdfLayout";
 import { DEMO_COMPANY, makePrefillData } from "./helpers/prefillFixtures";
 import { registerPdfFonts } from "./helpers/registerPdfFonts";
 
@@ -13,36 +19,6 @@ registerPdfFonts();
 
 const SECTION_BANNER =
 	/^(Informations entreprise|Information calcul|Effectifs physiques|Écart de rémunération|Proportion de femmes et d'hommes dans chaque quartile)/;
-
-type LayoutNode = {
-	type: string;
-	value?: string;
-	box?: { top?: number; height?: number };
-	children?: LayoutNode[];
-};
-
-type PageText = { text: string; top: number; bottom: number };
-
-function textOf(node: LayoutNode): string {
-	if (node.type === "TEXT_INSTANCE") return node.value ?? "";
-	return (node.children ?? []).map(textOf).join("");
-}
-
-function collectPageTexts(
-	node: LayoutNode,
-	parentTop: number,
-	out: PageText[],
-): void {
-	const top = parentTop + (node.box?.top ?? 0);
-	if (node.type === "TEXT" && node.box?.height !== undefined) {
-		out.push({
-			text: textOf(node).trim(),
-			top,
-			bottom: top + node.box.height,
-		});
-	}
-	for (const child of node.children ?? []) collectPageTexts(child, top, out);
-}
 
 async function renderLayout(data = makePrefillData()): Promise<PageText[][]> {
 	let layout: LayoutNode | undefined;
@@ -52,8 +28,7 @@ async function renderLayout(data = makePrefillData()): Promise<PageText[][]> {
 		}>,
 		{
 			onRender: (props: OnRenderProps) => {
-				layout = (props as { _INTERNAL__LAYOUT__DATA_?: LayoutNode })
-					._INTERNAL__LAYOUT__DATA_;
+				layout = readPdfLayout(props);
 			},
 		},
 	);
@@ -62,7 +37,8 @@ async function renderLayout(data = makePrefillData()): Promise<PageText[][]> {
 
 	return (layout.children ?? []).map((page) => {
 		const texts: PageText[] = [];
-		for (const child of page.children ?? []) collectPageTexts(child, 0, texts);
+		for (const child of page.children ?? [])
+			collectPdfPageTexts(child, 0, texts);
 		return texts.filter((entry) => entry.text.length > 0);
 	});
 }

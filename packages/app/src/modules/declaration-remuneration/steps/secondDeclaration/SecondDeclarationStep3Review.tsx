@@ -145,7 +145,9 @@ export function SecondDeclarationStep3Review({
 				d&apos;emplois aux services du ministre chargé du travail.
 			</p>
 
-			<h2 className="fr-h5 fr-mb-0">Indicateur par catégorie d&apos;emplois</h2>
+			<h2 className="fr-h5 fr-mb-0">
+				Indicateurs par catégorie d&apos;emplois
+			</h2>
 
 			<div className={stepStyles.card}>
 				<CardTitle tooltipId="tooltip-second-decl-categories">
