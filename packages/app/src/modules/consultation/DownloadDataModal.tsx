@@ -6,7 +6,6 @@ import styles from "./DownloadDataModal.module.scss";
 const MODAL_ID = "consultation-download-modal";
 
 type Props = {
-	/** Export URLs already carrying the criteria applied to the result list. */
 	declarationsHref: string;
 	representationsHref: string;
 };
@@ -61,7 +60,7 @@ export function DownloadDataModal({
 											>
 												Indicateurs de rémunération
 											</FileDownloadLink>
-											<p className={styles.format}>CSV</p>
+											<p className={`fr-text--xs ${styles.format}`}>CSV</p>
 										</div>
 										<div>
 											<FileDownloadLink
@@ -70,7 +69,7 @@ export function DownloadDataModal({
 											>
 												Indicateurs de représentation
 											</FileDownloadLink>
-											<p className={styles.format}>CSV</p>
+											<p className={`fr-text--xs ${styles.format}`}>CSV</p>
 										</div>
 									</div>
 								</div>

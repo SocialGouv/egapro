@@ -3,7 +3,6 @@ import { ratioToPercentPoints, toCsvField } from "~/modules/domain";
 export type CsvColumn<Row> = {
 	key: Extract<keyof Row, string>;
 	header: string;
-	/** Ratio (`0.074`) rendered in the CSV as percentage points (`7.4`). */
 	percent?: true;
 };
 

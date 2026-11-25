@@ -1,12 +1,12 @@
-import { and, desc, eq, inArray, type SQL, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, type SQL } from "drizzle-orm";
 import type { PgSelect } from "drizzle-orm/pg-core";
 import ExcelJS from "exceljs";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import {
-	getRepresentationCampaignYear,
-	REPRESENTATION_CAMPAIGN_YEAR_OFFSET,
+	getRepresentationReferenceYear,
+	PUBLIC_REPRESENTATION_RECENT_CAMPAIGN_YEARS,
 	toNullableNumber,
 	truncateDecimals,
 } from "~/modules/domain";
@@ -31,7 +31,10 @@ import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { db } from "~/server/db";
 import { diffusibleCompanyCondition } from "~/server/db/companyConditions";
 import { containsInsensitive } from "~/server/db/likeConditions";
-import { releasedRepresentationCampaignJoin } from "~/server/db/publicReleaseConditions";
+import {
+	releasedRepresentationCampaignJoin,
+	representationCampaignYearExpression,
+} from "~/server/db/publicReleaseConditions";
 import {
 	campaignDeadlines,
 	companies,
@@ -45,13 +48,7 @@ import {
 	withPublicExportSlot,
 } from "~/server/services/publicExportCache";
 
-const RECENT_CAMPAIGN_YEARS = 10;
-
 const FORMAT_SCHEMA = z.enum(["csv", "xlsx"]).default("csv");
-
-function campaignYearExpression() {
-	return sql<number>`${representationDeclarations.year} + ${REPRESENTATION_CAMPAIGN_YEAR_OFFSET}`;
-}
 
 async function publishedCampaignYears(): Promise<number[]> {
 	const rows = await db
@@ -60,13 +57,17 @@ async function publishedCampaignYears(): Promise<number[]> {
 		.innerJoin(campaignDeadlines, releasedRepresentationCampaignJoin())
 		.where(eq(representationDeclarations.status, "submitted"))
 		.orderBy(desc(representationDeclarations.year))
-		.limit(RECENT_CAMPAIGN_YEARS);
-	return rows.map((row) => getRepresentationCampaignYear(Number(row.year)));
+		.limit(PUBLIC_REPRESENTATION_RECENT_CAMPAIGN_YEARS);
+	return rows.map((row) => Number(row.year));
+}
+
+async function referenceYearsFor(input: PublicSearchInput): Promise<number[]> {
+	return input.year === undefined ? await publishedCampaignYears() : [];
 }
 
 function exportFilters(
 	input: PublicSearchInput,
-	campaignYears: number[],
+	referenceYears: number[],
 ): SQL[] {
 	const conditions = publicDeclarationFacetConditions(input);
 	if (input.q) {
@@ -81,8 +82,11 @@ function exportFilters(
 	}
 	conditions.push(
 		input.year === undefined
-			? inArray(campaignYearExpression(), campaignYears)
-			: eq(campaignYearExpression(), input.year),
+			? inArray(representationDeclarations.year, referenceYears)
+			: eq(
+					representationDeclarations.year,
+					getRepresentationReferenceYear(input.year),
+				),
 	);
 	return conditions;
 }
@@ -90,7 +94,7 @@ function exportFilters(
 function publishableRepresentations<Query extends PgSelect>(
 	query: Query,
 	input: PublicSearchInput,
-	campaignYears: number[],
+	referenceYears: number[],
 	limit: number,
 ) {
 	return query
@@ -106,22 +110,22 @@ function publishableRepresentations<Query extends PgSelect>(
 		.where(
 			and(
 				eq(representationDeclarations.status, "submitted"),
-				...exportFilters(input, campaignYears),
+				...exportFilters(input, referenceYears),
 			),
 		)
 		.orderBy(representationDeclarations.year, companies.siren)
 		.limit(limit);
 }
 
-function fetchPublishableRepresentations(
+async function fetchPublishableRepresentations(
 	input: PublicSearchInput,
-	campaignYears: number[],
 	limit: number,
 ) {
+	const referenceYears = await referenceYearsFor(input);
 	const query = db
 		.select({
 			...publicRepresentationColumns,
-			campaignYear: campaignYearExpression(),
+			campaignYear: representationCampaignYearExpression(),
 			siren: companies.siren,
 			name: companies.name,
 			address: companies.address,
@@ -137,19 +141,19 @@ function fetchPublishableRepresentations(
 		})
 		.from(representationDeclarations)
 		.$dynamic();
-	return publishableRepresentations(query, input, campaignYears, limit);
+	return publishableRepresentations(query, input, referenceYears, limit);
 }
 
-function probePublishableRepresentations(
+async function probePublishableRepresentations(
 	input: PublicSearchInput,
-	campaignYears: number[],
 	limit: number,
 ) {
+	const referenceYears = await referenceYearsFor(input);
 	const query = db
 		.select({ siren: representationDeclarations.siren })
 		.from(representationDeclarations)
 		.$dynamic();
-	return publishableRepresentations(query, input, campaignYears, limit);
+	return publishableRepresentations(query, input, referenceYears, limit);
 }
 
 type RepresentationRow = Awaited<
@@ -270,17 +274,13 @@ export const GET = withAuditedRoute(
 			}
 
 			const input = inputResult.data;
-			const campaignYears =
-				input.year === undefined ? await publishedCampaignYears() : [];
 
 			if (format === "xlsx") {
 				const workbook = await withPublicExportSlot(async () => {
 					const rows = await fetchWithinExportLimit(
 						format,
-						(limit) =>
-							fetchPublishableRepresentations(input, campaignYears, limit),
-						(limit) =>
-							probePublishableRepresentations(input, campaignYears, limit),
+						(limit) => fetchPublishableRepresentations(input, limit),
+						(limit) => probePublishableRepresentations(input, limit),
 					);
 					return rows instanceof Response
 						? rows
@@ -303,7 +303,7 @@ export const GET = withAuditedRoute(
 				input,
 				async () => {
 					const rows = await fetchWithinExportLimit(format, (limit) =>
-						fetchPublishableRepresentations(input, campaignYears, limit),
+						fetchPublishableRepresentations(input, limit),
 					);
 					return rows instanceof Response
 						? rows

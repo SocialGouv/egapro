@@ -23,6 +23,7 @@ vi.mock("~/server/db", () => ({
 
 vi.mock("~/server/db/publicReleaseConditions", () => ({
 	releasedRepresentationCampaignJoin: mocks.releasedRepresentationCampaignJoin,
+	representationCampaignYearExpression: vi.fn(() => "CAMPAIGN_YEAR_EXPRESSION"),
 	publiclyReleasedCampaignCondition: vi.fn(() => "RELEASE_GATE_SENTINEL"),
 }));
 
@@ -82,14 +83,13 @@ vi.mock("~/server/audit/log", () => ({
 	logAction: mocks.logAction,
 }));
 
-function setCampaignYears(years: number[]) {
+function setReferenceYears(years: number[]) {
 	const chain = {
 		from: () => chain,
 		innerJoin: () => chain,
 		where: () => chain,
 		orderBy: () => chain,
-		limit: () =>
-			Promise.resolve(years.map((campaignYear) => ({ campaignYear }))),
+		limit: () => Promise.resolve(years.map((year) => ({ year }))),
 	};
 	mocks.dbSelectDistinct.mockReturnValue(chain);
 }
@@ -170,7 +170,7 @@ describe("GET /api/public/representations/export", () => {
 	});
 
 	it("returns a CSV by default with the 15 DGT headers in order", async () => {
-		setCampaignYears([2027]);
+		setReferenceYears([2026]);
 		setRows([buildRow()]);
 
 		const response = await callGet();
@@ -200,7 +200,7 @@ describe("GET /api/public/representations/export", () => {
 	});
 
 	it("publishes the campaign year and the reference-year workforce", async () => {
-		setCampaignYears([2027]);
+		setReferenceYears([2026]);
 		setRows([buildRow()]);
 
 		const response = await callGet("?format=csv");
@@ -223,7 +223,7 @@ describe("GET /api/public/representations/export", () => {
 	});
 
 	it("masks identity, address, country and activity but keeps SIREN and percentages", async () => {
-		setCampaignYears([2027]);
+		setReferenceYears([2026]);
 		setRows([
 			buildRow({
 				siren: "987654321",
@@ -246,7 +246,7 @@ describe("GET /api/public/representations/export", () => {
 	});
 
 	it("leaves an unknown country and an absent workforce empty, not Non-diffusible", async () => {
-		setCampaignYears([2027]);
+		setReferenceYears([2026]);
 		setRows([
 			buildRow({ countryCode: null, countryLabel: null, workforceEma: null }),
 		]);
@@ -259,7 +259,7 @@ describe("GET /api/public/representations/export", () => {
 	});
 
 	it("omits publication columns and non-computability reasons", async () => {
-		setCampaignYears([2027]);
+		setReferenceYears([2026]);
 		setRows([buildRow()]);
 
 		const response = await callGet("?format=csv");
@@ -271,7 +271,7 @@ describe("GET /api/public/representations/export", () => {
 	});
 
 	it("gates on the released campaign and on submitted declarations", async () => {
-		setCampaignYears([2027]);
+		setReferenceYears([2026]);
 		setRows([buildRow()]);
 
 		await callGet("?format=csv");

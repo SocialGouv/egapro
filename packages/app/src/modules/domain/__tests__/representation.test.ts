@@ -5,6 +5,7 @@ import {
 	computeRepresentationVerdict,
 	deriveExecutivesNotComputableReason,
 	getRepresentationCampaignYear,
+	getRepresentationReferenceYear,
 	getRepresentationTarget,
 	isPresumedSubjectToRepresentation,
 	isRepresentationDeclarationSubmitted,
@@ -125,6 +126,13 @@ describe("getRepresentationCampaignYear", () => {
 	it("returns the reference year plus one", () => {
 		expect(getRepresentationCampaignYear(2026)).toBe(2027);
 		expect(getRepresentationCampaignYear(2028)).toBe(2029);
+	});
+});
+
+describe("getRepresentationReferenceYear", () => {
+	it("returns the campaign year minus one", () => {
+		expect(getRepresentationReferenceYear(2027)).toBe(2026);
+		expect(getRepresentationReferenceYear(2029)).toBe(2028);
 	});
 });
 
@@ -416,6 +424,7 @@ describe("verdict independence (S16)", () => {
 	it("exposes no aggregated verdict helper", async () => {
 		const representation = await import("../shared/representation");
 		expect(Object.keys(representation).sort()).toEqual([
+			"PUBLIC_REPRESENTATION_RECENT_CAMPAIGN_YEARS",
 			"REPRESENTATION_CAMPAIGN_YEAR_OFFSET",
 			"REPRESENTATION_OBLIGATION_FROM_CAMPAIGN_YEAR",
 			"REPRESENTATION_SUBJECTION_WINDOW_YEARS",
@@ -427,6 +436,7 @@ describe("verdict independence (S16)", () => {
 			"computeRepresentationVerdict",
 			"deriveExecutivesNotComputableReason",
 			"getRepresentationCampaignYear",
+			"getRepresentationReferenceYear",
 			"getRepresentationTarget",
 			"getRepresentationThresholdNotice",
 			"isPresumedSubjectToRepresentation",

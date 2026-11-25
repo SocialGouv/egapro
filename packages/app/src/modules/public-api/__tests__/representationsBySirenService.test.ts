@@ -136,10 +136,14 @@ function expectPublicationJoin(joins: Join[] | undefined) {
 	expect(join).toBeDefined();
 
 	const condition = join?.[1] as SqlNode;
-	expect(condition.values.slice(0, 2)).toEqual(["cd.year", "rd.year"]);
-	expect(condition.values[2]).toBe(REPRESENTATION_CAMPAIGN_YEAR_OFFSET);
+	expect(condition.values[0]).toBe("cd.year");
+	const campaignYear = condition.values[1] as SqlNode;
+	expect(campaignYear.values).toEqual([
+		"rd.year",
+		REPRESENTATION_CAMPAIGN_YEAR_OFFSET,
+	]);
 
-	const release = condition.values[3] as SqlNode;
+	const release = condition.values[2] as SqlNode;
 	expect(release.sql).toContain("IS NOT NULL");
 	expect(release.sql.toLowerCase()).toContain("at time zone 'europe/paris'");
 	expect(release.sql).toContain("::date");
