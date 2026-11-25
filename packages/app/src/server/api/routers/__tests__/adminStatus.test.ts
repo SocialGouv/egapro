@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { AUDIT_ACTIONS } from "~/modules/audit";
 import type { DB } from "~/server/db";
 
 const { logAction } = vi.hoisted(() => ({ logAction: vi.fn() }));
@@ -110,17 +109,12 @@ describe("adminStatus.getOverview", () => {
 		expect(overview.staleAfterSeconds).toBe(300);
 	});
 
-	it("audits the consultation as a sensitive read", async () => {
+	it("does not audit the overview, which the page polls every 30 seconds", async () => {
 		logAction.mockClear();
 		const { db } = buildDb();
 
 		await (await caller(db)).adminStatus.getOverview();
 
-		expect(logAction).toHaveBeenCalledWith(
-			expect.objectContaining({
-				action: AUDIT_ACTIONS.ADMIN_SERVICE_STATUS_VIEW,
-				status: "success",
-			}),
-		);
+		expect(logAction).not.toHaveBeenCalled();
 	});
 });
