@@ -1,8 +1,21 @@
-import { getMockFileTracingIncludes } from "~/server/config/mockAssets.js";
+import {
+	getMockFileTracingIncludes,
+	isDevEnvironment,
+} from "~/server/config/mockAssets.js";
 
 const DEV_INCLUDES = {
 	"/api/gip-mds/mock": ["./data/mock-gip-mds.csv"],
 };
+
+describe("isDevEnvironment", () => {
+	it.each([undefined, "", "dev"])("allows %s", (deployEnv) => {
+		expect(isDevEnvironment(deployEnv)).toBe(true);
+	});
+
+	it.each(["preprod", "prod", "staging"])("refuses %s", (deployEnv) => {
+		expect(isDevEnvironment(deployEnv)).toBe(false);
+	});
+});
 
 describe("getMockFileTracingIncludes", () => {
 	it("traces the GIP mock CSV in dev", () => {

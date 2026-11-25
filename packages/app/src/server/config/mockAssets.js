@@ -6,7 +6,7 @@ const MOCK_GIP_TRACING_INCLUDES = {
  * @param {string | undefined} deployEnv
  * @returns {boolean}
  */
-function isMockEnvironment(deployEnv) {
+export function isDevEnvironment(deployEnv) {
 	return deployEnv === undefined || deployEnv === "" || deployEnv === "dev";
 }
 
@@ -15,5 +15,5 @@ function isMockEnvironment(deployEnv) {
  * @returns {Record<string, string[]>}
  */
 export function getMockFileTracingIncludes(deployEnv) {
-	return isMockEnvironment(deployEnv) ? MOCK_GIP_TRACING_INCLUDES : {};
+	return isDevEnvironment(deployEnv) ? MOCK_GIP_TRACING_INCLUDES : {};
 }

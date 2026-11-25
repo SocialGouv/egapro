@@ -130,9 +130,11 @@ COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/backfill-company
 # Development/review-app fixture loaded by the optional post-deploy hook.
 # The bundle is bound from the builder inside the RUN so it never enters a
 # preprod/prod layer; only dev images (review apps, *-persist) carry it.
+# An unset build arg means dev, matching `NEXT_PUBLIC_EGAPRO_ENV`'s default in
+# `src/env.js` and `isDevEnvironment`.
 ARG NEXT_PUBLIC_EGAPRO_ENV
 RUN --mount=type=bind,from=builder,source=/app/packages/app/scripts/seed-demo-observatory.bundle.mjs,target=/tmp/seed-demo-observatory.bundle.mjs \
-    if [ "$NEXT_PUBLIC_EGAPRO_ENV" = "dev" ]; then \
+    if [ -z "$NEXT_PUBLIC_EGAPRO_ENV" ] || [ "$NEXT_PUBLIC_EGAPRO_ENV" = "dev" ]; then \
         cp /tmp/seed-demo-observatory.bundle.mjs ./packages/app/scripts/seed-demo-observatory.bundle.mjs && \
         chown 1000:1000 ./packages/app/scripts/seed-demo-observatory.bundle.mjs; \
     fi

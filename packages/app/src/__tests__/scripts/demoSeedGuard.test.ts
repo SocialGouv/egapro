@@ -1,17 +1,4 @@
-import {
-	assertDemoSeedAllowed,
-	isDemoSeedAllowed,
-} from "#scripts/demoSeedGuard";
-
-describe("isDemoSeedAllowed", () => {
-	it.each([undefined, "", "dev"])("allows %s", (deployEnv) => {
-		expect(isDemoSeedAllowed(deployEnv)).toBe(true);
-	});
-
-	it.each(["preprod", "prod", "staging"])("refuses %s", (deployEnv) => {
-		expect(isDemoSeedAllowed(deployEnv)).toBe(false);
-	});
-});
+import { assertDemoSeedAllowed } from "#scripts/demoSeedGuard";
 
 describe("assertDemoSeedAllowed", () => {
 	afterEach(() => {
