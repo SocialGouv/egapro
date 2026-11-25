@@ -150,6 +150,21 @@ describe("user-cleanup.mjs (integration)", () => {
 		return rows[0];
 	}
 
+	async function waitForBlockedSweep(): Promise<void> {
+		for (let attempt = 0; attempt < 200; attempt++) {
+			const rows = await sql<{ blocked: number }[]>`
+				SELECT count(*)::int AS blocked
+				FROM pg_stat_activity
+				WHERE application_name = 'user-cleanup-race'
+					AND wait_event_type = 'Lock'
+					AND query LIKE 'UPDATE app_user%'
+			`;
+			if ((rows[0]?.blocked ?? 0) > 0) return;
+			await new Promise((resolve) => setTimeout(resolve, 25));
+		}
+		throw new Error("The sweep never blocked on the app_user row lock");
+	}
+
 	it("anonymises an account inactive for longer than the window, and keeps its declaration (S1)", async () => {
 		// 25 months before NOW.
 		const email = await seedUser(userA, new Date("2024-05-15T00:00:00Z"));
@@ -200,7 +215,7 @@ describe("user-cleanup.mjs (integration)", () => {
 	});
 
 	it("keeps an account whose last activity is exactly at the boundary (S3)", async () => {
-		await seedUser(userC, NOW);
+		await seedUser(userC, new Date("2024-06-15T00:00:00Z"));
 
 		const result = await runUserCleanup({
 			sql,
@@ -240,6 +255,41 @@ describe("user-cleanup.mjs (integration)", () => {
 		await runUserCleanup({ sql, retentionYears: RETENTION, now: NOW });
 
 		expect((await getUser(userD))?.is_admin).toBe(false);
+	});
+
+	it("skips an account whose sign-in commits between the SELECT and the UPDATE (S8)", async () => {
+		await seedUser(userB, new Date("2024-01-15T00:00:00Z"));
+
+		const sweepSql = postgres(env.DATABASE_URL, {
+			max: 1,
+			connection: { application_name: "user-cleanup-race" },
+		});
+		const blocker = postgres(env.DATABASE_URL, { max: 1 });
+		let sweep: ReturnType<typeof runUserCleanup> | undefined;
+
+		try {
+			await blocker.begin(async (tx) => {
+				await tx`SELECT id FROM app_user WHERE id = ${userB} FOR UPDATE`;
+				sweep = runUserCleanup({
+					sql: sweepSql,
+					retentionYears: RETENTION,
+					now: NOW,
+				});
+				void sweep.catch(() => undefined);
+				await waitForBlockedSweep();
+				await tx`UPDATE app_user SET last_activity_at = ${NOW} WHERE id = ${userB}`;
+			});
+
+			if (!sweep) throw new Error("Sweep was never started");
+			expect((await sweep).anonymizedAccounts).toBe(0);
+		} finally {
+			await blocker.end();
+			await sweep?.catch(() => undefined);
+			await sweepSql.end();
+		}
+
+		expect((await getUser(userB))?.anonymized_at).toBeNull();
+		expect(await countCompanyLinks(userB)).toBe(1);
 	});
 
 	it("changes nothing in dry-run mode but reports the candidates (S6)", async () => {

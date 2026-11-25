@@ -106,22 +106,12 @@ export async function runUserCleanup({
 			return { anonymizedAccounts: ids.length, cutoff: sweepCutoff };
 		}
 
-		// Company membership is personal data: which employer a person
-		// declared for goes with the account.
-		await tx`DELETE FROM app_user_company WHERE user_id = ANY(${ids})`;
-		// Locks are ephemeral session state; a dead account must not appear as
-		// holding one. Declarations themselves are never touched.
-		await tx`DELETE FROM app_declaration_lock WHERE locked_by_user_id = ANY(${ids})`;
-		await tx`
-			DELETE FROM app_representation_declaration_lock
-			WHERE locked_by_user_id = ANY(${ids})
-		`;
-
 		// `.invalid` is reserved by RFC 2606: unroutable, unique per account,
 		// and it frees the original address for a fresh sign-up. No ProConnect
 		// identity can ever match it. The `anonymized_at IS NULL` guard keeps a
 		// concurrent or replayed run idempotent.
-		const updated = await tx`
+		// Re-checking the predicate here skips a sign-in committed since the SELECT.
+		const updated = await tx<{ id: string }[]>`
 			UPDATE app_user SET
 				first_name = NULL,
 				last_name = NULL,
@@ -129,11 +119,30 @@ export async function runUserCleanup({
 				email = 'compte-supprime-' || id || '@invalid',
 				is_admin = false,
 				anonymized_at = now()
-			WHERE id = ANY(${ids}) AND anonymized_at IS NULL
+			WHERE id = ANY(${ids})
+				AND anonymized_at IS NULL
+				AND last_activity_at < ${sweepCutoff}
+			RETURNING id
+		`;
+		const anonymizedIds = updated.map((row) => row.id);
+
+		if (anonymizedIds.length === 0) {
+			return { anonymizedAccounts: 0, cutoff: sweepCutoff };
+		}
+
+		// Company membership is personal data: which employer a person
+		// declared for goes with the account.
+		await tx`DELETE FROM app_user_company WHERE user_id = ANY(${anonymizedIds})`;
+		// Locks are ephemeral session state; a dead account must not appear as
+		// holding one. Declarations themselves are never touched.
+		await tx`DELETE FROM app_declaration_lock WHERE locked_by_user_id = ANY(${anonymizedIds})`;
+		await tx`
+			DELETE FROM app_representation_declaration_lock
+			WHERE locked_by_user_id = ANY(${anonymizedIds})
 		`;
 
 		return {
-			anonymizedAccounts: Number(updated.count ?? 0),
+			anonymizedAccounts: anonymizedIds.length,
 			cutoff: sweepCutoff,
 		};
 	});
