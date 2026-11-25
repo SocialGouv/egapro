@@ -95,7 +95,7 @@ Ce qui se vérifie mécaniquement n'est pas laissé à la lecture. Trois couches
 |---|---|---|
 | **git pre-commit** (`lefthook.yml`, installé par `pnpm install`) | chaque commit | `biome check --write` · `scripts/quality/check-patterns.sh --staged` · audit statique ultra11y |
 | **`pnpm verify`** | avant de déclarer une tâche terminée | patterns · a11y · lint · format · typecheck · test (`VERIFY_BASE`, défaut `origin/alpha`) |
-| **CI** | chaque push / PR | les mêmes, plus e2e, a11y-gate, a11y-lite |
+| **CI** | chaque push / PR | les mêmes, plus e2e, a11y-gate, la revue a11y `review-a11y` |
 
 `scripts/quality/check-patterns.sh` porte les interdits mécaniques (`any`, `process.env`, `../../`, `style={}`, `<svg>`/`<img>` bruts, couleurs en dur et `@media` en SCSS, `zod` dans un routeur ou un composant, helpers métier réécrits hors `domain/`, composant hors route dans `src/app/`…) — chaque message dit quoi faire à la place. **Si un garde-fou bloque, corrige la cause** : jamais `--no-verify`, jamais de commentaire de suppression (`biome-ignore`, `@ts-expect-error`…), jamais un test, une règle ou un seuil affaibli pour passer au vert.
 
@@ -105,10 +105,10 @@ Une tâche n'est **terminée** que quand `pnpm verify` est vert **et** que `/rev
 
 ## Accessibilité — RGAA 4.1.2 / WCAG 2.2 AA
 
-egapro est une plateforme de l'État : exigence first-class, au même titre que la sécurité. **Un seul dispositif : ultra11y**, à une seule version — la devDependency de `packages/app`. Tout en découle : pre-commit, `pnpm verify`, les skills `review-a11y` et `ultra11y` (symlinks dans `.agents/skills/`, lus par chaque outil), le gate commit / push / PR côté agent (hook dans `.claude/settings.json`, plugin dans `opencode.json`), le MCP `ultra11y`, et la gate de PR `a11y-gate`. Le run hebdomadaire de la CI passe par le bot `rgaa-audit` d'iterion, qui épingle son propre moteur ([`docs/accessibilite-ultra11y.md`](./docs/accessibilite-ultra11y.md)). Il n'y a pas de second système, et c'est délibéré.
+egapro est une plateforme de l'État : exigence first-class, au même titre que la sécurité. **Un seul dispositif : ultra11y**, à une seule version — la devDependency de `packages/app`. Tout en découle : pre-commit, `pnpm verify`, les skills `review-a11y` et `ultra11y` (symlinks dans `.agents/skills/`, lus par chaque outil), le gate commit / push / PR côté agent (hook dans `.claude/settings.json`, plugin dans `opencode.json`), la gate de PR `a11y-gate` et la revue de chaque PR (`a11y-review.yaml` : le skill `review-a11y` sans modèle, code modifié puis pages rendues que la PR atteint, commentaire par critère RGAA). L'audit complet (cron hebdomadaire ou manuel) passe par le bot `rgaa-audit` d'iterion, qui épingle son propre moteur ([`docs/accessibilite-ultra11y.md`](./docs/accessibilite-ultra11y.md)). Il n'y a pas de second système, et c'est délibéré.
 
 - **HTML natif d'abord, ARIA en dernier.** Un `<button>` est accessible ; un `<div role="button">` demande d'écrire à la main focus, clavier et état. Ne double jamais une sémantique implicite (`role="navigation"` sur `<nav>` est faux, pas redondant).
-- **Ne devine pas un critère de mémoire** : demande-le au skill `ultra11y` ou au MCP (`criteria --standard rgaa 8.3`, `guidance`, `glossary`).
+- **Ne devine pas un critère de mémoire** : demande-le au skill `ultra11y` (ses références RGAA, ou `pnpm --filter app exec ultra11y criteria --standard rgaa 8.3`).
 - Le jugement (ce que le moteur ne tranche pas) passe par le skill `review-a11y`, lancé par `/review gates`. Détail, versions et CI → [`a11y.md`](./.agents/skills/review/references/a11y.md) et [`docs/accessibilite-ultra11y.md`](./docs/accessibilite-ultra11y.md).
 
 ---
@@ -157,9 +157,9 @@ Données d'exemple fictives : `SIREN 123456789`, `email@example.fr`, `Société 
 
 ## Outils : MCP, scripts, CI
 
-- **MCP** (`next-devtools`, `dsfr`, `figma`, `playwright`, `ultra11y`) : **ne devine jamais de mémoire** une API Next.js, une classe DSFR, une valeur Figma ou un critère RGAA — demande au serveur.
+- **MCP** (`next-devtools`, `dsfr`, `figma`, `playwright`) : **ne devine jamais de mémoire** une API Next.js, une classe DSFR ou une valeur Figma — demande au serveur. Un critère RGAA se lit dans le skill `ultra11y` (ultra11y n'a plus de MCP depuis 7.0.0).
 - **Config générée** : `.mcp.json` et la `POLICY` de `scripts/ai/sync-agent-config.mjs` sont les sources ; `node scripts/ai/sync-agent-config.mjs` régénère les blocs `mcp` / `permission` d'`opencode.json`, les `permissions` de `.claude/settings.json` et `.codex/`. Jamais à la main : la CI refuse une copie désynchronisée. Les règles Codex ne comparent que des préfixes de tokens : elles refusent `--no-verify` / `-n` / `--force` collés à la sous-commande, pas placés après d'autres arguments (Claude Code et OpenCode, eux, les attrapent partout) ; pour Codex, un `--no-verify` ou `-n` qui passe est rattrapé par la CI (`quality-patterns`, `a11y-gate`), un `--force` en fin de commande ne l’est par rien.
 - **Scripts** : `pnpm verify` (le verdict « prêt » ; instantané si ce code exact est déjà vert, `--force` pour rejouer), `pnpm check:patterns`, `pnpm dev:app` (port 3000), `pnpm test:e2e` (exige un dev server). Le reste : `package.json`.
-- **CI** : un check rouge → lis son workflow dans `.github/workflows/`. Bloquants sur PR : `ci.yaml`, `a11y.yaml` (`a11y-gate`), `a11y-lite.yaml`, `e2e.yaml` (check requis « Test e2e »).
+- **CI** : un check rouge → lis son workflow dans `.github/workflows/`. Bloquants sur PR : `ci.yaml`, `a11y.yaml` (`a11y-gate`), `a11y-review.yaml` (`review-a11y`, le second job au déploiement de la préversion), `e2e.yaml` (check requis « Test e2e »).
 
 Tableaux complets (même config par outil, CI, scripts) : [README.md](./README.md).

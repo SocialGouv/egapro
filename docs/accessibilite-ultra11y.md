@@ -14,10 +14,19 @@ et un audit CI passe désormais par le bot **`rgaa-audit`** (Acci) d'iterion —
 [`bots/rgaa-audit/README.md`](https://github.com/SocialGouv/iterion/blob/main/bots/rgaa-audit/README.md),
 section « Run Acci in your CI ». La bascule date de #4899.
 
+Deux usages, deux outils, et ils ne se recouvrent pas :
+
+- **chaque PR** passe par le skill **`review-a11y`** d'ultra11y (la devDependency), exécuté sans
+  modèle par `a11y-review.yaml` : moteur statique sur le diff, puis rendu Playwright + axe des
+  seules pages que le diff atteint, comparé à la base. Seul ce qui est **nouveau** bloque ;
+- **l'audit complet** (la grille RGAA entière, adjugée, datée) passe par le bot iterion
+  **`rgaa-audit`**, une fois par semaine ou à la demande (`a11y.yaml`).
+
 | Job | Quand | Ce qu'il fait |
 |---|---|---|
 | `a11y-gate` (`a11y.yaml`) | **chaque PR** (bloquant) | `pnpm exec ultra11y audit src --jsx --graph --standard rgaa --lang fr --fail-on blocking` : la devDependency, la même commande que le pre-commit et `pnpm verify`. Tout `src`, pas le diff. Gratuit, aucun navigateur, aucun modèle. |
-| `a11y-lite` (`a11y-lite.yaml`) | **chaque PR vers `alpha`** (bloquant) | `npx ultra11y@<ULTRA11Y_VERSION> audit --since origin/<base> … --fail-on blocking --json` : les seuls fichiers que la PR change, au **moteur que le bot épingle**. Voir « La gate du code touché sur chaque PR ». |
+| `review-a11y-static` (`a11y-review.yaml`) | **chaque PR vers `alpha`** (bloquant) | `review-a11y` §1 : `pnpm exec ultra11y audit --since origin/alpha --jsx --graph --standard rgaa --lang fr --json`, puis la barrière rejouée sur ce document (`audit --in … --fail-on blocking`). Les seuls fichiers que la PR change ; rouge sur une non-conformité bloquante. Écrit sa section du commentaire de revue. Voir « La revue a11y de chaque PR ». |
+| `review-a11y-rendered` (`a11y-review.yaml`) | **chaque déploiement de la préversion d'une PR** (`deployment_status` de « Review Auto », bloquant) | `review-a11y` §1b : `affected --since origin/alpha`, puis `scan --since` sur la préversion de `alpha` (la base) et sur celle de la PR avec `--baseline`. Rouge sur une non-conformité **nouvelle** ou une page atteinte qui n'a pas pu être rendue. Écrit sa section du commentaire de revue. |
 | `a11y-pages` (`a11y.yaml`) | **cron hebdomadaire** (lundi 04:00 UTC, sur `alpha`) et manuel | La suite Playwright `src/e2e/a11y/` capture les pages en épinglant l'état applicatif que chaque écran exige (toutes celles que déclare `.ultra11yrc.json`, ce que tient `check --require-sample`). Le moteur de la devDependency — celui qui a écrit les instantanés — audite code et pages, **rejoue le registre sans modèle**, rend le rapport page par page et le rapport RGAA. Aucun modèle. Rouge sur une panne ou un balayage amputé, jamais sur un constat. |
 | `rgaa-audit` (`a11y.yaml`) | cron, manuel | Le bot iterion, épinglé par `ITERION_VERSION` (le bot est installé depuis le même tag, et son pin du moteur voyage avec lui). Audit statique de `packages/app/src`, rejeu du registre, adjudication par des agents en lecture seule (secret `CLAUDE_CODE_OAUTH_TOKEN`), second lecteur, rapport daté et annexe technique. `rendered=off`, `--max-cost-usd 60`, `--max-tokens 5000000`. Consultatif : rouge seulement sur un refus typé du bot. |
 | `a11y-bundle` (`a11y.yaml`) | cron, manuel | Fusionne les parties (`ultra11y-part-pages`, `ultra11y-part-rgaa-audit`, `ultra11y-part-playwright`) en un seul artefact `ultra11y-rgaa`. |
@@ -36,8 +45,10 @@ où ils vivent ; `undecidable_path=.ultra11y/undecidable.json` nomme le fichier 
 du bot est `undecidable-rgaa.json`).
 
 **Trois étages, et ils ne paient pas la même chose.** `pull_request` lance deux audits statiques
-— gratuits, sans modèle, bloquants. Le cron hebdomadaire, ou un `workflow_dispatch`, lance le
-balayage navigateur (minutes de runner) et le bot (modèle).
+(`a11y-gate`, tout `src` ; `review-a11y-static`, le diff) — gratuits, sans modèle, bloquants. Le
+déploiement de la préversion lance le rendu des pages touchées (une minute de navigateur, sans
+modèle, bloquant). Le cron hebdomadaire, ou un `workflow_dispatch`, lance le balayage navigateur
+complet (minutes de runner) et le bot (modèle).
 
 ### Pourquoi un cron hebdomadaire, et pas un run à chaque merge
 
@@ -81,50 +92,88 @@ Le run tourne donc **une fois par semaine**, sur l'état courant d'`alpha` :
 contrôle après un changement d'UI significatif.
 
 **Ce que ça donne, et ce que ça ne donne pas :** une régression du **code** que le moteur
-tranche est arrêtée sur la PR. Une régression de **rendu** (contraste calculé, focus visible,
-reflow) ou de **jugement** est rattrapée **au plus tard le lundi suivant**, et le run
-hebdomadaire ne bloque rien, il mesure et publie.
+tranche est arrêtée sur la PR, et une régression de **rendu** (contraste calculé, focus visible,
+reflow) sur une page que la PR atteint aussi, dès que sa préversion est déployée. Une régression
+de **jugement**, ou de rendu sur un écran que la préversion n'ouvre pas (tunnel derrière
+ProConnect), est rattrapée **au plus tard le lundi suivant**, et le run hebdomadaire ne bloque
+rien, il mesure et publie.
 
-Les gates de PR ré-auditent la **source**, sans modèle : le rouge/vert reste une fonction pure du commit, quoi qu'un modèle ait dit.
+Les gates de PR ne font appel à aucun modèle : le rouge/vert reste une fonction du commit et des
+deux préversions, quoi qu'un modèle ait dit.
 
-### La gate du code touché sur chaque PR
+### La revue a11y de chaque PR
 
-`.github/workflows/a11y-lite.yaml`, depuis #4899. Elle remplace le **mode lite** d'ultra11y 5.58.1
-(#5083) : capture des seules pages que le diff peut changer (`affected`), moteur seul, rouge sur un
-constat de rendu **nouveau** par rapport à une baseline rangée dans le cache Actions.
+`.github/workflows/a11y-review.yaml`, depuis #4899. C'est le skill **`review-a11y`** d'ultra11y
+(`.agents/skills/review-a11y/SKILL.md`, symlink vers la devDependency), exécuté à la lettre par la
+CI, **sans modèle** : ce qui bloque est le code de sortie du moteur. Le même skill est celui que
+`/review gates` invoque côté agent ([`a11y.md`](../.agents/skills/review/references/a11y.md)) ;
+l'agent y ajoute le jugement (pertinence d'un `alt`, intitulé de lien en contexte, logique
+clavier), qui ne bloque pas la CI.
 
-**Pourquoi il a disparu.** ultra11y **7.0.0** a retiré `affected`, `audit --lite`, la gate
-`--baseline` et les formats `sarif` / `github`. Le bot iterion n'a pas de mode bon marché : sans
-modèle, il n'a rien à ajouter à un audit statique. Réécrire `affected` et la baseline dans ce
-dépôt aurait recréé, en shell, ce que l'amont a retiré.
+**Passage 1 — le code modifié** (`review-a11y-static`, sur `pull_request` vers `alpha`) :
 
-**Ce qui le remplace :** `npx -y ultra11y@$ULTRA11Y_VERSION audit --since origin/<base> --jsx
---graph --standard rgaa --lang fr --fail-on blocking --json`, depuis `packages/app`. Les seuls
-fichiers que la PR change ; rouge sur un constat bloquant. Une step vérifie que le document
-existe et vient bien de la version épinglée, puis écrit le décompte dans le résumé du job ; le
-JSON part en artefact (`ultra11y-pr-diff`). Une PR qui ne touche aucun fichier auditable audite
-zéro fichier et passe.
+```bash
+pnpm exec ultra11y audit --since origin/alpha --jsx --graph --standard rgaa --lang fr --json > audits/review-static.json
+pnpm exec ultra11y audit --in audits/review-static.json --standard rgaa --lang fr --fail-on blocking
+```
 
-**Pourquoi une autre version que la devDependency.** `a11y-gate` audite déjà tout `src` avec la
-devDependency ; refaire le diff avec le même moteur n'ajouterait rien. `ULTRA11Y_VERSION` est la
-version que le bot iterion épingle (`bots/rgaa-audit/ultra11y.pin`, **7.2.0** depuis
-SocialGouv/iterion#3592) : une PR n'introduit pas ce que le livrable du lundi lui reprochera.
-Mesuré sur `alpha` le 25/11/2026 : `audit src` en 7.2.0 donne **0 constat** sur 406 fichiers, donc
-la gate ne rougit pas sur l'existant.
+Une passe de détection, puis la barrière rejouée sur le même document : son code de sortie est le
+verdict, et son texte porte les messages en français (le JSON garde le message canonique
+anglais). Une PR qui ne touche aucun fichier auditable audite zéro fichier et passe.
 
-**Ce qu'elle ne couvre plus**, et c'est la perte assumée de la bascule :
+**Passage 2 — les pages rendues que la PR atteint** (`review-a11y-rendered`, sur le
+`deployment_status` « success » de l'environnement `review-auto`, c'est-à-dire quand la
+préversion de la branche est en ligne) :
 
-- le **rendu** des pages touchées — contraste calculé, focus visible, zoom, reflow, contenu au
-  survol. Il n'est plus vu qu'au run hebdomadaire (`a11y-pages`) ;
-- les **routes nouvelles** : `require-sampled` (un `page.tsx` ni déclaré dans `sample.pages` ni
-  exempté dans `sample.exempt`) n'existe plus. Une page ajoutée sans être déclarée n'est pas
-  capturée, et rien ne le dit. Déclarer chaque nouvelle page dans `.ultra11yrc.json` reste à la
-  revue ;
-- les **critères de jugement**, comme avant : ils restent au run hebdomadaire.
+```bash
+pnpm exec ultra11y affected --since origin/alpha --base-url "$PR_URL" --json
+pnpm exec ultra11y scan --since origin/alpha --base-url "$BASE_URL" --browser-path "$CHROME" --no-snapshot --json > base-scan.json
+pnpm exec ultra11y scan --since origin/alpha --base-url "$PR_URL" --baseline base-scan.json --browser-path "$CHROME" --no-snapshot --json
+```
 
-`sample.global` et `sample.exempt` restent dans `.ultra11yrc.json` : plus rien ne les lit en CI,
-mais `sample.pages` est ce que `check --require-sample` tient, et les retirer est un changement
-de configuration à part.
+- **Quelles pages** : `affected` remonte le graphe d'imports depuis chaque fichier modifié jusqu'aux
+  `page.tsx` / `layout.tsx` de `src/app/` et aux `sample.pages[].sources` de `.ultra11yrc.json`.
+  Un `layout` sélectionne toutes les pages en dessous de lui.
+- **Les deux URL** viennent de la règle kontinuous de `lighthouse.yaml` (action
+  `socialgouv/kontinuous/.github/actions/env`) : `https://<sous-domaine de la branche>.ovh.fabrique.social.gouv.fr`
+  pour la PR, et celui de `alpha` (`https://egapro-alpha.ovh.fabrique.social.gouv.fr`) pour la
+  base. Les deux scans rendent les **mêmes chemins** : la sélection dépend du diff, pas de l'hôte.
+- **Ce qui bloque** : un constat rendu absent de la base (identité = règle axe, critère, chemin,
+  sélecteur), ou une page atteinte qui n'a pas pu être rendue (erreur HTTP, redirection vers la
+  connexion) **sauf** si elle ne l'était pas non plus sur la base. Les constats préexistants sont
+  comptés sur une ligne, hors verdict.
+- **Le navigateur** est le Chrome de l'image `ubuntu-latest` (`--browser-path`) : aucun
+  téléchargement, et le même pour les deux scans.
+- La PR est retrouvée par le SHA déployé (`commits/<sha>/pulls`) ; une branche poussée sans PR
+  ouverte vers `alpha` n'a rien à revoir, le job passe.
+
+**Le commentaire de revue.** Les deux jobs écrivent chacun leur section d'un **seul** commentaire
+de PR (repéré par `<!-- review-a11y -->`, mis à jour à chaque push), constats rangés par
+sévérité puis par **critère RGAA**, le WCAG en correspondance entre parenthèses, en français.
+`scripts/a11y/review-comment.mjs` le formate (testé par `review-comment.test.mjs`, dans
+`a11y-gate` et `pnpm verify`) : il rattache chaque constat rendu à son critère RGAA par la table
+du moteur épinglé (`ultra11y/src/data/standards/rgaa.json`), puisque `scan --json` cite le critère
+WCAG. `scripts/a11y/post-review-comment.sh` l'écrit (une tentative = chercher, fusionner,
+écrire ; relu après coup). Le même contenu va dans le résumé du job : une PR depuis un fork n'a
+pas le droit d'écrire le commentaire, le verdict ne change pas.
+
+**Ce que la revue ne voit pas**, à nommer en risque résiduel (règle fondamentale 3 du skill) :
+
+- les écrans **derrière ProConnect** ou gardés par la machine à états du tunnel : la préversion
+  redirige vers la connexion, sur la base comme sur la PR, donc la page est « non mesurée » des
+  deux côtés et ne bloque pas. Ces écrans ne sont rendus qu'au run hebdomadaire (`a11y-pages`) ;
+- une route dynamique (`[id]`) qu'aucune URL connue ne résout, et un fichier modifié qui n'atteint
+  aucune page : le commentaire les liste comme **non rendus**, jamais comme propres ;
+- tant que la préversion n'est pas déployée (ou si elle échoue), la section « pages rendues »
+  reste « en attente » : seul le passage 1 a tranché ;
+- les **routes nouvelles** : une page ajoutée n'est capturée par `a11y-pages` que si elle est
+  déclarée dans `sample.pages` (ou exemptée dans `sample.exempt`). `affected` la rend sur la PR,
+  mais déclarer chaque nouvelle page dans `.ultra11yrc.json` reste à la revue.
+
+**Ce qu'il a remplacé.** Le mode lite d'ultra11y 5.58.1 (#5083) puis, brièvement, `a11y-lite.yaml`
+(audit statique du diff à la version du bot) : ultra11y 7.0.0 avait retiré `affected` et
+`--baseline`, et 9.2.0 les a rendus au skill `review-a11y` (`scan --since --baseline`,
+SocialGouv/ultra11y#216). `a11y-lite.yaml` est retiré : la revue couvre les PR.
 
 ### Le registre de verdicts, et pourquoi il est revenu
 
@@ -446,19 +495,19 @@ Ce qui décide encore le tier local (contraste calculé, focus visible, zoom, re
 se vérifie en une commande, depuis `packages/app` :
 
 ```bash
-pnpm exec ultra11y scan <une-page.html> --runtime local --json | head -3
+pnpm exec ultra11y status --browser        # « navigateur disponible »
+pnpm exec ultra11y scan <une-page.html> --json | head -3
 # doit afficher  "engine": "axe-core@playwright (local)"  — pas "(docker)"
 ```
 
 ## Bump de version
 
-Trois versions, trois surfaces, et elles ne bougent pas ensemble :
+Deux versions, deux surfaces, et elles ne bougent pas ensemble :
 
 | Version | Où | Ce qu'elle porte |
 |---|---|---|
-| devDependency `ultra11y` (**5.58.1**) | `packages/app/package.json` | pre-commit, `pnpm verify`, `a11y-gate`, le plugin Playwright qui écrit les instantanés **et** le moteur d'`a11y-pages` qui les relit — un seul format par construction ; les skills, le hook et le plugin des agents |
-| `ITERION_VERSION` (**v7.35.0**) | `a11y.yaml`, job `rgaa-audit` | la release d'iterion et le bot, installé depuis le même tag, avec son pin du moteur |
-| `ULTRA11Y_VERSION` (**7.2.0**) | `a11y-lite.yaml` | le moteur de la gate du code touché ; tenu égal au pin du bot |
+| devDependency `ultra11y` (**9.6.5**) | `packages/app/package.json` | pre-commit, `pnpm verify`, `a11y-gate`, la revue de PR `a11y-review.yaml` (les deux passages), le plugin Playwright qui écrit les instantanés **et** le moteur d'`a11y-pages` qui les relit — un seul format par construction ; les skills, le hook et le plugin des agents |
+| `ITERION_VERSION` (**v7.38.1**) | `a11y.yaml`, job `rgaa-audit` | la release d'iterion et le bot, installé depuis le même tag, avec son pin du moteur |
 
 ```bash
 # devDependency — version EXACTE, pas de ^
@@ -467,20 +516,32 @@ pnpm --filter app add -D ultra11y@<version>
 gh api "repos/SocialGouv/iterion/contents/bots/rgaa-audit/ultra11y.pin?ref=<tag>" --jq .content | base64 -d
 ```
 
-Monter `ITERION_VERSION` et `ULTRA11Y_VERSION` dans la même PR. Dependabot ne voit ni l'une ni
-l'autre.
+Dependabot ne voit ni l'une ni l'autre. Viser un `ITERION_VERSION` dont le pin du moteur est égal
+à la devDependency : le registre de verdicts est écrit et rejoué par les deux.
 
-**À faire.** La release d'iterion épinglée ici (**v7.35.0**) porte encore le moteur **5.49.0** ;
-SocialGouv/iterion#3592 le passe en 7.2.0. Monter `ITERION_VERSION` à la première release qui
-l'inclut.
+**À faire.** La dernière release d'iterion (**v7.38.1**) épingle encore le moteur **7.2.0** ;
+SocialGouv/iterion#3708 le passe en **9.6.5**. Monter `ITERION_VERSION` à la première release
+qui l'inclut. D'ici là, le bot rejoue un registre écrit en 9.6.5 avec un moteur 7.2.0 : les
+entrées dont l'évidence diffère sont abandonnées comme périmées, donc ré-adjugées et repayées.
 
-**La devDependency reste en 5.58.1, délibérément.** ultra11y 7.0.0 retire aussi les commandes
-`mcp` et `dev` (le MCP `ultra11y` de `.mcp.json`, `pnpm a11y:dev`) ; 8.0.0 change le moteur de
-rendu. La montée est une migration à part — outils des agents, scripts du package, instantanés
-de la suite Playwright — pas un effet de bord de la bascule CI. L'ancien contrôle de cohérence
-(`scripts/a11y/check-ultra11y-version.sh`, job `a11y-version-coherence` de `ci.yaml`) tenait les
-`uses:` de l'Action égaux à la devDependency ; sans Action, il n'avait plus rien à comparer et a
-été retiré avec elle.
+**La montée 5.58.1 → 9.6.5 (#4899).** Ce qui a disparu en route, et ce qui le remplace :
+
+- `mcp` et `dev` (7.0.0) : le MCP `ultra11y` est retiré de `.mcp.json` (et donc d'`opencode.json`
+  et `.codex/config.toml`, générés par `scripts/ai/sync-agent-config.mjs`), le script
+  `pnpm a11y:dev` aussi. Les critères RGAA se lisent dans le skill `ultra11y` et ses références ;
+- `audit --lite`, `--format sarif|github`, l'Action (6.0.0, 7.0.0) : la revue de PR est
+  `review-a11y` (ci-dessus) ;
+- `--standard wcag`, `pack`, `--pack` (9.0.0) : egapro n'utilisait que `--standard rgaa` ;
+- les exports `ultra11y/vitest` et `ultra11y/jest` (8.0.0) : egapro n'utilise que
+  `ultra11y/playwright`, toujours là.
+
+Le premier rejeu du registre en 9.6.5 abandonne une partie des entrées comme périmées
+(l'évidence d'un critère a changé de forme entre les versions) : le run hebdomadaire suivant les
+ré-adjuge, et le registre qu'il écrit est à commiter après relecture.
+
+L'ancien contrôle de cohérence (`scripts/a11y/check-ultra11y-version.sh`, job
+`a11y-version-coherence` de `ci.yaml`) tenait les `uses:` de l'Action égaux à la devDependency ;
+sans Action, il n'avait plus rien à comparer et a été retiré avec elle.
 
 Les **outils IA** n'ont plus de copie à eux : les skills `review-a11y` et `ultra11y` sont des
 symlinks de `.agents/skills/` vers la devDependency (lus par Claude Code, OpenCode et Codex), le

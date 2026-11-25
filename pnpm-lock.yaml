@@ -190,8 +190,8 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
       ultra11y:
-        specifier: 5.58.1
-        version: 5.58.1(playwright-core@1.62.1)
+        specifier: 9.6.5
+        version: 9.6.5(playwright-core@1.62.1)
       vite-tsconfig-paths:
         specifier: ^6.1.1
         version: 6.1.1(typescript@6.0.2)(vite@7.3.1(@types/node@26.4.0)(sass@1.105.1)(terser@5.51.2)(tsx@4.23.12)(yaml@2.8.3))
@@ -4402,6 +4402,9 @@ packages:
   get-tsconfig@4.13.7:
     resolution: {integrity: sha512-7tN6rFgBlMgpBML5j8typ92BKFi2sFQvIdpAqLA2beia5avZDrMs0FLZiM5etShWq5irVyGcGMEA1jcDaK7A/Q==}
 
+  get-tsconfig@4.14.3:
+    resolution: {integrity: sha512-++QEw4DIY7WGoukz+/+A/8dGYPT9l9yIadnmSgZ8Rjr3YVSVDipQSO9CdnJo9ePqFqUUqh+wk9uIaoiAwsiPkA==}
+
   get-uri@6.0.5:
     resolution: {integrity: sha512-b1O07XYq8eRuVzBNgJLstU6FYc1tS6wnMtF1I1D9lE8LxZSOGZ7LhxN54yPP6mGw5f2CkXY2BQUL9Fx41qvcIg==}
     engines: {node: '>= 14'}
@@ -4535,6 +4538,10 @@ packages:
 
   ieee754@1.2.1:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
+
+  ignore@7.0.17:
+    resolution: {integrity: sha512-0c3zcBRlWmcKhcIQWckzkYncJRv5HHB8O32wO/FcWL8DDXWDJgiEF6SX9ThbTv5h/eZ+xJK+VvDjjQ+cQJhp3Q==}
+    engines: {node: '>= 4'}
 
   image-ssim@0.2.0:
     resolution: {integrity: sha512-W7+sO6/yhxy83L0G7xR8YAc5Z5QFtYEXXRV6EaE8tuYBZJnA3gVgp3q7X7muhLZVodeb9UfvjSbwt9VJwjIYAg==}
@@ -6554,8 +6561,8 @@ packages:
     engines: {node: '>=0.8.0'}
     hasBin: true
 
-  ultra11y@5.58.1:
-    resolution: {integrity: sha512-XUaC+NXY4D9Msntre378oLAhlliCExZ5dHUA5c6o2Pg0ajq20VNDBUvopXw4fNOwW2rrmKb7lKQGWScIDsIsIw==}
+  ultra11y@9.6.5:
+    resolution: {integrity: sha512-GE1VO8wFtxtMcZsuWwkNUSEUG8iHPlILH5Yvr9+wRVRISTfsajWKOKlwrv8b5Tcv5zWYiLW2cmP9Cb26LsyRsQ==}
     engines: {node: '>=22.18.0'}
     hasBin: true
 
@@ -11282,6 +11289,10 @@ snapshots:
     dependencies:
       resolve-pkg-maps: 1.0.0
 
+  get-tsconfig@4.14.3:
+    dependencies:
+      resolve-pkg-maps: 1.0.0
+
   get-uri@6.0.5:
     dependencies:
       basic-ftp: 5.2.2
@@ -11438,6 +11449,8 @@ snapshots:
       safer-buffer: 2.1.2
 
   ieee754@1.2.1: {}
+
+  ignore@7.0.17: {}
 
   image-ssim@0.2.0: {}
 
@@ -13446,13 +13459,18 @@ snapshots:
   uglify-js@3.19.3:
     optional: true
 
-  ultra11y@5.58.1(playwright-core@1.62.1):
+  ultra11y@9.6.5(playwright-core@1.62.1):
     dependencies:
       '@axe-core/playwright': 4.13.0(playwright-core@1.62.1)
       '@babel/parser': 8.0.4
       '@playwright/test': 1.62.1
+      axe-core: 4.13.0
       domhandler: 6.0.1
+      fdir: 6.5.0(picomatch@4.0.7)
+      get-tsconfig: 4.14.3
       htmlparser2: 12.0.0
+      ignore: 7.0.17
+      picomatch: 4.0.7
     transitivePeerDependencies:
       - playwright-core
 

@@ -3,8 +3,9 @@ name: "♿ Accessibilité (RGAA)"
 # Audit d'accessibilité RGAA 4.1.2 / WCAG 2.2 AA. Pourquoi ce câblage, ce qu'il coûte et les
 # décisions déjà prises → docs/accessibilite-ultra11y.md.
 #
-# L'Action `SocialGouv/ultra11y` n'existe plus : ultra11y 6.0.0 l'a retirée, et un audit CI
-# passe désormais par le bot `rgaa-audit` (Acci) d'iterion (#4899). Quatre jobs :
+# L'Action `SocialGouv/ultra11y` n'existe plus (ultra11y 6.0.0) : l'audit complet passe par le
+# bot `rgaa-audit` (Acci) d'iterion (#4899), et la revue de chaque PR par le skill `review-a11y`
+# (a11y-review.yaml). Quatre jobs ici :
 #
 #   a11y-gate    CODE     — PR. Audit statique JSX/TSX de tout `src` par la devDependency, la
 #                           même commande que le pre-commit et `pnpm verify`. Gratuit, aucun
@@ -24,9 +25,8 @@ name: "♿ Accessibilité (RGAA)"
 # état unique, sans ProConnect ni la machine à états du tunnel — il n'atteindrait pas les écrans
 # de déclaration. Le rendu reste donc à `a11y-pages`, qui seul sait les ouvrir.
 #
-# Le rendu des pages qu'une PR touche n'est plus gardé : le mode lite (`affected`, `audit --lite`,
-# baseline) a été retiré d'ultra11y en 7.0.0. a11y-lite.yaml garde le CODE touché, au moteur
-# du bot.
+# Le rendu des seules pages qu'une PR touche est gardé par a11y-review.yaml (`review-a11y` :
+# `affected` + `scan --since --baseline` sur la préversion de la PR).
 
 on:
   pull_request:
@@ -74,6 +74,10 @@ jobs:
       - name: ultra11y — audit RGAA statique
         working-directory: packages/app
         run: pnpm exec ultra11y audit src --jsx --graph --standard rgaa --lang fr --fail-on blocking
+      # Le commentaire de la revue de PR (a11y-review.yaml) lit la table RGAA de la devDependency :
+      # le test tourne ici, là où elle est installée.
+      - name: Test du commentaire de revue review-a11y
+        run: node --test scripts/a11y/review-comment.test.mjs
 
   a11y-pages:
     name: "RGAA · rendu page par page (moteur seul)"
@@ -188,8 +192,10 @@ jobs:
     timeout-minutes: 240
     env:
       # La release d'iterion ET la version du bot, installé depuis le même tag : le pin du moteur
-      # (`bots/rgaa-audit/ultra11y.pin`, version + sha256) voyage avec lui.
-      ITERION_VERSION: v7.35.0
+      # (`bots/rgaa-audit/ultra11y.pin`, version + sha256) voyage avec lui. v7.38.1 épingle
+      # encore le moteur 7.2.0 ; à monter sur la release qui contiendra SocialGouv/iterion#3708
+      # (pin 9.6.5, la version de la devDependency).
+      ITERION_VERSION: v7.38.1
       CLAUDE_CODE_VERSION: 2.1.332
       # Le credential du backend `claude_code` des agents. Lu depuis l'environnement, jamais
       # passé en argument.

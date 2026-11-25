@@ -803,7 +803,7 @@ Activé via `data-fr-scheme="system"` sur `<html>`. Cookie `fr-theme` lu par un 
 
 ### 11.5 RGAA 4.1.2 / WCAG 2.2 AA
 
-Toute l'accessibilité passe par **ultra11y**, en deux surfaces : le skill `review-a11y`, lancé par `/review gates` sur le code sous changement (après l'audit statique du pre-commit et de `pnpm verify`), et les workflows `.github/workflows/a11y.yaml` et `a11y-lite.yaml` — gates statiques bloquantes sur chaque PR, plus — au cron hebdomadaire ou en manuel — un balayage Playwright des pages audité par le moteur seul, et le bot iterion `rgaa-audit` qui adjuge les critères de jugement. Lighthouse rapporte un score d'accessibilité en avertissement, ce n'est pas une gate. Aucun système a11y parallèle. Règle canonique : `AGENTS.md` § Accessibilité, et `.agents/skills/review/references/a11y.md` pour la revue.
+Toute l'accessibilité passe par **ultra11y**, en deux surfaces : le skill `review-a11y`, lancé par `/review gates` sur le code sous changement (après l'audit statique du pre-commit et de `pnpm verify`), et les workflows `.github/workflows/a11y-review.yaml` et `a11y.yaml` — sur chaque PR, la revue `review-a11y` sans modèle (code modifié, puis pages rendues que la PR atteint, seules les non-conformités nouvelles bloquent) et l'audit statique de tout `src`, plus — au cron hebdomadaire ou en manuel — un balayage Playwright des pages audité par le moteur seul, et le bot iterion `rgaa-audit` qui adjuge les critères de jugement. Lighthouse rapporte un score d'accessibilité en avertissement, ce n'est pas une gate. Aucun système a11y parallèle. Règle canonique : `AGENTS.md` § Accessibilité, et `.agents/skills/review/references/a11y.md` pour la revue.
 
 ---
 
@@ -865,7 +865,7 @@ pnpm test:integration  # Tests intégration BDD (nécessite Docker)
 | `production.yaml` | push tag | Déploiement prod |
 | `release.yml` | manuel | semantic-release (versionnement automatique) |
 | `a11y.yaml` | PR · cron lundi 04:00 UTC · manuel | `a11y-gate` (audit RGAA statique, **bloquante**), `a11y-pages` (balayage Playwright + moteur seul, cron/manuel, non bloquant), `rgaa-audit` (bot iterion : audit + adjudication, cron/manuel, non bloquant), `a11y-bundle` (fusion en un artefact `ultra11y-rgaa`) |
-| `a11y-lite.yaml` | PR → `alpha` | audit RGAA statique des fichiers touchés, au moteur du bot, **bloquant** |
+| `a11y-review.yaml` | PR → `alpha` · déploiement de la préversion | revue `review-a11y` : audit statique du diff, puis rendu des pages touchées face à `alpha` (`scan --since --baseline`), **bloquante**, commentaire de PR par critère RGAA |
 | `claude-question.yml` | issue/PR labels | Intégration IA (questions) |
 
 ### 14.2 Kontinuous (déploiement Kubernetes)

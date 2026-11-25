@@ -177,7 +177,7 @@ Les identifiants (`EGAPRO_PROCONNECT_CLIENT_ID`, `EGAPRO_PROCONNECT_CLIENT_SECRE
 |---|---|---|
 | `ci.yaml` | chaque push | build · lint · format · patterns · typecheck · tests |
 | `a11y.yaml` | PR, cron lundi 04:00 UTC, manuel | Sur **PR** : `a11y-gate` seul — audit statique ultra11y de tout `src`, **bloquant**. Sur **cron** ou **manuel** : balayage Playwright des pages au moteur seul (`a11y-pages`), audit et adjudication par le bot iterion `rgaa-audit`, livrable unique (`a11y-bundle`) ; non bloquant et payant |
-| `a11y-lite.yaml` | PR → `alpha` | Audit statique ultra11y des seuls fichiers que la PR change, au moteur que le bot iterion épingle, **bloquant** sur un constat bloquant |
+| `a11y-review.yaml` | PR → `alpha`, déploiement de la préversion | La revue `review-a11y` de chaque PR, sans modèle : moteur statique sur les fichiers modifiés, puis rendu Playwright + axe des seules pages que la PR atteint, préversion de la PR face à celle d'`alpha`. **Bloquant** sur une non-conformité bloquante du code ou une non-conformité rendue **nouvelle** ; un commentaire de PR par critère RGAA |
 | `e2e.yaml` | PR → `alpha`, manuel | suite Playwright complète **et** les coordonnées de la grille de recette, en shards parallèles ; le check requis « Test e2e » est le job agrégateur |
 | `e2e-grille.yaml` | cron nocturne (02:00 UTC), manuel | grille de recette seule, rapport de recette |
 | `lighthouse.yaml` | `deployment_status` (success, hors env `build-*`) | audit Lighthouse sur l'URL déployée |
@@ -297,13 +297,13 @@ Ce qui reste propre à chaque développeur (config utilisateur, plugins perso, m
 | **git pre-commit** (`lefthook.yml`, installe par `pnpm install`) | chaque commit | `biome check --write`, `check-patterns.sh --staged`, audit statique ultra11y |
 | **git pre-push** | chaque push | typecheck |
 | **`pnpm verify`** | avant de declarer une tache terminee | patterns, a11y, lint, format, typecheck, tests |
-| **CI** | chaque push / PR | les memes, plus e2e, `a11y-gate`, `a11y-lite` |
+| **CI** | chaque push / PR | les memes, plus e2e, `a11y-gate`, la revue `review-a11y` |
 
 `scripts/quality/check-patterns.sh` porte les interdits mecaniques sur les lignes ajoutees : suppressions de lint, `: any`, `process.env`, `../../`, `dangerouslySetInnerHTML`, `style={}`, `<svg>`, `<img>`, couleurs en dur et `@media` en SCSS, `zod` dans un routeur ou un composant, helpers `domain` re-inlines, composant sur mesure dans `src/app/`. `--self-test` verifie chaque regle.
 
 ### Accessibilite
 
-ultra11y est le dispositif unique, a chaque etage : devDependency (moteur, pre-commit, `pnpm verify`), skills `review-a11y` et `ultra11y` lus depuis la devDependency par les trois outils (symlinks dans `.agents/skills/`), gate commit / push / PR cote agent (hook Claude Code dans `.claude/settings.json`, plugin OpenCode dans `opencode.json`, tous deux charges depuis la devDependency ; Codex : `ultra11y install --codex`, portee utilisateur), serveur MCP `ultra11y`, Action CI. Detail : [`docs/accessibilite-ultra11y.md`](docs/accessibilite-ultra11y.md).
+ultra11y est le dispositif unique, a chaque etage : devDependency (moteur, pre-commit, `pnpm verify`), skills `review-a11y` et `ultra11y` lus depuis la devDependency par les trois outils (symlinks dans `.agents/skills/`), gate commit / push / PR cote agent (hook Claude Code dans `.claude/settings.json`, plugin OpenCode dans `opencode.json`, tous deux charges depuis la devDependency ; Codex : `ultra11y install --codex`, portee utilisateur), revue de chaque PR par `review-a11y` (`a11y-review.yaml`) et audit complet par le bot iterion `rgaa-audit` (`a11y.yaml`). Detail : [`docs/accessibilite-ultra11y.md`](docs/accessibilite-ultra11y.md).
 
 > Hooks git : rien a installer a la main. `lefthook` est une devDependency (binaire precompile par plateforme, comme husky), et `pnpm install` pose les hooks ; un `core.hooksPath` local qui pointe vers un repertoire disparu est retire automatiquement.
 

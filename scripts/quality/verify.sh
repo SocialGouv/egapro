@@ -65,6 +65,7 @@ step patterns bash scripts/quality/check-patterns.sh --diff "$BASE"
 step agent-config node scripts/ai/sync-agent-config.mjs --check
 step agent-policy node --test scripts/ai/sync-agent-config.test.mjs
 step a11y a11y_static
+step a11y-review node --test scripts/a11y/review-comment.test.mjs
 step lint pnpm lint:check
 step format pnpm format:check
 step typecheck pnpm typecheck

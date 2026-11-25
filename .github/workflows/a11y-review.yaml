@@ -1,0 +1,252 @@
+name: "♿ Revue a11y de la PR (review-a11y)"
+
+# LA REVUE D'ACCESSIBILITÉ DE CHAQUE PR : les deux passages du skill `review-a11y` d'ultra11y
+# (la devDependency de packages/app), exécutés sans modèle. Pourquoi ce câblage, ce qu'il couvre
+# et ce qu'il ne voit pas → docs/accessibilite-ultra11y.md, « La revue a11y de chaque PR ».
+#
+#   review-a11y-static    PR → alpha. Moteur statique sur les fichiers que la PR change
+#                         (`audit --since`), rouge sur une non-conformité bloquante.
+#   review-a11y-rendered  quand la préversion de la PR (workflow « Review Auto ») est déployée.
+#                         `affected` choisit les pages que le diff atteint ; `scan` les rend
+#                         (Playwright + axe) sur la préversion de alpha puis sur celle de la PR,
+#                         et ne rougit que sur une non-conformité NOUVELLE (`--baseline`) ou une
+#                         page atteinte qui n'a pas pu être rendue.
+#
+# Les deux jobs écrivent chacun leur section d'un seul commentaire de PR, constats rangés par
+# critère RGAA. Aucun modèle ne participe à ce qui bloque : le verdict est le code de sortie du
+# moteur. Le jugement (pertinence des alternatives, intitulés…) reste à `/review gates` côté
+# agent, et l'audit complet au bot iterion `rgaa-audit` (a11y.yaml).
+
+on:
+  pull_request:
+    branches:
+      - alpha
+  # La préversion de la PR est déployée par review-auto.yaml (kontinuous). Le même événement
+  # que lighthouse.yaml.
+  deployment_status:
+
+permissions:
+  contents: read
+
+jobs:
+  review-a11y-static:
+    name: "RGAA · revue du code modifié (review-a11y)"
+    if: github.event_name == 'pull_request'
+    concurrency:
+      group: review-a11y-static-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write # le commentaire de revue
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # la branche de base, pour `--since`
+      - name: Set up pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: ".nvmrc"
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      # Une passe de détection en JSON, puis la barrière rejouée sur ce document (`audit --in`) :
+      # son code de sortie est le verdict, et son texte porte les messages en français.
+      - name: review-a11y — moteur statique sur le code modifié
+        id: static
+        working-directory: packages/app
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -uo pipefail
+          mkdir -p audits
+          rc=0
+          pnpm exec ultra11y audit --since "origin/$BASE_REF" --jsx --graph \
+            --standard rgaa --lang fr --json > audits/review-static.json || rc=$?
+          if [ "$rc" -ne 0 ] && [ "$rc" -ne 1 ]; then
+            echo "::error::ultra11y audit : sortie $rc"
+            exit "$rc"
+          fi
+          gate=0
+          pnpm exec ultra11y audit --in audits/review-static.json --standard rgaa --lang fr \
+            --fail-on blocking > audits/review-static.txt || gate=$?
+          cat audits/review-static.txt
+          echo "gate=$gate" >> "$GITHUB_OUTPUT"
+      - name: Section du commentaire de revue
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          node scripts/a11y/review-comment.mjs static \
+            --audit packages/app/audits/review-static.json \
+            --text packages/app/audits/review-static.txt \
+            --base "origin/$BASE_REF" > review-static.md
+          cat review-static.md >> "$GITHUB_STEP_SUMMARY"
+      # Une PR depuis un fork n'a pas le droit d'écrire : le verdict reste celui de la step
+      # suivante, le commentaire est perdu et le résumé du job le remplace.
+      - name: Publier la revue sur la PR
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: bash scripts/a11y/post-review-comment.sh "$PR_NUMBER" static review-static.md
+      - name: Verdict — aucune non-conformité bloquante dans le code modifié
+        env:
+          GATE: ${{ steps.static.outputs.gate }}
+        run: |
+          if [ "$GATE" != "0" ]; then
+            echo "::error::review-a11y : non-conformité bloquante dans le code modifié (détail dans le commentaire de la PR et le résumé du job)."
+            exit 1
+          fi
+      - name: Upload de la revue statique
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: review-a11y-static
+          path: packages/app/audits/review-static.*
+          retention-days: 7
+          if-no-files-found: ignore
+
+  review-a11y-rendered:
+    name: "RGAA · revue des pages rendues touchées (review-a11y)"
+    # La préversion d'une branche de PR, jamais alpha (c'est la base) ni un environnement
+    # persistant (`*-persist`, déployé depuis un tag par promote-test-env.yaml).
+    if: >
+      github.event_name == 'deployment_status' &&
+      github.event.deployment_status.state == 'success' &&
+      github.event.deployment.environment == 'review-auto' &&
+      github.event.deployment.ref != 'alpha' &&
+      !endsWith(github.event.deployment.ref, '-persist')
+    # Au niveau du job, pas du workflow : chaque déploiement émet plusieurs `deployment_status`
+    # (queued, in_progress, build-*), et un run au niveau du workflow annulerait le bon.
+    concurrency:
+      group: review-a11y-rendered-${{ github.event.deployment.ref }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      pull-requests: write # le commentaire de revue
+    env:
+      BASE_REF: alpha
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.deployment.sha }}
+          fetch-depth: 0 # la branche de base, pour `--since`
+      # Le déploiement porte un commit, pas une PR : on la retrouve par le SHA. Pas de PR ouverte
+      # vers alpha (branche poussée sans PR) → rien à revoir, le job s'arrête vert.
+      - name: Retrouver la PR du commit déployé
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.event.deployment.sha }}
+        run: |
+          set -euo pipefail
+          n=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/pulls" \
+            --jq "[.[] | select(.state == \"open\" and .base.ref == \"$BASE_REF\")][0].number // empty" </dev/null)
+          echo "number=$n" >> "$GITHUB_OUTPUT"
+          [ -n "$n" ] || echo "Aucune PR ouverte vers $BASE_REF pour $SHA : pas de revue rendue."
+      # Les deux URL viennent de la même règle kontinuous que lighthouse.yaml : la préversion de
+      # la branche de la PR, et celle de alpha, qui sert de base (`--baseline`).
+      - name: URL de la préversion de la PR
+        if: steps.pr.outputs.number != ''
+        id: pr-env
+        uses: socialgouv/kontinuous/.github/actions/env@1198b39082008127fd639ddc1700eb9315bb8ff3 # v1.188.0
+        with:
+          branch: ${{ github.event.deployment.ref }}
+      - name: URL de la préversion de alpha (la base)
+        if: steps.pr.outputs.number != ''
+        id: base-env
+        uses: socialgouv/kontinuous/.github/actions/env@1198b39082008127fd639ddc1700eb9315bb8ff3 # v1.188.0
+        with:
+          branch: alpha
+      - name: Set up pnpm
+        if: steps.pr.outputs.number != ''
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - name: Set up Node
+        if: steps.pr.outputs.number != ''
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: ".nvmrc"
+          cache: pnpm
+      - name: Install dependencies
+        if: steps.pr.outputs.number != ''
+        run: pnpm install --frozen-lockfile
+      # Le Chrome de l'image du runner (`--browser-path`) : aucun téléchargement de navigateur.
+      # Les deux scans rendent les MÊMES chemins (la sélection dépend du diff, pas de l'hôte),
+      # avec le même navigateur. `--no-snapshot` : une revue n'écrit pas `.ultra11y/pages/`.
+      - name: review-a11y — rendre les pages que le diff atteint
+        if: steps.pr.outputs.number != ''
+        id: rendered
+        working-directory: packages/app
+        env:
+          PR_URL: https://${{ steps.pr-env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr
+          BASE_URL: https://${{ steps.base-env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr
+        run: |
+          set -uo pipefail
+          mkdir -p audits
+          chrome="$(command -v google-chrome || command -v google-chrome-stable)"
+          echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+          echo "base_url=$BASE_URL" >> "$GITHUB_OUTPUT"
+          git fetch --no-tags origin "$BASE_REF"
+          pnpm exec ultra11y affected --since "origin/$BASE_REF" --base-url "$PR_URL" --json \
+            > audits/review-affected.json
+          cat audits/review-affected.json
+          rc=0
+          pnpm exec ultra11y scan --since "origin/$BASE_REF" --base-url "$BASE_URL" \
+            --browser-path "$chrome" --no-snapshot --json > audits/review-base-scan.json || rc=$?
+          if [ "$rc" -ne 0 ] && [ "$rc" -ne 1 ]; then
+            echo "::error::ultra11y scan (base) : sortie $rc"
+            exit "$rc"
+          fi
+          gate=0
+          pnpm exec ultra11y scan --since "origin/$BASE_REF" --base-url "$PR_URL" \
+            --baseline audits/review-base-scan.json --browser-path "$chrome" --no-snapshot \
+            --json > audits/review-scan.json || gate=$?
+          if [ "$gate" -ne 0 ] && [ "$gate" -ne 1 ]; then
+            echo "::error::ultra11y scan (PR) : sortie $gate"
+            exit "$gate"
+          fi
+          echo "gate=$gate" >> "$GITHUB_OUTPUT"
+      - name: Section du commentaire de revue
+        if: steps.pr.outputs.number != '' && steps.rendered.outcome == 'success'
+        env:
+          PR_URL: ${{ steps.rendered.outputs.pr_url }}
+          BASE_URL: ${{ steps.rendered.outputs.base_url }}
+        run: |
+          set -euo pipefail
+          node scripts/a11y/review-comment.mjs rendered \
+            --scan packages/app/audits/review-scan.json \
+            --affected packages/app/audits/review-affected.json \
+            --base-url "$BASE_URL" --pr-url "$PR_URL" > review-rendered.md
+          cat review-rendered.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Publier la revue sur la PR
+        if: steps.pr.outputs.number != '' && steps.rendered.outcome == 'success'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        run: bash scripts/a11y/post-review-comment.sh "$PR_NUMBER" rendered review-rendered.md
+      - name: Verdict — rien de nouveau sur les pages rendues
+        if: steps.pr.outputs.number != ''
+        env:
+          GATE: ${{ steps.rendered.outputs.gate }}
+        run: |
+          if [ "$GATE" != "0" ]; then
+            echo "::error::review-a11y : non-conformité nouvelle ou page non rendue sur les pages que la PR atteint (détail dans le commentaire de la PR)."
+            exit 1
+          fi
+      - name: Upload de la revue rendue
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: review-a11y-rendered
+          path: packages/app/audits/review-*.json
+          retention-days: 7
+          if-no-files-found: ignore

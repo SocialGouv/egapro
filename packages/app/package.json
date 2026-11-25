@@ -48,7 +48,6 @@
 		"check:pdf-ua": "tsx scripts/check-pdf-ua.ts",
 		"test:a11y": "ultra11y audit \"src/**/*.tsx\" --jsx --graph --standard rgaa --lang fr --fail-on blocking",
 		"a11y:report": "ultra11y audit \"src/**/*.tsx\" --jsx --graph --standard rgaa --lang fr --out audits && ultra11y report --in audits/audit-latest.json --standard rgaa --lang fr --out audits",
-		"a11y:dev": "ultra11y dev --standard rgaa --lang fr",
 		"test:lighthouse": "lhci collect --url=${LIGHTHOUSE_URL:-http://localhost:3000} && lhci upload && lhci assert",
 		"typecheck": "tsc --noEmit",
 		"generate:fetch-companies": "tsx scripts/fetch-companies.ts",
@@ -114,7 +113,7 @@
 		"swagger-ui-dist": "^5.32.14",
 		"tsx": "^4.21.0",
 		"typescript": "^6.0.2",
-		"ultra11y": "5.58.1",
+		"ultra11y": "9.6.5",
 		"vite-tsconfig-paths": "^6.1.1",
 		"vitest": "^4.1.11"
 	},
