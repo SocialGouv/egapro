@@ -1,6 +1,5 @@
 // @vitest-environment node
 
-import type { OnRenderProps } from "@react-pdf/renderer";
 import { Document, Page, pdf, View } from "@react-pdf/renderer";
 import { describe, expect, it } from "vitest";
 
@@ -10,6 +9,12 @@ import { noPayGapReferences } from "~/test/gipGapFixtures";
 import { styles } from "../recapPdfStyles";
 import { CategorySection } from "../sections/CategorySection";
 import type { DeclarationPdfData } from "../types";
+import {
+	collectPdfPageTexts,
+	type PdfLayoutNode as LayoutNode,
+	type PdfPageText as PageText,
+	readPdfLayout,
+} from "./helpers/pdfLayout";
 import { registerPdfFonts } from "./helpers/registerPdfFonts";
 
 registerPdfFonts();
@@ -17,47 +22,13 @@ registerPdfFonts();
 // Banners that must never end up alone at a page bottom.
 const BANNER = /^(Catégorie d'emplois n°\d+|Indicateurs par catégorie)/;
 
-// A @react-pdf LayoutNode: box.top is parent-relative, only TEXT carries height.
-type LayoutNode = {
-	type: string;
-	value?: string;
-	box?: { top?: number; height?: number };
-	children?: LayoutNode[];
-};
-
-// react-pdf exposes the laid-out tree on onRender but omits it from its public type.
-function readLayout(props: OnRenderProps): LayoutNode {
-	const layout = (props as { _INTERNAL__LAYOUT__DATA_?: LayoutNode })
-		._INTERNAL__LAYOUT__DATA_;
-	if (!layout) throw new Error("onRender did not expose the layout data");
-	return layout;
-}
-
-type PageText = { text: string; bottom: number };
-
-function textOf(node: LayoutNode): string {
-	if (node.type === "TEXT_INSTANCE") return node.value ?? "";
-	return (node.children ?? []).map(textOf).join("");
-}
-
-function collectPageTexts(
-	node: LayoutNode,
-	parentTop: number,
-	out: PageText[],
-): void {
-	const top = parentTop + (node.box?.top ?? 0);
-	if (node.type === "TEXT" && node.box?.height !== undefined) {
-		out.push({ text: textOf(node).trim(), bottom: top + node.box.height });
-	}
-	for (const child of node.children ?? []) collectPageTexts(child, top, out);
-}
-
 // A banner as the bottom-most text of a page means its block wrapped without it.
 function orphanedBanners(layout: LayoutNode): string[] {
 	const orphans: string[] = [];
 	for (const page of layout.children ?? []) {
 		const texts: PageText[] = [];
-		for (const child of page.children ?? []) collectPageTexts(child, 0, texts);
+		for (const child of page.children ?? [])
+			collectPdfPageTexts(child, 0, texts);
 		const printed = texts.filter((entry) => entry.text.length > 0);
 		if (printed.length === 0) continue;
 		const last = printed.reduce((a, b) => (b.bottom > a.bottom ? b : a));
@@ -123,7 +94,7 @@ async function renderWithFiller(fillerHeight: number): Promise<LayoutNode> {
 	const document = (
 		<Document
 			onRender={(props) => {
-				layout = readLayout(props);
+				layout = readPdfLayout(props);
 			}}
 		>
 			<Page size="A4" style={styles.page} wrap>
@@ -147,7 +118,7 @@ describe("PDF category pagination", () => {
 		const printed = (layout.children ?? []).flatMap((page) => {
 			const texts: PageText[] = [];
 			for (const child of page.children ?? [])
-				collectPageTexts(child, 0, texts);
+				collectPdfPageTexts(child, 0, texts);
 			return texts.map((entry) => entry.text);
 		});
 
@@ -179,7 +150,7 @@ describe("PDF category pagination", () => {
 		for (const page of layout.children ?? []) {
 			const texts: PageText[] = [];
 			for (const child of page.children ?? [])
-				collectPageTexts(child, 0, texts);
+				collectPdfPageTexts(child, 0, texts);
 			const headings = texts
 				.map((entry) => entry.text)
 				.filter((text) => /^Catégorie d'emplois n°\d+/.test(text));

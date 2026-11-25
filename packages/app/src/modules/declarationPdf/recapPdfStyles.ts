@@ -156,6 +156,7 @@ export const styles = StyleSheet.create({
 	},
 	infoRow: {
 		flexDirection: "row",
+		gap: 4,
 	},
 	infoLabelColumn: {
 		width: 142,
