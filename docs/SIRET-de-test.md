@@ -16,7 +16,9 @@
 
 Les **30 SIREN distincts** ci-dessous sont réservés aux tests UI et aux audits RGAA : 20 pour les tests UI (4 dans chacune des cinq tranches d’effectif demandées, [ticket #4724](https://github.com/SocialGouv/egapro/issues/4724)), 4 pour les audits RGAA de plus de 150 salariés ([ticket #4724](https://github.com/SocialGouv/egapro/issues/4724)) et 6 pour les audits RGAA de la représentation équilibrée, à 1 000 salariés et plus ([ticket #4875](https://github.com/SocialGouv/egapro/issues/4875)). Les SIRET indiqués sont ceux du siège, vérifiés avec l’[API Recherche d’Entreprises](https://recherche-entreprises.api.gouv.fr/) les 13 et 14 octobre 2026, puis le 26 octobre 2026 pour les 6 derniers. Les effectifs indiqués sont ceux **simulés dans le GIP mocké**.
 
-Chaque SIREN a une ligne dans le GIP mocké, importée en recette après promotion d’une release qui la contient. Cocher une case lors de l’attribution du SIRET, puis la décocher après usage.
+Chaque SIREN a une ligne dans le GIP mocké, importée en recette après promotion d'une release qui la contient. Cocher une case lors de l'attribution du SIRET, puis la décocher après usage.
+
+Depuis l'epic [#4354](https://github.com/SocialGouv/egapro/issues/4354), le CSV du GIP mocké n'est plus embarqué dans les images `preprod` et `prod` : ces SIREN restent réservés aux recettes et aux audits sur les environnements construits en `dev` (review apps, `rgaa-persist`, `perf-persist`, `recette-persist`).
 
 ### Tests UI — 50-99 (4)
 

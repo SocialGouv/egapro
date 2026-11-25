@@ -13,17 +13,17 @@ describe("admin stats page", () => {
 		mockEnv.NEXT_PUBLIC_EGAPRO_ENV = "dev";
 	});
 
-	it.each([
-		"dev",
-		"preprod",
-	])("asks for the test-data notice on the %s environment", (egaproEnv) => {
-		mockEnv.NEXT_PUBLIC_EGAPRO_ENV = egaproEnv;
+	it("asks for the test-data notice in dev", () => {
+		mockEnv.NEXT_PUBLIC_EGAPRO_ENV = "dev";
 
 		expect(StatsPage().props.showTestDataNotice).toBe(true);
 	});
 
-	it("hides the test-data notice in production", () => {
-		mockEnv.NEXT_PUBLIC_EGAPRO_ENV = "prod";
+	it.each([
+		"preprod",
+		"prod",
+	])("hides the test-data notice on the %s environment", (egaproEnv) => {
+		mockEnv.NEXT_PUBLIC_EGAPRO_ENV = egaproEnv;
 
 		expect(StatsPage().props.showTestDataNotice).toBe(false);
 	});
