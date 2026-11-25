@@ -8,8 +8,10 @@ import {
 	isLockedBySubsequentSubmission,
 	type LastTransmission,
 	SUBSEQUENT_SUBMISSION_EVENT_TYPES,
+	type SubmissionHistoryEvent,
 	type SubmissionLockTarget,
 	type SubsequentSubmissions,
+	TRANSMISSION_EVENT_TYPES,
 } from "~/modules/domain";
 import type { DB } from "~/server/db";
 import { declarationStatusHistory, declarations } from "~/server/db/schema";
@@ -84,7 +86,14 @@ function selectTransmissionHistory(
 			createdAt: declarationStatusHistory.createdAt,
 		})
 		.from(declarationStatusHistory)
-		.where(eq(declarationStatusHistory.declarationId, declarationId));
+		.where(
+			and(
+				eq(declarationStatusHistory.declarationId, declarationId),
+				inArray(declarationStatusHistory.eventType, [
+					...TRANSMISSION_EVENT_TYPES,
+				]),
+			),
+		);
 }
 
 export type DeclarationTrajectorySnapshot = SubsequentSubmissions & {
@@ -114,9 +123,10 @@ export async function loadLastTransmission(
 export function deriveCurrentRound(
 	events: ReadonlyArray<{ eventType: string }>,
 ): 1 | 2 {
-	return events.some((event) => event.eventType === "second_declaration_submit")
-		? 2
-		: 1;
+	const submissions = deriveSubsequentSubmissions(
+		events.map(({ eventType }) => ({ eventType, round: null })),
+	);
+	return submissions.hasSubmittedSecondDeclaration ? 2 : 1;
 }
 
 export async function loadTransmissionState(

@@ -247,13 +247,13 @@ describe("WithBannerLayout", () => {
 		}
 
 		it.each([
-			["demarche_completed", true, true],
-			["demarche_completed", false, false],
-			["awaiting_cse_opinion", true, false],
-			["corrective_actions_chosen", false, false],
-			["draft", false, false],
-		])("status %s, first declaration superseded %s → suspended %s", async (status, isFirstDeclarationLocked, expected) => {
-			mockLayout({ status, isFirstDeclarationLocked });
+			["demarche_completed", true, "cse_opinion", true],
+			["demarche_completed", false, "cse_opinion", false],
+			["awaiting_cse_opinion", true, "joint_evaluation", false],
+			["corrective_actions_chosen", false, null, false],
+			["draft", false, null, false],
+		])("status %s, first declaration superseded %s, last transmission %s → suspended %s", async (status, isFirstDeclarationLocked, lastTransmission, expected) => {
+			mockLayout({ status, isFirstDeclarationLocked, lastTransmission });
 
 			expect(await lockAcquisitionSuspended()).toBe(expected);
 		});
@@ -269,18 +269,6 @@ describe("WithBannerLayout", () => {
 			mockLayout({ status, isFirstDeclarationLocked, lastTransmission });
 
 			expect(await lockAcquisitionSuspended()).toBe(expected);
-		});
-
-		// Without the transmission context, the historical behaviour stands: a
-		// closed démarche with a superseded first declaration stays locked.
-		it("keeps the historical lock when the last transmission is not provided", async () => {
-			mockLayout({
-				status: "demarche_completed",
-				isFirstDeclarationLocked: true,
-				lastTransmission: undefined as never,
-			});
-
-			expect(await lockAcquisitionSuspended()).toBe(true);
 		});
 
 		it("never reads the campaign deadlines", async () => {

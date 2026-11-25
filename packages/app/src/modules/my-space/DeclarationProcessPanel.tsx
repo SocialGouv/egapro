@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { useRef } from "react";
 import { DeclarationLockAlert } from "~/modules/declaration-remuneration/shared/lock/DeclarationLockAlert";
-import type {
-	CampaignDeadlines,
-	DeclarationDisplayContext,
-	DeclarationFsmStatus,
-	LastTransmission,
+import {
+	type CampaignDeadlines,
+	type DeclarationDisplayContext,
+	type DeclarationFsmStatus,
+	isLastTransmissionPathChoice,
+	type LastTransmission,
 } from "~/modules/domain";
 import {
 	FORMAL_NOTICE_JOINT_EVALUATION,
@@ -286,10 +287,7 @@ function getClosedMessage({
 	if (lastTransmission === "second_declaration") {
 		return "Cette démarche est terminée. Votre seconde déclaration reste modifiable.";
 	}
-	if (
-		lastTransmission === "path_choice_round_1" ||
-		lastTransmission === "path_choice_round_2"
-	) {
+	if (isLastTransmissionPathChoice(lastTransmission)) {
 		return "Cette démarche est terminée. Votre choix de parcours reste modifiable.";
 	}
 	return firstDeclarationModifiable

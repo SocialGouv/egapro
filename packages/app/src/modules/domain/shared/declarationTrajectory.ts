@@ -226,6 +226,7 @@ function toTransmission(
 		case "second_declaration_submit":
 			return "second_declaration";
 		case "joint_evaluation_submit":
+		case "formal_notice_joint_evaluation_submit":
 			return "joint_evaluation";
 		case "cse_opinion_submit":
 			return "cse_opinion";

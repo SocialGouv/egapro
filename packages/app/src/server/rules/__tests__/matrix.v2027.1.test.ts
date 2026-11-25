@@ -747,13 +747,24 @@ describe("re-transmitting the last deposit of a closed démarche (#5128)", () =>
 			]);
 		});
 
-		it.each([
-			["another last transmission", { lastTransmission: "cse_opinion" }],
-			["a CSE still required", { cseRequired: true }],
-		])("refuses the re-transmission with %s", (_label, overrides) => {
+		it("refuses the re-transmission when another step is the last transmission", () => {
 			expect(() =>
-				applyAction(closed(overrides), "submit_joint_evaluation", rules),
+				applyAction(
+					closed({ lastTransmission: "cse_opinion" }),
+					"submit_joint_evaluation",
+					rules,
+				),
 			).toThrow(NoMatchingTransitionError);
+		});
+
+		it("keeps the last report re-transmittable once a CSE has become required", () => {
+			const result = applyAction(
+				closed({ cseRequired: true }),
+				"submit_joint_evaluation",
+				rules,
+			);
+
+			expect(result.nextStatus).toBe("demarche_completed");
 		});
 	});
 

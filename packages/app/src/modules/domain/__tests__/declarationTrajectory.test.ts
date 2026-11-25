@@ -418,7 +418,7 @@ describe("getLastTransmission", () => {
 		expect(getLastTransmission(events)).toBe("joint_evaluation");
 	});
 
-	it("ignores loop-back events and the formal-notice flow", () => {
+	it("counts the formal-notice deposit as the last joint-evaluation transmission", () => {
 		const events: DeclarationStatusEvent[] = [
 			buildEvent({
 				eventType: "second_declaration_submit",
@@ -435,7 +435,7 @@ describe("getLastTransmission", () => {
 			}),
 		];
 
-		expect(getLastTransmission(events)).toBe("second_declaration");
+		expect(getLastTransmission(events)).toBe("joint_evaluation");
 	});
 
 	it("treats a re-transmission as the new last transmission", () => {
