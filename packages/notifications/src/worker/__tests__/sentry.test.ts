@@ -99,16 +99,16 @@ describe("worker beforeSend", () => {
 		expect(scrubbed.exception?.values?.[0]?.value).toBe("TypeError");
 	});
 
-	it("strips breadcrumb payloads but keeps their message", () => {
+	it("strips breadcrumb payloads and messages", () => {
 		const event: Event = {
 			breadcrumbs: [
-				{ message: "smtp.send", data: { recipient: "[EMAIL_REDACTED]" } },
+				{ message: "smtp.send", data: { recipient: "jean@example.fr" } },
 			],
 		};
 
 		const scrubbed = beforeSendOf()(event);
 
-		expect(scrubbed.breadcrumbs?.[0]).toEqual({ message: "smtp.send" });
+		expect(scrubbed.breadcrumbs?.[0]).toEqual({});
 	});
 
 	it("survives an event with no exception, no message nor breadcrumbs", () => {

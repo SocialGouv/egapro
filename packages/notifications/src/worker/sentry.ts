@@ -12,7 +12,8 @@ export type WorkerSentryConfig = {
  * The worker cannot reuse `~/modules/observability` (a Next.js app module, and
  * this package ships as its own deployed tree), so the privacy contract is
  * enforced structurally instead of by sharing a scrubber: `beforeSend` drops
- * the request, the free-text message and every breadcrumb payload, and replaces
+ * the request, the free-text message, every breadcrumb payload and message,
+ * and replaces
  * each exception value with its type. What remains — stack, fingerprint, tags
  * and the bounded `extra` we pass — cannot carry an e-mail or a SIREN. Call
  * sites must therefore never put free text or user data in `extra`.
@@ -103,6 +104,7 @@ function redactEvent(event: Sentry.ErrorEvent): Sentry.ErrorEvent {
 	}
 	for (const breadcrumb of event.breadcrumbs ?? []) {
 		delete breadcrumb.data;
+		delete breadcrumb.message;
 	}
 
 	return event;
