@@ -3,10 +3,9 @@
  * for Docker builds.
  */
 import { fileURLToPath } from "node:url";
-
-import "./src/env.js";
-
 import { withSentryConfig } from "@sentry/nextjs/config";
+import { env } from "./src/env.js";
+import { getMockFileTracingIncludes } from "./src/server/config/mockAssets.js";
 import { buildSecurityHeaders } from "./src/server/security/securityHeaders.js";
 
 /** @type {import("next").NextConfig} */
@@ -45,9 +44,9 @@ const config = {
 	},
 	cacheHandler: fileURLToPath(new URL("./cache-handler.cjs", import.meta.url)),
 	cacheMaxMemorySize: 0,
-	outputFileTracingIncludes: {
-		"/api/gip-mds/mock": ["./data/mock-gip-mds.csv"],
-	},
+	outputFileTracingIncludes: getMockFileTracingIncludes(
+		env.NEXT_PUBLIC_EGAPRO_ENV,
+	),
 	// `notifications` ships pre-compiled JS in dist/ — keep it external so Next
 	// never tries to bundle its `pg-boss` / `nodemailer` deps into the app
 	// server bundle. The dist tree is produced by `pnpm --filter notifications
