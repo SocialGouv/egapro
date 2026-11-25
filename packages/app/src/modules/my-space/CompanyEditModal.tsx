@@ -23,6 +23,9 @@ import { useUpdateHasCse } from "./useUpdateHasCse";
 
 export const MODAL_ID = "company-edit-modal";
 const MODAL_TITLE_ID = "company-edit-modal-title";
+const CSE_FIELDSET_LEGEND_ID = "company-edit-modal-cse-legend";
+const CSE_FIELDSET_MESSAGES_ID = "company-edit-modal-cse-messages";
+const CSE_WARNING_MESSAGE = "Compléter l'information sur l'existence d'un CSE.";
 
 type Props = {
 	company: {
@@ -53,7 +56,8 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 		},
 	});
 
-	const hasCse = form.watch("hasCse");
+	const showCseWarning = cseApplicable && initialCompany.hasCse === null;
+	const hasCseErrorMessage = form.formState.errors.hasCse?.message;
 
 	const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -118,13 +122,53 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 								</button>
 							</div>
 							<div className="fr-modal__content">
-								<h2 className="fr-modal__title" id={MODAL_TITLE_ID}>
+								<h2 className="fr-modal__title fr-mb-4w" id={MODAL_TITLE_ID}>
 									Modifier les informations
 								</h2>
-								<p className="fr-mb-4w">
-									{cseApplicable
-										? "Vérifier les informations affichées et compléter l'information sur l'existence d'un CSE si nécessaire."
-										: "Vérifier les données affichées."}{" "}
+								{showCseWarning && (
+									<div className="fr-alert fr-alert--warning fr-alert--sm fr-mb-4w">
+										<p>{CSE_WARNING_MESSAGE}</p>
+									</div>
+								)}
+
+								<form
+									autoComplete="off"
+									id="company-edit-form"
+									onSubmit={onSubmit}
+								>
+									<CompanyReadonlySection company={initialCompany} />
+									{cseApplicable && (
+										<div className={`fr-mb-4w ${styles.section}`}>
+											<Controller
+												control={form.control}
+												name="hasCse"
+												render={({ field }) => (
+													<CseRadioGroup
+														error={hasCseErrorMessage}
+														hasCse={field.value ?? null}
+														setHasCse={field.onChange}
+													/>
+												)}
+											/>
+											<p
+												className={`fr-text--sm fr-mb-0 ${styles.sourceText} ${styles.cseSourceText}`}
+											>
+												Source : information relative aux élections
+												professionnelles transmise à l'administration.
+											</p>
+										</div>
+									)}
+									{submitError && (
+										<div
+											className="fr-alert fr-alert--error fr-mt-2w"
+											role="alert"
+										>
+											<p>{submitError}</p>
+										</div>
+									)}
+								</form>
+
+								<p className={`fr-mb-0 ${styles.contactParagraph}`}>
 									Si vous constatez une erreur, veuillez{" "}
 									<a
 										className={`fr-link fr-icon-external-link-line fr-link--icon-right ${styles.contactLink}`}
@@ -137,34 +181,6 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 									</a>
 									.
 								</p>
-
-								<form
-									autoComplete="off"
-									id="company-edit-form"
-									onSubmit={onSubmit}
-								>
-									<CompanyReadonlySection company={initialCompany} />
-									{cseApplicable && (
-										<Controller
-											control={form.control}
-											name="hasCse"
-											render={({ field }) => (
-												<CseRadioGroup
-													hasCse={field.value ?? null}
-													setHasCse={field.onChange}
-												/>
-											)}
-										/>
-									)}
-									{submitError && (
-										<div
-											className="fr-alert fr-alert--error fr-mt-2w"
-											role="alert"
-										>
-											<p>{submitError}</p>
-										</div>
-									)}
-								</form>
 							</div>
 							<div className="fr-modal__footer">
 								<ul className="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg">
@@ -172,9 +188,7 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 										<li>
 											<button
 												className="fr-btn"
-												disabled={
-													hasCse === undefined || updateHasCseMutation.isPending
-												}
+												disabled={updateHasCseMutation.isPending}
 												form="company-edit-form"
 												type="submit"
 											>
@@ -254,7 +268,7 @@ function CompanyReadonlySection({ company }: CompanyReadonlySectionProps) {
 					/>
 				</dl>
 				<p className={`fr-text--sm fr-mb-0 ${styles.sourceText}`}>
-					Source : DSN (Déclarations Sociales Nominatives).
+					Source : DSN (Déclarations sociales nominatives).
 				</p>
 			</div>
 		</>
@@ -270,7 +284,7 @@ function InfoRow({ label, value }: InfoRowProps) {
 	return (
 		<div className={styles.infoRow}>
 			<dt className={styles.label}>{label}</dt>
-			<dd>
+			<dd className={styles.value}>
 				<strong>{value ?? "—"}</strong>
 			</dd>
 		</div>
@@ -278,14 +292,22 @@ function InfoRow({ label, value }: InfoRowProps) {
 }
 
 type CseRadioGroupProps = {
+	error: string | undefined;
 	hasCse: boolean | null;
 	setHasCse: (value: boolean) => void;
 };
 
-function CseRadioGroup({ hasCse, setHasCse }: CseRadioGroupProps) {
+function CseRadioGroup({ error, hasCse, setHasCse }: CseRadioGroupProps) {
 	return (
-		<fieldset className={`fr-fieldset ${styles.cseFieldset}`}>
-			<legend className="fr-fieldset__legend--regular fr-fieldset__legend">
+		<fieldset
+			aria-labelledby={`${CSE_FIELDSET_LEGEND_ID} ${CSE_FIELDSET_MESSAGES_ID}`}
+			className={`fr-fieldset fr-mb-0 ${styles.cseFieldset} ${error ? "fr-fieldset--error" : ""}`}
+			role={error ? "group" : undefined}
+		>
+			<legend
+				className="fr-fieldset__legend--regular fr-fieldset__legend"
+				id={CSE_FIELDSET_LEGEND_ID}
+			>
 				Existence d'un CSE (obligatoire)
 			</legend>
 			<div className="fr-fieldset__element fr-fieldset__element--inline">
@@ -295,7 +317,6 @@ function CseRadioGroup({ hasCse, setHasCse }: CseRadioGroupProps) {
 						id="cse-radio-yes"
 						name="cse"
 						onChange={() => setHasCse(true)}
-						required
 						type="radio"
 						value="true"
 					/>
@@ -319,11 +340,14 @@ function CseRadioGroup({ hasCse, setHasCse }: CseRadioGroupProps) {
 					</label>
 				</div>
 			</div>
-			<div aria-live="polite" className="fr-messages-group"></div>
-			<p className={`fr-text--sm fr-mb-0 ${styles.sourceText}`}>
-				Source : information relative aux élections professionnelles transmise à
-				l'administration.
-			</p>
+			<div
+				aria-atomic="true"
+				aria-live="polite"
+				className="fr-messages-group"
+				id={CSE_FIELDSET_MESSAGES_ID}
+			>
+				{error ? <p className="fr-message fr-message--error">{error}</p> : null}
+			</div>
 		</fieldset>
 	);
 }

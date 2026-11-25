@@ -2,6 +2,7 @@ import "server-only";
 
 import { env } from "~/env";
 import {
+	companyPlaceholderName,
 	getLocationFromPostalCode,
 	headOfficeCountry,
 	legalUnitCountry,
@@ -248,7 +249,7 @@ export async function fetchCompanyBySiren(
 		name:
 			entity.denominationunitelegale ||
 			entity.raisonsociale ||
-			`Entreprise ${siren}`,
+			companyPlaceholderName(siren),
 		address: buildAddress(entity),
 		city: entity.libellecommune ?? null,
 		nafCode: entity.activiteprincipaleunitelegale ?? null,

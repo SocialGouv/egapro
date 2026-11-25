@@ -512,7 +512,7 @@ describe("Step6Review", () => {
 			),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText("Indicateur par catégorie d'emplois"),
+			screen.getByText("Indicateurs par catégorie d'emplois"),
 		).toBeInTheDocument();
 	});
 

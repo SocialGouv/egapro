@@ -92,6 +92,12 @@ export function referencePeriodDateBounds(year: number): {
 	};
 }
 
+export const PERCENTAGES_REQUIRED_MESSAGE =
+	"Veuillez renseigner le pourcentage de femmes ou d'hommes.";
+
+export const PERCENTAGES_SUM_MESSAGE =
+	"La somme des pourcentages doit être égale à 100 %.";
+
 function sumsToOneHundred(a: number, b: number): boolean {
 	return Math.round((a + b) * 10) / 10 === 100;
 }
@@ -112,26 +118,11 @@ export const subjectionSchema = z
 	});
 
 export function referencePeriodSchema(year: number) {
-	const yearMismatchMessage = `La date sélectionnée ne correspond pas à l'année de référence ${year}.`;
-
 	return z
 		.object({
 			referencePeriodStart: isoDateStringSchema,
 			referencePeriodEnd: isoDateStringSchema,
 		})
-		.refine(
-			(period) => {
-				if (!isValidIsoDate(period.referencePeriodStart)) return true;
-				const startYear = parseIsoDate(
-					period.referencePeriodStart,
-				).getUTCFullYear();
-				return startYear === year || startYear === year - 1;
-			},
-			{
-				message: yearMismatchMessage,
-				path: ["referencePeriodStart"],
-			},
-		)
 		.refine(
 			(period) => {
 				if (!isValidIsoDate(period.referencePeriodEnd)) return true;
@@ -140,7 +131,7 @@ export function referencePeriodSchema(year: number) {
 				);
 			},
 			{
-				message: yearMismatchMessage,
+				message: `La date sélectionnée ne correspond pas à l'année de calcul des indicateurs ${year}.`,
 				path: ["referencePeriodEnd"],
 			},
 		)
@@ -180,7 +171,7 @@ export const executivesSchema = z
 			data.executivesCount !== "two_or_more" ||
 			sumsToOneHundred(data.executiveWomenPercent, data.executiveMenPercent),
 		{
-			message: "La somme des pourcentages doit être égale à 100 %.",
+			message: PERCENTAGES_SUM_MESSAGE,
 			path: ["executiveMenPercent"],
 		},
 	);
@@ -199,7 +190,7 @@ export const membersSchema = z
 			!data.hasManagementBody ||
 			sumsToOneHundred(data.memberWomenPercent, data.memberMenPercent),
 		{
-			message: "La somme des pourcentages doit être égale à 100 %.",
+			message: PERCENTAGES_SUM_MESSAGE,
 			path: ["memberMenPercent"],
 		},
 	);

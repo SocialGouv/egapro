@@ -44,6 +44,7 @@ const company: CompanyDetail = {
 	departmentLabel: null,
 	gipWorkforce: null,
 	hasCse: null,
+	identityUnavailable: false,
 };
 
 const currentYear = getCurrentYear();

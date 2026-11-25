@@ -72,16 +72,35 @@ describe("referencePeriodSchema", () => {
 		["after the reference year", "2027-04-03"],
 		["on the calendar year right after it", "2026-01-01"],
 		["more than one year before it", "2023-01-02"],
-	])("rejects a start date %s", (_label, start) => {
+	])("never flags a start date %s with the year message (#4994)", (_label, start) => {
 		const result = referencePeriodSchema(YEAR).safeParse({
 			referencePeriodStart: start,
 			referencePeriodEnd: VALID_PERIOD.referencePeriodEnd,
 		});
 
-		expect(issues(result)).toContainEqual({
-			path: "referencePeriodStart",
-			message: VALIDATION_MESSAGES.periodYear(YEAR),
-		});
+		expect(issues(result)).not.toContainEqual(
+			expect.objectContaining({ path: "referencePeriodStart" }),
+		);
+	});
+
+	it.each([
+		["entirely after the reference year", "2026-01-01", "2026-12-31"],
+		["straddling two years past it", "2026-04-03", "2027-04-02"],
+		["straddling two years before it", "2023-06-01", "2024-05-31"],
+	])("reports a period %s on the end date only (#4994)", (_label, start, end) => {
+		const reported = issues(
+			referencePeriodSchema(YEAR).safeParse({
+				referencePeriodStart: start,
+				referencePeriodEnd: end,
+			}),
+		);
+
+		expect(reported).toEqual([
+			{
+				path: "referencePeriodEnd",
+				message: VALIDATION_MESSAGES.periodYear(YEAR),
+			},
+		]);
 	});
 
 	it.each([

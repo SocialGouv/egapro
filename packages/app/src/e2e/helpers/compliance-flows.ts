@@ -140,7 +140,7 @@ function cseCheckboxName(
 /**
  * Complete CSE step 2 through the real UI: upload the PDF, associate the required
  * content types via the matrix (or, with a single required column, check that the
- * page pre-associated and locked it), then submit and certify. Exercises the matrix
+ * page pre-associated it and hid its column), then submit and certify. Exercises the matrix
  * introduced by epic #3476 instead of injecting rows directly in the database.
  */
 export async function submitCseStep2(
@@ -160,20 +160,14 @@ export async function submitCseStep2(
 		// step), after which the page re-renders with the matrix.
 		await page.locator("#cse-file-upload").setInputFiles(DUMMY_PDF);
 		const matrix = page.getByRole("table", {
-			name: /Associez chaque fichier déposé/,
+			name: /Associez chaque fichier déposé|Fichier déposé associé au type d'avis/,
 		});
 		await expect(matrix).toBeVisible({ timeout: 30_000 });
 
 		// Phase B — a single column is auto-associated before any listener could
 		// attach, so its save is awaited through the submit button instead.
-		const [onlyColumn] = columns;
-		if (columns.length === 1 && onlyColumn) {
-			const lockedCheckbox = matrix.getByRole("checkbox", {
-				name: cseCheckboxName(onlyColumn, fileName, hasSecondDeclaration),
-			});
-			await expect(matrix.getByRole("checkbox")).toHaveCount(1);
-			await expect(lockedCheckbox).toBeChecked();
-			await expect(lockedCheckbox).toBeDisabled();
+		if (columns.length === 1) {
+			await expect(matrix.getByRole("checkbox")).toHaveCount(0);
 		} else {
 			for (const column of columns) {
 				const persisted = page.waitForResponse((response) =>
