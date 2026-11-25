@@ -9,5 +9,10 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-	return <SitemapPage />;
+	return (
+		<>
+			<input type="text" name="q" />
+			<SitemapPage />
+		</>
+	);
 }
