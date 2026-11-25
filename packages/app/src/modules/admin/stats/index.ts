@@ -30,6 +30,7 @@ export {
 	getStepDropoffRateSchema,
 	getStepDurationsSchema,
 } from "./schemas";
+export { shouldShowTestDataNotice } from "./testDataNotice";
 export type {
 	CampaignProgressionPoint,
 	CampaignProgressionSeries,

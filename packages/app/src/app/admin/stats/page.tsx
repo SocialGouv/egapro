@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 
 import { env } from "~/env.js";
-import { StatsDashboard } from "~/modules/admin/stats";
+import {
+	StatsDashboard,
+	shouldShowTestDataNotice,
+} from "~/modules/admin/stats";
 import { FIRST_DECLARATION_YEAR, getCurrentYear } from "~/modules/domain";
 
 export const metadata: Metadata = { title: "Statistiques" };
@@ -15,7 +18,7 @@ export default function Page() {
 		<StatsDashboard
 			availableYears={availableYears}
 			currentYear={currentYear}
-			showTestDataNotice={env.NEXT_PUBLIC_EGAPRO_ENV !== "prod"}
+			showTestDataNotice={shouldShowTestDataNotice(env.NEXT_PUBLIC_EGAPRO_ENV)}
 		/>
 	);
 }
