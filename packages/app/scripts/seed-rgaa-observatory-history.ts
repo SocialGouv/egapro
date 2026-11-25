@@ -39,6 +39,7 @@ import {
 	REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
 } from "~/modules/domain";
 import dedicatedTestSirens from "../data/dedicated-test-sirens.json";
+import { assertDemoSeedAllowed } from "./demoSeedGuard";
 import {
 	DEMO_PUBLIC_RELEASE_DATE,
 	DEMO_SEED_USER_ID,
@@ -618,6 +619,8 @@ async function main(): Promise<void> {
 	if (!parsed.ok) {
 		process.exit(1);
 	}
+
+	assertDemoSeedAllowed();
 
 	const sql = postgres(resolveDatabaseUrl(), { max: 1 });
 	try {
