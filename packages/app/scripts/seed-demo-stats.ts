@@ -41,6 +41,7 @@ import type {
 	compliancePathEnum,
 	declarationEventTypeEnum,
 } from "~/server/db/schema";
+import { assertDemoSeedAllowed } from "./demoSeedGuard";
 
 type CompliancePath = (typeof compliancePathEnum.enumValues)[number];
 type DeclarationEventType =
@@ -95,6 +96,8 @@ function requireDatabaseUrl(): string {
 	}
 	return url;
 }
+
+assertDemoSeedAllowed();
 
 const DATABASE_URL = requireDatabaseUrl();
 

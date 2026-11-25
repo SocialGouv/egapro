@@ -39,6 +39,8 @@ pnpm db:seed-observatory -- --clean
 
 Les review apps éphémères de branche utilisent l'environnement `dev` : un Job Helm post-déploiement y exécute automatiquement le même seed, de façon idempotente. Le seed reste désactivé par défaut dans les valeurs communes et n'est donc pas exécuté en préproduction ou en production.
 
+Les seeds de démonstration ne sont légitimes que sur les environnements construits en `dev` : le poste local, les review apps éphémères et les environnements persistants `rgaa-persist`, `perf-persist` et `recette-persist`. Les trois scripts (`db:seed-observatory`, `db:seed-rgaa-history`, `db:seed-stats`) refusent de s'exécuter lorsque `NEXT_PUBLIC_EGAPRO_ENV` vaut autre chose que `dev` : ils s'arrêtent avant toute connexion, sans écrire, y compris en mode `--clean`. La variable est absente sur un poste local (comportement inchangé) et vaut `dev` dans le Job Helm des environnements `dev` ; les images `preprod` et `prod` n'embarquent ni le script de démonstration de l'Observatoire, ni le CSV du GIP mocké ([#4354](https://github.com/SocialGouv/egapro/issues/4354)).
+
 ## Historique des SIREN de l'audit RGAA
 
 Les dix SIREN `purpose: "rgaa"` de `packages/app/data/dedicated-test-sirens.json` sont de vraies entreprises, créées par l'import GIP du déploiement, qui n'importe que l'année de campagne courante. Sans historique, le sélecteur d'année, les courbes et l'onglet `Représentation` de leur fiche ne sont pas auditables. Le script suivant leur injecte les campagnes passées :
