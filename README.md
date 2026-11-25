@@ -175,9 +175,9 @@ Les identifiants (`EGAPRO_PROCONNECT_CLIENT_ID`, `EGAPRO_PROCONNECT_CLIENT_SECRE
 
 | Fichier | Déclencheur | Rôle |
 |---|---|---|
-| `ci.yaml` | chaque push | build · lint · format · patterns · typecheck · tests · cohérence des versions ultra11y |
-| `a11y.yaml` | PR, cron lundi 04:00 UTC, manuel | ultra11y. Sur **PR** : `a11y-gate` seul — audit statique de tout `src`, **bloquant**. Sur **cron** ou **manuel** : chaîne complète (`a11y-pages` + `a11y-bundle`), non bloquante et payante |
-| `a11y-lite.yaml` | PR → `alpha`, push `alpha` | ultra11y mode lite. Sur **PR** : capture des pages que le diff peut changer, moteur seul, **bloquant** sur un constat de rendu nouveau ou une route non échantillonnée. Sur **push `alpha`** : capture tout et écrit la baseline |
+| `ci.yaml` | chaque push | build · lint · format · patterns · typecheck · tests |
+| `a11y.yaml` | PR, cron lundi 04:00 UTC, manuel | Sur **PR** : `a11y-gate` seul — audit statique ultra11y de tout `src`, **bloquant**. Sur **cron** ou **manuel** : balayage Playwright des pages au moteur seul (`a11y-pages`), audit et adjudication par le bot iterion `rgaa-audit`, livrable unique (`a11y-bundle`) ; non bloquant et payant |
+| `a11y-lite.yaml` | PR → `alpha` | Audit statique ultra11y des seuls fichiers que la PR change, au moteur que le bot iterion épingle, **bloquant** sur un constat bloquant |
 | `e2e.yaml` | PR → `alpha`, manuel | suite Playwright complète **et** les coordonnées de la grille de recette, en shards parallèles ; le check requis « Test e2e » est le job agrégateur |
 | `e2e-grille.yaml` | cron nocturne (02:00 UTC), manuel | grille de recette seule, rapport de recette |
 | `lighthouse.yaml` | `deployment_status` (success, hors env `build-*`) | audit Lighthouse sur l'URL déployée |

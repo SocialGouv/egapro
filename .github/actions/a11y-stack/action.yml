@@ -2,12 +2,11 @@ name: "Stack egapro pour la capture RGAA"
 description: >-
   Prépare ce que la suite Playwright `src/e2e/a11y/` exige pour capturer des pages rendues et
   authentifiées : variables de la stack, dépendances, Chromium, services docker, build de
-  production, schéma de base. Partagée par `a11y-pages` (a11y.yaml, run hebdomadaire) et
-  `a11y-lite` (a11y-lite.yaml, chaque PR) : une seule préparation, donc une seule à corriger.
+  production, schéma de base. Utilisée par `a11y-pages` (a11y.yaml, run hebdomadaire).
   Le checkout reste au workflow — une action locale n'existe qu'après lui.
 
 # Les secrets ne sont exposés qu'au build. Le workflow les repasse lui-même à la step de
-# capture, la seule autre qui fasse tourner l'app — jamais à l'Action ultra11y. Même découpage
+# capture, la seule autre qui fasse tourner l'app — jamais aux steps du moteur. Même découpage
 # que le job `shard` d'e2e.yaml (#4699).
 inputs:
   proconnect-client-id:

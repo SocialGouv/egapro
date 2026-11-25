@@ -95,7 +95,7 @@ Ce qui se vérifie mécaniquement n'est pas laissé à la lecture. Trois couches
 |---|---|---|
 | **git pre-commit** (`lefthook.yml`, installé par `pnpm install`) | chaque commit | `biome check --write` · `scripts/quality/check-patterns.sh --staged` · audit statique ultra11y |
 | **`pnpm verify`** | avant de déclarer une tâche terminée | patterns · a11y · lint · format · typecheck · test (`VERIFY_BASE`, défaut `origin/alpha`) |
-| **CI** | chaque push / PR | les mêmes, plus e2e, a11y-lite, a11y-gate |
+| **CI** | chaque push / PR | les mêmes, plus e2e, a11y-gate, a11y-lite |
 
 `scripts/quality/check-patterns.sh` porte les interdits mécaniques (`any`, `process.env`, `../../`, `style={}`, `<svg>`/`<img>` bruts, couleurs en dur et `@media` en SCSS, `zod` dans un routeur ou un composant, helpers métier réécrits hors `domain/`, composant hors route dans `src/app/`…) — chaque message dit quoi faire à la place. **Si un garde-fou bloque, corrige la cause** : jamais `--no-verify`, jamais de commentaire de suppression (`biome-ignore`, `@ts-expect-error`…), jamais un test, une règle ou un seuil affaibli pour passer au vert.
 
@@ -105,7 +105,7 @@ Une tâche n'est **terminée** que quand `pnpm verify` est vert **et** que `/rev
 
 ## Accessibilité — RGAA 4.1.2 / WCAG 2.2 AA
 
-egapro est une plateforme de l'État : exigence first-class, au même titre que la sécurité. **Un seul dispositif : ultra11y**, à une seule version — la devDependency de `packages/app`, tenue égale à l'Action CI. Tout en découle : pre-commit, `pnpm verify`, les skills `review-a11y` et `ultra11y` (symlinks dans `.agents/skills/`, lus par chaque outil), le gate commit / push / PR côté agent (hook dans `.claude/settings.json`, plugin dans `opencode.json`), le MCP `ultra11y`. Il n'y a pas de second système, et c'est délibéré.
+egapro est une plateforme de l'État : exigence first-class, au même titre que la sécurité. **Un seul dispositif : ultra11y**, à une seule version — la devDependency de `packages/app`. Tout en découle : pre-commit, `pnpm verify`, les skills `review-a11y` et `ultra11y` (symlinks dans `.agents/skills/`, lus par chaque outil), le gate commit / push / PR côté agent (hook dans `.claude/settings.json`, plugin dans `opencode.json`), le MCP `ultra11y`, et la gate de PR `a11y-gate`. Le run hebdomadaire de la CI passe par le bot `rgaa-audit` d'iterion, qui épingle son propre moteur ([`docs/accessibilite-ultra11y.md`](./docs/accessibilite-ultra11y.md)). Il n'y a pas de second système, et c'est délibéré.
 
 - **HTML natif d'abord, ARIA en dernier.** Un `<button>` est accessible ; un `<div role="button">` demande d'écrire à la main focus, clavier et état. Ne double jamais une sémantique implicite (`role="navigation"` sur `<nav>` est faux, pas redondant).
 - **Ne devine pas un critère de mémoire** : demande-le au skill `ultra11y` ou au MCP (`criteria --standard rgaa 8.3`, `guidance`, `glossary`).
