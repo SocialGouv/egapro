@@ -195,12 +195,12 @@ jobs:
           echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
           echo "base_url=$BASE_URL" >> "$GITHUB_OUTPUT"
           git fetch --no-tags origin "$BASE_REF"
-          pnpm exec ultra11y affected --since "origin/$BASE_REF" --base-url "$PR_URL" --json \
+          pnpm exec ultra11y affected --since "origin/$BASE_REF" --base-url "$PR_URL" --lang fr --json \
             > audits/review-affected.json
           cat audits/review-affected.json
           rc=0
           pnpm exec ultra11y scan --since "origin/$BASE_REF" --base-url "$BASE_URL" \
-            --browser-path "$chrome" --no-snapshot --json > audits/review-base-scan.json || rc=$?
+            --browser-path "$chrome" --no-snapshot --lang fr --json > audits/review-base-scan.json || rc=$?
           if [ "$rc" -ne 0 ] && [ "$rc" -ne 1 ]; then
             echo "::error::ultra11y scan (base) : sortie $rc"
             exit "$rc"
@@ -208,7 +208,7 @@ jobs:
           gate=0
           pnpm exec ultra11y scan --since "origin/$BASE_REF" --base-url "$PR_URL" \
             --baseline audits/review-base-scan.json --browser-path "$chrome" --no-snapshot \
-            --json > audits/review-scan.json || gate=$?
+            --lang fr --json > audits/review-scan.json || gate=$?
           if [ "$gate" -ne 0 ] && [ "$gate" -ne 1 ]; then
             echo "::error::ultra11y scan (PR) : sortie $gate"
             exit "$gate"

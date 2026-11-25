@@ -153,7 +153,7 @@ sévérité puis par **critère RGAA**, le WCAG en correspondance entre parenth�
 `scripts/a11y/review-comment.mjs` le formate (testé par `review-comment.test.mjs`, dans
 `a11y-gate` et `pnpm verify`) : il rattache chaque constat rendu à son critère RGAA par la table
 du moteur épinglé (`ultra11y/src/data/standards/rgaa.json`), puisque `scan --json` cite le critère
-WCAG. `scripts/a11y/post-review-comment.sh` l'écrit (une tentative = chercher, fusionner,
+WCAG. Les scans passent `--lang fr` : depuis 9.6.6, les messages d'axe sont ceux de sa locale française. `scripts/a11y/post-review-comment.sh` l'écrit (une tentative = chercher, fusionner,
 écrire ; relu après coup). Le même contenu va dans le résumé du job : une PR depuis un fork n'a
 pas le droit d'écrire le commentaire, le verdict ne change pas.
 
@@ -506,7 +506,7 @@ Deux versions, deux surfaces, et elles ne bougent pas ensemble :
 
 | Version | Où | Ce qu'elle porte |
 |---|---|---|
-| devDependency `ultra11y` (**9.6.5**) | `packages/app/package.json` | pre-commit, `pnpm verify`, `a11y-gate`, la revue de PR `a11y-review.yaml` (les deux passages), le plugin Playwright qui écrit les instantanés **et** le moteur d'`a11y-pages` qui les relit — un seul format par construction ; les skills, le hook et le plugin des agents |
+| devDependency `ultra11y` (**9.6.6**) | `packages/app/package.json` | pre-commit, `pnpm verify`, `a11y-gate`, la revue de PR `a11y-review.yaml` (les deux passages), le plugin Playwright qui écrit les instantanés **et** le moteur d'`a11y-pages` qui les relit — un seul format par construction ; les skills, le hook et le plugin des agents |
 | `ITERION_VERSION` (**v7.38.1**) | `a11y.yaml`, job `rgaa-audit` | la release d'iterion et le bot, installé depuis le même tag, avec son pin du moteur |
 
 ```bash
@@ -521,10 +521,10 @@ Dependabot ne voit ni l'une ni l'autre. Viser un `ITERION_VERSION` dont le pin d
 
 **À faire.** La dernière release d'iterion (**v7.38.1**) épingle encore le moteur **7.2.0** ;
 SocialGouv/iterion#3708 le passe en **9.6.5**. Monter `ITERION_VERSION` à la première release
-qui l'inclut. D'ici là, le bot rejoue un registre écrit en 9.6.5 avec un moteur 7.2.0 : les
+qui l'inclut (puis viser le pin égal à la devDependency, 9.6.6 aujourd'hui). D'ici là, le bot rejoue un registre écrit en 9.6.6 avec un moteur 7.2.0 : les
 entrées dont l'évidence diffère sont abandonnées comme périmées, donc ré-adjugées et repayées.
 
-**La montée 5.58.1 → 9.6.5 (#4899).** Ce qui a disparu en route, et ce qui le remplace :
+**La montée 5.58.1 → 9.6.6 (#4899).** Ce qui a disparu en route, et ce qui le remplace :
 
 - `mcp` et `dev` (7.0.0) : le MCP `ultra11y` est retiré de `.mcp.json` (et donc d'`opencode.json`
   et `.codex/config.toml`, générés par `scripts/ai/sync-agent-config.mjs`), le script
@@ -535,7 +535,7 @@ entrées dont l'évidence diffère sont abandonnées comme périmées, donc ré-
 - les exports `ultra11y/vitest` et `ultra11y/jest` (8.0.0) : egapro n'utilise que
   `ultra11y/playwright`, toujours là.
 
-Le premier rejeu du registre en 9.6.5 abandonne une partie des entrées comme périmées
+Le premier rejeu du registre en 9.6.6 abandonne une partie des entrées comme périmées
 (l'évidence d'un critère a changé de forme entre les versions) : le run hebdomadaire suivant les
 ré-adjuge, et le registre qu'il écrit est à commiter après relecture.
 
