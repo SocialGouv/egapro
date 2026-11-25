@@ -1,9 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { TransmissionHistoryEvent } from "~/modules/domain";
 import {
 	createCaller,
 	mockDeclaration,
 } from "./helpers/declarationTestHelpers";
-import { withLockMiddleware } from "./helpers/lockTestHelpers";
+import {
+	withLockMiddleware,
+	withTxGuardHistory,
+} from "./helpers/lockTestHelpers";
 
 // updateEmployeeCategories runs through `declarationLockedWriteProcedure`, so
 // the lock middleware issues two `ctx.db.select` calls before the handler;
@@ -56,6 +60,7 @@ describe("declarationRouter", () => {
 		function createEmployeeTx(
 			declaration: unknown,
 			existingJobs: unknown[] = [],
+			transmissionEvents: TransmissionHistoryEvent[] = [],
 		) {
 			let selectCallCount = 0;
 			const txSelectWhere = vi.fn().mockImplementation(() => {
@@ -69,7 +74,11 @@ describe("declarationRouter", () => {
 				return result;
 			});
 			const txSelectFrom = vi.fn().mockReturnValue({ where: txSelectWhere });
-			const txSelect = vi.fn().mockReturnValue({ from: txSelectFrom });
+			const txSelect = withTxGuardHistory(
+				vi.fn().mockReturnValue({ from: txSelectFrom }),
+				[],
+				transmissionEvents,
+			);
 
 			mockUpdateWhere.mockResolvedValue(undefined);
 			mockSet.mockReturnValue({ where: mockUpdateWhere });
@@ -184,6 +193,35 @@ describe("declarationRouter", () => {
 			const tx = createEmployeeTx(
 				{ ...mockDeclaration, status: "awaiting_revision_choice" },
 				existingJobs,
+			);
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
+			const mockDb = { transaction: mockTransaction } as unknown;
+			const caller = await createLockedCaller(mockDb);
+
+			const result = await caller.updateEmployeeCategories(correctionInput);
+
+			expect(result).toEqual({ success: true });
+			expect(mockSet).toHaveBeenCalledWith(
+				expect.objectContaining({ secondDeclarationStep: 2 }),
+			);
+		});
+
+		// A closed démarche without a CSE keeps its last second declaration
+		// writable until the next campaign (epic #5128).
+		it("accepts a correction write on a closed démarche whose last transmission is the second declaration", async () => {
+			const existingJobs = [{ id: "job-1", categoryIndex: 0, name: "Cadres" }];
+			const tx = createEmployeeTx(
+				{ ...mockDeclaration, status: "demarche_completed" },
+				existingJobs,
+				[
+					{
+						eventType: "second_declaration_submit",
+						round: 2,
+						createdAt: new Date("2027-06-01T10:00:00Z"),
+					},
+				],
 			);
 			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
 				fn(tx),

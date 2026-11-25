@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	getDefaultCampaignDeadlines,
 	type SubmissionHistoryEvent,
+	type TransmissionHistoryEvent,
 } from "~/modules/domain";
 import { isUserLinkedToSiren } from "~/server/auth/companyLink";
 import {
@@ -274,6 +275,7 @@ function createSubmitMockDb(
 function createUnderLockDb(
 	reads: unknown[][],
 	subsequentEvents: SubmissionHistoryEvent[] = [],
+	transmissionEvents: TransmissionHistoryEvent[] = [],
 ) {
 	const steps: Array<"lock" | "read"> = [];
 	const pending = [...reads];
@@ -289,6 +291,7 @@ function createUnderLockDb(
 	const txSelect = withTxGuardHistory(
 		vi.fn().mockReturnValue({ from }),
 		subsequentEvents,
+		transmissionEvents,
 	);
 
 	const updateWhere = vi.fn().mockResolvedValue(undefined);
@@ -323,23 +326,29 @@ function createOneRowSelectDb(
 	declaration: DeclarationStateRow | null,
 	correctionCategories: Array<Record<string, unknown>> = [],
 	txRows: unknown[] = [],
+	transmissionEvents: TransmissionHistoryEvent[] = [],
 ) {
-	return createUnderLockDb([
-		declaration ? [declaration] : [],
-		correctionCategories.map((ec) => ({ employee_category: ec })),
-		txRows,
-	]);
+	return createUnderLockDb(
+		[
+			declaration ? [declaration] : [],
+			correctionCategories.map((ec) => ({ employee_category: ec })),
+			txRows,
+		],
+		[],
+		transmissionEvents,
+	);
 }
 
 function createSimpleSelectDb(
 	declaration: DeclarationStateRow | null,
-	historyForRound: unknown[] = [],
 	historyForLock: SubmissionHistoryEvent[] = [],
 	txRows: unknown[] = [],
+	transmissionEvents: TransmissionHistoryEvent[] = [],
 ) {
 	return createUnderLockDb(
-		[declaration ? [declaration] : [], historyForRound, txRows],
+		[declaration ? [declaration] : [], txRows],
 		historyForLock,
+		transmissionEvents,
 	);
 }
 
@@ -354,13 +363,18 @@ function createJointEvaluationDb(
 	declaration: DeclarationStateRow | null,
 	jointEvaluationFiles: unknown[] = [JOINT_EVALUATION_FILE],
 	txRows: unknown[] = [],
+	transmissionEvents: TransmissionHistoryEvent[] = [],
 ) {
-	return createUnderLockDb([
-		declaration ? [declaration] : [],
-		[{ at: null }],
-		jointEvaluationFiles,
-		txRows,
-	]);
+	return createUnderLockDb(
+		[
+			declaration ? [declaration] : [],
+			[{ at: null }],
+			jointEvaluationFiles,
+			txRows,
+		],
+		[],
+		transmissionEvents,
+	);
 }
 
 describe("declarationRouter", () => {
@@ -447,9 +461,21 @@ describe("declarationRouter", () => {
 						from: () => ({
 							where: () =>
 								Promise.resolve([
-									{ eventType: "second_declaration_submit" },
-									{ eventType: "step_change" },
-									{ eventType: "second_declaration_submit" },
+									{
+										eventType: "second_declaration_submit",
+										round: 2,
+										createdAt: new Date("2027-06-01T10:00:00Z"),
+									},
+									{
+										eventType: "step_change",
+										round: 5,
+										createdAt: new Date("2027-06-01T11:00:00Z"),
+									},
+									{
+										eventType: "second_declaration_submit",
+										round: 2,
+										createdAt: new Date("2027-06-02T10:00:00Z"),
+									},
 								]),
 						}),
 					}),
@@ -465,30 +491,51 @@ describe("declarationRouter", () => {
 
 		it.each([
 			{
-				events: [{ eventType: "submit", round: null }],
+				events: [
+					{
+						eventType: "submit",
+						round: null,
+						createdAt: new Date("2027-03-01T10:00:00Z"),
+					},
+				],
 				expected: {
 					hasSubmittedSecondDeclaration: false,
 					hasSubmittedJointEvaluation: false,
 					hasSubmittedCseOpinion: false,
 					isFirstDeclarationLocked: false,
+					lastTransmission: "first_declaration",
 				},
 			},
 			{
-				events: [{ eventType: "joint_evaluation_submit", round: 1 }],
+				events: [
+					{
+						eventType: "joint_evaluation_submit",
+						round: 1,
+						createdAt: new Date("2027-05-01T10:00:00Z"),
+					},
+				],
 				expected: {
 					hasSubmittedSecondDeclaration: false,
 					hasSubmittedJointEvaluation: true,
 					hasSubmittedCseOpinion: false,
 					isFirstDeclarationLocked: true,
+					lastTransmission: "joint_evaluation",
 				},
 			},
 			{
-				events: [{ eventType: "cse_opinion_submit", round: null }],
+				events: [
+					{
+						eventType: "cse_opinion_submit",
+						round: null,
+						createdAt: new Date("2027-06-01T10:00:00Z"),
+					},
+				],
 				expected: {
 					hasSubmittedSecondDeclaration: false,
 					hasSubmittedJointEvaluation: false,
 					hasSubmittedCseOpinion: true,
 					isFirstDeclarationLocked: true,
+					lastTransmission: "cse_opinion",
 				},
 			},
 		])("derives the downstream submission flags and the first-declaration lock from $events.0.eventType", async ({
@@ -1269,8 +1316,15 @@ describe("declarationRouter", () => {
 			});
 			const ctx = createSimpleSelectDb(
 				declaration,
-				[{ eventType: "second_declaration_submit" }],
 				[],
+				[],
+				[
+					{
+						eventType: "second_declaration_submit",
+						round: 2,
+						createdAt: new Date("2027-05-01T10:00:00Z"),
+					},
+				],
 			);
 			const caller = await createLockedCaller(ctx.db);
 
@@ -1304,8 +1358,15 @@ describe("declarationRouter", () => {
 			});
 			const ctx = createSimpleSelectDb(
 				declaration,
-				[{ eventType: "second_declaration_submit" }],
 				[],
+				[],
+				[
+					{
+						eventType: "second_declaration_submit",
+						round: 2,
+						createdAt: new Date("2027-05-01T10:00:00Z"),
+					},
+				],
 			);
 			const caller = await createLockedCaller(ctx.db);
 
@@ -1323,11 +1384,9 @@ describe("declarationRouter", () => {
 				cseRequired: true,
 				firstDeclarationPathChoice: "justify",
 			});
-			const ctx = createSimpleSelectDb(
-				declaration,
-				[],
-				[{ eventType: "joint_evaluation_submit", round: 1 }],
-			);
+			const ctx = createSimpleSelectDb(declaration, [
+				{ eventType: "joint_evaluation_submit", round: 1 },
+			]);
 			const caller = await createLockedCaller(ctx.db);
 
 			await expect(
@@ -1347,8 +1406,15 @@ describe("declarationRouter", () => {
 			});
 			const ctx = createSimpleSelectDb(
 				declaration,
-				[{ eventType: "second_declaration_submit" }],
 				[{ eventType: "cse_opinion_submit", round: null }],
+				[],
+				[
+					{
+						eventType: "second_declaration_submit",
+						round: 2,
+						createdAt: new Date("2027-05-01T10:00:00Z"),
+					},
+				],
 			);
 			const caller = await createLockedCaller(ctx.db);
 
@@ -1467,8 +1533,15 @@ describe("declarationRouter", () => {
 				});
 				const ctx = createSimpleSelectDb(
 					declaration,
-					[{ eventType: "second_declaration_submit" }],
 					[],
+					[],
+					[
+						{
+							eventType: "second_declaration_submit",
+							round: 2,
+							createdAt: new Date("2027-05-01T10:00:00Z"),
+						},
+					],
 				);
 				const caller = await createLockedCaller(ctx.db);
 
@@ -1535,8 +1608,15 @@ describe("declarationRouter", () => {
 				});
 				const ctx = createSimpleSelectDb(
 					declaration,
-					[{ eventType: "second_declaration_submit" }],
 					[],
+					[],
+					[
+						{
+							eventType: "second_declaration_submit",
+							round: 2,
+							createdAt: new Date("2027-05-01T10:00:00Z"),
+						},
+					],
 				);
 				const caller = await createLockedCaller(ctx.db);
 
@@ -1563,7 +1643,7 @@ describe("declarationRouter", () => {
 					main: { step1: {} },
 				},
 			});
-			const ctx = createSimpleSelectDb(declaration, [], [], [declaration]);
+			const ctx = createSimpleSelectDb(declaration, [], [declaration]);
 			const caller = await createLockedCaller(ctx.db);
 
 			await caller.saveCompliancePath({
@@ -1586,7 +1666,7 @@ describe("declarationRouter", () => {
 				cseRequired: true,
 				draft: { compliance: { step1: { path: "justify" } } },
 			});
-			const ctx = createSimpleSelectDb(declaration, [], [], [declaration]);
+			const ctx = createSimpleSelectDb(declaration, [], [declaration]);
 			const caller = await createLockedCaller(ctx.db);
 
 			await caller.saveCompliancePath({
@@ -1842,6 +1922,280 @@ describe("declarationRouter", () => {
 					code: "NOT_FOUND",
 				});
 				expect(mockEnqueueReceipt).not.toHaveBeenCalled();
+			});
+		});
+	});
+
+	describe("re-transmitting the last deposit of a closed démarche (#5165)", () => {
+		function history(
+			...events: Array<{ eventType: string; round?: number | null }>
+		): TransmissionHistoryEvent[] {
+			const base = Date.parse("2027-06-01T10:00:00Z");
+			return events.map((event, index) => ({
+				eventType: event.eventType,
+				round: event.round ?? null,
+				createdAt: new Date(base + index * 60_000),
+			}));
+		}
+
+		function insertedEventTypes(ctx: {
+			insertValues: { mock: { calls: unknown[][] } };
+		}): string[] {
+			const rows = ctx.insertValues.mock.calls[0]?.[0] as Array<{
+				eventType: string;
+				round: number | null;
+			}>;
+			return rows.map((row) => row.eventType);
+		}
+
+		describe("submitJointEvaluation", () => {
+			it("keeps the démarche closed and preserves the round of the re-transmitted report", async () => {
+				const declaration = buildDeclaration({
+					status: "demarche_completed",
+					cseRequired: false,
+					firstDeclarationPathChoice: "joint_evaluation",
+				});
+				const ctx = createJointEvaluationDb(
+					declaration,
+					[JOINT_EVALUATION_FILE],
+					[],
+					history({ eventType: "joint_evaluation_submit", round: 1 }),
+				);
+				const caller = await createLockedCaller(ctx.db);
+				await caller.submitJointEvaluation();
+
+				expect(ctx.set.mock.calls[0]?.[0]).toMatchObject({
+					status: "demarche_completed",
+				});
+				expect(insertedEventTypes(ctx)).toEqual([
+					"joint_evaluation_submit",
+					"demarche_complete",
+				]);
+				const rows = ctx.insertValues.mock.calls[0]?.[0] as Array<{
+					round: number | null;
+				}>;
+				expect(rows[0]?.round).toBe(1);
+			});
+
+			it("preserves round 2 once a second declaration was transmitted", async () => {
+				const declaration = buildDeclaration({
+					status: "demarche_completed",
+					cseRequired: false,
+					firstDeclarationPathChoice: "corrective_action",
+					secondDeclarationPathChoice: "joint_evaluation",
+				});
+				const ctx = createJointEvaluationDb(
+					declaration,
+					[JOINT_EVALUATION_FILE],
+					[],
+					history(
+						{ eventType: "second_declaration_submit", round: 2 },
+						{ eventType: "joint_evaluation_submit", round: 2 },
+					),
+				);
+				const caller = await createLockedCaller(ctx.db);
+				await caller.submitJointEvaluation();
+
+				const rows = ctx.insertValues.mock.calls[0]?.[0] as Array<{
+					eventType: string;
+					round: number | null;
+				}>;
+				expect(rows[0]).toMatchObject({
+					eventType: "joint_evaluation_submit",
+					round: 2,
+				});
+				expect(ctx.set.mock.calls[0]?.[0]).toMatchObject({
+					status: "demarche_completed",
+				});
+			});
+
+			it("refuses the re-transmission when another step is the last transmission", async () => {
+				const declaration = buildDeclaration({
+					status: "demarche_completed",
+					cseRequired: false,
+					firstDeclarationPathChoice: "joint_evaluation",
+				});
+				const ctx = createJointEvaluationDb(
+					declaration,
+					[JOINT_EVALUATION_FILE],
+					[],
+					history({ eventType: "second_declaration_submit", round: 2 }),
+				);
+				const caller = await createLockedCaller(ctx.db);
+
+				await expect(caller.submitJointEvaluation()).rejects.toMatchObject({
+					code: "PRECONDITION_FAILED",
+					message:
+						"L'évaluation conjointe ne peut pas être transmise à cette étape de la démarche.",
+				});
+				expect(ctx.insertValues).not.toHaveBeenCalled();
+			});
+		});
+
+		describe("submitSecondDeclaration", () => {
+			it("reopens the revision choice when the gap persists", async () => {
+				const declaration = buildDeclaration({
+					status: "demarche_completed",
+					cseRequired: false,
+					firstDeclarationPathChoice: "corrective_action",
+				});
+				const ctx = createOneRowSelectDb(
+					declaration,
+					[{ annualBaseWomen: "80", annualBaseMen: "100" }],
+					[],
+					history({ eventType: "second_declaration_submit", round: 2 }),
+				);
+				const caller = await createLockedCaller(ctx.db);
+				await caller.submitSecondDeclaration();
+
+				expect(ctx.set.mock.calls[0]?.[0]).toMatchObject({
+					status: "awaiting_revision_choice",
+				});
+				expect(insertedEventTypes(ctx)).toEqual(["second_declaration_submit"]);
+			});
+
+			it("keeps the démarche closed when the gap is resolved", async () => {
+				const declaration = buildDeclaration({
+					status: "demarche_completed",
+					cseRequired: false,
+					firstDeclarationPathChoice: "corrective_action",
+				});
+				const ctx = createOneRowSelectDb(
+					declaration,
+					[{ annualBaseWomen: "100", annualBaseMen: "100" }],
+					[],
+					history({ eventType: "second_declaration_submit", round: 2 }),
+				);
+				const caller = await createLockedCaller(ctx.db);
+				await caller.submitSecondDeclaration();
+
+				expect(ctx.set.mock.calls[0]?.[0]).toMatchObject({
+					status: "demarche_completed",
+				});
+				expect(insertedEventTypes(ctx)).toEqual([
+					"second_declaration_submit",
+					"demarche_complete",
+				]);
+			});
+
+			it("refuses the re-transmission when the report is the last transmission", async () => {
+				const declaration = buildDeclaration({
+					status: "demarche_completed",
+					cseRequired: false,
+					firstDeclarationPathChoice: "joint_evaluation",
+				});
+				const ctx = createOneRowSelectDb(
+					declaration,
+					[{ annualBaseWomen: "100", annualBaseMen: "100" }],
+					[],
+					history({ eventType: "joint_evaluation_submit", round: 1 }),
+				);
+				const caller = await createLockedCaller(ctx.db);
+
+				await expect(caller.submitSecondDeclaration()).rejects.toMatchObject({
+					code: "PRECONDITION_FAILED",
+					message:
+						"La seconde déclaration ne peut pas être transmise à cette étape de la démarche.",
+				});
+			});
+		});
+
+		describe("saveCompliancePath", () => {
+			it("reopens the initial path choice from a round-1 terminal choice", async () => {
+				const declaration = buildDeclaration({
+					status: "demarche_completed",
+					cseRequired: false,
+					firstDeclarationPathChoice: "justify",
+				});
+				const ctx = createSimpleSelectDb(
+					declaration,
+					[],
+					[],
+					history({
+						eventType: "path_choice",
+						round: 1,
+					}),
+				);
+				const caller = await createLockedCaller(ctx.db);
+				await caller.saveCompliancePath({
+					gapJustification: "partial",
+					path: "corrective_action",
+				});
+
+				expect(ctx.set.mock.calls[0]?.[0]).toMatchObject({
+					status: "corrective_actions_chosen",
+					firstDeclarationPathChoice: "corrective_action",
+				});
+				const rows = ctx.insertValues.mock.calls[0]?.[0] as Array<{
+					eventType: string;
+					round: number | null;
+				}>;
+				expect(rows[0]).toMatchObject({
+					eventType: "path_choice",
+					round: 1,
+				});
+			});
+
+			it("reopens the revision choice from a round-2 terminal choice", async () => {
+				const declaration = buildDeclaration({
+					status: "demarche_completed",
+					cseRequired: false,
+					firstDeclarationPathChoice: "corrective_action",
+					secondDeclarationPathChoice: "justify",
+				});
+				const ctx = createSimpleSelectDb(
+					declaration,
+					[],
+					[],
+					history(
+						{ eventType: "second_declaration_submit", round: 2 },
+						{ eventType: "path_choice", round: 2 },
+					),
+				);
+				const caller = await createLockedCaller(ctx.db);
+				await caller.saveCompliancePath({
+					gapJustification: "partial",
+					path: "joint_evaluation",
+				});
+
+				expect(ctx.set.mock.calls[0]?.[0]).toMatchObject({
+					status: "revised_joint_evaluation_chosen",
+					secondDeclarationPathChoice: "joint_evaluation",
+				});
+				const rows = ctx.insertValues.mock.calls[0]?.[0] as Array<{
+					eventType: string;
+					round: number | null;
+				}>;
+				expect(rows[0]).toMatchObject({
+					eventType: "path_choice",
+					round: 2,
+				});
+			});
+
+			it("refuses the path choice when another step is the last transmission", async () => {
+				const declaration = buildDeclaration({
+					status: "demarche_completed",
+					cseRequired: false,
+					firstDeclarationPathChoice: "joint_evaluation",
+				});
+				const ctx = createSimpleSelectDb(
+					declaration,
+					[],
+					[],
+					history({ eventType: "joint_evaluation_submit", round: 1 }),
+				);
+				const caller = await createLockedCaller(ctx.db);
+
+				await expect(
+					caller.saveCompliancePath({
+						gapJustification: "partial",
+						path: "corrective_action",
+					}),
+				).rejects.toMatchObject({
+					code: "PRECONDITION_FAILED",
+					message:
+						"Le choix du parcours de mise en conformité n'est pas ouvert à cette étape de la démarche.",
+				});
 			});
 		});
 	});

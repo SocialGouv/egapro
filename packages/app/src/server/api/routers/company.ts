@@ -11,6 +11,7 @@ import {
 	getCurrentDate,
 	getCurrentYear,
 	getDeclarationProcessStepDeadline,
+	getLastTransmission,
 	getObligationWorkforce,
 	getReferenceYearFor,
 	isCompanyIdentityUnresolved,
@@ -335,6 +336,7 @@ export const companyRouter = createTRPCRouter({
 					hasSubmittedSecondDeclaration:
 						submissions.hasSubmittedSecondDeclaration,
 					secondDeclarationStep: d.secondDeclarationStep,
+					lastTransmission: getLastTransmission(declarationEvents),
 					hasSubmittedJointEvaluation: submissions.hasSubmittedJointEvaluation,
 					hasSubmittedCseOpinion: submissions.hasSubmittedCseOpinion,
 					cseOpinionViewAvailable:
@@ -374,6 +376,7 @@ export const companyRouter = createTRPCRouter({
 					secondDeclarationPathChoice: null,
 					hasSubmittedSecondDeclaration: false,
 					secondDeclarationStep: null,
+					lastTransmission: null,
 					hasSubmittedJointEvaluation: false,
 					hasSubmittedCseOpinion: false,
 					cseRequired: false,
