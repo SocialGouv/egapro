@@ -157,7 +157,7 @@ describe("user-cleanup.mjs (integration)", () => {
 				FROM pg_stat_activity
 				WHERE application_name = 'user-cleanup-race'
 					AND wait_event_type = 'Lock'
-					AND query LIKE 'UPDATE app_user%'
+					AND query LIKE '%UPDATE app_user%'
 			`;
 			if ((rows[0]?.blocked ?? 0) > 0) return;
 			await new Promise((resolve) => setTimeout(resolve, 25));

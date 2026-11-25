@@ -257,7 +257,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Test the account retention sweep against Postgres
-        run: pnpm --filter app test:integration -- src/server/audit/__tests__/userCleanupScript.integration.test.ts
+        run: pnpm --filter app test:integration:user-cleanup
 
   app-lint:
     name: App · Lint & Format
