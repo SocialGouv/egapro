@@ -755,9 +755,9 @@ sequenceDiagram
 
 **Déclenchement** : un **CronJob Kubernetes** (`user-cleanup-daily`, tous les jours à 02:00 UTC) exécute le script autonome `packages/app/scripts/user-cleanup.ts`. Aucun écran utilisateur ni procédure tRPC. Détail technique et diagramme : [`architecture.md` §9.6](architecture.md#96-traitements-planifiés-crons-de-maintenance-des-données).
 
-**Horloge** : `app_user.last_activity_at`, réécrit à chaque connexion réussie. Une démarche exige une session : la date de connexion est toujours au moins aussi récente, et couvre donc la formulation « dernière démarche **ou** inactivité du compte ».
+**Horloge** : `app_user.last_activity_at`, réécrit à chaque connexion réussie et, pour une session déjà ouverte, à la lecture de session (au plus une écriture par jour). Une démarche exige une session : la date d'activité est toujours au moins aussi récente, et couvre donc la formulation « dernière démarche **ou** inactivité du compte ».
 
-**Fenêtre** : `USER_ACCOUNT_INACTIVITY_RETENTION_YEARS` (`~/modules/domain/shared/retention.ts`, **2 ans**) — la même constante que celle affichée par la page publique, surchargeable par `EGAPRO_USER_RETENTION_YEARS` pour le script. Borne **stricte** : un compte dont la dernière activité date d'exactement deux ans est conservé.
+**Fenêtre** : `USER_ACCOUNT_INACTIVITY_RETENTION_YEARS` (`~/modules/domain/shared/retention.ts`, **2 ans**) — la même constante que celle affichée par la page publique, non surchargeable par le script. Borne **stricte** : un compte dont la dernière activité date d'exactement deux ans est conservé.
 
 **Ce qui est anonymisé** : prénom, nom, téléphone ; l'e-mail devient `compte-supprime-<id>@invalid` (non routable, libère l'adresse d'origine) ; `is_admin` repasse à `false` ; les rattachements à une entreprise et les verrous d'édition résiduels sont supprimés. La ligne `app_user` **reste** : les déclarations conservées 6 ans (§13.8), l'historique des statuts, le journal d'impersonation et les paramètres gardent leur référence et restent valides. Cette purge ne supprime **jamais** une déclaration.
 

@@ -1,6 +1,5 @@
 export { getPublicCompanyLocation } from "./companyLocationService";
 export { NON_DIFFUSIBLE_LABEL } from "./constants";
-export type { CsvColumn } from "./declarationExportColumns";
 export { CSV_COLUMNS } from "./declarationExportColumns";
 export { getPublicDeclarationsBySiren } from "./declarationsBySirenService";
 export {
@@ -28,6 +27,13 @@ export {
 	toPublicCompanyLocation,
 	toPublicDeclaration,
 } from "./projection";
+export type { CsvColumn } from "./publicCsvExport";
+export { toPublicCsv } from "./publicCsvExport";
+export type { RepresentationExportRow } from "./representationExportColumns";
+export {
+	REPRESENTATION_EXPORT_COLUMNS,
+	REPRESENTATION_XLSX_HEADERS,
+} from "./representationExportColumns";
 export type {
 	PublicRepresentationCompanySource,
 	PublicRepresentationSource,

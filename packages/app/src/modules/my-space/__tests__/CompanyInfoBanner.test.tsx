@@ -26,7 +26,13 @@ const baseCompany: CompanyDetail = {
 
 describe("CompanyInfoBanner", () => {
 	it("renders the company name as the page h1 heading", () => {
-		render(<CompanyInfoBanner company={baseCompany} />);
+		render(
+			<CompanyInfoBanner
+				company={baseCompany}
+				cseAnswer={null}
+				cseLocked={false}
+			/>,
+		);
 		expect(
 			screen.getByRole("heading", { level: 1, name: "Alpha Solutions" }),
 		).toBeInTheDocument();
@@ -36,6 +42,8 @@ describe("CompanyInfoBanner", () => {
 		const { container } = render(
 			<CompanyInfoBanner
 				company={{ ...baseCompany, address: "12 RUE DE PARIS, 75001 PARIS" }}
+				cseAnswer={null}
+				cseLocked={false}
 			/>,
 		);
 		const terms = Array.from(container.querySelectorAll("dl dt")).map(
@@ -47,12 +55,24 @@ describe("CompanyInfoBanner", () => {
 	});
 
 	it("renders the formatted SIREN", () => {
-		render(<CompanyInfoBanner company={baseCompany} />);
+		render(
+			<CompanyInfoBanner
+				company={baseCompany}
+				cseAnswer={null}
+				cseLocked={false}
+			/>,
+		);
 		expect(screen.getByText("532 847 196")).toBeInTheDocument();
 	});
 
 	it("does not render a breadcrumb", () => {
-		render(<CompanyInfoBanner company={baseCompany} />);
+		render(
+			<CompanyInfoBanner
+				company={baseCompany}
+				cseAnswer={null}
+				cseLocked={false}
+			/>,
+		);
 		expect(
 			screen.queryByRole("navigation", { name: "vous êtes ici :" }),
 		).not.toBeInTheDocument();
@@ -65,6 +85,8 @@ describe("CompanyInfoBanner", () => {
 		render(
 			<CompanyInfoBanner
 				company={{ ...baseCompany, address: "12 RUE DE PARIS, 75001 PARIS" }}
+				cseAnswer={null}
+				cseLocked={false}
 			/>,
 		);
 		expect(
@@ -74,7 +96,11 @@ describe("CompanyInfoBanner", () => {
 
 	it("renders the NAF code when provided", () => {
 		render(
-			<CompanyInfoBanner company={{ ...baseCompany, nafCode: "62.01Z" }} />,
+			<CompanyInfoBanner
+				company={{ ...baseCompany, nafCode: "62.01Z" }}
+				cseAnswer={null}
+				cseLocked={false}
+			/>,
 		);
 		expect(screen.getByText("62.01Z")).toBeInTheDocument();
 	});
@@ -87,6 +113,8 @@ describe("CompanyInfoBanner", () => {
 					nafCode: "62.01Z",
 					nafLabel: "Programmation informatique",
 				}}
+				cseAnswer={null}
+				cseLocked={false}
 			/>,
 		);
 		expect(
@@ -96,46 +124,114 @@ describe("CompanyInfoBanner", () => {
 
 	it("renders the workforce when provided", () => {
 		render(
-			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 150 }} />,
+			<CompanyInfoBanner
+				company={{ ...baseCompany, gipWorkforce: 150 }}
+				cseAnswer={null}
+				cseLocked={false}
+			/>,
 		);
 		expect(screen.getByText("150")).toBeInTheDocument();
 	});
 
 	it("labels the workforce with the N-1 reference year, not the current campaign year", () => {
-		render(<CompanyInfoBanner company={baseCompany} />);
+		render(
+			<CompanyInfoBanner
+				company={baseCompany}
+				cseAnswer={null}
+				cseLocked={false}
+			/>,
+		);
 		expect(
 			screen.getByText(`Effectif annuel moyen en ${getWorkforceYear()} :`),
 		).toBeInTheDocument();
 	});
 
-	it("renders 'À compléter' badge when hasCse is null", () => {
-		render(<CompanyInfoBanner company={{ ...baseCompany, hasCse: null }} />);
+	it("renders 'À compléter' badge while the year's answer is unknown", () => {
+		render(
+			<CompanyInfoBanner
+				company={baseCompany}
+				cseAnswer={null}
+				cseLocked={false}
+			/>,
+		);
 		expect(screen.getByText("À compléter")).toBeInTheDocument();
 	});
 
-	it("renders 'Oui' when hasCse is true", () => {
-		render(<CompanyInfoBanner company={{ ...baseCompany, hasCse: true }} />);
+	it("renders 'Oui' when the year's answer is true", () => {
+		render(
+			<CompanyInfoBanner
+				company={baseCompany}
+				cseAnswer={true}
+				cseLocked={false}
+			/>,
+		);
 		expect(screen.getByText("Oui")).toBeInTheDocument();
 	});
 
-	it("renders 'Non' when hasCse is false", () => {
-		render(<CompanyInfoBanner company={{ ...baseCompany, hasCse: false }} />);
+	it("renders 'Non' when the year's answer is false", () => {
+		render(
+			<CompanyInfoBanner
+				company={baseCompany}
+				cseAnswer={false}
+				cseLocked={false}
+			/>,
+		);
 		expect(screen.getByText("Non")).toBeInTheDocument();
 	});
 
+	it("renders the year's answer, not the live company column", () => {
+		// #4228: the banner used `company.hasCse`, so a correction on the live
+		// column could contradict the answer frozen with the year.
+		render(
+			<CompanyInfoBanner
+				company={{ ...baseCompany, hasCse: true }}
+				cseAnswer={false}
+				cseLocked
+			/>,
+		);
+		expect(screen.getByText("Non")).toBeInTheDocument();
+		expect(screen.queryByText("Oui")).not.toBeInTheDocument();
+	});
+
+	it("renders 'Non renseigné' for a completed year that was never answered", () => {
+		// The question cannot be asked any more, so 'À compléter' would promise
+		// an edit the user has no way to perform.
+		render(
+			<CompanyInfoBanner company={baseCompany} cseAnswer={null} cseLocked />,
+		);
+		expect(screen.getByText("Non renseigné")).toBeInTheDocument();
+		expect(screen.queryByText("À compléter")).not.toBeInTheDocument();
+	});
+
 	it("does not render address when null", () => {
-		render(<CompanyInfoBanner company={baseCompany} />);
+		render(
+			<CompanyInfoBanner
+				company={baseCompany}
+				cseAnswer={null}
+				cseLocked={false}
+			/>,
+		);
 		expect(screen.queryByText(/rue|avenue|boulevard/i)).not.toBeInTheDocument();
 	});
 
 	it("does not render NAF code section when nafCode is null", () => {
-		render(<CompanyInfoBanner company={baseCompany} />);
+		render(
+			<CompanyInfoBanner
+				company={baseCompany}
+				cseAnswer={null}
+				cseLocked={false}
+			/>,
+		);
 		expect(screen.queryByText("Code NAF :")).not.toBeInTheDocument();
 	});
 
 	it("renders '< 50' and hides the CSE row when gipWorkforce is null", () => {
 		render(
-			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: null }} />,
+			<CompanyInfoBanner
+				company={{ ...baseCompany, gipWorkforce: null }}
+				cseAnswer={null}
+				cseLocked={false}
+			/>,
 		);
 		expect(
 			screen.getByText(GIP_WORKFORCE_VOLUNTARY_DISPLAY),
@@ -147,7 +243,11 @@ describe("CompanyInfoBanner", () => {
 		// Issue 3914: the bracket was keyed on "absent from the GIP file", so a
 		// company present with 37 employees rendered "37".
 		render(
-			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 37 }} />,
+			<CompanyInfoBanner
+				company={{ ...baseCompany, gipWorkforce: 37 }}
+				cseAnswer={null}
+				cseLocked={false}
+			/>,
 		);
 		expect(
 			screen.getByText(GIP_WORKFORCE_VOLUNTARY_DISPLAY),
@@ -157,7 +257,11 @@ describe("CompanyInfoBanner", () => {
 
 	it("floors the workforce display and hides the CSE row below the 100 threshold", () => {
 		render(
-			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 99.97 }} />,
+			<CompanyInfoBanner
+				company={{ ...baseCompany, gipWorkforce: 99.97 }}
+				cseAnswer={null}
+				cseLocked={false}
+			/>,
 		);
 		expect(screen.getByText("99")).toBeInTheDocument();
 		expect(screen.queryByText("Existence d'un CSE :")).not.toBeInTheDocument();
@@ -165,14 +269,24 @@ describe("CompanyInfoBanner", () => {
 
 	it("shows the workforce and the CSE row at or above the 100 threshold", () => {
 		render(
-			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 250 }} />,
+			<CompanyInfoBanner
+				company={{ ...baseCompany, gipWorkforce: 250 }}
+				cseAnswer={null}
+				cseLocked={false}
+			/>,
 		);
 		expect(screen.getByText("250")).toBeInTheDocument();
 		expect(screen.getByText("Existence d'un CSE :")).toBeInTheDocument();
 	});
 
 	it("renders the 'Modifier' button at or above the 100 threshold", () => {
-		render(<CompanyInfoBanner company={baseCompany} />);
+		render(
+			<CompanyInfoBanner
+				company={baseCompany}
+				cseAnswer={null}
+				cseLocked={false}
+			/>,
+		);
 		expect(
 			screen.getByRole("button", { name: "Modifier" }),
 		).toBeInTheDocument();
@@ -180,7 +294,11 @@ describe("CompanyInfoBanner", () => {
 
 	it("hides the 'Modifier' button between 50 and 99 (nothing is editable)", () => {
 		render(
-			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 70 }} />,
+			<CompanyInfoBanner
+				company={{ ...baseCompany, gipWorkforce: 70 }}
+				cseAnswer={null}
+				cseLocked={false}
+			/>,
 		);
 		expect(
 			screen.queryByRole("button", { name: "Modifier" }),
@@ -189,7 +307,11 @@ describe("CompanyInfoBanner", () => {
 
 	it("hides the 'Modifier' button just below the 100 threshold", () => {
 		render(
-			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 99.97 }} />,
+			<CompanyInfoBanner
+				company={{ ...baseCompany, gipWorkforce: 99.97 }}
+				cseAnswer={null}
+				cseLocked={false}
+			/>,
 		);
 		expect(
 			screen.queryByRole("button", { name: "Modifier" }),
@@ -198,7 +320,11 @@ describe("CompanyInfoBanner", () => {
 
 	it("hides the 'Modifier' button below 50", () => {
 		render(
-			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 42 }} />,
+			<CompanyInfoBanner
+				company={{ ...baseCompany, gipWorkforce: 42 }}
+				cseAnswer={null}
+				cseLocked={false}
+			/>,
 		);
 		expect(
 			screen.queryByRole("button", { name: "Modifier" }),
@@ -207,17 +333,36 @@ describe("CompanyInfoBanner", () => {
 
 	it("hides the 'Modifier' button when the company is absent from the GIP file", () => {
 		render(
-			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: null }} />,
+			<CompanyInfoBanner
+				company={{ ...baseCompany, gipWorkforce: null }}
+				cseAnswer={null}
+				cseLocked={false}
+			/>,
 		);
 		expect(
 			screen.queryByRole("button", { name: "Modifier" }),
 		).not.toBeInTheDocument();
 	});
 
+	it("hides the 'Modifier' button once the year's démarche is completed", () => {
+		render(
+			<CompanyInfoBanner company={baseCompany} cseAnswer={null} cseLocked />,
+		);
+		expect(
+			screen.queryByRole("button", { name: "Modifier" }),
+		).not.toBeInTheDocument();
+		// The answer itself stays readable: it is history, not a hidden field.
+		expect(screen.getByText("Existence d'un CSE :")).toBeInTheDocument();
+	});
+
 	describe("info source tooltip", () => {
 		it("shows an info button describing the INSEE + DSN source between 50 and 99 employees", () => {
 			render(
-				<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 70 }} />,
+				<CompanyInfoBanner
+					company={{ ...baseCompany, gipWorkforce: 70 }}
+					cseAnswer={null}
+					cseLocked={false}
+				/>,
 			);
 			expect(
 				screen.getByRole("button", {
@@ -230,7 +375,11 @@ describe("CompanyInfoBanner", () => {
 
 		it("shows an info button describing the INSEE-only source below 50 employees", () => {
 			render(
-				<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 37 }} />,
+				<CompanyInfoBanner
+					company={{ ...baseCompany, gipWorkforce: 37 }}
+					cseAnswer={null}
+					cseLocked={false}
+				/>,
 			);
 			expect(
 				screen.getByRole("button", {
@@ -242,7 +391,11 @@ describe("CompanyInfoBanner", () => {
 
 		it("shows an info button describing the INSEE-only source when absent from the GIP file", () => {
 			render(
-				<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: null }} />,
+				<CompanyInfoBanner
+					company={{ ...baseCompany, gipWorkforce: null }}
+					cseAnswer={null}
+					cseLocked={false}
+				/>,
 			);
 			expect(
 				screen.getByRole("button", {
@@ -254,7 +407,11 @@ describe("CompanyInfoBanner", () => {
 
 		it("describes the INSEE + DSN source just below the 100 threshold", () => {
 			render(
-				<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 99.97 }} />,
+				<CompanyInfoBanner
+					company={{ ...baseCompany, gipWorkforce: 99.97 }}
+					cseAnswer={null}
+					cseLocked={false}
+				/>,
 			);
 			expect(
 				screen.getByRole("button", {
@@ -267,7 +424,11 @@ describe("CompanyInfoBanner", () => {
 
 		it("describes the INSEE-only source just below the 50 threshold", () => {
 			render(
-				<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 49.99 }} />,
+				<CompanyInfoBanner
+					company={{ ...baseCompany, gipWorkforce: 49.99 }}
+					cseAnswer={null}
+					cseLocked={false}
+				/>,
 			);
 			expect(
 				screen.getByRole("button", {
@@ -279,7 +440,11 @@ describe("CompanyInfoBanner", () => {
 
 		it("hides the info button at or above the 100 threshold, leaving 'Modifier' in place", () => {
 			render(
-				<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 100 }} />,
+				<CompanyInfoBanner
+					company={{ ...baseCompany, gipWorkforce: 100 }}
+					cseAnswer={null}
+					cseLocked={false}
+				/>,
 			);
 			expect(
 				screen.queryByRole("button", {
@@ -293,7 +458,11 @@ describe("CompanyInfoBanner", () => {
 
 		it("hides the info button well above the 100 threshold", () => {
 			render(
-				<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 250 }} />,
+				<CompanyInfoBanner
+					company={{ ...baseCompany, gipWorkforce: 250 }}
+					cseAnswer={null}
+					cseLocked={false}
+				/>,
 			);
 			expect(
 				screen.queryByRole("button", {
@@ -304,7 +473,11 @@ describe("CompanyInfoBanner", () => {
 
 		it("keeps the h1 accessible name as the exact company name when the info button is shown", () => {
 			render(
-				<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 70 }} />,
+				<CompanyInfoBanner
+					company={{ ...baseCompany, gipWorkforce: 70 }}
+					cseAnswer={null}
+					cseLocked={false}
+				/>,
 			);
 			expect(
 				screen.getByRole("heading", { level: 1, name: "Alpha Solutions" }),
@@ -322,6 +495,8 @@ describe("CompanyInfoBanner", () => {
 						countryLabel: "QATAR",
 						address: "58 AV SOME STREET",
 					}}
+					cseAnswer={null}
+					cseLocked={false}
 				/>,
 			);
 			expect(screen.getByText("Pays :")).toBeInTheDocument();
@@ -338,6 +513,8 @@ describe("CompanyInfoBanner", () => {
 						countryLabel: "FRANCE",
 						address: "12 RUE DE PARIS, 75001 PARIS",
 					}}
+					cseAnswer={null}
+					cseLocked={false}
 				/>,
 			);
 			expect(screen.getByText("Adresse :")).toBeInTheDocument();
@@ -353,6 +530,8 @@ describe("CompanyInfoBanner", () => {
 						countryLabel: null,
 						address: "58 AV SOME STREET",
 					}}
+					cseAnswer={null}
+					cseLocked={false}
 				/>,
 			);
 			expect(screen.getByText("Pays :")).toBeInTheDocument();
@@ -369,6 +548,8 @@ describe("CompanyInfoBanner", () => {
 						countryCode: "99248",
 						countryLabel: null,
 					}}
+					cseAnswer={null}
+					cseLocked={false}
 				/>,
 			);
 			expect(screen.getByText("Pays :")).toBeInTheDocument();
@@ -384,6 +565,8 @@ describe("CompanyInfoBanner", () => {
 						countryLabel: "BELGIQUE",
 						address: "12 RUE DE LA DEMO",
 					}}
+					cseAnswer={null}
+					cseLocked={false}
 				/>,
 			);
 			expect(screen.getByText("Pays :")).toBeInTheDocument();
@@ -401,6 +584,8 @@ describe("CompanyInfoBanner", () => {
 						departmentLabel: "Nord",
 						address: "1 RUE DU NORD, 59000 LILLE",
 					}}
+					cseAnswer={null}
+					cseLocked={false}
 				/>,
 			);
 			expect(screen.getByText("Adresse :")).toBeInTheDocument();
@@ -418,13 +603,21 @@ describe("CompanyInfoBanner", () => {
 						countryCode: "99123",
 						countryLabel: "AFRIQUE DU SUD",
 					}}
+					cseAnswer={null}
+					cseLocked={false}
 				/>,
 			);
 			expect(screen.getByText("Afrique du Sud")).toBeInTheDocument();
 		});
 
 		it("does not render the country row for a French company without an address", () => {
-			render(<CompanyInfoBanner company={baseCompany} />);
+			render(
+				<CompanyInfoBanner
+					company={baseCompany}
+					cseAnswer={null}
+					cseLocked={false}
+				/>,
+			);
 			expect(screen.queryByText("Pays :")).not.toBeInTheDocument();
 			expect(screen.queryByText("Adresse :")).not.toBeInTheDocument();
 		});
@@ -439,7 +632,13 @@ describe("CompanyInfoBanner", () => {
 		};
 
 		it("explains why the identity is missing and keeps the dependable data", () => {
-			render(<CompanyInfoBanner company={unresolvedCompany} />);
+			render(
+				<CompanyInfoBanner
+					company={unresolvedCompany}
+					cseAnswer={null}
+					cseLocked={false}
+				/>,
+			);
 
 			expect(
 				screen.getByText(
@@ -458,7 +657,13 @@ describe("CompanyInfoBanner", () => {
 		});
 
 		it("never prints the raw placeholder SIREN in the heading", () => {
-			render(<CompanyInfoBanner company={unresolvedCompany} />);
+			render(
+				<CompanyInfoBanner
+					company={unresolvedCompany}
+					cseAnswer={null}
+					cseLocked={false}
+				/>,
+			);
 
 			expect(
 				screen.queryByRole("heading", {
@@ -469,7 +674,13 @@ describe("CompanyInfoBanner", () => {
 		});
 
 		it("shows no location row rather than an unknown country", () => {
-			render(<CompanyInfoBanner company={unresolvedCompany} />);
+			render(
+				<CompanyInfoBanner
+					company={unresolvedCompany}
+					cseAnswer={null}
+					cseLocked={false}
+				/>,
+			);
 
 			expect(screen.queryByText("Pays :")).not.toBeInTheDocument();
 			expect(screen.queryByText("Adresse :")).not.toBeInTheDocument();
@@ -477,7 +688,13 @@ describe("CompanyInfoBanner", () => {
 		});
 
 		it("leaves a resolved identity without the notice", () => {
-			render(<CompanyInfoBanner company={baseCompany} />);
+			render(
+				<CompanyInfoBanner
+					company={baseCompany}
+					cseAnswer={null}
+					cseLocked={false}
+				/>,
+			);
 
 			expect(
 				screen.queryByText(/informations d'identification de l'entreprise/i),

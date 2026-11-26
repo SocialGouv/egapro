@@ -28,6 +28,7 @@ describe("NextStepsBox", () => {
 		render(
 			<NextStepsBox
 				cseApplicable
+				cseLocked={false}
 				cseOpinionRequired
 				hasGapsAboveThreshold={false}
 				siren="123456789"
@@ -53,6 +54,7 @@ describe("NextStepsBox", () => {
 		render(
 			<NextStepsBox
 				cseApplicable
+				cseLocked={false}
 				cseOpinionRequired
 				hasGapsAboveThreshold
 				siren="123456789"
@@ -99,6 +101,7 @@ describe("NextStepsBox", () => {
 		render(
 			<NextStepsBox
 				cseApplicable={false}
+				cseLocked={false}
 				cseOpinionRequired={false}
 				hasGapsAboveThreshold={false}
 				siren="123456789"

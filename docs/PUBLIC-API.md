@@ -1,6 +1,6 @@
 # API publique EGAPRO
 
-API publique d'export des indicateurs de rémunération A à F des déclarations d'index égalité professionnelle. Aucune authentification requise. Accessible depuis n'importe quelle origine (CORS `*`).
+API publique d'export des déclarations publiées : les indicateurs de rémunération A à F de l'index égalité professionnelle, et les indicateurs de représentation équilibrée (loi Rixain). Aucune authentification requise. Accessible depuis n'importe quelle origine (CORS `*`).
 
 La spécification OpenAPI 3.1 complète est disponible à :
 
@@ -51,7 +51,8 @@ Contrairement à l'API SUIT (`/api/v1/openapi.json`, retournant 404 en productio
 
 | Méthode | Chemin | Description |
 | --- | --- | --- |
-| `GET` | `/api/public/declarations/export` | Export complet (JSON, CSV ou Excel) |
+| `GET` | `/api/public/declarations/export` | Export complet de la rémunération (JSON, CSV ou Excel) |
+| `GET` | `/api/public/representations/export` | Export de la représentation équilibrée (CSV ou Excel) |
 | `GET` | `/api/public/openapi.json` | Spécification OpenAPI 3.1 |
 
 ### Export complet (`GET /api/public/declarations/export`)
@@ -88,9 +89,33 @@ curl "https://egapro.travail.gouv.fr/api/public/declarations/export?format=csv&y
 
 Le CSV DGT utilise `;`, place chaque champ entre guillemets et contient 41 colonnes. Après `Annee_declaration`, ses colonnes d'identité sont, dans l'ordre : `SIREN`, `Raison_sociale`, `Adresse`, `Region`, `Code_departement`, `Departement`, `Pays`, `Code_NAF`, `Libelle_NAF`. Les indicateurs suivent avec les noms métier (`Effectif_annuel_moyen`, effectifs femmes/hommes annuels et horaires, écarts, proportions et quartiles). Les 26 colonnes de ratio (écarts, proportions de rémunération variable, quartiles) sont exprimées en points de pourcentage — tronqués à 2 décimales, point décimal, sans symbole `%` — alors que le JSON et le XLSX restent en ratio brut entre −1 et 1. `city`, `regionCode` et `countryCode` restent disponibles en JSON et XLSX, mais ne figurent pas dans le CSV DGT. Une donnée inconnue donne une cellule vide ; `Non-diffusible` désigne une identité masquée.
 
+### Représentation équilibrée (`GET /api/public/representations/export`)
+
+Retourne les déclarations de représentation équilibrée publiées, dans les mêmes conditions de publication que l'export de rémunération. `format` vaut `csv` par défaut et accepte `xlsx` : **aucun JSON n'est servi** et tout autre format renvoie `400`. Les filtres de la recherche de l'observatoire (`q`, `city`, `region`, `departement`, `naf`, `workforceRanges`, `workforceMin`, `workforceMax`) restreignent l'export de la même façon ; `limit`, `offset` et `sort` sont ignorés.
+
+`year` désigne l'**année de campagne** (l'année de référence de la déclaration plus un). Sans `year`, l'export couvre les **10 campagnes publiées les plus récentes**. Le fichier s'appelle `Indicateurs_representation_<annee>.csv` avec `year`, `indicateurs-representation.csv` sans, et `index-egapro-representations-equilibrees.xlsx` en Excel.
+
+```sh
+# CSV de toutes les campagnes récentes
+curl "https://egapro.travail.gouv.fr/api/public/representations/export" \
+  -o indicateurs-representation.csv
+
+# CSV d'une seule campagne
+curl "https://egapro.travail.gouv.fr/api/public/representations/export?format=csv&year=2027" \
+  -o Indicateurs_representation_2027.csv
+```
+
+Le CSV utilise `;`, place chaque champ entre guillemets et contient 15 colonnes, dans cet ordre : `Annee_declaration`, `SIREN`, `Raison_sociale`, `Adresse`, `Region`, `Code_departement`, `Departement`, `Pays`, `Code_NAF`, `Libelle_NAF`, `Effectif_annuel_moyen`, `Cadres_pourcentage_F`, `Cadres_pourcentage_H`, `Membres_pourcentage_F`, `Membres_pourcentage_H`.
+
+- `Annee_declaration` est l'année de campagne, alors que l'effectif et les pourcentages portent sur l'année de référence (la campagne moins un).
+- `Effectif_annuel_moyen` vient des données GIP-MDS de l'année de référence ; il reste vide quand l'effectif est inconnu.
+- Les quatre pourcentages (cadres et membres, femmes et hommes) sont exprimés en pourcentage — tronqués à 2 décimales, point décimal, sans symbole `%` — et restent vides quand l'indicateur n'est pas calculable.
+- Les colonnes de publication (`Date_publication`, `Url_publication`, `Modalites_publication`) et les motifs de non-calculabilité ne figurent pas dans le fichier.
+- Une donnée inconnue donne une cellule vide ; `Non-diffusible` masque la raison sociale, l'adresse, la région, le département, le pays et le NAF d'une entreprise non diffusible, le SIREN et les pourcentages restant visibles.
+
 ### Plafonds, cache et calculs simultanés
 
-L'export `/api/public/declarations/export` applique un nombre maximal de lignes par requête :
+Les deux exports publics appliquent le même nombre maximal de lignes par requête :
 
 | Format | Plafond |
 | --- | --- |
@@ -101,12 +126,13 @@ Au-delà, l'API répond **`413 Payload Too Large`** avec un message d'erreur JSO
 
 Le plafond JSON/CSV est dimensionné pour l'export complet sans filtre, celui que publie la ressource data.gouv.fr et que sert le bouton « tout télécharger » de la consultation. Environ 35 000 entreprises déclarent par campagne et l'export couvre toutes les campagnes publiées depuis 2027 : 200 000 lignes laissent cinq campagnes de marge, tout en bornant la mémoire d'une requête (de l'ordre du gigaoctet au plafond, pour des pods limités à 2 Go). À l'approche du plafond, la ressource data.gouv.fr devra passer à un export par année (`year`).
 
-Seuls les deux exports complets, **sans aucun filtre**, sont mis en cache **1 heure côté serveur** :
+Seuls les exports complets, **sans aucun filtre**, sont mis en cache **1 heure côté serveur** :
 
 | Export | Utilisé par |
 | --- | --- |
 | `/api/public/declarations/export?format=csv` | la ressource data.gouv.fr, le bouton « tout télécharger » |
 | `/api/public/declarations/export` (JSON) | l'export complet documenté ci-dessus |
+| `/api/public/representations/export` (CSV) | le bouton « Indicateurs de représentation » de la consultation |
 
 `limit`, `offset`, `sort` et les paramètres inconnus ne comptent pas comme des filtres. Une modification met donc jusqu'à une heure à se refléter dans ces exports, comme le permet déjà l'en-tête `Cache-Control: public, max-age=3600`. Cela vaut dans les deux sens : une nouvelle déclaration publiée peut tarder à apparaître, et un **retrait** (entreprise devenue non diffusible, déclaration annulée) peut tarder jusqu'à une heure à disparaître. Des requêtes simultanées sur un même export complet absent du cache ne déclenchent qu'un seul calcul par pod.
 
@@ -119,7 +145,7 @@ Les jeux de données publics complets sont publiés sur data.gouv.fr :
 - [Index égalité professionnelle F/H des entreprises de 50 salariés ou plus](https://www.data.gouv.fr/datasets/index-egalite-professionnelle-f-h-des-entreprises-de-50-salaries-ou-plus)
 - [Représentation équilibrée F/H dans les postes de direction des grandes entreprises](https://www.data.gouv.fr/datasets/representation-equilibree-f-h-dans-les-postes-de-direction-des-grandes-entreprises)
 
-La représentation équilibrée n'est exposée par aucune API publique : elle se consulte sur la fiche entreprise de l'observatoire et sur data.gouv.fr.
+La représentation équilibrée est aussi servie par l'export `/api/public/representations/export` (CSV ou Excel) et se consulte sur la fiche entreprise de l'observatoire.
 
 ## Licence
 

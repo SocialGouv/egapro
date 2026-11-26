@@ -19,6 +19,7 @@ const EMPTY_DECLARATION = {
 	lastTransmission: null,
 	hasSubmittedJointEvaluation: false,
 	hasSubmittedCseOpinion: false,
+	hasCse: null,
 	cseRequired: false,
 	hasJointEvaluationFile: false,
 	formalNoticeAvailable: false,
@@ -106,6 +107,25 @@ describe("buildDeclarationList", () => {
 		const result = buildDeclarationList(SIREN, [record], 2026);
 
 		expect(result[0]).toMatchObject({ lastTransmission: "joint_evaluation" });
+	});
+
+	it("carries each year's own CSE snapshot and leaves a missing row unanswered", () => {
+		const result = buildDeclarationList(
+			SIREN,
+			[
+				makeDbDeclaration({ year: 2026, hasCse: true }),
+				makeDbDeclaration({ year: 2025, hasCse: false }),
+			],
+			2026,
+		);
+
+		expect(result.find((row) => row.year === 2026)?.hasCse).toBe(true);
+		expect(result.find((row) => row.year === 2025)?.hasCse).toBe(false);
+		// The representation row has no CSE answer of its own.
+		expect(
+			result.find((row) => row.year === 2026 && row.type === "representation")
+				?.hasCse,
+		).toBeNull();
 	});
 
 	it("includes previous year DB records after current year rows", () => {

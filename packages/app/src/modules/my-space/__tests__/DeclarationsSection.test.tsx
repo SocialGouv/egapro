@@ -35,6 +35,7 @@ const NO_COMPLIANCE = {
 
 	hasSubmittedJointEvaluation: false,
 	hasSubmittedCseOpinion: false,
+	hasCse: null,
 	cseRequired: false,
 	hasJointEvaluationFile: false,
 	formalNoticeAvailable: false,
@@ -87,6 +88,7 @@ function renderSection(
 	return render(
 		<DeclarationsSection
 			cseApplicable={true}
+			cseLocked={false}
 			declarations={overrides?.declarations ?? declarations}
 			hasCse={true}
 			representationCampaign={

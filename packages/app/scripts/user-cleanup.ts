@@ -10,11 +10,10 @@ import { cleanupErrorDiagnostic } from "./cleanup-error-diagnostic";
  *
  * Anonymised in place, never deleted: eight foreign keys point at
  * `app_user.id` (several `NOT NULL`) and declarations legally kept six years
- * must stay attributable. The clock is the last sign-in
- * (`~/server/auth/config.ts`): a démarche needs a session, so it covers the
- * policy's "dernière démarche ou inactivité du compte".
+ * must stay attributable. The clock is the last activity — sign-in
+ * (`~/server/auth/config.ts`) or a session read — so it covers the policy's
+ * "dernière démarche ou inactivité du compte".
  *
- * EGAPRO_USER_RETENTION_YEARS overrides the default window;
  * EGAPRO_USER_CLEANUP_DRY_RUN counts candidates without touching them.
  */
 
@@ -61,23 +60,12 @@ function getDatabaseUrl(): string {
 	throw new Error("DATABASE_URL or POSTGRES_HOST+POSTGRES_DB must be set");
 }
 
-function toPositiveInt(raw: string | undefined, fallback: number): number {
-	if (raw === undefined || raw === null || raw === "") return fallback;
-	const n = Number(raw);
-	if (!Number.isFinite(n) || !Number.isInteger(n) || n <= 0) {
-		throw new Error(
-			`Invalid retention value: "${raw}". Expected a positive integer.`,
-		);
-	}
-	return n;
-}
-
 function toBoolean(raw: string | undefined): boolean {
 	return raw === "true" || raw === "1";
 }
 
 /**
- * Anonymise every account whose last sign-in is older than the retention
+ * Anonymise every account whose last activity is older than the retention
  * window. The boundary is strict: an account whose last activity is exactly
  * `retentionYears` old is kept, like the declaration sweep.
  */
@@ -208,10 +196,7 @@ const isMain = ((): boolean => {
 })();
 
 if (isMain) {
-	const retentionYears = toPositiveInt(
-		process.env.EGAPRO_USER_RETENTION_YEARS,
-		USER_ACCOUNT_INACTIVITY_RETENTION_YEARS,
-	);
+	const retentionYears = USER_ACCOUNT_INACTIVITY_RETENTION_YEARS;
 	const dryRun = toBoolean(process.env.EGAPRO_USER_CLEANUP_DRY_RUN);
 
 	const sql = postgres(getDatabaseUrl(), { max: 1 });

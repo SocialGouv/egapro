@@ -31,6 +31,7 @@ describe("DeclarationLink", () => {
 		render(
 			<DeclarationLink
 				cseApplicable={true}
+				cseLocked={false}
 				hasCse={true}
 				type={type}
 				userPhone="0122334455"
@@ -52,6 +53,7 @@ describe("DeclarationLink", () => {
 		render(
 			<DeclarationLink
 				cseApplicable={true}
+				cseLocked={false}
 				hasCse={true}
 				type="representation"
 				userPhone={null}
@@ -69,6 +71,7 @@ describe("DeclarationLink", () => {
 		render(
 			<DeclarationLink
 				cseApplicable={true}
+				cseLocked={false}
 				hasCse={true}
 				type="remuneration"
 				userPhone="0122334455"
@@ -89,6 +92,7 @@ describe("DeclarationLink", () => {
 		render(
 			<DeclarationLink
 				cseApplicable={true}
+				cseLocked={false}
 				hasCse={true}
 				type="remuneration"
 				userPhone={null}
@@ -105,6 +109,7 @@ describe("DeclarationLink", () => {
 		render(
 			<DeclarationLink
 				cseApplicable={true}
+				cseLocked={false}
 				hasCse={null}
 				type="remuneration"
 				userPhone="0122334455"
@@ -121,6 +126,7 @@ describe("DeclarationLink", () => {
 		render(
 			<DeclarationLink
 				cseApplicable={false}
+				cseLocked={false}
 				hasCse={null}
 				type="remuneration"
 				userPhone="0122334455"
@@ -139,6 +145,7 @@ describe("DeclarationLink", () => {
 		render(
 			<DeclarationLink
 				cseApplicable={false}
+				cseLocked={false}
 				hasCse={null}
 				type="remuneration"
 				userPhone={null}
@@ -154,6 +161,7 @@ describe("DeclarationLink", () => {
 		render(
 			<DeclarationLink
 				cseApplicable={true}
+				cseLocked={false}
 				hasCse={true}
 				type="remuneration"
 				userPhone={null}
@@ -169,6 +177,7 @@ describe("DeclarationLink", () => {
 		render(
 			<DeclarationLink
 				cseApplicable={true}
+				cseLocked={false}
 				hasCse={true}
 				type="representation"
 				userPhone="0122334455"
@@ -190,6 +199,7 @@ describe("DeclarationLink", () => {
 		render(
 			<DeclarationLink
 				cseApplicable={true}
+				cseLocked={false}
 				hasCse={true}
 				type="representation"
 				userPhone={null}
@@ -208,6 +218,7 @@ describe("DeclarationLink", () => {
 		render(
 			<DeclarationLink
 				cseApplicable={true}
+				cseLocked={false}
 				hasCse={null}
 				type="remuneration"
 				userPhone={null}

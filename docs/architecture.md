@@ -665,6 +665,8 @@ Trois CronJobs Kubernetes assurent la maintenance des données. Ils partagent le
 
 Ces trois actions sont de catégorie `system` (rétention 365 j). Toute modification de ces scripts → **test d'intégration obligatoire** (`*.integration.test.ts`, cf. §13).
 
+Le journal de dédoublonnage des relances n'est pas purgé par un CronJob : la table appartient au worker de notifications, qui la crée et la purge lui-même (`reminder-log-purge-daily`, `0 3 * * *` Europe/Paris, action `SYSTEM_REMINDER_LOG_CLEANUP` / `system.reminder_log_cleanup`, catégorie `system`). Voir [`docs/journaux-et-conservation.md`](journaux-et-conservation.md) §4.6.
+
 #### Purge RGPD des déclarations (`declaration-cleanup.ts`)
 
 Objectif : supprimer les déclarations (et toutes leurs données rattachées) au-delà de la durée légale de conservation.
@@ -707,9 +709,9 @@ flowchart TD
 
 #### Purge des comptes utilisateurs (`user-cleanup.ts`)
 
-Objectif : appliquer la durée annoncée par la politique de confidentialité pour les comptes — « 2 ans à compter de la dernière démarche ou de l'inactivité du compte » (#4770). Le texte public et le script lisent la même constante, `USER_ACCOUNT_INACTIVITY_RETENTION_YEARS` (`packages/app/src/modules/domain/shared/retention.ts`) ; `EGAPRO_USER_RETENTION_YEARS` surcharge le défaut côté script.
+Objectif : appliquer la durée annoncée par la politique de confidentialité pour les comptes — « 2 ans à compter de la dernière démarche ou de l'inactivité du compte » (#4770). Le texte public et le script lisent la même constante, `USER_ACCOUNT_INACTIVITY_RETENTION_YEARS` (`packages/app/src/modules/domain/shared/retention.ts`) ; le script ne peut pas la surcharger.
 
-**Horloge** : `app_user.last_activity_at`, réécrit à chaque connexion réussie par le callback `jwt` de `~/server/auth/config.ts` (jamais sur une lecture de session). Une démarche exigeant une session, cette date est toujours au moins aussi récente que la dernière démarche : elle couvre les deux termes du texte. Les comptes existants sont backfillés au déploiement (migration `0065_backfill-user-last-activity`) avec le signal le plus récent disponible — inscription, dernière connexion encore présente dans `audit.action_log`, dernière déclaration, dernier statut, dernière représentation, dernier rattachement ; un compte sans signal garde la date de migration.
+**Horloge** : `app_user.last_activity_at`, réécrit à chaque connexion réussie par le callback `jwt` de `~/server/auth/config.ts` — et, pour une session déjà ouverte, à la lecture de session (au plus une écriture par jour). Une démarche exigeant une session, cette date est toujours au moins aussi récente que la dernière démarche : elle couvre les deux termes du texte. Les comptes existants sont backfillés au déploiement (migration `0066_backfill-user-last-activity`) avec le signal le plus récent disponible — inscription, dernière connexion encore présente dans `audit.action_log`, dernière déclaration créée ou modifiée, dernier statut, dernière représentation créée ou modifiée, dernier rattachement ; un compte sans signal garde la date de migration.
 
 **Seuil** : `last_activity_at < now() − N ans`, calculé par PostgreSQL (`make_interval`, exact les années bissextiles). La borne est **stricte** : un compte dont la dernière activité date d'exactement N ans est conservé.
 
@@ -719,11 +721,11 @@ Objectif : appliquer la durée annoncée par la politique de confidentialité po
 flowchart TD
     A[SELECT id FROM app_user<br/>WHERE anonymized_at IS NULL<br/>AND last_activity_at &lt; cutoff] --> B{ids vides ou dry-run ?}
     B -->|oui| Z[Rien à modifier]
-    B -->|non| C[DELETE app_user_company]
+    B -->|non| F[UPDATE app_user<br/>données vidées, email @invalid<br/>anonymized_at = now<br/>RETURNING id]
+    F --> C[DELETE app_user_company]
     C --> D[DELETE app_declaration_lock]
     D --> E[DELETE app_representation_declaration_lock]
-    E --> F[UPDATE app_user<br/>données vidées, email @invalid<br/>anonymized_at = now]
-    F --> G[(commit)]
+    E --> G[(commit)]
 ```
 
 - `first_name`, `last_name`, `phone` → `NULL` ; `email` → `compte-supprime-<id>@invalid` (TLD réservé RFC 2606 : non routable, unique, libère l'adresse d'origine) ; `is_admin` → `false` ; `anonymized_at` → `now()`.

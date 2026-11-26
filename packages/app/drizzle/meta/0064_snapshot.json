@@ -1,5 +1,5 @@
 {
-	"id": "b447480d-ee26-4e51-b533-4c4c5d7151e6",
+	"id": "e9ae271c-5f45-4456-97be-819d26b5e717",
 	"prevId": "4bd3c55d-2767-4e11-b065-9fe794aa463a",
 	"version": "7",
 	"dialect": "postgresql",
@@ -1236,6 +1236,12 @@
 				"cse_opinion_draft_updated_at": {
 					"name": "cse_opinion_draft_updated_at",
 					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"has_cse": {
+					"name": "has_cse",
+					"type": "boolean",
 					"primaryKey": false,
 					"notNull": false
 				},
@@ -2919,19 +2925,6 @@
 					"primaryKey": false,
 					"notNull": true,
 					"default": false
-				},
-				"last_activity_at": {
-					"name": "last_activity_at",
-					"type": "timestamp with time zone",
-					"primaryKey": false,
-					"notNull": true,
-					"default": "now()"
-				},
-				"anonymized_at": {
-					"name": "anonymized_at",
-					"type": "timestamp with time zone",
-					"primaryKey": false,
-					"notNull": false
 				}
 			},
 			"indexes": {},

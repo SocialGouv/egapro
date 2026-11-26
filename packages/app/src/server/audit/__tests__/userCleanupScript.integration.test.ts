@@ -13,18 +13,33 @@ import postgres from "postgres";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { logUserCleanupFailure, runUserCleanup } from "#scripts/user-cleanup";
 import { env } from "~/env.js";
+import { USER_ACCOUNT_INACTIVITY_RETENTION_YEARS } from "~/modules/domain";
 
 const ACTION = "system.user_cleanup";
 const SIREN = "123456789";
-const RETENTION = 2;
-// 2026 − 2 ⇒ cutoff 2024-06-15T00:00:00Z. The boundary is strict.
+const RETENTION = USER_ACCOUNT_INACTIVITY_RETENTION_YEARS;
 const NOW = new Date("2026-06-15T00:00:00Z");
+const DAY = 24 * 60 * 60 * 1000;
+// Same calendar arithmetic as PostgreSQL's `make_interval(years => …)`.
+const CUTOFF = new Date(
+	Date.UTC(
+		NOW.getUTCFullYear() - RETENTION,
+		NOW.getUTCMonth(),
+		NOW.getUTCDate(),
+		NOW.getUTCHours(),
+		NOW.getUTCMinutes(),
+		NOW.getUTCSeconds(),
+		NOW.getUTCMilliseconds(),
+	),
+);
 
 const USER_PREFIX = "test-user-cleanup-";
 const userA = `${USER_PREFIX}a`;
 const userB = `${USER_PREFIX}b`;
 const userC = `${USER_PREFIX}c`;
 const userD = `${USER_PREFIX}d`;
+const userE = `${USER_PREFIX}e`;
+const userF = `${USER_PREFIX}f`;
 
 describe("user-cleanup.mjs (integration)", () => {
 	let sql!: ReturnType<typeof postgres>;
@@ -166,8 +181,7 @@ describe("user-cleanup.mjs (integration)", () => {
 	}
 
 	it("anonymises an account inactive for longer than the window, and keeps its declaration (S1)", async () => {
-		// 25 months before NOW.
-		const email = await seedUser(userA, new Date("2024-05-15T00:00:00Z"));
+		const email = await seedUser(userA, new Date(CUTOFF.getTime() - 30 * DAY));
 		await seedDeclaration("decl-s1", userA);
 		await seedDeclarationLock("decl-s1", userA);
 
@@ -200,7 +214,7 @@ describe("user-cleanup.mjs (integration)", () => {
 	});
 
 	it("keeps an account active inside the window (S2)", async () => {
-		await seedUser(userB, new Date("2024-07-15T00:00:00Z"));
+		await seedUser(userB, new Date(CUTOFF.getTime() + 30 * DAY));
 
 		const result = await runUserCleanup({
 			sql,
@@ -214,8 +228,10 @@ describe("user-cleanup.mjs (integration)", () => {
 		expect(user?.anonymized_at).toBeNull();
 	});
 
-	it("keeps an account whose last activity is exactly at the boundary (S3)", async () => {
-		await seedUser(userC, new Date("2024-06-15T00:00:00Z"));
+	it("applies a strict boundary: a day before is purged, exactly at and after are kept (S3)", async () => {
+		await seedUser(userC, CUTOFF);
+		await seedUser(userE, new Date(CUTOFF.getTime() - DAY));
+		await seedUser(userF, new Date(CUTOFF.getTime() + DAY));
 
 		const result = await runUserCleanup({
 			sql,
@@ -223,8 +239,10 @@ describe("user-cleanup.mjs (integration)", () => {
 			now: NOW,
 		});
 
-		expect(result.anonymizedAccounts).toBe(0);
+		expect(result.anonymizedAccounts).toBe(1);
 		expect((await getUser(userC))?.anonymized_at).toBeNull();
+		expect((await getUser(userE))?.anonymized_at).toBeInstanceOf(Date);
+		expect((await getUser(userF))?.anonymized_at).toBeNull();
 	});
 
 	it("is idempotent: a second run anonymises nobody and still writes an audit row (S4)", async () => {

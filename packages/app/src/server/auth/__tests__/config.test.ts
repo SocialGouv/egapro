@@ -27,7 +27,12 @@ vi.mock("~/server/db", () => ({
 	},
 }));
 vi.mock("~/server/db/schema", () => ({
-	users: { email: "email", id: "id" },
+	users: {
+		email: "email",
+		id: "id",
+		lastActivityAt: "lastActivityAt",
+		anonymizedAt: "anonymizedAt",
+	},
 	companies: { siren: "siren" },
 	userCompanies: {},
 	// The sign-in branch closes any open impersonation row (#4466), so the
@@ -171,6 +176,28 @@ describe("auth config", () => {
 			expect(result.siret).toBe("12345678901234");
 			expect(result.phone).toBe("0123456789");
 			expect(result.id_token).toBe("stored-token");
+		});
+
+		it("stamps the last activity on a session refresh, not only at sign-in", async () => {
+			vi.useFakeTimers();
+			vi.setSystemTime(new Date("2026-11-17T09:00:00.000Z"));
+			try {
+				const where = vi.fn().mockResolvedValue(undefined);
+				const set = vi.fn().mockReturnValue({ where });
+				mockUpdate.mockReturnValue({ set });
+
+				await callJwt({
+					token: { id: "uuid-123" } as JWT,
+					account: null,
+				});
+
+				expect(set).toHaveBeenCalledWith({
+					lastActivityAt: new Date("2026-11-17T09:00:00.000Z"),
+				});
+				expect(where).toHaveBeenCalled();
+			} finally {
+				vi.useRealTimers();
+			}
 		});
 	});
 

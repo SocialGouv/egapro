@@ -155,6 +155,8 @@ export const publicRepresentationDTOSchema = z.object({
 	region: z.string().nullable(),
 	departmentCode: z.string().nullable(),
 	departmentLabel: z.string().nullable(),
+	countryCode: z.string().nullable(),
+	countryLabel: z.string().nullable(),
 	nafCode: z.string().nullable(),
 	nafLabel: z.string().nullable(),
 	referencePeriodStart: z.string().nullable(),

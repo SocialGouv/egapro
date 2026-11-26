@@ -6,8 +6,9 @@
 --   - account creation (email_verified, set at sign-up);
 --   - last sign-in still present in the audit log (365-day retention — more
 --     reliable than the sign-up date when it exists);
---   - last declaration created, last status change authored by the account,
---     last representation declaration;
+--   - last declaration created or updated (any edit is activity), last status
+--     change authored by the account, last representation declaration created
+--     or updated;
 --   - last company link.
 -- An account with no signal keeps the migration date (now()): an account we
 -- cannot date is never purged.
@@ -21,7 +22,7 @@ SET "last_activity_at" = COALESCE(
       WHERE a."user_id" = u."id" AND a."action" = 'auth.login'
     ),
     (
-      SELECT max(d."created_at")
+      SELECT max(GREATEST(d."created_at", d."updated_at"))
       FROM "app_declaration" d
       WHERE d."declarant_id" = u."id"
     ),
@@ -31,7 +32,7 @@ SET "last_activity_at" = COALESCE(
       WHERE h."actor_user_id" = u."id"
     ),
     (
-      SELECT max(r."created_at")
+      SELECT max(GREATEST(r."created_at", r."updated_at"))
       FROM "app_representation_declaration" r
       WHERE r."declarant_id" = u."id"
     ),

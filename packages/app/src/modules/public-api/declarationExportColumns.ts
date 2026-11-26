@@ -1,18 +1,17 @@
+import type { CsvColumn } from "./publicCsvExport";
 import type { PublicDeclarationDTO } from "./schemas";
 
-export type CsvColumn = {
-	key: keyof PublicDeclarationDTO;
-	header: string;
-	/** Ratio (`0.074`) rendered in the CSV as percentage points (`7.4`). See `ratioToPercentPoints`. */
-	percent?: true;
-};
+type DeclarationCsvColumn = CsvColumn<PublicDeclarationDTO>;
 
 /** Builds a ratio column: rendered in the CSV as percentage points (see `ratioToPercentPoints`). */
-function percentColumn(key: CsvColumn["key"], header: string): CsvColumn {
+function percentColumn(
+	key: DeclarationCsvColumn["key"],
+	header: string,
+): DeclarationCsvColumn {
 	return { key, header, percent: true };
 }
 
-const CSV_COLUMN_DEFINITIONS: CsvColumn[] = [
+const CSV_COLUMN_DEFINITIONS: DeclarationCsvColumn[] = [
 	{ key: "year", header: "Annee_declaration" },
 	{ key: "siren", header: "SIREN" },
 	{ key: "name", header: "Raison_sociale" },

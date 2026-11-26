@@ -46,6 +46,7 @@ function makeDeclaration(
 
 		hasSubmittedJointEvaluation: false,
 		hasSubmittedCseOpinion: false,
+		hasCse: null,
 		cseRequired: false,
 		hasJointEvaluationFile: false,
 		formalNoticeAvailable: false,

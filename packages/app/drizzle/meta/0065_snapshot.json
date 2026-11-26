@@ -1,6 +1,6 @@
 {
-	"id": "699cf53f-8882-4e4d-9bea-4371e9271952",
-	"prevId": "b447480d-ee26-4e51-b533-4c4c5d7151e6",
+	"id": "b447480d-ee26-4e51-b533-4c4c5d7151e6",
+	"prevId": "e9ae271c-5f45-4456-97be-819d26b5e717",
 	"version": "7",
 	"dialect": "postgresql",
 	"tables": {
@@ -57,29 +57,29 @@
 						}
 					],
 					"isUnique": false,
-					"with": {},
+					"concurrently": false,
 					"method": "btree",
-					"concurrently": false
+					"with": {}
 				}
 			},
 			"foreignKeys": {
 				"app_admin_impersonation_event_admin_user_id_app_user_id_fk": {
 					"name": "app_admin_impersonation_event_admin_user_id_app_user_id_fk",
 					"tableFrom": "app_admin_impersonation_event",
-					"columnsFrom": ["admin_user_id"],
 					"tableTo": "app_user",
+					"columnsFrom": ["admin_user_id"],
 					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
+					"onDelete": "no action",
+					"onUpdate": "no action"
 				},
 				"app_admin_impersonation_event_siren_app_company_siren_fk": {
 					"name": "app_admin_impersonation_event_siren_app_company_siren_fk",
 					"tableFrom": "app_admin_impersonation_event",
-					"columnsFrom": ["siren"],
 					"tableTo": "app_company",
+					"columnsFrom": ["siren"],
 					"columnsTo": ["siren"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
+					"onDelete": "no action",
+					"onUpdate": "no action"
 				}
 			},
 			"compositePrimaryKeys": {},
@@ -353,9 +353,9 @@
 						}
 					],
 					"isUnique": false,
-					"with": {},
+					"concurrently": false,
 					"method": "btree",
-					"concurrently": false
+					"with": {}
 				},
 				"cse_opinion_file_file_idx": {
 					"name": "cse_opinion_file_file_idx",
@@ -368,37 +368,37 @@
 						}
 					],
 					"isUnique": false,
-					"with": {},
+					"concurrently": false,
 					"method": "btree",
-					"concurrently": false
+					"with": {}
 				}
 			},
 			"foreignKeys": {
 				"app_cse_opinion_file_declaration_id_app_declaration_id_fk": {
 					"name": "app_cse_opinion_file_declaration_id_app_declaration_id_fk",
 					"tableFrom": "app_cse_opinion_file",
-					"columnsFrom": ["declaration_id"],
 					"tableTo": "app_declaration",
+					"columnsFrom": ["declaration_id"],
 					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
+					"onDelete": "no action",
+					"onUpdate": "no action"
 				},
 				"app_cse_opinion_file_file_id_app_file_id_fk": {
 					"name": "app_cse_opinion_file_file_id_app_file_id_fk",
 					"tableFrom": "app_cse_opinion_file",
-					"columnsFrom": ["file_id"],
 					"tableTo": "app_file",
+					"columnsFrom": ["file_id"],
 					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "cascade"
+					"onDelete": "cascade",
+					"onUpdate": "no action"
 				}
 			},
 			"compositePrimaryKeys": {},
 			"uniqueConstraints": {
 				"cse_opinion_file_decl_number_type_idx": {
 					"name": "cse_opinion_file_decl_number_type_idx",
-					"columns": ["declaration_id", "declaration_number", "type"],
-					"nullsNotDistinct": false
+					"nullsNotDistinct": false,
+					"columns": ["declaration_id", "declaration_number", "type"]
 				}
 			},
 			"policies": {},
@@ -476,28 +476,28 @@
 						}
 					],
 					"isUnique": false,
-					"with": {},
+					"concurrently": false,
 					"method": "btree",
-					"concurrently": false
+					"with": {}
 				}
 			},
 			"foreignKeys": {
 				"app_cse_opinion_declaration_id_app_declaration_id_fk": {
 					"name": "app_cse_opinion_declaration_id_app_declaration_id_fk",
 					"tableFrom": "app_cse_opinion",
-					"columnsFrom": ["declaration_id"],
 					"tableTo": "app_declaration",
+					"columnsFrom": ["declaration_id"],
 					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
+					"onDelete": "no action",
+					"onUpdate": "no action"
 				}
 			},
 			"compositePrimaryKeys": {},
 			"uniqueConstraints": {
 				"cse_opinion_decl_number_type_idx": {
 					"name": "cse_opinion_decl_number_type_idx",
-					"columns": ["declaration_id", "declaration_number", "type"],
-					"nullsNotDistinct": false
+					"nullsNotDistinct": false,
+					"columns": ["declaration_id", "declaration_number", "type"]
 				}
 			},
 			"policies": {},
@@ -557,9 +557,9 @@
 						}
 					],
 					"isUnique": true,
-					"with": {},
+					"concurrently": false,
 					"method": "btree",
-					"concurrently": false
+					"with": {}
 				},
 				"declaration_lock_expires_at_idx": {
 					"name": "declaration_lock_expires_at_idx",
@@ -572,29 +572,29 @@
 						}
 					],
 					"isUnique": false,
-					"with": {},
+					"concurrently": false,
 					"method": "btree",
-					"concurrently": false
+					"with": {}
 				}
 			},
 			"foreignKeys": {
 				"app_declaration_lock_declaration_id_app_declaration_id_fk": {
 					"name": "app_declaration_lock_declaration_id_app_declaration_id_fk",
 					"tableFrom": "app_declaration_lock",
-					"columnsFrom": ["declaration_id"],
 					"tableTo": "app_declaration",
+					"columnsFrom": ["declaration_id"],
 					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "cascade"
+					"onDelete": "cascade",
+					"onUpdate": "no action"
 				},
 				"app_declaration_lock_locked_by_user_id_app_user_id_fk": {
 					"name": "app_declaration_lock_locked_by_user_id_app_user_id_fk",
 					"tableFrom": "app_declaration_lock",
-					"columnsFrom": ["locked_by_user_id"],
 					"tableTo": "app_user",
+					"columnsFrom": ["locked_by_user_id"],
 					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
+					"onDelete": "no action",
+					"onUpdate": "no action"
 				}
 			},
 			"compositePrimaryKeys": {},
@@ -669,29 +669,29 @@
 						}
 					],
 					"isUnique": false,
-					"with": {},
+					"concurrently": false,
 					"method": "btree",
-					"concurrently": false
+					"with": {}
 				}
 			},
 			"foreignKeys": {
 				"app_declaration_status_history_declaration_id_app_declaration_id_fk": {
 					"name": "app_declaration_status_history_declaration_id_app_declaration_id_fk",
 					"tableFrom": "app_declaration_status_history",
-					"columnsFrom": ["declaration_id"],
 					"tableTo": "app_declaration",
+					"columnsFrom": ["declaration_id"],
 					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "cascade"
+					"onDelete": "cascade",
+					"onUpdate": "no action"
 				},
 				"app_declaration_status_history_actor_user_id_app_user_id_fk": {
 					"name": "app_declaration_status_history_actor_user_id_app_user_id_fk",
 					"tableFrom": "app_declaration_status_history",
-					"columnsFrom": ["actor_user_id"],
 					"tableTo": "app_user",
+					"columnsFrom": ["actor_user_id"],
 					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
+					"onDelete": "no action",
+					"onUpdate": "no action"
 				}
 			},
 			"compositePrimaryKeys": {},
@@ -1239,6 +1239,12 @@
 					"primaryKey": false,
 					"notNull": false
 				},
+				"has_cse": {
+					"name": "has_cse",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": false
+				},
 				"cse_required": {
 					"name": "cse_required",
 					"type": "boolean",
@@ -1302,10 +1308,10 @@
 						}
 					],
 					"isUnique": true,
-					"with": {},
-					"method": "btree",
 					"where": "cancelled_at IS NULL",
-					"concurrently": false
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
 				},
 				"declaration_declarant_idx": {
 					"name": "declaration_declarant_idx",
@@ -1318,29 +1324,29 @@
 						}
 					],
 					"isUnique": false,
-					"with": {},
+					"concurrently": false,
 					"method": "btree",
-					"concurrently": false
+					"with": {}
 				}
 			},
 			"foreignKeys": {
 				"app_declaration_siren_app_company_siren_fk": {
 					"name": "app_declaration_siren_app_company_siren_fk",
 					"tableFrom": "app_declaration",
-					"columnsFrom": ["siren"],
 					"tableTo": "app_company",
+					"columnsFrom": ["siren"],
 					"columnsTo": ["siren"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
+					"onDelete": "no action",
+					"onUpdate": "no action"
 				},
 				"app_declaration_declarant_id_app_user_id_fk": {
 					"name": "app_declaration_declarant_id_app_user_id_fk",
 					"tableFrom": "app_declaration",
-					"columnsFrom": ["declarant_id"],
 					"tableTo": "app_user",
+					"columnsFrom": ["declarant_id"],
 					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
+					"onDelete": "no action",
+					"onUpdate": "no action"
 				}
 			},
 			"compositePrimaryKeys": {},
@@ -1462,19 +1468,19 @@
 				"app_employee_category_job_category_id_app_job_category_id_fk": {
 					"name": "app_employee_category_job_category_id_app_job_category_id_fk",
 					"tableFrom": "app_employee_category",
-					"columnsFrom": ["job_category_id"],
 					"tableTo": "app_job_category",
+					"columnsFrom": ["job_category_id"],
 					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
+					"onDelete": "no action",
+					"onUpdate": "no action"
 				}
 			},
 			"compositePrimaryKeys": {},
 			"uniqueConstraints": {
 				"employee_category_job_type_idx": {
 					"name": "employee_category_job_type_idx",
-					"columns": ["job_category_id", "declaration_type"],
-					"nullsNotDistinct": false
+					"nullsNotDistinct": false,
+					"columns": ["job_category_id", "declaration_type"]
 				}
 			},
 			"policies": {},
@@ -1535,8 +1541,8 @@
 			"uniqueConstraints": {
 				"export_year_version_idx": {
 					"name": "export_year_version_idx",
-					"columns": ["year", "version"],
-					"nullsNotDistinct": false
+					"nullsNotDistinct": false,
+					"columns": ["year", "version"]
 				}
 			},
 			"policies": {},
@@ -1603,9 +1609,9 @@
 						}
 					],
 					"isUnique": false,
-					"with": {},
+					"concurrently": false,
 					"method": "btree",
-					"concurrently": false
+					"with": {}
 				},
 				"file_joint_eval_unique": {
 					"name": "file_joint_eval_unique",
@@ -1618,21 +1624,21 @@
 						}
 					],
 					"isUnique": true,
-					"with": {},
-					"method": "btree",
 					"where": "\"type\" = 'joint_evaluation'",
-					"concurrently": false
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
 				}
 			},
 			"foreignKeys": {
 				"app_file_declaration_id_app_declaration_id_fk": {
 					"name": "app_file_declaration_id_app_declaration_id_fk",
 					"tableFrom": "app_file",
-					"columnsFrom": ["declaration_id"],
 					"tableTo": "app_declaration",
+					"columnsFrom": ["declaration_id"],
 					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
+					"onDelete": "no action",
+					"onUpdate": "no action"
 				}
 			},
 			"compositePrimaryKeys": {},
@@ -2204,20 +2210,20 @@
 						}
 					],
 					"isUnique": false,
-					"with": {},
+					"concurrently": false,
 					"method": "btree",
-					"concurrently": false
+					"with": {}
 				}
 			},
 			"foreignKeys": {
 				"app_gip_mds_data_siren_app_company_siren_fk": {
 					"name": "app_gip_mds_data_siren_app_company_siren_fk",
 					"tableFrom": "app_gip_mds_data",
-					"columnsFrom": ["siren"],
 					"tableTo": "app_company",
+					"columnsFrom": ["siren"],
 					"columnsTo": ["siren"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
+					"onDelete": "no action",
+					"onUpdate": "no action"
 				}
 			},
 			"compositePrimaryKeys": {
@@ -2267,11 +2273,11 @@
 				"app_global_setting_updated_by_app_user_id_fk": {
 					"name": "app_global_setting_updated_by_app_user_id_fk",
 					"tableFrom": "app_global_setting",
-					"columnsFrom": ["updated_by"],
 					"tableTo": "app_user",
+					"columnsFrom": ["updated_by"],
 					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
+					"onDelete": "no action",
+					"onUpdate": "no action"
 				}
 			},
 			"compositePrimaryKeys": {},
@@ -2320,19 +2326,19 @@
 				"app_job_category_declaration_id_app_declaration_id_fk": {
 					"name": "app_job_category_declaration_id_app_declaration_id_fk",
 					"tableFrom": "app_job_category",
-					"columnsFrom": ["declaration_id"],
 					"tableTo": "app_declaration",
+					"columnsFrom": ["declaration_id"],
 					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
+					"onDelete": "no action",
+					"onUpdate": "no action"
 				}
 			},
 			"compositePrimaryKeys": {},
 			"uniqueConstraints": {
 				"job_category_declaration_index_idx": {
 					"name": "job_category_declaration_index_idx",
-					"columns": ["declaration_id", "category_index"],
-					"nullsNotDistinct": false
+					"nullsNotDistinct": false,
+					"columns": ["declaration_id", "category_index"]
 				}
 			},
 			"policies": {},
@@ -2424,9 +2430,9 @@
 						}
 					],
 					"isUnique": false,
-					"with": {},
+					"concurrently": false,
 					"method": "btree",
-					"concurrently": false
+					"with": {}
 				}
 			},
 			"foreignKeys": {},
@@ -2538,9 +2544,9 @@
 						}
 					],
 					"isUnique": true,
-					"with": {},
+					"concurrently": false,
 					"method": "btree",
-					"concurrently": false
+					"with": {}
 				},
 				"representation_declaration_lock_expires_at_idx": {
 					"name": "representation_declaration_lock_expires_at_idx",
@@ -2553,29 +2559,29 @@
 						}
 					],
 					"isUnique": false,
-					"with": {},
+					"concurrently": false,
 					"method": "btree",
-					"concurrently": false
+					"with": {}
 				}
 			},
 			"foreignKeys": {
 				"app_representation_declaration_lock_siren_app_company_siren_fk": {
 					"name": "app_representation_declaration_lock_siren_app_company_siren_fk",
 					"tableFrom": "app_representation_declaration_lock",
-					"columnsFrom": ["siren"],
 					"tableTo": "app_company",
+					"columnsFrom": ["siren"],
 					"columnsTo": ["siren"],
-					"onUpdate": "no action",
-					"onDelete": "cascade"
+					"onDelete": "cascade",
+					"onUpdate": "no action"
 				},
 				"app_representation_declaration_lock_locked_by_user_id_app_user_id_fk": {
 					"name": "app_representation_declaration_lock_locked_by_user_id_app_user_id_fk",
 					"tableFrom": "app_representation_declaration_lock",
-					"columnsFrom": ["locked_by_user_id"],
 					"tableTo": "app_user",
+					"columnsFrom": ["locked_by_user_id"],
 					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
+					"onDelete": "no action",
+					"onUpdate": "no action"
 				}
 			},
 			"compositePrimaryKeys": {},
@@ -2756,9 +2762,9 @@
 						}
 					],
 					"isUnique": true,
-					"with": {},
+					"concurrently": false,
 					"method": "btree",
-					"concurrently": false
+					"with": {}
 				},
 				"representation_declaration_declarant_idx": {
 					"name": "representation_declaration_declarant_idx",
@@ -2771,29 +2777,29 @@
 						}
 					],
 					"isUnique": false,
-					"with": {},
+					"concurrently": false,
 					"method": "btree",
-					"concurrently": false
+					"with": {}
 				}
 			},
 			"foreignKeys": {
 				"app_representation_declaration_siren_app_company_siren_fk": {
 					"name": "app_representation_declaration_siren_app_company_siren_fk",
 					"tableFrom": "app_representation_declaration",
-					"columnsFrom": ["siren"],
 					"tableTo": "app_company",
+					"columnsFrom": ["siren"],
 					"columnsTo": ["siren"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
+					"onDelete": "no action",
+					"onUpdate": "no action"
 				},
 				"app_representation_declaration_declarant_id_app_user_id_fk": {
 					"name": "app_representation_declaration_declarant_id_app_user_id_fk",
 					"tableFrom": "app_representation_declaration",
-					"columnsFrom": ["declarant_id"],
 					"tableTo": "app_user",
+					"columnsFrom": ["declarant_id"],
 					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
+					"onDelete": "no action",
+					"onUpdate": "no action"
 				}
 			},
 			"compositePrimaryKeys": {},
@@ -2837,29 +2843,29 @@
 						}
 					],
 					"isUnique": false,
-					"with": {},
+					"concurrently": false,
 					"method": "btree",
-					"concurrently": false
+					"with": {}
 				}
 			},
 			"foreignKeys": {
 				"app_user_company_user_id_app_user_id_fk": {
 					"name": "app_user_company_user_id_app_user_id_fk",
 					"tableFrom": "app_user_company",
-					"columnsFrom": ["user_id"],
 					"tableTo": "app_user",
+					"columnsFrom": ["user_id"],
 					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
+					"onDelete": "no action",
+					"onUpdate": "no action"
 				},
 				"app_user_company_siren_app_company_siren_fk": {
 					"name": "app_user_company_siren_app_company_siren_fk",
 					"tableFrom": "app_user_company",
-					"columnsFrom": ["siren"],
 					"tableTo": "app_company",
+					"columnsFrom": ["siren"],
 					"columnsTo": ["siren"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
+					"onDelete": "no action",
+					"onUpdate": "no action"
 				}
 			},
 			"compositePrimaryKeys": {
@@ -3049,9 +3055,9 @@
 						}
 					],
 					"isUnique": false,
-					"with": {},
+					"concurrently": false,
 					"method": "btree",
-					"concurrently": false
+					"with": {}
 				},
 				"action_log_user_idx": {
 					"name": "action_log_user_idx",
@@ -3070,9 +3076,9 @@
 						}
 					],
 					"isUnique": false,
-					"with": {},
+					"concurrently": false,
 					"method": "btree",
-					"concurrently": false
+					"with": {}
 				},
 				"action_log_siren_idx": {
 					"name": "action_log_siren_idx",
@@ -3091,9 +3097,9 @@
 						}
 					],
 					"isUnique": false,
-					"with": {},
+					"concurrently": false,
 					"method": "btree",
-					"concurrently": false
+					"with": {}
 				},
 				"action_log_action_idx": {
 					"name": "action_log_action_idx",
@@ -3112,9 +3118,9 @@
 						}
 					],
 					"isUnique": false,
-					"with": {},
+					"concurrently": false,
 					"method": "btree",
-					"concurrently": false
+					"with": {}
 				},
 				"action_log_category_created_at_idx": {
 					"name": "action_log_category_created_at_idx",
@@ -3133,9 +3139,9 @@
 						}
 					],
 					"isUnique": false,
-					"with": {},
+					"concurrently": false,
 					"method": "btree",
-					"concurrently": false
+					"with": {}
 				}
 			},
 			"foreignKeys": {},
@@ -3224,10 +3230,10 @@
 	"schemas": {
 		"audit": "audit"
 	},
-	"views": {},
 	"sequences": {},
 	"roles": {},
 	"policies": {},
+	"views": {},
 	"_meta": {
 		"columns": {},
 		"schemas": {},

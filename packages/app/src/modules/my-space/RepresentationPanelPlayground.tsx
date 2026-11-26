@@ -80,6 +80,7 @@ function makeDeclaration(variant: PlaygroundVariant): DeclarationItem {
 		lastTransmission: null,
 		hasSubmittedJointEvaluation: false,
 		hasSubmittedCseOpinion: false,
+		hasCse: null,
 		cseRequired: false,
 		hasJointEvaluationFile: false,
 		formalNoticeAvailable: false,
