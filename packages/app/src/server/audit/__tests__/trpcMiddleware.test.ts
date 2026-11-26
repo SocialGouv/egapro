@@ -673,7 +673,6 @@ describe("auditMiddleware", () => {
 	it.each([
 		"representationDeclaration.get",
 		"representationDeclaration.saveDraft",
-		"representationDeclaration.submit",
 		"representationDeclaration.declareNotSubject",
 	])("keeps only the allowlisted keys in metadata for %s", async (path) => {
 		const next = vi.fn(async () => okResult(undefined));
@@ -741,7 +740,7 @@ describe("auditMiddleware", () => {
 		await auditMiddleware({
 			ctx: buildCtx(),
 			type: "mutation",
-			path: "representationDeclaration.submit",
+			path: "representationDeclaration.saveDraft",
 			getRawInput: buildGetRawInput({ executiveWomenPercent: 60 }),
 			next,
 		});
@@ -753,7 +752,7 @@ describe("auditMiddleware", () => {
 		await auditMiddleware({
 			ctx: buildCtx(),
 			type: "mutation",
-			path: "representationDeclaration.submit",
+			path: "representationDeclaration.saveDraft",
 			getRawInput: buildGetRawInput({
 				year: "2026 private@example.com",
 				publishModalities: "private text",
@@ -834,7 +833,7 @@ describe("auditMiddleware", () => {
 		await auditMiddleware({
 			ctx: buildCtx(),
 			type: "mutation",
-			path: "representationDeclaration.submit",
+			path: "representationDeclaration.saveDraft",
 			getRawInput: buildGetRawInput({
 				year: 2026,
 				publishModalities: "private text",

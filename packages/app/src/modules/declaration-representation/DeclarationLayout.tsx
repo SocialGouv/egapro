@@ -13,7 +13,6 @@ type DeclarationLayoutProps = {
 	campaignYear: number;
 	year?: number;
 	campaignOpen?: boolean;
-	isSubmitted?: boolean;
 	lockEnabled?: boolean;
 	children: React.ReactNode;
 };
@@ -23,7 +22,6 @@ export function DeclarationLayout({
 	campaignYear,
 	year,
 	campaignOpen = true,
-	isSubmitted = false,
 	lockEnabled = false,
 	children,
 }: DeclarationLayoutProps) {
@@ -31,7 +29,6 @@ export function DeclarationLayout({
 		<RepresentationLockProvider
 			campaignOpen={campaignOpen}
 			enabled={lockEnabled}
-			isSubmitted={isSubmitted}
 			year={year ?? getReferenceYearFor(campaignYear)}
 		>
 			<main id="content" tabIndex={-1}>

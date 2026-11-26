@@ -9,9 +9,20 @@ const RepresentationPlayground = dynamic(() =>
 	),
 );
 
+const RepresentationPanelPlayground = dynamic(() =>
+	import("~/modules/my-space/RepresentationPanelPlayground").then(
+		(m) => m.RepresentationPanelPlayground,
+	),
+);
+
 export default function RepresentationTestPanelPage() {
 	if (env.NODE_ENV === "production") {
 		notFound();
 	}
-	return <RepresentationPlayground />;
+	return (
+		<>
+			<RepresentationPlayground />
+			<RepresentationPanelPlayground />
+		</>
+	);
 }

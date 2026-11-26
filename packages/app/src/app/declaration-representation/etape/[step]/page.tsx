@@ -5,10 +5,14 @@ import {
 	getStepDefinition,
 	parseStepParam,
 	representationDraftFromDeclaration,
+	representationTransmittedDraftFromDeclaration,
 	StepPageClient,
 	TOTAL_REPRESENTATION_STEPS,
 } from "~/modules/declaration-representation";
-import { getCurrentYear, getReferenceYearFor } from "~/modules/domain";
+import {
+	getCurrentRepresentationCampaignYear,
+	getReferenceYearFor,
+} from "~/modules/domain";
 import {
 	clampRepresentationStep,
 	LAST_REPRESENTATION_STEP,
@@ -44,7 +48,7 @@ export default async function RepresentationStepPage({
 		notFound();
 	}
 
-	const campaignYear = getCurrentYear();
+	const campaignYear = getCurrentRepresentationCampaignYear();
 	const year = getReferenceYearFor(campaignYear);
 
 	const { declaration, campaignOpen, declarationDeadline } =
@@ -68,8 +72,11 @@ export default async function RepresentationStepPage({
 			campaignOpen={campaignOpen}
 			campaignYear={campaignYear}
 			declarationDeadline={declarationDeadline}
-			initialDraft={representationDraftFromDeclaration(declaration, step)}
-			isSubmitted={declaration?.status === "submitted"}
+			initialDraft={
+				campaignOpen
+					? representationDraftFromDeclaration(declaration, step)
+					: representationTransmittedDraftFromDeclaration(declaration, step)
+			}
 			step={step}
 			year={year}
 		/>

@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 
 import { Confirmation } from "~/modules/declaration-representation";
 import {
-	getCurrentYear,
+	getCurrentRepresentationCampaignYear,
 	getReferenceYearFor,
 	isRepresentationDeclarationSubmitted,
 } from "~/modules/domain";
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 };
 
 export default async function RepresentationConfirmationPage() {
-	const campaignYear = getCurrentYear();
+	const campaignYear = getCurrentRepresentationCampaignYear();
 	const year = getReferenceYearFor(campaignYear);
 
 	const [session, { declaration }] = await Promise.all([

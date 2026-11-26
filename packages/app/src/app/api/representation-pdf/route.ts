@@ -6,7 +6,10 @@ import {
 import { RepresentationPdfDocument } from "~/modules/declarationPdf/RepresentationPdfDocument";
 import { representationPdfFilename } from "~/modules/declarationPdf/representationPdfFilename";
 import { renderTaggedPdf } from "~/modules/declarationPdf/tagging/renderTaggedPdf";
-import { getCurrentYear, getReferenceYearFor } from "~/modules/domain";
+import {
+	getCurrentRepresentationCampaignYear,
+	getReferenceYearFor,
+} from "~/modules/domain";
 import { auditQueryMetadata } from "~/server/audit/queryMetadata";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { getSessionSiren } from "~/server/auth/sessionSiren";
@@ -53,7 +56,9 @@ async function resolveRepresentationPdf(
 	if (!requestedYear.success) {
 		return { error: invalidYearResponse() };
 	}
-	const year = requestedYear.data.year ?? getReferenceYearFor(getCurrentYear());
+	const year =
+		requestedYear.data.year ??
+		getReferenceYearFor(getCurrentRepresentationCampaignYear());
 
 	const data = await buildRepresentationPdfData(siren, year, new Date());
 

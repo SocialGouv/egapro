@@ -6,7 +6,6 @@ import {
 	writeCampaignYearOverride,
 } from "~/modules/domain";
 import {
-	ALREADY_SUBMITTED_MESSAGE,
 	CLOSED_CAMPAIGN,
 	CLOSED_CAMPAIGN_YEAR,
 	CLOSED_MESSAGE,
@@ -168,18 +167,19 @@ describe("representationDeclarationRouter lock procedures", () => {
 			).not.toHaveBeenCalled();
 		});
 
-		it("refuses on a submitted declaration", async () => {
+		it("grants the lock on a declaration that was already transmitted", async () => {
 			const mock = createMockDb([{ status: "submitted" }]);
 
-			await expect(
-				createCaller(mock.db).acquireLock({ year: YEAR }),
-			).rejects.toMatchObject({
-				code: "FORBIDDEN",
-				message: ALREADY_SUBMITTED_MESSAGE,
-			});
-			expect(
-				lockMocks.acquireOrRefreshRepresentationLock,
-			).not.toHaveBeenCalled();
+			const result = await createCaller(mock.db).acquireLock({ year: YEAR });
+
+			expect(result).toEqual(ACQUIRED);
+			expect(lockMocks.acquireOrRefreshRepresentationLock).toHaveBeenCalledWith(
+				mock.db,
+				SIREN,
+				YEAR,
+				USER_ID,
+				DEFAULT_LOCK_TIMEOUT_MINUTES,
+			);
 		});
 
 		it("refuses while impersonating a company", async () => {
