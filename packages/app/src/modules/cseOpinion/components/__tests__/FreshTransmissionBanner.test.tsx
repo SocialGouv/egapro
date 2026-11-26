@@ -10,6 +10,7 @@ import type { SubmissionBannerState } from "~/modules/cseOpinion/submissionBanne
 import {
 	markDeclarationTransmissionSuccess,
 	markJointEvaluationTransmissionSuccess,
+	markSecondDeclarationTransmissionSuccess,
 } from "~/modules/declaration-remuneration/shared/declarationSuccessFlash";
 import {
 	FreshTransmissionBanner,
@@ -37,12 +38,23 @@ describe("useFreshTransmission", () => {
 		expect(result.current).toBeNull();
 	});
 
-	it("keeps the second declaration banner without any signal", () => {
+	it("hides the second declaration banner without any signal", () => {
 		const { result } = renderHook(() =>
 			useFreshTransmission(SECOND_DECLARATION),
 		);
 
-		expect(result.current).toBe("compliance_path");
+		expect(result.current).toBeNull();
+	});
+
+	it("shows the second declaration banner only right after its transmission", () => {
+		expect(
+			renderHook(() => useFreshTransmission(SECOND_DECLARATION)).result.current,
+		).toBeNull();
+
+		markSecondDeclarationTransmissionSuccess();
+		expect(
+			renderHook(() => useFreshTransmission(SECOND_DECLARATION)).result.current,
+		).toBe("compliance_path");
 	});
 
 	it("shows the joint evaluation banner only right after its transmission", () => {
@@ -56,6 +68,15 @@ describe("useFreshTransmission", () => {
 		).toBe("compliance_path");
 	});
 
+	it("does not let a joint evaluation signal reveal the second declaration banner", () => {
+		markJointEvaluationTransmissionSuccess();
+		const { result } = renderHook(() =>
+			useFreshTransmission(SECOND_DECLARATION),
+		);
+
+		expect(result.current).toBeNull();
+	});
+
 	it("reports a declaration just transmitted when no compliance path banner applies", () => {
 		markDeclarationTransmissionSuccess();
 		const { result } = renderHook(() => useFreshTransmission(null));
@@ -65,6 +86,7 @@ describe("useFreshTransmission", () => {
 
 	it("lets the compliance path banner win over a declaration signal", () => {
 		markDeclarationTransmissionSuccess();
+		markSecondDeclarationTransmissionSuccess();
 		const { result } = renderHook(() =>
 			useFreshTransmission(SECOND_DECLARATION),
 		);

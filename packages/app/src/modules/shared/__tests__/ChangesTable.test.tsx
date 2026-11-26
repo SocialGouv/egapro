@@ -20,9 +20,9 @@ describe("ChangesTable", () => {
 		expect(
 			screen.getByRole("table", { name: "Modifications à confirmer" }),
 		).toBeInTheDocument();
-		expect(screen.getByText("Modifications à confirmer")).toHaveClass(
-			"fr-sr-only",
-		);
+		expect(
+			screen.getByText("Modifications à confirmer").closest(".fr-table"),
+		).toHaveClass("fr-table--no-caption");
 	});
 
 	it("declares the three column headers with a col scope", () => {

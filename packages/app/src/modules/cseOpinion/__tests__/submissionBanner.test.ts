@@ -118,6 +118,27 @@ describe("getSubmissionBannerState", () => {
 		).toBe(false);
 	});
 
+	it("keeps the last deposit of a closed démarche modifiable even with a CSE", () => {
+		expect(
+			state(
+				"demarche_completed",
+				"joint_evaluation",
+				null,
+				false,
+				"joint_evaluation",
+			)?.depositModifiable,
+		).toBe(true);
+		expect(
+			state(
+				"demarche_completed",
+				"corrective_action",
+				null,
+				true,
+				"second_declaration",
+			)?.depositModifiable,
+		).toBe(true);
+	});
+
 	it.each(
 		DECLARATION_FSM_STATUSES,
 	)("follows the domain writability rules in %s", (status) => {

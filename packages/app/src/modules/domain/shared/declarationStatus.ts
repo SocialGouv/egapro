@@ -6,9 +6,10 @@ import type {
 } from "../types";
 import { isDeadlinePassed } from "./campaign";
 import { getDeclarationProcessStepDeadline } from "./declarationProcessStep";
-import type {
-	LastTransmission,
-	SubsequentSubmissions,
+import {
+	isLastTransmissionPathChoice,
+	type LastTransmission,
+	type SubsequentSubmissions,
 } from "./declarationTrajectory";
 
 export function isDeclarationSubmitted(status: string | null): boolean {
@@ -28,15 +29,14 @@ export function isComplianceProcessCompleted(status: string | null): boolean {
 export function isDeclarationWritingClosed(
 	status: string | null,
 	isFirstDeclarationSuperseded: boolean,
-	lastTransmission?: LastTransmission | null,
+	lastTransmission: LastTransmission | null,
 ): boolean {
 	if (!isComplianceProcessCompleted(status) || !isFirstDeclarationSuperseded) {
 		return false;
 	}
-	// With a CSE, the démarche closes on its opinion and every earlier deposit
-	// stays locked. Without one, the last deposit remains writable until the
-	// next campaign.
-	return lastTransmission === undefined || lastTransmission === "cse_opinion";
+	// A démarche closed on the CSE opinion keeps every earlier deposit locked;
+	// any other last deposit remains writable until the next campaign.
+	return lastTransmission === "cse_opinion";
 }
 
 export function getCurrentCompliancePath(declaration: {
@@ -151,7 +151,7 @@ export function isCompliancePathStepApplicable(declaration: {
 // until the next campaign (epic #5128).
 export function isSecondDeclarationWritable(
 	status: DeclarationFsmStatus | null,
-	lastTransmission?: LastTransmission | null,
+	lastTransmission: LastTransmission | null,
 ): boolean {
 	if (
 		status === "corrective_actions_chosen" ||
@@ -172,7 +172,7 @@ export function isSecondDeclarationWritable(
 // a CSE, until the next campaign (epic #5128).
 export function isJointEvaluationWritable(
 	status: DeclarationFsmStatus | null,
-	lastTransmission?: LastTransmission | null,
+	lastTransmission: LastTransmission | null,
 ): boolean {
 	if (
 		status === "joint_evaluation_chosen" ||
@@ -260,7 +260,7 @@ export function getCompliancePathReadOnlyReason(params: {
 	hasSubmittedSecondDeclaration: boolean;
 	hasSubmittedCseOpinion: boolean;
 	hasSubmittedJointEvaluation: boolean;
-	lastTransmission?: LastTransmission | null;
+	lastTransmission: LastTransmission | null;
 }): CompliancePathReadOnlyReason | null {
 	const {
 		status,
@@ -271,11 +271,10 @@ export function getCompliancePathReadOnlyReason(params: {
 		lastTransmission,
 	} = params;
 
-	// A terminal path choice ("justify" without a CSE) stays writable until the
-	// next campaign as long as nothing superseded it (epic #5128).
+	// A terminal path choice ("justify") stays writable until the next campaign
+	// as long as nothing superseded it (epic #5128).
 	const keepsTerminalPathChoiceWritable =
-		lastTransmission === "path_choice_round_1" ||
-		lastTransmission === "path_choice_round_2";
+		isLastTransmissionPathChoice(lastTransmission);
 
 	if (
 		isComplianceProcessCompleted(status) &&

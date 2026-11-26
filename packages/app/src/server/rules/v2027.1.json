@@ -356,7 +356,7 @@
 		{
 			"id": "resubmit_joint_evaluation_round_1_from_completed",
 			"advertisable": false,
-			"description": "Sans CSE, un rapport d'évaluation conjointe qui est la dernière transmission reste modifiable jusqu'à la nouvelle campagne. Le round d'origine est préservé (il alimente le verrou du choix de parcours round 1).",
+			"description": "Un rapport d'évaluation conjointe qui est la dernière transmission reste modifiable jusqu'à la nouvelle campagne. Le round d'origine est préservé (il alimente le verrou du choix de parcours round 1).",
 			"from": ["demarche_completed"],
 			"action": "submit_joint_evaluation",
 			"matchPayload": { "round": 1 },
@@ -366,8 +366,7 @@
 						"fact": "lastTransmission",
 						"op": "==",
 						"value": "joint_evaluation"
-					},
-					{ "fact": "cseRequired", "op": "==", "value": false }
+					}
 				]
 			},
 			"to": "demarche_completed",
@@ -389,8 +388,7 @@
 						"fact": "lastTransmission",
 						"op": "==",
 						"value": "joint_evaluation"
-					},
-					{ "fact": "cseRequired", "op": "==", "value": false }
+					}
 				]
 			},
 			"to": "demarche_completed",
@@ -412,7 +410,6 @@
 						"op": "==",
 						"value": "second_declaration"
 					},
-					{ "fact": "cseRequired", "op": "==", "value": false },
 					{ "fact": "action.stillHasGap", "op": "==", "value": true }
 				]
 			},
@@ -432,7 +429,6 @@
 						"op": "==",
 						"value": "second_declaration"
 					},
-					{ "fact": "cseRequired", "op": "==", "value": false },
 					{ "fact": "action.stillHasGap", "op": "==", "value": false }
 				]
 			},
@@ -551,7 +547,7 @@
 		},
 		{
 			"id": "revise_path_choice_round_1_after_completion",
-			"description": "Sans CSE, un choix de parcours terminal (justifier, round 1) qui est la dernière transmission reste modifiable jusqu'à la nouvelle campagne : le choix repart de awaiting_compliance_path_choice.",
+			"description": "Un choix de parcours terminal (justifier, round 1) qui est la dernière transmission reste modifiable jusqu'à la nouvelle campagne : le choix repart de awaiting_compliance_path_choice.",
 			"action": "choose_compliance_path",
 			"from": ["demarche_completed"],
 			"guard": {

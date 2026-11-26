@@ -400,7 +400,7 @@ export const FICHE_SCENARIOS = {
 		).toBeVisible();
 		await expect(
 			page.getByRole("heading", {
-				name: "Indicateur par catégorie d'emplois",
+				name: "Indicateurs par catégorie d'emplois",
 			}),
 		).toBeVisible();
 		await expectRecapNextSteps(

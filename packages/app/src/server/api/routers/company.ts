@@ -14,6 +14,7 @@ import {
 	getLastTransmission,
 	getObligationWorkforce,
 	getReferenceYearFor,
+	isCompanyIdentityUnresolved,
 	isCseRequired,
 	isJointEvaluationFileTransmitted,
 	isPresumedSubjectToRepresentation,
@@ -92,6 +93,7 @@ async function findUserCompany(db: DB, session: Session, siren: string) {
 	const company = {
 		...rest,
 		gipWorkforce: parseGipWorkforce(workforceEma),
+		identityUnavailable: isCompanyIdentityUnresolved(row),
 	};
 
 	// Below 100 the CSE field is out of scope entirely, so `hasCse` stays null.
