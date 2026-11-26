@@ -9,10 +9,14 @@ import {
 	UPLOAD_REQUEST_TIMEOUT_MS,
 } from "~/modules/shared/uploadConfig";
 import { db } from "~/server/db";
-import { resolveCurrentDeclarationId } from "~/server/db/declarationConditions";
+import {
+	type CurrentDeclarationForWrite,
+	resolveCurrentDeclarationForWrite,
+} from "~/server/db/declarationConditions";
 import { declarations, files } from "~/server/db/schema";
 
 import { getRequiredContentTypes } from "./cseRequiredContentTypes";
+import { writeStagedJointUpload } from "./declarationDraftStaging";
 import { handleStreamingUpload, type UploadFailureReason } from "./fileUpload";
 import { isFormalNoticeAvailableFor } from "./formalNoticeExposure";
 import { deleteFile as deleteS3File } from "./s3";
@@ -150,6 +154,40 @@ export async function runUploadPipeline(
 	// S3 object is now committed. Any failure from here on must trigger a
 	// compensating delete to avoid orphan blobs.
 	try {
+		// A closed démarche keeps its transmitted report readable until the
+		// déposant transmits again: the re-upload is staged in the draft and only
+		// promoted by `submitJointEvaluation`.
+		if (
+			input.flowType === "joint_evaluation" &&
+			declaration.status === "demarche_completed"
+		) {
+			const replacedStagedPath = await writeStagedJointUpload(
+				db,
+				declaration.id,
+				declaration,
+				{
+					fileId: streamResult.fileId,
+					fileName: input.fileName,
+					filePath: streamResult.key,
+					uploadedAt: new Date().toISOString(),
+				},
+			);
+			if (replacedStagedPath) {
+				void deleteS3File(replacedStagedPath).catch((err) => {
+					console.error(
+						"[uploadPipeline] best-effort delete of replaced staged file failed",
+						{ filePath: replacedStagedPath, err },
+					);
+				});
+			}
+			return {
+				ok: true,
+				fileId: streamResult.fileId,
+				fileName: input.fileName,
+				filePath: streamResult.key,
+			};
+		}
+
 		const { fileId, replacedFilePath } = await commitFileRow({
 			declarationId: declaration.id,
 			flowType: input.flowType,
@@ -221,9 +259,8 @@ async function compensateS3Commit(key: string): Promise<"ok" | "failed"> {
 async function findCurrentDeclaration(
 	siren: string,
 	year: number,
-): Promise<{ id: string } | null> {
-	const id = await resolveCurrentDeclarationId(db, siren, year);
-	return id === null ? null : { id };
+): Promise<CurrentDeclarationForWrite | null> {
+	return resolveCurrentDeclarationForWrite(db, siren, year);
 }
 
 async function countFilesByType(

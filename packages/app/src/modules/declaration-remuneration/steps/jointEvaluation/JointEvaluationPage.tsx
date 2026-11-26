@@ -38,6 +38,7 @@ export async function JointEvaluationPage() {
 			declarationSiren={data.declaration.siren}
 			declarationYear={currentYear}
 			existingFile={existingFile}
+			isClosedDemarche={data.declaration.status === "demarche_completed"}
 			jointEvaluationDeadline={selectJointEvaluationDeadline(
 				campaignDeadlines,
 				isRevisedJoint,

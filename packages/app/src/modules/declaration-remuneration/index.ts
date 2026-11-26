@@ -8,6 +8,7 @@ export {
 	categoryFormEntrySchema,
 	categoryFormSchema,
 	compliancePathFormSchema,
+	employeeCategoryInputSchema,
 	updateEmployeeCategoriesSchema,
 	updateStep1Schema,
 	updateStep2Schema,
@@ -28,6 +29,21 @@ export {
 	getDraftInput,
 	saveDraftInput,
 } from "./shared/draft/schemas";
+export type {
+	StagedJointUpload,
+	StagedSecondDeclaration,
+} from "./shared/draft/staged";
+export {
+	parseStagedJointUpload,
+	parseStagedSecondDeclaration,
+	STAGED_JOINT_UPLOAD_KIND,
+	STAGED_JOINT_UPLOAD_STEP,
+	STAGED_SECOND_DECLARATION_KIND,
+	STAGED_SECOND_DECLARATION_STEP,
+	stagedJointUploadSchema,
+	stagedSecondDeclarationSchema,
+	toEmployeeCategoryRows,
+} from "./shared/draft/staged";
 export {
 	getFunnelSteps,
 	getNextStepHref,

@@ -30,6 +30,7 @@ type Props = {
 	declarationSiren: string;
 	declarationYear: number;
 	existingFile: JointEvaluationExistingFile | null;
+	isClosedDemarche: boolean;
 	jointEvaluationDeadline: Date;
 	jointEvaluationRound: 1 | 2;
 };
@@ -39,6 +40,7 @@ export function JointEvaluationForm({
 	declarationSiren,
 	declarationYear,
 	existingFile,
+	isClosedDemarche,
 	jointEvaluationDeadline,
 	jointEvaluationRound,
 }: Props) {
@@ -98,13 +100,18 @@ export function JointEvaluationForm({
 				router.push(getPostComplianceDestination(cseOpinionRequired));
 			},
 			// The transition may have committed before the response was lost.
+			// A closed démarche already transmitted its report in this round: the
+			// round check cannot tell a lost response from a real failure, so it
+			// would hide a failed staged submission.
 			onError: () => {
+				if (isClosedDemarche) return;
 				void redirectIfAlreadyTransmitted();
 			},
 		});
 	}, [
 		clearDraft,
 		cseOpinionRequired,
+		isClosedDemarche,
 		redirectIfAlreadyTransmitted,
 		router,
 		submitJointEvaluationMutation,

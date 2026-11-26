@@ -17,6 +17,7 @@ vi.mock("~/server/db/getCampaignDeadlines", async () => {
 vi.mock("~/trpc/server", () => ({
 	api: {
 		declaration: { getOrCreate: vi.fn() },
+		declarationDraft: { get: vi.fn() },
 		company: { get: vi.fn() },
 	},
 	HydrateClient: ({ children }: { children: React.ReactNode }) => children,
@@ -51,6 +52,7 @@ function mockPathChoice(
 		lastTransmission,
 	} as never);
 	vi.mocked(api.company.get).mockResolvedValue({ hasCse: null } as never);
+	vi.mocked(api.declarationDraft.get).mockResolvedValue(null);
 }
 
 // The page only assembles elements: HydrateClient is mocked as a passthrough,

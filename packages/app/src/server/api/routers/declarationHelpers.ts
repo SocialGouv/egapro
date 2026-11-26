@@ -200,6 +200,38 @@ export async function deleteJobAndEmployeeCategories(
 	}
 }
 
+// The correction rows are the transmitted second declaration: they are only
+// rewritten from the step-2 mutation while the funnel is open, or from
+// `submitSecondDeclaration` when a staged edit is transmitted.
+export async function replaceCorrectionCategories(
+	tx: Tx,
+	declarationId: string,
+	categories: ReadonlyArray<{ data: EmployeeCategoryData }>,
+): Promise<void> {
+	const jobs = await tx
+		.select()
+		.from(jobCategories)
+		.where(eq(jobCategories.declarationId, declarationId));
+
+	for (const job of jobs) {
+		const cat = categories[job.categoryIndex];
+		if (!cat) continue;
+
+		await tx
+			.delete(employeeCategories)
+			.where(
+				and(
+					eq(employeeCategories.jobCategoryId, job.id),
+					eq(employeeCategories.declarationType, "correction"),
+				),
+			);
+
+		await tx
+			.insert(employeeCategories)
+			.values(buildEmployeeCategoryValues(job.id, "correction", cat.data));
+	}
+}
+
 export async function fetchAllCategories(tx: Tx, declarationId: string) {
 	const jobs = await tx
 		.select()

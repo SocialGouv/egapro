@@ -51,6 +51,12 @@ import {
 } from "~/server/db/schema";
 import { loadRules } from "~/server/rules/engine";
 import {
+	promoteStagedJointEvaluation,
+	readStagedSecondDeclaration,
+	writeStagedSecondDeclaration,
+} from "~/server/services/declarationDraftStaging";
+import { deleteFile } from "~/server/services/s3";
+import {
 	activeDeclarationFilter,
 	applyPercentagesAfterUpdate,
 	buildEmployeeCategoryValues,
@@ -60,6 +66,7 @@ import {
 	fetchPreviousYearJobCategories,
 	findJointEvaluationFile,
 	purgeDraftSlice,
+	replaceCorrectionCategories,
 } from "./declarationHelpers";
 import {
 	applyActionOrRefuse,
@@ -681,30 +688,20 @@ export const declarationRouter = createTRPCRouter({
 							message: "La seconde déclaration n'est pas ouverte à la saisie.",
 						});
 
-					const existingJobs = await tx
-						.select()
-						.from(jobCategories)
-						.where(eq(jobCategories.declarationId, declaration.id));
-
-					for (const job of existingJobs) {
-						const cat = input.categories[job.categoryIndex];
-						if (!cat) continue;
-
-						await tx
-							.delete(employeeCategories)
-							.where(
-								and(
-									eq(employeeCategories.jobCategoryId, job.id),
-									eq(employeeCategories.declarationType, "correction"),
-								),
-							);
-
-						await tx
-							.insert(employeeCategories)
-							.values(
-								buildEmployeeCategoryValues(job.id, "correction", cat.data),
-							);
+					// A closed démarche keeps its transmitted second declaration
+					// readable (PDF, exports, admin) until the next transmission: the
+					// edit is staged in the draft, not written over the canonical rows.
+					if (current.status === "demarche_completed") {
+						await writeStagedSecondDeclaration(tx, current.id, current, {
+							source: input.source,
+							categories: input.categories,
+							referencePeriodStart: input.referencePeriodStart,
+							referencePeriodEnd: input.referencePeriodEnd,
+						});
+						return;
 					}
+
+					await replaceCorrectionCategories(tx, current.id, input.categories);
 
 					await tx
 						.update(declarations)
@@ -715,7 +712,7 @@ export const declarationRouter = createTRPCRouter({
 							secondDeclReferencePeriodEnd: input.referencePeriodEnd ?? null,
 							updatedAt: new Date(),
 						})
-						.where(eq(declarations.id, declaration.id));
+						.where(eq(declarations.id, current.id));
 				}
 			});
 
@@ -958,6 +955,28 @@ export const declarationRouter = createTRPCRouter({
 						message: SECOND_DECLARATION_UNAVAILABLE_ERROR,
 					});
 
+				// A closed démarche was edited into the draft: transmitting is what
+				// makes the staged categories the new transmitted data.
+				if (declaration.status === "demarche_completed") {
+					const staged = readStagedSecondDeclaration(declaration);
+					if (staged) {
+						await replaceCorrectionCategories(
+							tx,
+							declaration.id,
+							staged.categories,
+						);
+						await tx
+							.update(declarations)
+							.set({
+								secondDeclReferencePeriodStart:
+									staged.referencePeriodStart ?? null,
+								secondDeclReferencePeriodEnd: staged.referencePeriodEnd ?? null,
+								updatedAt: new Date(),
+							})
+							.where(eq(declarations.id, declaration.id));
+					}
+				}
+
 				const correctionCategories = await loadEmployeeCategoriesForDeclaration(
 					tx,
 					declaration.id,
@@ -1021,6 +1040,8 @@ export const declarationRouter = createTRPCRouter({
 			const siren = ctx.siren;
 			const year = getCurrentYear();
 
+			let replacedFilePath: string | null = null;
+
 			await ctx.db.transaction(async (tx) => {
 				const declaration = await lockAndReadDeclaration(
 					tx,
@@ -1040,6 +1061,17 @@ export const declarationRouter = createTRPCRouter({
 					loadRules(declaration.rulesVersion),
 					JOINT_EVALUATION_UNAVAILABLE_ERROR,
 				);
+
+				// A closed démarche staged its re-uploaded report in the draft: the
+				// transmission is what replaces the previously transmitted file.
+				if (declaration.status === "demarche_completed") {
+					const promotion = await promoteStagedJointEvaluation(
+						tx,
+						declaration.id,
+						declaration,
+					);
+					replacedFilePath = promotion.replacedFilePath;
+				}
 
 				if (!(await findJointEvaluationFile(tx, declaration.id))) {
 					throw new TRPCError({
@@ -1062,6 +1094,15 @@ export const declarationRouter = createTRPCRouter({
 					.where(activeDeclarationFilter(siren, year));
 				await purgeDraftSlice(tx, siren, year, "joint");
 			});
+
+			if (replacedFilePath) {
+				void deleteFile(replacedFilePath).catch((error) => {
+					console.error(
+						"[declaration] best-effort delete of replaced joint evaluation failed",
+						{ error },
+					);
+				});
+			}
 
 			const email = ctx.session.user.email;
 			if (email) {

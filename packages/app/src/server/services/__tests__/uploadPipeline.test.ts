@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
 	deleteFile: vi.fn(),
 	dbSelect: vi.fn(),
 	dbTransaction: vi.fn(),
+	dbUpdate: vi.fn(),
 	getRequiredContentTypes: vi.fn(),
 	isFormalNoticeAvailableFor: vi.fn(),
 }));
@@ -29,6 +30,7 @@ vi.mock("~/server/db", () => ({
 	db: {
 		select: mocks.dbSelect,
 		transaction: mocks.dbTransaction,
+		update: mocks.dbUpdate,
 	},
 }));
 
@@ -72,7 +74,13 @@ function createStream(): ReadableStream<Uint8Array> {
  * row). CSE count is called zero or one time and returns a row `{ value: N }`.
  */
 type Step =
-	| { kind: "declaration"; id?: string }
+	| {
+			kind: "declaration";
+			id?: string;
+			status?: string;
+			draft?: unknown;
+			draftUpdatedAt?: Date | null;
+	  }
 	| { kind: "count"; value: number };
 
 function primeDbSelect(steps: Step[]) {
@@ -92,7 +100,14 @@ function primeDbSelect(steps: Step[]) {
 					// different row than the lock guard, and must break loudly.
 					const rows =
 						step?.kind === "declaration" && step.id !== undefined
-							? [{ id: step.id }]
+							? [
+									{
+										id: step.id,
+										status: step.status,
+										draft: step.draft ?? null,
+										draftUpdatedAt: step.draftUpdatedAt ?? null,
+									},
+								]
 							: [];
 					return {
 						orderBy: () => ({ limit: () => Promise.resolve(rows) }),
@@ -376,6 +391,50 @@ describe("runUploadPipeline", () => {
 		await new Promise<void>((resolve) => setImmediate(resolve));
 		expect(mocks.deleteFile).toHaveBeenCalledWith(
 			"123456789/2027/old-file.pdf",
+		);
+	});
+
+	it("stages a joint-evaluation upload on a closed démarche instead of replacing the transmitted file", async () => {
+		primeDbSelect([
+			{
+				kind: "declaration",
+				id: "decl-1",
+				status: "demarche_completed",
+				draft: null,
+				draftUpdatedAt: null,
+			},
+		]);
+		mocks.handleStreamingUpload.mockResolvedValue({
+			ok: true,
+			key: "123456789/2027/staged-file.pdf",
+			fileId: "staged-file",
+		});
+		const set = vi.fn().mockReturnValue({
+			where: vi.fn().mockResolvedValue(undefined),
+		});
+		mocks.dbUpdate.mockReturnValue({ set });
+
+		const { runUploadPipeline } = await import("../uploadPipeline");
+		const result = await runUploadPipeline({
+			...baseInput,
+			stream: createStream(),
+			flowType: "joint_evaluation",
+		});
+
+		expect(result.ok).toBe(true);
+		expect(mocks.dbTransaction).not.toHaveBeenCalled();
+		expect(set).toHaveBeenCalledWith(
+			expect.objectContaining({
+				draft: {
+					joint: {
+						upload: expect.objectContaining({
+							fileId: "staged-file",
+							filePath: "123456789/2027/staged-file.pdf",
+						}),
+					},
+				},
+				draftUpdatedAt: expect.any(Date),
+			}),
 		);
 	});
 

@@ -306,7 +306,15 @@ function createUnderLockDb(
 	const transaction = vi
 		.fn()
 		.mockImplementation(async (fn: (tx: unknown) => unknown) =>
-			fn({ execute, select: txSelect, insert, update, delete: vi.fn() }),
+			fn({
+				execute,
+				select: txSelect,
+				insert,
+				update,
+				delete: vi.fn().mockReturnValue({
+					where: vi.fn().mockResolvedValue(undefined),
+				}),
+			}),
 		);
 
 	return {
@@ -2128,6 +2136,47 @@ describe("declarationRouter", () => {
 				});
 				expect(ctx.insertValues).not.toHaveBeenCalled();
 			});
+
+			it("promotes the staged report into the transmitted file on transmission", async () => {
+				const stagedUpload = {
+					fileId: "file-staged",
+					fileName: "rapport-v2.pdf",
+					filePath: "uploads/rapport-v2.pdf",
+					uploadedAt: new Date("2027-06-02T10:00:00Z").toISOString(),
+				};
+				const declaration = buildDeclaration({
+					status: "demarche_completed",
+					cseRequired: false,
+					firstDeclarationPathChoice: "joint_evaluation",
+					draft: { joint: { upload: stagedUpload } },
+					draftUpdatedAt: new Date(),
+				});
+				// Existing transmitted report, then the stages-1 departure, then the
+				// transmitted report the promotion just inserted.
+				const ctx = createUnderLockDb(
+					[
+						[declaration],
+						[{ at: null }],
+						[{ id: "file-old", filePath: "uploads/rapport.pdf" }],
+						[JOINT_EVALUATION_FILE],
+					],
+					[],
+					history({ eventType: "joint_evaluation_submit", round: 1 }),
+				);
+				const caller = await createLockedCaller(ctx.db);
+
+				await caller.submitJointEvaluation();
+
+				const fileInserts = ctx.insertValues.mock.calls
+					.map((call) => call[0] as Record<string, unknown>)
+					.filter((value) => value.type === "joint_evaluation");
+				expect(fileInserts).toHaveLength(1);
+				expect(fileInserts[0]).toMatchObject({
+					id: "file-staged",
+					fileName: "rapport-v2.pdf",
+					filePath: "uploads/rapport-v2.pdf",
+				});
+			});
 		});
 
 		describe("submitSecondDeclaration", () => {
@@ -2149,7 +2198,10 @@ describe("declarationRouter", () => {
 				expect(ctx.set.mock.calls[0]?.[0]).toMatchObject({
 					status: "awaiting_revision_choice",
 				});
-				expect(insertedEventTypes(ctx)).toEqual(["second_declaration_submit"]);
+				expect(insertedEventTypes(ctx)).toEqual([
+					"demarche_reopened",
+					"second_declaration_submit",
+				]);
 			});
 
 			it("keeps the démarche closed when the gap is resolved", async () => {
@@ -2174,6 +2226,67 @@ describe("declarationRouter", () => {
 					"second_declaration_submit",
 					"demarche_complete",
 				]);
+			});
+
+			it("applies the staged categories and reference period on transmission", async () => {
+				const staged = {
+					source: "dads",
+					categories: [
+						{
+							name: "Cadres",
+							data: {
+								womenCount: 12,
+								menCount: 18,
+								annualBaseWomen: "80",
+								annualBaseMen: "100",
+								annualVariableWomen: "0",
+								annualVariableMen: "0",
+								hourlyBaseWomen: "10",
+								hourlyBaseMen: "11",
+								hourlyVariableWomen: "0",
+								hourlyVariableMen: "0",
+							},
+						},
+					],
+					referencePeriodStart: "2025-01-01",
+					referencePeriodEnd: "2025-12-31",
+				};
+				const declaration = buildDeclaration({
+					status: "demarche_completed",
+					cseRequired: false,
+					firstDeclarationPathChoice: "corrective_action",
+					draft: { second: { "second-categories": staged } },
+					draftUpdatedAt: new Date(),
+				});
+				const ctx = createUnderLockDb(
+					[
+						[declaration],
+						[{ id: "job-1", categoryIndex: 0 }],
+						[
+							{
+								employee_category: {
+									annualBaseWomen: "80",
+									annualBaseMen: "100",
+								},
+							},
+						],
+					],
+					[],
+					history({ eventType: "second_declaration_submit", round: 2 }),
+				);
+				const caller = await createLockedCaller(ctx.db);
+
+				await caller.submitSecondDeclaration();
+
+				expect(ctx.set.mock.calls[0]?.[0]).toMatchObject({
+					secondDeclReferencePeriodStart: "2025-01-01",
+					secondDeclReferencePeriodEnd: "2025-12-31",
+				});
+				const correctionInserts = ctx.insertValues.mock.calls
+					.map((call) => call[0] as Record<string, unknown>)
+					.filter((value) => value.declarationType === "correction");
+				expect(correctionInserts).toHaveLength(1);
+				expect(correctionInserts[0]).toMatchObject({ womenCount: 12 });
 			});
 
 			it("refuses the re-transmission when the report is the last transmission", async () => {
@@ -2229,6 +2342,9 @@ describe("declarationRouter", () => {
 					round: number | null;
 				}>;
 				expect(rows[0]).toMatchObject({
+					eventType: "demarche_reopened",
+				});
+				expect(rows[1]).toMatchObject({
 					eventType: "path_choice",
 					round: 1,
 				});
@@ -2265,6 +2381,9 @@ describe("declarationRouter", () => {
 					round: number | null;
 				}>;
 				expect(rows[0]).toMatchObject({
+					eventType: "demarche_reopened",
+				});
+				expect(rows[1]).toMatchObject({
 					eventType: "path_choice",
 					round: 2,
 				});
