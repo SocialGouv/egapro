@@ -162,9 +162,9 @@ timing d'envoi (`handleDailyDeadlineReminders`, cron `0 8 * * *`).
 
 **Couverture événementielle : 4/4** (les 4 confirmations event-driven du
 schéma BRD). **Couverture rappels : 7/7** (les 7 rappels du plan d'envoi
-Figma) — implémentés via 7 builders schedule-driven et 8 schedules pg-boss
+Figma) — implémentés via 7 builders schedule-driven et 9 schedules pg-boss
 (1 tick quotidien pour les 6 rappels à échéance + 5 crons CSE + ouverture
-cycle + bascule ; tous en `tz=Europe/Paris`), avec déduplication par
+cycle + bascule + purge du journal de dédoublonnage ; tous en `tz=Europe/Paris`), avec déduplication par
 `notifications.reminder_sent_log` (UNIQUE `type/siren/year/variant`) qui
 garantit l'idempotence des ticks. Voir [`docs/mails.md`](../../docs/mails.md)
 pour le détail des éligibilités SQL, des variants, et de l'architecture.

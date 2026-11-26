@@ -17,8 +17,14 @@ function buildBoss(): BossStub {
 }
 
 describe("SCHEDULES", () => {
-	it("declares the expected 8 schedules", () => {
-		expect(SCHEDULES.length).toBe(8);
+	it("declares the expected 9 schedules", () => {
+		expect(SCHEDULES.length).toBe(9);
+	});
+
+	it("purges the reminder dedup log once a day", () => {
+		const purge = SCHEDULES.find((s) => s.name === "reminder-log-purge-daily");
+		expect(purge).toBeDefined();
+		expect(purge?.cron).toBe("0 3 * * *");
 	});
 
 	it("drives the deadline reminders from a single daily tick", () => {

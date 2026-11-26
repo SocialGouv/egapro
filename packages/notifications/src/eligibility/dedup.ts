@@ -12,6 +12,37 @@ import type { Sql } from "postgres";
 
 let migrated = false;
 
+export const REMINDER_LOG_RETENTION_YEARS = 3;
+
+export type ReminderLogPurgeSummary = {
+	deletedCount: number;
+	cutoffYear: number;
+	retentionYears: number;
+};
+
+export function reminderLogCutoffYear(currentYear: number): number {
+	return currentYear - REMINDER_LOG_RETENTION_YEARS + 1;
+}
+
+export async function purgeSentLog(
+	sql: Sql,
+	params: { currentYear: number },
+): Promise<ReminderLogPurgeSummary> {
+	const cutoffYear = reminderLogCutoffYear(params.currentYear);
+	// `count` is the number of affected rows reported by postgres.js: asking
+	// for `RETURNING` would materialise the whole purged history in memory on
+	// the first run.
+	const deleted = await sql`
+		DELETE FROM notifications.reminder_sent_log
+		WHERE year < ${cutoffYear}
+	`;
+	return {
+		deletedCount: deleted.count,
+		cutoffYear,
+		retentionYears: REMINDER_LOG_RETENTION_YEARS,
+	};
+}
+
 export async function ensureDedupTable(sql: Sql): Promise<void> {
 	if (migrated) return;
 	await sql.unsafe(`
