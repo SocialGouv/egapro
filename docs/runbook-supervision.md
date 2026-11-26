@@ -181,7 +181,7 @@ Un 200 non JSON est presque toujours une page d'erreur d'un proxy en amont. Vér
 
 **Symptôme.** `Dégradé — SUIT (certificat client)`, message `certificat client SUIT expire le <date> (dans N j)` ; puis `Indisponible` avec le même message, ou `certificat client SUIT expiré le <date>` ; `Mal configuré`, message `bundle PKCS#12 illisible`.
 
-**Ce que ça veut dire.** La sonde lit le `notAfter` du `.p12` monté dans le worker — elle ne fait aucun appel. `degraded` = à moins de `HEALTHCHECK_CERT_WARN_DAYS` (30 j) de l'expiration : le renouvellement doit être lancé maintenant. `unavailable` = expiré ou à moins de 7 jours : les appels mTLS vers SUIT vont échouer ou échouent déjà. `misconfigured` = le bundle ou la phrase de passe est faux : aucune connexion SUIT ne peut aboutir, et les deux sondes mTLS le diront aussi. Sans certificat configuré, la sonde reste verte (`non configuré`) — le mTLS est optionnel hors production.
+**Ce que ça veut dire.** La sonde lit le `notAfter` du `.p12` monté dans le worker — elle ne fait aucun appel. `degraded` = à moins de `HEALTHCHECK_CERT_WARN_DAYS` (30 j) de l'expiration : le renouvellement doit être lancé maintenant. `unavailable` = expiré ou à moins de 7 jours : les appels mTLS vers SUIT vont échouer ou échouent déjà. `misconfigured` = le bundle ou la phrase de passe est faux : aucune connexion SUIT ne peut aboutir, et les deux sondes mTLS le diront aussi. Sans certificat configuré, la sonde est `misconfigured` avec le message « non configuré » : l'absence de mTLS reste visible au lieu de passer pour un service sain.
 
 **Diagnostic.** Sur le bundle monté : `openssl pkcs12 -in bundle.p12 -nokeys -clcerts -passin pass:<phrase> | openssl x509 -noout -dates -subject` ; comparer avec le certificat attendu par SUIT. Sur le worker, `Mal configuré` sans expérience d'appel signifie phrase de passe fausse ou bundle tronqué au scellement.
 
@@ -255,7 +255,7 @@ Un 200 non JSON est presque toujours une page d'erreur d'un proxy en amont. Vér
 
 **Diagnostic.** `verify()` de la connexion (le worker le fait) ; comparer avec les erreurs du worker de notifications ; vérifier `MAIL_ENABLED`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`.
 
-**Action.** Corriger la configuration ou les identifiants ; le worker réessaie et la file se vide. Pour un envoi désactivé volontairement, la sonde est « non configuré », pas rouge — un rouge signifie que l'envoi est activé et qu'il échoue.
+**Action.** Corriger la configuration ou les identifiants ; le worker réessaie et la file se vide. Un envoi désactivé volontairement est `misconfigured` (« non configuré ») : la désactivation est visible, elle ne se déguise pas en service sain.
 
 **Escalade.** Fournisseur SMTP au-delà d'une heure ; prévenir la DGT si des relances réglementaires sont concernées.
 

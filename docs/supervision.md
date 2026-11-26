@@ -92,7 +92,7 @@ Un échec plus récent que le dernier succès n'est **pas** une panne tant qu'un
 
 ### 2.5 « Non configuré » n'est pas une panne
 
-Une sonde dont la cible n'est pas configurée dans l'environnement répond `operational` avec le message « non configuré » : le pod de review qui n'a ni WEEZ ni SMTP ne doit pas paraître rouge. Ce qui est **vérifiable** est ce qui est configuré ; la liste des sondes effectivement armées se lit au démarrage du pod, dans les avertissements `[healthcheck] no … — probe not configured`.
+Une sonde dont la cible n'est pas configurée dans l'environnement répond `misconfigured` avec le message « non configuré » : la couverture perdue reste visible sur l'écran au lieu de passer pour un service sain. C'est un choix explicite — un environnement qui n'arme pas une sonde attendue doit le voir, y compris le pod de review qui n'a ni WEEZ ni SMTP. La liste des sondes effectivement armées se lit aussi au démarrage du pod, dans les avertissements `[healthcheck] no … — probe not configured`.
 
 ## 3. Les états et les incidents
 
@@ -176,7 +176,7 @@ La ConfigMap est montée en `optional: true` : **absente, le défaut du code s'a
 
 **Ne montre pas** : de courbes, d'historique de latence, ni de tendance. Cette matière n'existe que dans les lignes `health_check` de stdout, donc dans Grafana. L'écran est une photographie de l'instant et des transitions, pas une série temporelle — c'est un choix, pour que la base ne conserve pas un point par sonde et par minute.
 
-Le bandeau de la home lit directement le service (`readServiceStatusBanner`), sans passer par la query tRPC auditée : visiter `/admin` n'écrit pas de ligne d'audit. La page `/admin/etat-des-services`, elle, écrit une ligne `read_sensitive` à chaque rafraîchissement (voir [`journaux-et-conservation.md` §4.1](journaux-et-conservation.md#41-journal-daudit-des-actions)).
+Le bandeau de la home lit directement le service (`readServiceStatusBanner`), sans passer par une query tRPC auditée : ni la visiter, ni rafraîchir l'écran `/admin/etat-des-services` n'écrit de ligne d'audit (voir [`journaux-et-conservation.md` §4.1](journaux-et-conservation.md#41-journal-daudit-des-actions)).
 
 ## 8. Limites assumées
 

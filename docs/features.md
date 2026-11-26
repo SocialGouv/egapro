@@ -541,7 +541,7 @@ Toutes les **mutations** et les **lectures de données sensibles** (PII, donnée
 | Catégorie | Rétention | Exemples |
 |---|---|---|
 | `mutation` | 365 jours | toutes les écritures (déclaration, CSE, admin, verrous) |
-| `read_sensitive` | 180 jours | `profile.get`, `declaration.getOrCreate`, `declaration.getStatusHistory`, recherche admin, téléchargement PDF, état du verrou, état des services (`adminStatus.getOverview`) |
+| `read_sensitive` | 180 jours | `profile.get`, `declaration.getOrCreate`, `declaration.getStatusHistory`, recherche admin, téléchargement PDF, état du verrou |
 | `public_search` | 180 jours | recherche / vue d'un référent public |
 | `auth` | 365 jours | login OK / login KO / logout |
 | `export` | 365 jours | téléchargements API publique |
