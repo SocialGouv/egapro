@@ -31,6 +31,8 @@ const companyFixture: PublicRepresentationCompanySource = {
 	region: "Île-de-France",
 	departmentCode: "75",
 	departmentLabel: "Paris",
+	countryCode: null,
+	countryLabel: "FRANCE",
 	nafCode: "62.01Z",
 	nafLabel: "Programmation informatique",
 	statutDiffusion: "O",
@@ -46,6 +48,8 @@ const MASKED_COMPANY_FIELDS = [
 	"region",
 	"departmentCode",
 	"departmentLabel",
+	"countryCode",
+	"countryLabel",
 	"nafCode",
 	"nafLabel",
 ] as const;
@@ -101,9 +105,12 @@ describe("maskNonDiffusibleRepresentation", () => {
 		siren: "123456789",
 		year: 2026,
 		name: "Société Démo",
+		address: "1 rue de la Paix, 75002 Paris",
 		region: "Île-de-France",
 		departmentCode: "75",
 		departmentLabel: "Paris",
+		countryCode: null,
+		countryLabel: "FRANCE",
 		nafCode: "62.01Z",
 		nafLabel: "Programmation informatique",
 		executiveWomenPercent: 35.5,
@@ -123,9 +130,12 @@ describe("maskNonDiffusibleRepresentation", () => {
 			siren: "123456789",
 			year: 2026,
 			name: "Non-diffusible",
+			address: "Non-diffusible",
 			region: "Non-diffusible",
 			departmentCode: "Non-diffusible",
 			departmentLabel: "Non-diffusible",
+			countryCode: "Non-diffusible",
+			countryLabel: "Non-diffusible",
 			nafCode: "Non-diffusible",
 			nafLabel: "Non-diffusible",
 			executiveWomenPercent: 35.5,
@@ -135,10 +145,10 @@ describe("maskNonDiffusibleRepresentation", () => {
 		});
 	});
 
-	it("masks the address only when the representation carries one", () => {
-		expect(
-			maskNonDiffusibleRepresentation(representation, false),
-		).not.toHaveProperty("address");
+	it("masks the address whether or not it is known", () => {
+		expect(maskNonDiffusibleRepresentation(representation, false).address).toBe(
+			"Non-diffusible",
+		);
 		expect(
 			maskNonDiffusibleRepresentation(
 				{ ...representation, address: null },
@@ -189,6 +199,8 @@ describe("toPublicRepresentation", () => {
 		expect(dto.region).toBe("Île-de-France");
 		expect(dto.departmentCode).toBe("75");
 		expect(dto.departmentLabel).toBe("Paris");
+		expect(dto.countryCode).toBeNull();
+		expect(dto.countryLabel).toBe("FRANCE");
 		expect(dto.nafCode).toBe("62.01Z");
 		expect(dto.nafLabel).toBe("Programmation informatique");
 	});
@@ -293,6 +305,8 @@ describe("toPublicRepresentation", () => {
 			region: "Non-diffusible",
 			departmentCode: "Non-diffusible",
 			departmentLabel: "Non-diffusible",
+			countryCode: "Non-diffusible",
+			countryLabel: "Non-diffusible",
 			nafCode: "Non-diffusible",
 			nafLabel: "Non-diffusible",
 			referencePeriodStart: "2025-01-01",
@@ -323,6 +337,8 @@ describe("toPublicRepresentation", () => {
 			region: "Île-de-France",
 			departmentCode: "75",
 			departmentLabel: "Paris",
+			countryCode: null,
+			countryLabel: "FRANCE",
 			nafCode: "62.01Z",
 			nafLabel: "Programmation informatique",
 			referencePeriodStart: "2025-01-01",

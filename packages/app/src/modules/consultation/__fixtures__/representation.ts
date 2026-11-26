@@ -12,6 +12,8 @@ export function representationFixture(
 		region: "Île-de-France",
 		departmentCode: "75",
 		departmentLabel: "Paris",
+		countryCode: null,
+		countryLabel: "FRANCE",
 		nafCode: "62.02A",
 		nafLabel: "Conseil en systèmes et logiciels informatiques",
 		referencePeriodStart: "2026-01-01",

@@ -221,10 +221,26 @@ describe("logAction", () => {
 		expect(mockInsertValues).not.toHaveBeenCalled();
 	});
 
+	it("keeps the representation export format and year in stdout without persisting them", async () => {
+		await logAction({
+			action: AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_EXPORT,
+			status: "success",
+			metadata: { format: "csv", year: 2027 },
+		});
+		expect(mockEmitActivityLog).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_EXPORT,
+				rawInput: { format: "csv", year: 2027 },
+			}),
+		);
+		expect(mockInsertValues).not.toHaveBeenCalled();
+	});
+
 	it.each([
 		AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH,
 		AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW,
 		AUDIT_ACTIONS.PUBLIC_DECLARATIONS_EXPORT,
+		AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_EXPORT,
 	])("emits only stdout for public action %s on success and failure", async (action) => {
 		for (const status of ["success", "failure"] as const) {
 			await logAction({

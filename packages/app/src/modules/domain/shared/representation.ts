@@ -8,6 +8,8 @@ export const REPRESENTATION_OBLIGATION_FROM_CAMPAIGN_YEAR = 2026;
 export const REPRESENTATION_SUBJECTION_WORKFORCE_MIN = 1000;
 export const REPRESENTATION_SUBJECTION_WINDOW_YEARS = 3;
 export const REPRESENTATION_CAMPAIGN_YEAR_OFFSET = 1;
+/** Number of most recent released campaigns the unfiltered public export covers. */
+export const PUBLIC_REPRESENTATION_RECENT_CAMPAIGN_YEARS = 10;
 
 export type RepresentationComplianceVerdict =
 	| "compliant"
@@ -60,6 +62,10 @@ export function deriveExecutivesNotComputableReason(
 
 export function getRepresentationCampaignYear(referenceYear: number): number {
 	return referenceYear + REPRESENTATION_CAMPAIGN_YEAR_OFFSET;
+}
+
+export function getRepresentationReferenceYear(campaignYear: number): number {
+	return campaignYear - REPRESENTATION_CAMPAIGN_YEAR_OFFSET;
 }
 
 export function isPresumedSubjectToRepresentation(

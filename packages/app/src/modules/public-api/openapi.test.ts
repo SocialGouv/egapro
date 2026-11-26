@@ -16,14 +16,15 @@ describe("publicOpenApiSpec", () => {
 	it("is a valid OpenAPI 3.1 document", () => {
 		expect(publicOpenApiSpec.openapi).toBe("3.1.0");
 		expect(publicOpenApiSpec.info.title).toBe("EGAPRO — API publique");
-		expect(publicOpenApiSpec.info.version).toBe("2.0.0");
+		expect(publicOpenApiSpec.info.version).toBe("2.1.0");
 		expect(publicOpenApiSpec.info.license?.name).toBe("Etalab 2.0");
 		expect(publicOpenApiSpec.paths).toBeDefined();
 	});
 
-	it("documents the declarations export as the only public endpoint", () => {
+	it("documents the declarations and representations exports as the public endpoints", () => {
 		expect(Object.keys(publicOpenApiSpec.paths)).toEqual([
 			"/api/public/declarations/export",
+			"/api/public/representations/export",
 		]);
 	});
 
@@ -118,6 +119,92 @@ describe("publicOpenApiSpec", () => {
 		});
 	});
 
+	describe("representation export endpoint", () => {
+		const operation =
+			publicOpenApiSpec.paths["/api/public/representations/export"].get;
+
+		it("declares the export operation with a csv/xlsx format enum, csv by default", () => {
+			expect(operation.operationId).toBe("exportPublicRepresentations");
+			const format = operation.parameters.find((p) => p.name === "format");
+			expect(format?.schema).toMatchObject({
+				enum: ["csv", "xlsx"],
+				default: "csv",
+			});
+		});
+
+		it("serves no JSON", () => {
+			const content = operation.responses["200"].content as Record<
+				string,
+				unknown
+			>;
+			expect(content["application/json"]).toBeUndefined();
+			expect(content["text/csv"]).toBeDefined();
+		});
+
+		it("documents the annual and multi-year CSV names", () => {
+			expect(operation.description).toContain(
+				"Indicateurs_representation_<annee>.csv",
+			);
+			expect(operation.description).toContain("indicateurs-representation.csv");
+		});
+
+		it("describes the 15 DGT columns, the campaign year and the empty cell", () => {
+			const csv = operation.responses["200"].content["text/csv"].schema;
+			for (const column of [
+				"Annee_declaration",
+				"SIREN",
+				"Raison_sociale",
+				"Adresse",
+				"Region",
+				"Code_departement",
+				"Departement",
+				"Pays",
+				"Code_NAF",
+				"Libelle_NAF",
+				"Effectif_annuel_moyen",
+				"Cadres_pourcentage_F",
+				"Cadres_pourcentage_H",
+				"Membres_pourcentage_F",
+				"Membres_pourcentage_H",
+			]) {
+				expect(csv.description).toContain(column);
+			}
+			expect(csv.description).toContain("15 colonnes DGT");
+			expect(csv.description).toContain("année de campagne");
+			expect(csv.description).toContain("cellule vide");
+			expect(csv.description).toContain("Non-diffusible");
+		});
+
+		it("declares the filters as optional, without pagination", () => {
+			expect(operation.parameters.map((p) => p.name).sort()).toEqual([
+				"departement",
+				"format",
+				"naf",
+				"q",
+				"region",
+				"year",
+			]);
+			for (const param of operation.parameters) {
+				expect(param.required).toBe(false);
+			}
+		});
+
+		it("documents the file names and the public CORS header on the 200", () => {
+			const headers = operation.responses["200"].headers;
+			expect(headers["Content-Disposition"]).toBeDefined();
+			expect(headers["Access-Control-Allow-Origin"]).toBeDefined();
+		});
+
+		it("documents the 400, 413, 500 and 503 responses", () => {
+			expect(operation.responses["400"]).toBeDefined();
+			expect(operation.responses["413"].description).toContain(
+				formatCount(MAX_XLSX_EXPORT_ROWS),
+			);
+			expect(operation.responses["500"]).toBeDefined();
+			expect(operation.responses["503"].description).toContain("Retry-After");
+		});
+	});
+
 	describe("PublicDeclaration schema — data-model guarantees", () => {
 		it("only requires year and siren", () => {
 			expect(declarationSchema.required).toEqual(["year", "siren"]);
@@ -165,6 +252,12 @@ describe("publicOpenApiSpec", () => {
 			expect(description).toMatch(/données brutes/i);
 			expect(description).toMatch(/indicateur G/i);
 			expect(description).toMatch(/statutDiffusion/);
+		});
+
+		it("says the API serves the representation export too, never as JSON", () => {
+			const description = publicOpenApiSpec.info.description;
+			expect(description).toMatch(/représentation équilibrée/i);
+			expect(description).toMatch(/jamais de JSON/);
 		});
 
 		it("documents the public-release date gate in the top-level description", () => {

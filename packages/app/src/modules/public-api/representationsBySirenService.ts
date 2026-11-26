@@ -23,6 +23,8 @@ const representationCompanyColumns = {
 	region: companies.region,
 	departmentCode: companies.departmentCode,
 	departmentLabel: companies.departmentLabel,
+	countryCode: companies.countryCode,
+	countryLabel: companies.countryLabel,
 	nafCode: companies.nafCode,
 	nafLabel: companies.nafLabel,
 	statutDiffusion: companies.statutDiffusion,
@@ -39,6 +41,8 @@ function toCompanySource(row: {
 	region: string | null;
 	departmentCode: string | null;
 	departmentLabel: string | null;
+	countryCode: string | null;
+	countryLabel: string | null;
 	nafCode: string | null;
 	nafLabel: string | null;
 	statutDiffusion: string | null;
@@ -50,6 +54,8 @@ function toCompanySource(row: {
 		region: row.region,
 		departmentCode: row.departmentCode,
 		departmentLabel: row.departmentLabel,
+		countryCode: row.countryCode,
+		countryLabel: row.countryLabel,
 		nafCode: row.nafCode,
 		nafLabel: row.nafLabel,
 		statutDiffusion: row.statutDiffusion,

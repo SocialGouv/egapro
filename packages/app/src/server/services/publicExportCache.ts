@@ -17,7 +17,10 @@ const gunzipAsync = promisify(gunzip);
 const inflight = new Map<UnfilteredPublicExport, Promise<string | Response>>();
 let runningExports = 0;
 
-type UnfilteredPublicExport = "declarations:csv" | "declarations:json";
+type UnfilteredPublicExport =
+	| "declarations:csv"
+	| "declarations:json"
+	| "representations:csv";
 
 // Every other field narrows the rows, so a filter added to the schema later is never served from the full-export key.
 function isUnfiltered(input: PublicSearchInput): boolean {
