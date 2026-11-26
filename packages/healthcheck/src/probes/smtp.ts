@@ -63,7 +63,7 @@ export function createSmtpProbe({
 		async probe() {
 			if (!transporter) {
 				return {
-					status: "operational",
+					status: "misconfigured",
 					latencyMs: 0,
 					message: "non configuré",
 				};

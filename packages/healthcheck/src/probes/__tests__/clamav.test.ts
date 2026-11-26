@@ -132,14 +132,14 @@ describe("clamav probe", () => {
 		);
 	});
 
-	it("is operational with 'non configuré' when CLAMAV_HOST is absent", async () => {
+	it("is misconfigured with 'non configuré' when CLAMAV_HOST is absent", async () => {
 		const result = await createClamavProbe({
 			connection: null,
 			secrets: [],
 		}).probe(new AbortController().signal);
 
 		expect(result).toEqual({
-			status: "operational",
+			status: "misconfigured",
 			latencyMs: 0,
 			message: "non configuré",
 		});

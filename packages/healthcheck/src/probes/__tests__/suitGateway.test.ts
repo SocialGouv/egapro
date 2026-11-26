@@ -111,13 +111,13 @@ describe("SUIT gateway probe", () => {
 		expect(result.message).not.toContain("10.0.0.9");
 	});
 
-	it("is operational with 'non configuré' without a target", async () => {
+	it("is misconfigured with 'non configuré' without a target", async () => {
 		const result = await probe({ connection: null }).probe(
 			new AbortController().signal,
 		);
 
 		expect(result).toEqual({
-			status: "operational",
+			status: "misconfigured",
 			latencyMs: 0,
 			message: "non configuré",
 		});

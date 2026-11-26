@@ -225,7 +225,7 @@ export function createSuitFilesProbe({
 		async probe() {
 			if (!gateway || !referenceSiren) {
 				return {
-					status: "operational",
+					status: "misconfigured",
 					latencyMs: 0,
 					message: "non configuré",
 				};
@@ -346,7 +346,7 @@ export function createSuitCertificateProbe({
 		async probe() {
 			if (!p12Base64) {
 				return {
-					status: "operational",
+					status: "misconfigured",
 					latencyMs: 0,
 					message: "non configuré",
 				};

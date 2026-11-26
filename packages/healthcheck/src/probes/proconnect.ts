@@ -28,7 +28,7 @@ export function createProconnectProbe({
 		async probe(signal) {
 			if (!issuer) {
 				return {
-					status: "operational",
+					status: "misconfigured",
 					latencyMs: 0,
 					message: "non configuré",
 				};

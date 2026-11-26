@@ -54,7 +54,7 @@ export function createEmailQueueJobProbe({
 		async probe(): Promise<ProbeResult> {
 			if (!sql) {
 				return {
-					status: "operational",
+					status: "misconfigured",
 					latencyMs: 0,
 					message: "non configuré",
 				};

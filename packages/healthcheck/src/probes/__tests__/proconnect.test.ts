@@ -111,11 +111,11 @@ describe("proconnect probe", () => {
 		expect(result.message).not.toContain("10.0.0.4");
 	});
 
-	it("is operational with 'non configuré' without an issuer", async () => {
+	it("is misconfigured with 'non configuré' without an issuer", async () => {
 		const result = await probe(null).probe(new AbortController().signal);
 
 		expect(result).toEqual({
-			status: "operational",
+			status: "misconfigured",
 			latencyMs: 0,
 			message: "non configuré",
 		});

@@ -104,13 +104,13 @@ describe("public API probe", () => {
 		expect(result.message).not.toContain("egapro.internal");
 	});
 
-	it("is operational with 'non configuré' without a public URL", async () => {
+	it("is misconfigured with 'non configuré' without a public URL", async () => {
 		const result = await probe({ publicUrl: null }).probe(
 			new AbortController().signal,
 		);
 
 		expect(result).toEqual({
-			status: "operational",
+			status: "misconfigured",
 			latencyMs: 0,
 			message: "non configuré",
 		});

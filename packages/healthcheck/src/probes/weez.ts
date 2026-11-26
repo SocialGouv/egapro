@@ -33,7 +33,7 @@ export function createWeezProbe({
 		async probe(signal) {
 			if (!connection) {
 				return {
-					status: "operational",
+					status: "misconfigured",
 					latencyMs: 0,
 					message: "non configuré",
 				};

@@ -90,14 +90,14 @@ describe("valkey probe", () => {
 		expect(result.message).toBe("réponse inattendue de Valkey");
 	});
 
-	it("is operational with 'non configuré' without VALKEY_URL", async () => {
+	it("is misconfigured with 'non configuré' without VALKEY_URL", async () => {
 		const result = await createValkeyProbe({
 			url: null,
 			secrets: [],
 		}).probe(new AbortController().signal);
 
 		expect(result).toEqual({
-			status: "operational",
+			status: "misconfigured",
 			latencyMs: 0,
 			message: "non configuré",
 		});

@@ -83,14 +83,14 @@ describe("smtp probe", () => {
 		expect(result.message).not.toContain("s3cr3t-pass");
 	});
 
-	it("is operational with 'non configuré' when mail is disabled", async () => {
+	it("is misconfigured with 'non configuré' when mail is disabled", async () => {
 		const result = await createSmtpProbe({
 			transporter: null,
 			secrets: [],
 		}).probe(new AbortController().signal);
 
 		expect(result).toEqual({
-			status: "operational",
+			status: "misconfigured",
 			latencyMs: 0,
 			message: "non configuré",
 		});

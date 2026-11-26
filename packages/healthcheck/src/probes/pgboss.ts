@@ -45,7 +45,7 @@ export function createPgbossProbe({
 		async probe() {
 			if (!sql || !limits) {
 				return {
-					status: "operational",
+					status: "misconfigured",
 					latencyMs: 0,
 					message: "non configuré",
 				};

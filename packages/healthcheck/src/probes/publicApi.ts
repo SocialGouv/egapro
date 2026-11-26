@@ -30,7 +30,7 @@ export function createPublicApiProbe({
 		async probe(signal) {
 			if (!publicUrl) {
 				return {
-					status: "operational",
+					status: "misconfigured",
 					latencyMs: 0,
 					message: "non configuré",
 				};

@@ -33,7 +33,7 @@ export function createValkeyProbe({
 		async probe() {
 			if (!url) {
 				return {
-					status: "operational",
+					status: "misconfigured",
 					latencyMs: 0,
 					message: "non configuré",
 				};

@@ -112,11 +112,11 @@ describe("pg-boss queue probe", () => {
 		expect(result.status).toBe("misconfigured");
 	});
 
-	it("is operational with 'non configuré' without a queue database", async () => {
+	it("is misconfigured with 'non configuré' without a queue database", async () => {
 		const result = await probe(null).probe(new AbortController().signal);
 
 		expect(result).toEqual({
-			status: "operational",
+			status: "misconfigured",
 			latencyMs: 0,
 			message: "non configuré",
 		});

@@ -104,7 +104,7 @@ describe("weez probe", () => {
 		expect(result.message).not.toContain("weez.internal");
 	});
 
-	it("is operational with 'non configuré' without a target", async () => {
+	it("is misconfigured with 'non configuré' without a target", async () => {
 		const result = await createWeezProbe({
 			connection: null,
 			secrets: [],
@@ -112,7 +112,7 @@ describe("weez probe", () => {
 		}).probe(new AbortController().signal);
 
 		expect(result).toEqual({
-			status: "operational",
+			status: "misconfigured",
 			latencyMs: 0,
 			message: "non configuré",
 		});

@@ -175,7 +175,7 @@ describe("createSuitGipMdsProbe", () => {
 describe("createSuitFilesProbe", () => {
 	const gateway = { baseUrl: "https://api-suit.example.gouv.fr", apiKey: "k" };
 
-	it("stays silent without a gateway or a reference SIREN", async () => {
+	it("is misconfigured without a gateway or a reference SIREN", async () => {
 		const result = await createSuitFilesProbe({
 			gateway: null,
 			referenceSiren: SIREN,
@@ -183,7 +183,7 @@ describe("createSuitFilesProbe", () => {
 		}).probe(new AbortController().signal);
 
 		expect(result).toMatchObject({
-			status: "operational",
+			status: "misconfigured",
 			message: "non configuré",
 		});
 	});
@@ -295,7 +295,7 @@ describe("certificateResult", () => {
 });
 
 describe("createSuitCertificateProbe", () => {
-	it("stays green without a configured bundle", async () => {
+	it("is misconfigured without a configured bundle", async () => {
 		const result = await createSuitCertificateProbe({
 			p12Base64: null,
 			passphrase: null,
@@ -304,7 +304,7 @@ describe("createSuitCertificateProbe", () => {
 		}).probe(new AbortController().signal);
 
 		expect(result).toMatchObject({
-			status: "operational",
+			status: "misconfigured",
 			message: "non configuré",
 		});
 	});
