@@ -372,7 +372,9 @@ test.describe("Campaign deadlines are informational; only the last submission is
 				),
 			).toBeVisible();
 			await expect(
-				page.getByText(/Échéance pour transmettre l'avis ou les avis du CSE/),
+				page.getByText(
+					"Vous pouvez modifier votre dépôt jusqu'à ce que vous transmettiez l'avis ou les avis du CSE.",
+				),
 			).toBeVisible();
 			await expect(
 				page.getByRole("link", {
