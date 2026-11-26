@@ -3,6 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
+import {
+	markDeclarationTransmissionSuccess,
+	markSecondDeclarationTransmissionSuccess,
+} from "~/modules/declaration-remuneration/shared/declarationSuccessFlash";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { SubmitDeclarationModal } from "~/modules/declaration-remuneration/shared/SubmitDeclarationModal";
@@ -14,6 +18,7 @@ import {
 	type DeclarationFsmStatus,
 	hasHighGap,
 	isSecondDeclarationWritable,
+	type LastTransmission,
 } from "~/modules/domain";
 import {
 	getCurrentStageHref,
@@ -22,7 +27,6 @@ import {
 import { COMPLIANCE_PATH, complianceStepHref } from "~/modules/routes";
 import { getDsfrModal, SUBMIT_LABEL } from "~/modules/shared";
 import { api } from "~/trpc/react";
-import { markDeclarationTransmissionSuccess } from "../../shared/declarationSuccessFlash";
 import { GapBadge } from "../../shared/GapValueBadge";
 import stepStyles from "../Step6Review.module.scss";
 import { CardTitle } from "../step6/CardTitle";
@@ -40,6 +44,7 @@ type Props = {
 	status: DeclarationFsmStatus | null;
 	firstDeclarationPathChoice: CompliancePathValue | null;
 	secondDeclarationPathChoice: CompliancePathValue | null;
+	lastTransmission: LastTransmission | null;
 };
 
 export function SecondDeclarationStep3Review({
@@ -52,6 +57,7 @@ export function SecondDeclarationStep3Review({
 	status,
 	firstDeclarationPathChoice,
 	secondDeclarationPathChoice,
+	lastTransmission,
 }: Props) {
 	const router = useRouter();
 	const modalRef = useRef<HTMLDialogElement>(null);
@@ -59,6 +65,7 @@ export function SecondDeclarationStep3Review({
 		status,
 		firstDeclarationPathChoice,
 		secondDeclarationPathChoice,
+		lastTransmission,
 	});
 	const submissionAttemptFingerprintRef = useRef(
 		secondDeclarationSubmissionCount,
@@ -95,6 +102,7 @@ export function SecondDeclarationStep3Review({
 			markDeclarationTransmissionSuccess();
 			router.push(COMPLIANCE_PATH);
 		} else {
+			if (cseOpinionRequired) markSecondDeclarationTransmissionSuccess();
 			router.push(getPostComplianceDestination(cseOpinionRequired));
 		}
 	}, [
@@ -162,7 +170,9 @@ export function SecondDeclarationStep3Review({
 				d&apos;emplois aux services du ministre chargé du travail.
 			</p>
 
-			<h2 className="fr-h5 fr-mb-0">Indicateur par catégorie d&apos;emplois</h2>
+			<h2 className="fr-h5 fr-mb-0">
+				Indicateurs par catégorie d&apos;emplois
+			</h2>
 
 			<div className={stepStyles.card}>
 				<CardTitle tooltipId="tooltip-second-decl-categories">

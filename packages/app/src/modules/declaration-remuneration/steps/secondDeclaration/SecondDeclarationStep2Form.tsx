@@ -13,6 +13,7 @@ import {
 	type DeclarationFsmStatus,
 	getReferenceYearFor,
 	isSecondDeclarationWritable,
+	type LastTransmission,
 } from "~/modules/domain";
 import { complianceStepHref } from "~/modules/routes";
 import { api } from "~/trpc/react";
@@ -32,6 +33,7 @@ type Props = {
 	status: DeclarationFsmStatus | null;
 	firstDeclarationPathChoice: CompliancePathValue | null;
 	secondDeclarationPathChoice: CompliancePathValue | null;
+	lastTransmission: LastTransmission | null;
 };
 
 export function SecondDeclarationStep2Form({
@@ -46,6 +48,7 @@ export function SecondDeclarationStep2Form({
 	status,
 	firstDeclarationPathChoice,
 	secondDeclarationPathChoice,
+	lastTransmission,
 }: Props) {
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
@@ -54,6 +57,7 @@ export function SecondDeclarationStep2Form({
 		status,
 		firstDeclarationPathChoice,
 		secondDeclarationPathChoice,
+		lastTransmission,
 	});
 	const isFormDisabled = isImpersonating || !isWritable;
 	const [startDate, setStartDate] = useState(initialStartDate);

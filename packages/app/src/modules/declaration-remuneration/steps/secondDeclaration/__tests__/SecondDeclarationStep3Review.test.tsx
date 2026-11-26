@@ -11,6 +11,9 @@ const mockRefresh = vi.fn();
 const mockReset = vi.fn();
 const mockConceal = vi.fn();
 const mockSetDraftData = vi.fn();
+const { mockMarkSecondDeclarationTransmissionSuccess } = vi.hoisted(() => ({
+	mockMarkSecondDeclarationTransmissionSuccess: vi.fn(),
+}));
 type MockSubmissionError = {
 	message: string;
 	data?: { code: string };
@@ -31,6 +34,17 @@ vi.mock("~/modules/shared", async (importOriginal) => ({
 	...(await importOriginal<typeof import("~/modules/shared")>()),
 	getDsfrModal: () => ({ disclose: vi.fn(), conceal: mockConceal }),
 }));
+
+vi.mock(
+	"~/modules/declaration-remuneration/shared/declarationSuccessFlash",
+	async (importOriginal) => ({
+		...(await importOriginal<
+			typeof import("~/modules/declaration-remuneration/shared/declarationSuccessFlash")
+		>()),
+		markSecondDeclarationTransmissionSuccess:
+			mockMarkSecondDeclarationTransmissionSuccess,
+	}),
+);
 
 vi.mock("~/trpc/react", () => ({
 	api: {
@@ -141,6 +155,7 @@ function step3Review(
 			cseOpinionRequired={false}
 			declarationYear={2025}
 			firstDeclarationPathChoice="corrective_action"
+			lastTransmission={null}
 			secondDeclarationCategories={mockCategories}
 			secondDeclarationPathChoice={null}
 			secondDeclarationSubmissionCount={INITIAL_SUBMISSION_COUNT}
@@ -179,6 +194,7 @@ describe("SecondDeclarationStep3Review", () => {
 		mockReset.mockClear();
 		mockConceal.mockClear();
 		mockSetDraftData.mockClear();
+		mockMarkSecondDeclarationTransmissionSuccess.mockClear();
 		mockMutationState.error = null;
 		mockMutationState.isPending = false;
 		mockMutationState.networkMode = undefined;
@@ -338,6 +354,7 @@ describe("SecondDeclarationStep3Review", () => {
 		expect(mockConceal.mock.invocationCallOrder[0]).toBeLessThan(
 			mockPush.mock.invocationCallOrder[0] ?? 0,
 		);
+		expect(mockMarkSecondDeclarationTransmissionSuccess).not.toHaveBeenCalled();
 	});
 
 	it("shows a submission error inside the confirmation modal", () => {
@@ -577,6 +594,10 @@ describe("SecondDeclarationStep3Review", () => {
 
 		expect(mockMutate).toHaveBeenCalledTimes(1);
 		expect(mockPush).toHaveBeenCalledWith("/avis-cse");
+		// The /avis-cse banner is one-shot: only a fresh flash may reveal it.
+		expect(mockMarkSecondDeclarationTransmissionSuccess).toHaveBeenCalledTimes(
+			1,
+		);
 	});
 
 	it("navigates to confirmation when no gaps remain and no CSE opinion is due", async () => {
@@ -591,6 +612,7 @@ describe("SecondDeclarationStep3Review", () => {
 		expect(mockPush).toHaveBeenCalledWith(
 			"/declaration-remuneration/parcours-conformite/confirmation",
 		);
+		expect(mockMarkSecondDeclarationTransmissionSuccess).not.toHaveBeenCalled();
 	});
 
 	it("renders empty state when no categories", () => {
@@ -734,6 +756,36 @@ describe("SecondDeclarationStep3Review", () => {
 		).toBeInTheDocument();
 	});
 
+	it("reopens the transmission when the second declaration is the last transmission of a closed démarche (#5167)", () => {
+		renderStep3({
+			lastTransmission: "second_declaration",
+			status: "demarche_completed",
+		});
+
+		expect(
+			screen.getByRole("button", { name: /transmettre/i }),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole("link", { name: /suivant/i }),
+		).not.toBeInTheDocument();
+		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
+			"href",
+			"/declaration-remuneration/parcours-conformite/etape/2",
+		);
+	});
+
+	it("keeps the funnel read-only when another step closed the démarche (#5167)", () => {
+		renderStep3({
+			lastTransmission: "joint_evaluation",
+			status: "demarche_completed",
+		});
+
+		expect(
+			screen.queryByRole("button", { name: /transmettre/i }),
+		).not.toBeInTheDocument();
+		expect(screen.getByRole("link", { name: /suivant/i })).toBeInTheDocument();
+	});
+
 	describe("CSE consultation section gating (issue #3945)", () => {
 		it("hides the CSE consultation section but keeps gap actions and the CSE update button when cseOpinionRequired is false", () => {
 			renderStep3({
@@ -833,7 +885,7 @@ describe("SecondDeclarationStep3Review", () => {
 			expect(screen.queryByText(/vous pouvez :/)).not.toBeInTheDocument();
 		});
 
-		it("shows a single help link and no gap section when no gap reaches the threshold", () => {
+		it("hides the help section entirely and keeps the CSE reminder when no gap reaches the threshold (#5122)", () => {
 			renderStep3({
 				cseOpinionRequired: true,
 				secondDeclarationCategories: noGapCategories,
@@ -845,18 +897,25 @@ describe("SecondDeclarationStep3Review", () => {
 			).not.toBeInTheDocument();
 
 			expect(
-				screen.getByRole("heading", { level: 2, name: "Pour vous aider" }),
-			).toBeInTheDocument();
+				screen.queryByRole("heading", { name: "Pour vous aider" }),
+			).not.toBeInTheDocument();
 			expect(
-				screen.getByRole("link", {
+				screen.queryByRole("link", {
 					name: /critères objectifs et non fondés sur le sexe/,
 				}),
-			).toBeInTheDocument();
+			).not.toBeInTheDocument();
 			expect(
 				screen.queryByRole("link", {
 					name: /évaluation conjointe des rémunérations/,
 				}),
 			).not.toBeInTheDocument();
+
+			expect(
+				screen.getByRole("heading", {
+					level: 2,
+					name: "Rappel : Informer et consulter le CSE",
+				}),
+			).toBeInTheDocument();
 		});
 
 		it("adds the joint evaluation help link only when a gap reaches the threshold", () => {
@@ -874,6 +933,45 @@ describe("SecondDeclarationStep3Review", () => {
 
 			expect(
 				screen.queryByText(/actions correctives et seconde déclaration/),
+			).not.toBeInTheDocument();
+		});
+	});
+
+	describe("no empty next steps card when nothing applies (issue #5122)", () => {
+		it("renders nothing when there is no CSE and no remaining gap", () => {
+			renderStep3({
+				cseApplicable: false,
+				cseOpinionRequired: false,
+				secondDeclarationCategories: noGapCategories,
+			});
+
+			expect(
+				screen.queryByRole("heading", { name: "Prochaines étapes" }),
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByRole("heading", { name: "Pour vous aider" }),
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByRole("button", {
+					name: "Mettre à jour l'existence d'un CSE",
+				}),
+			).not.toBeInTheDocument();
+		});
+
+		it("still shows the CSE update trigger when applicable, with no help section, once gaps are gone", () => {
+			renderStep3({
+				cseApplicable: true,
+				cseOpinionRequired: false,
+				secondDeclarationCategories: noGapCategories,
+			});
+
+			expect(
+				screen.getByRole("button", {
+					name: "Mettre à jour l'existence d'un CSE",
+				}),
+			).toBeInTheDocument();
+			expect(
+				screen.queryByRole("heading", { name: "Pour vous aider" }),
 			).not.toBeInTheDocument();
 		});
 	});

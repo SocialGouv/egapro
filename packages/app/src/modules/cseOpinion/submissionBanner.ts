@@ -4,6 +4,7 @@ import {
 	getCurrentCompliancePath,
 	isJointEvaluationWritable,
 	isSecondDeclarationWritable,
+	type LastTransmission,
 } from "~/modules/domain";
 
 export type SubmissionBannerVariant = "joint_evaluation" | "second_declaration";
@@ -18,11 +19,15 @@ export function getSubmissionBannerState(declaration: {
 	firstDeclarationPathChoice: CompliancePathValue | null;
 	secondDeclarationPathChoice: CompliancePathValue | null;
 	hasSubmittedSecondDeclaration: boolean;
+	lastTransmission: LastTransmission | null;
 }): SubmissionBannerState {
 	if (getCurrentCompliancePath(declaration) === "joint_evaluation") {
 		return {
 			variant: "joint_evaluation",
-			depositModifiable: isJointEvaluationWritable(declaration.status),
+			depositModifiable: isJointEvaluationWritable(
+				declaration.status,
+				declaration.lastTransmission,
+			),
 		};
 	}
 	if (declaration.hasSubmittedSecondDeclaration) {

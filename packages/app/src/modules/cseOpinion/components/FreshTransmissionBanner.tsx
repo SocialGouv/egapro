@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import {
 	consumeDeclarationTransmissionSuccess,
 	consumeJointEvaluationTransmissionSuccess,
+	consumeSecondDeclarationTransmissionSuccess,
 } from "~/modules/declaration-remuneration/shared/declarationSuccessFlash";
 import { DeclarationSuccessBanner } from "~/modules/declaration-remuneration/steps/compliancePath/DeclarationSuccessBanner";
 import { API_DECLARATION_PDF } from "~/modules/routes";
@@ -18,6 +19,7 @@ export function useFreshTransmission(
 	const [fresh, setFresh] = useState({
 		declaration: false,
 		jointEvaluation: false,
+		secondDeclaration: false,
 	});
 
 	useEffect(() => {
@@ -26,13 +28,17 @@ export function useFreshTransmission(
 		setFresh({
 			declaration: consumeDeclarationTransmissionSuccess(),
 			jointEvaluation: consumeJointEvaluationTransmissionSuccess(),
+			secondDeclaration: consumeSecondDeclarationTransmissionSuccess(),
 		});
 	}, []);
 
-	if (
-		banner &&
-		(banner.variant !== "joint_evaluation" || fresh.jointEvaluation)
-	) {
+	const freshForVariant =
+		banner?.variant === "joint_evaluation"
+			? fresh.jointEvaluation
+			: banner?.variant === "second_declaration"
+				? fresh.secondDeclaration
+				: false;
+	if (banner && freshForVariant) {
 		return "compliance_path";
 	}
 	return fresh.declaration ? "declaration" : null;

@@ -36,12 +36,12 @@ export function CampaignProgressionTable({ series }: Props) {
 			<summary className="fr-text--sm">
 				Consulter les données du graphique sous forme de tableau
 			</summary>
-			<div className="fr-table fr-table--bordered fr-mt-2w">
+			<div className="fr-table fr-table--bordered fr-table--no-caption fr-mt-2w">
 				<div className="fr-table__wrapper">
 					<div className="fr-table__container">
 						<div className="fr-table__content">
 							<table>
-								<caption className="fr-sr-only">
+								<caption>
 									Déclarations cumulées par jour calendaire et par année.
 								</caption>
 								<thead>

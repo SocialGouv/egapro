@@ -44,6 +44,7 @@ const company: CompanyDetail = {
 	departmentLabel: null,
 	gipWorkforce: null,
 	hasCse: null,
+	identityUnavailable: false,
 };
 
 const currentYear = getCurrentYear();
@@ -65,6 +66,7 @@ function makeDeclaration(
 		secondDeclarationPathChoice: null,
 		hasSubmittedSecondDeclaration: false,
 		secondDeclarationStep: null,
+		lastTransmission: null,
 		hasSubmittedJointEvaluation: false,
 		hasSubmittedCseOpinion: false,
 		cseRequired: false,

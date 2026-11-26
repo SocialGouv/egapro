@@ -3,6 +3,7 @@ import type {
 	CampaignDeadlines,
 	DeclarationDisplayContext,
 	DeclarationFsmStatus,
+	LastTransmission,
 } from "~/modules/domain";
 import {
 	getCurrentCompliancePath,
@@ -46,6 +47,7 @@ const SECOND_DECLARATION_MENTION =
 	"Modifiable jusqu'au choix de votre nouveau parcours";
 const SECOND_DECLARATION_CSE_MENTION =
 	"Modifiable jusqu'à la transmission des avis du CSE";
+const CLOSED_MENTION = "Modifiable jusqu'à la nouvelle campagne";
 
 const PATH_CHOICE_LABEL = "Choix du parcours de mise en conformité";
 
@@ -142,6 +144,7 @@ export function Step2Content({
 	campaignDeadlines,
 	declarationFsmStatus,
 	displayContext,
+	lastTransmission,
 	pathChoiceModifiable,
 	secondDeclarationSubmitted,
 	jointEvaluationSubmitted,
@@ -152,6 +155,7 @@ export function Step2Content({
 	campaignDeadlines: CampaignDeadlines;
 	declarationFsmStatus: DeclarationFsmStatus | null;
 	displayContext: DeclarationDisplayContext;
+	lastTransmission: LastTransmission | null;
 	pathChoiceModifiable: boolean;
 	secondDeclarationSubmitted: boolean;
 	jointEvaluationSubmitted: boolean;
@@ -174,6 +178,7 @@ export function Step2Content({
 		status: declarationFsmStatus,
 		firstDeclarationPathChoice: displayContext.firstDeclarationPathChoice,
 		secondDeclarationPathChoice: displayContext.secondDeclarationPathChoice,
+		lastTransmission,
 	})
 		? { href: complianceStepHref(1) }
 		: undefined;
@@ -182,12 +187,16 @@ export function Step2Content({
 			? SECOND_DECLARATION_CSE_MENTION
 			: SECOND_DECLARATION_MENTION;
 	const secondDeclarationMention = secondDeclarationModification
-		? secondDeclarationWritableMention
+		? variant === "closed"
+			? CLOSED_MENTION
+			: secondDeclarationWritableMention
 		: undefined;
 	const pathChoiceRow = pathChoiceModifiable ? (
 		<TransmittedRow
 			label="Votre choix de parcours a été transmis"
-			mention={NEXT_TRANSMISSION_MENTION}
+			mention={
+				variant === "closed" ? CLOSED_MENTION : NEXT_TRANSMISSION_MENTION
+			}
 			modification={{ href: COMPLIANCE_PATH }}
 		/>
 	) : null;
@@ -271,8 +280,10 @@ export function Step2Content({
 		);
 	}
 
-	const jointEvaluationWritable =
-		isJointEvaluationWritable(declarationFsmStatus);
+	const jointEvaluationWritable = isJointEvaluationWritable(
+		declarationFsmStatus,
+		lastTransmission,
+	);
 
 	return (
 		<div className={styles.stepContent}>
@@ -289,6 +300,11 @@ export function Step2Content({
 			{displayContext.shouldShowJointEvaluation && (
 				<TransmittedRow
 					label="Votre rapport de l'évaluation conjointe a été transmis"
+					mention={
+						jointEvaluationWritable && variant === "closed"
+							? CLOSED_MENTION
+							: undefined
+					}
 					modification={
 						jointEvaluationWritable
 							? { href: COMPLIANCE_JOINT_EVALUATION }
