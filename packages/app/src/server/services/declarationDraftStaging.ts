@@ -11,7 +11,7 @@ import {
 	STAGED_SECOND_DECLARATION_STEP,
 	type StagedJointUpload,
 	type StagedSecondDeclaration,
-} from "~/modules/declaration-remuneration";
+} from "~/modules/declaration-remuneration/shared/draft/staged";
 import { DRAFT_EXPIRY_DAYS } from "~/modules/domain";
 import type { DB } from "~/server/db";
 import { declarations, files } from "~/server/db/schema";
