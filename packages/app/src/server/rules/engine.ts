@@ -1,5 +1,10 @@
 import type { DeclarationFsmStatus } from "~/modules/domain";
-import { type RuleEvent, type Rules, RulesSchema } from "./schema";
+import {
+	type ChoiceRevision,
+	type RuleEvent,
+	type Rules,
+	RulesSchema,
+} from "./schema";
 import rawV20271 from "./v2027.1.json";
 
 export type { RuleEvent, Rules };
@@ -256,17 +261,16 @@ function readCurrentState(facts: Facts): string | undefined {
 		: undefined;
 }
 
-function resolveChoiceRevision(
+function findChoiceRevision(
 	facts: Facts,
 	action: string,
 	rules: Rules,
 	computations: Record<string, ComputationNode>,
-): string | undefined {
-	const storedState = readCurrentState(facts);
-	const revision = (rules.choiceRevisions ?? []).find(
+): ChoiceRevision | undefined {
+	return (rules.choiceRevisions ?? []).find(
 		(candidate) =>
 			candidate.action === action &&
-			candidate.from.some((from) => from === storedState) &&
+			candidate.from.some((from) => from === readCurrentState(facts)) &&
 			(!candidate.guard ||
 				evaluatePredicate(
 					candidate.guard,
@@ -275,7 +279,19 @@ function resolveChoiceRevision(
 					rules.thresholds,
 				)),
 	);
-	return revision?.reopens ?? storedState;
+}
+
+function resolveChoiceRevision(
+	facts: Facts,
+	action: string,
+	rules: Rules,
+	computations: Record<string, ComputationNode>,
+): string | undefined {
+	const storedState = readCurrentState(facts);
+	return (
+		findChoiceRevision(facts, action, rules, computations)?.reopens ??
+		storedState
+	);
 }
 
 function findMatchingTransition(
@@ -316,7 +332,15 @@ export function applyAction(
 	if (!transition) {
 		throw new NoMatchingTransitionError(readCurrentState(facts), action, facts);
 	}
-	return { nextStatus: transition.to, events: transition.events };
+	const computations = (rules.computations ?? {}) as Record<
+		string,
+		ComputationNode
+	>;
+	const revision = findChoiceRevision(facts, action, rules, computations);
+	return {
+		nextStatus: transition.to,
+		events: [...(revision?.events ?? []), ...transition.events],
+	};
 }
 
 export function canApplyAction(

@@ -820,7 +820,10 @@ describe("re-transmitting the last deposit of a closed démarche (#5128)", () =>
 
 			expect(result).toEqual({
 				nextStatus: "awaiting_revision_choice",
-				events: [{ type: "second_declaration_submit", round: 2 }],
+				events: [
+					{ type: "demarche_reopened" },
+					{ type: "second_declaration_submit", round: 2 },
+				],
 			});
 		});
 
@@ -867,7 +870,10 @@ describe("re-transmitting the last deposit of a closed démarche (#5128)", () =>
 
 			expect(result).toEqual({
 				nextStatus: "joint_evaluation_chosen",
-				events: [{ type: "path_choice", value: "joint_evaluation", round: 1 }],
+				events: [
+					{ type: "demarche_reopened" },
+					{ type: "path_choice", value: "joint_evaluation", round: 1 },
+				],
 			});
 		});
 
@@ -883,7 +889,10 @@ describe("re-transmitting the last deposit of a closed démarche (#5128)", () =>
 
 			expect(result).toEqual({
 				nextStatus: "revised_joint_evaluation_chosen",
-				events: [{ type: "path_choice", value: "joint_evaluation", round: 2 }],
+				events: [
+					{ type: "demarche_reopened" },
+					{ type: "path_choice", value: "joint_evaluation", round: 2 },
+				],
 			});
 		});
 

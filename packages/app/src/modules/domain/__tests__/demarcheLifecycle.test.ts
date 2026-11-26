@@ -133,6 +133,7 @@ describe("isTransmissionEventType", () => {
 	it.each([
 		"step_change",
 		"demarche_complete",
+		"demarche_reopened",
 		"cancel",
 		"unknown",
 	])("does not count %s as a transmission", (eventType) => {
@@ -142,17 +143,22 @@ describe("isTransmissionEventType", () => {
 
 // A new event type emitted by the engine must be classified here, or this fails.
 describe("transmission events — conformance with the rule engine", () => {
-	const emittedTypes = new Set(
-		loadRules("2027.1").transitions.flatMap((transition) =>
+	const emittedTypes = new Set([
+		...loadRules("2027.1").transitions.flatMap((transition) =>
 			transition.events.map((event) => event.type),
 		),
-	);
+		...(loadRules("2027.1").choiceRevisions ?? []).flatMap((revision) =>
+			(revision.events ?? []).map((event) => event.type),
+		),
+	]);
 
 	it.each([
 		...emittedTypes,
 	])("classifies the emitted %s event as a transmission or as the completion", (eventType) => {
 		expect(
-			isTransmissionEventType(eventType) || eventType === "demarche_complete",
+			isTransmissionEventType(eventType) ||
+				eventType === "demarche_complete" ||
+				eventType === "demarche_reopened",
 		).toBe(true);
 	});
 

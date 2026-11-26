@@ -168,9 +168,9 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 	},
 	declaration_status_history: {
 		declaration_id:
-			"Référence vers la déclaration concernée. Append-only — chaque event capture une transition métier (submit / path_choice / *_submit / cse_opinion_submit / cancel / demarche_complete).",
+			"Référence vers la déclaration concernée. Append-only — chaque event capture une transition métier (submit / path_choice / *_submit / cse_opinion_submit / cancel / demarche_complete / demarche_reopened).",
 		event_type:
-			"Type d'event métier. Source de vérité de la trajectoire FSM (la colonne app_declaration.status est une projection dérivée du dernier event). Inclut step_change pour les transitions du stepper Indicateurs A–F (alimente le KPI K4). Inclut formal_notice_joint_evaluation_submit pour la transmission du rapport d'évaluation conjointe suite à mise en demeure (démarche déjà close, état inchangé).",
+			"Type d'event métier. Source de vérité de la trajectoire FSM (la colonne app_declaration.status est une projection dérivée du dernier event). Inclut step_change pour les transitions du stepper Indicateurs A–F (alimente le KPI K4). Inclut formal_notice_joint_evaluation_submit pour la transmission du rapport d'évaluation conjointe suite à mise en demeure (démarche déjà close, état inchangé). Inclut demarche_reopened quand une démarche close sort de demarche_completed par un nouveau dépôt : les statuts et KPI de complétion lisent le dernier événement de cycle de vie (complete / reopened).",
 		value:
 			"Charge utile facultative selon le type d'event. Pour path_choice: 'justify' | 'corrective_action' | 'joint_evaluation'. Pour step_change: 'from:N|to:M' (N peut être 'null' à la création).",
 		round:

@@ -41,6 +41,8 @@ export const EVENT_TYPE_MEANINGS: Record<DeclarationEventType, string> = {
 	cancel: "Annulation de la déclaration.",
 	demarche_complete:
 		"Fin de la démarche. Ne pas confondre avec l'état `demarche_completed` de `Parcours.Statut`, qui ne diffère que d'une lettre.",
+	demarche_reopened:
+		"Réouverture de la démarche : un dépôt ultérieur l'a fait sortir de l'état `demarche_completed`.",
 	formal_notice_joint_evaluation_submit:
 		"Dépôt du rapport d'évaluation conjointe suite à mise en demeure de la DREETS, après la fin de la démarche. `Parcours.Statut` reste `demarche_completed`.",
 };

@@ -4,6 +4,7 @@ import { and, eq, gte, inArray, lt, or, sql } from "drizzle-orm";
 import type { DB } from "~/server/db";
 import { db } from "~/server/db";
 import {
+	currentDemarcheCompletedAt,
 	notCancelledCondition,
 	submittedDeclarationCondition,
 } from "~/server/db/declarationConditions";
@@ -88,7 +89,7 @@ export const statusHistoryProjection = {
 	secondDeclarationSubmittedAt: latestEventAt("second_declaration_submit"),
 	jointEvaluationSubmittedAt: latestEventAt("joint_evaluation_submit"),
 	cseOpinionCompletedAt: latestEventAt("cse_opinion_submit"),
-	demarcheCompletedAt: latestEventAt("demarche_complete"),
+	demarcheCompletedAt: currentDemarcheCompletedAt(),
 	statusHistoryArray: statusHistoryArray(),
 };
 

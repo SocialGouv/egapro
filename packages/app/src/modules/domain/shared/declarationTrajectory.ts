@@ -6,6 +6,7 @@ export type DeclarationEventType =
 	| "cse_opinion_submit"
 	| "cancel"
 	| "demarche_complete"
+	| "demarche_reopened"
 	| "formal_notice_joint_evaluation_submit";
 
 export type DeclarationStatusEvent = {
@@ -118,10 +119,32 @@ export function getCseOpinionCompletedAt(
 	return getEventTimestamp(events, (e) => e.eventType === "cse_opinion_submit");
 }
 
+// A démarche re-opened after its last completion is not "completed" any more:
+// the admin funnels and the "terminée le" dates must stop counting it. Read the
+// last of the two lifecycle events, a completion winning a timestamp tie (the
+// same transaction can re-open and complete again when the new path ends the
+// démarche).
 export function getDemarcheCompletedAt(
-	events: ReadonlyArray<DeclarationStatusEvent>,
+	events: ReadonlyArray<{ eventType: string; createdAt: Date }>,
 ): Date | null {
-	return getEventTimestamp(events, (e) => e.eventType === "demarche_complete");
+	let latest: { eventType: string; createdAt: Date } | null = null;
+	for (const event of events) {
+		if (
+			event.eventType !== "demarche_complete" &&
+			event.eventType !== "demarche_reopened"
+		) {
+			continue;
+		}
+		if (
+			latest === null ||
+			event.createdAt > latest.createdAt ||
+			(event.createdAt.getTime() === latest.createdAt.getTime() &&
+				event.eventType === "demarche_complete")
+		) {
+			latest = event;
+		}
+	}
+	return latest?.eventType === "demarche_complete" ? latest.createdAt : null;
 }
 
 export function getPathChoiceAt(

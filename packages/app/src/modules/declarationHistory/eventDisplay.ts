@@ -97,6 +97,12 @@ export function getHistoryEventDisplay(event: HistoryEvent) {
 				pageLabel: "Démarche finalisée",
 				pageHref: DECLARATION_REMUNERATION_RECAP,
 			};
+		case "demarche_reopened":
+			return {
+				label: "Démarche rouverte",
+				pageLabel: "Parcours de mise en conformité",
+				pageHref: COMPLIANCE_PATH,
+			};
 		default: {
 			const _exhaustive: never = event.eventType;
 			throw new Error(`Unknown event type: ${String(_exhaustive)}`);

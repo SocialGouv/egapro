@@ -43,6 +43,7 @@ import {
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
 import {
 	complianceProcessCompletedCondition,
+	currentDemarcheCompletedAt,
 	notCancelledCondition,
 	submittedDeclarationCondition,
 } from "~/server/db/declarationConditions";
@@ -903,7 +904,7 @@ export const adminStatsRouter = createTRPCRouter({
 					${countDeclarationsWithEvent({ eventType: "step_change", round: 0, alias: "draft_started" })},
 					${countDeclarationsWithEvent({ eventType: "step_change", round: 5, alias: "indicators_filled" })},
 					${countDeclarationsWithEvent({ eventType: "step_change", round: 6, alias: "submitted" })},
-					${countDeclarationsWithEvent({ eventType: "demarche_complete", alias: "demarche_completed" })}
+					${countCompletedDeclarations("demarche_completed")}
 				FROM base
 			`);
 
@@ -931,7 +932,7 @@ export const adminStatsRouter = createTRPCRouter({
 					COUNT(DISTINCT base.declaration_id)::int AS submitted_with_alert,
 					${countDeclarationsWithEvent({ eventType: "path_choice", alias: "path_chosen" })},
 					${countDeclarationsWithEvent({ eventType: ["second_declaration_submit", "joint_evaluation_submit"], alias: "corrective_action_submitted" })},
-					${countDeclarationsWithEvent({ eventType: "demarche_complete", alias: "demarche_completed" })}
+					${countCompletedDeclarations("demarche_completed")}
 				FROM base
 			`);
 
@@ -971,7 +972,7 @@ export const adminStatsRouter = createTRPCRouter({
 					COUNT(DISTINCT base.declaration_id)::int AS revision_required,
 					${countDeclarationsWithEvent({ eventType: "path_choice", round: 2, alias: "revision_path_chosen" })},
 					${countDeclarationsWithEvent({ eventType: "joint_evaluation_submit", round: 2, alias: "revision_action_submitted" })},
-					${countDeclarationsWithEvent({ eventType: "demarche_complete", alias: "demarche_completed" })}
+					${countCompletedDeclarations("demarche_completed")}
 				FROM base
 			`);
 
@@ -999,7 +1000,7 @@ export const adminStatsRouter = createTRPCRouter({
 					${countDeclarationsWithEvent({ eventType: "step_change", round: 5, alias: "indicators_filled" })},
 					${countDeclarationsWithEvent({ eventType: "step_change", round: 6, alias: "submitted" })},
 					${countDeclarationsWithEvent({ eventType: "cse_opinion_submit", alias: "cse_opinion_submitted" })},
-					${countDeclarationsWithEvent({ eventType: "demarche_complete", alias: "demarche_completed" })}
+					${countCompletedDeclarations("demarche_completed")}
 				FROM base
 			`);
 
@@ -1146,6 +1147,17 @@ function countDeclarationsWithEvent(opts: {
 				AND ${eventClause}${roundClause}
 		)
 	)::int AS ${sql.raw(opts.alias)}`;
+}
+
+/**
+ * Counts the démarches that are currently completed: a `demarche_complete`
+ * event that no later `demarche_reopened` superseded. Shared with the
+ * `demarcheCompletedAt` date so the funnel and the date agree.
+ */
+function countCompletedDeclarations(alias: string): SQL {
+	return sql`COUNT(DISTINCT base.declaration_id) FILTER (
+		WHERE ${currentDemarcheCompletedAt(sql`base.declaration_id`)} IS NOT NULL
+	)::int AS ${sql.raw(alias)}`;
 }
 
 type FunnelStepDef = Readonly<{ key: string; label: string }>;

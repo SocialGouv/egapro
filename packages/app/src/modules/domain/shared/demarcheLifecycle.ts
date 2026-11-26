@@ -13,7 +13,8 @@ export const DEMARCHE_LIFECYCLE_STATUSES = [
 export type DemarcheLifecycleStatus =
 	(typeof DEMARCHE_LIFECYCLE_STATUSES)[number];
 
-// `demarche_complete` is a system consequence and `cancel` an admin action: neither is something the company transmitted.
+// `demarche_complete` and `demarche_reopened` are system consequences and
+// `cancel` an admin action: none is something the company transmitted.
 export const TRANSMISSION_EVENT_TYPES = [
 	"submit",
 	"path_choice",
