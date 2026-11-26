@@ -86,11 +86,23 @@ const CORRECTION_CATEGORIES_INPUT = {
 	referencePeriodEnd: "2025-12-31",
 };
 
-const SECOND_DECLARATION_SUBMITTED: SubmissionHistoryEvent[] = [
+type HistoryRow = SubmissionHistoryEvent & { createdAt: Date };
+
+// The trajectory projections read `createdAt`; a stable, increasing stamp keeps
+// the "latest event wins" derivation deterministic in these fixtures.
+function historyRows(events: SubmissionHistoryEvent[]): HistoryRow[] {
+	const base = Date.parse("2027-01-01T00:00:00Z");
+	return events.map((event, index) => ({
+		...event,
+		createdAt: new Date(base + index * 60_000),
+	}));
+}
+
+const SECOND_DECLARATION_SUBMITTED: HistoryRow[] = historyRows([
 	{ eventType: "submit", round: null },
 	{ eventType: "path_choice", round: 1 },
 	{ eventType: "second_declaration_submit", round: null },
-];
+]);
 
 function allDeadlines(at: Date): CampaignDeadlines {
 	return {
@@ -152,7 +164,7 @@ function createStepDb() {
 
 function createCategoriesDb(options: {
 	status: string;
-	historyEvents: SubmissionHistoryEvent[];
+	historyEvents: HistoryRow[];
 }) {
 	const declaration = { id: "decl-1", status: options.status, currentStep: 4 };
 	const existingJobs = [{ id: "job-1", categoryIndex: 0, name: "Cadres" }];
@@ -202,7 +214,7 @@ function createCategoriesDb(options: {
 	};
 }
 
-async function stepCaller(historyEvents: SubmissionHistoryEvent[] = []) {
+async function stepCaller(historyEvents: HistoryRow[] = []) {
 	const ctx = createStepDb();
 	const caller = await createCaller(
 		withLockMiddleware(ctx.db, { subsequentEvents: historyEvents }),
@@ -212,7 +224,7 @@ async function stepCaller(historyEvents: SubmissionHistoryEvent[] = []) {
 
 async function categoriesCaller(options: {
 	status: string;
-	historyEvents: SubmissionHistoryEvent[];
+	historyEvents: HistoryRow[];
 }) {
 	const ctx = createCategoriesDb(options);
 	const caller = await createCaller(withLockMiddleware(ctx.db));
@@ -236,9 +248,9 @@ describe("declarationModifiableWriteProcedure — only the latest submission is 
 	});
 
 	it("lets a submitted first declaration with nothing downstream be modified, every deadline being past", async () => {
-		const { caller, set } = await stepCaller([
-			{ eventType: "submit", round: null },
-		]);
+		const { caller, set } = await stepCaller(
+			historyRows([{ eventType: "submit", round: null }]),
+		);
 
 		await expect(caller.updateStep1(STEP1_INPUT)).resolves.toEqual({
 			success: true,
@@ -249,10 +261,10 @@ describe("declarationModifiableWriteProcedure — only the latest submission is 
 	it("saves step 2 of the second declaration in corrective_actions_chosen, every deadline being past", async () => {
 		const { caller, set } = await categoriesCaller({
 			status: "corrective_actions_chosen",
-			historyEvents: [
+			historyEvents: historyRows([
 				{ eventType: "submit", round: null },
 				{ eventType: "path_choice", round: 1 },
-			],
+			]),
 		});
 
 		await expect(
@@ -313,10 +325,9 @@ describe("declarationModifiableWriteProcedure — only the latest submission is 
 		{ eventType: "joint_evaluation_submit", round: 1 },
 		{ eventType: "cse_opinion_submit", round: null },
 	])("rejects updateStep1 once a $eventType exists", async (event) => {
-		const { caller, transaction } = await stepCaller([
-			{ eventType: "submit", round: null },
-			event,
-		]);
+		const { caller, transaction } = await stepCaller(
+			historyRows([{ eventType: "submit", round: null }, event]),
+		);
 
 		await expect(caller.updateStep1(STEP1_INPUT)).rejects.toMatchObject(
 			SUPERSEDED,
@@ -325,11 +336,13 @@ describe("declarationModifiableWriteProcedure — only the latest submission is 
 	});
 
 	it("lets a first declaration closed without any downstream submission (demarche_completed) be modified", async () => {
-		const { caller, set } = await stepCaller([
-			{ eventType: "submit", round: null },
-			{ eventType: "path_choice", round: 1 },
-			{ eventType: "demarche_complete", round: null },
-		]);
+		const { caller, set } = await stepCaller(
+			historyRows([
+				{ eventType: "submit", round: null },
+				{ eventType: "path_choice", round: 1 },
+				{ eventType: "demarche_complete", round: null },
+			]),
+		);
 
 		await expect(caller.updateStep1(STEP1_INPUT)).resolves.toEqual({
 			success: true,
@@ -362,10 +375,10 @@ describe("declarationModifiableWriteProcedure — only the latest submission is 
 	it("rebuilds the categories on an initial write in corrective_actions_chosen, before any second declaration is submitted", async () => {
 		const { caller, insert, set } = await categoriesCaller({
 			status: "corrective_actions_chosen",
-			historyEvents: [
+			historyEvents: historyRows([
 				{ eventType: "submit", round: null },
 				{ eventType: "path_choice", round: 1 },
-			],
+			]),
 		});
 
 		await expect(

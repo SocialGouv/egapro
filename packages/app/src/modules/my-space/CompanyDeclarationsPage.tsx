@@ -149,6 +149,7 @@ export function CompanyDeclarationsPage({
 					currentDeclaration?.jointEvaluationViewAvailable
 				}
 				lastActionDate={lastActionDate}
+				lastTransmission={currentDeclaration?.lastTransmission ?? null}
 				lockedByOther={lockedByOther}
 				lockHolder={lockHolder}
 				siren={company.siren}

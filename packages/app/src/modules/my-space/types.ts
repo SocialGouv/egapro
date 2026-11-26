@@ -5,12 +5,14 @@ export type {
 	DeclarationFsmStatus,
 	DeclarationStatus,
 	DeclarationType,
+	LastTransmission,
 } from "~/modules/domain";
 
 import type {
 	DeclarationFsmStatus,
 	DeclarationStatus,
 	DeclarationType,
+	LastTransmission,
 } from "~/modules/domain";
 
 export type CompanyDetail = {
@@ -24,6 +26,7 @@ export type CompanyDetail = {
 	departmentLabel: string | null;
 	gipWorkforce: number | null;
 	hasCse: boolean | null;
+	identityUnavailable: boolean;
 };
 
 type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
@@ -40,6 +43,7 @@ export type DeclarationItem = {
 	secondDeclarationPathChoice: CompliancePath | null;
 	hasSubmittedSecondDeclaration: boolean;
 	secondDeclarationStep: number | null;
+	lastTransmission: LastTransmission | null;
 	hasSubmittedJointEvaluation: boolean;
 	hasSubmittedCseOpinion: boolean;
 	cseOpinionViewAvailable?: boolean;

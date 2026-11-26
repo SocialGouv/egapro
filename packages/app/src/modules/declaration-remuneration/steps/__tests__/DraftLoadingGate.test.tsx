@@ -227,6 +227,7 @@ describe("DraftLoadingGate", () => {
 				declarationSiren="123456789"
 				declarationYear={2026}
 				initialFirstDeclarationCategories={[]}
+				lastTransmission={null}
 				status="corrective_actions_chosen"
 			/>,
 		);

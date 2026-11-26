@@ -233,7 +233,7 @@ export function RecapitulatifPage({
 			{indicatorGRequired && (
 				<section>
 					<h2 className={`fr-h6 fr-mb-3w ${styles.sectionHeading}`}>
-						Indicateur par catégorie d&apos;emplois
+						Indicateurs par catégorie d&apos;emplois
 					</h2>
 					{sourceLabel && (
 						<p className={`fr-mb-3w ${styles.sourceLine}`}>

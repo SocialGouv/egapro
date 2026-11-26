@@ -64,7 +64,39 @@ describe("isDeclarationWritingClosed", () => {
 		[null, true, false],
 		[null, false, false],
 	])("status %s, superseded %s → closed %s", (status, superseded, expected) => {
-		expect(isDeclarationWritingClosed(status, superseded)).toBe(expected);
+		expect(isDeclarationWritingClosed(status, superseded, "cse_opinion")).toBe(
+			expected,
+		);
+	});
+
+	it("keeps writing open on a closed démarche whose last transmission is not the CSE opinion", () => {
+		expect(
+			isDeclarationWritingClosed(
+				"demarche_completed",
+				true,
+				"joint_evaluation",
+			),
+		).toBe(false);
+		expect(
+			isDeclarationWritingClosed(
+				"demarche_completed",
+				true,
+				"second_declaration",
+			),
+		).toBe(false);
+		expect(
+			isDeclarationWritingClosed(
+				"demarche_completed",
+				true,
+				"path_choice_round_1",
+			),
+		).toBe(false);
+	});
+
+	it("keeps writing closed when the CSE opinion is the last transmission", () => {
+		expect(
+			isDeclarationWritingClosed("demarche_completed", true, "cse_opinion"),
+		).toBe(true);
 	});
 });
 
@@ -473,13 +505,13 @@ describe("isSecondDeclarationWritable", () => {
 	it.each(
 		WRITABLE,
 	)("returns true for %s, where the engine still exposes submit_second_declaration", (status) => {
-		expect(isSecondDeclarationWritable(status)).toBe(true);
+		expect(isSecondDeclarationWritable(status, null)).toBe(true);
 	});
 
 	it.each(
 		allStatusesExcept(WRITABLE),
 	)("returns false for %s, where no submit_second_declaration transition exists", (status) => {
-		expect(isSecondDeclarationWritable(status)).toBe(false);
+		expect(isSecondDeclarationWritable(status, null)).toBe(false);
 	});
 });
 
@@ -493,17 +525,55 @@ describe("isJointEvaluationWritable", () => {
 	it.each(
 		WRITABLE,
 	)("returns true for %s, where the engine still exposes submit_joint_evaluation", (status) => {
-		expect(isJointEvaluationWritable(status)).toBe(true);
+		expect(isJointEvaluationWritable(status, null)).toBe(true);
 	});
 
 	it.each(
 		allStatusesExcept(WRITABLE),
 	)("returns false for %s, where no submit_joint_evaluation transition exists", (status) => {
-		expect(isJointEvaluationWritable(status)).toBe(false);
+		expect(isJointEvaluationWritable(status, null)).toBe(false);
 	});
 
 	it("returns false once the démarche is completed, which only reopens submit_cse_opinion", () => {
-		expect(isJointEvaluationWritable("demarche_completed")).toBe(false);
+		expect(isJointEvaluationWritable("demarche_completed", null)).toBe(false);
+	});
+
+	it("reopens a closed démarche whose last transmission is the report", () => {
+		expect(
+			isJointEvaluationWritable("demarche_completed", "joint_evaluation"),
+		).toBe(true);
+	});
+
+	it("stays closed when another step is the last transmission", () => {
+		expect(isJointEvaluationWritable("demarche_completed", "cse_opinion")).toBe(
+			false,
+		);
+		expect(
+			isJointEvaluationWritable("demarche_completed", "second_declaration"),
+		).toBe(false);
+		expect(
+			isJointEvaluationWritable("awaiting_cse_opinion", "joint_evaluation"),
+		).toBe(false);
+	});
+});
+
+describe("isSecondDeclarationWritable — last transmission context", () => {
+	it("reopens a closed démarche whose last transmission is the second declaration", () => {
+		expect(
+			isSecondDeclarationWritable("demarche_completed", "second_declaration"),
+		).toBe(true);
+	});
+
+	it("stays closed when another step is the last transmission", () => {
+		expect(
+			isSecondDeclarationWritable("demarche_completed", "cse_opinion"),
+		).toBe(false);
+		expect(
+			isSecondDeclarationWritable("demarche_completed", "joint_evaluation"),
+		).toBe(false);
+		expect(
+			isSecondDeclarationWritable("awaiting_cse_opinion", "second_declaration"),
+		).toBe(false);
 	});
 });
 
@@ -710,6 +780,7 @@ describe("getCompliancePathReadOnlyReason", () => {
 		hasSubmittedSecondDeclaration: false,
 		hasSubmittedCseOpinion: false,
 		hasSubmittedJointEvaluation: false,
+		lastTransmission: null,
 	} satisfies Parameters<typeof getCompliancePathReadOnlyReason>[0];
 
 	afterEach(() => {
@@ -737,6 +808,36 @@ describe("getCompliancePathReadOnlyReason", () => {
 				status: "demarche_completed",
 				pathChoice: "justify",
 				hasSubmittedCseOpinion: true,
+			}),
+		).toBe("demarche_completed");
+	});
+
+	it("keeps a terminal path choice editable when it is the last transmission", () => {
+		expect(
+			getCompliancePathReadOnlyReason({
+				...baseParams,
+				status: "demarche_completed",
+				pathChoice: "justify",
+				lastTransmission: "path_choice_round_1",
+			}),
+		).toBeNull();
+		expect(
+			getCompliancePathReadOnlyReason({
+				...baseParams,
+				status: "demarche_completed",
+				pathChoice: "justify",
+				lastTransmission: "path_choice_round_2",
+			}),
+		).toBeNull();
+	});
+
+	it("keeps the done reason when the path choice was superseded", () => {
+		expect(
+			getCompliancePathReadOnlyReason({
+				...baseParams,
+				status: "demarche_completed",
+				pathChoice: "justify",
+				lastTransmission: "cse_opinion",
 			}),
 		).toBe("demarche_completed");
 	});
