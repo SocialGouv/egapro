@@ -20,6 +20,7 @@ type Props = {
 	indicatorGRequired: boolean;
 	hasSignificantIndicatorGGap: boolean;
 	cseApplicable: boolean;
+	cseLocked: boolean;
 	cseOpinionRequired: boolean;
 	siren: string;
 };
@@ -29,6 +30,7 @@ export function NextStepsSection({
 	indicatorGRequired,
 	hasSignificantIndicatorGGap,
 	cseApplicable,
+	cseLocked,
 	cseOpinionRequired,
 	siren,
 }: Props) {
@@ -47,6 +49,7 @@ export function NextStepsSection({
 						<NextStepsBlockContent
 							block={block}
 							cseApplicable={cseApplicable}
+							cseLocked={cseLocked}
 							cseOpinionRequired={cseOpinionRequired}
 						/>
 					</Fragment>
@@ -54,7 +57,11 @@ export function NextStepsSection({
 			</div>
 
 			{blocks.includes("cse-inform-and-consult") && (
-				<UpdateCseModal cseApplicable={cseApplicable} siren={siren} />
+				<UpdateCseModal
+					cseApplicable={cseApplicable}
+					cseLocked={cseLocked}
+					siren={siren}
+				/>
 			)}
 		</>
 	);
@@ -63,12 +70,14 @@ export function NextStepsSection({
 type BlockContentProps = {
 	block: NextStepsBlock;
 	cseApplicable: boolean;
+	cseLocked: boolean;
 	cseOpinionRequired: boolean;
 };
 
 function NextStepsBlockContent({
 	block,
 	cseApplicable,
+	cseLocked,
 	cseOpinionRequired,
 }: BlockContentProps) {
 	switch (block) {
@@ -78,6 +87,7 @@ function NextStepsBlockContent({
 			return (
 				<CseInformAndConsultBlock
 					cseApplicable={cseApplicable}
+					cseLocked={cseLocked}
 					cseOpinionRequired={cseOpinionRequired}
 				/>
 			);
@@ -108,9 +118,11 @@ function CseInformBlock() {
 
 function CseInformAndConsultBlock({
 	cseApplicable,
+	cseLocked,
 	cseOpinionRequired,
 }: {
 	cseApplicable: boolean;
+	cseLocked: boolean;
 	cseOpinionRequired: boolean;
 }) {
 	return (
@@ -144,7 +156,7 @@ function CseInformAndConsultBlock({
 							</p>
 						</>
 					)}
-					{cseApplicable && (
+					{cseApplicable && !cseLocked && (
 						<button
 							aria-controls="update-cse-modal"
 							className="fr-btn fr-btn--secondary"

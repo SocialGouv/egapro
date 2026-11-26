@@ -121,6 +121,15 @@ describe("AUDIT_ACTIONS", () => {
 			AUDIT_ACTION_CATEGORIES[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_EXPORT],
 		).toBe("export");
 	});
+
+	it("maps the public representations export to the export category", () => {
+		expect(AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_EXPORT).toBe(
+			"public_representations.export",
+		);
+		expect(
+			AUDIT_ACTION_CATEGORIES[AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_EXPORT],
+		).toBe("export");
+	});
 });
 
 describe("retention constants", () => {

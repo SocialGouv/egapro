@@ -16,7 +16,13 @@ export function publiclyReleasedCampaignCondition(
 }
 
 // SQL mirror of getRepresentationCampaignYear: joining on the reference year would read the previous, already released campaign.
+export function representationCampaignYearExpression(
+	referenceYearColumn: AnyPgColumn = representationDeclarations.year,
+) {
+	return sql<number>`${referenceYearColumn} + ${REPRESENTATION_CAMPAIGN_YEAR_OFFSET}`;
+}
+
 export function releasedRepresentationCampaignJoin() {
-	return sql<boolean>`(${campaignDeadlines.year} = ${representationDeclarations.year} + ${REPRESENTATION_CAMPAIGN_YEAR_OFFSET}
+	return sql<boolean>`(${campaignDeadlines.year} = ${representationCampaignYearExpression()}
 		AND ${publiclyReleasedCampaignCondition()})`;
 }

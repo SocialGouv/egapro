@@ -1,5 +1,6 @@
 import type { Sql } from "postgres";
 
+import type { ReminderLogPurgeSummary } from "../eligibility/index.js";
 import { isNotificationType } from "../mails/index.js";
 import type { NotificationType } from "../queue.js";
 
@@ -80,5 +81,58 @@ export async function logAuditMain(
 		`;
 	} catch {
 		console.error("[notifications] audit insert failed");
+	}
+}
+
+const REMINDER_LOG_CLEANUP_ACTION = "system.reminder_log_cleanup";
+const REMINDER_LOG_CLEANUP_CATEGORY = "system";
+const REMINDER_LOG_CLEANUP_FAILURE_CODE = "REMINDER_LOG_CLEANUP_FAILED";
+
+export async function logReminderLogCleanup(
+	sql: Sql,
+	summary: ReminderLogPurgeSummary,
+): Promise<void> {
+	try {
+		await sql`
+			INSERT INTO audit.action_log (
+				id, created_at, action, category, status, metadata
+			)
+			VALUES (
+				${crypto.randomUUID()},
+				${new Date()},
+				${REMINDER_LOG_CLEANUP_ACTION},
+				${REMINDER_LOG_CLEANUP_CATEGORY},
+				${"success"},
+				${sql.json({
+					deletedCount: summary.deletedCount,
+					cutoffYear: summary.cutoffYear,
+					retentionYears: summary.retentionYears,
+				})}
+			)
+		`;
+	} catch {
+		console.error("[notifications] reminder log cleanup audit insert failed");
+	}
+}
+
+export async function logReminderLogCleanupFailure(sql: Sql): Promise<void> {
+	try {
+		await sql`
+			INSERT INTO audit.action_log (
+				id, created_at, action, category, status, error_message
+			)
+			VALUES (
+				${crypto.randomUUID()},
+				${new Date()},
+				${REMINDER_LOG_CLEANUP_ACTION},
+				${REMINDER_LOG_CLEANUP_CATEGORY},
+				${"failure"},
+				${REMINDER_LOG_CLEANUP_FAILURE_CODE}
+			)
+		`;
+	} catch {
+		console.error(
+			"[notifications] reminder log cleanup failure audit insert failed",
+		);
 	}
 }

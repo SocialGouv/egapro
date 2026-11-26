@@ -5,6 +5,7 @@ import {
 	type DeclarationFsmStatus,
 	isJointEvaluationWritable,
 	isSecondDeclarationWritable,
+	type LastTransmission,
 } from "~/modules/domain";
 import { getSubmissionBannerState } from "../submissionBanner";
 
@@ -13,12 +14,14 @@ function state(
 	first: CompliancePathValue | null,
 	second: CompliancePathValue | null,
 	hasSubmittedSecondDeclaration: boolean,
+	lastTransmission: LastTransmission | null = null,
 ) {
 	return getSubmissionBannerState({
 		status,
 		firstDeclarationPathChoice: first,
 		secondDeclarationPathChoice: second,
 		hasSubmittedSecondDeclaration,
+		lastTransmission,
 	});
 }
 
@@ -61,13 +64,52 @@ describe("getSubmissionBannerState", () => {
 
 	it.each(
 		CSE_STEP_STATUSES,
-	)("keeps both deposits closed in %s with the current state machine", (status) => {
+	)("keeps the joint evaluation deposit closed in %s", (status) => {
 		expect(
 			state(status, "joint_evaluation", null, false)?.depositModifiable,
 		).toBe(false);
+	});
+
+	it("keeps the corrective second declaration modifiable while the CSE opinions are pending", () => {
 		expect(
-			state(status, "corrective_action", null, true)?.depositModifiable,
+			state("awaiting_cse_opinion", "corrective_action", null, true)
+				?.depositModifiable,
+		).toBe(true);
+	});
+
+	it("closes the second declaration once the CSE opinions are submitted", () => {
+		expect(
+			state("demarche_completed", "corrective_action", null, true)
+				?.depositModifiable,
 		).toBe(false);
+	});
+
+	it("closes the second declaration when the revised path is justify", () => {
+		expect(
+			state("awaiting_cse_opinion", "corrective_action", "justify", true)
+				?.depositModifiable,
+		).toBe(false);
+	});
+
+	it("keeps the last deposit of a closed démarche modifiable even with a CSE", () => {
+		expect(
+			state(
+				"demarche_completed",
+				"joint_evaluation",
+				null,
+				false,
+				"joint_evaluation",
+			)?.depositModifiable,
+		).toBe(true);
+		expect(
+			state(
+				"demarche_completed",
+				"corrective_action",
+				null,
+				true,
+				"second_declaration",
+			)?.depositModifiable,
+		).toBe(true);
 	});
 
 	it.each(
@@ -75,11 +117,16 @@ describe("getSubmissionBannerState", () => {
 	)("follows the domain writability rules in %s", (status) => {
 		expect(state(status, "joint_evaluation", null, false)).toEqual({
 			variant: "joint_evaluation",
-			depositModifiable: isJointEvaluationWritable(status),
+			depositModifiable: isJointEvaluationWritable(status, null),
 		});
 		expect(state(status, "corrective_action", null, true)).toEqual({
 			variant: "second_declaration",
-			depositModifiable: isSecondDeclarationWritable(status),
+			depositModifiable: isSecondDeclarationWritable({
+				status,
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: null,
+				lastTransmission: null,
+			}),
 		});
 	});
 });

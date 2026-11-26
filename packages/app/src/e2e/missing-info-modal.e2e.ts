@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 import { urlGlob } from "~/e2e/helpers/routes";
 import {
 	DECLARATION_REMUNERATION,
@@ -314,6 +314,55 @@ test.describe("Missing info modal", () => {
 				await page.goto(remunerationStepHref(4));
 				await page.waitForURL(urlGlob(remunerationStepHref(4)));
 				await expect(page.getByText("Étape 4 sur 6")).toBeVisible();
+			});
+		});
+	});
+
+	// The CSE answer is part of what the year declared,
+	// so the "Modifier" entry point disappears with the completed démarche and only
+	// reopens on the next campaign — the API lock is asserted by company.test.ts.
+	test.describe("CSE answer frozen with the completed démarche (#4228)", () => {
+		const modifyButton = (page: Page) =>
+			page.getByRole("button", { exact: true, name: "Modifier" });
+
+		test.beforeAll(async () => {
+			await resetGipWorkforce();
+			await setUserPhone(TEST_USER_PHONE);
+			await setCompanyHasCse(false);
+			await setDeclarationComplianceState({
+				status: "demarche_completed",
+				currentStep: 6,
+				cseRequired: true,
+			});
+		});
+
+		test.afterAll(async () => {
+			await resetDeclarationToDraft();
+			await setCompanyHasCse(true);
+		});
+
+		test("hides the edit entry point on a closed year and restores it on the next one", async ({
+			page,
+		}) => {
+			await page.context().clearCookies();
+			await loginWithProConnect(page);
+
+			await test.step("completed démarche — the answer is frozen", async () => {
+				await page.goto(MY_SPACE);
+				await expect(modifyButton(page)).toHaveCount(0);
+				await expect(
+					page.locator("dt", { hasText: "Existence d'un CSE" }),
+				).toBeVisible();
+			});
+
+			await test.step("next campaign — the question reopens", async () => {
+				await setDeclarationComplianceState({
+					status: "awaiting_cse_opinion",
+					currentStep: 6,
+					cseRequired: true,
+				});
+				await page.reload();
+				await expect(modifyButton(page)).toBeVisible();
 			});
 		});
 	});

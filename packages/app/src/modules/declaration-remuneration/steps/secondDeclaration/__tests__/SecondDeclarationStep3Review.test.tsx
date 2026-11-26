@@ -150,7 +150,10 @@ function step3Review(
 			cseApplicable
 			cseOpinionRequired={false}
 			declarationYear={2025}
+			firstDeclarationPathChoice="corrective_action"
+			lastTransmission={null}
 			secondDeclarationCategories={mockCategories}
+			secondDeclarationPathChoice={null}
 			secondDeclarationSubmissionCount={INITIAL_SUBMISSION_COUNT}
 			siren="532847196"
 			status="corrective_actions_chosen"
@@ -648,11 +651,89 @@ describe("SecondDeclarationStep3Review", () => {
 		).not.toBeInTheDocument();
 	});
 
+	it("keeps Transmettre while the CSE opinions are pending", () => {
+		renderStep3({ status: "awaiting_cse_opinion", cseOpinionRequired: true });
+		expect(
+			screen.getByRole("button", { name: /transmettre/i }),
+		).toBeInTheDocument();
+	});
+
+	it("hides Transmettre in awaiting_cse_opinion once the revised path is justify", () => {
+		renderStep3({
+			status: "awaiting_cse_opinion",
+			cseOpinionRequired: true,
+			secondDeclarationPathChoice: "justify",
+		});
+		expect(
+			screen.queryByRole("button", { name: /transmettre/i }),
+		).not.toBeInTheDocument();
+		expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
+			"href",
+			"/avis-cse",
+		);
+	});
+
+	it("goes back to the CSE opinions after a resubmission without gap from awaiting_cse_opinion", async () => {
+		renderStep3({
+			status: "awaiting_cse_opinion",
+			cseOpinionRequired: true,
+			secondDeclarationCategories: noGapCategories,
+		});
+		await submitDeclaration();
+
+		expect(mockMutate).toHaveBeenCalledTimes(1);
+		expect(mockPush).toHaveBeenCalledWith("/avis-cse");
+	});
+
+	it("goes to the compliance path after a resubmission with a gap from awaiting_cse_opinion", async () => {
+		renderStep3({
+			status: "awaiting_cse_opinion",
+			cseOpinionRequired: true,
+			secondDeclarationCategories: highGapCategories,
+		});
+		await submitDeclaration();
+
+		expect(mockMutate).toHaveBeenCalledTimes(1);
+		expect(mockPush).toHaveBeenCalledWith(
+			"/declaration-remuneration/parcours-conformite",
+		);
+	});
+
 	it("keeps Transmettre while awaiting a revision choice", () => {
 		renderStep3({ status: "awaiting_revision_choice" });
 		expect(
 			screen.getByRole("button", { name: /transmettre/i }),
 		).toBeInTheDocument();
+	});
+
+	it("reopens the transmission when the second declaration is the last transmission of a closed démarche (#5167)", () => {
+		renderStep3({
+			lastTransmission: "second_declaration",
+			status: "demarche_completed",
+		});
+
+		expect(
+			screen.getByRole("button", { name: /transmettre/i }),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole("link", { name: /suivant/i }),
+		).not.toBeInTheDocument();
+		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
+			"href",
+			"/declaration-remuneration/parcours-conformite/etape/2",
+		);
+	});
+
+	it("keeps the funnel read-only when another step closed the démarche (#5167)", () => {
+		renderStep3({
+			lastTransmission: "joint_evaluation",
+			status: "demarche_completed",
+		});
+
+		expect(
+			screen.queryByRole("button", { name: /transmettre/i }),
+		).not.toBeInTheDocument();
+		expect(screen.getByRole("link", { name: /suivant/i })).toBeInTheDocument();
 	});
 
 	describe("CSE consultation section gating (issue #3945)", () => {

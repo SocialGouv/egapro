@@ -2,19 +2,25 @@ import { expect, type Page, test } from "@playwright/test";
 import { urlGlob } from "~/e2e/helpers/routes";
 import { representationPdfFilename } from "~/modules/declarationPdf/representationPdfFilename";
 import {
+	formatCivilLongDate,
 	formatPercentage,
 	formatPrecisePercentage,
+	getCurrentRepresentationCampaignYear,
 	getReferenceYearFor,
+	getRepresentationCampaignEndDate,
 	getRepresentationTarget,
 	REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
 } from "~/modules/domain";
 import {
 	API_PUBLIC_DECLARATIONS_EXPORT,
+	API_PUBLIC_REPRESENTATIONS_EXPORT,
 	DECLARATION_REPRESENTATION,
+	FIRST_REPRESENTATION_STEP,
 	MY_SPACE,
 	mySpaceRepresentationHref,
 	OBSERVATORY_SEARCH,
 	observatoryCompanyHref,
+	representationStepHref,
 	routeWithQuery,
 } from "~/modules/routes";
 // Leaf module, not the barrel: the Playwright runner cannot load the CSS
@@ -22,7 +28,6 @@ import {
 import { SUBMIT_LABEL } from "~/modules/shared/submitLabels";
 import { TEST_SIREN } from "./constants";
 import {
-	getCurrentDbYear,
 	getTestCompanyName,
 	resetGipWorkforce,
 	resetRepresentationDeclaration,
@@ -133,7 +138,7 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 	let submittedAt: Date;
 
 	test.beforeAll(async () => {
-		campaignYear = await getCurrentDbYear();
+		campaignYear = getCurrentRepresentationCampaignYear();
 		referenceYear = getReferenceYearFor(campaignYear);
 		await resetRepresentationDeclaration();
 		await clearNotificationQueue();
@@ -541,7 +546,7 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 				await expect(panel.getByText(/conforme|objectif/i)).toHaveCount(0);
 			});
 
-			await test.step("no public API serves the representation, only the remuneration export remains", async () => {
+			await test.step("the retired representation endpoints keep answering 404", async () => {
 				const retiredUrls = [
 					"/api/public/declarations",
 					`/api/public/declarations/${TEST_SIREN}`,
@@ -549,19 +554,67 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 					"/api/public/representations",
 					`/api/public/representations/${TEST_SIREN}`,
 					`/api/public/representations/${TEST_SIREN}/${referenceYear}`,
-					"/api/public/representations/export?format=csv",
 					"/api/search?q=Demo",
 				];
 				for (const url of retiredUrls) {
 					const response = await anonCtx.request.get(url, { maxRedirects: 0 });
 					expect(response.status(), url).toBe(404);
 				}
+			});
 
-				const exportResponse = await anonCtx.request.get(
+			await test.step("both public exports answer a DGT CSV", async () => {
+				const declarationsResponse = await anonCtx.request.get(
 					routeWithQuery(API_PUBLIC_DECLARATIONS_EXPORT, "format=csv"),
 				);
-				expect(exportResponse.status()).toBe(200);
-				expect(exportResponse.headers()["content-type"]).toContain("text/csv");
+				expect(declarationsResponse.status()).toBe(200);
+				expect(declarationsResponse.headers()["content-type"]).toContain(
+					"text/csv",
+				);
+
+				const representationsResponse = await anonCtx.request.get(
+					routeWithQuery(API_PUBLIC_REPRESENTATIONS_EXPORT, "format=csv"),
+				);
+				expect(representationsResponse.status()).toBe(200);
+				expect(representationsResponse.headers()["content-type"]).toContain(
+					"text/csv",
+				);
+				const [header] = (await representationsResponse.text()).split("\n");
+				expect(header).toBe(
+					'"Annee_declaration";"SIREN";"Raison_sociale";"Adresse";"Region";"Code_departement";"Departement";"Pays";"Code_NAF";"Libelle_NAF";"Effectif_annuel_moyen";"Cadres_pourcentage_F";"Cadres_pourcentage_H";"Membres_pourcentage_F";"Membres_pourcentage_H"',
+				);
+			});
+
+			await test.step("the download modal offers both CSV files", async () => {
+				await anonPage.goto(
+					routeWithQuery(OBSERVATORY_SEARCH, `region=11&q=${TEST_SIREN}`),
+				);
+				const dialog = anonPage
+					.getByRole("dialog", { name: "Télécharger les données" })
+					.first();
+				// A freshly loaded results page mounts a second copy of the section
+				// while it hydrates: a click landing on the doomed copy opens a
+				// dialog React then discards. Retry until the live dialog holds.
+				await expect(async () => {
+					if (!(await dialog.isVisible())) {
+						await anonPage
+							.getByRole("button", { name: "Télécharger les données" })
+							.first()
+							.click();
+					}
+					await expect(dialog).toBeVisible({ timeout: 2_000 });
+				}).toPass({ timeout: 20_000 });
+				await expect(
+					dialog.getByRole("link", { name: "Indicateurs de rémunération" }),
+				).toHaveAttribute(
+					"href",
+					`${API_PUBLIC_DECLARATIONS_EXPORT}?format=csv&q=${TEST_SIREN}&region=11`,
+				);
+				await expect(
+					dialog.getByRole("link", { name: "Indicateurs de représentation" }),
+				).toHaveAttribute(
+					"href",
+					`${API_PUBLIC_REPRESENTATIONS_EXPORT}?format=csv&q=${TEST_SIREN}&region=11`,
+				);
 			});
 		} finally {
 			if (baseline.exists) {
@@ -622,9 +675,12 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 		);
 		const panel = page.locator(`#${PANEL_ID}`);
 		const consultationHref = mySpaceRepresentationHref(campaignYear);
-		await expect(
-			panel.getByRole("link", { name: "Voir la déclaration" }),
-		).toHaveAttribute("href", consultationHref);
+
+		await test.step("the panel carries no footer CTA: the transmitted row holds both actions", async () => {
+			await expect(
+				panel.getByRole("link", { name: "Voir la déclaration" }),
+			).toHaveCount(0);
+		});
 
 		await test.step("the declaration step announces the transmission instead of the work left to do", async () => {
 			await expect(
@@ -641,16 +697,23 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 			await expect(panel.getByText(/Échéance :/)).toHaveCount(0);
 		});
 
-		await test.step("a transmitted declaration is immutable: a view button, never a modify affordance", async () => {
+		await test.step("a transmitted declaration stays modifiable until the end of the campaign", async () => {
 			await expect(
 				panel.getByRole("link", {
 					name: "Voir le récapitulatif de la déclaration",
 				}),
 			).toHaveAttribute("href", consultationHref);
-			await expect(panel.getByRole("link", { name: "Modifier" })).toHaveCount(
-				0,
+			await expect(
+				panel.getByRole("link", { name: "Modifier" }),
+			).toHaveAttribute(
+				"href",
+				representationStepHref(FIRST_REPRESENTATION_STEP),
 			);
-			await expect(panel.getByText(/Modifiable jusqu'au/)).toHaveCount(0);
+			await expect(
+				panel.getByText(
+					`Modifiable jusqu'au ${formatCivilLongDate(getRepresentationCampaignEndDate(campaignYear))}`,
+				),
+			).toBeVisible();
 		});
 
 		await test.step("the view button opens the read-only consultation page", async () => {
@@ -719,6 +782,33 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 			await main.getByRole("link", { name: "Mon espace", exact: true }).click();
 			await page.waitForURL(urlGlob(MY_SPACE));
 		});
+
+		// Last, because it leaves Mon espace: the panel's modification entrance
+		// opens the funnel on an editable step.
+		await test.step("the modify button opens the editable funnel on its first step", async () => {
+			await waitForDsfrModal(page, PANEL_ID);
+			await clickAndExpectDialogOpen(
+				page,
+				page.getByRole("button", { name: "Représentation", exact: true }),
+				PANEL_ID,
+			);
+
+			await page
+				.locator(`#${PANEL_ID}`)
+				.getByRole("link", { name: "Modifier" })
+				.click();
+			await page.waitForURL(
+				urlGlob(representationStepHref(FIRST_REPRESENTATION_STEP)),
+			);
+
+			// A read-only step exposes a "Suivant" link; an editable one a button.
+			await expect(
+				page.getByRole("button", { name: "Suivant", exact: true }),
+			).toBeVisible();
+			await expect(
+				page.getByRole("link", { name: "Suivant", exact: true }),
+			).toHaveCount(0);
+		});
 	});
 });
 
@@ -730,7 +820,7 @@ test.describe("Représentation équilibrée — écarts non calculables", () => 
 	let seededYears: number[] = [];
 
 	test.beforeAll(async () => {
-		campaignYear = await getCurrentDbYear();
+		campaignYear = getCurrentRepresentationCampaignYear();
 		referenceYear = getReferenceYearFor(campaignYear);
 		await resetRepresentationDeclaration();
 		seededYears = await setRepresentationWorkforceWindow(
@@ -822,7 +912,7 @@ test.describe("Représentation équilibrée — parcours non-assujetti", () => {
 	let seededYears: number[] = [];
 
 	test.beforeAll(async () => {
-		campaignYear = await getCurrentDbYear();
+		campaignYear = getCurrentRepresentationCampaignYear();
 		referenceYear = getReferenceYearFor(campaignYear);
 		await resetRepresentationDeclaration();
 		seededYears = await setRepresentationWorkforceWindow(

@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { computeDeclarationStatus } from "~/modules/my-space/declarationStatus";
 import { isUserLinkedToSiren } from "~/server/auth/companyLink";
+import { declarations } from "~/server/db/schema";
 
 const { syncCseRequirementMock } = vi.hoisted(() => ({
 	syncCseRequirementMock: vi.fn(),
@@ -555,68 +556,112 @@ describe("companyRouter.updateHasCse", () => {
 		vi.restoreAllMocks();
 	});
 
-	it("updates hasCse for the given company", async () => {
-		const companyRow = {
-			siren: "339787277",
-			name: "Test Company",
-			address: "1 rue de Paris",
-			nafCode: "6202A",
-			workforceEma: "100.00",
-			hasCse: false,
-		};
-
-		mockLimit.mockResolvedValue([companyRow]);
-		mockWhere.mockReturnValue({ limit: mockLimit });
-		mockLeftJoin.mockReturnValue({ where: mockWhere });
-		mockFrom.mockReturnValue({ leftJoin: mockLeftJoin });
-		mockSelect.mockReturnValue({ from: mockFrom });
+	function createUpdateDb({
+		companyRows,
+		declarationRows = [],
+	}: {
+		companyRows: unknown[];
+		declarationRows?: unknown[];
+	}) {
+		// The mutation reads the company (joined with the GIP file) and, inside the
+		// transaction, the active declaration of the year — dispatched on the table
+		// so a single `select` mock can serve both shapes.
+		mockSelect.mockImplementation(() => ({
+			from: (table: unknown) =>
+				table === declarations
+					? { where: () => ({ limit: async () => declarationRows }) }
+					: {
+							leftJoin: () => ({
+								where: () => ({ limit: async () => companyRows }),
+							}),
+						},
+		}));
 
 		mockUpdateWhere.mockResolvedValue(undefined);
 		mockSet.mockReturnValue({ where: mockUpdateWhere });
 		mockUpdate.mockReturnValue({ set: mockSet });
 
-		const mockDb = { select: mockSelect, update: mockUpdate } as unknown;
+		const tx = {
+			select: mockSelect,
+			update: mockUpdate,
+			execute: vi.fn(async () => undefined),
+		};
 
+		return {
+			select: mockSelect,
+			update: mockUpdate,
+			transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn(tx),
+		} as unknown;
+	}
+
+	async function createCaller(
+		db: unknown,
+		session: Record<string, unknown> = {},
+	) {
 		const { companyRouter } = await import("../company");
-		const caller = companyRouter.createCaller({
-			db: mockDb,
-			session: { user: { id: "user-1" }, expires: "" },
+		return companyRouter.createCaller({
+			db,
+			session: { user: { id: "user-1", ...session }, expires: "" },
 			headers: new Headers(),
 		} as never);
+	}
 
-		await caller.updateHasCse({ siren: "339787277", hasCse: true });
+	const companyAtThreshold = {
+		siren: "339787277",
+		name: "Test Company",
+		address: "1 rue de Paris",
+		nafCode: "6202A",
+		workforceEma: "250.00",
+		hasCse: true,
+	};
 
-		expect(mockSet).toHaveBeenCalledWith({ hasCse: true });
+	it("writes the answer on the company and on the year's declaration", async () => {
+		const caller = await createCaller(
+			createUpdateDb({
+				companyRows: [companyAtThreshold],
+				declarationRows: [{ id: "decl-1", status: "awaiting_cse_opinion" }],
+			}),
+		);
+
+		await caller.updateHasCse({ siren: "339787277", hasCse: false });
+
+		expect(mockSet).toHaveBeenCalledWith({ hasCse: false });
+		expect(mockSet).toHaveBeenCalledTimes(2);
+	});
+
+	it("writes only the company when no démarche exists for the year", async () => {
+		const caller = await createCaller(
+			createUpdateDb({ companyRows: [companyAtThreshold] }),
+		);
+
+		await caller.updateHasCse({ siren: "339787277", hasCse: false });
+
+		expect(mockSet).toHaveBeenCalledTimes(1);
+		expect(mockSet).toHaveBeenCalledWith({ hasCse: false });
+	});
+
+	it("refuses once the year's démarche is completed", async () => {
+		const caller = await createCaller(
+			createUpdateDb({
+				companyRows: [companyAtThreshold],
+				declarationRows: [{ id: "decl-1", status: "demarche_completed" }],
+			}),
+		);
+
+		await expect(
+			caller.updateHasCse({ siren: "339787277", hasCse: false }),
+		).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
+		expect(mockSet).not.toHaveBeenCalled();
+		expect(syncCseRequirementMock).not.toHaveBeenCalled();
 	});
 
 	it("realigns the declaration on the new CSE answer", async () => {
-		const companyRow = {
-			siren: "339787277",
-			name: "Test Company",
-			address: "1 rue de Paris",
-			nafCode: "6202A",
-			workforceEma: "250.00",
-			hasCse: true,
-		};
-
-		mockLimit.mockResolvedValue([companyRow]);
-		mockWhere.mockReturnValue({ limit: mockLimit });
-		mockLeftJoin.mockReturnValue({ where: mockWhere });
-		mockFrom.mockReturnValue({ leftJoin: mockLeftJoin });
-		mockSelect.mockReturnValue({ from: mockFrom });
-
-		mockUpdateWhere.mockResolvedValue(undefined);
-		mockSet.mockReturnValue({ where: mockUpdateWhere });
-		mockUpdate.mockReturnValue({ set: mockSet });
-
-		const mockDb = { select: mockSelect, update: mockUpdate } as unknown;
-
-		const { companyRouter } = await import("../company");
-		const caller = companyRouter.createCaller({
-			db: mockDb,
-			session: { user: { id: "user-1" }, expires: "" },
-			headers: new Headers(),
-		} as never);
+		const caller = await createCaller(
+			createUpdateDb({
+				companyRows: [companyAtThreshold],
+				declarationRows: [{ id: "decl-1", status: "awaiting_cse_opinion" }],
+			}),
+		);
 
 		await caller.updateHasCse({ siren: "339787277", hasCse: false });
 
@@ -631,29 +676,11 @@ describe("companyRouter.updateHasCse", () => {
 	});
 
 	it("refuses the update below the CSE threshold (GIP workforce < 100)", async () => {
-		const companyRow = {
-			siren: "339787277",
-			name: "Test Company",
-			address: "1 rue de Paris",
-			nafCode: "6202A",
-			workforceEma: "70.00",
-			hasCse: null,
-		};
-
-		mockLimit.mockResolvedValue([companyRow]);
-		mockWhere.mockReturnValue({ limit: mockLimit });
-		mockLeftJoin.mockReturnValue({ where: mockWhere });
-		mockFrom.mockReturnValue({ leftJoin: mockLeftJoin });
-		mockSelect.mockReturnValue({ from: mockFrom });
-
-		const mockDb = { select: mockSelect, update: mockUpdate } as unknown;
-
-		const { companyRouter } = await import("../company");
-		const caller = companyRouter.createCaller({
-			db: mockDb,
-			session: { user: { id: "user-1" }, expires: "" },
-			headers: new Headers(),
-		} as never);
+		const caller = await createCaller(
+			createUpdateDb({
+				companyRows: [{ ...companyAtThreshold, workforceEma: "70.00" }],
+			}),
+		);
 
 		await expect(
 			caller.updateHasCse({ siren: "339787277", hasCse: true }),
@@ -662,29 +689,11 @@ describe("companyRouter.updateHasCse", () => {
 	});
 
 	it("refuses the update when the company is absent from the GIP file", async () => {
-		const companyRow = {
-			siren: "339787277",
-			name: "Test Company",
-			address: "1 rue de Paris",
-			nafCode: "6202A",
-			workforceEma: null,
-			hasCse: null,
-		};
-
-		mockLimit.mockResolvedValue([companyRow]);
-		mockWhere.mockReturnValue({ limit: mockLimit });
-		mockLeftJoin.mockReturnValue({ where: mockWhere });
-		mockFrom.mockReturnValue({ leftJoin: mockLeftJoin });
-		mockSelect.mockReturnValue({ from: mockFrom });
-
-		const mockDb = { select: mockSelect, update: mockUpdate } as unknown;
-
-		const { companyRouter } = await import("../company");
-		const caller = companyRouter.createCaller({
-			db: mockDb,
-			session: { user: { id: "user-1" }, expires: "" },
-			headers: new Headers(),
-		} as never);
+		const caller = await createCaller(
+			createUpdateDb({
+				companyRows: [{ ...companyAtThreshold, workforceEma: null }],
+			}),
+		);
 
 		await expect(
 			caller.updateHasCse({ siren: "339787277", hasCse: true }),
@@ -693,23 +702,14 @@ describe("companyRouter.updateHasCse", () => {
 	});
 
 	it("refuses the update when the admin is impersonating the company", async () => {
-		const mockDb = { select: mockSelect, update: mockUpdate } as unknown;
-
-		const { companyRouter } = await import("../company");
-		const caller = companyRouter.createCaller({
-			db: mockDb,
-			session: {
-				user: {
-					id: "user-1",
-					isAdmin: true,
-					// An impersonation only bites while the admin MFA window is open (#4466).
-					adminMfaAt: Math.floor(Date.now() / 1000),
-					impersonation: { siren: "339787277", name: "Acme" },
-				},
-				expires: "",
+		const caller = await createCaller(
+			{ select: mockSelect, update: mockUpdate } as unknown,
+			{
+				isAdmin: true,
+				adminMfaAt: Math.floor(Date.now() / 1000),
+				impersonation: { siren: "339787277", name: "Acme" },
 			},
-			headers: new Headers(),
-		} as never);
+		);
 
 		await expect(
 			caller.updateHasCse({ siren: "339787277", hasCse: true }),

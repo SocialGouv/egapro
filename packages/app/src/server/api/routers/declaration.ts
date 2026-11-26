@@ -26,6 +26,7 @@ import {
 	isLockedBySubsequentSubmission,
 	isSecondDeclarationWritable,
 	isTriennialYear,
+	type LastTransmission,
 	parseGipWorkforce,
 } from "~/modules/domain";
 import {
@@ -68,9 +69,10 @@ import {
 	buildStepChangeInsert,
 	computeProjectionUpdates,
 	type DeclarationTransaction,
-	getCurrentRound,
 	hasLockingEventForRound,
-	loadSubsequentSubmissions,
+	loadDeclarationTrajectory,
+	loadLastTransmission,
+	loadTransmissionState,
 	lockAndReadDeclaration,
 } from "./statusHistoryHelpers";
 
@@ -175,10 +177,12 @@ function buildSubmitFacts(
 function buildSecondDeclarationFacts(
 	declaration: DeclarationRow,
 	stillHasGap: boolean,
+	lastTransmission: LastTransmission | null,
 ): Record<string, unknown> {
 	return {
 		currentState: declaration.status,
 		cseRequired: declaration.cseRequired,
+		lastTransmission,
 		action: { stillHasGap },
 	};
 }
@@ -186,22 +190,28 @@ function buildSecondDeclarationFacts(
 function buildCompliancePathFacts(
 	declaration: DeclarationRow,
 	path: SaveCompliancePathInput["path"],
+	lastTransmission: LastTransmission | null,
 ): Record<string, unknown> {
 	return {
 		currentState: declaration.status,
 		cseRequired: declaration.cseRequired,
 		firstDeclarationPathChoice: declaration.firstDeclarationPathChoice,
 		secondDeclarationPathChoice: declaration.secondDeclarationPathChoice,
+		lastTransmission,
 		action: { path },
 	};
 }
 
 function buildJointEvaluationFacts(
 	declaration: DeclarationRow,
+	lastTransmission: LastTransmission | null,
+	round: 1 | 2,
 ): Record<string, unknown> {
 	return {
 		currentState: declaration.status,
 		cseRequired: declaration.cseRequired,
+		lastTransmission,
+		action: { round },
 	};
 }
 
@@ -310,18 +320,18 @@ export const declarationRouter = createTRPCRouter({
 			: await fetchPreviousYearJobCategories(ctx.db, siren, year);
 
 		const declarationId = result.declaration.id;
-		const subsequentSubmissions =
+		const trajectory =
 			declarationId === ""
-				? deriveSubsequentSubmissions([])
-				: await loadSubsequentSubmissions(ctx.db, declarationId);
+				? { ...deriveSubsequentSubmissions([]), lastTransmission: null }
+				: await loadDeclarationTrajectory(ctx.db, declarationId);
 
 		return {
 			...result,
 			gipPrefillData,
 			previousYearCategories,
-			...subsequentSubmissions,
+			...trajectory,
 			isFirstDeclarationLocked: isLockedBySubsequentSubmission(
-				subsequentSubmissions,
+				trajectory,
 				"first_declaration",
 			),
 		};
@@ -664,7 +674,8 @@ export const declarationRouter = createTRPCRouter({
 						siren,
 						year,
 					);
-					if (!isSecondDeclarationWritable(current.status))
+					const lastTransmission = await loadLastTransmission(tx, current.id);
+					if (!isSecondDeclarationWritable({ ...current, lastTransmission }))
 						throw new TRPCError({
 							code: "FORBIDDEN",
 							message: "La seconde déclaration n'est pas ouverte à la saisie.",
@@ -794,6 +805,9 @@ export const declarationRouter = createTRPCRouter({
 				.set({
 					...computeProjectionUpdates(events, nextStatus),
 					cseRequired: cseRequiredSnapshot,
+					// The answer itself is snapshotted too: it is what the campaign
+					// owed, and the next campaign must not rewrite it.
+					hasCse: company.hasCse,
 					currentStep: 6,
 					updatedAt: new Date(),
 				})
@@ -844,7 +858,10 @@ export const declarationRouter = createTRPCRouter({
 					year,
 				);
 
-				const round = await getCurrentRound(tx, declaration.id);
+				const { lastTransmission, round } = await loadTransmissionState(
+					tx,
+					declaration.id,
+				);
 
 				if (round === 2 && input.path === "corrective_action") {
 					throw new TRPCError({
@@ -874,7 +891,7 @@ export const declarationRouter = createTRPCRouter({
 				}
 
 				const { nextStatus, events } = applyActionOrRefuse(
-					buildCompliancePathFacts(declaration, input.path),
+					buildCompliancePathFacts(declaration, input.path, lastTransmission),
 					"choose_compliance_path",
 					loadRules(declaration.rulesVersion),
 					PATH_CHOICE_UNAVAILABLE_ERROR,
@@ -937,6 +954,12 @@ export const declarationRouter = createTRPCRouter({
 					siren,
 					year,
 				);
+				const lastTransmission = await loadLastTransmission(tx, declaration.id);
+				if (!isSecondDeclarationWritable({ ...declaration, lastTransmission }))
+					throw new TRPCError({
+						code: "PRECONDITION_FAILED",
+						message: SECOND_DECLARATION_UNAVAILABLE_ERROR,
+					});
 
 				const correctionCategories = await loadEmployeeCategoriesForDeclaration(
 					tx,
@@ -948,6 +971,7 @@ export const declarationRouter = createTRPCRouter({
 					buildSecondDeclarationFacts(
 						declaration,
 						hasGapsAboveThreshold(correctionCategories),
+						lastTransmission,
 					),
 					"submit_second_declaration",
 					loadRules(declaration.rulesVersion),
@@ -1008,8 +1032,13 @@ export const declarationRouter = createTRPCRouter({
 					year,
 				);
 
+				const { lastTransmission, round } = await loadTransmissionState(
+					tx,
+					declaration.id,
+				);
+
 				const { nextStatus, events } = applyActionOrRefuse(
-					buildJointEvaluationFacts(declaration),
+					buildJointEvaluationFacts(declaration, lastTransmission, round),
 					"submit_joint_evaluation",
 					loadRules(declaration.rulesVersion),
 					JOINT_EVALUATION_UNAVAILABLE_ERROR,

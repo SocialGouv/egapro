@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from "react";
 
-import type { CampaignDeadlines, DeclarationFsmStatus } from "~/modules/domain";
+import type {
+	CampaignDeadlines,
+	DeclarationFsmStatus,
+	LastTransmission,
+} from "~/modules/domain";
 import {
 	getDeclarationDisplayContext,
 	getDefaultCampaignDeadlines,
@@ -38,6 +42,19 @@ const COMPLIANCE_PATHS = [
 	"joint_evaluation",
 	"justify",
 ] as const;
+
+// The closed-variant gating (epic #5128) turns on which step was transmitted last.
+const LAST_TRANSMISSIONS: Array<{
+	value: LastTransmission | null;
+	label: string;
+}> = [
+	{ value: null, label: "Aucune (null)" },
+	{ value: "joint_evaluation", label: "Rapport d'évaluation conjointe" },
+	{ value: "second_declaration", label: "Seconde déclaration" },
+	{ value: "path_choice_round_1", label: "Choix de parcours — round 1" },
+	{ value: "path_choice_round_2", label: "Choix de parcours — round 2" },
+	{ value: "cse_opinion", label: "Avis du CSE" },
+];
 
 type DatePreset = "future" | "past" | "custom";
 
@@ -161,6 +178,8 @@ export function PanelPlayground() {
 	const [jointEvaluationSubmitted, setJointEvaluationSubmitted] =
 		useState(false);
 	const [cseOpinionSubmitted, setCseOpinionSubmitted] = useState(false);
+	const [lastTransmission, setLastTransmission] =
+		useState<LastTransmission | null>(null);
 	const [formalNoticeAvailable, setFormalNoticeAvailable] = useState(false);
 	const [revisedJointEvaluation, setRevisedJointEvaluation] = useState(false);
 	const [cseOpinionRequired, setCseOpinionRequired] = useState(true);
@@ -211,6 +230,23 @@ export function PanelPlayground() {
 				label={value}
 				name="compliancePath"
 				onChange={() => setCompliancePath(value)}
+			/>
+		);
+	}
+
+	function renderLastTransmissionOption(
+		value: LastTransmission | null,
+		label: string,
+	) {
+		const id = `last-transmission-${value ?? "none"}`;
+		return (
+			<PlaygroundRadio
+				checked={lastTransmission === value}
+				id={id}
+				key={id}
+				label={label}
+				name="lastTransmission"
+				onChange={() => setLastTransmission(value)}
 			/>
 		);
 	}
@@ -323,6 +359,17 @@ export function PanelPlayground() {
 
 			<fieldset className="fr-fieldset fr-mb-4w">
 				<legend className="fr-fieldset__legend fr-text--regular">
+					Dernière transmission
+				</legend>
+				<div className="fr-fieldset__content">
+					{LAST_TRANSMISSIONS.map((option) =>
+						renderLastTransmissionOption(option.value, option.label),
+					)}
+				</div>
+			</fieldset>
+
+			<fieldset className="fr-fieldset fr-mb-4w">
+				<legend className="fr-fieldset__legend fr-text--regular">
 					Deadlines
 				</legend>
 				<div className="fr-fieldset__content">
@@ -392,6 +439,7 @@ export function PanelPlayground() {
 				hasSubmittedSecondDeclaration={secondDeclarationSubmitted}
 				indicatorGRequired={indicatorGRequired}
 				lastActionDate="12 mars 2026"
+				lastTransmission={lastTransmission}
 				lockedByOther={false}
 				lockHolder={null}
 				siren="000000000"

@@ -95,6 +95,7 @@ export async function resetDeclarationToDraft() {
 			    hourly_men = NULL,
 			    draft = NULL,
 			    draft_updated_at = NULL,
+			    has_cse = NULL,
 			    cse_opinion_draft_updated_at = NULL
 			WHERE siren = ${TEST_SIREN}
 		`;
@@ -216,6 +217,11 @@ export async function setCompanyHasCse(hasCse: boolean | null) {
 	try {
 		await sql`
 			UPDATE app_company SET has_cse = ${hasCse} WHERE siren = ${TEST_SIREN}
+		`;
+		// The answer is snapshotted per year too: a fixture that models
+		// "no answer yet" must clear the year's copy too, or it wins over the company.
+		await sql`
+			UPDATE app_declaration SET has_cse = ${hasCse} WHERE siren = ${TEST_SIREN}
 		`;
 	} finally {
 		await sql.end();
@@ -653,6 +659,34 @@ export async function countPathChoiceEventsRound1(): Promise<number> {
 			  AND h.round = 1
 		`;
 		return rows[0]?.n ?? 0;
+	} finally {
+		await sql.end();
+	}
+}
+
+export async function getSecondDeclarationSubmissionState(
+	year: number,
+): Promise<{ status: DeclarationFsmStatus | null; submissions: number }> {
+	const sql = createConnection();
+	try {
+		const rows = await sql<
+			[{ status: DeclarationFsmStatus; submissions: number }]
+		>`
+			SELECT d.status,
+			       COUNT(h.id) FILTER (
+			         WHERE h.event_type = 'second_declaration_submit'
+			       )::int AS submissions
+			FROM app_declaration d
+			LEFT JOIN app_declaration_status_history h ON h.declaration_id = d.id
+			WHERE d.siren = ${TEST_SIREN}
+			  AND d.year = ${year}
+			  AND d.cancelled_at IS NULL
+			GROUP BY d.id, d.status
+		`;
+		return {
+			status: rows[0]?.status ?? null,
+			submissions: rows[0]?.submissions ?? 0,
+		};
 	} finally {
 		await sql.end();
 	}

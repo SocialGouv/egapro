@@ -29,7 +29,6 @@ type StepPageClientProps = {
 	initialDraft: RepresentationDraft;
 	campaignOpen: boolean;
 	declarationDeadline: Date;
-	isSubmitted?: boolean;
 };
 
 function isPublicationStepRequired(draft: RepresentationDraft): boolean {
@@ -52,7 +51,6 @@ export function StepPageClient({
 	initialDraft,
 	campaignOpen,
 	declarationDeadline,
-	isSubmitted = false,
 }: StepPageClientProps) {
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
@@ -60,11 +58,7 @@ export function StepPageClient({
 	const [navigationError, setNavigationError] = useState<string | null>(null);
 	const [isAdvancing, setIsAdvancing] = useState(false);
 	const isReadOnly =
-		!campaignOpen ||
-		isSubmitted ||
-		isImpersonating ||
-		lock.isReadOnly ||
-		lock.isLoading;
+		!campaignOpen || isImpersonating || lock.isReadOnly || lock.isLoading;
 
 	const {
 		draft,
@@ -79,7 +73,7 @@ export function StepPageClient({
 		year,
 		step,
 		initialDraft,
-		enabled: campaignOpen && !isSubmitted && !isReadOnly,
+		enabled: campaignOpen && !isReadOnly,
 	});
 
 	const { registerPendingSave } = lock;

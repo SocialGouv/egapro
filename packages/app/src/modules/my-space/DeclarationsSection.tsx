@@ -34,7 +34,9 @@ type Props = {
 	userPhone: string | null;
 	hasCse: boolean | null;
 	cseApplicable: boolean;
+	cseLocked: boolean;
 	representationCampaign: RepresentationCampaign;
+	representationCampaignYear: number;
 	representationLockedByOther?: boolean;
 	representationLockHolder?: LockHolderDisplay | null;
 };
@@ -42,8 +44,13 @@ type Props = {
 function getDeadlineCell(
 	declaration: DeclarationItem,
 	representationCampaign: RepresentationCampaign,
+	representationCampaignYear: number,
 ): string {
-	const isCurrentCampaign = declaration.year >= getCurrentYear();
+	const isCurrentCampaign =
+		declaration.year >=
+		(declaration.type === "representation"
+			? representationCampaignYear
+			: getCurrentYear());
 	if (declaration.type === "representation") {
 		if (declaration.notSubject) return "-";
 		if (
@@ -66,17 +73,28 @@ export function DeclarationsSection({
 	userPhone,
 	hasCse,
 	cseApplicable,
+	cseLocked,
 	representationCampaign,
+	representationCampaignYear,
 	representationLockedByOther = false,
 	representationLockHolder = null,
 }: Props) {
 	const currentYear = getCurrentYear();
-	const currentYearDeclarations = declarations.filter(
-		(d) => d.year >= currentYear,
+	// Representation campaigns open on 1 March: in January and February the
+	// campaign in force is the previous one, so it must stay under "Démarche en
+	// cours" instead of falling into "Années précédentes".
+	const yearFor = (declaration: DeclarationItem) =>
+		declaration.type === "representation"
+			? representationCampaignYear
+			: currentYear;
+	const isCurrentCampaign = (declaration: DeclarationItem) =>
+		declaration.year >= yearFor(declaration);
+	const currentYearDeclarations = declarations.filter(isCurrentCampaign);
+	const previousDeclarations = declarations.filter(
+		(declaration) => !isCurrentCampaign(declaration),
 	);
-	const previousDeclarations = declarations.filter((d) => d.year < currentYear);
 	const currentRepresentationDeclaration = declarations.find(
-		(d) => d.type === "representation" && d.year === currentYear,
+		(d) => d.type === "representation" && d.year === representationCampaignYear,
 	);
 
 	const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0] ?? 10);
@@ -115,10 +133,12 @@ export function DeclarationsSection({
 			{visibleCurrentDeclarations.length > 0 && (
 				<DeclarationsTable
 					cseApplicable={cseApplicable}
+					cseLocked={cseLocked}
 					declarations={visibleCurrentDeclarations}
 					hasCse={hasCse}
 					labelledById="demarches-en-cours-title"
 					representationCampaign={representationCampaign}
+					representationCampaignYear={representationCampaignYear}
 					userPhone={userPhone}
 				/>
 			)}
@@ -129,10 +149,12 @@ export function DeclarationsSection({
 					</h2>
 					<DeclarationsTable
 						cseApplicable={cseApplicable}
+						cseLocked={cseLocked}
 						declarations={visiblePreviousDeclarations}
 						hasCse={hasCse}
 						labelledById="annees-precedentes-title"
 						representationCampaign={representationCampaign}
+						representationCampaignYear={representationCampaignYear}
 						userPhone={userPhone}
 					/>
 				</>
@@ -169,7 +191,7 @@ export function DeclarationsSection({
 			)}
 			<RepresentationProcessPanel
 				campaign={representationCampaign}
-				campaignYear={currentYear}
+				campaignYear={representationCampaignYear}
 				declaration={currentRepresentationDeclaration}
 				lockedByOther={representationLockedByOther}
 				lockHolder={representationLockHolder}
@@ -184,7 +206,9 @@ type DeclarationsTableProps = {
 	userPhone: string | null;
 	hasCse: boolean | null;
 	cseApplicable: boolean;
+	cseLocked: boolean;
 	representationCampaign: RepresentationCampaign;
+	representationCampaignYear: number;
 };
 
 function DeclarationsTable({
@@ -193,7 +217,9 @@ function DeclarationsTable({
 	userPhone,
 	hasCse,
 	cseApplicable,
+	cseLocked,
 	representationCampaign,
+	representationCampaignYear,
 }: DeclarationsTableProps) {
 	return (
 		<div className={`fr-table ${styles.tableNoCaptionOffset}`}>
@@ -219,6 +245,7 @@ function DeclarationsTable({
 											<td>
 												<DeclarationLink
 													cseApplicable={cseApplicable}
+													cseLocked={cseLocked}
 													hasCse={hasCse}
 													type={declaration.type}
 													userPhone={userPhone}
@@ -229,7 +256,11 @@ function DeclarationsTable({
 											<td>{declaration.year}</td>
 											<td>{getDeclarationProcessStepLabel(declaration)}</td>
 											<td>
-												{getDeadlineCell(declaration, representationCampaign)}
+												{getDeadlineCell(
+													declaration,
+													representationCampaign,
+													representationCampaignYear,
+												)}
 											</td>
 											<td>
 												<StatusBadge status={declaration.status} />

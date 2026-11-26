@@ -9,7 +9,10 @@ import {
 	parseGipWorkforce,
 } from "~/modules/domain";
 import type { DB } from "~/server/db";
-import { submittedDeclarationCondition } from "~/server/db/declarationConditions";
+import {
+	cseAnswerForYear,
+	submittedDeclarationCondition,
+} from "~/server/db/declarationConditions";
 import { companies, declarations, gipMdsData, users } from "~/server/db/schema";
 import { mapCseOpinions } from "./mapIndicators";
 import {
@@ -53,7 +56,7 @@ export async function buildExportRows(
 			workforceEma: gipMdsData.workforceEma,
 			nafCode: companies.nafCode,
 			address: companies.address,
-			hasCse: companies.hasCse,
+			hasCse: cseAnswerForYear(),
 			declarantFirstName: users.firstName,
 			declarantLastName: users.lastName,
 			declarantEmail: users.email,

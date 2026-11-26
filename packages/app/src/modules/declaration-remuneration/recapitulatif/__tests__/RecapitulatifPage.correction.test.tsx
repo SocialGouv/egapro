@@ -86,7 +86,7 @@ describe("RecapitulatifPage — second declaration (isCorrection)", () => {
 		expect(
 			screen.getByRole("heading", {
 				level: 2,
-				name: "Indicateur par catégorie d'emplois",
+				name: "Indicateurs par catégorie d'emplois",
 			}),
 		).toBeInTheDocument();
 		expect(

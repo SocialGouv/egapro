@@ -66,8 +66,10 @@ function makeDeclaration(
 		secondDeclarationPathChoice: null,
 		hasSubmittedSecondDeclaration: false,
 		secondDeclarationStep: null,
+		lastTransmission: null,
 		hasSubmittedJointEvaluation: false,
 		hasSubmittedCseOpinion: false,
+		hasCse: null,
 		cseRequired: false,
 		hasJointEvaluationFile: false,
 		formalNoticeAvailable: false,
@@ -99,6 +101,7 @@ const BASE_PROPS = {
 	lockedByOther: false,
 	lockHolder: null as LockHolder | null,
 	representationCampaign: getDefaultRepresentationCampaign(currentYear),
+	representationCampaignYear: currentYear,
 	userPhone: "0122334455" as string | null,
 };
 
@@ -118,6 +121,41 @@ describe("CompanyDeclarationsPage", () => {
 		renderPage();
 		expect(
 			screen.getByRole("heading", { level: 1, name: "Alpha Solutions" }),
+		).toBeInTheDocument();
+	});
+
+	it("hides the CSE edit entry point once the year's démarche is completed", () => {
+		renderPage({
+			company: { ...company, gipWorkforce: 250, hasCse: true },
+			declarations: [
+				makeDeclaration("remuneration", {
+					status: "done",
+					fsmStatus: "demarche_completed",
+					hasCse: true,
+				}),
+				makeDeclaration("representation"),
+			],
+		});
+
+		expect(
+			screen.queryByRole("button", { name: "Modifier" }),
+		).not.toBeInTheDocument();
+	});
+
+	it("keeps the CSE edit entry point while the year's démarche is open", () => {
+		renderPage({
+			company: { ...company, gipWorkforce: 250, hasCse: true },
+			declarations: [
+				makeDeclaration("remuneration", {
+					fsmStatus: "awaiting_cse_opinion",
+					hasCse: true,
+				}),
+				makeDeclaration("representation"),
+			],
+		});
+
+		expect(
+			screen.getByRole("button", { name: "Modifier" }),
 		).toBeInTheDocument();
 	});
 
@@ -352,6 +390,34 @@ describe("CompanyDeclarationsPage", () => {
 	it("renders MissingInfoModal when hasCse is null", () => {
 		const { container } = renderPage({ company: { ...company, hasCse: null } });
 		expect(container.querySelector("#missing-info-modal")).toBeInTheDocument();
+	});
+
+	it("routes a locked year with no CSE answer to the declaration panel, not the empty missing-info form", () => {
+		// #4228: the question cannot be asked on a completed démarche, so the row
+		// must not open a panel that has nothing to offer.
+		renderPage({
+			company: { ...company, gipWorkforce: 250, hasCse: null },
+			declarations: [
+				makeDeclaration("remuneration", { fsmStatus: "demarche_completed" }),
+			],
+		});
+		expect(
+			screen.getByRole("button", { name: "Rémunération" }),
+		).toHaveAttribute("aria-controls", "declaration-process-panel");
+	});
+
+	it("shows the frozen year's answer instead of the live company one in the banner", () => {
+		renderPage({
+			company: { ...company, gipWorkforce: 250, hasCse: true },
+			declarations: [
+				makeDeclaration("remuneration", {
+					fsmStatus: "demarche_completed",
+					hasCse: false,
+				}),
+			],
+		});
+		const cseTerm = screen.getByText("Existence d'un CSE :");
+		expect(cseTerm.nextElementSibling).toHaveTextContent("Non");
 	});
 
 	it("forwards the lock alert when the declaration is locked by another user", () => {

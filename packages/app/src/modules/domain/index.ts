@@ -18,6 +18,7 @@ export {
 // Campaign
 export {
 	getCurrentDate,
+	getCurrentRepresentationCampaignYear,
 	getCurrentYear,
 	getDeclarationReferencePeriod,
 	getDefaultCampaignDeadlineColumns,
@@ -27,6 +28,8 @@ export {
 	getPathChoiceRound1Deadline,
 	getReferencePeriod,
 	getReferenceYearFor,
+	getRepresentationCampaignEndDate,
+	getRepresentationCampaignStartDate,
 	getWorkforceYear,
 	isDeadlinePassed,
 	isRepresentationCampaignOpen,
@@ -125,7 +128,9 @@ export type {
 export {
 	isComplianceProcessRequired,
 	isComplianceProcessRevisionRequired,
+	isCseAnswerLocked,
 	isCseOpinionRequired,
+	resolveCseAnswerForYear,
 	resolveCseReconciliation,
 } from "./shared/declarationFlags";
 // Declaration edit lock constants
@@ -165,6 +170,7 @@ export {
 	isInComplianceProcess,
 	isJointEvaluationWritable,
 	isLockedBySubsequentSubmission,
+	isSecondDeclarationResubmissionPending,
 	isSecondDeclarationWritable,
 } from "./shared/declarationStatus";
 // Declaration steps labels (A–F stepper), post-submit milestones, K19 funnels
@@ -199,9 +205,11 @@ export type {
 	DeclarationEventType,
 	DeclarationStatusEvent,
 	JointEvaluationTransmissionFacts,
+	LastTransmission,
 	SubmissionHistoryEvent,
 	SubsequentSubmissions,
 	TrajectoryEntry,
+	TransmissionHistoryEvent,
 } from "./shared/declarationTrajectory";
 export {
 	deriveSubsequentSubmissions,
@@ -211,12 +219,14 @@ export {
 	getDemarcheCompletedAt,
 	getEventTimestamp,
 	getJointEvaluationSubmittedAt,
+	getLastTransmission,
 	getPathChoiceAt,
 	getSecondDeclarationSubmittedAt,
 	getSubmittedAt,
 	hasEvent,
 	hasSubmittedSecondDeclaration,
 	isJointEvaluationFileTransmitted,
+	isLastTransmissionPathChoice,
 	SUBSEQUENT_SUBMISSION_EVENT_TYPES,
 } from "./shared/declarationTrajectory";
 // Démarche lifecycle — admin-facing 4-value status, its date, and the transmission events
@@ -410,12 +420,14 @@ export {
 	computeRepresentationVerdict,
 	deriveExecutivesNotComputableReason,
 	getRepresentationCampaignYear,
+	getRepresentationReferenceYear,
 	getRepresentationTarget,
 	getRepresentationThresholdNotice,
 	isPresumedSubjectToRepresentation,
 	isRepresentationDeclarationSubmitted,
 	isRepresentationNotSubject,
 	isRepresentationPublicationRequired,
+	PUBLIC_REPRESENTATION_RECENT_CAMPAIGN_YEARS,
 	REPRESENTATION_CAMPAIGN_YEAR_OFFSET,
 	REPRESENTATION_OBLIGATION_FROM_CAMPAIGN_YEAR,
 	REPRESENTATION_SUBJECTION_WINDOW_YEARS,

@@ -143,6 +143,7 @@ function renderStep(
 		columns?: ContentTypeColumn[];
 		initialAssociations?: StoredFileContentType[];
 		isReadOnly?: boolean;
+		opinionsStale?: boolean;
 	} = {},
 ) {
 	return render(
@@ -152,6 +153,7 @@ function renderStep(
 				declarationYear={2026}
 				existingFiles={props.existingFiles}
 				initialAssociations={props.initialAssociations}
+				opinionsStale={props.opinionsStale}
 				siren="123456789"
 			/>
 		</LockProvider>,
@@ -183,6 +185,22 @@ describe("Step2Upload", () => {
 
 	afterEach(() => {
 		vi.clearAllMocks();
+	});
+
+	it("warns when saved opinions predate the latest second declaration submission", () => {
+		renderStep({ opinionsStale: true });
+
+		expect(
+			screen.getByText("Vérifiez les avis déjà renseignés"),
+		).toBeInTheDocument();
+	});
+
+	it("does not warn when no opinion predates the latest submission", () => {
+		renderStep();
+
+		expect(
+			screen.queryByText("Vérifiez les avis déjà renseignés"),
+		).not.toBeInTheDocument();
 	});
 
 	it("renders the page title", () => {
@@ -695,6 +713,28 @@ describe("Step2Upload", () => {
 		expect(
 			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
 		).not.toBeChecked();
+	});
+
+	it("re-reads the server state once an association write settles, so the stale-opinion warning clears", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: ACCURACY_AND_GAP_COLUMNS,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+			initialAssociations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+			],
+		});
+
+		await user.click(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		);
+		refreshMock.mockClear();
+
+		act(() => {
+			setTypesMutationOptions.onSuccess?.(undefined, { associations: [] });
+		});
+
+		expect(refreshMock).toHaveBeenCalled();
 	});
 
 	it("surfaces an error when persisting the association fails", () => {
