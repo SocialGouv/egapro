@@ -2,6 +2,7 @@ import "server-only";
 
 import { MissingSiret } from "~/modules/declaration-remuneration";
 import {
+	getCurrentRepresentationCampaignYear,
 	getCurrentYear,
 	getReferenceYearFor,
 	parseSiren,
@@ -27,7 +28,8 @@ export async function MonEspacePage({
 		return <MissingSiret />;
 	}
 	const currentYear = getCurrentYear();
-	const representationYear = getReferenceYearFor(currentYear);
+	const representationCampaignYear = getCurrentRepresentationCampaignYear();
+	const representationYear = getReferenceYearFor(representationCampaignYear);
 	const getRepresentationLockState =
 		api.representationDeclaration?.getLockState;
 	const [
@@ -39,7 +41,7 @@ export async function MonEspacePage({
 	] = await Promise.all([
 		api.company.getWithDeclarations({ siren }),
 		getCampaignDeadlines(currentYear),
-		getRepresentationCampaign(currentYear),
+		getRepresentationCampaign(representationCampaignYear),
 		api.declarationLock.getActiveLockForCurrentDeclaration(),
 		getRepresentationLockState
 			? getRepresentationLockState({ year: representationYear })
@@ -55,6 +57,7 @@ export async function MonEspacePage({
 			lockedByOther={lockState.lockedByOther}
 			lockHolder={lockState.holder}
 			representationCampaign={representationCampaign}
+			representationCampaignYear={representationCampaignYear}
 			representationLockedByOther={
 				representationLock.locked && !representationLock.isOwnLock
 			}

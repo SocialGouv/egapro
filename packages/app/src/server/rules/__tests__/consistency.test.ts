@@ -150,12 +150,18 @@ describe("v2027.1.json — structural consistency", () => {
 			rules.states.some((s) => s.terminal === true) ||
 			(() => {
 				const toStates = new Set(rules.transitions.map((t) => t.to));
-				// Terminal = reachable and with no transition leaving it for a
-				// *different* state. A self-loop (e.g. a re-submittable CSE deposit
-				// looping on demarche_completed) does not disqualify it.
+				// Terminal = reachable and with no *advertisable* transition leaving it
+				// for a different state. A self-loop (e.g. a re-submittable CSE deposit
+				// looping on demarche_completed) does not disqualify it, and neither
+				// does a non-advertisable escape hatch (re-submitting the last
+				// transmission of a closed démarche, epic #5128): the user cannot pick
+				// it from the funnel graph.
 				return [...toStates].some(
 					(id) =>
-						!rules.transitions.some((t) => t.from.includes(id) && t.to !== id),
+						!rules.transitions.some(
+							(t) =>
+								t.advertisable !== false && t.from.includes(id) && t.to !== id,
+						),
 				);
 			})();
 		expect(hasTerminal).toBe(true);

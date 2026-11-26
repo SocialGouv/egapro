@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getCurrentRepresentationCampaignYear } from "~/modules/domain";
 import { HomePage } from "~/modules/home";
 import { MY_SPACE } from "~/modules/routes";
 import { auth } from "~/server/auth";
@@ -20,9 +21,10 @@ export default async function Page() {
 	}
 
 	const year = await getActiveCampaignYear();
+	const representationYear = await getCurrentRepresentationCampaignYear();
 	const [remunerationDeadlines, representationCampaign] = await Promise.all([
 		getCampaignDeadlines(year),
-		getRepresentationCampaign(year),
+		getRepresentationCampaign(representationYear),
 	]);
 
 	return (

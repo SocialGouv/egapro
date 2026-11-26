@@ -83,6 +83,12 @@ function submittedColumnsToDraft(
 	};
 }
 
+/**
+ * Funnel loader: an edit saved after the transmission lands in `draft` while
+ * the row keeps the `submitted` status, so the saved draft wins over the
+ * transmitted columns it was derived from. A transmitted row without a draft is
+ * rebuilt from its columns.
+ */
 export function representationDraftFromDeclaration(
 	declaration: RepresentationDeclarationSnapshot | null | undefined,
 	fallbackStep: number,
@@ -90,9 +96,24 @@ export function representationDraftFromDeclaration(
 	if (declaration === null || declaration === undefined) {
 		return { currentStep: fallbackStep };
 	}
+	const parsed = representationDraftSchema.safeParse(declaration.draft);
+	if (parsed.success) return parsed.data;
 	if (declaration.status === "submitted") {
 		return submittedColumnsToDraft(declaration, fallbackStep);
 	}
-	const parsed = representationDraftSchema.safeParse(declaration.draft);
-	return parsed.success ? parsed.data : { currentStep: fallbackStep };
+	return { currentStep: fallbackStep };
+}
+
+/**
+ * What was actually transmitted — the consultation view and the receipt PDF
+ * must never display an edit that was not re-transmitted.
+ */
+export function representationTransmittedDraftFromDeclaration(
+	declaration: RepresentationDeclarationSnapshot | null | undefined,
+	fallbackStep: number,
+): RepresentationDraft {
+	if (declaration?.status === "submitted") {
+		return submittedColumnsToDraft(declaration, fallbackStep);
+	}
+	return representationDraftFromDeclaration(declaration, fallbackStep);
 }

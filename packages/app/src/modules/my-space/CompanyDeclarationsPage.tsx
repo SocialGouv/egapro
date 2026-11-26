@@ -37,6 +37,7 @@ type Props = {
 	representationLockedByOther?: boolean;
 	representationLockHolder?: LockHolderDisplay | null;
 	representationCampaign: RepresentationCampaign;
+	representationCampaignYear: number;
 	userPhone: string | null;
 };
 
@@ -62,6 +63,7 @@ export function CompanyDeclarationsPage({
 	representationLockedByOther = false,
 	representationLockHolder = null,
 	representationCampaign,
+	representationCampaignYear,
 	userPhone,
 }: Props) {
 	const currentYear = getCurrentYear();
@@ -108,6 +110,7 @@ export function CompanyDeclarationsPage({
 				declarations={declarations}
 				hasCse={company.hasCse}
 				representationCampaign={representationCampaign}
+				representationCampaignYear={representationCampaignYear}
 				representationLockedByOther={representationLockedByOther}
 				representationLockHolder={representationLockHolder}
 				userPhone={userPhone}
@@ -146,6 +149,7 @@ export function CompanyDeclarationsPage({
 					currentDeclaration?.jointEvaluationViewAvailable
 				}
 				lastActionDate={lastActionDate}
+				lastTransmission={currentDeclaration?.lastTransmission ?? null}
 				lockedByOther={lockedByOther}
 				lockHolder={lockHolder}
 				siren={company.siren}

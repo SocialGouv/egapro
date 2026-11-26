@@ -131,7 +131,6 @@ function renderProvider(
 	props: Partial<{
 		enabled: boolean;
 		campaignOpen: boolean;
-		isSubmitted: boolean;
 		pendingSave: PendingSaveFlush;
 	}> = {},
 ) {
@@ -143,7 +142,6 @@ function renderProvider(
 			<RepresentationLockProvider
 				campaignOpen={props.campaignOpen ?? true}
 				enabled={props.enabled ?? true}
-				isSubmitted={props.isSubmitted ?? false}
 				year={YEAR}
 			>
 				<LockProbe />
@@ -218,11 +216,8 @@ describe("RepresentationLockProvider", () => {
 			expect(acquireMutateAsync).not.toHaveBeenCalled();
 		});
 
-		it.each([
-			["the campaign is closed", { campaignOpen: false }],
-			["the declaration is submitted", { isSubmitted: true }],
-		])("stays read-only without acquiring when %s", async (_, props) => {
-			renderProvider(props);
+		it("stays read-only without acquiring when the campaign is closed", async () => {
+			renderProvider({ campaignOpen: false });
 			await advance();
 
 			expect(probe("readOnly")).toBe("true");
@@ -311,7 +306,7 @@ describe("RepresentationLockProvider", () => {
 			expect(probe("readOnly")).toBe("false");
 		});
 
-		it("stops retrying without an unavailable alert when the declaration is already submitted", async () => {
+		it("stops retrying without an unavailable alert when the campaign is closed", async () => {
 			acquireMutateAsync.mockRejectedValue({ data: { code: "FORBIDDEN" } });
 
 			renderProvider();

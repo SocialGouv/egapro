@@ -16,6 +16,7 @@ const EMPTY_DECLARATION = {
 	secondDeclarationPathChoice: null,
 	hasSubmittedSecondDeclaration: false,
 	secondDeclarationStep: null,
+	lastTransmission: null,
 	hasSubmittedJointEvaluation: false,
 	hasSubmittedCseOpinion: false,
 	cseRequired: false,
@@ -98,6 +99,13 @@ describe("buildDeclarationList", () => {
 			status: "to_complete",
 			fsmStatus: null,
 		});
+	});
+
+	it("forwards the row's last transmission to the panel item (#5164)", () => {
+		const record = makeDbDeclaration({ lastTransmission: "joint_evaluation" });
+		const result = buildDeclarationList(SIREN, [record], 2026);
+
+		expect(result[0]).toMatchObject({ lastTransmission: "joint_evaluation" });
 	});
 
 	it("includes previous year DB records after current year rows", () => {
@@ -323,6 +331,45 @@ describe("buildDeclarationList", () => {
 			year: 2026,
 			notSubject: false,
 		});
+	});
+
+	it("resolves the representation row on the representation campaign year", () => {
+		const result = buildDeclarationList(
+			SIREN,
+			[makeDbDeclaration({ type: "representation", year: 2025 })],
+			2026,
+			new Set(),
+			true,
+			getDefaultCampaignDeadlines(2026),
+			2025,
+		);
+
+		expect(result[0]).toMatchObject({
+			type: "remuneration",
+			year: 2026,
+			status: "to_complete",
+		});
+		expect(result[1]).toEqual({
+			...makeDbDeclaration({ type: "representation", year: 2025 }),
+			siren: SIREN,
+		});
+	});
+
+	it("keeps a previous representation placeholder rather than skipping a campaign", () => {
+		const result = buildDeclarationList(
+			SIREN,
+			[],
+			2026,
+			new Set(),
+			true,
+			undefined,
+			2025,
+		);
+
+		expect(result).toEqual([
+			placeholderRow("remuneration", 2026),
+			placeholderRow("representation", 2025),
+		]);
 	});
 
 	it("propagates notSubject from a previous year representation record", () => {

@@ -66,6 +66,7 @@ export default async function WithBannerLayout({
 	const lockAcquisitionSuspended = isDeclarationWritingClosed(
 		declaration.status,
 		declarationData.isFirstDeclarationLocked,
+		declarationData.lastTransmission,
 	);
 
 	return (

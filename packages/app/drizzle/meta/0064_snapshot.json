@@ -1,6 +1,6 @@
 {
-	"id": "70d59283-8114-4223-a64b-518dc473a0da",
-	"prevId": "5bf81bb9-2ab0-453a-a67f-73c6c6da41eb",
+	"id": "5bf81bb9-2ab0-453a-a67f-73c6c6da41eb",
+	"prevId": "4bd3c55d-2767-4e11-b065-9fe794aa463a",
 	"version": "7",
 	"dialect": "postgresql",
 	"tables": {
@@ -2449,12 +2449,6 @@
 				"last_error": {
 					"name": "last_error",
 					"type": "varchar(500)",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"next_expected_at": {
-					"name": "next_expected_at",
-					"type": "timestamp with time zone",
 					"primaryKey": false,
 					"notNull": false
 				}

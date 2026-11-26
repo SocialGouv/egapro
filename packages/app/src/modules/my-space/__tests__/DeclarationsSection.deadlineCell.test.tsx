@@ -22,6 +22,7 @@ const finalisedRemuneration: DeclarationItem = {
 	secondDeclarationPathChoice: null,
 	hasSubmittedSecondDeclaration: false,
 	secondDeclarationStep: null,
+	lastTransmission: null,
 	hasSubmittedJointEvaluation: false,
 	hasSubmittedCseOpinion: false,
 	cseRequired: false,
@@ -46,6 +47,7 @@ function deadlineCellText(declaration: DeclarationItem): string | null {
 			declarations={[declaration]}
 			hasCse={true}
 			representationCampaign={getDefaultRepresentationCampaign(currentYear)}
+			representationCampaignYear={currentYear}
 			userPhone="0122334455"
 		/>,
 	);

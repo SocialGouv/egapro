@@ -4,7 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import {
 	getRepresentationDeclarationSchema,
 	RepresentationConsultation,
-	representationDraftFromDeclaration,
+	representationTransmittedDraftFromDeclaration,
 } from "~/modules/declaration-representation";
 import {
 	getReferenceYearFor,
@@ -74,7 +74,7 @@ export default async function RepresentationConsultationPage({
 		api.representationDeclaration.getWorkforceHistory({ campaignYear }),
 	]);
 
-	const draft = representationDraftFromDeclaration(
+	const draft = representationTransmittedDraftFromDeclaration(
 		declaration,
 		LAST_REPRESENTATION_STEP,
 	);

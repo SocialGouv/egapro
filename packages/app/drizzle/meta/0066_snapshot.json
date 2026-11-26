@@ -1,6 +1,6 @@
 {
-	"id": "74d80555-e95b-4e85-9c1e-45c71b1e288f",
-	"prevId": "bcff481e-716f-4063-baba-cce93f302a88",
+	"id": "bcff481e-716f-4063-baba-cce93f302a88",
+	"prevId": "70d59283-8114-4223-a64b-518dc473a0da",
 	"version": "7",
 	"dialect": "postgresql",
 	"tables": {
@@ -2421,13 +2421,6 @@
 					"primaryKey": false,
 					"notNull": true
 				},
-				"interval_seconds": {
-					"name": "interval_seconds",
-					"type": "integer",
-					"primaryKey": false,
-					"notNull": true,
-					"default": 60
-				},
 				"status": {
 					"name": "status",
 					"type": "health_status",
@@ -2468,18 +2461,6 @@
 				},
 				"next_expected_at": {
 					"name": "next_expected_at",
-					"type": "timestamp with time zone",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"last_success_at": {
-					"name": "last_success_at",
-					"type": "timestamp with time zone",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"last_failure_at": {
-					"name": "last_failure_at",
 					"type": "timestamp with time zone",
 					"primaryKey": false,
 					"notNull": false
