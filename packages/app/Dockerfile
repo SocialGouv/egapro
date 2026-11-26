@@ -67,12 +67,24 @@ RUN pnpm --filter notifications build
 RUN pnpm --filter app exec esbuild \
     scripts/migrate.ts \
     scripts/audit-cleanup.ts \
-    scripts/declaration-cleanup.ts \
     scripts/backfill-company-naf.ts \
     scripts/backfill-company-region-department.ts \
     scripts/seed-demo-observatory.ts \
     --bundle --platform=node --format=esm --packages=external \
     --outdir=scripts --out-extension:.js=.bundle.mjs
+
+# declaration-cleanup gets its own bundle with no external package. It lazily
+# imports `@aws-sdk/client-s3` (the S3 object deletion of purged PDFs), which a
+# `--packages=external` bundle would only find in the runner if Next's output
+# file tracing happened to copy it into the standalone tree — an implicit
+# dependency nothing verifies. Bundling `postgres` and the SDK in keeps the
+# script self-contained, so its CronJob needs the image and nothing else.
+# The banner is mandatory: the SDK's CommonJS dependencies call
+# `require("buffer")`, which esbuild cannot shim in an ESM output.
+RUN pnpm --filter app exec esbuild scripts/declaration-cleanup.ts \
+    --bundle --platform=node --format=esm \
+    --banner:js='import { createRequire as __createRequire } from "node:module"; const require = __createRequire(import.meta.url);' \
+    --outfile=scripts/declaration-cleanup.bundle.mjs
 
 # Produce a self-contained runtime tree for the notifications worker. The
 # output bundles its own `node_modules/.pnpm` store, so the symlinks
@@ -129,12 +141,14 @@ COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/backfill-company
 COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/backfill-company-naf.bundle.mjs ./packages/app/scripts/backfill-company-naf.bundle.mjs
 # Development/review-app fixture loaded by the optional post-deploy hook.
 COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/seed-demo-observatory.bundle.mjs ./packages/app/scripts/seed-demo-observatory.bundle.mjs
-# Standalone script invoked by the audit-cleanup CronJob (issue #3268 — direct
-# DB access replaces the former curl → /api/audit/cleanup HTTP trigger).
-# declaration-cleanup is deliberately NOT copied: its CronJob has never found it
-# in this image. That packaging gap predates the TypeScript migration and is
-# tracked on its own — fixing it here would be a behaviour change out of scope.
+# Standalone scripts invoked by CronJobs (issue #3268 — direct DB access
+# replaces the former curl → /api/audit/cleanup HTTP trigger).
 COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/audit-cleanup.bundle.mjs ./packages/app/scripts/audit-cleanup.bundle.mjs
+# RGPD declaration purge (#4773), invoked by the declaration-cleanup-daily
+# CronJob at this exact path. This bundle embeds its own `postgres` and
+# `@aws-sdk/client-s3` (see its dedicated bundle step above), so it resolves
+# nothing from the runner's node_modules.
+COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/declaration-cleanup.bundle.mjs ./packages/app/scripts/declaration-cleanup.bundle.mjs
 
 # Notifications worker — independent workspace, runs as its own K8s
 # Deployment (notifications-deployment.yaml). Source = `pnpm deploy` output

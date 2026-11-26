@@ -5,6 +5,11 @@ metadata:
   namespace: {{ .Values.global.namespace }}
 spec:
   schedule: "0 3 * * *" # Daily at 03:00 UTC — offset from audit-cleanup (04:00) to avoid overlap
+  # Production is suspended until PO and DPO validate the volume the first real
+  # run would delete (#4773). Dev and preprod stay scheduled; a suspended
+  # CronJob can still be triggered once by hand
+  # (`kubectl create job --from=cronjob/declaration-cleanup-daily …`).
+  suspend: {{ .Values.global.declarationCleanupSuspended | default false }}
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3

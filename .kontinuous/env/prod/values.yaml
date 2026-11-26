@@ -1,5 +1,9 @@
 global:
   host: egapro.travail.gouv.fr
+  # The RGPD declaration purge ships in the image but stays suspended here until
+  # PO and DPO validate the volume the first real run would delete (#4773).
+  # Flip to false — and only then — to schedule the daily purge in production.
+  declarationCleanupSuspended: true
 
 app:
   redirectFrom:
