@@ -36,6 +36,7 @@
 	"dependencies": {
 		"@react-email/components": "^1.0.12",
 		"@react-email/render": "^2.0.8",
+		"@sentry/node": "^11.6.0",
 		"html-to-text": "^9.0.5",
 		"nodemailer": "^10.0.15",
 		"pg-boss": "^12.18.2",

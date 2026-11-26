@@ -449,6 +449,34 @@
 			"when": 1794480552397,
 			"tag": "0063_align-representation-campaign-window",
 			"breakpoints": true
+		},
+		{
+			"idx": 64,
+			"version": "7",
+			"when": 1794921740759,
+			"tag": "0064_cloudy_thunderbird",
+			"breakpoints": true
+		},
+		{
+			"idx": 65,
+			"version": "7",
+			"when": 1795080859267,
+			"tag": "0065_glossy_darkhawk",
+			"breakpoints": true
+		},
+		{
+			"idx": 66,
+			"version": "7",
+			"when": 1795093463489,
+			"tag": "0066_empty_mac_gargan",
+			"breakpoints": true
+		},
+		{
+			"idx": 67,
+			"version": "7",
+			"when": 1795098525133,
+			"tag": "0067_magenta_molten_man",
+			"breakpoints": true
 		}
 	]
 }

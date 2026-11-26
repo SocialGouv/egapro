@@ -1,0 +1,1 @@
+ALTER TABLE "app_health_probe" ADD COLUMN "next_expected_at" timestamp with time zone;

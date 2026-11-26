@@ -22,16 +22,20 @@ COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY patches/ ./patches/
 COPY packages/app/package.json ./packages/app/
 COPY packages/notifications/package.json ./packages/notifications/
+COPY packages/healthcheck/package.json ./packages/healthcheck/
+COPY packages/suit-transport/package.json ./packages/suit-transport/
 
 # Install both the app (Next.js build) and the notifications worker
 # subtree. Both packages are leaves of the workspace graph; listing them
 # explicitly is enough.
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
-    pnpm install --filter app --filter notifications --frozen-lockfile --store-dir=/pnpm/store
+    pnpm install --filter app --filter notifications --filter healthcheck --filter suit-transport --frozen-lockfile --store-dir=/pnpm/store
 
 # Copy source code (after install to maximize cache hits)
 COPY packages/app/ ./packages/app/
 COPY packages/notifications/ ./packages/notifications/
+COPY packages/healthcheck/ ./packages/healthcheck/
+COPY packages/suit-transport/ ./packages/suit-transport/
 
 # Build-time env handling
 ENV HUSKY=0
@@ -52,11 +56,17 @@ ENV NEXT_PUBLIC_MATOMO_URL=$NEXT_PUBLIC_MATOMO_URL
 ARG NEXT_PUBLIC_MATOMO_SITE_ID
 ENV NEXT_PUBLIC_MATOMO_SITE_ID=$NEXT_PUBLIC_MATOMO_SITE_ID
 
+# The shared SUIT transport must exist before either consumer compiles: the app
+# imports it by package name (resolved through its dist), and the healthcheck
+# worker's own build imports the same package.
+RUN pnpm --filter suit-transport build
+
 # Compile the notifications worker / publisher TypeScript sources to dist/
 # BEFORE the Next.js build. The app's runtime dynamic import
 # `await import("notifications/publisher")` resolves to ./dist/publisher.js
 # via package.json exports, so the dist must exist when Next.js starts.
 RUN pnpm --filter notifications build
+RUN pnpm --filter healthcheck build
 
 # Bundle the standalone maintenance scripts for the minimal production image.
 # Their sources are TypeScript and some of them import shared modules from src/;
@@ -81,6 +91,10 @@ RUN pnpm --filter app exec esbuild \
 # don't use injected workspace packages).
 RUN pnpm --filter notifications deploy --prod --legacy /deploy/notifications
 
+# Same treatment for the healthcheck worker: a flat deploy tree (compiled
+# dist + a real node_modules with the AWS SDK and postgres resolved inline).
+RUN pnpm --filter healthcheck deploy --prod --legacy /deploy/healthcheck
+
 # Build with Next.js cache persisted across builds.
 # The Sentry auth token stays a BuildKit secret: it is a credential and must never
 # land in an image layer. The three public values below are ARGs on purpose — they
@@ -89,10 +103,13 @@ RUN pnpm --filter notifications deploy --prod --legacy /deploy/notifications
 # Auto already built for the same commit and ship the branch name instead of the
 # tag. Declaring them here, right before the build, keeps the dependency layers
 # shared: this layer is already invalidated by the source tree itself.
+# The cache id is versioned: a build that dies during asset emission leaves a
+# Turbopack cache the next build panics on ("generate_source_map was canceled",
+# seconds in, on every retry). Bumping the id starts from a clean cache.
 ARG APP_VERSION
 ARG PR_NUMBER
 ARG SENTRY_RELEASE
-RUN --mount=type=cache,id=next-cache-v2,sharing=locked,target=/app/packages/app/.next/cache \
+RUN --mount=type=cache,id=next-cache-v3,sharing=locked,target=/app/packages/app/.next/cache \
     --mount=type=secret,id=sentry_auth_token \
     SENTRY_AUTH_TOKEN=$(cat /run/secrets/sentry_auth_token 2>/dev/null) \
     NEXT_PUBLIC_SENTRY_RELEASE=$(echo "$SENTRY_RELEASE" | tr '/' '-') \
@@ -110,6 +127,14 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
+# Public Sentry DSN, re-declared in this stage: the notifications worker
+# initialises @sentry/node at runtime, whereas the Next.js bundle only inlines
+# the value at build time. Keeping it a build argument — never a file in the
+# repository — keeps one source (the GitHub variable) and no third copy to
+# drift (#5199). The DSN is public by design: it already ships in the browser
+# bundle.
+ARG NEXT_PUBLIC_SENTRY_DSN
+ENV NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN
 
 WORKDIR /app
 
@@ -144,6 +169,13 @@ COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/audit-cleanup.bu
 COPY --from=builder --chown=1000:1000 /deploy/notifications/dist ./packages/notifications/dist
 COPY --from=builder --chown=1000:1000 /deploy/notifications/package.json ./packages/notifications/package.json
 COPY --from=builder --chown=1000:1000 /deploy/notifications/node_modules ./packages/notifications/node_modules
+
+# Healthcheck worker — independent workspace, runs as its own K8s Deployment
+# (healthcheck-deployment.yaml). Same deployed-tree shape as the notifications
+# worker above.
+COPY --from=builder --chown=1000:1000 /deploy/healthcheck/dist ./packages/healthcheck/dist
+COPY --from=builder --chown=1000:1000 /deploy/healthcheck/package.json ./packages/healthcheck/package.json
+COPY --from=builder --chown=1000:1000 /deploy/healthcheck/node_modules ./packages/healthcheck/node_modules
 
 USER 1000
 

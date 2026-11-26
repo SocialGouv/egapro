@@ -70,12 +70,12 @@ run_rules() {
 	rule '\.(ts|tsx)$' \
 		'process\.env' \
 		'Direct process.env is forbidden. Use: import { env } from "~/env.js".' \
-		'(env\.js|instrumentation(-client)?\.ts|next\.config|trpc/react\.tsx|sentry\.(client|server|edge)\.config\.ts|global-setup\.ts|integration-setup\.ts|playwright\.config|drizzle[^/]*\.config|packages/app/scripts/|e2e/helpers/|packages/notifications/)'
+		'(env\.js|instrumentation(-client)?\.ts|next\.config|trpc/react\.tsx|sentry\.(client|server|edge)\.config\.ts|global-setup\.ts|integration-setup\.ts|playwright\.config|drizzle[^/]*\.config|packages/app/scripts/|e2e/helpers/|packages/notifications/|packages/healthcheck/)'
 
 	rule '\.(ts|tsx)$' \
 		'(\.\./){2,}' \
 		'Deep relative imports (../../ or deeper) are forbidden. Use the ~/ path alias.' \
-		'(packages/notifications/)'
+		'(packages/notifications/|packages/healthcheck/)'
 
 	rule '\.scss$' \
 		'#[0-9a-fA-F]{3,8}' \

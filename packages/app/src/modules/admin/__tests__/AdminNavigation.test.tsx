@@ -30,6 +30,9 @@ describe("AdminNavigation", () => {
 			screen.getByRole("link", { name: "Statistiques" }),
 		).toBeInTheDocument();
 		expect(
+			screen.getByRole("link", { name: "État des services" }),
+		).toBeInTheDocument();
+		expect(
 			screen.queryByRole("link", { name: "Statistiques campagne" }),
 		).not.toBeInTheDocument();
 		expect(

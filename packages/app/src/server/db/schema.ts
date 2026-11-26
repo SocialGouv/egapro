@@ -977,6 +977,81 @@ export const referents = createTable(
 	(t) => [index("referent_region_idx").on(t.region)],
 );
 
+// ── Supervision tables ──────────────────────────────────────────────
+// Written by the `healthcheck` worker (packages/healthcheck), read by the
+// back-office. One row per probe and per observed state change — never one per
+// tick, or ten probes a minute would add ~14 000 rows a day.
+
+export const healthStatusEnum = pgEnum("health_status", [
+	"operational",
+	"degraded",
+	"unavailable",
+	"misconfigured",
+]);
+
+export const healthCriticalityEnum = pgEnum("health_criticality", [
+	"critical",
+	"important",
+	"low",
+]);
+
+export const healthProbeKindEnum = pgEnum("health_probe_kind", [
+	"internal",
+	"partner",
+	"exposed",
+	"job",
+]);
+
+export const healthProbes = createTable("health_probe", (d) => ({
+	key: d.varchar({ length: 100 }).notNull().primaryKey(),
+	label: d.varchar({ length: 255 }).notNull(),
+	criticality: healthCriticalityEnum().notNull(),
+	kind: healthProbeKindEnum().notNull(),
+	// Cycle the worker runs this probe at. The screen widens its staleness
+	// threshold to two cycles, so a 15-minute partner probe is not flagged
+	// "inconnu" ten minutes out of fifteen (#5200).
+	intervalSeconds: d.integer().notNull().default(60),
+	status: healthStatusEnum().notNull(),
+	latencyMs: d.integer(),
+	checkedAt: d.timestamp({ withTimezone: true }).notNull(),
+	changedAt: d.timestamp({ withTimezone: true }).notNull(),
+	consecutiveFailures: d.integer().notNull().default(0),
+	lastError: d.varchar({ length: 500 }),
+	// Only `kind: "job"` probes carry it: the next run the worker expects,
+	// derived from the cron definition it owns. The screen prints it as
+	// "prochaine exécution attendue" instead of re-deriving a schedule.
+	nextExpectedAt: d.timestamp({ withTimezone: true }),
+	// Last successful and failed run the probe could observe. Written by the
+	// worker from the same trace it uses to grade the probe, so the back-office
+	// prints them without replaying audit or pg-boss queries itself (#5200).
+	lastSuccessAt: d.timestamp({ withTimezone: true }),
+	lastFailureAt: d.timestamp({ withTimezone: true }),
+}));
+
+export const healthIncidents = createTable(
+	"health_incident",
+	(d) => ({
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		probeKey: d
+			.varchar({ length: 100 })
+			.notNull()
+			.references(() => healthProbes.key, { onDelete: "cascade" }),
+		fromStatus: healthStatusEnum("from_status").notNull(),
+		toStatus: healthStatusEnum("to_status").notNull(),
+		startedAt: d.timestamp({ withTimezone: true }).notNull(),
+		endedAt: d.timestamp({ withTimezone: true }),
+		lastError: d.varchar({ length: 500 }),
+	}),
+	(t) => [
+		index("health_incident_started_at_idx").on(t.startedAt),
+		index("health_incident_probe_key_idx").on(t.probeKey, t.startedAt),
+	],
+);
+
 // ── Export tables ───────────────────────────────────────────────────
 
 export const exports = createTable(
@@ -994,6 +1069,11 @@ export const exports = createTable(
 		s3Key: d.varchar({ length: 500 }).notNull(),
 		rowCount: d.integer().notNull(),
 		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+		// Refreshed on every successful regeneration: the daily CronJob upserts
+		// the same (year, version) row, so `created_at` alone cannot tell whether
+		// the archive was produced today. The supervision freshness probe reads
+		// this column (#5197).
+		generatedAt: d.timestamp({ withTimezone: true }).notNull().defaultNow(),
 	}),
 	(t) => [unique("export_year_version_idx").on(t.year, t.version)],
 );

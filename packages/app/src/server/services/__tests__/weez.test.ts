@@ -1,5 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+const { captureDependencyFailure } = vi.hoisted(() => ({
+	captureDependencyFailure: vi.fn(),
+}));
+
+vi.mock("~/server/observability/captureDependency", () => ({
+	captureDependencyFailure,
+}));
+
 import { fetchCompanyBySiren, trancheToWorkforce } from "../weez";
 
 describe("trancheToWorkforce", () => {
@@ -26,6 +34,7 @@ describe("fetchCompanyBySiren", () => {
 		// previous test's call history and queued responses, and any assertion
 		// on a call index silently reads the wrong request.
 		fetchSpy.mockReset();
+		captureDependencyFailure.mockReset();
 		vi.stubGlobal("fetch", fetchSpy);
 	});
 
@@ -423,6 +432,13 @@ describe("fetchCompanyBySiren", () => {
 		await expect(fetchCompanyBySiren("123456789")).rejects.toThrow(
 			"Weez API error: 500 Internal Server Error",
 		);
+		// Every caller degrades silently on a Weez refusal, so the capture is
+		// the only trace of it.
+		expect(captureDependencyFailure).toHaveBeenCalledWith(
+			"weez",
+			expect.any(Error),
+			{ call: "by-siren", status: 500 },
+		);
 	});
 
 	it("uses raisonsociale as fallback when denominationunitelegale is null", async () => {
@@ -595,7 +611,8 @@ describe("fetchCompanyBySiren", () => {
 
 	it("leaves the country unknown when the head-office call fails, without breaking the lookup (S3)", async () => {
 		mockLegalUnit({ siren: "987654321", codepostal: null, name: "Gamma SARL" });
-		fetchSpy.mockRejectedValueOnce(new Error("network down"));
+		const failure = new Error("network down");
+		fetchSpy.mockRejectedValueOnce(failure);
 
 		const result = await fetchCompanyBySiren("987654321");
 
@@ -603,6 +620,10 @@ describe("fetchCompanyBySiren", () => {
 			name: "Gamma SARL",
 			countryCode: null,
 			countryLabel: null,
+		});
+		// Swallowed into UNKNOWN_COUNTRY: the failure disappears without a capture.
+		expect(captureDependencyFailure).toHaveBeenCalledWith("weez", failure, {
+			call: "head-office",
 		});
 	});
 
@@ -617,6 +638,22 @@ describe("fetchCompanyBySiren", () => {
 		const result = await fetchCompanyBySiren("987654321");
 
 		expect(result).toMatchObject({ countryCode: null, countryLabel: null });
+		expect(captureDependencyFailure).toHaveBeenCalledWith(
+			"weez",
+			expect.any(Error),
+			{ call: "head-office" },
+		);
+	});
+
+	it("reports nothing when the whole lookup succeeds", async () => {
+		mockLegalUnit({
+			siren: "532847196",
+			codepostal: "[FR_POSTAL_CODE_REDACTED]",
+		});
+
+		await fetchCompanyBySiren("532847196");
+
+		expect(captureDependencyFailure).not.toHaveBeenCalled();
 	});
 
 	it("leaves the country unknown when the head office carries no country (S3)", async () => {

@@ -2,6 +2,7 @@ import * as Sentry from "@sentry/nextjs";
 import { z } from "zod";
 import {
 	replayEventPrivacyIntegration,
+	resolveTracesSampleRate,
 	sentryPrivacyOptions,
 	sentryReplayPrivacyOptions,
 } from "~/modules/observability";
@@ -16,8 +17,9 @@ Sentry.init({
 	release: process.env.NEXT_PUBLIC_SENTRY_RELEASE,
 	environment: process.env.NEXT_PUBLIC_EGAPRO_ENV,
 
-	// Capture 100% of traces in dev, adjust in production (e.g., 0.1 for 10%)
-	tracesSampleRate: 1.0,
+	// The server-only knob cannot reach the browser bundle; the browser keeps
+	// the same production/non-production default (0.1 / 1.0) — #5199.
+	tracesSampleRate: resolveTracesSampleRate({ nodeEnv: process.env.NODE_ENV }),
 
 	// Session Replay: sample 10% of sessions, 100% on error
 	replaysSessionSampleRate: 0.1,

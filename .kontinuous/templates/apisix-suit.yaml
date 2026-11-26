@@ -2,7 +2,7 @@
 #
 # Why a gateway here: before the infra-level API Gateway arrives at Fabrique,
 # we need somewhere to enforce the Bearer-key check and rate-limit on the
-# three SUIT routes. Doing it in the app would mean hand-rolling a signature
+# SUIT routes. Doing it in the app would mean hand-rolling a signature
 # scheme again (the V1 approach we just removed). APISIX ships `key-auth` and
 # `limit-req` as native plugins — zero custom code.
 #
@@ -59,10 +59,11 @@ spec:
         runAsGroup: 1000
         fsGroup: 1000
       initContainers:
-        # Sealed-secret `suit` is applied in the same wave as this Deployment;
-        # kubelet then races the controller (rollout watcher gives up in ~7s).
-        # An optional volume lets this init start, then we block until the key
-        # is projected so the main container's required envFrom does not 404.
+        # Sealed-secrets `suit` and `suit-monitoring` are applied in the same
+        # wave as this Deployment; kubelet then races the controller (rollout
+        # watcher gives up in ~7s). Optional volumes let this init start, then
+        # we block until both keys are projected so the main container's
+        # required envFrom does not 404.
         - name: wait-suit-secret
           image: apache/apisix:3.11.0-debian
           imagePullPolicy: IfNotPresent
@@ -75,19 +76,23 @@ spec:
             - -c
             - |
               set -eu
-              echo "waiting for secret/suit to be projected..."
+              echo "waiting for secret/suit and secret/suit-monitoring to be projected..."
               for i in $(seq 1 90); do
-                if [ -s /var/run/suit/EGAPRO_SUIT_API_KEY ]; then
-                  echo "secret/suit is available"
+                if [ -s /var/run/suit/EGAPRO_SUIT_API_KEY ] &&
+                   [ -s /var/run/suit-monitoring/HEALTHCHECK_APISIX_SUIT_API_KEY ]; then
+                  echo "secrets are available"
                   exit 0
                 fi
                 sleep 2
               done
-              echo "timeout waiting for secret/suit" >&2
+              echo "timeout waiting for secret/suit and secret/suit-monitoring" >&2
               exit 1
           volumeMounts:
             - name: suit-secret
               mountPath: /var/run/suit
+              readOnly: true
+            - name: suit-monitoring-secret
+              mountPath: /var/run/suit-monitoring
               readOnly: true
         - name: seed-conf
           image: apache/apisix:3.11.0-debian
@@ -119,6 +124,10 @@ spec:
           envFrom:
             - secretRef:
                 name: suit
+            # Dedicated supervision consumer key. The healthcheck worker mounts
+            # the same secret to call /api/v1/healthz.
+            - secretRef:
+                name: suit-monitoring
           ports:
             - name: http
               containerPort: 9080
@@ -206,6 +215,10 @@ spec:
         - name: suit-secret
           secret:
             secretName: suit
+            optional: true
+        - name: suit-monitoring-secret
+          secret:
+            secretName: suit-monitoring
             optional: true
 ---
 apiVersion: v1

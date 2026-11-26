@@ -21,8 +21,19 @@ async function loadSuitClient(certEnv: Record<string, string | undefined>) {
 	const fetchSpy = vi.fn().mockResolvedValue({ ok: true });
 	vi.stubGlobal("fetch", fetchSpy);
 
+	const captureDependencyFailure = vi.fn();
+	vi.doMock("~/server/observability/captureDependency", () => ({
+		captureDependencyFailure,
+	}));
+
 	const { suitFetch, suitAwareFetch } = await import("../suitClient");
-	return { suitFetch, suitAwareFetch, fetchSpy, undiciFetchSpy };
+	return {
+		suitFetch,
+		suitAwareFetch,
+		fetchSpy,
+		undiciFetchSpy,
+		captureDependencyFailure,
+	};
 }
 
 const WITH_CERT = {
@@ -128,6 +139,45 @@ describe("suitFetch", () => {
 		expect(AgentMock.mock.calls[0]?.[0].connect.pfx.toString()).toBe(
 			P12_CONTENT,
 		);
+	});
+
+	it.each([
+		401, 403, 500, 502, 503,
+	])("reports HTTP %i as a dependency failure", async (status) => {
+		const { suitFetch, fetchSpy, captureDependencyFailure } =
+			await loadSuitClient({});
+		fetchSpy.mockResolvedValueOnce({ ok: false, status });
+
+		await suitFetch("/suit/api/externe/portail/CSE/339787277");
+
+		expect(captureDependencyFailure).toHaveBeenCalledWith(
+			"suit",
+			expect.any(Error),
+			{ status },
+		);
+	});
+
+	it("does not report a 404: it is a data answer, not an outage", async () => {
+		const { suitFetch, fetchSpy, captureDependencyFailure } =
+			await loadSuitClient({});
+		fetchSpy.mockResolvedValueOnce({ ok: false, status: 404 });
+
+		await suitFetch("/suit/api/externe/portail/CSE/339787277");
+
+		expect(captureDependencyFailure).not.toHaveBeenCalled();
+	});
+
+	it("reports a rejected call and still rethrows it", async () => {
+		const { suitFetch, fetchSpy, captureDependencyFailure } =
+			await loadSuitClient({});
+		const failure = new Error("certificate has expired");
+		fetchSpy.mockRejectedValueOnce(failure);
+
+		await expect(
+			suitFetch("/suit/api/externe/portail/CSE/339787277"),
+		).rejects.toThrow("certificate has expired");
+
+		expect(captureDependencyFailure).toHaveBeenCalledWith("suit", failure);
 	});
 });
 

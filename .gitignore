@@ -15,6 +15,10 @@ build/
 
 # notifications worker — compiled by tsc in the Docker builder stage
 packages/notifications/dist/
+# healthcheck worker — same, compiled in the Docker builder stage
+packages/healthcheck/dist/
+# shared SUIT transport — same, compiled before the app and the worker build
+packages/suit-transport/dist/
 
 # misc
 .DS_Store

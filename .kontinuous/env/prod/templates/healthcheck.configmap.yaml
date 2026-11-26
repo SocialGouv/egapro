@@ -1,0 +1,33 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: healthcheck
+data:
+  HEALTHCHECK_INTERVAL_SECONDS: "60"
+  # pg-boss depth thresholds: crossing either turns the queue probe `degraded`.
+  HEALTHCHECK_QUEUE_MAX_PENDING: "100"
+  HEALTHCHECK_QUEUE_MAX_AGE_SECONDS: "900"
+  # Partner cadence: 15 min is the accepted detection delay for ProConnect and
+  # WEEZ, and it caps the load on their side.
+  HEALTHCHECK_PARTNER_INTERVAL_SECONDS: "900"
+  # Stable public entity used to prove WEEZ answers (DINUM).
+  HEALTHCHECK_WEEZ_REFERENCE_SIREN: "130025265"
+  # Stable public SIREN used by the SUIT probes (#5195): its CSE record proves
+  # the mTLS CSE route answers, and the file route is read for it. Never a
+  # client company.
+  HEALTHCHECK_SUIT_REFERENCE_SIREN: "130025265"
+  # Exposed chain and partners: off in review apps (dev) so N namespaces do
+  # not multiply the calls to ProConnect, WEEZ and the SUIT gateway.
+  HEALTHCHECK_PARTNER_PROBES_ENABLED: "true"
+  # Cadence of the exposed probes; 5 min keeps the public API quota untouched
+  # for real callers (the rate limiter counts per caller).
+  HEALTHCHECK_EXPOSED_INTERVAL_SECONDS: "300"
+  # Public entrypoints, resolved per namespace from the global host.
+  HEALTHCHECK_PUBLIC_URL: "https://{{ .Values.global.host }}"
+  HEALTHCHECK_APISIX_SUIT_URL: "https://api-suit-{{ .Values.global.host }}"
+  # The public certificate is watched without a platform API client.
+  HEALTHCHECK_CERT_WARN_DAYS: "30"
+  # Anti-flapping: a critical or important probe alerts on the run that reaches
+  # this many consecutive failures (3 x 60 s < 5 min). A misconfigured probe
+  # alerts immediately; `low` never alerts.
+  HEALTHCHECK_ALERT_AFTER_FAILURES: "3"

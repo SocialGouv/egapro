@@ -180,6 +180,23 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 		created_at:
 			"Timestamp d'émission de l'event (rétention permanente, hors purge CNIL applicable à audit.action_log).",
 	},
+	export: {
+		generated_at:
+			"Horodatage de la dernière génération réussie de l'archive. Rafraîchi à chaque upsert du couple (année, version) — contrairement à created_at, figé à la première génération. Lu par la sonde de fraîcheur du worker `healthcheck` (#5197).",
+	},
+	health_probe: {
+		key: "Identifiant stable de la sonde (une ligne par sonde, jamais une par passage).",
+		next_expected_at:
+			"Prochaine exécution attendue, calculée par le worker `healthcheck` depuis la définition de cron qu'il possède. Renseignée uniquement pour les sondes de traitement (`kind = 'job'`) ; NULL pour les sondes de service et pour les files continues.",
+		interval_seconds:
+			"Cycle d'exécution de la sonde, en secondes. L'écran de supervision élargit sa fenêtre de fraîcheur à deux cycles pour ne pas afficher « inconnu » entre deux relèves d'une sonde lente (partenaires toutes les 15 min).",
+		last_success_at:
+			"Dernière exécution réussie observée par le worker (trace d'audit, job pg-boss terminé). Renseignée pour les sondes de traitement ; conservée quand une relève ne peut pas la lire, pour ne pas effacer l'historique au moment où l'écran en a besoin.",
+		last_failure_at:
+			"Dernière exécution en échec observée par le worker. Renseignée pour les sondes de traitement, conservée quand une relève ne peut pas la lire.",
+		last_error:
+			"Dernier message d'erreur assaini (aucun secret, aucune donnée personnelle). NULL quand la sonde est opérationnelle.",
+	},
 	employee_category: {
 		women_count: "SUIT: Indicateurs.G.Effectif_F",
 		men_count: "SUIT: Indicateurs.G.Effectif_H",

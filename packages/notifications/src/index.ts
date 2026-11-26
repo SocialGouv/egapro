@@ -6,8 +6,18 @@ import { buildMail, MAIL_BUILDERS } from "./mails/index.js";
 import { QUEUE_NAME, validateJobData } from "./queue.js";
 import { registerSchedules, SCHEDULES } from "./schedules/index.js";
 import { logAuditMain } from "./worker/auditLog.js";
+import {
+	createQueueDbCheck,
+	resolveHealthPort,
+	startHealthServer,
+} from "./worker/health.js";
 import { makeJobHandler } from "./worker/jobHandler.js";
 import { installShutdownHooks } from "./worker/lifecycle.js";
+import {
+	captureQueueConnectionFailure,
+	flushWorkerSentry,
+	initWorkerSentry,
+} from "./worker/sentry.js";
 import { buildTransporter, getMailEnabled } from "./worker/transporter.js";
 
 /**
@@ -58,6 +68,7 @@ const BOOT_DELAY_MS = Number.parseInt(
 	process.env.NOTIFICATIONS_BOOT_RETRY_DELAY_MS ?? "5000",
 	10,
 );
+const HEALTH_PORT = resolveHealthPort(process.env.NOTIFICATIONS_HEALTH_PORT);
 
 // On a fresh review app the queue DB (`pg-rw`, the main app Postgres used as
 // fallback when no dedicated pg-notifications secret exists) may not resolve
@@ -104,6 +115,17 @@ async function startBoss(connectionString: string): Promise<PgBoss> {
 }
 
 async function main(): Promise<void> {
+	// Before anything can fail: the queue connection retries below are exactly
+	// the failures this SDK is here to report. The DSN is baked into the image
+	// by the Dockerfile from the same GitHub variable the app bundle uses;
+	// SENTRY_DSN stays the escape hatch for an out-of-image override.
+	initWorkerSentry({
+		dsn: process.env.SENTRY_DSN ?? process.env.NEXT_PUBLIC_SENTRY_DSN,
+		environment:
+			process.env.SENTRY_ENVIRONMENT ?? process.env.NEXT_PUBLIC_EGAPRO_ENV,
+		release: process.env.SENTRY_RELEASE,
+	});
+
 	const notifUrl = resolveNotificationsDbUrl();
 	if (!notifUrl) {
 		throw new Error(
@@ -116,6 +138,29 @@ async function main(): Promise<void> {
 	const mailFrom = process.env.MAIL_FROM ?? "no-reply@egapro.local";
 
 	const mainSql: Sql | null = mainUrl ? postgres(mainUrl, { max: 2 }) : null;
+
+	// Only when NOTIFICATIONS_HEALTH_PORT is set (the Deployment sets it next to
+	// the probes): a bare local run must not grab a port. Started before pg-boss
+	// so liveness answers during the boot retry loop — the pod stays Running
+	// instead of crash-looping on a transient DNS race.
+	const healthSql =
+		HEALTH_PORT === null
+			? null
+			: postgres(notifUrl, {
+					max: 1,
+					connect_timeout: 2,
+					connection: { statement_timeout: 2000 },
+				});
+	const health =
+		HEALTH_PORT === null || healthSql === null
+			? null
+			: {
+					server: await startHealthServer({
+						port: HEALTH_PORT,
+						checkQueueDb: createQueueDbCheck(healthSql),
+					}),
+					sql: healthSql,
+				};
 
 	const boss = await startBoss(notifUrl);
 	console.log(
@@ -148,7 +193,7 @@ async function main(): Promise<void> {
 
 	await registerSchedules(boss, mainSql);
 
-	installShutdownHooks({ boss, mainSql });
+	installShutdownHooks({ boss, mainSql, health });
 }
 
 const isCli = (() => {
@@ -162,8 +207,14 @@ const isCli = (() => {
 })();
 
 if (isCli) {
-	main().catch((error: unknown) => {
+	main().catch(async (error: unknown) => {
+		// Only the final failure reaches here: `startBoss` already swallowed the
+		// retries it will perform.
+		captureQueueConnectionFailure(error, BOOT_MAX_ATTEMPTS);
 		console.error("[notifications] fatal:", error);
+		// The capture only queued the event: exiting now would drop the one
+		// outage this code exists to report.
+		await flushWorkerSentry(2000);
 		process.exit(1);
 	});
 }

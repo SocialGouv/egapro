@@ -10,6 +10,7 @@ import {
 	UNKNOWN_COUNTRY,
 } from "~/modules/domain";
 import { isCompanyDiffusible } from "~/modules/public-api";
+import { captureDependencyFailure } from "~/server/observability/captureDependency";
 
 const NON_DIFFUSIBLE_NAME = "Entreprise non diffusible";
 
@@ -165,7 +166,10 @@ async function resolveCountry(
 
 	try {
 		return headOfficeCountry(await fetchHeadOffice(siren));
-	} catch {
+	} catch (error) {
+		// Swallowed: the country stays unknown rather than breaking the lookup.
+		console.error("[weez] head office lookup failed");
+		captureDependencyFailure("weez", error, { call: "head-office" });
 		return UNKNOWN_COUNTRY;
 	}
 }
@@ -182,12 +186,24 @@ export async function fetchCompanyBySiren(
 		headers: { Accept: "application/json" },
 		signal: AbortSignal.timeout(WEEZ_TIMEOUT_MS),
 		next: { revalidate: TWENTY_FOUR_HOURS },
+	}).catch((error: unknown) => {
+		console.error("[weez] lookup failed");
+		captureDependencyFailure("weez", error, { call: "by-siren" });
+		throw error;
 	});
 
 	if (!response.ok) {
-		throw new Error(
+		// Every caller degrades silently (cached NAF pair, login, import loop), so
+		// the refusal has to be reported here or it never is.
+		const error = new Error(
 			`Weez API error: ${response.status} ${response.statusText}`,
 		);
+		console.error(`[weez] lookup failed: HTTP ${response.status}`);
+		captureDependencyFailure("weez", error, {
+			call: "by-siren",
+			status: response.status,
+		});
+		throw error;
 	}
 
 	const data =

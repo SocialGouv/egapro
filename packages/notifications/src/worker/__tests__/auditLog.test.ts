@@ -1,7 +1,7 @@
 import type { Sql } from "postgres";
 import { describe, expect, it, vi } from "vitest";
 
-import { logAuditMain, type AuditRow } from "../auditLog.js";
+import { type AuditRow, logAuditMain } from "../auditLog.js";
 
 function sqlCapture() {
 	const calls: { query: string; values: unknown[] }[] = [];

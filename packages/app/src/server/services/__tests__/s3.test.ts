@@ -1,4 +1,12 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const { captureDependencyFailure } = vi.hoisted(() => ({
+	captureDependencyFailure: vi.fn(),
+}));
+
+vi.mock("~/server/observability/captureDependency", () => ({
+	captureDependencyFailure,
+}));
 
 const sendMock = vi.fn().mockResolvedValue({
 	Body: {
@@ -26,6 +34,9 @@ vi.mock("@aws-sdk/client-s3", () => {
 });
 
 describe("s3 service", () => {
+	beforeEach(() => {
+		captureDependencyFailure.mockReset();
+	});
 	describe("ensureBucket", () => {
 		it("does nothing when bucket already exists", async () => {
 			sendMock.mockResolvedValueOnce({});
@@ -48,6 +59,20 @@ describe("s3 service", () => {
 
 			const { CreateBucketCommand } = await import("@aws-sdk/client-s3");
 			expect(CreateBucketCommand).toHaveBeenCalled();
+			expect(captureDependencyFailure).not.toHaveBeenCalled();
+		});
+
+		it("reports and rethrows a bucket check that failed for another reason", async () => {
+			const outage = new Error("AccessDenied");
+			Object.assign(outage, { $metadata: { httpStatusCode: 500 } });
+			sendMock.mockRejectedValueOnce(outage);
+
+			const { ensureBucket } = await import("../s3");
+
+			await expect(ensureBucket()).rejects.toThrow("AccessDenied");
+			expect(captureDependencyFailure).toHaveBeenCalledWith("s3", outage, {
+				operation: "ensure-bucket",
+			});
 		});
 	});
 
@@ -91,10 +116,16 @@ describe("s3 service", () => {
 		});
 
 		it("returns null when the head request fails", async () => {
-			sendMock.mockRejectedValueOnce(new Error("NoSuchKey"));
+			const failure = new Error("NoSuchKey");
+			sendMock.mockRejectedValueOnce(failure);
 			const { getFileSize } = await import("../s3");
 
 			expect(await getFileSize("missing.pdf")).toBeNull();
+			// Swallowed to `null`, so the size is never shown and the outage is
+			// otherwise silent.
+			expect(captureDependencyFailure).toHaveBeenCalledWith("s3", failure, {
+				operation: "get-file-size",
+			});
 		});
 	});
 

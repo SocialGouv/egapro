@@ -58,6 +58,9 @@ const config = {
 	// Kept external with @react-pdf/renderer so the tagged renderer shares its font store and pdfkit.
 	serverExternalPackages: [
 		"notifications",
+		// Same reasoning: `suit-transport` ships dist/ built before Next.js and
+		// owns the mTLS `Agent`, which must stay a single module instance.
+		"suit-transport",
 		"@react-pdf/renderer",
 		"@react-pdf/layout",
 		"@react-pdf/render",

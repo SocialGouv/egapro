@@ -1,0 +1,11 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: sentry
+data:
+  # Server-side traces sampling: 10 % in production, everything elsewhere.
+  # Resolved in ~/modules/observability/sampling.ts. The DSN is deliberately
+  # absent: it is a build argument (GitHub variable), baked into the image and
+  # read at runtime by the notifications worker — one source, nothing secret in
+  # the repository (#5199).
+  SENTRY_TRACES_SAMPLE_RATE: "1"

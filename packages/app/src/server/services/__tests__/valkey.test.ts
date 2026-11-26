@@ -3,10 +3,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
 	env: { VALKEY_URL: "" },
 	createClient: vi.fn(),
+	captureDependencyFailure: vi.fn(),
 }));
 
 vi.mock("~/env", () => ({ env: mocks.env }));
 vi.mock("redis", () => ({ createClient: mocks.createClient }));
+vi.mock("~/server/observability/captureDependency", () => ({
+	captureDependencyFailure: mocks.captureDependencyFailure,
+}));
 
 function fakeClient(connect: () => Promise<unknown>) {
 	const client = {
@@ -31,7 +35,7 @@ describe("createValkeyConnection", () => {
 	it("resolves to null without opening a client when Valkey is not configured", async () => {
 		const { createValkeyConnection } = await import("../valkey");
 
-		expect(await createValkeyConnection().client()).toBeNull();
+		expect(await createValkeyConnection("rate-limit").client()).toBeNull();
 		expect(mocks.createClient).not.toHaveBeenCalled();
 	});
 
@@ -41,7 +45,7 @@ describe("createValkeyConnection", () => {
 			fakeClient(async () => undefined),
 		);
 		const { createValkeyConnection } = await import("../valkey");
-		const connection = createValkeyConnection();
+		const connection = createValkeyConnection("rate-limit");
 
 		const first = await connection.client();
 		const second = await connection.client();
@@ -53,14 +57,35 @@ describe("createValkeyConnection", () => {
 
 	it("resolves to null and destroys the client when the connection fails", async () => {
 		mocks.env.VALKEY_URL = "redis://valkey:6379";
+		const failure = new Error("ECONNREFUSED");
 		const client = fakeClient(async () => {
-			throw new Error("ECONNREFUSED");
+			throw failure;
 		});
 		mocks.createClient.mockReturnValue(client);
 		const { createValkeyConnection } = await import("../valkey");
 
-		expect(await createValkeyConnection().client()).toBeNull();
+		expect(await createValkeyConnection("rate-limit").client()).toBeNull();
 		expect(client.destroy).toHaveBeenCalledTimes(1);
+		// The failure is swallowed into `null` by every caller, so Sentry is the
+		// only place it can be seen.
+		expect(mocks.captureDependencyFailure).toHaveBeenCalledWith(
+			"valkey",
+			failure,
+			{ connection: "rate-limit" },
+		);
+	});
+
+	it("does not report a healthy connection", async () => {
+		mocks.env.VALKEY_URL = "redis://valkey:6379";
+		mocks.createClient.mockImplementation(() =>
+			fakeClient(async () => undefined),
+		);
+		const { createValkeyConnection } = await import("../valkey");
+
+		expect(
+			await createValkeyConnection("export-cache").client(),
+		).not.toBeNull();
+		expect(mocks.captureDependencyFailure).not.toHaveBeenCalled();
 	});
 
 	it("reconnects after a discarded client", async () => {
@@ -69,7 +94,7 @@ describe("createValkeyConnection", () => {
 			fakeClient(async () => undefined),
 		);
 		const { createValkeyConnection } = await import("../valkey");
-		const connection = createValkeyConnection();
+		const connection = createValkeyConnection("rate-limit");
 		const first = await connection.client();
 		if (!first) throw new Error("expected a client");
 
@@ -87,7 +112,7 @@ describe("createValkeyConnection", () => {
 			fakeClient(async () => undefined),
 		);
 		const { createValkeyConnection } = await import("../valkey");
-		const connection = createValkeyConnection();
+		const connection = createValkeyConnection("rate-limit");
 		const first = await connection.client();
 		if (!first) throw new Error("expected a client");
 

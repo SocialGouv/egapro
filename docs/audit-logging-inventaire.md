@@ -8,7 +8,7 @@ Toute PR qui ajoute, retire ou ré-câble un route handler, ou change ce que `lo
 
 ## Route Handler coverage map (`src/app/api/**/route.ts`)
 
-Inventory refreshed by issues #3764, #4664 and #4491 — **28 route files**, every one of them
+Inventory refreshed by issues #3764, #4664, #4491, #5196 and #5198 — **30 route files**, every one of them
 accounted for below. Re-run the inventory with:
 
 ```bash
@@ -34,6 +34,7 @@ counts — never inside them.
 | `prefill-pdf` | `PDF_PREFILL_DOWNLOAD` |
 | `public/declarations/export` | `PUBLIC_DECLARATIONS_EXPORT` |
 | `public/referents-egalite-professionnelle` | `PUBLIC_REFERENT_SEARCH` |
+| `representation-declaration-lock/release` | `DECLARATION_LOCK_RELEASED` |
 | `representation-pdf` | `PDF_REPRESENTATION_DOWNLOAD` |
 | `v1/export/declarations` | `EXPORT_API_DECLARATIONS` |
 | `v1/export/representations` | `EXPORT_API_REPRESENTATIONS` |
@@ -64,16 +65,18 @@ The wrapper forwards the route context (`{ params }`) to `resolveContext`,
 which removes the *type-level* blocker; it does not make the conversion
 desirable.
 
-### Deliberate exemptions (10)
+### Deliberate exemptions (12)
 
 | Route | Why no audit row |
 |---|---|
 | `healthz` | Liveness probe hit by Kubernetes every few seconds. Returns `"OK"`, reads nothing. Explicitly excluded above. |
+| `readyz` | Readiness probe hit by Kubernetes every few seconds (#5198). Runs `SELECT 1` on a dedicated pool and returns 200/503; a per-probe audit line would describe the kubelet, not a user action. |
 | `e2e-clock` | Test-only clock override, unreachable in production. Auditing it would flood `action_log` from the E2E suite for zero compliance value. |
 | `test-sentry` | Throws on purpose to exercise Sentry capture, for an admin with a fresh second factor only; 404s to anyone else and always in `prod`. No user data. |
 | `v1/docs` | Serves the static Swagger UI shell; 404s in `prod`. No data access. |
 | `public/openapi.json` | Static OpenAPI document, identical for every caller. |
 | `v1/openapi.json` | idem. |
+| `v1/healthz` | Supervision probe of the SUIT gateway (#5196). Sits behind APISIX `key-auth` and returns a constant `"OK"`; it exists precisely so monitoring does not write into `action_log` as if it were a SUIT integrator. |
 | `gip-mds/mock` | Reads a checked-in fixture CSV (`data/mock-gip-mds.csv`) that stands in for the GIP MDS API until it exists. Fictional data only. |
 | `auth/logout/callback` | Bare redirect to `/` after the ProConnect end-session round-trip. The logout itself is audited by `auth/logout`; auditing the callback would double-count. |
 | `auth/[...nextauth]` | NextAuth's own catch-all. Successful login is audited in the JWT callback and failures in the `logger` hook (pattern §4 of the audit-logging rule) — wrapping the handler would duplicate every row. |

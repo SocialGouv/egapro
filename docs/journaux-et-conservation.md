@@ -63,6 +63,7 @@ Le vocabulaire de la colonne **Statut** est défini en [section 3](#3-vocabulair
 | Logs de la passerelle API SUIT | Sécurité et diagnostic de l'accès API | IP du client, requêtes | Non définie dans le dépôt | Non définie dans le dépôt | [4.10](#410-logs-de-la-passerelle-api-suit) |
 | Historique des CronJobs | Diagnostic d'exécution des traitements planifiés | Logs des scripts exécutés | 3 exécutions réussies et 3 en échec, par CronJob | Appliquée par le code | [4.11](#411-historique-des-cronjobs) |
 | Compteurs de limitation de débit (API publique) | Protection anti-abus | Empreinte de l'IP ou du jeton d'API | 60 s | Appliquée par le code | [4.12](#412-compteurs-de-limitation-de-débit-de-lapi-publique) |
+| Supervision (état des services, incidents, alertes) | Diagnostic d'exploitation : un service répond-il, un traitement tourne-t-il ? | Aucune (clé de sonde, état, latence, messages d'erreur assainis) | Illimitée de fait pour les incidents ; lignes stdout et canal Mattermost non définis dans le dépôt | Aucune purge pour les incidents ; Non définie dans le dépôt pour les lignes et le canal | [4.14](#414-supervision) |
 | Plateforme et tiers (ingress, logs PostgreSQL, sauvegardes, SMTP, ProConnect) | Exploitation de la plateforme | Variable selon le composant | Non définie dans le dépôt | Non définie dans le dépôt | [4.13](#413-plateforme-et-tiers-non-couverts-par-le-dépôt) |
 
 ### 2.2 Données métier
@@ -96,6 +97,8 @@ Dans la colonne Durée, « Illimitée de fait » accompagne le statut « Aucune 
 Table Postgres `audit.action_log`, schéma dédié `audit` (pas de clé étrangère vers les tables applicatives, pour ne jamais bloquer une suppression RGPD d'utilisateur). Les écritures conservent l'action, la catégorie, le statut, la date et, quand ils sont nécessaires et valides, l'identifiant utilisateur, le SIREN et un identifiant technique de ressource. L'adresse IP est tronquée, le message d'erreur est remplacé par un code contrôlé et les métadonnées sont limitées aux champs autorisés. L'e-mail et l'agent utilisateur ne sont plus enregistrés.
 
 Les lectures publiques restantes (`PUBLIC_REFERENT_SEARCH`, `PUBLIC_REFERENT_VIEW` et `PUBLIC_DECLARATIONS_EXPORT`) ne créent plus de nouvelle ligne dans cette table. Elles gardent leur ligne d'activité stdout décrite en [4.2](#42-ligne-dactivité-applicative). Les anciennes lignes d'audit restent soumises à la purge ordinaire.
+
+Les lectures d'exploitation ne sont pas auditées ligne à ligne : l'écran `/admin/etat-des-services` et le bandeau de la home `/admin` lisent le même service directement (`readServiceStatusBanner`), et un rafraîchissement — toutes les 30 secondes tant que l'onglet est au premier plan — n'écrit **rien** dans `audit.action_log`. Cette table reste le journal des actions et des lectures de données personnelles, pas une trace de supervision.
 
 **Quatre points d'écriture** : l'application (`packages/app/src/server/audit/log.ts`), le worker de notifications (`packages/notifications/src/worker/auditLog.ts`), l'auto-audit de la purge quotidienne elle-même (`packages/app/scripts/audit-cleanup.ts`) et la purge des déclarations (`packages/app/scripts/declaration-cleanup.ts`). L'auto-audit quotidien conserve les nombres de lignes supprimées dans chaque journal et leur total, sans identifiant personnel.
 
@@ -138,9 +141,11 @@ L'analyse antivirus des fichiers déposés y écrit une ligne préfixée `[antiv
 
 ### 4.4 Sentry (erreurs, traces et sessions enregistrées)
 
-Sentry capture les erreurs non gérées côté serveur et côté client, avec 100 % des traces échantillonnées. Côté client, l'enregistrement de session (Session Replay) est actif sur 10 % des sessions, et 100 % des sessions qui rencontrent une erreur.
+Sentry capture les erreurs non gérées côté serveur, côté client et dans le worker `notifications`. Les traces sont échantillonnées à 10 % en production, et à 100 % ailleurs (`SENTRY_TRACES_SAMPLE_RATE` permet de régler le taux côté serveur). Côté client, l'enregistrement de session (Session Replay) est actif sur 10 % des sessions, et 100 % des sessions qui rencontrent une erreur.
 
-**Anonymisation à l'émission** : les trois initialisations Sentry étalent les options du module `packages/app/src/modules/observability/`, qui empêchent les données personnelles de partir vers Sentry.
+Les pannes de dépendances qui étaient auparavant avalées dans un `console.error` (WEEZ, SUIT, S3, Valkey, Matomo, file de messages, relais SMTP) remontent désormais comme événements, regroupés par dépendance et accompagnés d'un contexte borné (code HTTP, opération, tentative) qui ne contient ni adresse e-mail ni SIREN. Le volume est borné : au plus un événement par dépendance et par minute, quel que soit le nombre de requêtes qui échouent pendant l'incident.
+
+**Anonymisation à l'émission** : les trois initialisations de l'application étalent les options du module `packages/app/src/modules/observability/`, qui empêchent les données personnelles de partir vers Sentry. Le worker, qui embarque son propre SDK (`@sentry/node`) sans partager ce module, applique le même contrat de façon structurelle : requête, message libre et valeur des exceptions sont supprimés de l'événement, les données des breadcrumbs sont retirées.
 
 - La collecte côté SDK est coupée à la source (`dataCollection`) : informations d'utilisateur automatiques, cookies, en-têtes HTTP, corps de requête et de réponse, paramètres d'URL, variables locales des piles d'appels, paramètres des requêtes SQL et arguments des tâches en file.
 - Avant tout envoi d'erreur ou de span, un filtre parcourt le contenu — message d'erreur, valeurs d'exception, breadcrumbs, `extra`, `contexts`, `tags`, nom et attributs des spans — et remplace les adresses e-mail par `[email]` et les SIREN et SIRET (collés, espacés, encodés dans une URL ou numériques) par `[siren]`. Les chaînes de requête et fragments sont retirés des URL (requête, breadcrumbs de navigation et de `fetch`, spans), ce qui écarte aussi les entrées tRPC et les paramètres de retour ProConnect. L'objet utilisateur, les cookies, l'en-tête `Authorization` et le corps de requête sont supprimés de l'événement. Les piles d'appels et les identifiants de trace ne sont pas modifiés.
@@ -149,7 +154,7 @@ Sentry capture les erreurs non gérées côté serveur et côté client, avec 10
 
 **Durée** : non définie dans le dépôt — c'est un réglage de l'instance Sentry de l'équipe, pas du code applicatif.
 
-**Sources** : `packages/app/src/modules/observability/` · `packages/app/src/sentry.server.config.ts` · `packages/app/src/sentry.edge.config.ts` · `packages/app/src/instrumentation-client.ts`.
+**Sources** : `packages/app/src/modules/observability/` · `packages/app/src/sentry.server.config.ts` · `packages/app/src/sentry.edge.config.ts` · `packages/app/src/instrumentation-client.ts` · `packages/notifications/src/worker/sentry.ts`.
 
 ### 4.5 File de notification par e-mail
 
@@ -221,6 +226,20 @@ Rien dans `.kontinuous/` ne configure explicitement : les logs d'ingress, les lo
 
 **Durée** : non définie dans le dépôt pour chacun de ces éléments. Voir [section 6](#6-durées-non-définies-dans-le-dépôt) pour l'interlocuteur à solliciter.
 
+### 4.14 Supervision
+
+Trois artefacts distincts, produits par le worker `packages/healthcheck` et l'écran d'état des services :
+
+| Artefact | Contenu | Rétention |
+|---|---|---|
+| Tables `app_health_probe` et `app_health_incident` | une ligne par sonde (état courant) et une ligne par transition d'état ; aucun identifiant personnel, les messages d'erreur sont assainis avant écriture | l'état courant est écrasé à chaque relève ; les incidents ne sont **pas purgés** (aucune durée définie) |
+| Lignes `health_check` sur stdout | clé de sonde, état, latence, horodatage, une ligne par relève | non définie dans le dépôt — collectée par la plateforme d'hébergement, qui fixe la durée |
+| Messages du canal Mattermost | libellé de sonde, état, temps depuis, échecs, latence, message assaini, lien vers l'écran | non définie dans le dépôt — canal tiers, créé hors dépôt |
+
+Les transitions sont conservées sans limite pour que l'écran affiche les incidents des 30 derniers jours ; au-delà, rien ne les supprime. La durée de conservation des incidents est donc **à trancher** (elle relève de la doctrine d'exploitation, pas du code) et à reporter ici une fois fixée.
+
+**Sources** : `packages/healthcheck/src/persistence.ts` · `packages/healthcheck/src/stdout.ts` · `packages/healthcheck/src/notify/mattermost.ts` · `packages/app/src/server/services/serviceStatus.ts` · [`supervision.md`](supervision.md).
+
 ## 5. Données métier
 
 ### 5.1 Déclarations de rémunération et données rattachées
@@ -291,7 +310,7 @@ Reportés tels quels, sans les atténuer :
 3. **Représentation équilibrée** : aucune purge, alors que des lignes reprises de la V1 contiennent des coordonnées personnelles. Suite : [#4502](https://github.com/SocialGouv/egapro/issues/4502).
 4. **Table jamais purgée** : le journal de dédoublonnage des relances n'a aucun mécanisme de suppression. Suite : [#4769](https://github.com/SocialGouv/egapro/issues/4769).
 5. **Durées d'audit écrites deux fois** : une fois dans les constantes du module (lues uniquement par les tests), une fois en dur dans le script de purge qui les applique réellement. Suite : [#4771](https://github.com/SocialGouv/egapro/issues/4771).
-6. **Sentry** : l'enregistrement de session et l'échantillonnage à 100 % des traces ne sont mentionnés ni dans la page `/donnees-personnelles` ni dans `/gestion-des-cookies`. Le docx fourni par la DGT pour la nouvelle politique de confidentialité ([#3669](https://github.com/SocialGouv/egapro/issues/3669)) ne couvre pas ce point, qui reste à traiter. Suite : [#4772](https://github.com/SocialGouv/egapro/issues/4772).
+6. **Sentry** : l'enregistrement de session et l'échantillonnage des traces (10 % en production) ne sont mentionnés ni dans la page `/donnees-personnelles` ni dans `/gestion-des-cookies`. Le docx fourni par la DGT pour la nouvelle politique de confidentialité ([#3669](https://github.com/SocialGouv/egapro/issues/3669)) ne couvre pas ce point, qui reste à traiter. Suite : [#4772](https://github.com/SocialGouv/egapro/issues/4772).
 
 7. **Préférence de thème** : la page `/gestion-des-cookies` annonce un cookie `fr-theme` d’un an, mais le dépôt ne contient aucun code qui le crée ou applique cette durée. Le thème DSFR est mémorisé dans `localStorage` (`scheme`). Suite : vérifier et corriger la page publique ou implémenter le cookie annoncé.
 
@@ -303,7 +322,6 @@ Tickets ouverts qui changeront une ligne de cette page :
 |---|---|
 | [#4502](https://github.com/SocialGouv/egapro/issues/4502) | Purge de la représentation équilibrée après 6 ans |
 | [#4549](https://github.com/SocialGouv/egapro/issues/4549) | Journalisation des erreurs internes tRPC hors développement |
-| [#2710](https://github.com/SocialGouv/egapro/issues/2710) | Supervision des traitements planifiés |
 | [#4769](https://github.com/SocialGouv/egapro/issues/4769) | Purge du journal de dédoublonnage des relances |
 | [#4770](https://github.com/SocialGouv/egapro/issues/4770) | Appliquer aux comptes utilisateurs la durée annoncée |
 | [#4771](https://github.com/SocialGouv/egapro/issues/4771) | Une seule source pour les durées de conservation du journal d'audit |

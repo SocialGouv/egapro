@@ -1,0 +1,1 @@
+ALTER TABLE "app_export" ADD COLUMN "generated_at" timestamp with time zone DEFAULT now() NOT NULL;

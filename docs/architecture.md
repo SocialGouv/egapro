@@ -19,7 +19,7 @@ Audience principale : nouveaux développeurs (onboarding). L'équipe métier / P
 9. [Audit logging](#9-audit-logging)
 10. [Sécurité](#10-sécurité)
 11. [UI, DSFR, accessibilité](#11-ui-dsfr-accessibilité)
-12. [Observabilité (Sentry)](#12-observabilité-sentry)
+12. [Observabilité](#12-observabilité)
 13. [Tests](#13-tests)
 14. [CI/CD et déploiement](#14-cicd-et-déploiement)
 15. [Dépendances externes](#15-dépendances-externes)
@@ -28,7 +28,7 @@ Audience principale : nouveaux développeurs (onboarding). L'équipe métier / P
 
 ## 1. Vue d'ensemble
 
-EGAPRO V2 est une **application Next.js 16** (App Router, React 19) servant un site public et un espace authentifié, déployée dans un cluster Kubernetes via [Kontinuous](https://github.com/SocialGouv/kontinuous). Le code applicatif vit dans un **monorepo pnpm** (`packages/app/`) ; le package `packages/api/` est un placeholder vide hérité de la V1. Le package `packages/notifications/` contient le worker de mails (pg-boss + React Email).
+EGAPRO V2 est une **application Next.js 16** (App Router, React 19) servant un site public et un espace authentifié, déployée dans un cluster Kubernetes via [Kontinuous](https://github.com/SocialGouv/kontinuous). Le code applicatif vit dans un **monorepo pnpm** (`packages/app/`) ; le package `packages/api/` est un placeholder vide hérité de la V1. Le package `packages/notifications/` contient le worker de mails (pg-boss + React Email), `packages/healthcheck/` le sondeur de supervision et `packages/suit-transport/` le transport mTLS vers SUIT, partagé par l'application et le sondeur.
 
 ```mermaid
 flowchart LR
@@ -655,14 +655,22 @@ Toute nouvelle action audited requiert **3 points** :
 
 ### 9.6 Traitements planifiés (crons de maintenance des données)
 
-Deux CronJobs Kubernetes assurent la maintenance des données. Ils partagent le même modèle de déploiement (`.kontinuous/templates/*-cron.yaml`) : image applicative, `concurrencyPolicy: Forbid`, `backoffLimit: 0`, `restartPolicy: Never`, un `run` par jour.
+Cinq CronJobs Kubernetes assurent la maintenance et l'alimentation des données. Tous partagent `concurrencyPolicy: Forbid` et un `run` par jour (`.kontinuous/templates/*-cron.yaml`) ; ils diffèrent par leur exécutant :
 
-| CronJob | Script | Horaire (UTC) | Action audit associée | Rôle |
+- **image applicative**, `backoffLimit: 0`, `restartPolicy: Never` : les deux purges, qui écrivent leur propre ligne d'audit et doivent échouer franchement plutôt que réessayer ;
+- **`curlimages/curl`**, `backoffLimit: 3`, `restartPolicy: OnFailure` : les trois déclencheurs, qui n'appellent qu'une route de l'application — le travail réel est fait par l'appel HTTP, pas par le Job.
+
+| CronJob | Exécutant | Horaire (UTC) | Trace applicative | Rôle |
 |---|---|---|---|---|
-| `audit-cleanup-daily` | `packages/app/scripts/audit-cleanup.ts` | `0 4 * * *` (04:00) | `SYSTEM_AUDIT_CLEANUP` (`system.audit_cleanup`) | Purge les lignes d'`audit.action_log` au-delà de leur fenêtre de rétention |
+| `export-generate-daily` | `POST /api/export/generate` | `0 2 * * *` (02:00) | `EXPORT_GENERATE` (`export.generate`), corroborée par une ligne `app_export` | Génère l'export annuel des indicateurs consommé par la DGT et data.gouv |
+| `gip-mds-import-daily` | `POST /api/gip-mds/import` | `0 3 * * *` (03:00) | `GIP_MDS_IMPORT` (`gip_mds.import`) | Importe le fichier GIP-MDS de la campagne (effectifs, indicateurs A–F) |
 | `declaration-cleanup-daily` | `packages/app/scripts/declaration-cleanup.ts` | `0 3 * * *` (03:00) | `SYSTEM_DECLARATION_CLEANUP` (`system.declaration_cleanup`) | Purge RGPD des déclarations dont l'année est antérieure au seuil de rétention |
+| `audit-cleanup-daily` | `packages/app/scripts/audit-cleanup.ts` | `0 4 * * *` (04:00) | `SYSTEM_AUDIT_CLEANUP` (`system.audit_cleanup`) | Purge les lignes d'`audit.action_log` au-delà de leur fenêtre de rétention |
+| `data-gouv-refresh-daily` | `PUT` sur l'API data.gouv | `30 4 * * *` (04:30) | aucune — Job `curl` pur | Repointe la ressource data.gouv vers l'export CSV public, qui est régénéré à la demande |
 
-Ces deux actions sont de catégorie `system` (rétention 365 j). Toute modification de ces scripts → **test d'intégration obligatoire** (`*.integration.test.ts`, cf. §13).
+Les deux purges sont de catégorie `system` (rétention 365 j). Toute modification de ces scripts → **test d'intégration obligatoire** (`*.integration.test.ts`, cf. §13).
+
+Le sondeur (`packages/healthcheck`) surveille la fraîcheur des quatre CronJobs qui écrivent une trace en lisant `audit.action_log` — il ne lit pas l'état des Jobs Kubernetes, faute de RBAC. `data-gouv-refresh-daily`, qui n'écrit aucune trace applicative, n'est donc pas couvert : c'est une limite assumée, écrite dans [`supervision.md` §8](supervision.md#8-limites-assumées).
 
 #### Purge RGPD des déclarations (`declaration-cleanup.ts`)
 
@@ -740,9 +748,9 @@ Deux appels sortants sont concernés, tous deux servis par le même hôte SUIT :
 | Récupération du fichier GIP-MDS | `/suit/api/externe/egapro/gipmds/latest` | `gipMds.ts` → `suitAwareFetch()` | ouvert |
 | Existence d'un CSE | `/suit/api/externe/portail/CSE/{siren}` | `suit.ts` → `suitFetch()` | pas encore développé (404) |
 
-Le second part de `src/server/services/suit.ts` via `suitFetch()`, qui construit le chemin sous `EGAPRO_SUIT_API_URL`. Le premier cible une URL **configurable** (`EGAPRO_GIP_MDS_API_URL`), qui pointe sur un mock interne hors production : il passe donc par `suitAwareFetch()`, qui n'attache le certificat que si l'URL est sur la même origine que `EGAPRO_SUIT_API_URL`. Les deux fonctions vivent dans `src/server/services/suitClient.ts`.
+Le second part de `src/server/services/suit.ts` via `suitFetch()`, qui construit le chemin sous `EGAPRO_SUIT_API_URL`. Le premier cible une URL **configurable** (`EGAPRO_GIP_MDS_API_URL`), qui pointe sur un mock interne hors production : il passe donc par `suitAwareFetch()`, qui n'attache le certificat que si l'URL est sur la même origine que `EGAPRO_SUIT_API_URL`. Les deux fonctions vivent dans `src/server/services/suitClient.ts`, adaptateur de `~/env` au-dessus du paquet partagé `packages/suit-transport`.
 
-L'endpoint CSE n'étant pas encore développé côté SUIT, `fetchCseBySiren` reçoit un 404 et renvoie `null` — le champ `hasCse` reste simplement non renseigné. Le statut HTTP est journalisé (`[suit] CSE lookup: HTTP 404`) précisément pour le distinguer d'un échec de certificat, qui lui ne produit aucune réponse et remonte en exception. Le certificat est transporté **encodé en base64 dans une variable d'environnement** (aucun volume à monter), décodé une seule fois, et transformé en dispatcher undici mémoïsé. Ce dispatcher n'est **jamais exporté** : le lier à l'URL construite depuis `EGAPRO_SUIT_API_URL` est ce qui garantit que le certificat client ne peut être présenté qu'à SUIT, et à aucun autre hôte. Les appels posent aussi `redirect: "error"` — une redirection suivie réutilise le même dispatcher et présenterait donc le certificat à l'hôte cible ; l'API JSON de SUIT ne redirige pas, refuser une 3xx transforme une fuite silencieuse en échec journalisé. L'option `dispatcher` traverse le `fetch` patché de Next.js et n'entre pas dans la clé du cache de données : la revalidation de 24 h des deux appels est préservée.
+L'endpoint CSE n'étant pas encore développé côté SUIT, `fetchCseBySiren` reçoit un 404 et renvoie `null` — le champ `hasCse` reste simplement non renseigné. Le statut HTTP est journalisé (`[suit] CSE lookup: HTTP 404`) précisément pour le distinguer d'un échec de certificat, qui lui ne produit aucune réponse et remonte en exception. Le certificat est transporté **encodé en base64 dans une variable d'environnement** (aucun volume à monter), décodé une seule fois, et transformé en dispatcher undici mémoïsé. Ce dispatcher n'est **jamais exporté** : le lier à l'URL construite depuis `EGAPRO_SUIT_API_URL` est ce qui garantit que le certificat client ne peut être présenté qu'à SUIT, et à aucun autre hôte. La construction de l'agent et ce contrôle d'origine vivent dans `packages/suit-transport`, seul endroit du dépôt qui les porte ; l'application les atteint par `suitClient.ts`, le sondeur `packages/healthcheck` par ses sondes SUIT. Dupliquer ce garde-fou dans le worker est exclu, précisément parce qu'une copie dérive. Les appels posent aussi `redirect: "error"` — une redirection suivie réutilise le même dispatcher et présenterait donc le certificat à l'hôte cible ; l'API JSON de SUIT ne redirige pas, refuser une 3xx transforme une fuite silencieuse en échec journalisé. L'option `dispatcher` traverse le `fetch` patché de Next.js et n'entre pas dans la clé du cache de données : la revalidation de 24 h des deux appels est préservée.
 
 En cluster, les deux variables viennent d'un sealed-secret dédié `suit-client-cert` (un par environnement sous `.kontinuous/env/*/templates/`), monté avec `optional: true`. Il est volontairement distinct du secret `suit` : ce dernier est monté sans `optional`, donc un scellement incomplet y empêcherait le pod de démarrer. En local, `pnpm --filter app suit:encode-cert <cert.p12>` produit les deux lignes à coller dans `.env`.
 
@@ -807,19 +815,45 @@ Toute l'accessibilité passe par **ultra11y**, en deux surfaces : le skill `revi
 
 ---
 
-## 12. Observabilité (Sentry)
+## 12. Observabilité
 
-Trois entrées Sentry, une par runtime :
+Trois dispositifs, chacun avec sa question : **Sentry** dit *pourquoi* quelque chose a échoué, la **supervision** dit *si* le service répond et si les traitements tournent, les **lignes stdout** fournissent l'historique et les courbes.
+
+### 12.1 Sentry — les erreurs
+
+Quatre entrées Sentry, une par runtime :
 
 | Fichier | Runtime | Rôle |
 |---|---|---|
 | `src/instrumentation.ts` | Server (Node) | Erreurs SSR, Server Components, tRPC |
 | `src/sentry.edge.config.ts` | Edge | Middleware `src/middleware.ts` |
 | `src/instrumentation-client.ts` | Client (browser) | Erreurs React + global handlers |
+| `packages/notifications/src/worker/sentry.ts` | Worker `notifications` | Connexion à la file, rendu et envoi des e-mails |
 
 `src/app/global-error.tsx` capture les erreurs non gérées de l'arbre React et les remonte à Sentry.
 
-Les trois initialisations étalent les options du module `src/modules/observability`, qui anonymise ce qui part vers Sentry : collecte minimale côté SDK, filtrage des e-mails et SIREN/SIRET dans les erreurs, traces et breadcrumbs, et Session Replay entièrement masqué.
+Les trois initialisations de l'application étalent les options du module `src/modules/observability`, qui anonymise ce qui part vers Sentry : collecte minimale côté SDK, filtrage des e-mails et SIREN/SIRET dans les erreurs, traces et breadcrumbs, et Session Replay entièrement masqué. Les traces sont échantillonnées à 10 % en production et à 100 % ailleurs ; `SENTRY_TRACES_SAMPLE_RATE` règle le taux côté serveur (`src/modules/observability/sampling.ts`).
+
+Les pannes de dépendances avalées par l'appelant (WEEZ, SUIT, S3, Valkey, Matomo, file de messages) passent par `captureDependencyFailure` (`src/server/observability/captureDependency.ts`), qui les regroupe par dépendance, n'ajoute qu'un contexte borné et plafonne à un événement par dépendance et par minute. Le worker ne partage pas ce module : son `beforeSend` supprime la requête, le message libre et la valeur des exceptions, et vide les breadcrumbs.
+
+### 12.2 Supervision — le service répond-il, les traitements tournent-ils ?
+
+Un worker dédié, `packages/healthcheck`, sonde les services internes, les partenaires, la chaîne exposée et la fraîcheur des traitements planifiés. Il vit **hors du processus Next.js** : un sondeur embarqué mourrait avec l'application, consommerait sa mémoire et ne verrait jamais la chaîne ingress → passerelle → pods.
+
+Ses trois sorties : l'écran `/admin/etat-des-services` (état courant, traitements en retard, incidents des 30 derniers jours), le **canal Mattermost** (une alerte par panne, un retour par rétablissement), et une ligne JSON `health_check` par relève sur stdout. Le worker écrit son état dans `app_health_probe` (une ligne par sonde, mise à jour) et ses transitions dans `app_health_incident` ; **seules les transitions sont conservées**, jamais un point par relève.
+
+Le runbook, les seuils, la configuration et les limites de périmètre vivent dans [`supervision.md`](supervision.md) et [`runbook-supervision.md`](runbook-supervision.md) — cette section ne les recopie pas.
+
+### 12.3 Lignes stdout — l'historique
+
+Deux familles de lignes JSON partent sur la sortie standard, collectées par la plateforme d'hébergement :
+
+| Ligne | Émetteur | Contenu |
+|---|---|---|
+| `health_check` | worker de supervision | clé de sonde, état, latence, horodatage — la seule matière des tableaux de bord Grafana |
+| `user_activity` | application (tRPC et routes) | action, catégorie, route, statut, code d'erreur, durée, identifiant utilisateur, SIREN, IP tronquée |
+
+Les tableaux de bord Grafana, la conservation de ces lignes et le canal Mattermost sont hors du dépôt ; la liste de ce qui reste à faire est en [`supervision.md` §9](supervision.md#9-ce-qui-reste-à-faire-hors-dépôt). Le détail des journaux et de leurs durées est dans [`journaux-et-conservation.md` §4](journaux-et-conservation.md#4-journaux).
 
 ---
 
