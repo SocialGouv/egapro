@@ -25,7 +25,13 @@ describe("CompanyInfoBanner — text colour", () => {
 		"Code NAF :",
 		"Existence d'un CSE :",
 	])("renders the '%s' datapoint in the title grey", (label) => {
-		render(<CompanyInfoBanner company={company} cseLocked={false} />);
+		render(
+			<CompanyInfoBanner
+				company={company}
+				cseAnswer={null}
+				cseLocked={false}
+			/>,
+		);
 		expect(screen.getByText(label).closest("dl")).toHaveClass(
 			"fr-text-title--grey",
 		);

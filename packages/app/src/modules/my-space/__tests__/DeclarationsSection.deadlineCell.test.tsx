@@ -45,6 +45,7 @@ function deadlineCellText(declaration: DeclarationItem): string | null {
 	render(
 		<DeclarationsSection
 			cseApplicable={true}
+			cseLocked={false}
 			declarations={[declaration]}
 			hasCse={true}
 			representationCampaign={getDefaultRepresentationCampaign(currentYear)}

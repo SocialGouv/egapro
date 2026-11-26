@@ -26,7 +26,13 @@ const baseCompany: CompanyDetail = {
 
 describe("CompanyInfoBanner", () => {
 	it("renders the company name as the page h1 heading", () => {
-		render(<CompanyInfoBanner company={baseCompany} cseLocked={false} />);
+		render(
+			<CompanyInfoBanner
+				company={baseCompany}
+				cseAnswer={null}
+				cseLocked={false}
+			/>,
+		);
 		expect(
 			screen.getByRole("heading", { level: 1, name: "Alpha Solutions" }),
 		).toBeInTheDocument();
@@ -36,6 +42,7 @@ describe("CompanyInfoBanner", () => {
 		const { container } = render(
 			<CompanyInfoBanner
 				company={{ ...baseCompany, address: "12 RUE DE PARIS, 75001 PARIS" }}
+				cseAnswer={null}
 				cseLocked={false}
 			/>,
 		);
@@ -48,12 +55,24 @@ describe("CompanyInfoBanner", () => {
 	});
 
 	it("renders the formatted SIREN", () => {
-		render(<CompanyInfoBanner company={baseCompany} cseLocked={false} />);
+		render(
+			<CompanyInfoBanner
+				company={baseCompany}
+				cseAnswer={null}
+				cseLocked={false}
+			/>,
+		);
 		expect(screen.getByText("532 847 196")).toBeInTheDocument();
 	});
 
 	it("does not render a breadcrumb", () => {
-		render(<CompanyInfoBanner company={baseCompany} cseLocked={false} />);
+		render(
+			<CompanyInfoBanner
+				company={baseCompany}
+				cseAnswer={null}
+				cseLocked={false}
+			/>,
+		);
 		expect(
 			screen.queryByRole("navigation", { name: "vous êtes ici :" }),
 		).not.toBeInTheDocument();
@@ -66,6 +85,7 @@ describe("CompanyInfoBanner", () => {
 		render(
 			<CompanyInfoBanner
 				company={{ ...baseCompany, address: "12 RUE DE PARIS, 75001 PARIS" }}
+				cseAnswer={null}
 				cseLocked={false}
 			/>,
 		);
@@ -78,6 +98,7 @@ describe("CompanyInfoBanner", () => {
 		render(
 			<CompanyInfoBanner
 				company={{ ...baseCompany, nafCode: "62.01Z" }}
+				cseAnswer={null}
 				cseLocked={false}
 			/>,
 		);
@@ -92,6 +113,7 @@ describe("CompanyInfoBanner", () => {
 					nafCode: "62.01Z",
 					nafLabel: "Programmation informatique",
 				}}
+				cseAnswer={null}
 				cseLocked={false}
 			/>,
 		);
@@ -104,6 +126,7 @@ describe("CompanyInfoBanner", () => {
 		render(
 			<CompanyInfoBanner
 				company={{ ...baseCompany, gipWorkforce: 150 }}
+				cseAnswer={null}
 				cseLocked={false}
 			/>,
 		);
@@ -111,49 +134,94 @@ describe("CompanyInfoBanner", () => {
 	});
 
 	it("labels the workforce with the N-1 reference year, not the current campaign year", () => {
-		render(<CompanyInfoBanner company={baseCompany} cseLocked={false} />);
+		render(
+			<CompanyInfoBanner
+				company={baseCompany}
+				cseAnswer={null}
+				cseLocked={false}
+			/>,
+		);
 		expect(
 			screen.getByText(`Effectif annuel moyen en ${getWorkforceYear()} :`),
 		).toBeInTheDocument();
 	});
 
-	it("renders 'À compléter' badge when hasCse is null", () => {
+	it("renders 'À compléter' badge while the year's answer is unknown", () => {
 		render(
 			<CompanyInfoBanner
-				company={{ ...baseCompany, hasCse: null }}
+				company={baseCompany}
+				cseAnswer={null}
 				cseLocked={false}
 			/>,
 		);
 		expect(screen.getByText("À compléter")).toBeInTheDocument();
 	});
 
-	it("renders 'Oui' when hasCse is true", () => {
+	it("renders 'Oui' when the year's answer is true", () => {
 		render(
 			<CompanyInfoBanner
-				company={{ ...baseCompany, hasCse: true }}
+				company={baseCompany}
+				cseAnswer={true}
 				cseLocked={false}
 			/>,
 		);
 		expect(screen.getByText("Oui")).toBeInTheDocument();
 	});
 
-	it("renders 'Non' when hasCse is false", () => {
+	it("renders 'Non' when the year's answer is false", () => {
 		render(
 			<CompanyInfoBanner
-				company={{ ...baseCompany, hasCse: false }}
+				company={baseCompany}
+				cseAnswer={false}
 				cseLocked={false}
 			/>,
 		);
 		expect(screen.getByText("Non")).toBeInTheDocument();
 	});
 
+	it("renders the year's answer, not the live company column", () => {
+		// #4228: the banner used `company.hasCse`, so a correction on the live
+		// column could contradict the answer frozen with the year.
+		render(
+			<CompanyInfoBanner
+				company={{ ...baseCompany, hasCse: true }}
+				cseAnswer={false}
+				cseLocked
+			/>,
+		);
+		expect(screen.getByText("Non")).toBeInTheDocument();
+		expect(screen.queryByText("Oui")).not.toBeInTheDocument();
+	});
+
+	it("renders 'Non renseigné' for a completed year that was never answered", () => {
+		// The question cannot be asked any more, so 'À compléter' would promise
+		// an edit the user has no way to perform.
+		render(
+			<CompanyInfoBanner company={baseCompany} cseAnswer={null} cseLocked />,
+		);
+		expect(screen.getByText("Non renseigné")).toBeInTheDocument();
+		expect(screen.queryByText("À compléter")).not.toBeInTheDocument();
+	});
+
 	it("does not render address when null", () => {
-		render(<CompanyInfoBanner company={baseCompany} cseLocked={false} />);
+		render(
+			<CompanyInfoBanner
+				company={baseCompany}
+				cseAnswer={null}
+				cseLocked={false}
+			/>,
+		);
 		expect(screen.queryByText(/rue|avenue|boulevard/i)).not.toBeInTheDocument();
 	});
 
 	it("does not render NAF code section when nafCode is null", () => {
-		render(<CompanyInfoBanner company={baseCompany} cseLocked={false} />);
+		render(
+			<CompanyInfoBanner
+				company={baseCompany}
+				cseAnswer={null}
+				cseLocked={false}
+			/>,
+		);
 		expect(screen.queryByText("Code NAF :")).not.toBeInTheDocument();
 	});
 
@@ -161,6 +229,7 @@ describe("CompanyInfoBanner", () => {
 		render(
 			<CompanyInfoBanner
 				company={{ ...baseCompany, gipWorkforce: null }}
+				cseAnswer={null}
 				cseLocked={false}
 			/>,
 		);
@@ -176,6 +245,7 @@ describe("CompanyInfoBanner", () => {
 		render(
 			<CompanyInfoBanner
 				company={{ ...baseCompany, gipWorkforce: 37 }}
+				cseAnswer={null}
 				cseLocked={false}
 			/>,
 		);
@@ -189,6 +259,7 @@ describe("CompanyInfoBanner", () => {
 		render(
 			<CompanyInfoBanner
 				company={{ ...baseCompany, gipWorkforce: 99.97 }}
+				cseAnswer={null}
 				cseLocked={false}
 			/>,
 		);
@@ -200,6 +271,7 @@ describe("CompanyInfoBanner", () => {
 		render(
 			<CompanyInfoBanner
 				company={{ ...baseCompany, gipWorkforce: 250 }}
+				cseAnswer={null}
 				cseLocked={false}
 			/>,
 		);
@@ -208,7 +280,13 @@ describe("CompanyInfoBanner", () => {
 	});
 
 	it("renders the 'Modifier' button at or above the 100 threshold", () => {
-		render(<CompanyInfoBanner company={baseCompany} cseLocked={false} />);
+		render(
+			<CompanyInfoBanner
+				company={baseCompany}
+				cseAnswer={null}
+				cseLocked={false}
+			/>,
+		);
 		expect(
 			screen.getByRole("button", { name: "Modifier" }),
 		).toBeInTheDocument();
@@ -218,6 +296,7 @@ describe("CompanyInfoBanner", () => {
 		render(
 			<CompanyInfoBanner
 				company={{ ...baseCompany, gipWorkforce: 70 }}
+				cseAnswer={null}
 				cseLocked={false}
 			/>,
 		);
@@ -230,6 +309,7 @@ describe("CompanyInfoBanner", () => {
 		render(
 			<CompanyInfoBanner
 				company={{ ...baseCompany, gipWorkforce: 99.97 }}
+				cseAnswer={null}
 				cseLocked={false}
 			/>,
 		);
@@ -242,6 +322,7 @@ describe("CompanyInfoBanner", () => {
 		render(
 			<CompanyInfoBanner
 				company={{ ...baseCompany, gipWorkforce: 42 }}
+				cseAnswer={null}
 				cseLocked={false}
 			/>,
 		);
@@ -254,6 +335,7 @@ describe("CompanyInfoBanner", () => {
 		render(
 			<CompanyInfoBanner
 				company={{ ...baseCompany, gipWorkforce: null }}
+				cseAnswer={null}
 				cseLocked={false}
 			/>,
 		);
@@ -263,7 +345,9 @@ describe("CompanyInfoBanner", () => {
 	});
 
 	it("hides the 'Modifier' button once the year's démarche is completed", () => {
-		render(<CompanyInfoBanner company={baseCompany} cseLocked />);
+		render(
+			<CompanyInfoBanner company={baseCompany} cseAnswer={null} cseLocked />,
+		);
 		expect(
 			screen.queryByRole("button", { name: "Modifier" }),
 		).not.toBeInTheDocument();
@@ -276,6 +360,7 @@ describe("CompanyInfoBanner", () => {
 			render(
 				<CompanyInfoBanner
 					company={{ ...baseCompany, gipWorkforce: 70 }}
+					cseAnswer={null}
 					cseLocked={false}
 				/>,
 			);
@@ -292,6 +377,7 @@ describe("CompanyInfoBanner", () => {
 			render(
 				<CompanyInfoBanner
 					company={{ ...baseCompany, gipWorkforce: 37 }}
+					cseAnswer={null}
 					cseLocked={false}
 				/>,
 			);
@@ -307,6 +393,7 @@ describe("CompanyInfoBanner", () => {
 			render(
 				<CompanyInfoBanner
 					company={{ ...baseCompany, gipWorkforce: null }}
+					cseAnswer={null}
 					cseLocked={false}
 				/>,
 			);
@@ -322,6 +409,7 @@ describe("CompanyInfoBanner", () => {
 			render(
 				<CompanyInfoBanner
 					company={{ ...baseCompany, gipWorkforce: 99.97 }}
+					cseAnswer={null}
 					cseLocked={false}
 				/>,
 			);
@@ -338,6 +426,7 @@ describe("CompanyInfoBanner", () => {
 			render(
 				<CompanyInfoBanner
 					company={{ ...baseCompany, gipWorkforce: 49.99 }}
+					cseAnswer={null}
 					cseLocked={false}
 				/>,
 			);
@@ -353,6 +442,7 @@ describe("CompanyInfoBanner", () => {
 			render(
 				<CompanyInfoBanner
 					company={{ ...baseCompany, gipWorkforce: 100 }}
+					cseAnswer={null}
 					cseLocked={false}
 				/>,
 			);
@@ -370,6 +460,7 @@ describe("CompanyInfoBanner", () => {
 			render(
 				<CompanyInfoBanner
 					company={{ ...baseCompany, gipWorkforce: 250 }}
+					cseAnswer={null}
 					cseLocked={false}
 				/>,
 			);
@@ -384,6 +475,7 @@ describe("CompanyInfoBanner", () => {
 			render(
 				<CompanyInfoBanner
 					company={{ ...baseCompany, gipWorkforce: 70 }}
+					cseAnswer={null}
 					cseLocked={false}
 				/>,
 			);
@@ -403,6 +495,7 @@ describe("CompanyInfoBanner", () => {
 						countryLabel: "QATAR",
 						address: "58 AV SOME STREET",
 					}}
+					cseAnswer={null}
 					cseLocked={false}
 				/>,
 			);
@@ -420,6 +513,7 @@ describe("CompanyInfoBanner", () => {
 						countryLabel: "FRANCE",
 						address: "12 RUE DE PARIS, 75001 PARIS",
 					}}
+					cseAnswer={null}
 					cseLocked={false}
 				/>,
 			);
@@ -436,6 +530,7 @@ describe("CompanyInfoBanner", () => {
 						countryLabel: null,
 						address: "58 AV SOME STREET",
 					}}
+					cseAnswer={null}
 					cseLocked={false}
 				/>,
 			);
@@ -453,6 +548,7 @@ describe("CompanyInfoBanner", () => {
 						countryCode: "99248",
 						countryLabel: null,
 					}}
+					cseAnswer={null}
 					cseLocked={false}
 				/>,
 			);
@@ -469,6 +565,7 @@ describe("CompanyInfoBanner", () => {
 						countryLabel: "BELGIQUE",
 						address: "12 RUE DE LA DEMO",
 					}}
+					cseAnswer={null}
 					cseLocked={false}
 				/>,
 			);
@@ -487,6 +584,7 @@ describe("CompanyInfoBanner", () => {
 						departmentLabel: "Nord",
 						address: "1 RUE DU NORD, 59000 LILLE",
 					}}
+					cseAnswer={null}
 					cseLocked={false}
 				/>,
 			);
@@ -505,6 +603,7 @@ describe("CompanyInfoBanner", () => {
 						countryCode: "99123",
 						countryLabel: "AFRIQUE DU SUD",
 					}}
+					cseAnswer={null}
 					cseLocked={false}
 				/>,
 			);
@@ -512,7 +611,13 @@ describe("CompanyInfoBanner", () => {
 		});
 
 		it("does not render the country row for a French company without an address", () => {
-			render(<CompanyInfoBanner company={baseCompany} cseLocked={false} />);
+			render(
+				<CompanyInfoBanner
+					company={baseCompany}
+					cseAnswer={null}
+					cseLocked={false}
+				/>,
+			);
 			expect(screen.queryByText("Pays :")).not.toBeInTheDocument();
 			expect(screen.queryByText("Adresse :")).not.toBeInTheDocument();
 		});
@@ -528,7 +633,11 @@ describe("CompanyInfoBanner", () => {
 
 		it("explains why the identity is missing and keeps the dependable data", () => {
 			render(
-				<CompanyInfoBanner company={unresolvedCompany} cseLocked={false} />,
+				<CompanyInfoBanner
+					company={unresolvedCompany}
+					cseAnswer={null}
+					cseLocked={false}
+				/>,
 			);
 
 			expect(
@@ -549,7 +658,11 @@ describe("CompanyInfoBanner", () => {
 
 		it("never prints the raw placeholder SIREN in the heading", () => {
 			render(
-				<CompanyInfoBanner company={unresolvedCompany} cseLocked={false} />,
+				<CompanyInfoBanner
+					company={unresolvedCompany}
+					cseAnswer={null}
+					cseLocked={false}
+				/>,
 			);
 
 			expect(
@@ -562,7 +675,11 @@ describe("CompanyInfoBanner", () => {
 
 		it("shows no location row rather than an unknown country", () => {
 			render(
-				<CompanyInfoBanner company={unresolvedCompany} cseLocked={false} />,
+				<CompanyInfoBanner
+					company={unresolvedCompany}
+					cseAnswer={null}
+					cseLocked={false}
+				/>,
 			);
 
 			expect(screen.queryByText("Pays :")).not.toBeInTheDocument();
@@ -571,7 +688,13 @@ describe("CompanyInfoBanner", () => {
 		});
 
 		it("leaves a resolved identity without the notice", () => {
-			render(<CompanyInfoBanner company={baseCompany} cseLocked={false} />);
+			render(
+				<CompanyInfoBanner
+					company={baseCompany}
+					cseAnswer={null}
+					cseLocked={false}
+				/>,
+			);
 
 			expect(
 				screen.queryByText(/informations d'identification de l'entreprise/i),

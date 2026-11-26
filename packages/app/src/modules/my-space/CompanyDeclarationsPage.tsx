@@ -111,9 +111,14 @@ export function CompanyDeclarationsPage({
 	return (
 		<main id="content" tabIndex={-1}>
 			<WelcomeBanner />
-			<CompanyInfoBanner company={company} cseLocked={cseLocked} />
+			<CompanyInfoBanner
+				company={company}
+				cseAnswer={cseAnswer}
+				cseLocked={cseLocked}
+			/>
 			<DeclarationsSection
 				cseApplicable={cseApplicable}
+				cseLocked={cseLocked}
 				declarations={declarations}
 				hasCse={cseAnswer}
 				representationCampaign={representationCampaign}

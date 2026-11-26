@@ -4,6 +4,7 @@ import { and, desc, eq, inArray, isNull, ne, type SQL, sql } from "drizzle-orm";
 
 import {
 	DEMARCHE_LIFECYCLE_STATUSES,
+	type DeclarationFsmStatus,
 	type DemarcheLifecycleStatus,
 	TRANSMISSION_EVENT_TYPES,
 	type TransmissionEventType,
@@ -200,18 +201,49 @@ function currentDeclarationOrder() {
  * `DESC` place les NULL en tête : `nulls last` renvoie les lignes sans date au
  * fond, là où « la plus récente » les attend.
  */
+async function resolveCurrentDeclarationRow(
+	db: DbOrTx,
+	siren: string,
+	year: number,
+) {
+	const rows = await db
+		.select({
+			id: declarations.id,
+			hasCse: declarations.hasCse,
+			status: declarations.status,
+		})
+		.from(declarations)
+		.where(currentDeclarationFilter(siren, year))
+		.orderBy(...currentDeclarationOrder())
+		.limit(1);
+	return rows[0] ?? null;
+}
+
 export async function resolveCurrentDeclarationId(
 	db: DbOrTx,
 	siren: string,
 	year: number,
 ): Promise<string | null> {
-	const rows = await db
-		.select({ id: declarations.id })
-		.from(declarations)
-		.where(currentDeclarationFilter(siren, year))
-		.orderBy(...currentDeclarationOrder())
-		.limit(1);
-	return rows[0]?.id ?? null;
+	const row = await resolveCurrentDeclarationRow(db, siren, year);
+	return row?.id ?? null;
+}
+
+/**
+ * The CSE facts of the year's current declaration, for readers that must not
+ * create a draft: the per-year answer beats the live company one, and the
+ * completed démarche is what freezes it.
+ *
+ * Resolved through the same row as `resolveCurrentDeclarationId`, so a guard
+ * and the mutation it duplicates can never disagree about which year they read.
+ */
+export async function resolveCurrentDeclarationCseState(
+	db: DbOrTx,
+	siren: string,
+	year: number,
+): Promise<{ hasCse: boolean | null; status: DeclarationFsmStatus } | null> {
+	const row = await resolveCurrentDeclarationRow(db, siren, year);
+	if (!row) return null;
+	return { hasCse: row.hasCse, status: row.status };
 }
 
 export type ExportDeclarationResolution = {

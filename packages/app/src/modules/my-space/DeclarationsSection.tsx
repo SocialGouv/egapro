@@ -34,6 +34,7 @@ type Props = {
 	userPhone: string | null;
 	hasCse: boolean | null;
 	cseApplicable: boolean;
+	cseLocked: boolean;
 	representationCampaign: RepresentationCampaign;
 	representationCampaignYear: number;
 	representationLockedByOther?: boolean;
@@ -72,6 +73,7 @@ export function DeclarationsSection({
 	userPhone,
 	hasCse,
 	cseApplicable,
+	cseLocked,
 	representationCampaign,
 	representationCampaignYear,
 	representationLockedByOther = false,
@@ -131,6 +133,7 @@ export function DeclarationsSection({
 			{visibleCurrentDeclarations.length > 0 && (
 				<DeclarationsTable
 					cseApplicable={cseApplicable}
+					cseLocked={cseLocked}
 					declarations={visibleCurrentDeclarations}
 					hasCse={hasCse}
 					labelledById="demarches-en-cours-title"
@@ -146,6 +149,7 @@ export function DeclarationsSection({
 					</h2>
 					<DeclarationsTable
 						cseApplicable={cseApplicable}
+						cseLocked={cseLocked}
 						declarations={visiblePreviousDeclarations}
 						hasCse={hasCse}
 						labelledById="annees-precedentes-title"
@@ -202,6 +206,7 @@ type DeclarationsTableProps = {
 	userPhone: string | null;
 	hasCse: boolean | null;
 	cseApplicable: boolean;
+	cseLocked: boolean;
 	representationCampaign: RepresentationCampaign;
 	representationCampaignYear: number;
 };
@@ -212,6 +217,7 @@ function DeclarationsTable({
 	userPhone,
 	hasCse,
 	cseApplicable,
+	cseLocked,
 	representationCampaign,
 	representationCampaignYear,
 }: DeclarationsTableProps) {
@@ -239,6 +245,7 @@ function DeclarationsTable({
 											<td>
 												<DeclarationLink
 													cseApplicable={cseApplicable}
+													cseLocked={cseLocked}
 													hasCse={hasCse}
 													type={declaration.type}
 													userPhone={userPhone}

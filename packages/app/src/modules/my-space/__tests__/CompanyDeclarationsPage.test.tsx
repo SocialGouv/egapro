@@ -392,6 +392,34 @@ describe("CompanyDeclarationsPage", () => {
 		expect(container.querySelector("#missing-info-modal")).toBeInTheDocument();
 	});
 
+	it("routes a locked year with no CSE answer to the declaration panel, not the empty missing-info form", () => {
+		// #4228: the question cannot be asked on a completed démarche, so the row
+		// must not open a panel that has nothing to offer.
+		renderPage({
+			company: { ...company, gipWorkforce: 250, hasCse: null },
+			declarations: [
+				makeDeclaration("remuneration", { fsmStatus: "demarche_completed" }),
+			],
+		});
+		expect(
+			screen.getByRole("button", { name: "Rémunération" }),
+		).toHaveAttribute("aria-controls", "declaration-process-panel");
+	});
+
+	it("shows the frozen year's answer instead of the live company one in the banner", () => {
+		renderPage({
+			company: { ...company, gipWorkforce: 250, hasCse: true },
+			declarations: [
+				makeDeclaration("remuneration", {
+					fsmStatus: "demarche_completed",
+					hasCse: false,
+				}),
+			],
+		});
+		const cseTerm = screen.getByText("Existence d'un CSE :");
+		expect(cseTerm.nextElementSibling).toHaveTextContent("Non");
+	});
+
 	it("forwards the lock alert when the declaration is locked by another user", () => {
 		const { container } = renderPage({
 			lockedByOther: true,

@@ -88,6 +88,7 @@ function renderSection(
 	return render(
 		<DeclarationsSection
 			cseApplicable={true}
+			cseLocked={false}
 			declarations={overrides?.declarations ?? declarations}
 			hasCse={true}
 			representationCampaign={

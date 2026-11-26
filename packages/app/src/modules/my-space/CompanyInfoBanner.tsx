@@ -19,6 +19,8 @@ import type { CompanyDetail } from "./types";
 
 type Props = {
 	company: CompanyDetail;
+	// The year's answer: snapshot first, live column as fallback.
+	cseAnswer: boolean | null;
 	// Frozen with the year's completed démarche.
 	cseLocked: boolean;
 };
@@ -32,7 +34,7 @@ const INFO_SOURCE_TEXT_BY_SIZE: Partial<Record<CompanySize, string>> = {
 		"Source : INSEE et DSN (Déclarations Sociales Nominatives) pour l'effectif annuel moyen.",
 };
 
-export function CompanyInfoBanner({ company, cseLocked }: Props) {
+export function CompanyInfoBanner({ company, cseAnswer, cseLocked }: Props) {
 	const workforceYear = getWorkforceYear();
 	const obligationWorkforce = getObligationWorkforce(company.gipWorkforce);
 	// The CSE field is the only editable datapoint and it starts at 100, so below
@@ -144,8 +146,12 @@ export function CompanyInfoBanner({ company, cseLocked }: Props) {
 							<div className={styles.datapoint}>
 								<dt>Existence d'un CSE :</dt>
 								<dd>
-									{company.hasCse !== null ? (
-										<strong>{company.hasCse ? "Oui" : "Non"}</strong>
+									{cseAnswer !== null ? (
+										<strong>{cseAnswer ? "Oui" : "Non"}</strong>
+									) : cseLocked ? (
+										// A closed year can no longer be answered, so the
+										// "À compléter" prompt would be a dead end.
+										<strong>Non renseigné</strong>
 									) : (
 										<StatusBadge status="to_complete" />
 									)}
