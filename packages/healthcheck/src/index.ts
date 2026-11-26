@@ -2,6 +2,7 @@ import postgres from "postgres";
 
 import { type HealthcheckConfig, resolveConfig } from "./config.js";
 import { createMattermostNotifier } from "./notify/mattermost.js";
+import { createNotificationQueue } from "./notify/delivery.js";
 import { decideNotification } from "./notify/policy.js";
 import { persistProbeResult } from "./persistence.js";
 import { buildProbes } from "./probes/index.js";
@@ -32,6 +33,7 @@ export async function main(): Promise<void> {
 	await logReceiptOutboxGap(sql);
 
 	const notifier = createNotifier(config);
+	const notifications = notifier ? createNotificationQueue(notifier) : null;
 	const probes = buildProbes(config, sql, queueSql);
 	const scheduler = createScheduler({
 		probes,
@@ -44,7 +46,7 @@ export async function main(): Promise<void> {
 				result,
 				checkedAt,
 			});
-			if (!notifier) return;
+			if (!notifications) return;
 
 			const notification = decideNotification({
 				probe,
@@ -63,7 +65,7 @@ export async function main(): Promise<void> {
 				previous,
 				alertAfterFailures: config.alerts.alertAfterFailures,
 			});
-			if (notification) await notifier.notify(notification);
+			if (notification) await notifications.enqueue(notification);
 		},
 		onError(probe, error) {
 			console.error(
