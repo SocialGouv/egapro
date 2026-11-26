@@ -110,7 +110,7 @@ jobs:
           # Les valeurs se lisent dans playwright-core/browsers.json de la version installée :
           #   jq '.browsers[] | select(.name=="chromium")' node_modules/playwright-core/browsers.json
           # -> revision = CHROMIUM_VERSION, browserVersion = CFT_BUILD.
-          # Les TROIS workflows (e2e, a11y, e2e-grille) partagent ce bloc et ce cache : les
+          # Les deux workflows (e2e, e2e-grille) partagent ce bloc et ce cache : les
           # désaligner, c'est laisser rouge celui qu'on n'a pas corrigé.
           CHROMIUM_VERSION=1234
           CFT_BUILD=151.0.7922.34

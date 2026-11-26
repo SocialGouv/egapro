@@ -162,7 +162,7 @@ jobs:
           # Les valeurs se lisent dans playwright-core/browsers.json de la version installée :
           #   jq '.browsers[] | select(.name=="chromium")' node_modules/playwright-core/browsers.json
           # -> revision = CHROMIUM_VERSION, browserVersion = CFT_BUILD.
-          # Les TROIS workflows (e2e, a11y, e2e-grille) partagent ce bloc et ce cache : les
+          # Les deux workflows (e2e, e2e-grille) partagent ce bloc et ce cache : les
           # désaligner, c'est laisser rouge celui qu'on n'a pas corrigé.
           CHROMIUM_VERSION=1234
           CFT_BUILD=151.0.7922.34
@@ -201,11 +201,9 @@ jobs:
             "chromium_headless_shell-${CHROMIUM_VERSION}" \
             "chrome-headless-shell-linux64" \
             "chrome-headless-shell-linux64"
-      # Même retry que dans a11y.yaml, et pour la même raison : `install-deps` est un
-      # `apt-get install`, et une tentative unique sous 5 minutes est un tirage au sort quand le
-      # miroir est lent (mesuré : le job a11y a expiré à 5:00 pile sur un commit où celui-ci
-      # passait). Les deux workflows partagent volontairement ce bloc d'infrastructure — les
-      # désaligner, c'est laisser le flake dans celui qu'on n'a pas corrigé.
+      # Retry : `install-deps` est un `apt-get install`, et une tentative unique sous 5 minutes
+      # est un tirage au sort quand le miroir est lent (mesuré : un job a expiré à 5:00 pile sur
+      # un commit où celui-ci passait).
       - name: Install Playwright system dependencies
         timeout-minutes: 14
         env:

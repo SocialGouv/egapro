@@ -2,9 +2,7 @@ version: 2
 updates:
   - package-ecosystem: github-actions
     directory: "/"
-    # Même cadence et même branche que l'écosystème npm ci-dessous. Les versions de la chaîne
-    # a11y que Dependabot ne voit pas (`ITERION_VERSION` d'a11y.yaml) se montent à la main
-    # → docs/accessibilite-ultra11y.md, « Bump de version ».
+    # Même cadence et même branche que l'écosystème npm ci-dessous.
     target-branch: alpha
     labels:
       - bot

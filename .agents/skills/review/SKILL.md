@@ -22,7 +22,7 @@ Deux modes. Choisis-le à l'étape 0, puis suis **uniquement** la section du mod
 |---|---|
 | un `.ts` / `.tsx` / un test est dans le diff | [references/structural.md](references/structural.md) |
 | le diff touche `src/server/**`, `routers/`, tRPC, `src/app/api/**`, l'auth | [references/security.md](references/security.md) |
-| un `.tsx` est dans le diff | [references/a11y.md](references/a11y.md) |
+| un `.tsx` / `.scss` est dans le diff | [references/a11y.md](references/a11y.md) (lance le skill `review-a11y`) |
 | un `.tsx` / `.scss` est dans le diff | [references/design-fidelity.md](references/design-fidelity.md) |
 | le diff change le comportement de l'app (pas seulement tests, docs, config d'outillage) | [references/functional.md](references/functional.md) |
 | mode **pr** | [references/pr-comments.md](references/pr-comments.md) |
@@ -47,7 +47,7 @@ Tu **rapportes**, tu ne corriges pas. L'appelant (toi plus tard, ou le skill `im
    ```bash
    pnpm verify
    ```
-   (patterns sur le diff, audit statique ultra11y de tout `src` — comme la gate CI —, lint, format, typecheck, tests.) Si ce code exact a déjà passé `pnpm verify` au vert (l'étape 5 de `/implement`), la commande répond aussitôt — lance-la quand même, c'est elle qui fait foi.
+   (patterns sur le diff, audit statique ultra11y de tout `src`, lint, format, typecheck, tests.) Si ce code exact a déjà passé `pnpm verify` au vert (l'étape 5 de `/implement`), la commande répond aussitôt — lance-la quand même, c'est elle qui fait foi.
    **FAIL → STOP.** Rends le tableau avec `verify: FAIL` et les lignes d'erreur utiles. Les checklists ne servent à rien tant que la machine est rouge.
    Si un dev server tourne : appelle aussi `nextjs_call` (`get_errors`) du MCP `next-devtools`.
 

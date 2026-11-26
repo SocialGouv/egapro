@@ -760,7 +760,7 @@ Déclarées et validées dans `src/env.js`. **Jamais lire `process.env` directem
 
 Aucune valeur secrète **dans le repo**. Gérés via des [sealed-secrets](https://github.com/bitnami-labs/sealed-secrets) sous `.kontinuous/`. Les CronJobs récupèrent leurs credentials PostgreSQL et S3 via `secretKeyRef` / `secretRef` (jamais en clair dans les manifests).
 
-**Secrets de la CI E2E** (`e2e.yaml`, `e2e-grille.yaml`, job `a11y-pages` d'`a11y.yaml`) — ces jobs exécutent le code de la branche testée, scripts d'installation compris, donc aucun secret du dépôt n'y est posé au niveau du job (#4699) :
+**Secrets de la CI E2E** (`e2e.yaml`, `e2e-grille.yaml`) — ces jobs exécutent le code de la branche testée, scripts d'installation compris, donc aucun secret du dépôt n'y est posé au niveau du job (#4699) :
 
 | Variable | Source | Exposée à |
 |---|---|---|
@@ -803,7 +803,7 @@ Activé via `data-fr-scheme="system"` sur `<html>`. Cookie `fr-theme` lu par un 
 
 ### 11.5 RGAA 4.1.2 / WCAG 2.2 AA
 
-Toute l'accessibilité passe par **ultra11y**, en deux surfaces : le skill `review-a11y`, lancé par `/review gates` sur le code sous changement (après l'audit statique du pre-commit et de `pnpm verify`), et les workflows `.github/workflows/a11y-review.yaml` et `a11y.yaml` — sur chaque PR, la revue `review-a11y` sans modèle (code modifié, puis pages rendues que la PR atteint, seules les non-conformités nouvelles bloquent) et l'audit statique de tout `src`, plus — au cron hebdomadaire ou en manuel — un balayage Playwright des pages audité par le moteur seul, et le bot iterion `rgaa-audit` qui adjuge les critères de jugement. Lighthouse rapporte un score d'accessibilité en avertissement, ce n'est pas une gate. Aucun système a11y parallèle. Règle canonique : `AGENTS.md` § Accessibilité, et `.agents/skills/review/references/a11y.md` pour la revue.
+Toute l'accessibilité passe par **ultra11y**, en deux surfaces : le skill `review-a11y`, lancé par `/review gates` sur le code sous changement (après l'audit statique du pre-commit et de `pnpm verify`), et iterion (iterion.cloud), hors GitHub Actions — le bot `rgaa-audit` (Acci) audite et adjuge la grille RGAA complète chaque lundi et à la demande sur une PR (`/acci`), et le bot Revi revoit les PR. Lighthouse rapporte un score d'accessibilité en avertissement, ce n'est pas une gate. Aucun système a11y parallèle. Règle canonique : `AGENTS.md` § Accessibilité, et `.agents/skills/review/references/a11y.md` pour la revue.
 
 ---
 
@@ -829,7 +829,7 @@ Les trois initialisations étalent les options du module `src/modules/observabil
 |---|---|---|---|
 | Unit | Vitest | `src/modules/**/__tests__/` | ≥ 75% global, **100%** sur `domain/` |
 | E2E | Playwright | `packages/app/src/e2e/` | Au moins une E2E par `page.tsx` |
-| RGAA / a11y | ultra11y · bot iterion `rgaa-audit` | `.github/workflows/a11y.yaml` · `pnpm --filter app test:a11y` | Gate statique **bloquante** (`fail-on: blocking`) sur PR ; balayage page par page au cron hebdo ou en manuel, non bloquant |
+| RGAA / a11y | ultra11y · bot iterion `rgaa-audit` | `pnpm --filter app test:a11y` · `src/e2e/a11y/` · iterion.cloud | Audit statique **bloquant** (`fail-on: blocking`) au pre-commit et dans `pnpm verify` ; audit complet par Acci (lundi, `/acci`), non bloquant |
 | Intégration BDD | Vitest + Docker | `*.integration.test.ts` | Obligatoire pour code touchant `audit.action_log` ou les scripts de purge (audit, déclarations) |
 
 ### 13.1 Mocks centralisés
@@ -864,8 +864,6 @@ pnpm test:integration  # Tests intégration BDD (nécessite Docker)
 | `preproduction.yaml` | push branche `beta` | Déploiement preprod |
 | `production.yaml` | push tag | Déploiement prod |
 | `release.yml` | manuel | semantic-release (versionnement automatique) |
-| `a11y.yaml` | PR · cron lundi 04:00 UTC · manuel | `a11y-gate` (audit RGAA statique, **bloquante**), `a11y-pages` (balayage Playwright + moteur seul, cron/manuel, non bloquant), `rgaa-audit` (bot iterion : audit + adjudication, cron/manuel, non bloquant), `a11y-bundle` (fusion en un artefact `ultra11y-rgaa`) |
-| `a11y-review.yaml` | PR → `alpha` · déploiement de la préversion | revue `review-a11y` : audit statique du diff, puis rendu des pages touchées face à `alpha` (`scan --since --baseline`), **bloquante**, commentaire de PR par critère RGAA |
 | `claude-question.yml` | issue/PR labels | Intégration IA (questions) |
 
 ### 14.2 Kontinuous (déploiement Kubernetes)
