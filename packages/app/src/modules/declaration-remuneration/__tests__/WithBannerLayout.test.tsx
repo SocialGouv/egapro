@@ -73,6 +73,7 @@ function mockLayout({
 	profileFails = false,
 	status = "draft" as string,
 	isFirstDeclarationLocked = false,
+	lastTransmission,
 	user = DEFAULT_USER as Record<string, unknown>,
 }: {
 	gipWorkforce?: number | null;
@@ -81,6 +82,7 @@ function mockLayout({
 	profileFails?: boolean;
 	status?: string;
 	isFirstDeclarationLocked?: boolean;
+	lastTransmission?: string | null;
 	user?: Record<string, unknown>;
 } = {}) {
 	mockAuth.mockResolvedValue({ user });
@@ -96,6 +98,7 @@ function mockLayout({
 	vi.mocked(api.declaration.getOrCreate).mockResolvedValue({
 		declaration: { id: "d1", year: 2026, siren: SIREN, status },
 		isFirstDeclarationLocked,
+		...(lastTransmission === undefined ? {} : { lastTransmission }),
 	} as never);
 	if (profileFails) {
 		vi.mocked(api.profile.get).mockRejectedValue(new Error("NOT_FOUND"));
@@ -244,13 +247,26 @@ describe("WithBannerLayout", () => {
 		}
 
 		it.each([
-			["demarche_completed", true, true],
-			["demarche_completed", false, false],
-			["awaiting_cse_opinion", true, false],
-			["corrective_actions_chosen", false, false],
-			["draft", false, false],
-		])("status %s, first declaration superseded %s → suspended %s", async (status, isFirstDeclarationLocked, expected) => {
-			mockLayout({ status, isFirstDeclarationLocked });
+			["demarche_completed", true, "cse_opinion", true],
+			["demarche_completed", false, "cse_opinion", false],
+			["awaiting_cse_opinion", true, "joint_evaluation", false],
+			["corrective_actions_chosen", false, null, false],
+			["draft", false, null, false],
+		])("status %s, first declaration superseded %s, last transmission %s → suspended %s", async (status, isFirstDeclarationLocked, lastTransmission, expected) => {
+			mockLayout({ status, isFirstDeclarationLocked, lastTransmission });
+
+			expect(await lockAcquisitionSuspended()).toBe(expected);
+		});
+
+		it.each([
+			["demarche_completed", true, "cse_opinion", true],
+			["demarche_completed", true, "joint_evaluation", false],
+			["demarche_completed", true, "second_declaration", false],
+			["demarche_completed", true, "path_choice_round_1", false],
+			["demarche_completed", true, "path_choice_round_2", false],
+			["demarche_completed", true, null, false],
+		])("status %s, first declaration superseded %s, last transmission %s → suspended %s", async (status, isFirstDeclarationLocked, lastTransmission, expected) => {
+			mockLayout({ status, isFirstDeclarationLocked, lastTransmission });
 
 			expect(await lockAcquisitionSuspended()).toBe(expected);
 		});

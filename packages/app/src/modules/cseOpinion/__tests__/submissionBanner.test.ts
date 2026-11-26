@@ -5,6 +5,7 @@ import {
 	type DeclarationFsmStatus,
 	isJointEvaluationWritable,
 	isSecondDeclarationWritable,
+	type LastTransmission,
 } from "~/modules/domain";
 import { getSubmissionBannerState } from "../submissionBanner";
 
@@ -13,12 +14,14 @@ function state(
 	first: CompliancePathValue | null,
 	second: CompliancePathValue | null,
 	hasSubmittedSecondDeclaration: boolean,
+	lastTransmission: LastTransmission | null = null,
 ) {
 	return getSubmissionBannerState({
 		status,
 		firstDeclarationPathChoice: first,
 		secondDeclarationPathChoice: second,
 		hasSubmittedSecondDeclaration,
+		lastTransmission,
 	});
 }
 
@@ -88,12 +91,33 @@ describe("getSubmissionBannerState", () => {
 		).toBe(false);
 	});
 
+	it("keeps the last deposit of a closed démarche modifiable even with a CSE", () => {
+		expect(
+			state(
+				"demarche_completed",
+				"joint_evaluation",
+				null,
+				false,
+				"joint_evaluation",
+			)?.depositModifiable,
+		).toBe(true);
+		expect(
+			state(
+				"demarche_completed",
+				"corrective_action",
+				null,
+				true,
+				"second_declaration",
+			)?.depositModifiable,
+		).toBe(true);
+	});
+
 	it.each(
 		DECLARATION_FSM_STATUSES,
 	)("follows the domain writability rules in %s", (status) => {
 		expect(state(status, "joint_evaluation", null, false)).toEqual({
 			variant: "joint_evaluation",
-			depositModifiable: isJointEvaluationWritable(status),
+			depositModifiable: isJointEvaluationWritable(status, null),
 		});
 		expect(state(status, "corrective_action", null, true)).toEqual({
 			variant: "second_declaration",
@@ -101,6 +125,7 @@ describe("getSubmissionBannerState", () => {
 				status,
 				firstDeclarationPathChoice: "corrective_action",
 				secondDeclarationPathChoice: null,
+				lastTransmission: null,
 			}),
 		});
 	});

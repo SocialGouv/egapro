@@ -18,6 +18,7 @@ import {
 	type DeclarationFsmStatus,
 	hasHighGap,
 	isSecondDeclarationWritable,
+	type LastTransmission,
 } from "~/modules/domain";
 import {
 	getCurrentStageHref,
@@ -43,6 +44,7 @@ type Props = {
 	status: DeclarationFsmStatus | null;
 	firstDeclarationPathChoice: CompliancePathValue | null;
 	secondDeclarationPathChoice: CompliancePathValue | null;
+	lastTransmission: LastTransmission | null;
 };
 
 export function SecondDeclarationStep3Review({
@@ -55,6 +57,7 @@ export function SecondDeclarationStep3Review({
 	status,
 	firstDeclarationPathChoice,
 	secondDeclarationPathChoice,
+	lastTransmission,
 }: Props) {
 	const router = useRouter();
 	const modalRef = useRef<HTMLDialogElement>(null);
@@ -62,6 +65,7 @@ export function SecondDeclarationStep3Review({
 		status,
 		firstDeclarationPathChoice,
 		secondDeclarationPathChoice,
+		lastTransmission,
 	});
 	const submissionAttemptFingerprintRef = useRef(
 		secondDeclarationSubmissionCount,

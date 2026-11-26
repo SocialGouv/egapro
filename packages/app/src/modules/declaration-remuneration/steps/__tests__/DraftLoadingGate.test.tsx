@@ -228,6 +228,7 @@ describe("DraftLoadingGate", () => {
 				declarationYear={2026}
 				firstDeclarationPathChoice="corrective_action"
 				initialFirstDeclarationCategories={[]}
+				lastTransmission={null}
 				secondDeclarationPathChoice={null}
 				status="corrective_actions_chosen"
 			/>,

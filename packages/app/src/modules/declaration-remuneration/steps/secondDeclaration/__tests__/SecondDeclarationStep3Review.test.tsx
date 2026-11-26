@@ -151,6 +151,7 @@ function step3Review(
 			cseOpinionRequired={false}
 			declarationYear={2025}
 			firstDeclarationPathChoice="corrective_action"
+			lastTransmission={null}
 			secondDeclarationCategories={mockCategories}
 			secondDeclarationPathChoice={null}
 			secondDeclarationSubmissionCount={INITIAL_SUBMISSION_COUNT}
@@ -703,6 +704,36 @@ describe("SecondDeclarationStep3Review", () => {
 		expect(
 			screen.getByRole("button", { name: /transmettre/i }),
 		).toBeInTheDocument();
+	});
+
+	it("reopens the transmission when the second declaration is the last transmission of a closed démarche (#5167)", () => {
+		renderStep3({
+			lastTransmission: "second_declaration",
+			status: "demarche_completed",
+		});
+
+		expect(
+			screen.getByRole("button", { name: /transmettre/i }),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole("link", { name: /suivant/i }),
+		).not.toBeInTheDocument();
+		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
+			"href",
+			"/declaration-remuneration/parcours-conformite/etape/2",
+		);
+	});
+
+	it("keeps the funnel read-only when another step closed the démarche (#5167)", () => {
+		renderStep3({
+			lastTransmission: "joint_evaluation",
+			status: "demarche_completed",
+		});
+
+		expect(
+			screen.queryByRole("button", { name: /transmettre/i }),
+		).not.toBeInTheDocument();
+		expect(screen.getByRole("link", { name: /suivant/i })).toBeInTheDocument();
 	});
 
 	describe("CSE consultation section gating (issue #3945)", () => {

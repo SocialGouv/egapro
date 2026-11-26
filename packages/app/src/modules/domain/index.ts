@@ -200,9 +200,11 @@ export type {
 	DeclarationEventType,
 	DeclarationStatusEvent,
 	JointEvaluationTransmissionFacts,
+	LastTransmission,
 	SubmissionHistoryEvent,
 	SubsequentSubmissions,
 	TrajectoryEntry,
+	TransmissionHistoryEvent,
 } from "./shared/declarationTrajectory";
 export {
 	deriveSubsequentSubmissions,
@@ -212,12 +214,14 @@ export {
 	getDemarcheCompletedAt,
 	getEventTimestamp,
 	getJointEvaluationSubmittedAt,
+	getLastTransmission,
 	getPathChoiceAt,
 	getSecondDeclarationSubmittedAt,
 	getSubmittedAt,
 	hasEvent,
 	hasSubmittedSecondDeclaration,
 	isJointEvaluationFileTransmitted,
+	isLastTransmissionPathChoice,
 	SUBSEQUENT_SUBMISSION_EVENT_TYPES,
 } from "./shared/declarationTrajectory";
 // Démarche lifecycle — admin-facing 4-value status, its date, and the transmission events

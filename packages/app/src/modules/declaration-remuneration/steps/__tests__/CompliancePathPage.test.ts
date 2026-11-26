@@ -24,6 +24,7 @@ describe("isConcernedDeclarationModifiable", () => {
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				isFirstDeclarationLocked: false,
+				lastTransmission: null,
 			}),
 		).toBe(true);
 	});
@@ -36,6 +37,7 @@ describe("isConcernedDeclarationModifiable", () => {
 				firstDeclarationPathChoice: "corrective_action",
 				secondDeclarationPathChoice: null,
 				isFirstDeclarationLocked: true,
+				lastTransmission: null,
 			}),
 		).toBe(false);
 	});
@@ -54,6 +56,7 @@ describe("isConcernedDeclarationModifiable", () => {
 				firstDeclarationPathChoice: "corrective_action",
 				secondDeclarationPathChoice,
 				isFirstDeclarationLocked: true,
+				lastTransmission: null,
 			}),
 		).toBe(expected);
 	});
@@ -66,8 +69,29 @@ describe("isConcernedDeclarationModifiable", () => {
 				firstDeclarationPathChoice: "corrective_action",
 				secondDeclarationPathChoice: null,
 				isFirstDeclarationLocked: true,
+				lastTransmission: null,
 			}),
 		).toBe(true);
+	});
+
+	// The flag only drives the success banner ("vous pouvez modifier votre seconde
+	// déclaration jusqu'au choix de votre nouveau parcours"), so it tracks the
+	// second declaration — not the path choice, which `readOnlyReason` governs.
+	it("second round: the banner follows the last transmission, not the path choice (#5166)", () => {
+		const modifiable = (
+			lastTransmission: "second_declaration" | "path_choice_round_2",
+		) =>
+			isConcernedDeclarationModifiable({
+				isSecondRound: true,
+				status: "demarche_completed",
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: null,
+				isFirstDeclarationLocked: true,
+				lastTransmission,
+			});
+
+		expect(modifiable("second_declaration")).toBe(true);
+		expect(modifiable("path_choice_round_2")).toBe(false);
 	});
 });
 

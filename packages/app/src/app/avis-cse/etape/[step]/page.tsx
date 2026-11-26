@@ -57,6 +57,7 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 			...declarationData.declaration,
 			hasSubmittedSecondDeclaration:
 				declarationData.hasSubmittedSecondDeclaration,
+			lastTransmission: declarationData.lastTransmission,
 		});
 		const campaignDeadlines = await getCampaignDeadlines(
 			declarationData.declaration.year,
