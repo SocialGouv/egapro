@@ -263,9 +263,24 @@ describe("declarationRouter", () => {
 			const result = await caller.updateEmployeeCategories(correctionInput);
 
 			expect(result).toEqual({ success: true });
+			// A1: the transmitted correction rows stay untouched until the
+			// re-transmission; the edit is staged in the draft.
 			expect(mockSet).toHaveBeenCalledWith(
-				expect.objectContaining({ secondDeclarationStep: 2 }),
+				expect.objectContaining({
+					draft: expect.objectContaining({
+						second: expect.objectContaining({
+							"second-categories": expect.objectContaining({
+								source: "dads",
+								referencePeriodStart: "2025-01-01",
+								referencePeriodEnd: "2025-12-31",
+							}),
+						}),
+					}),
+					draftUpdatedAt: expect.any(Date),
+				}),
 			);
+			expect(mockDelete).not.toHaveBeenCalled();
+			expect(mockValues).not.toHaveBeenCalled();
 		});
 
 		it.each([

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { RulesSchema } from "../schema";
+import { EVENT_TYPES, RulesSchema } from "../schema";
 import rawV20271 from "../v2027.1.json";
 
 describe("v2027.1.json — structural consistency", () => {
@@ -76,21 +76,20 @@ describe("v2027.1.json — structural consistency", () => {
 	});
 
 	it("every event type emitted by a transition is one of the allowed types", () => {
-		const allowedTypes = new Set([
-			"submit",
-			"path_choice",
-			"second_declaration_submit",
-			"joint_evaluation_submit",
-			"cse_opinion_submit",
-			"cancel",
-			"demarche_complete",
-			"formal_notice_joint_evaluation_submit",
-		]);
+		const allowedTypes = new Set<string>(EVENT_TYPES);
 		for (const t of rules.transitions) {
 			for (const event of t.events) {
 				expect(
 					allowedTypes.has(event.type),
 					`transition "${t.id}" emits unknown event type "${event.type}"`,
+				).toBe(true);
+			}
+		}
+		for (const revision of rules.choiceRevisions ?? []) {
+			for (const event of revision.events ?? []) {
+				expect(
+					allowedTypes.has(event.type),
+					`choice revision "${revision.id}" emits unknown event type "${event.type}"`,
 				).toBe(true);
 			}
 		}

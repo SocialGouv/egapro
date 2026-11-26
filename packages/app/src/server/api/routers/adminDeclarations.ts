@@ -24,6 +24,7 @@ import {
 	floorWorkforce,
 	getCurrentYear,
 	getDeclarationReferencePeriod,
+	getDemarcheCompletedAt,
 	getDemarcheLifecycleStatus,
 	getDemarcheNextStepLabel,
 	getDemarcheStatusDate,
@@ -335,7 +336,7 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				lock: activeLock
 					? { holder: activeLock.email, expiresAt: activeLock.expiresAt }
 					: null,
-				demarcheCompletedAt: findLatest("demarche_complete"),
+				demarcheCompletedAt: getDemarcheCompletedAt(historyRows),
 				secondDeclarationSubmittedAt: findLatest("second_declaration_submit"),
 			};
 		}),

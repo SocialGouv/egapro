@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
 	deleteFile: vi.fn(),
 	dbSelect: vi.fn(),
 	dbTransaction: vi.fn(),
+	dbUpdate: vi.fn(),
 	getRequiredContentTypes: vi.fn(),
 	isFormalNoticeAvailableFor: vi.fn(),
 }));
@@ -29,6 +30,7 @@ vi.mock("~/server/db", () => ({
 	db: {
 		select: mocks.dbSelect,
 		transaction: mocks.dbTransaction,
+		update: mocks.dbUpdate,
 	},
 }));
 
@@ -37,6 +39,9 @@ vi.mock("~/server/db/schema", () => ({
 		id: "declarations.id",
 		siren: "declarations.siren",
 		year: "declarations.year",
+		status: "declarations.status",
+		draft: "declarations.draft",
+		draftUpdatedAt: "declarations.draftUpdatedAt",
 	},
 	files: {
 		id: "files.id",
@@ -72,7 +77,13 @@ function createStream(): ReadableStream<Uint8Array> {
  * row). CSE count is called zero or one time and returns a row `{ value: N }`.
  */
 type Step =
-	| { kind: "declaration"; id?: string }
+	| {
+			kind: "declaration";
+			id?: string;
+			status?: string;
+			draft?: unknown;
+			draftUpdatedAt?: Date | null;
+	  }
 	| { kind: "count"; value: number };
 
 function primeDbSelect(steps: Step[]) {
@@ -92,7 +103,14 @@ function primeDbSelect(steps: Step[]) {
 					// different row than the lock guard, and must break loudly.
 					const rows =
 						step?.kind === "declaration" && step.id !== undefined
-							? [{ id: step.id }]
+							? [
+									{
+										id: step.id,
+										status: step.status,
+										draft: step.draft ?? null,
+										draftUpdatedAt: step.draftUpdatedAt ?? null,
+									},
+								]
 							: [];
 					return {
 						orderBy: () => ({ limit: () => Promise.resolve(rows) }),
@@ -332,27 +350,18 @@ describe("runUploadPipeline", () => {
 		const existingRow = [
 			{ id: "old-file", filePath: "123456789/2027/old-file.pdf" },
 		];
-		// First tx.select() locks the declaration row via `.for("update").limit(1)`.
-		// Second tx.select() looks up the existing joint_evaluation file.
-		let txSelectCallCount = 0;
-		const txSelect = vi.fn().mockImplementation(() => {
-			txSelectCallCount++;
-			if (txSelectCallCount === 1) {
-				return {
-					from: () => ({
-						where: () => ({
-							for: () => ({ limit: () => Promise.resolve([{ id: "decl-1" }]) }),
-						}),
+		// The chain answers both the declaration lock (`.for("update").limit(1)`)
+		// and the existing-file lookup (`.limit(1)`), whichever transaction runs it.
+		const txSelect = vi.fn().mockReturnValue({
+			from: () => ({
+				where: () => ({
+					for: () => ({
+						limit: () =>
+							Promise.resolve([{ id: "decl-1", status: "draft", draft: null }]),
 					}),
-				};
-			}
-			return {
-				from: () => ({
-					where: () => ({
-						limit: () => Promise.resolve(existingRow),
-					}),
+					limit: () => Promise.resolve(existingRow),
 				}),
-			};
+			}),
 		});
 		mocks.dbTransaction.mockImplementation(
 			async (fn: (tx: unknown) => unknown) =>
@@ -376,6 +385,192 @@ describe("runUploadPipeline", () => {
 		await new Promise<void>((resolve) => setImmediate(resolve));
 		expect(mocks.deleteFile).toHaveBeenCalledWith(
 			"123456789/2027/old-file.pdf",
+		);
+	});
+
+	it("stages a joint-evaluation upload on a closed démarche instead of replacing the transmitted file", async () => {
+		primeDbSelect([
+			{
+				kind: "declaration",
+				id: "decl-1",
+				status: "demarche_completed",
+				draft: null,
+				draftUpdatedAt: null,
+			},
+		]);
+		mocks.handleStreamingUpload.mockResolvedValue({
+			ok: true,
+			key: "123456789/2027/staged-file.pdf",
+			fileId: "staged-file",
+		});
+		const set = vi.fn().mockReturnValue({
+			where: vi.fn().mockResolvedValue(undefined),
+		});
+		const txUpdate = vi.fn().mockReturnValue({ set });
+		const txSelect = vi.fn().mockReturnValue({
+			from: () => ({
+				where: () => ({
+					for: () => ({
+						limit: () =>
+							Promise.resolve([
+								{
+									status: "demarche_completed",
+									draft: null,
+									draftUpdatedAt: null,
+								},
+							]),
+					}),
+				}),
+			}),
+		});
+		mocks.dbTransaction.mockImplementation(
+			async (fn: (tx: unknown) => unknown) =>
+				fn({ select: txSelect, update: txUpdate }),
+		);
+
+		const { runUploadPipeline } = await import("../uploadPipeline");
+		const result = await runUploadPipeline({
+			...baseInput,
+			stream: createStream(),
+			flowType: "joint_evaluation",
+		});
+
+		expect(result.ok).toBe(true);
+		expect(set).toHaveBeenCalledWith(
+			expect.objectContaining({
+				draft: {
+					joint: {
+						upload: expect.objectContaining({
+							fileId: "staged-file",
+							filePath: "123456789/2027/staged-file.pdf",
+						}),
+					},
+				},
+				draftUpdatedAt: expect.any(Date),
+			}),
+		);
+	});
+
+	it("merges the staged upload into the draft re-read under the row lock, not the pre-stream snapshot", async () => {
+		// The snapshot resolved before the stream has no second-declaration
+		// draft; a concurrent tab saves one while the upload streams. Merging
+		// the stale snapshot would wipe it.
+		primeDbSelect([
+			{
+				kind: "declaration",
+				id: "decl-1",
+				status: "demarche_completed",
+				draft: null,
+				draftUpdatedAt: null,
+			},
+		]);
+		mocks.handleStreamingUpload.mockResolvedValue({
+			ok: true,
+			key: "123456789/2027/staged-file.pdf",
+			fileId: "staged-file",
+		});
+		const freshDraft = {
+			second: { categories: { saved: true } },
+		};
+		const set = vi.fn().mockReturnValue({
+			where: vi.fn().mockResolvedValue(undefined),
+		});
+		const txUpdate = vi.fn().mockReturnValue({ set });
+		const txSelect = vi.fn().mockReturnValue({
+			from: () => ({
+				where: () => ({
+					for: () => ({
+						limit: () =>
+							Promise.resolve([
+								{
+									status: "demarche_completed",
+									draft: freshDraft,
+									draftUpdatedAt: new Date(),
+								},
+							]),
+					}),
+				}),
+			}),
+		});
+		mocks.dbTransaction.mockImplementation(
+			async (fn: (tx: unknown) => unknown) =>
+				fn({ select: txSelect, update: txUpdate }),
+		);
+
+		const { runUploadPipeline } = await import("../uploadPipeline");
+		await runUploadPipeline({
+			...baseInput,
+			stream: createStream(),
+			flowType: "joint_evaluation",
+		});
+
+		expect(set).toHaveBeenCalledWith(
+			expect.objectContaining({
+				draft: {
+					second: { categories: { saved: true } },
+					joint: {
+						upload: expect.objectContaining({ fileId: "staged-file" }),
+					},
+				},
+			}),
+		);
+	});
+
+	it("commits the transmitted file when the démarche was re-opened during the stream", async () => {
+		// The pre-stream snapshot says `demarche_completed`, so the pipeline
+		// intended to stage. The row lock re-reads `draft`: the démarche was
+		// re-opened meanwhile, so the upload must replace the transmitted file
+		// instead of landing in a draft nobody promotes.
+		primeDbSelect([
+			{
+				kind: "declaration",
+				id: "decl-1",
+				status: "demarche_completed",
+				draft: null,
+				draftUpdatedAt: null,
+			},
+		]);
+		mocks.handleStreamingUpload.mockResolvedValue({
+			ok: true,
+			key: "123456789/2027/new-file.pdf",
+			fileId: "new-file",
+		});
+		const insertValues = vi.fn().mockResolvedValue(undefined);
+		const insert = vi.fn().mockReturnValue({ values: insertValues });
+		const del = vi.fn().mockReturnValue({
+			where: vi.fn().mockResolvedValue(undefined),
+		});
+		const txSelect = vi.fn().mockReturnValue({
+			from: () => ({
+				where: () => ({
+					for: () => ({
+						limit: () =>
+							Promise.resolve([{ id: "decl-1", status: "draft", draft: null }]),
+					}),
+					limit: () => Promise.resolve([]),
+				}),
+			}),
+		});
+		mocks.dbTransaction.mockImplementation(
+			async (fn: (tx: unknown) => unknown) =>
+				fn({ select: txSelect, insert, delete: del }),
+		);
+
+		const { runUploadPipeline } = await import("../uploadPipeline");
+		const result = await runUploadPipeline({
+			...baseInput,
+			stream: createStream(),
+			flowType: "joint_evaluation",
+		});
+
+		expect(result).toEqual({
+			ok: true,
+			fileId: "new-file",
+			fileName: "avis-cse.pdf",
+			filePath: "123456789/2027/new-file.pdf",
+		});
+		expect(insertValues).toHaveBeenCalledWith(
+			expect.objectContaining({ type: "joint_evaluation" }),
 		);
 	});
 

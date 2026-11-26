@@ -9,6 +9,7 @@ export const draftPayloadSchema = z.object({
 		z.number().int().min(1).max(6),
 		z.literal("second-1"),
 		z.literal("second-2"),
+		z.literal("second-categories"),
 		z.literal("joint"),
 		z.literal("compliance"),
 		z.literal("opinions"),

@@ -426,7 +426,10 @@
 				]
 			},
 			"to": "awaiting_revision_choice",
-			"events": [{ "type": "second_declaration_submit", "round": 2 }]
+			"events": [
+				{ "type": "demarche_reopened" },
+				{ "type": "second_declaration_submit", "round": 2 }
+			]
 		},
 		{
 			"id": "resubmit_second_declaration_resolved_from_completed",
@@ -501,7 +504,8 @@
 				"op": "==",
 				"value": "path_choice_round_1"
 			},
-			"reopens": "awaiting_compliance_path_choice"
+			"reopens": "awaiting_compliance_path_choice",
+			"events": [{ "type": "demarche_reopened" }]
 		},
 		{
 			"id": "revise_path_choice_round_2_after_completion",
@@ -513,7 +517,8 @@
 				"op": "==",
 				"value": "path_choice_round_2"
 			},
-			"reopens": "awaiting_revision_choice"
+			"reopens": "awaiting_revision_choice",
+			"events": [{ "type": "demarche_reopened" }]
 		}
 	]
 }

@@ -184,6 +184,58 @@ describe("event-type-specific getters", () => {
 		expect(getDemarcheCompletedAt(events)).toEqual(at("2027-09-01T00:00:00Z"));
 	});
 
+	it("getDemarcheCompletedAt returns null once a later re-opening superseded the completion", () => {
+		const events: DeclarationStatusEvent[] = [
+			buildEvent({
+				eventType: "demarche_complete",
+				createdAt: at("2027-09-01T00:00:00Z"),
+			}),
+			buildEvent({
+				eventType: "demarche_reopened",
+				createdAt: at("2027-09-02T00:00:00Z"),
+			}),
+		];
+		expect(getDemarcheCompletedAt(events)).toBeNull();
+	});
+
+	it("getDemarcheCompletedAt keeps a completion that follows the last re-opening", () => {
+		const events: DeclarationStatusEvent[] = [
+			buildEvent({
+				eventType: "demarche_reopened",
+				createdAt: at("2027-09-01T00:00:00Z"),
+			}),
+			buildEvent({
+				eventType: "demarche_complete",
+				createdAt: at("2027-09-02T00:00:00Z"),
+			}),
+		];
+		expect(getDemarcheCompletedAt(events)).toEqual(at("2027-09-02T00:00:00Z"));
+	});
+
+	it("getDemarcheCompletedAt breaks a timestamp tie in favour of the completion", () => {
+		const events: DeclarationStatusEvent[] = [
+			buildEvent({
+				eventType: "demarche_complete",
+				createdAt: at("2027-09-01T00:00:00Z"),
+			}),
+			buildEvent({
+				eventType: "demarche_reopened",
+				createdAt: at("2027-09-01T00:00:00Z"),
+			}),
+		];
+		expect(getDemarcheCompletedAt(events)).toEqual(at("2027-09-01T00:00:00Z"));
+	});
+
+	it("getDemarcheCompletedAt ignores unrelated events", () => {
+		const events: DeclarationStatusEvent[] = [
+			buildEvent({
+				eventType: "submit",
+				createdAt: at("2027-09-03T00:00:00Z"),
+			}),
+		];
+		expect(getDemarcheCompletedAt(events)).toBeNull();
+	});
+
 	it("getPathChoiceAt returns the latest path_choice for the given round", () => {
 		const events: DeclarationStatusEvent[] = [
 			buildEvent({

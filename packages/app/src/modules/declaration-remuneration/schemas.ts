@@ -152,18 +152,16 @@ const employeeCategoryDataSchema = z
 		},
 	);
 
+export const employeeCategoryInputSchema = z.object({
+	name: z.string().min(1).max(CATEGORY_NAME_LEGACY_MAX_LENGTH),
+	data: employeeCategoryDataSchema,
+});
+
 export const updateEmployeeCategoriesSchema = z
 	.object({
 		declarationType: z.enum(["initial", "correction"]),
 		source: z.string().min(1),
-		categories: z
-			.array(
-				z.object({
-					name: z.string().min(1).max(CATEGORY_NAME_LEGACY_MAX_LENGTH),
-					data: employeeCategoryDataSchema,
-				}),
-			)
-			.max(50),
+		categories: z.array(employeeCategoryInputSchema).max(50),
 		referencePeriodStart: z.string().optional(),
 		referencePeriodEnd: z.string().optional(),
 	})

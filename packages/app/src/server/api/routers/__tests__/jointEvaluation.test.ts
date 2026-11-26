@@ -37,10 +37,16 @@ const { findTransmittedJointEvaluation } = await import(
 
 const mockSelect = vi.fn();
 
-// Reads in order: the middleware declaration lookup, the latest departure from
-// the joint evaluation, then the report itself.
+// Reads in order: the middleware declaration lookup, the draft snapshot of
+// the declaration handler, the latest departure from the joint evaluation,
+// then the report itself.
 function createMockDb(rows: unknown[] = []) {
-	const pending: unknown[][] = [[{ id: "decl-1" }], [{ at: null }], rows];
+	const pending: unknown[][] = [
+		[{ id: "decl-1" }],
+		[{ draft: null, draftUpdatedAt: null }],
+		[{ at: null }],
+		rows,
+	];
 	const where = vi.fn().mockImplementation(() => {
 		const result = Promise.resolve(pending.shift() ?? []);
 		return Object.assign(result, { limit: vi.fn().mockReturnValue(result) });

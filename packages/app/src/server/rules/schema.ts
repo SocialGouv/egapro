@@ -52,6 +52,7 @@ export const EVENT_TYPES = [
 	"cse_opinion_submit",
 	"cancel",
 	"demarche_complete",
+	"demarche_reopened",
 	"formal_notice_joint_evaluation_submit",
 ] as const;
 
@@ -86,6 +87,7 @@ export const ChoiceRevisionSchema = z.object({
 	from: z.array(z.enum(DECLARATION_FSM_STATUSES)).min(1),
 	guard: PredicateSchema.optional(),
 	reopens: z.enum(DECLARATION_FSM_STATUSES),
+	events: z.array(EventSchema).optional(),
 });
 
 export type ChoiceRevision = z.infer<typeof ChoiceRevisionSchema>;

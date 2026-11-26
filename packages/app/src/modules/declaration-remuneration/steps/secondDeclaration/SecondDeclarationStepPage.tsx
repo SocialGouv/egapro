@@ -2,6 +2,10 @@ import { notFound, redirect } from "next/navigation";
 
 import { campaignYearDimension, FunnelStepTracker } from "~/modules/analytics";
 import {
+	parseStagedSecondDeclaration,
+	toEmployeeCategoryRows,
+} from "~/modules/declaration-remuneration/shared/draft/staged";
+import {
 	getObligationWorkforce,
 	isCseOpinionRequired,
 	isCseRequired,
@@ -38,6 +42,14 @@ export async function SecondDeclarationStepPage({ step: rawStep }: Props) {
 	const company = await api.company.get({ siren: data.declaration.siren });
 	const currentYear = data.declaration.year;
 	const campaignDeadlines = await getCampaignDeadlines(currentYear);
+	const draft = await api.declarationDraft.get({
+		siren: data.declaration.siren,
+		year: currentYear,
+	});
+	const staged = parseStagedSecondDeclaration(draft);
+	const stagedCategories = staged
+		? toEmployeeCategoryRows(staged.categories)
+		: [];
 
 	const initialCategories = mapToEmployeeCategoryRows(
 		data.jobCategories,
@@ -48,15 +60,26 @@ export async function SecondDeclarationStepPage({ step: rawStep }: Props) {
 	const hasCorrectionData = data.employeeCategories.some(
 		(e) => e.declarationType === "correction",
 	);
-	const correctionCategories = hasCorrectionData
-		? mapToEmployeeCategoryRows(
-				data.jobCategories,
-				data.employeeCategories,
-				"correction",
-			)
-		: [];
+	const correctionCategories =
+		stagedCategories.length > 0
+			? stagedCategories
+			: hasCorrectionData
+				? mapToEmployeeCategoryRows(
+						data.jobCategories,
+						data.employeeCategories,
+						"correction",
+					)
+				: [];
 
-	const initialSource = data.jobCategories[0]?.source;
+	const initialSource = staged?.source ?? data.jobCategories[0]?.source;
+	const referencePeriodStart =
+		staged?.referencePeriodStart ??
+		data.declaration.secondDeclReferencePeriodStart ??
+		undefined;
+	const referencePeriodEnd =
+		staged?.referencePeriodEnd ??
+		data.declaration.secondDeclReferencePeriodEnd ??
+		undefined;
 
 	const cseOpinionRequired = isCseOpinionRequired({
 		workforce: getObligationWorkforce(company.gipWorkforce),
@@ -96,17 +119,13 @@ export async function SecondDeclarationStepPage({ step: rawStep }: Props) {
 						firstDeclarationPathChoice={
 							data.declaration.firstDeclarationPathChoice
 						}
-						initialEndDate={
-							data.declaration.secondDeclReferencePeriodEnd ?? undefined
-						}
+						initialEndDate={referencePeriodEnd}
 						initialFirstDeclarationCategories={initialCategories}
 						initialSecondDeclarationCategories={
 							correctionCategories.length > 0 ? correctionCategories : undefined
 						}
 						initialSource={initialSource}
-						initialStartDate={
-							data.declaration.secondDeclReferencePeriodStart ?? undefined
-						}
+						initialStartDate={referencePeriodStart}
 						lastTransmission={data.lastTransmission}
 						sameWorkforceByPayBasis={
 							data.declaration.totalWomen !== null &&

@@ -100,7 +100,9 @@ export function SecondDeclarationStep2Form({
 
 	const mutation = api.declaration.updateEmployeeCategories.useMutation({
 		onSuccess: () => {
-			clearDraft();
+			// On a closed démarche the edit is staged in the draft itself: clearing it
+			// would throw away the categories the déposant is about to transmit.
+			if (status !== "demarche_completed") clearDraft();
 			router.push(complianceStepHref(3));
 		},
 	});

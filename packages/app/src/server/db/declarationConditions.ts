@@ -1,6 +1,16 @@
 import "server-only";
 
-import { and, desc, eq, inArray, isNull, ne, type SQL, sql } from "drizzle-orm";
+import {
+	type AnyColumn,
+	and,
+	desc,
+	eq,
+	inArray,
+	isNull,
+	ne,
+	type SQL,
+	sql,
+} from "drizzle-orm";
 
 import {
 	DEMARCHE_LIFECYCLE_STATUSES,
@@ -103,8 +113,32 @@ export function lastTransmissionAt(): SQL<Date | null> {
 	return latestHistoryEventAt(TRANSMISSION_EVENT_TYPES).mapWith(toDate);
 }
 
+/**
+ * SQL mirror of `getDemarcheCompletedAt`: the completion date, or `NULL` once
+ * the démarche was re-opened (a `demarche_reopened` event more recent than the
+ * latest `demarche_complete`). A completion wins a timestamp tie, since the
+ * same transaction can re-open and complete again when the new path ends the
+ * démarche.
+ */
+export function currentDemarcheCompletedAt(
+	declarationId: SQL | AnyColumn = declarations.id,
+): SQL<Date | null> {
+	return sql<Date | null>`(
+		SELECT MAX(c.created_at)
+		FROM ${declarationStatusHistory} c
+		WHERE c.declaration_id = ${declarationId}
+		AND c.event_type = 'demarche_complete'
+		AND NOT EXISTS (
+			SELECT 1 FROM ${declarationStatusHistory} r
+			WHERE r.declaration_id = ${declarationId}
+			AND r.event_type = 'demarche_reopened'
+			AND r.created_at > c.created_at
+		)
+	)`.mapWith(toDate);
+}
+
 export function demarcheCompletedAt(): SQL<Date | null> {
-	return latestHistoryEventAt(["demarche_complete"]).mapWith(toDate);
+	return currentDemarcheCompletedAt(declarations.id);
 }
 
 export type LastTransmissionEvent = {
@@ -133,7 +167,7 @@ export function demarcheStatusDate(): SQL<Date | null> {
 	return demarcheLifecycleCase({
 		draft: sql`${declarations.createdAt}`,
 		in_progress: latestHistoryEventAt(TRANSMISSION_EVENT_TYPES),
-		completed: latestHistoryEventAt(["demarche_complete"]),
+		completed: currentDemarcheCompletedAt(),
 		cancelled: sql`(${declarations.cancelledAt} AT TIME ZONE 'UTC')`,
 	}).mapWith(toDate);
 }
@@ -192,18 +226,39 @@ function currentDeclarationOrder() {
  * `DESC` place les NULL en tête : `nulls last` renvoie les lignes sans date au
  * fond, là où « la plus récente » les attend.
  */
+export type CurrentDeclarationForWrite = {
+	id: string;
+	status: typeof declarations.$inferSelect.status;
+	draft: unknown;
+	draftUpdatedAt: Date | null;
+};
+
+export async function resolveCurrentDeclarationForWrite(
+	db: DbOrTx,
+	siren: string,
+	year: number,
+): Promise<CurrentDeclarationForWrite | null> {
+	const rows = await db
+		.select({
+			id: declarations.id,
+			status: declarations.status,
+			draft: declarations.draft,
+			draftUpdatedAt: declarations.draftUpdatedAt,
+		})
+		.from(declarations)
+		.where(currentDeclarationFilter(siren, year))
+		.orderBy(...currentDeclarationOrder())
+		.limit(1);
+	return rows[0] ?? null;
+}
+
 export async function resolveCurrentDeclarationId(
 	db: DbOrTx,
 	siren: string,
 	year: number,
 ): Promise<string | null> {
-	const rows = await db
-		.select({ id: declarations.id })
-		.from(declarations)
-		.where(currentDeclarationFilter(siren, year))
-		.orderBy(...currentDeclarationOrder())
-		.limit(1);
-	return rows[0]?.id ?? null;
+	const row = await resolveCurrentDeclarationForWrite(db, siren, year);
+	return row?.id ?? null;
 }
 
 export type ExportDeclarationResolution = {

@@ -89,6 +89,7 @@ Type d'événement brut de la ligne d'historique. Ce n'est pas un état de la ma
 | `cse_opinion_submit` | Dépôt d'un avis CSE | Dépôt d'un avis du CSE. |
 | `cancel` | Annulation de la déclaration | Annulation de la déclaration. |
 | `demarche_complete` | Démarche terminée | Fin de la démarche. Ne pas confondre avec l'état `demarche_completed` de `Parcours.Statut`, qui ne diffère que d'une lettre. |
+| `demarche_reopened` | Démarche rouverte | Réouverture de la démarche : un dépôt ultérieur l'a fait sortir de l'état `demarche_completed`. |
 | `formal_notice_joint_evaluation_submit` | Dépôt du rapport d'évaluation conjointe suite à mise en demeure | Dépôt du rapport d'évaluation conjointe suite à mise en demeure de la DREETS, après la fin de la démarche. `Parcours.Statut` reste `demarche_completed`. |
 
 ### `Historique_statuts[].Libelle_statut`
@@ -108,6 +109,7 @@ Libellé FR lisible de la ligne d'historique. La liste ci-dessous est exhaustive
 | `Dépôt d'un avis CSE` | Événement `cse_opinion_submit`. |
 | `Annulation de la déclaration` | Événement `cancel`. |
 | `Démarche terminée` | Événement `demarche_complete`. |
+| `Démarche rouverte` | Événement `demarche_reopened`. |
 | `Dépôt du rapport d'évaluation conjointe suite à mise en demeure` | Événement `formal_notice_joint_evaluation_submit`. |
 | `Choix du parcours — Justification de l'écart` | Événement `path_choice` portant la valeur `justify`. |
 | `Choix du parcours — Actions correctives` | Événement `path_choice` portant la valeur `corrective_action`. |

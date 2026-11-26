@@ -1,0 +1,1 @@
+ALTER TYPE "public"."declaration_event_type" ADD VALUE 'demarche_reopened' BEFORE 'step_change';

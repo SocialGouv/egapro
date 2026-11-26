@@ -48,6 +48,7 @@ export const declarationEventTypeEnum = pgEnum("declaration_event_type", [
 	"cse_opinion_submit",
 	"cancel",
 	"demarche_complete",
+	"demarche_reopened",
 	"step_change",
 	"formal_notice_joint_evaluation_submit",
 ]);

@@ -80,6 +80,7 @@ const defaultProps = {
 	declarationSiren: "123456789",
 	declarationYear: 2026,
 	existingFile: null,
+	isClosedDemarche: false,
 	jointEvaluationDeadline: new Date("2026-08-01T00:00:00Z"),
 	jointEvaluationRound: 1 as const,
 };
