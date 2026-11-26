@@ -3,6 +3,7 @@ import "server-only";
 import { and, count, eq, sql } from "drizzle-orm";
 
 import { MAX_CSE_FILES } from "~/modules/cseOpinion/types";
+import type { StagedJointUpload } from "~/modules/declaration-remuneration/shared/draft/staged";
 import {
 	ALLOWED_UPLOAD_MIME_TYPES,
 	type FlowType,
@@ -157,21 +158,26 @@ export async function runUploadPipeline(
 		// A closed démarche keeps its transmitted report readable until the
 		// déposant transmits again: the re-upload is staged in the draft and only
 		// promoted by `submitJointEvaluation`.
-		if (
-			input.flowType === "joint_evaluation" &&
-			declaration.status === "demarche_completed"
-		) {
-			const replacedStagedPath = await writeStagedJointUpload(
-				db,
-				declaration.id,
-				declaration,
-				{
-					fileId: streamResult.fileId,
-					fileName: input.fileName,
-					filePath: streamResult.key,
-					uploadedAt: new Date().toISOString(),
-				},
-			);
+		//
+		// The status and the draft are re-read under the row lock: the snapshot
+		// resolved before the stream is stale by now (the démarche can be
+		// re-opened, or another tab can save the second-declaration draft or the
+		// CSE opinion during a slow upload), and merging into it would silently
+		// drop that concurrent save.
+		const staging =
+			input.flowType === "joint_evaluation"
+				? await stageJointUploadUnderLock({
+						declarationId: declaration.id,
+						upload: {
+							fileId: streamResult.fileId,
+							fileName: input.fileName,
+							filePath: streamResult.key,
+							uploadedAt: new Date().toISOString(),
+						},
+					})
+				: ({ staged: false } as const);
+		if (staging.staged) {
+			const replacedStagedPath = staging.replacedStagedPath;
 			if (replacedStagedPath) {
 				void deleteS3File(replacedStagedPath).catch((err) => {
 					console.error(
@@ -261,6 +267,54 @@ async function findCurrentDeclaration(
 	year: number,
 ): Promise<CurrentDeclarationForWrite | null> {
 	return resolveCurrentDeclarationForWrite(db, siren, year);
+}
+
+type StageJointUploadInput = {
+	declarationId: string;
+	upload: StagedJointUpload;
+};
+
+type StageJointUploadResult =
+	| { staged: true; replacedStagedPath: string | null }
+	| { staged: false };
+
+/**
+ * Stages a joint-evaluation report only if the démarche is still closed *at
+ * commit time*, and merges into the draft read under the row lock.
+ *
+ * The declaration row resolved before the stream cannot be reused: a slow
+ * upload gives a concurrent tab time to save the second-declaration draft or
+ * the CSE opinion, and to re-open or finalize the démarche. Merging the stale
+ * snapshot would overwrite that save. When the status is no longer
+ * `demarche_completed`, the caller falls back to the transmitted-file upsert.
+ */
+async function stageJointUploadUnderLock(
+	input: StageJointUploadInput,
+): Promise<StageJointUploadResult> {
+	return db.transaction(async (tx) => {
+		const [locked] = await tx
+			.select({
+				status: declarations.status,
+				draft: declarations.draft,
+				draftUpdatedAt: declarations.draftUpdatedAt,
+			})
+			.from(declarations)
+			.where(eq(declarations.id, input.declarationId))
+			.for("update")
+			.limit(1);
+
+		if (!locked || locked.status !== "demarche_completed") {
+			return { staged: false };
+		}
+
+		const replacedStagedPath = await writeStagedJointUpload(
+			tx,
+			input.declarationId,
+			locked,
+			input.upload,
+		);
+		return { staged: true, replacedStagedPath };
+	});
 }
 
 async function countFilesByType(
