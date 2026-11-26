@@ -804,6 +804,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		])("offers Modifier on the second declaration row for the status %s, with its mention", (declarationFsmStatus) => {
 			const { panel, dialog } = renderPanel("cse", {
 				...SUBMITTED_ROWS,
+				displayContext: makeDisplayContext("corrective_action"),
 				declarationFsmStatus,
 			});
 			expect(dialog.querySelector(DECL2_MODIFY)).toBeInTheDocument();
@@ -812,7 +813,43 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			).toBeInTheDocument();
 		});
 
-		it("ties the joint evaluation mention to the FSM state, not to the variant", () => {
+		it("offers Modifier on the second declaration row while the CSE opinions are pending, with the CSE mention", () => {
+			const { panel, dialog } = renderPanel("cse", {
+				...SUBMITTED_ROWS,
+				displayContext: makeDisplayContext("corrective_action"),
+				declarationFsmStatus: "awaiting_cse_opinion",
+			});
+			expect(dialog.querySelector(DECL2_MODIFY)).toBeInTheDocument();
+			expect(
+				panel.getByText(
+					"Modifiable jusqu'à la transmission de vos avis du CSE",
+				),
+			).toBeInTheDocument();
+			expect(
+				panel.queryByText(
+					"Modifiable jusqu'au choix de votre nouveau parcours",
+				),
+			).not.toBeInTheDocument();
+		});
+
+		it.each([
+			"justify",
+			"joint_evaluation",
+		] as const)("withholds Modifier on the second declaration while the CSE opinions are pending once the revised path is %s", (revisedPath) => {
+			const { panel, dialog } = renderPanel("cse", {
+				displayContext: makeDisplayContext("corrective_action", revisedPath),
+				declarationFsmStatus: "awaiting_cse_opinion",
+				hasSubmittedSecondDeclaration: true,
+			});
+			expect(dialog.querySelector(DECL2_MODIFY)).not.toBeInTheDocument();
+			expect(
+				panel.queryByText(
+					"Modifiable jusqu'à la transmission de vos avis du CSE",
+				),
+			).not.toBeInTheDocument();
+		});
+
+		it("gives the joint evaluation row a Modifier but no mention", () => {
 			const { panel } = renderPanel("cse", {
 				...SUBMITTED_ROWS,
 				declarationFsmStatus: "joint_evaluation_chosen",
@@ -876,6 +913,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		it("offers Modifier and the CSE mention on the second declaration row", () => {
 			const { panel, dialog } = renderPanel("cse", {
 				...SUBMITTED_ROWS,
+				displayContext: makeDisplayContext("corrective_action"),
 				declarationFsmStatus: "awaiting_cse_opinion",
 				lastTransmission: "second_declaration",
 			});
@@ -887,7 +925,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		it("withholds both Modifier links once the CSE opinion is the last transmission", () => {
 			const { panel, dialog } = renderPanel("cse", {
 				...SUBMITTED_ROWS,
-				declarationFsmStatus: "awaiting_cse_opinion",
+				declarationFsmStatus: "demarche_completed",
 				lastTransmission: "cse_opinion",
 			});
 
@@ -1008,12 +1046,12 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		const WRITABLE: DeclarationFsmStatus[] = [
 			"corrective_actions_chosen",
 			"awaiting_revision_choice",
+			"awaiting_cse_opinion",
 		];
 		const NOT_WRITABLE: DeclarationFsmStatus[] = [
 			"awaiting_compliance_path_choice",
 			"joint_evaluation_chosen",
 			"revised_joint_evaluation_chosen",
-			"awaiting_cse_opinion",
 			"demarche_completed",
 		];
 		const VARIANTS: PanelVariant[] = [

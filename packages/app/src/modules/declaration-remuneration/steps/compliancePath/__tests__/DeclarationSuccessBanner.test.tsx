@@ -43,12 +43,12 @@ describe("DeclarationSuccessBanner", () => {
 		expect(screen.queryByText(/jusqu'au /)).not.toBeInTheDocument();
 	});
 
-	it("says the second declaration stays modifiable until the new path is chosen", () => {
+	it("says the second declaration stays modifiable until the new path is chosen or the CSE opinions are transmitted", () => {
 		renderBanner({ isSecondDeclaration: true });
 
 		expect(
 			screen.getByText(
-				"Vous pouvez modifier votre seconde déclaration jusqu'au choix de votre nouveau parcours de mise en conformité.",
+				"Vous pouvez modifier votre seconde déclaration jusqu'au choix de votre nouveau parcours de mise en conformité ou jusqu'à la transmission de vos avis du CSE.",
 			),
 		).toBeInTheDocument();
 		expect(

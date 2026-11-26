@@ -5,7 +5,10 @@ import {
 	getRepresentationResumeStep,
 	SubjectionScreen,
 } from "~/modules/declaration-representation";
-import { getCurrentYear, getReferenceYearFor } from "~/modules/domain";
+import {
+	getCurrentRepresentationCampaignYear,
+	getReferenceYearFor,
+} from "~/modules/domain";
 import {
 	clampRepresentationStep,
 	LAST_REPRESENTATION_STEP,
@@ -18,7 +21,7 @@ export const metadata: Metadata = {
 };
 
 export default async function RepresentationHomePage() {
-	const campaignYear = getCurrentYear();
+	const campaignYear = getCurrentRepresentationCampaignYear();
 	const year = getReferenceYearFor(campaignYear);
 
 	const { declaration, campaignOpen } = await api.representationDeclaration.get(

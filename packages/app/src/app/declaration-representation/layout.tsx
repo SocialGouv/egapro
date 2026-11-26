@@ -2,7 +2,10 @@ import { redirect } from "next/navigation";
 
 import { MissingSiret } from "~/modules/declaration-remuneration";
 import { DeclarationLayout } from "~/modules/declaration-representation";
-import { getCurrentYear, getReferenceYearFor } from "~/modules/domain";
+import {
+	getCurrentRepresentationCampaignYear,
+	getReferenceYearFor,
+} from "~/modules/domain";
 import { LOGIN } from "~/modules/routes";
 import { auth } from "~/server/auth";
 import { resolveAuthorizedSiren } from "~/server/auth/companyAccess";
@@ -25,7 +28,7 @@ export default async function RepresentationFunnelLayout({
 	}
 
 	const company = await api.company.get({ siren });
-	const campaignYear = getCurrentYear();
+	const campaignYear = getCurrentRepresentationCampaignYear();
 	const year = getReferenceYearFor(campaignYear);
 	const getRepresentationDeclaration = api.representationDeclaration?.get;
 	const representation = getRepresentationDeclaration
@@ -37,7 +40,6 @@ export default async function RepresentationFunnelLayout({
 			campaignOpen={representation.campaignOpen}
 			campaignYear={campaignYear}
 			company={company}
-			isSubmitted={representation.declaration?.status === "submitted"}
 			lockEnabled={getRepresentationDeclaration !== undefined}
 			year={year}
 		>

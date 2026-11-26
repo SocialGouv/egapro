@@ -233,6 +233,45 @@ const MATRIX: Case[] = [
 	},
 	{
 		label:
+			"submit_second_declaration re-submit from awaiting_cse_opinion, gap reappears",
+		from: "awaiting_cse_opinion",
+		action: "submit_second_declaration",
+		facts: base("awaiting_cse_opinion", {
+			cseRequired: true,
+			action: { stillHasGap: true },
+		}),
+		expectedTo: "awaiting_revision_choice",
+		expectedEvents: [{ type: "second_declaration_submit", round: 2 }],
+	},
+	{
+		label:
+			"submit_second_declaration re-submit from awaiting_cse_opinion, gap still resolved with CSE",
+		from: "awaiting_cse_opinion",
+		action: "submit_second_declaration",
+		facts: base("awaiting_cse_opinion", {
+			cseRequired: true,
+			action: { stillHasGap: false },
+		}),
+		expectedTo: "awaiting_cse_opinion",
+		expectedEvents: [{ type: "second_declaration_submit", round: 2 }],
+	},
+	{
+		label:
+			"submit_second_declaration re-submit from awaiting_cse_opinion, gap resolved without CSE",
+		from: "awaiting_cse_opinion",
+		action: "submit_second_declaration",
+		facts: base("awaiting_cse_opinion", {
+			cseRequired: false,
+			action: { stillHasGap: false },
+		}),
+		expectedTo: "demarche_completed",
+		expectedEvents: [
+			{ type: "second_declaration_submit", round: 2 },
+			{ type: "demarche_complete" },
+		],
+	},
+	{
+		label:
 			"submit_second_declaration re-submit from awaiting_revision_choice, gap resolved without CSE",
 		from: "awaiting_revision_choice",
 		action: "submit_second_declaration",
@@ -381,14 +420,6 @@ describe("choice revisions — the last deposit stays re-transmittable before th
 			expectedTo: "awaiting_cse_opinion",
 			expectedEvents: [{ type: "joint_evaluation_submit", round: 2 }],
 		},
-		{
-			label: "the second declaration without a remaining gap",
-			action: "submit_second_declaration",
-			lastTransmission: "second_declaration",
-			facts: { action: { stillHasGap: false } },
-			expectedTo: "awaiting_cse_opinion",
-			expectedEvents: [{ type: "second_declaration_submit", round: 2 }],
-		},
 	] as const;
 
 	it.each(
@@ -457,17 +488,6 @@ describe("choice revisions — the last deposit stays re-transmittable before th
 				action,
 				rules,
 			),
-		).toThrow(NoMatchingTransitionError);
-	});
-
-	it("keeps the second declaration closed once the revision chose to justify", () => {
-		const facts = base("awaiting_cse_opinion", {
-			lastTransmission: "path_choice_round_2",
-			action: { stillHasGap: false },
-		});
-
-		expect(() =>
-			applyAction(facts, "submit_second_declaration", rules),
 		).toThrow(NoMatchingTransitionError);
 	});
 

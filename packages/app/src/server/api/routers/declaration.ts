@@ -676,7 +676,7 @@ export const declarationRouter = createTRPCRouter({
 						year,
 					);
 					const lastTransmission = await loadLastTransmission(tx, current.id);
-					if (!isSecondDeclarationWritable(current.status, lastTransmission))
+					if (!isSecondDeclarationWritable({ ...current, lastTransmission }))
 						throw new TRPCError({
 							code: "FORBIDDEN",
 							message: "La seconde déclaration n'est pas ouverte à la saisie.",
@@ -954,13 +954,18 @@ export const declarationRouter = createTRPCRouter({
 					siren,
 					year,
 				);
+				const lastTransmission = await loadLastTransmission(tx, declaration.id);
+				if (!isSecondDeclarationWritable({ ...declaration, lastTransmission }))
+					throw new TRPCError({
+						code: "PRECONDITION_FAILED",
+						message: SECOND_DECLARATION_UNAVAILABLE_ERROR,
+					});
 
 				const correctionCategories = await loadEmployeeCategoriesForDeclaration(
 					tx,
 					declaration.id,
 					"correction",
 				);
-				const lastTransmission = await loadLastTransmission(tx, declaration.id);
 
 				const { nextStatus, events } = applyActionOrRefuse(
 					buildSecondDeclarationFacts(

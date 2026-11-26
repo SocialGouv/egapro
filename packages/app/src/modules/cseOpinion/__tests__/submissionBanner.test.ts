@@ -109,12 +109,30 @@ describe("getSubmissionBannerState", () => {
 
 	it.each(
 		CSE_STEP_STATUSES,
-	)("keeps both deposits closed in %s with no transmission history", (status) => {
+	)("keeps the joint evaluation deposit closed in %s", (status) => {
 		expect(
 			state(status, "joint_evaluation", null, false)?.depositModifiable,
 		).toBe(false);
+	});
+
+	it("keeps the corrective second declaration modifiable while the CSE opinions are pending", () => {
 		expect(
-			state(status, "corrective_action", null, true)?.depositModifiable,
+			state("awaiting_cse_opinion", "corrective_action", null, true)
+				?.depositModifiable,
+		).toBe(true);
+	});
+
+	it("closes the second declaration once the CSE opinions are submitted", () => {
+		expect(
+			state("demarche_completed", "corrective_action", null, true)
+				?.depositModifiable,
+		).toBe(false);
+	});
+
+	it("closes the second declaration when the revised path is justify", () => {
+		expect(
+			state("awaiting_cse_opinion", "corrective_action", "justify", true)
+				?.depositModifiable,
 		).toBe(false);
 	});
 
@@ -155,10 +173,12 @@ describe("getSubmissionBannerState", () => {
 			state(status, "corrective_action", null, true, secondLastTransmission),
 		).toEqual({
 			variant: "second_declaration",
-			depositModifiable: isSecondDeclarationWritable(
+			depositModifiable: isSecondDeclarationWritable({
 				status,
-				secondLastTransmission,
-			),
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: null,
+				lastTransmission: secondLastTransmission,
+			}),
 		});
 	});
 });

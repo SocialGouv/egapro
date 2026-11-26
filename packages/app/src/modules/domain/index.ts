@@ -18,6 +18,7 @@ export {
 // Campaign
 export {
 	getCurrentDate,
+	getCurrentRepresentationCampaignYear,
 	getCurrentYear,
 	getDeclarationReferencePeriod,
 	getDefaultCampaignDeadlineColumns,
@@ -27,6 +28,8 @@ export {
 	getPathChoiceRound1Deadline,
 	getReferencePeriod,
 	getReferenceYearFor,
+	getRepresentationCampaignEndDate,
+	getRepresentationCampaignStartDate,
 	getWorkforceYear,
 	isDeadlinePassed,
 	isRepresentationCampaignOpen,
@@ -165,6 +168,7 @@ export {
 	isInComplianceProcess,
 	isJointEvaluationWritable,
 	isLockedBySubsequentSubmission,
+	isSecondDeclarationResubmissionPending,
 	isSecondDeclarationWritable,
 } from "./shared/declarationStatus";
 // Declaration steps labels (A–F stepper), post-submit milestones, K19 funnels

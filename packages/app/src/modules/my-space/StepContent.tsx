@@ -185,18 +185,22 @@ export function Step2Content({
 		return title;
 	}
 
-	const secondDeclarationModification = isSecondDeclarationWritable(
-		declarationFsmStatus,
+	const secondDeclarationModification = isSecondDeclarationWritable({
+		status: declarationFsmStatus,
+		firstDeclarationPathChoice: displayContext.firstDeclarationPathChoice,
+		secondDeclarationPathChoice: displayContext.secondDeclarationPathChoice,
 		lastTransmission,
-	)
+	})
 		? { href: complianceStepHref(1) }
 		: undefined;
+	const secondDeclarationWritableMention =
+		declarationFsmStatus === "awaiting_cse_opinion"
+			? CSE_OPINION_MENTION
+			: SECOND_DECLARATION_MENTION;
 	const secondDeclarationMention = secondDeclarationModification
-		? getDepositMention(
-				variant,
-				declarationFsmStatus,
-				SECOND_DECLARATION_MENTION,
-			)
+		? variant === "closed"
+			? CLOSED_MENTION
+			: secondDeclarationWritableMention
 		: undefined;
 	const pathChoiceRow = pathChoiceModifiable ? (
 		<TransmittedRow

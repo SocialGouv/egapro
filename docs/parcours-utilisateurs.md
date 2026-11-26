@@ -450,7 +450,9 @@ Répondre « non concernée » **clôture immédiatement la démarche** de l'ann
 
 L'étape 4 n'apparaît que si l'entreprise compte **2 cadres dirigeants ou plus**, ou déclare disposer d'une **instance dirigeante** — sautée sinon dans les deux sens de navigation.
 
-Chaque changement d'étape déclenche un `saveDraft` (upsert du brouillon). La démarche est bloquée en écriture si la **campagne est fermée** (`isRepresentationCampaignOpen` → sinon `FORBIDDEN`), y compris pour `declareNotSubject`. À l'étape 5, la transmission (`submit`) re-valide l'intégralité du payload côté serveur, fige la déclaration (`status = submitted`) et déclenche l'envoi du mail `representation_receipt`.
+Chaque changement d'étape déclenche un `saveDraft` (upsert du brouillon). La démarche est bloquée en écriture si la **campagne est fermée** (`isRepresentationCampaignOpen` → sinon `FORBIDDEN`), y compris pour `declareNotSubject`. À l'étape 5, la transmission (`submit`) re-valide l'intégralité du payload côté serveur, passe la déclaration en `status = submitted` et déclenche l'envoi du mail `representation_receipt`.
+
+**Modification d'une déclaration transmise** : tant que la campagne est ouverte (jusqu'au 28/29 février), une déclaration transmise reste modifiable. Le funnel se rouvre à l'étape 1 depuis « Modifier », chaque étape est éditable et pré-remplie — avec les valeurs transmises, ou avec l'édition déjà sauvegardée en brouillon — et l'étape 5 repropose « Transmettre ». Un nouvel appel à `submit` met la ligne à jour en place (aucun versionnement), rafraîchit la date de transmission et renvoie le reçu (`isResend: true`). La page de consultation et le PDF téléchargeable n'affichent, eux, que les valeurs effectivement transmises.
 
 ### 8.4 Sortie
 

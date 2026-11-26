@@ -57,8 +57,14 @@ const SIREN = "123456789";
 const CSE_OPINION_PATH = "/avis-cse";
 const CONFIRMATION_PATH =
 	"/declaration-remuneration/parcours-conformite/confirmation";
+const SECOND_DECLARATION_RECAP_PATH =
+	"/declaration-remuneration/parcours-conformite/etape/3";
 
-function mockCompany(gipWorkforce: number | null, hasCse: boolean | null) {
+function mockCompany(
+	gipWorkforce: number | null,
+	hasCse: boolean | null,
+	declaration: Record<string, unknown> = {},
+) {
 	mockAuth.mockResolvedValue({ user: { id: "u1", siret: `${SIREN}00015` } });
 	mockResolveAuthorizedSiren.mockResolvedValue(SIREN);
 	vi.mocked(api.company.get).mockResolvedValue({
@@ -68,7 +74,7 @@ function mockCompany(gipWorkforce: number | null, hasCse: boolean | null) {
 		hasCse,
 	} as never);
 	vi.mocked(api.declaration.getOrCreate).mockResolvedValue({
-		declaration: { id: "d1", year: 2026, siren: SIREN },
+		declaration: { id: "d1", year: 2026, siren: SIREN, ...declaration },
 	} as never);
 }
 
@@ -102,6 +108,30 @@ describe("CseOpinionRootLayout", () => {
 
 	it("serves the funnel to a company that owes an opinion", async () => {
 		mockCompany(COMPANY_SIZE_ANNUAL_MIN, true);
+
+		await expect(renderLayout()).resolves.toBeDefined();
+		expect(mockRedirect).not.toHaveBeenCalled();
+	});
+
+	it("sends the declarant back to the second-declaration recap while a rewrite awaits re-transmission", async () => {
+		mockCompany(COMPANY_SIZE_ANNUAL_MIN, true, {
+			status: "awaiting_cse_opinion",
+			firstDeclarationPathChoice: "corrective_action",
+			secondDeclarationPathChoice: null,
+			secondDeclarationStep: 2,
+		});
+
+		await expect(renderLayout()).rejects.toThrow("NEXT_REDIRECT");
+		expect(mockRedirect).toHaveBeenCalledWith(SECOND_DECLARATION_RECAP_PATH);
+	});
+
+	it("keeps the funnel open once that correction has been re-transmitted", async () => {
+		mockCompany(COMPANY_SIZE_ANNUAL_MIN, true, {
+			status: "awaiting_cse_opinion",
+			firstDeclarationPathChoice: "corrective_action",
+			secondDeclarationPathChoice: null,
+			secondDeclarationStep: 3,
+		});
 
 		await expect(renderLayout()).resolves.toBeDefined();
 		expect(mockRedirect).not.toHaveBeenCalled();

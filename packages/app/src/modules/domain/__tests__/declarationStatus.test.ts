@@ -17,6 +17,7 @@ import {
 	isInComplianceProcess,
 	isJointEvaluationWritable,
 	isLockedBySubsequentSubmission,
+	isSecondDeclarationResubmissionPending,
 	isSecondDeclarationWritable,
 	type SubmissionLockTarget,
 } from "../shared/declarationStatus";
@@ -530,18 +531,153 @@ describe("isSecondDeclarationWritable", () => {
 	const WRITABLE: DeclarationFsmStatus[] = [
 		"corrective_actions_chosen",
 		"awaiting_revision_choice",
+		"awaiting_cse_opinion",
 	];
+
+	function correctivePath(status: DeclarationFsmStatus | null) {
+		return {
+			status,
+			firstDeclarationPathChoice: "corrective_action" as const,
+			secondDeclarationPathChoice: null,
+			lastTransmission: null,
+		};
+	}
 
 	it.each(
 		WRITABLE,
-	)("returns true for %s, where the engine still exposes submit_second_declaration", (status) => {
-		expect(isSecondDeclarationWritable(status, null)).toBe(true);
+	)("returns true for %s on the corrective-action path", (status) => {
+		expect(isSecondDeclarationWritable(correctivePath(status))).toBe(true);
 	});
 
 	it.each(
 		allStatusesExcept(WRITABLE),
 	)("returns false for %s, where no submit_second_declaration transition exists", (status) => {
-		expect(isSecondDeclarationWritable(status, null)).toBe(false);
+		expect(isSecondDeclarationWritable(correctivePath(status))).toBe(false);
+	});
+
+	it.each([
+		["justify", null],
+		["joint_evaluation", null],
+		[null, null],
+	] as const)("returns false in awaiting_cse_opinion when the first path is %s", (firstDeclarationPathChoice, secondDeclarationPathChoice) => {
+		expect(
+			isSecondDeclarationWritable({
+				status: "awaiting_cse_opinion",
+				firstDeclarationPathChoice,
+				secondDeclarationPathChoice,
+				lastTransmission: null,
+			}),
+		).toBe(false);
+	});
+
+	it.each([
+		"justify",
+		"joint_evaluation",
+	] as const)("returns false in awaiting_cse_opinion once the revised path is %s", (secondDeclarationPathChoice) => {
+		expect(
+			isSecondDeclarationWritable({
+				status: "awaiting_cse_opinion",
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice,
+				lastTransmission: null,
+			}),
+		).toBe(false);
+	});
+
+	it("returns false in awaiting_revision_choice when the current path is not corrective", () => {
+		expect(
+			isSecondDeclarationWritable({
+				status: "awaiting_revision_choice",
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: "justify",
+				lastTransmission: null,
+			}),
+		).toBe(false);
+	});
+
+	it("reopens a closed démarche whose last transmission is the second declaration", () => {
+		expect(
+			isSecondDeclarationWritable({
+				status: "demarche_completed",
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: null,
+				lastTransmission: "second_declaration",
+			}),
+		).toBe(true);
+	});
+
+	it("keeps a closed démarche closed when its last transmission is not the second declaration", () => {
+		expect(
+			isSecondDeclarationWritable({
+				status: "demarche_completed",
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: null,
+				lastTransmission: "joint_evaluation",
+			}),
+		).toBe(false);
+	});
+});
+
+describe("isSecondDeclarationResubmissionPending", () => {
+	const corrected = {
+		status: "awaiting_cse_opinion" as const,
+		firstDeclarationPathChoice: "corrective_action" as const,
+		secondDeclarationPathChoice: null,
+	};
+
+	it("returns true once the correction is saved at step 2 after its last transmission", () => {
+		expect(
+			isSecondDeclarationResubmissionPending({
+				...corrected,
+				secondDeclarationStep: 2,
+			}),
+		).toBe(true);
+	});
+
+	it("returns false once the correction has been re-transmitted at step 3", () => {
+		expect(
+			isSecondDeclarationResubmissionPending({
+				...corrected,
+				secondDeclarationStep: 3,
+			}),
+		).toBe(false);
+	});
+
+	it("returns false before any correction was saved", () => {
+		expect(
+			isSecondDeclarationResubmissionPending({
+				...corrected,
+				secondDeclarationStep: null,
+			}),
+		).toBe(false);
+	});
+
+	it.each([
+		["justify", null],
+		["joint_evaluation", null],
+		["corrective_action", "justify"],
+		["corrective_action", "joint_evaluation"],
+	] as const)("returns false while the current path is not corrective (%s then %s)", (firstDeclarationPathChoice, secondDeclarationPathChoice) => {
+		expect(
+			isSecondDeclarationResubmissionPending({
+				status: "awaiting_cse_opinion",
+				firstDeclarationPathChoice,
+				secondDeclarationPathChoice,
+				secondDeclarationStep: 2,
+			}),
+		).toBe(false);
+	});
+
+	it.each(
+		allStatusesExcept(["awaiting_cse_opinion"]),
+	)("returns false in %s, where no CSE opinion is being collected", (status) => {
+		expect(
+			isSecondDeclarationResubmissionPending({
+				...corrected,
+				status,
+				secondDeclarationStep: 2,
+			}),
+		).toBe(false);
 	});
 });
 
@@ -598,44 +734,6 @@ describe("isJointEvaluationWritable", () => {
 		).toBe(false);
 		expect(
 			isJointEvaluationWritable("awaiting_cse_opinion", "path_choice_round_2"),
-		).toBe(false);
-	});
-});
-
-describe("isSecondDeclarationWritable — last transmission context", () => {
-	it("reopens a closed démarche whose last transmission is the second declaration", () => {
-		expect(
-			isSecondDeclarationWritable("demarche_completed", "second_declaration"),
-		).toBe(true);
-	});
-
-	it("stays closed when another step is the last transmission", () => {
-		expect(
-			isSecondDeclarationWritable("demarche_completed", "cse_opinion"),
-		).toBe(false);
-		expect(
-			isSecondDeclarationWritable("demarche_completed", "joint_evaluation"),
-		).toBe(false);
-	});
-
-	it("keeps the second declaration writable while the CSE opinion is still owed", () => {
-		expect(
-			isSecondDeclarationWritable("awaiting_cse_opinion", "second_declaration"),
-		).toBe(true);
-	});
-
-	it("stays closed in awaiting_cse_opinion when the revision chose to justify", () => {
-		expect(
-			isSecondDeclarationWritable(
-				"awaiting_cse_opinion",
-				"path_choice_round_2",
-			),
-		).toBe(false);
-		expect(
-			isSecondDeclarationWritable("awaiting_cse_opinion", "joint_evaluation"),
-		).toBe(false);
-		expect(
-			isSecondDeclarationWritable("awaiting_cse_opinion", "cse_opinion"),
 		).toBe(false);
 	});
 });

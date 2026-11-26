@@ -69,7 +69,14 @@ describe("deposit writability mirrors the pre-CSE revisions of the ruleset (#498
 					rules,
 				),
 				`second declaration / ${lastTransmission}`,
-			).toBe(isSecondDeclarationWritable(STATUS, lastTransmission));
+			).toBe(
+				isSecondDeclarationWritable({
+					status: STATUS,
+					firstDeclarationPathChoice: "corrective_action",
+					secondDeclarationPathChoice: null,
+					lastTransmission,
+				}),
+			);
 		}
 	});
 
