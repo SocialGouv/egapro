@@ -29,13 +29,15 @@ export async function purgeSentLog(
 	params: { currentYear: number },
 ): Promise<ReminderLogPurgeSummary> {
 	const cutoffYear = reminderLogCutoffYear(params.currentYear);
-	const deleted = await sql<{ deleted: number }[]>`
+	// `count` is the number of affected rows reported by postgres.js: asking
+	// for `RETURNING` would materialise the whole purged history in memory on
+	// the first run.
+	const deleted = await sql`
 		DELETE FROM notifications.reminder_sent_log
 		WHERE year < ${cutoffYear}
-		RETURNING 1 AS deleted
 	`;
 	return {
-		deletedCount: deleted.length,
+		deletedCount: deleted.count,
 		cutoffYear,
 		retentionYears: REMINDER_LOG_RETENTION_YEARS,
 	};
