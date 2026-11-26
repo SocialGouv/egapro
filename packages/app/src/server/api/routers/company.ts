@@ -7,18 +7,23 @@ import {
 	COMPANY_SIZE_VOLUNTARY_MAX,
 	computeDeclarationStatus,
 	computeRepresentationDeclarationStatus,
+	type DeclarationFsmStatus,
 	deriveSubsequentSubmissions,
 	getCurrentDate,
+	getCurrentRepresentationCampaignYear,
 	getCurrentYear,
 	getDeclarationProcessStepDeadline,
+	getLastTransmission,
 	getObligationWorkforce,
 	getReferenceYearFor,
 	isCompanyIdentityUnresolved,
+	isCseAnswerLocked,
 	isCseRequired,
 	isJointEvaluationFileTransmitted,
 	isPresumedSubjectToRepresentation,
 	isRepresentationNotSubject,
 	parseGipWorkforce,
+	resolveCseAnswerForYear,
 } from "~/modules/domain";
 import {
 	buildDeclarationList,
@@ -28,6 +33,8 @@ import {
 	sirenInputSchema,
 	updateHasCseSchema,
 } from "~/modules/my-space/schemas";
+import { activeDeclarationFilter } from "~/server/api/routers/declarationHelpers";
+import { lockAndReadDeclaration } from "~/server/api/routers/statusHistoryHelpers";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import {
 	assertNotImpersonating,
@@ -134,6 +141,17 @@ async function findUserCompany(db: DB, session: Session, siren: string) {
 	return company;
 }
 
+const CSE_ANSWER_LOCKED_MESSAGE =
+	"L'existence d'un CSE n'est plus modifiable une fois la démarche de l'année clôturée.";
+
+function assertCseAnswerModifiable(status: DeclarationFsmStatus | null): void {
+	if (!isCseAnswerLocked(status)) return;
+	throw new TRPCError({
+		code: "PRECONDITION_FAILED",
+		message: CSE_ANSWER_LOCKED_MESSAGE,
+	});
+}
+
 export const companyRouter = createTRPCRouter({
 	get: protectedProcedure
 		.input(sirenInputSchema)
@@ -146,6 +164,7 @@ export const companyRouter = createTRPCRouter({
 		.query(async ({ ctx, input }) => {
 			const company = await findUserCompany(ctx.db, ctx.session, input.siren);
 			const year = getCurrentYear();
+			const representationCampaignYear = getCurrentRepresentationCampaignYear();
 
 			const [
 				declarationRows,
@@ -168,6 +187,7 @@ export const companyRouter = createTRPCRouter({
 							declarations.secondDeclarationPathChoice,
 						secondDeclarationStep: declarations.secondDeclarationStep,
 						cseOpinionDraftUpdatedAt: declarations.cseOpinionDraftUpdatedAt,
+						hasCse: declarations.hasCse,
 						cseRequired: declarations.cseRequired,
 						rulesVersion: declarations.rulesVersion,
 					})
@@ -216,7 +236,10 @@ export const companyRouter = createTRPCRouter({
 							isNull(declarations.cancelledAt),
 						),
 					),
-				getRepresentationWorkforceHistory(input.siren, year),
+				getRepresentationWorkforceHistory(
+					input.siren,
+					representationCampaignYear,
+				),
 				ctx.db
 					.select({
 						status: representationDeclarations.status,
@@ -229,7 +252,10 @@ export const companyRouter = createTRPCRouter({
 						and(
 							eq(representationDeclarations.siren, input.siren),
 							// The représentation funnel stores the *reference* year, not the campaign year.
-							eq(representationDeclarations.year, getReferenceYearFor(year)),
+							eq(
+								representationDeclarations.year,
+								getReferenceYearFor(representationCampaignYear),
+							),
 						),
 					)
 					.limit(1),
@@ -274,7 +300,7 @@ export const companyRouter = createTRPCRouter({
 					COMPANY_SIZE_VOLUNTARY_MAX &&
 					isPresumedSubjectToRepresentation(
 						representationWorkforceHistory,
-						year,
+						representationCampaignYear,
 					));
 			const mappedDeclarations: DbDeclaration[] = declarationRows.map((d) => {
 				const projectedStatus = computeDeclarationStatus({
@@ -335,11 +361,13 @@ export const companyRouter = createTRPCRouter({
 					hasSubmittedSecondDeclaration:
 						submissions.hasSubmittedSecondDeclaration,
 					secondDeclarationStep: d.secondDeclarationStep,
+					lastTransmission: getLastTransmission(declarationEvents),
 					hasSubmittedJointEvaluation: submissions.hasSubmittedJointEvaluation,
 					hasSubmittedCseOpinion: submissions.hasSubmittedCseOpinion,
 					cseOpinionViewAvailable:
 						submissions.hasSubmittedCseOpinion && !d.cseOpinionDraftUpdatedAt,
 					jointEvaluationViewAvailable,
+					hasCse: resolveCseAnswerForYear(d.hasCse, company.hasCse),
 					cseRequired: d.cseRequired,
 					hasJointEvaluationFile: yearsWithJointEval.has(d.year),
 					formalNoticeAvailable: isFormalNoticeAvailable(
@@ -362,7 +390,7 @@ export const companyRouter = createTRPCRouter({
 			if (representationRow) {
 				mappedDeclarations.push({
 					type: "representation" as const,
-					year,
+					year: representationCampaignYear,
 					status: computeRepresentationDeclarationStatus({
 						status: representationRow.status,
 						currentStep: representationRow.currentStep,
@@ -374,8 +402,10 @@ export const companyRouter = createTRPCRouter({
 					secondDeclarationPathChoice: null,
 					hasSubmittedSecondDeclaration: false,
 					secondDeclarationStep: null,
+					lastTransmission: null,
 					hasSubmittedJointEvaluation: false,
 					hasSubmittedCseOpinion: false,
+					hasCse: null,
 					cseRequired: false,
 					hasJointEvaluationFile: false,
 					formalNoticeAvailable: false,
@@ -394,6 +424,7 @@ export const companyRouter = createTRPCRouter({
 				yearsWithPrefill,
 				representationVisible,
 				currentYearDeadlines,
+				representationCampaignYear,
 			);
 
 			return { company, declarations: declarationItems };
@@ -404,17 +435,45 @@ export const companyRouter = createTRPCRouter({
 		.mutation(async ({ ctx, input }) => {
 			assertNotImpersonating(ctx.session);
 			const company = await findUserCompany(ctx.db, ctx.session, input.siren);
-			if (!isCseRequired(getObligationWorkforce(company.gipWorkforce))) {
+			const workforce = getObligationWorkforce(company.gipWorkforce);
+			if (!isCseRequired(workforce)) {
 				throw new TRPCError({
 					code: "PRECONDITION_FAILED",
 					message:
 						"Le champ CSE est réservé aux entreprises de 100 salariés et plus.",
 				});
 			}
-			await ctx.db
-				.update(companies)
-				.set({ hasCse: input.hasCse })
-				.where(eq(companies.siren, input.siren));
+
+			const year = getCurrentYear();
+
+			await ctx.db.transaction(async (tx) => {
+				const [active] = await tx
+					.select({ id: declarations.id })
+					.from(declarations)
+					.where(activeDeclarationFilter(input.siren, year))
+					.limit(1);
+
+				if (active) {
+					// Lock before deciding: a concurrent submission could close the
+					// démarche between the read and the write.
+					const declaration = await lockAndReadDeclaration(
+						tx,
+						active.id,
+						input.siren,
+						year,
+					);
+					assertCseAnswerModifiable(declaration.status);
+					await tx
+						.update(declarations)
+						.set({ hasCse: input.hasCse })
+						.where(eq(declarations.id, declaration.id));
+				}
+
+				await tx
+					.update(companies)
+					.set({ hasCse: input.hasCse })
+					.where(eq(companies.siren, input.siren));
+			});
 
 			// The engine reads a snapshot of the CSE requirement taken at
 			// submission; realign it, otherwise a démarche parked on the CSE step
@@ -422,8 +481,8 @@ export const companyRouter = createTRPCRouter({
 			await syncCseRequirement({
 				db: ctx.db,
 				siren: input.siren,
-				year: getCurrentYear(),
-				workforce: getObligationWorkforce(company.gipWorkforce),
+				year,
+				workforce,
 				hasCse: input.hasCse,
 				actorUserId: ctx.session.user.id,
 			});

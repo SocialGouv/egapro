@@ -1,15 +1,19 @@
 import type React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockRedirect, mockAuth, mockResolveAuthorizedSiren } = vi.hoisted(
-	() => ({
-		mockRedirect: vi.fn<(url: string) => never>().mockImplementation(() => {
-			throw new Error("NEXT_REDIRECT");
-		}),
-		mockAuth: vi.fn(),
-		mockResolveAuthorizedSiren: vi.fn(),
+const {
+	mockRedirect,
+	mockAuth,
+	mockResolveAuthorizedSiren,
+	mockResolveCurrentDeclarationCseState,
+} = vi.hoisted(() => ({
+	mockRedirect: vi.fn<(url: string) => never>().mockImplementation(() => {
+		throw new Error("NEXT_REDIRECT");
 	}),
-);
+	mockAuth: vi.fn(),
+	mockResolveAuthorizedSiren: vi.fn(),
+	mockResolveCurrentDeclarationCseState: vi.fn(),
+}));
 
 vi.mock("next/navigation", () => ({
 	usePathname: vi.fn(),
@@ -25,6 +29,9 @@ vi.mock("next/navigation", () => ({
 vi.mock("~/server/auth", () => ({ auth: mockAuth }));
 
 vi.mock("~/server/db", () => ({ db: {} }));
+vi.mock("~/server/db/declarationConditions", () => ({
+	resolveCurrentDeclarationCseState: mockResolveCurrentDeclarationCseState,
+}));
 vi.mock("~/server/auth/companyAccess", async (importOriginal) => ({
 	...(await importOriginal<typeof import("~/server/auth/companyAccess")>()),
 	resolveAuthorizedSiren: mockResolveAuthorizedSiren,
@@ -72,7 +79,12 @@ function mockLayout({
 	phone = PHONE as string | null,
 	profileFails = false,
 	status = "draft" as string,
+	yearCse = { hasCse: null, status: "draft" } as {
+		hasCse: boolean | null;
+		status: string;
+	},
 	isFirstDeclarationLocked = false,
+	lastTransmission,
 	user = DEFAULT_USER as Record<string, unknown>,
 }: {
 	gipWorkforce?: number | null;
@@ -80,11 +92,14 @@ function mockLayout({
 	phone?: string | null;
 	profileFails?: boolean;
 	status?: string;
+	yearCse?: { hasCse: boolean | null; status: string };
 	isFirstDeclarationLocked?: boolean;
+	lastTransmission?: string | null;
 	user?: Record<string, unknown>;
 } = {}) {
 	mockAuth.mockResolvedValue({ user });
 	mockResolveAuthorizedSiren.mockResolvedValue(SIREN);
+	mockResolveCurrentDeclarationCseState.mockResolvedValue(yearCse);
 	vi.mocked(api.company.get).mockResolvedValue({
 		name: "Société Démo",
 		siren: SIREN,
@@ -96,6 +111,7 @@ function mockLayout({
 	vi.mocked(api.declaration.getOrCreate).mockResolvedValue({
 		declaration: { id: "d1", year: 2026, siren: SIREN, status },
 		isFirstDeclarationLocked,
+		...(lastTransmission === undefined ? {} : { lastTransmission }),
 	} as never);
 	if (profileFails) {
 		vi.mocked(api.profile.get).mockRejectedValue(new Error("NOT_FOUND"));
@@ -113,6 +129,7 @@ describe("WithBannerLayout", () => {
 		mockRedirect.mockClear();
 		mockAuth.mockReset();
 		mockResolveAuthorizedSiren.mockReset();
+		mockResolveCurrentDeclarationCseState.mockReset();
 		vi.mocked(api.declaration.getOrCreate).mockClear();
 	});
 
@@ -166,6 +183,32 @@ describe("WithBannerLayout", () => {
 
 		await expect(renderLayout()).rejects.toThrow("NEXT_REDIRECT");
 		expect(mockRedirect).toHaveBeenCalledWith(MY_SPACE_PATH);
+	});
+
+	// #4228: the year's snapshot is the answer that year declared, so a frozen
+	// year that was never answered must not block the funnel any more.
+	it("serves the funnel when the completed year's answer is frozen and was never filled", async () => {
+		mockLayout({
+			gipWorkforce: COMPANY_SIZE_ANNUAL_MIN,
+			hasCse: null,
+			yearCse: { hasCse: null, status: "demarche_completed" },
+		});
+
+		await expect(renderLayout()).resolves.toBeDefined();
+		expect(mockRedirect).not.toHaveBeenCalled();
+	});
+
+	// The snapshot beats the live column: a known year answer unlocks the funnel
+	// even when the company row itself has not been filled.
+	it("serves the funnel when the year's snapshot answers what the live column does not", async () => {
+		mockLayout({
+			gipWorkforce: COMPANY_SIZE_ANNUAL_MIN,
+			hasCse: null,
+			yearCse: { hasCse: false, status: "draft" },
+		});
+
+		await expect(renderLayout()).resolves.toBeDefined();
+		expect(mockRedirect).not.toHaveBeenCalled();
 	});
 
 	// `has_cse` is only collectable above the threshold — requiring it below bounces forever.
@@ -244,13 +287,26 @@ describe("WithBannerLayout", () => {
 		}
 
 		it.each([
-			["demarche_completed", true, true],
-			["demarche_completed", false, false],
-			["awaiting_cse_opinion", true, false],
-			["corrective_actions_chosen", false, false],
-			["draft", false, false],
-		])("status %s, first declaration superseded %s → suspended %s", async (status, isFirstDeclarationLocked, expected) => {
-			mockLayout({ status, isFirstDeclarationLocked });
+			["demarche_completed", true, "cse_opinion", true],
+			["demarche_completed", false, "cse_opinion", false],
+			["awaiting_cse_opinion", true, "joint_evaluation", false],
+			["corrective_actions_chosen", false, null, false],
+			["draft", false, null, false],
+		])("status %s, first declaration superseded %s, last transmission %s → suspended %s", async (status, isFirstDeclarationLocked, lastTransmission, expected) => {
+			mockLayout({ status, isFirstDeclarationLocked, lastTransmission });
+
+			expect(await lockAcquisitionSuspended()).toBe(expected);
+		});
+
+		it.each([
+			["demarche_completed", true, "cse_opinion", true],
+			["demarche_completed", true, "joint_evaluation", false],
+			["demarche_completed", true, "second_declaration", false],
+			["demarche_completed", true, "path_choice_round_1", false],
+			["demarche_completed", true, "path_choice_round_2", false],
+			["demarche_completed", true, null, false],
+		])("status %s, first declaration superseded %s, last transmission %s → suspended %s", async (status, isFirstDeclarationLocked, lastTransmission, expected) => {
+			mockLayout({ status, isFirstDeclarationLocked, lastTransmission });
 
 			expect(await lockAcquisitionSuspended()).toBe(expected);
 		});

@@ -15,11 +15,13 @@ type Props = {
 	 * caller that forgets the check would offer a control that can only fail.
 	 */
 	cseApplicable: boolean;
+	// Frozen once the year's démarche is completed.
+	cseLocked: boolean;
 	siren: string;
 };
 
 /** Modal to update CSE presence for a company */
-export function UpdateCseModal({ cseApplicable, siren }: Props) {
+export function UpdateCseModal({ cseApplicable, cseLocked, siren }: Props) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
 	const [hasCse, setHasCse] = useState<boolean | null>(null);
 	const readOnlyGuard = useReadOnlyGuard();
@@ -39,7 +41,7 @@ export function UpdateCseModal({ cseApplicable, siren }: Props) {
 		mutation.mutate({ siren, hasCse });
 	}
 
-	if (!cseApplicable) return null;
+	if (!cseApplicable || cseLocked) return null;
 
 	return (
 		// No aria-modal here, unlike the other fr-modal dialogs: this one is

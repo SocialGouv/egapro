@@ -4,6 +4,7 @@ import type {
 	RepresentationDeclarationStatus,
 } from "~/modules/domain";
 import {
+	getCurrentRepresentationCampaignYear,
 	getCurrentYear,
 	getDefaultCampaignDeadlines,
 	getReferenceYearFor,
@@ -286,16 +287,19 @@ describe("companyRouter.getWithDeclarations", () => {
 				{
 					declarationId: DECLARATION_ID,
 					eventType: "second_declaration_submit",
+					createdAt: new Date("2027-01-01T00:00:00Z"),
 					round: 1,
 				},
 				{
 					declarationId: DECLARATION_ID,
 					eventType: "joint_evaluation_submit",
+					createdAt: new Date("2027-01-01T00:01:00Z"),
 					round: 2,
 				},
 				{
 					declarationId: DECLARATION_ID,
 					eventType: "cse_opinion_submit",
+					createdAt: new Date("2027-01-01T00:02:00Z"),
 					round: null,
 				},
 			],
@@ -309,7 +313,37 @@ describe("companyRouter.getWithDeclarations", () => {
 			hasSubmittedSecondDeclaration: true,
 			hasSubmittedJointEvaluation: true,
 			hasSubmittedCseOpinion: true,
+			lastTransmission: "cse_opinion",
 		});
+	});
+
+	it("exposes the latest transmission of the remuneration row, and none for the representation row (#5164)", async () => {
+		const { caller } = await makeCaller({
+			declRows: [makeDeclRow(getCurrentYear())],
+			eventRows: [
+				{
+					declarationId: DECLARATION_ID,
+					eventType: "joint_evaluation_submit",
+					round: 1,
+					createdAt: new Date("2027-05-01T10:00:00Z"),
+				},
+				{
+					declarationId: DECLARATION_ID,
+					eventType: "second_declaration_submit",
+					round: 2,
+					createdAt: new Date("2027-06-01T10:00:00Z"),
+				},
+			],
+		});
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(
+			result.declarations.find((d) => d.type === "remuneration"),
+		).toMatchObject({ lastTransmission: "second_declaration" });
+		expect(
+			result.declarations.find((d) => d.type === "representation"),
+		).toMatchObject({ lastTransmission: null });
 	});
 
 	it("derives hasSubmittedJointEvaluation from the events, not from the uploaded file", async () => {
@@ -320,6 +354,7 @@ describe("companyRouter.getWithDeclarations", () => {
 				{
 					declarationId: DECLARATION_ID,
 					eventType: "path_choice",
+					createdAt: new Date("2027-01-01T00:03:00Z"),
 					round: 1,
 				},
 			],
@@ -342,6 +377,7 @@ describe("companyRouter.getWithDeclarations", () => {
 				{
 					declarationId: "another-declaration",
 					eventType: "joint_evaluation_submit",
+					createdAt: new Date("2027-01-01T00:04:00Z"),
 					round: 1,
 				},
 			],
@@ -476,6 +512,7 @@ describe("companyRouter.getWithDeclarations", () => {
 						{
 							declarationId: DECLARATION_ID,
 							eventType: "formal_notice_joint_evaluation_submit",
+							createdAt: new Date("2027-01-01T00:05:00Z"),
 							round: null,
 						},
 					],
@@ -494,6 +531,7 @@ describe("companyRouter.getWithDeclarations", () => {
 						{
 							declarationId: "another-declaration",
 							eventType: "formal_notice_joint_evaluation_submit",
+							createdAt: new Date("2027-01-01T00:06:00Z"),
 							round: null,
 						},
 					],
@@ -647,10 +685,10 @@ describe("companyRouter.getWithDeclarations", () => {
 		// The représentation funnel stores the reference year (N-1), not the
 		// campaign year: filtering on the campaign year never matches a real row.
 		expect(filters.get(representationDeclarations.year)).toBe(
-			getReferenceYearFor(getCurrentYear()),
+			getReferenceYearFor(getCurrentRepresentationCampaignYear()),
 		);
 		expect(filters.get(representationDeclarations.year)).not.toBe(
-			getCurrentYear(),
+			getCurrentRepresentationCampaignYear(),
 		);
 		// Exactly two filters: no status predicate, so a draft counts as much as a
 		// submitted declaration — the line must never disappear once started.
@@ -822,7 +860,9 @@ describe("companyRouter.getWithDeclarations", () => {
 			(d) => d.type === "representation",
 		);
 		expect(representation).toHaveLength(1);
-		expect(representation[0]?.year).toBe(getCurrentYear());
+		expect(representation[0]?.year).toBe(
+			getCurrentRepresentationCampaignYear(),
+		);
 	});
 
 	it("falls back to step 0 when the row carries no current step", async () => {

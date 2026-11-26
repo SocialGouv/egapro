@@ -2,12 +2,18 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
 	enqueueReceipt: vi.fn().mockResolvedValue(undefined),
+	logAction: vi.fn(),
 }));
 
 vi.mock("~/modules/mail/server", () => ({
 	enqueueReceipt: mocks.enqueueReceipt,
 }));
 
+vi.mock("~/server/audit/log", () => ({
+	logAction: (...args: unknown[]) => mocks.logAction(...args),
+}));
+
+import { AUDIT_ACTIONS } from "~/modules/audit";
 import {
 	COMPUTABLE_EXECUTIVES,
 	COMPUTABLE_MEMBERS,
@@ -368,6 +374,16 @@ describe("representationDeclarationRouter.submit", () => {
 			expect(mocks.enqueueReceipt).not.toHaveBeenCalled();
 		});
 
+		it("acknowledges a declaration that was already transmitted as a resend", async () => {
+			const mock = createMockDb([{ status: "submitted" }]);
+
+			await submit(mock, FULL_PAYLOAD);
+
+			expect(mocks.enqueueReceipt).toHaveBeenCalledWith(
+				expect.objectContaining({ isResend: true }),
+			);
+		});
+
 		it("sends no acknowledgement once the campaign is closed", async () => {
 			mockGetRepresentationCampaign.mockResolvedValue(CLOSED_CAMPAIGN);
 			const mock = createMockDb();
@@ -377,6 +393,55 @@ describe("representationDeclarationRouter.submit", () => {
 			});
 
 			expect(mocks.enqueueReceipt).not.toHaveBeenCalled();
+		});
+	});
+
+	describe("re-transmission", () => {
+		beforeEach(() => {
+			mocks.enqueueReceipt.mockClear();
+			mocks.logAction.mockClear();
+		});
+
+		it("refreshes the transmission timestamps of the stored row", async () => {
+			const resubmittedAt = new Date("2026-07-01T10:00:00.000Z");
+			vi.setSystemTime(resubmittedAt);
+			const mock = createMockDb([{ status: "submitted" }]);
+
+			await submit(mock, FULL_PAYLOAD);
+
+			expect(conflictSet(mock).set).toMatchObject({
+				status: "submitted",
+				submittedAt: resubmittedAt,
+				updatedAt: resubmittedAt,
+			});
+		});
+
+		it("journals the resubmission flag", async () => {
+			const mock = createMockDb([{ status: "submitted" }]);
+
+			await submit(mock, FULL_PAYLOAD);
+
+			expect(mocks.logAction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					action: AUDIT_ACTIONS.REPRESENTATION_SUBMIT,
+					status: "success",
+					siren: SIREN,
+					resourceType: "representation_declaration",
+					metadata: { year: YEAR, resubmission: true },
+				}),
+			);
+		});
+
+		it("journals a first transmission as a non-resubmission", async () => {
+			const mock = createMockDb();
+
+			await submit(mock, FULL_PAYLOAD);
+
+			expect(mocks.logAction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					metadata: { year: YEAR, resubmission: false },
+				}),
+			);
 		});
 	});
 });

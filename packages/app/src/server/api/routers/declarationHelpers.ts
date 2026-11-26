@@ -19,6 +19,7 @@ import {
 	isJointEvaluationFileTransmitted,
 } from "~/modules/domain";
 import {
+	cseAnswerForYear,
 	notCancelledCondition,
 	submittedDeclarationCondition,
 } from "~/server/db/declarationConditions";
@@ -466,7 +467,7 @@ export async function findTransmittedCseOpinions(
 						departmentLabel: companies.departmentLabel,
 						nafCode: companies.nafCode,
 						nafLabel: companies.nafLabel,
-						hasCse: companies.hasCse,
+						hasCse: cseAnswerForYear(),
 					},
 					declarant: {
 						firstName: users.firstName,

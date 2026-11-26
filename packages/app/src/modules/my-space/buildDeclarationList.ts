@@ -10,6 +10,7 @@ import type {
 	DeclarationItem,
 	DeclarationStatus,
 	DeclarationType,
+	LastTransmission,
 } from "./types";
 
 type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
@@ -25,10 +26,12 @@ export type DbDeclaration = {
 	secondDeclarationPathChoice: CompliancePath | null;
 	hasSubmittedSecondDeclaration: boolean;
 	secondDeclarationStep: number | null;
+	lastTransmission: LastTransmission | null;
 	hasSubmittedJointEvaluation: boolean;
 	hasSubmittedCseOpinion: boolean;
 	cseOpinionViewAvailable?: boolean;
 	jointEvaluationViewAvailable?: boolean;
+	hasCse: boolean | null;
 	cseRequired: boolean;
 	hasJointEvaluationFile: boolean;
 	formalNoticeAvailable: boolean;
@@ -48,18 +51,24 @@ export function buildDeclarationList(
 	currentYearDeadlines: CampaignDeadlines = getDefaultCampaignDeadlines(
 		currentYear,
 	),
+	// Representation campaigns open on 1 March, so they carry their own current
+	// year: in January and February the previous campaign is still the current one.
+	representationYear: number = currentYear,
 ): DeclarationItem[] {
 	const rows: DeclarationItem[] = [];
+	const yearFor = (type: DeclarationType) =>
+		type === "representation" ? representationYear : currentYear;
 
 	for (const type of EXPECTED_DECLARATION_TYPES) {
+		const typeYear = yearFor(type);
 		const existing = dbDeclarations.find(
-			(d) => d.year === currentYear && d.type === type,
+			(d) => d.year === typeYear && d.type === type,
 		);
 		if (existing) {
 			rows.push({
 				type,
 				siren,
-				year: currentYear,
+				year: typeYear,
 				status: existing.status,
 				fsmStatus: existing.fsmStatus,
 				currentStep: existing.currentStep,
@@ -68,10 +77,12 @@ export function buildDeclarationList(
 				secondDeclarationPathChoice: existing.secondDeclarationPathChoice,
 				hasSubmittedSecondDeclaration: existing.hasSubmittedSecondDeclaration,
 				secondDeclarationStep: existing.secondDeclarationStep,
+				lastTransmission: existing.lastTransmission,
 				hasSubmittedJointEvaluation: existing.hasSubmittedJointEvaluation,
 				hasSubmittedCseOpinion: existing.hasSubmittedCseOpinion,
 				cseOpinionViewAvailable: existing.cseOpinionViewAvailable,
 				jointEvaluationViewAvailable: existing.jointEvaluationViewAvailable,
+				hasCse: existing.hasCse,
 				cseRequired: existing.cseRequired,
 				hasJointEvaluationFile: existing.hasJointEvaluationFile,
 				formalNoticeAvailable: existing.formalNoticeAvailable,
@@ -85,7 +96,7 @@ export function buildDeclarationList(
 			rows.push({
 				type,
 				siren,
-				year: currentYear,
+				year: typeYear,
 				status: "to_complete",
 				fsmStatus: null,
 				currentStep: 0,
@@ -94,14 +105,17 @@ export function buildDeclarationList(
 				secondDeclarationPathChoice: null,
 				hasSubmittedSecondDeclaration: false,
 				secondDeclarationStep: null,
+				lastTransmission: null,
 				hasSubmittedJointEvaluation: false,
 				hasSubmittedCseOpinion: false,
+				// No row means no snapshot: the caller falls back to the live answer.
+				hasCse: null,
 				cseRequired: false,
 				hasJointEvaluationFile: false,
 				formalNoticeAvailable: false,
 				hasSubmittedFormalNoticeJointEvaluation: false,
 				hasPrefillData:
-					type === "remuneration" && yearsWithPrefill.has(currentYear),
+					type === "remuneration" && yearsWithPrefill.has(typeYear),
 				deadline:
 					type === "remuneration"
 						? getDeclarationProcessStepDeadline(null, currentYearDeadlines)
@@ -112,7 +126,7 @@ export function buildDeclarationList(
 	}
 
 	const previousYears = dbDeclarations
-		.filter((d) => d.year < currentYear)
+		.filter((d) => d.year < yearFor(d.type))
 		.sort((a, b) => b.year - a.year);
 
 	for (const d of previousYears) {
@@ -128,10 +142,12 @@ export function buildDeclarationList(
 			secondDeclarationPathChoice: d.secondDeclarationPathChoice,
 			hasSubmittedSecondDeclaration: d.hasSubmittedSecondDeclaration,
 			secondDeclarationStep: d.secondDeclarationStep,
+			lastTransmission: d.lastTransmission,
 			hasSubmittedJointEvaluation: d.hasSubmittedJointEvaluation,
 			hasSubmittedCseOpinion: d.hasSubmittedCseOpinion,
 			cseOpinionViewAvailable: d.cseOpinionViewAvailable,
 			jointEvaluationViewAvailable: d.jointEvaluationViewAvailable,
+			hasCse: d.hasCse,
 			cseRequired: d.cseRequired,
 			hasJointEvaluationFile: d.hasJointEvaluationFile,
 			formalNoticeAvailable: d.formalNoticeAvailable,

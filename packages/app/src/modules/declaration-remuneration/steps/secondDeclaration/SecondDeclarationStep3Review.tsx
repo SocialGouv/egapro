@@ -14,9 +14,12 @@ import { getSubmissionErrorMessage } from "~/modules/declaration-remuneration/sh
 import { useRefreshAfterSubmissionError } from "~/modules/declaration-remuneration/shared/useRefreshAfterSubmissionError";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import {
+	type CompliancePathValue,
 	type DeclarationFsmStatus,
 	hasHighGap,
+	isCseAnswerLocked,
 	isSecondDeclarationWritable,
+	type LastTransmission,
 } from "~/modules/domain";
 import {
 	getCurrentStageHref,
@@ -40,6 +43,9 @@ type Props = {
 	secondDeclarationCategories: EmployeeCategoryRow[];
 	siren: string;
 	status: DeclarationFsmStatus | null;
+	firstDeclarationPathChoice: CompliancePathValue | null;
+	secondDeclarationPathChoice: CompliancePathValue | null;
+	lastTransmission: LastTransmission | null;
 };
 
 export function SecondDeclarationStep3Review({
@@ -50,10 +56,18 @@ export function SecondDeclarationStep3Review({
 	secondDeclarationCategories,
 	siren,
 	status,
+	firstDeclarationPathChoice,
+	secondDeclarationPathChoice,
+	lastTransmission,
 }: Props) {
 	const router = useRouter();
 	const modalRef = useRef<HTMLDialogElement>(null);
-	const isWritable = isSecondDeclarationWritable(status);
+	const isWritable = isSecondDeclarationWritable({
+		status,
+		firstDeclarationPathChoice,
+		secondDeclarationPathChoice,
+		lastTransmission,
+	});
 	const submissionAttemptFingerprintRef = useRef(
 		secondDeclarationSubmissionCount,
 	);
@@ -145,7 +159,9 @@ export function SecondDeclarationStep3Review({
 				d&apos;emplois aux services du ministre chargé du travail.
 			</p>
 
-			<h2 className="fr-h5 fr-mb-0">Indicateur par catégorie d&apos;emplois</h2>
+			<h2 className="fr-h5 fr-mb-0">
+				Indicateurs par catégorie d&apos;emplois
+			</h2>
 
 			<div className={stepStyles.card}>
 				<CardTitle tooltipId="tooltip-second-decl-categories">
@@ -197,6 +213,7 @@ export function SecondDeclarationStep3Review({
 
 			<SecondDeclarationNextSteps
 				cseApplicable={cseApplicable}
+				cseLocked={isCseAnswerLocked(status)}
 				cseOpinionRequired={cseOpinionRequired}
 				hasGapsAboveThreshold={gapsExist}
 				siren={siren}

@@ -17,6 +17,8 @@ import {
 	findJointEvaluationPendingSecondRound,
 	findOpenCycleRecipients,
 	getCampaignDeadlines,
+	purgeSentLog,
+	type ReminderLogPurgeSummary,
 	type ReminderRecipient,
 } from "../eligibility/index.js";
 import type {
@@ -24,6 +26,10 @@ import type {
 	NotificationPayloadMap,
 	NotificationType,
 } from "../mails/types.js";
+import {
+	logReminderLogCleanup,
+	logReminderLogCleanupFailure,
+} from "../worker/auditLog.js";
 import { type DispatchResult, dispatchReminder } from "./dispatch.js";
 
 // 2028 is the first cycle that can announce its opening: 2027 is the
@@ -298,4 +304,21 @@ export async function handleNextCycleHandover(
 		payloadFor: ({ siren }) => ({ siren, previousYear, nextYear }),
 		dedupYearFor: () => previousYear,
 	});
+}
+
+export async function handleReminderLogPurge(
+	sql: Sql,
+	now: Date = new Date(),
+): Promise<ReminderLogPurgeSummary> {
+	await ensureDedupTable(sql);
+	try {
+		const summary = await purgeSentLog(sql, {
+			currentYear: getCurrentYear(now),
+		});
+		await logReminderLogCleanup(sql, summary);
+		return summary;
+	} catch (error) {
+		await logReminderLogCleanupFailure(sql);
+		throw error;
+	}
 }

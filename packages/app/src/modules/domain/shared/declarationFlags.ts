@@ -1,5 +1,6 @@
 import type { DeclarationFsmStatus } from "../types";
 import { COMPANY_SIZE_ANNUAL_MIN } from "./constants";
+import { isComplianceProcessCompleted } from "./declarationStatus";
 import {
 	type DeclarationStatusEvent,
 	hasSubmittedSecondDeclaration,
@@ -24,6 +25,23 @@ export type CseOpinionRequiredInput = {
  */
 export function isCseOpinionRequired(input: CseOpinionRequiredInput): boolean {
 	return input.workforce >= COMPANY_SIZE_ANNUAL_MIN && input.hasCse === true;
+}
+
+// Editable while the démarche drives the path; history once it is completed, the
+// next campaign being a new row.
+export function isCseAnswerLocked(
+	status: DeclarationFsmStatus | null,
+): boolean {
+	return isComplianceProcessCompleted(status);
+}
+
+// A snapshot beats the live value so a correction made for a later campaign
+// cannot rewrite what an earlier one declared.
+export function resolveCseAnswerForYear(
+	declarationHasCse: boolean | null,
+	companyHasCse: boolean | null,
+): boolean | null {
+	return declarationHasCse ?? companyHasCse;
 }
 
 export type CseReconciliationInput = CseOpinionRequiredInput & {

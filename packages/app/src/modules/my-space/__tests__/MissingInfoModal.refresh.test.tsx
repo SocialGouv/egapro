@@ -110,6 +110,7 @@ describe("MissingInfoModal — refreshes the RSC props after saving (#4056)", ()
 		render(
 			<MissingInfoModal
 				cseApplicable={true}
+				cseLocked={false}
 				hasCse={null}
 				siren="532847196"
 				userPhone="0122334455"
@@ -133,6 +134,7 @@ describe("MissingInfoModal — refreshes the RSC props after saving (#4056)", ()
 		render(
 			<MissingInfoModal
 				cseApplicable={false}
+				cseLocked={false}
 				hasCse={null}
 				siren="532847196"
 				userPhone={null}
@@ -158,6 +160,7 @@ describe("MissingInfoModal — refreshes the RSC props after saving (#4056)", ()
 		render(
 			<MissingInfoModal
 				cseApplicable={true}
+				cseLocked={false}
 				hasCse={null}
 				siren="532847196"
 				userPhone="0122334455"
@@ -182,6 +185,7 @@ describe("MissingInfoModal — refreshes the RSC props after saving (#4056)", ()
 		render(
 			<MissingInfoModal
 				cseApplicable={true}
+				cseLocked={false}
 				hasCse={null}
 				siren="532847196"
 				userPhone="0122334455"
@@ -210,6 +214,7 @@ describe("MissingInfoModal — refreshes the RSC props after saving (#4056)", ()
 		const { container } = render(
 			<MissingInfoModal
 				cseApplicable={true}
+				cseLocked={false}
 				hasCse={null}
 				siren="532847196"
 				userPhone="0122334455"
@@ -237,6 +242,7 @@ describe("MissingInfoModal — refreshes the RSC props after saving (#4056)", ()
 		const { container } = render(
 			<MissingInfoModal
 				cseApplicable={true}
+				cseLocked={false}
 				hasCse={null}
 				siren="532847196"
 				userPhone="0122334455"
@@ -265,6 +271,7 @@ describe("MissingInfoModal — refreshes the RSC props after saving (#4056)", ()
 		const { container } = render(
 			<MissingInfoModal
 				cseApplicable={true}
+				cseLocked={false}
 				hasCse={null}
 				siren="532847196"
 				userPhone="0122334455"
@@ -295,6 +302,7 @@ describe("MissingInfoModal — refreshes the RSC props after saving (#4056)", ()
 		const { container } = render(
 			<MissingInfoModal
 				cseApplicable={true}
+				cseLocked={false}
 				hasCse={null}
 				siren="532847196"
 				userPhone="0122334455"
@@ -325,6 +333,7 @@ describe("MissingInfoModal — refreshes the RSC props after saving (#4056)", ()
 		const { container } = render(
 			<MissingInfoModal
 				cseApplicable={true}
+				cseLocked={false}
 				hasCse={null}
 				siren="532847196"
 				userPhone="0122334455"

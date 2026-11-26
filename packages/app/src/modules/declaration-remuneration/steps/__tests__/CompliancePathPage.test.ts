@@ -21,7 +21,10 @@ describe("isConcernedDeclarationModifiable", () => {
 			isConcernedDeclarationModifiable({
 				isSecondRound: false,
 				status: "awaiting_compliance_path_choice",
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
 				isFirstDeclarationLocked: false,
+				lastTransmission: null,
 			}),
 		).toBe(true);
 	});
@@ -31,22 +34,29 @@ describe("isConcernedDeclarationModifiable", () => {
 			isConcernedDeclarationModifiable({
 				isSecondRound: false,
 				status: "awaiting_cse_opinion",
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: null,
 				isFirstDeclarationLocked: true,
+				lastTransmission: null,
 			}),
 		).toBe(false);
 	});
 
 	it.each([
-		["corrective_actions_chosen", true],
-		["awaiting_revision_choice", true],
-		["awaiting_cse_opinion", false],
-		["demarche_completed", false],
-	] as const)("second declaration follows isSecondDeclarationWritable (%s → %s)", (status, expected) => {
+		["corrective_actions_chosen", null, true],
+		["awaiting_revision_choice", null, true],
+		["awaiting_cse_opinion", null, true],
+		["awaiting_cse_opinion", "justify", false],
+		["demarche_completed", null, false],
+	] as const)("second declaration follows isSecondDeclarationWritable (%s, revised path %s → %s)", (status, secondDeclarationPathChoice, expected) => {
 		expect(
 			isConcernedDeclarationModifiable({
 				isSecondRound: true,
 				status,
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice,
 				isFirstDeclarationLocked: true,
+				lastTransmission: null,
 			}),
 		).toBe(expected);
 	});
@@ -56,9 +66,32 @@ describe("isConcernedDeclarationModifiable", () => {
 			isConcernedDeclarationModifiable({
 				isSecondRound: true,
 				status: "corrective_actions_chosen",
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: null,
 				isFirstDeclarationLocked: true,
+				lastTransmission: null,
 			}),
 		).toBe(true);
+	});
+
+	// The flag only drives the success banner ("vous pouvez modifier votre seconde
+	// déclaration jusqu'au choix de votre nouveau parcours"), so it tracks the
+	// second declaration — not the path choice, which `readOnlyReason` governs.
+	it("second round: the banner follows the last transmission, not the path choice (#5166)", () => {
+		const modifiable = (
+			lastTransmission: "second_declaration" | "path_choice_round_2",
+		) =>
+			isConcernedDeclarationModifiable({
+				isSecondRound: true,
+				status: "demarche_completed",
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: null,
+				isFirstDeclarationLocked: true,
+				lastTransmission,
+			});
+
+		expect(modifiable("second_declaration")).toBe(true);
+		expect(modifiable("path_choice_round_2")).toBe(false);
 	});
 });
 

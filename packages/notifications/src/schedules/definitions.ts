@@ -1,4 +1,5 @@
 import type { Sql } from "postgres";
+import type { ReminderLogPurgeSummary } from "../eligibility/index.js";
 import type { CseOpinionReminderVariant } from "../mails/types.js";
 import type { DispatchResult } from "./dispatch.js";
 import {
@@ -6,13 +7,16 @@ import {
 	handleCycleOpeningInfo,
 	handleDailyDeadlineReminders,
 	handleNextCycleHandover,
+	handleReminderLogPurge,
 } from "./handlers.js";
+
+export type ScheduleOutcome = DispatchResult | ReminderLogPurgeSummary;
 
 export type ScheduleDefinition = {
 	name: string;
 	cron: string;
 	timeZone: string;
-	run: (sql: Sql) => Promise<DispatchResult>;
+	run: (sql: Sql) => Promise<ScheduleOutcome>;
 };
 
 const TZ = "Europe/Paris";
@@ -33,6 +37,11 @@ const TZ = "Europe/Paris";
 // - `cycle_opening_info` (1er mars) and `next_cycle_handover` (2 mars) are
 //   fixed informational milestones. `cycle_opening_info` still reads the admin
 //   deadline for the date it prints.
+//
+// - `reminder-log-purge-daily` (03:00) trims `notifications.reminder_sent_log`.
+//   Reminders only read the current and previous campaign year, so the purge
+//   keeps the last three (`REMINDER_LOG_RETENTION_YEARS`) and never deletes a
+//   year the dedup still needs.
 
 const CSE_VARIANT_SCHEDULES: ReadonlyArray<{
 	suffix: string;
@@ -70,5 +79,11 @@ export const SCHEDULES: ScheduleDefinition[] = [
 		cron: "0 8 2 3 *",
 		timeZone: TZ,
 		run: handleNextCycleHandover,
+	},
+	{
+		name: "reminder-log-purge-daily",
+		cron: "0 3 * * *",
+		timeZone: TZ,
+		run: handleReminderLogPurge,
 	},
 ];

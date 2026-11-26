@@ -4,10 +4,13 @@ import {
 	MissingSiret,
 } from "~/modules/declaration-remuneration";
 import {
+	getCurrentYear,
 	getObligationWorkforce,
 	hasRequiredDeclarationInfo,
+	isCseAnswerLocked,
 	isCseRequired,
 	isDeclarationWritingClosed,
+	resolveCseAnswerForYear,
 } from "~/modules/domain";
 import { LOGIN, MY_SPACE } from "~/modules/routes";
 import { auth } from "~/server/auth";
@@ -16,6 +19,7 @@ import {
 	resolveAuthorizedSiren,
 } from "~/server/auth/companyAccess";
 import { db } from "~/server/db";
+import { resolveCurrentDeclarationCseState } from "~/server/db/declarationConditions";
 import { api } from "~/trpc/server";
 
 /**
@@ -39,20 +43,32 @@ export default async function WithBannerLayout({
 	const siren = await resolveAuthorizedSiren(db, session);
 	if (!siren) return <MissingSiret />;
 
-	const [company, profile] = await Promise.all([
+	const year = getCurrentYear();
+	const [company, profile, declarationCse] = await Promise.all([
 		api.company.get({ siren }),
 		api.profile.get().catch(() => null),
+		resolveCurrentDeclarationCseState(db, siren, year),
 	]);
 
 	const cseApplicable = isCseRequired(
 		getObligationWorkforce(company.gipWorkforce),
 	);
+	// The year's snapshot is the answer that year declared; the live column is
+	// only the fallback for years no submission ever filled. The lock follows
+	// the same declaration, so a frozen year stops asking the question.
+	const cseAnswer = resolveCseAnswerForYear(
+		declarationCse?.hasCse ?? null,
+		company.hasCse,
+	);
+	const cseLocked = isCseAnswerLocked(declarationCse?.status ?? null);
+
 	if (
 		!isImpersonating(session) &&
 		!hasRequiredDeclarationInfo(
 			profile?.phone ?? null,
-			company.hasCse,
+			cseAnswer,
 			cseApplicable,
+			cseLocked,
 		)
 	) {
 		redirect(MY_SPACE);
@@ -66,6 +82,7 @@ export default async function WithBannerLayout({
 	const lockAcquisitionSuspended = isDeclarationWritingClosed(
 		declaration.status,
 		declarationData.isFirstDeclarationLocked,
+		declarationData.lastTransmission,
 	);
 
 	return (

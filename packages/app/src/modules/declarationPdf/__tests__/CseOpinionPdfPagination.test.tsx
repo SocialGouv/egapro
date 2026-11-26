@@ -7,25 +7,18 @@ import { describe, expect, it } from "vitest";
 
 import type { CseOpinionRecapData } from "../buildCseOpinionRecapData";
 import { CseOpinionPdfDocument } from "../CseOpinionPdfDocument";
+import {
+	type PdfLayoutNode as LayoutNode,
+	pdfTextOf,
+	readPdfLayout,
+} from "./helpers/pdfLayout";
 import { registerPdfFonts } from "./helpers/registerPdfFonts";
 
 registerPdfFonts();
 
-type LayoutNode = {
-	type: string;
-	value?: string;
-	box?: { top?: number; height?: number };
-	children?: LayoutNode[];
-};
-
-function textOf(node: LayoutNode): string {
-	if (node.type === "TEXT_INSTANCE") return node.value ?? "";
-	return (node.children ?? []).map(textOf).join("");
-}
-
 function collectTexts(node: LayoutNode, out: string[]): void {
 	if (node.type === "TEXT") {
-		const text = textOf(node).trim();
+		const text = pdfTextOf(node).trim();
 		if (text) out.push(text);
 		return;
 	}
@@ -103,8 +96,7 @@ async function renderPages(
 		}>,
 		{
 			onRender: (props: OnRenderProps) => {
-				layout = (props as { _INTERNAL__LAYOUT__DATA_?: LayoutNode })
-					._INTERNAL__LAYOUT__DATA_;
+				layout = readPdfLayout(props);
 			},
 		},
 	);

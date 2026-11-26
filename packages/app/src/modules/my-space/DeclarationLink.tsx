@@ -20,6 +20,7 @@ type Props = {
 	userPhone: string | null;
 	hasCse: boolean | null;
 	cseApplicable: boolean;
+	cseLocked: boolean;
 	children: React.ReactNode;
 };
 
@@ -29,12 +30,13 @@ export function DeclarationLink({
 	userPhone,
 	hasCse,
 	cseApplicable,
+	cseLocked,
 	children,
 }: Props) {
 	const isImpersonating = useIsImpersonating();
 	const hasMissingInfo =
 		!isImpersonating &&
-		!hasRequiredDeclarationInfo(userPhone, hasCse, cseApplicable);
+		!hasRequiredDeclarationInfo(userPhone, hasCse, cseApplicable, cseLocked);
 
 	// When info is missing, open missing-info modal (for both types)
 	if (hasMissingInfo) {
