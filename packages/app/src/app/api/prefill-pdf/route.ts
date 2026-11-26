@@ -7,12 +7,13 @@ import {
 } from "~/modules/declarationPdf/buildPrefillPdfData";
 import { PrefillPdfDocument } from "~/modules/declarationPdf/PrefillPdfDocument";
 import { renderTaggedPdf } from "~/modules/declarationPdf/tagging/renderTaggedPdf";
-import { getCurrentYear } from "~/modules/domain";
+import { getCurrentYear, resolveCseAnswerForYear } from "~/modules/domain";
 import { auditQueryMetadata } from "~/server/audit/queryMetadata";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { getSessionSiren } from "~/server/auth/sessionSiren";
 import { db } from "~/server/db";
-import { companies, gipMdsData } from "~/server/db/schema";
+import { resolveCurrentDeclarationId } from "~/server/db/declarationConditions";
+import { companies, declarations, gipMdsData } from "~/server/db/schema";
 import {
 	invalidYearResponse,
 	parseRequestedYear,
@@ -65,24 +66,43 @@ async function resolvePrefillPdf(
 		return { error: pdfErrorResponse("Aucune donnée préremplie", 404) };
 	}
 
-	const [company] = await db
-		.select({
-			name: companies.name,
-			address: companies.address,
-			nafCode: companies.nafCode,
-			nafLabel: companies.nafLabel,
-			hasCse: companies.hasCse,
-		})
-		.from(companies)
-		.where(eq(companies.siren, siren))
-		.limit(1);
+	const declarationId = await resolveCurrentDeclarationId(db, siren, year);
+
+	const [[company], [declaration]] = await Promise.all([
+		db
+			.select({
+				name: companies.name,
+				address: companies.address,
+				nafCode: companies.nafCode,
+				nafLabel: companies.nafLabel,
+				hasCse: companies.hasCse,
+			})
+			.from(companies)
+			.where(eq(companies.siren, siren))
+			.limit(1),
+		declarationId
+			? db
+					.select({ hasCse: declarations.hasCse })
+					.from(declarations)
+					.where(eq(declarations.id, declarationId))
+					.limit(1)
+			: Promise.resolve([]),
+	]);
 
 	const data = buildPrefillPdfData({
 		siren,
 		year,
 		gip,
 		workforceEma: row.workforceEma,
-		company,
+		company: company
+			? {
+					...company,
+					hasCse: resolveCseAnswerForYear(
+						declaration?.hasCse ?? null,
+						company.hasCse,
+					),
+				}
+			: undefined,
 	});
 
 	return { data, filename: `donnees-preremplies-${siren}-${year}.pdf` };

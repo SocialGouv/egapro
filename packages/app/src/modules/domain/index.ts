@@ -128,7 +128,9 @@ export type {
 export {
 	isComplianceProcessRequired,
 	isComplianceProcessRevisionRequired,
+	isCseAnswerLocked,
 	isCseOpinionRequired,
+	resolveCseAnswerForYear,
 	resolveCseReconciliation,
 } from "./shared/declarationFlags";
 // Declaration edit lock constants

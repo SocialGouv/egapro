@@ -17,6 +17,7 @@ import {
 	type CompliancePathValue,
 	type DeclarationFsmStatus,
 	hasHighGap,
+	isCseAnswerLocked,
 	isSecondDeclarationWritable,
 	type LastTransmission,
 } from "~/modules/domain";
@@ -212,6 +213,7 @@ export function SecondDeclarationStep3Review({
 
 			<SecondDeclarationNextSteps
 				cseApplicable={cseApplicable}
+				cseLocked={isCseAnswerLocked(status)}
 				cseOpinionRequired={cseOpinionRequired}
 				hasGapsAboveThreshold={gapsExist}
 				siren={siren}

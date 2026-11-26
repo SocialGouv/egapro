@@ -194,6 +194,9 @@ export const declarations = createTable(
 		secondDeclReferencePeriodEnd: d.varchar({ length: 10 }),
 		// Set by CSE edits after the last transmission; cleared atomically on submit.
 		cseOpinionDraftUpdatedAt: d.timestamp({ withTimezone: true }),
+		// The company's answer for this campaign year, snapshotted at submission so
+		// a correction made for a later campaign cannot rewrite this one.
+		hasCse: d.boolean(),
 		cseRequired: d.boolean().notNull().default(false),
 		rulesVersion: d
 			.varchar("rules_version")

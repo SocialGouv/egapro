@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 import { COMPANY_SIZE_ANNUAL_MIN } from "../shared/constants";
 import {
 	isComplianceProcessRequired,
+	isCseAnswerLocked,
 	isCseOpinionRequired,
+	resolveCseAnswerForYear,
 	resolveCseReconciliation,
 } from "../shared/declarationFlags";
 
@@ -113,6 +115,48 @@ describe("isCseOpinionRequired", () => {
 // The reconciliation exists because the CSE requirement is snapshotted at
 // submission: when the GIP file later moves a company across the threshold, the
 // snapshot goes stale and only this rule says what the démarche owes (#4184).
+// The lock follows the FSM terminal state alone: the answer stays editable at
+// every step of the démarche, and the next campaign is a new row.
+describe("isCseAnswerLocked", () => {
+	it("locks the answer once the démarche is completed", () => {
+		expect(isCseAnswerLocked("demarche_completed")).toBe(true);
+	});
+
+	it("keeps the answer editable at every step of the démarche", () => {
+		const openStatuses = [
+			null,
+			"draft",
+			"awaiting_compliance_path_choice",
+			"awaiting_cse_opinion",
+			"corrective_actions_chosen",
+			"joint_evaluation_chosen",
+			"awaiting_revision_choice",
+			"revised_joint_evaluation_chosen",
+		] as const;
+
+		for (const status of openStatuses) {
+			expect(isCseAnswerLocked(status)).toBe(false);
+		}
+	});
+});
+
+describe("resolveCseAnswerForYear", () => {
+	it("prefers the year's snapshot over the live company answer", () => {
+		// The case the snapshot exists for: a correction in N+1 must not rewrite N.
+		expect(resolveCseAnswerForYear(true, false)).toBe(true);
+		expect(resolveCseAnswerForYear(false, true)).toBe(false);
+	});
+
+	it("falls back to the live answer when the year never snapshotted one", () => {
+		expect(resolveCseAnswerForYear(null, true)).toBe(true);
+		expect(resolveCseAnswerForYear(null, false)).toBe(false);
+	});
+
+	it("stays unanswered when neither side answered", () => {
+		expect(resolveCseAnswerForYear(null, null)).toBeNull();
+	});
+});
+
 describe("resolveCseReconciliation", () => {
 	const parked = {
 		status: "awaiting_cse_opinion",

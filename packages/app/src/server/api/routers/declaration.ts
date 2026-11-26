@@ -805,6 +805,9 @@ export const declarationRouter = createTRPCRouter({
 				.set({
 					...computeProjectionUpdates(events, nextStatus),
 					cseRequired: cseRequiredSnapshot,
+					// The answer itself is snapshotted too: it is what the campaign
+					// owed, and the next campaign must not rewrite it.
+					hasCse: company.hasCse,
 					currentStep: 6,
 					updatedAt: new Date(),
 				})

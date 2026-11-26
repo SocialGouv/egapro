@@ -449,6 +449,13 @@
 			"when": 1794480552397,
 			"tag": "0063_align-representation-campaign-window",
 			"breakpoints": true
+		},
+		{
+			"idx": 64,
+			"version": "7",
+			"when": 1794908035687,
+			"tag": "0064_declaration-has-cse",
+			"breakpoints": true
 		}
 	]
 }
