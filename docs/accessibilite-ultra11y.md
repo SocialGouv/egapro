@@ -12,8 +12,8 @@
 Aucun workflow GitHub Actions ne fait d'accessibilité. Deux surfaces, et seulement deux :
 
 - **dans le dépôt, la revue manuelle** : le skill `review`
-  ([`/review gates`](../.agents/skills/review/SKILL.md)) lance, dès qu'un `.tsx` / `.scss` est
-  dans le diff, le skill vendoré **`review-a11y`** (passage statique sur le diff, puis rendu des
+  ([`/review gates`](../.agents/skills/review/SKILL.md)) lance, à chaque revue (modes gates et pr),
+  quel que soit le diff, le skill vendoré **`review-a11y`** (passage statique sur le diff, puis rendu des
   pages touchées quand une URL existe) et range ses constats RGAA dans son rapport, en français
   ([`a11y.md`](../.agents/skills/review/references/a11y.md)) ;
 - **hors du dépôt, l'audit RGAA complet** est le bot **`rgaa-audit`** (Acci) — doc :
