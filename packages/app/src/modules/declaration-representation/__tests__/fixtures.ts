@@ -85,11 +85,13 @@ export const NOT_COMPUTABLE_PAYLOAD = {
 
 export const VALIDATION_MESSAGES = {
 	selectionRequired: "Veuillez sélectionner une option pour continuer.",
+	percentagesRequired:
+		"Veuillez renseigner le pourcentage de femmes ou d'hommes.",
 	sum: "La somme des pourcentages doit être égale à 100 %.",
 	range: "Le pourcentage doit être compris entre 0 et 100.",
 	decimal: "Le pourcentage ne peut comporter plus d'une décimale.",
 	periodYear: (year: number) =>
-		`La date sélectionnée ne correspond pas à l'année de référence ${year}.`,
+		`La date sélectionnée ne correspond pas à l'année de calcul des indicateurs ${year}.`,
 	periodLength: "La période de référence doit couvrir 12 mois consécutifs.",
 	urlRequired: "L'adresse de la page internet est obligatoire.",
 	urlInvalid:

@@ -5,9 +5,24 @@ import { useId, useState } from "react";
 
 import { displayInputDecimal, parseNumber } from "~/modules/domain";
 import { composeDescribedBy } from "~/modules/shared";
+import {
+	PERCENTAGES_REQUIRED_MESSAGE,
+	PERCENTAGES_SUM_MESSAGE,
+} from "../schemas";
 import styles from "./PercentagePairFields.module.scss";
 
 const PERCENTAGE_INPUT_PATTERN = /^\d{0,3}([.,]\d?)?$/;
+
+export function percentagePairError({
+	missing,
+	sumError,
+}: {
+	missing: boolean;
+	sumError: boolean;
+}): string | undefined {
+	if (missing) return PERCENTAGES_REQUIRED_MESSAGE;
+	return sumError ? PERCENTAGES_SUM_MESSAGE : undefined;
+}
 
 export type PercentagePairValues = {
 	womenPercent: string;

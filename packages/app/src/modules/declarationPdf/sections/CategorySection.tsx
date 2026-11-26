@@ -14,9 +14,11 @@ import {
 	shouldRetainCategoryPayValues,
 } from "~/modules/domain";
 import { styles } from "../recapPdfStyles";
+import { pdfTag } from "../tagging/pdfStructure";
 import type { DeclarationPdfData } from "../types";
 import { GapCell } from "./GapCell";
 import { CategoryBanner, SectionBanner, SubTitle } from "./headings";
+import { InfoRow } from "./InfoSection";
 import { Cell, Row, Table } from "./tableParts";
 import { PAY_TABLE } from "./tableWidths";
 
@@ -206,20 +208,14 @@ function CategoryBlock({
 export function CategorySection({ data }: { data: DeclarationPdfData }) {
 	return (
 		<>
-			<View minPresenceAhead={80} wrap={false}>
-				<SectionBanner title="Écart de rémunération par catégorie d'emplois" />
+			<View {...pdfTag("Sect")} minPresenceAhead={80} wrap={false}>
+				<SectionBanner title="Indicateurs par catégorie d'emplois" />
 				{data.categories.length > 0 ? (
-					<View style={styles.infoBody}>
-						<View
-							style={[styles.infoLabelColumn, styles.categorySourceLabelColumn]}
-						>
-							<Text style={styles.infoLabel}>
-								Source des catégories d'emplois
-							</Text>
-						</View>
-						<View style={styles.infoValueColumn}>
-							<Text style={styles.infoValue}>{data.source ?? "-"}</Text>
-						</View>
+					<View {...pdfTag("L")} style={styles.infoBody}>
+						<InfoRow
+							label={"Source des catégories\nd'emplois"}
+							value={data.source ?? "-"}
+						/>
 					</View>
 				) : (
 					<Text style={styles.noData}>Aucune donnée renseignée.</Text>

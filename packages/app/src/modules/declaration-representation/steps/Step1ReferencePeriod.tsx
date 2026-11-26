@@ -91,7 +91,7 @@ export function Step1ReferencePeriod() {
 	return (
 		<>
 			<p className="fr-text-title--grey">
-				Année de référence : <strong>{year}</strong>
+				Année de calcul des indicateurs : <strong>{year}</strong>
 			</p>
 			<p className="fr-text-title--grey">
 				Sélectionnez la période de l'exercice comptable utilisé pour le calcul

@@ -143,6 +143,7 @@ function renderStep(
 		columns?: ContentTypeColumn[];
 		initialAssociations?: StoredFileContentType[];
 		isReadOnly?: boolean;
+		opinionsStale?: boolean;
 	} = {},
 ) {
 	return render(
@@ -152,6 +153,7 @@ function renderStep(
 				declarationYear={2026}
 				existingFiles={props.existingFiles}
 				initialAssociations={props.initialAssociations}
+				opinionsStale={props.opinionsStale}
 				siren="123456789"
 			/>
 		</LockProvider>,
@@ -183,6 +185,22 @@ describe("Step2Upload", () => {
 
 	afterEach(() => {
 		vi.clearAllMocks();
+	});
+
+	it("warns when saved opinions predate the latest second declaration submission", () => {
+		renderStep({ opinionsStale: true });
+
+		expect(
+			screen.getByText("Vérifiez les avis déjà renseignés"),
+		).toBeInTheDocument();
+	});
+
+	it("does not warn when no opinion predates the latest submission", () => {
+		renderStep();
+
+		expect(
+			screen.queryByText("Vérifiez les avis déjà renseignés"),
+		).not.toBeInTheDocument();
 	});
 
 	it("renders the page title", () => {
@@ -697,6 +715,28 @@ describe("Step2Upload", () => {
 		).not.toBeChecked();
 	});
 
+	it("re-reads the server state once an association write settles, so the stale-opinion warning clears", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: ACCURACY_AND_GAP_COLUMNS,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+			initialAssociations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+			],
+		});
+
+		await user.click(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		);
+		refreshMock.mockClear();
+
+		act(() => {
+			setTypesMutationOptions.onSuccess?.(undefined, { associations: [] });
+		});
+
+		expect(refreshMock).toHaveBeenCalled();
+	});
+
 	it("surfaces an error when persisting the association fails", () => {
 		renderStep({
 			columns: SINGLE_COLUMN,
@@ -1021,7 +1061,7 @@ describe("Step2Upload", () => {
 
 	it("hydrates the matrix from the stored associations on return (S10)", () => {
 		renderStep({
-			columns: SINGLE_COLUMN,
+			columns: ACCURACY_AND_GAP_COLUMNS,
 			existingFiles: [makeFile("avis-1.pdf", "file-1")],
 			initialAssociations: [
 				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
@@ -1150,7 +1190,7 @@ describe("Step2Upload", () => {
 
 	it("clears the association and refreshes on delete success", () => {
 		renderStep({
-			columns: SINGLE_COLUMN,
+			columns: ACCURACY_AND_GAP_COLUMNS,
 			existingFiles: [makeFile("avis-1.pdf", "file-1")],
 			initialAssociations: [
 				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
@@ -1192,7 +1232,7 @@ describe("Step2Upload", () => {
 	});
 
 	describe("single possible association (#4731)", () => {
-		it("pre-checks, persists and locks the only content type for the only file", () => {
+		it("persists the only content type for the only file and hides its column", () => {
 			renderStep({
 				columns: SINGLE_COLUMN,
 				existingFiles: [makeFile("avis-1.pdf", "file-1")],
@@ -1204,14 +1244,19 @@ describe("Step2Upload", () => {
 					{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
 				],
 			});
-			const checkbox = screen.getByRole("checkbox", {
-				name: "Exactitude — avis-1.pdf",
-			});
-			expect(checkbox).toBeChecked();
-			expect(checkbox).toBeDisabled();
+			expect(screen.getByRole("link", { name: /avis-1\.pdf/ })).toBeVisible();
+			expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+			expect(
+				screen.queryByRole("columnheader", { name: /Exactitude/ }),
+			).not.toBeInTheDocument();
+			expect(
+				screen.getByRole("table", {
+					name: /^Fichier déposé associé au type d'avis : Exactitude/,
+				}),
+			).toBeInTheDocument();
 		});
 
-		it("locks a stored association on return without writing it again", () => {
+		it("hides a stored association on return without writing it again", () => {
 			renderStep({
 				columns: SINGLE_COLUMN,
 				existingFiles: [makeFile("avis-1.pdf", "file-1")],
@@ -1221,9 +1266,7 @@ describe("Step2Upload", () => {
 			});
 
 			expect(setTypesMutateMock).not.toHaveBeenCalled();
-			expect(
-				screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
-			).toBeDisabled();
+			expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
 		});
 
 		it("leaves the choice to the user when several content types are required", () => {
@@ -1250,7 +1293,7 @@ describe("Step2Upload", () => {
 			expect(setTypesMutateMock).not.toHaveBeenCalled();
 		});
 
-		it("does not retry in a loop when the save fails, and unlocks the box so the user can retry", () => {
+		it("does not retry in a loop when the save fails, and shows the box so the user can retry", () => {
 			renderStep({
 				columns: SINGLE_COLUMN,
 				existingFiles: [makeFile("avis-1.pdf", "file-1")],

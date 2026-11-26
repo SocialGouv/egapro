@@ -1,8 +1,12 @@
 import { redirect } from "next/navigation";
 import { CseOpinionLayout } from "~/modules/cseOpinion";
-import { getObligationWorkforce, isCseOpinionRequired } from "~/modules/domain";
+import {
+	getObligationWorkforce,
+	isCseOpinionRequired,
+	isSecondDeclarationResubmissionPending,
+} from "~/modules/domain";
 import { getPostComplianceDestination } from "~/modules/navigation";
-import { LOGIN } from "~/modules/routes";
+import { complianceStepHref, LOGIN } from "~/modules/routes";
 import { auth } from "~/server/auth";
 import { resolveAuthorizedSiren } from "~/server/auth/companyAccess";
 import { db } from "~/server/db";
@@ -44,6 +48,13 @@ export default async function CseOpinionRootLayout({
 	}
 
 	const declaration = declarationData.declaration;
+
+	// The opinions must not be transmitted over numbers the declarant has since
+	// rewritten without re-submitting: send them back to the recap to do it.
+	if (isSecondDeclarationResubmissionPending(declaration)) {
+		redirect(complianceStepHref(3));
+	}
+
 	const { isReadOnly, lockHolder } = await getLockReadState(
 		db,
 		declaration.id,

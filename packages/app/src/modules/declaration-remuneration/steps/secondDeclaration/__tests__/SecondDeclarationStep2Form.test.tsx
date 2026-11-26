@@ -90,7 +90,10 @@ function renderStep2(
 			<SecondDeclarationStep2Form
 				declarationSiren="123456789"
 				declarationYear={2025}
+				firstDeclarationPathChoice="corrective_action"
 				initialFirstDeclarationCategories={mockCategories}
+				lastTransmission={null}
+				secondDeclarationPathChoice={null}
 				status="corrective_actions_chosen"
 				{...overrides}
 			/>
@@ -106,7 +109,10 @@ function renderStep2ReadOnly(
 			<SecondDeclarationStep2Form
 				declarationSiren="123456789"
 				declarationYear={2025}
+				firstDeclarationPathChoice="corrective_action"
 				initialFirstDeclarationCategories={mockCategories}
+				lastTransmission={null}
+				secondDeclarationPathChoice={null}
 				status="corrective_actions_chosen"
 				{...overrides}
 			/>
@@ -126,7 +132,10 @@ describe("SecondDeclarationStep2Form", () => {
 			<SecondDeclarationStep2Form
 				declarationSiren="123456789"
 				declarationYear={2025}
+				firstDeclarationPathChoice="corrective_action"
 				initialFirstDeclarationCategories={mockCategories}
+				lastTransmission={null}
+				secondDeclarationPathChoice={null}
 				status="corrective_actions_chosen"
 			/>
 		);
@@ -310,6 +319,36 @@ describe("SecondDeclarationStep2Form", () => {
 		).not.toBeInTheDocument();
 	});
 
+	it("reopens the inputs and the transmission when the second declaration is the last transmission of a closed démarche (#5167)", () => {
+		renderStep2({
+			lastTransmission: "second_declaration",
+			status: "demarche_completed",
+		});
+
+		expect(
+			screen.getByRole("button", { name: /suivant/i }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
+		).not.toBeDisabled();
+		expect(screen.getByLabelText(/Date de début/)).not.toBeDisabled();
+	});
+
+	it("keeps the funnel read-only when another step closed the démarche (#5167)", () => {
+		renderStep2({
+			lastTransmission: "joint_evaluation",
+			status: "demarche_completed",
+		});
+
+		expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
+			"href",
+			"/declaration-remuneration/parcours-conformite/etape/3",
+		);
+		expect(
+			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
+		).toBeDisabled();
+	});
+
 	it("renders Suivant as a recap link when the second declaration is no longer writable", () => {
 		renderStep2({ status: "revised_joint_evaluation_chosen" });
 		expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
@@ -319,6 +358,25 @@ describe("SecondDeclarationStep2Form", () => {
 		expect(
 			screen.queryByRole("button", { name: /suivant/i }),
 		).not.toBeInTheDocument();
+	});
+
+	it("keeps Suivant as a submit button while the CSE opinions are pending", () => {
+		renderStep2({ status: "awaiting_cse_opinion" });
+		expect(
+			screen.getByRole("button", { name: /suivant/i }),
+		).toBeInTheDocument();
+		expect(screen.getByLabelText(/Date de début/)).toBeEnabled();
+	});
+
+	it("renders Suivant as a recap link in awaiting_cse_opinion once the revised path is justify", () => {
+		renderStep2({
+			status: "awaiting_cse_opinion",
+			secondDeclarationPathChoice: "justify",
+		});
+		expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
+			"href",
+			"/declaration-remuneration/parcours-conformite/etape/3",
+		);
 	});
 
 	it("disables the reference period pickers when the second declaration is no longer writable", () => {

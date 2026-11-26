@@ -1,9 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { TransmissionHistoryEvent } from "~/modules/domain";
 import {
 	createCaller,
 	mockDeclaration,
 } from "./helpers/declarationTestHelpers";
-import { withLockMiddleware } from "./helpers/lockTestHelpers";
+import {
+	withLockMiddleware,
+	withTxGuardHistory,
+} from "./helpers/lockTestHelpers";
 
 // updateEmployeeCategories runs through `declarationLockedWriteProcedure`, so
 // the lock middleware issues two `ctx.db.select` calls before the handler;
@@ -56,6 +60,7 @@ describe("declarationRouter", () => {
 		function createEmployeeTx(
 			declaration: unknown,
 			existingJobs: unknown[] = [],
+			transmissionEvents: TransmissionHistoryEvent[] = [],
 		) {
 			let selectCallCount = 0;
 			const txSelectWhere = vi.fn().mockImplementation(() => {
@@ -69,7 +74,11 @@ describe("declarationRouter", () => {
 				return result;
 			});
 			const txSelectFrom = vi.fn().mockReturnValue({ where: txSelectWhere });
-			const txSelect = vi.fn().mockReturnValue({ from: txSelectFrom });
+			const txSelect = withTxGuardHistory(
+				vi.fn().mockReturnValue({ from: txSelectFrom }),
+				[],
+				transmissionEvents,
+			);
 
 			mockUpdateWhere.mockResolvedValue(undefined);
 			mockSet.mockReturnValue({ where: mockUpdateWhere });
@@ -158,7 +167,11 @@ describe("declarationRouter", () => {
 		it("updates employee categories for correction declaration", async () => {
 			const existingJobs = [{ id: "job-1", categoryIndex: 0, name: "Cadres" }];
 			const tx = createEmployeeTx(
-				{ ...mockDeclaration, status: "corrective_actions_chosen" },
+				{
+					...mockDeclaration,
+					status: "corrective_actions_chosen",
+					firstDeclarationPathChoice: "corrective_action",
+				},
 				existingJobs,
 			);
 			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
@@ -182,7 +195,11 @@ describe("declarationRouter", () => {
 		it("accepts a correction write once the declaration awaits a revision choice", async () => {
 			const existingJobs = [{ id: "job-1", categoryIndex: 0, name: "Cadres" }];
 			const tx = createEmployeeTx(
-				{ ...mockDeclaration, status: "awaiting_revision_choice" },
+				{
+					...mockDeclaration,
+					status: "awaiting_revision_choice",
+					firstDeclarationPathChoice: "corrective_action",
+				},
 				existingJobs,
 			);
 			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
@@ -199,6 +216,89 @@ describe("declarationRouter", () => {
 			);
 		});
 
+		it("accepts a correction write while the CSE opinions are pending on the corrective path", async () => {
+			const existingJobs = [{ id: "job-1", categoryIndex: 0, name: "Cadres" }];
+			const tx = createEmployeeTx(
+				{
+					...mockDeclaration,
+					status: "awaiting_cse_opinion",
+					firstDeclarationPathChoice: "corrective_action",
+					secondDeclarationPathChoice: null,
+				},
+				existingJobs,
+			);
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
+			const mockDb = { transaction: mockTransaction } as unknown;
+			const caller = await createLockedCaller(mockDb);
+
+			const result = await caller.updateEmployeeCategories(correctionInput);
+
+			expect(result).toEqual({ success: true });
+			expect(mockSet).toHaveBeenCalledWith(
+				expect.objectContaining({ secondDeclarationStep: 2 }),
+			);
+		});
+
+		it("accepts a correction write on a closed démarche whose last transmission is the second declaration", async () => {
+			const existingJobs = [{ id: "job-1", categoryIndex: 0, name: "Cadres" }];
+			const tx = createEmployeeTx(
+				{ ...mockDeclaration, status: "demarche_completed" },
+				existingJobs,
+				[
+					{
+						eventType: "second_declaration_submit",
+						round: 2,
+						createdAt: new Date("2027-06-01T10:00:00Z"),
+					},
+				],
+			);
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
+			const mockDb = { transaction: mockTransaction } as unknown;
+			const caller = await createLockedCaller(mockDb);
+
+			const result = await caller.updateEmployeeCategories(correctionInput);
+
+			expect(result).toEqual({ success: true });
+			expect(mockSet).toHaveBeenCalledWith(
+				expect.objectContaining({ secondDeclarationStep: 2 }),
+			);
+		});
+
+		it.each([
+			["justify", null],
+			["joint_evaluation", null],
+			["corrective_action", "justify"],
+			["corrective_action", "joint_evaluation"],
+		])("rejects a correction write in awaiting_cse_opinion when the paths are %s then %s", async (firstDeclarationPathChoice, secondDeclarationPathChoice) => {
+			const existingJobs = [{ id: "job-1", categoryIndex: 0, name: "Cadres" }];
+			const tx = createEmployeeTx(
+				{
+					...mockDeclaration,
+					status: "awaiting_cse_opinion",
+					firstDeclarationPathChoice,
+					secondDeclarationPathChoice,
+				},
+				existingJobs,
+			);
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
+			const mockDb = { transaction: mockTransaction } as unknown;
+			const caller = await createLockedCaller(mockDb);
+
+			await expect(
+				caller.updateEmployeeCategories(correctionInput),
+			).rejects.toMatchObject({
+				code: "FORBIDDEN",
+				message: "La seconde déclaration n'est pas ouverte à la saisie.",
+			});
+			expect(mockSet).not.toHaveBeenCalled();
+		});
+
 		// A correction write outside the round-2 funnel would otherwise plant
 		// `secondDeclarationStep`, which the deadline guard reads to grant the
 		// later second-declaration deadline — letting the company edit its
@@ -210,7 +310,14 @@ describe("declarationRouter", () => {
 			"demarche_completed",
 		])("rejects a correction write from %s", async (status) => {
 			const existingJobs = [{ id: "job-1", categoryIndex: 0, name: "Cadres" }];
-			const tx = createEmployeeTx({ ...mockDeclaration, status }, existingJobs);
+			const tx = createEmployeeTx(
+				{
+					...mockDeclaration,
+					status,
+					firstDeclarationPathChoice: "corrective_action",
+				},
+				existingJobs,
+			);
 			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
 				fn(tx),
 			);

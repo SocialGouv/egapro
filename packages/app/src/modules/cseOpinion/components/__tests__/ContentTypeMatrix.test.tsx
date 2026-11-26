@@ -150,7 +150,7 @@ describe("ContentTypeMatrix", () => {
 		).toBeDisabled();
 	});
 
-	it("keeps a locked column checked but not editable, leaving the other columns free (#4731)", () => {
+	it("does not render a hidden column, leaving the other columns free (#5141)", () => {
 		const accuracyColumnId = buildColumnId(1, "accuracy");
 		const associations = emptyMap();
 		associations[accuracyColumnId] = "file-1";
@@ -158,19 +158,49 @@ describe("ContentTypeMatrix", () => {
 		renderMatrix({
 			files: [SINGLE_FILE],
 			associations,
-			lockedColumnIds: new Set([accuracyColumnId]),
+			hiddenColumnIds: new Set([accuracyColumnId]),
 		});
 
-		const locked = screen.getByRole("checkbox", {
-			name: "Exactitude — 1re déclaration — avis-1.pdf",
-		});
-		expect(locked).toBeChecked();
-		expect(locked).toBeDisabled();
+		expect(
+			screen.queryByRole("checkbox", {
+				name: "Exactitude — 1re déclaration — avis-1.pdf",
+			}),
+		).not.toBeInTheDocument();
 		expect(
 			screen.getByRole("checkbox", {
 				name: "Justification — 1re déclaration — avis-1.pdf",
 			}),
 		).toBeEnabled();
+		for (const cell of screen.getAllByRole("cell")) {
+			expect(cell.getAttribute("headers") ?? "").not.toContain(
+				"matrix-col-1-accuracy",
+			);
+		}
+		expect(
+			screen.getByRole("table", {
+				name: "Associez chaque fichier déposé aux types de contenu requis.",
+			}),
+		).toBeInTheDocument();
+	});
+
+	it("names the table after the associated type once every column is hidden (#5141)", () => {
+		const accuracyColumn = COLUMNS[0];
+		if (!accuracyColumn) throw new Error("missing accuracy column");
+		const associations = emptyMap();
+		associations[accuracyColumn.id] = "file-1";
+
+		renderMatrix({
+			files: [SINGLE_FILE],
+			columns: [accuracyColumn],
+			associations,
+			hiddenColumnIds: new Set([accuracyColumn.id]),
+		});
+
+		expect(
+			screen.getByRole("table", {
+				name: "Fichier déposé associé au type d'avis : Exactitude — 1re déclaration.",
+			}),
+		).toBeInTheDocument();
 	});
 
 	it("calls onToggle with the column id, file id and the new checked state", async () => {

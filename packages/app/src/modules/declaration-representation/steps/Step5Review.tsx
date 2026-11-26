@@ -110,7 +110,7 @@ export function Step5Review() {
 				</h2>
 				<InfoList
 					items={[
-						{ label: "Année de référence", value: year },
+						{ label: "Année de calcul des indicateurs", value: year },
 						{
 							label: "Période de référence",
 							value: `${formatOptionalIsoDate(draft.referencePeriodStart)} - ${formatOptionalIsoDate(draft.referencePeriodEnd)}`,

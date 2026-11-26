@@ -19,6 +19,7 @@ import { api } from "~/trpc/react";
 import { ContentTypeMatrix } from "./components/ContentTypeMatrix";
 import { CseStepIndicator } from "./components/CseStepIndicator";
 import { OpinionSummaryBox } from "./components/OpinionSummaryBox";
+import { StaleOpinionsAlert } from "./components/StaleOpinionsAlert";
 import {
 	type SubmissionAlertSnapshot,
 	SubmissionAlerts,
@@ -48,6 +49,7 @@ type Props = {
 	existingFiles?: UploadedFile[];
 	columns: ContentTypeColumn[];
 	initialAssociations?: StoredFileContentType[];
+	opinionsStale?: boolean;
 };
 
 export function Step2Upload({
@@ -56,6 +58,7 @@ export function Step2Upload({
 	existingFiles = [],
 	columns,
 	initialAssociations = [],
+	opinionsStale = false,
 }: Props) {
 	const router = useRouter();
 	const utils = api.useUtils();
@@ -120,13 +123,14 @@ export function Step2Upload({
 		if (next === null) {
 			isAssociationWriteInFlightRef.current = false;
 			setHasPendingAssociationWrite(false);
+			refreshFileList();
 			return;
 		}
 		queuedAssociationWriteRef.current = null;
 		setTypesMutation.mutate({
 			associations: toAssociationPayload(columns, next),
 		});
-	}, [columns, setTypesMutation]);
+	}, [columns, refreshFileList, setTypesMutation]);
 
 	const handleToggle = useCallback(
 		(columnId: string, fileId: string, checked: boolean) => {
@@ -153,7 +157,7 @@ export function Step2Upload({
 		singleChoice && associations[singleChoice.columnId] === singleChoice.fileId
 			? singleChoice.columnId
 			: null;
-	const lockedColumnIds = useMemo(
+	const hiddenColumnIds = useMemo(
 		() => (singleChoiceColumnId ? new Set([singleChoiceColumnId]) : undefined),
 		[singleChoiceColumnId],
 	);
@@ -303,6 +307,8 @@ export function Step2Upload({
 
 				<CseStepIndicator currentStep={2} />
 
+				{opinionsStale && <StaleOpinionsAlert />}
+
 				<div>
 					<label
 						className="fr-label"
@@ -346,7 +352,7 @@ export function Step2Upload({
 						deletingFileId={deletingFileId}
 						disabled={isReadOnly}
 						files={existingFiles}
-						lockedColumnIds={lockedColumnIds}
+						hiddenColumnIds={hiddenColumnIds}
 						onDelete={(fileId) => {
 							setDeletingFileId(fileId);
 							deleteMutation.mutate({ fileId });

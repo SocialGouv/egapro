@@ -1,5 +1,5 @@
 {
-	"id": "07f412ee-b50c-4101-997d-2e830be823a5",
+	"id": "4bd3c55d-2767-4e11-b065-9fe794aa463a",
 	"prevId": "f8798867-810b-4610-8092-76ec363bd1bd",
 	"version": "7",
 	"dialect": "postgresql",
@@ -2919,19 +2919,6 @@
 					"primaryKey": false,
 					"notNull": true,
 					"default": false
-				},
-				"last_activity_at": {
-					"name": "last_activity_at",
-					"type": "timestamp with time zone",
-					"primaryKey": false,
-					"notNull": true,
-					"default": "now()"
-				},
-				"anonymized_at": {
-					"name": "anonymized_at",
-					"type": "timestamp with time zone",
-					"primaryKey": false,
-					"notNull": false
 				}
 			},
 			"indexes": {},

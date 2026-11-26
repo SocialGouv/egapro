@@ -87,6 +87,9 @@ Le champ `Parcours.Statut` suit une machine à états (FSM) versionnée. La vers
 | `revised_joint_evaluation_chosen` | `submit_joint_evaluation` | `awaiting_cse_opinion` | CSE requis |
 | `revised_joint_evaluation_chosen` | `submit_joint_evaluation` | `demarche_completed` | CSE non requis |
 | `awaiting_cse_opinion` | `submit_cse_opinion` | `demarche_completed` | — |
+| `awaiting_cse_opinion` | `submit_second_declaration` | `awaiting_revision_choice` | l'écart persiste (≥ 5 %) |
+| `awaiting_cse_opinion` | `submit_second_declaration` | `awaiting_cse_opinion` | l'écart est résorbé (< 5 %) et CSE requis |
+| `awaiting_cse_opinion` | `submit_second_declaration` | `demarche_completed` | l'écart est résorbé (< 5 %) et CSE non requis |
 | `awaiting_cse_opinion` | `sync_cse_requirement` | `demarche_completed` | CSE non requis (le besoin d'avis CSE disparaît en cours de route) |
 | `demarche_completed` | `submit_cse_opinion` | `demarche_completed` | — |
 | `demarche_completed` | `submit_formal_notice_joint_evaluation` | `demarche_completed` | `formalNoticeExposure` : parcours « justification » choisi au dernier tour, et CSE non requis ou avis du CSE défavorable sur la justification de ce tour |

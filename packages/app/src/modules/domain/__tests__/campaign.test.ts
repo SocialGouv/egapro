@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
 	getCurrentDate,
+	getCurrentRepresentationCampaignYear,
 	getCurrentYear,
 	getDeclarationReferencePeriod,
 	getDefaultCampaignDeadlineColumns,
@@ -467,12 +468,20 @@ describe("getDefaultCampaignDeadlineColumns", () => {
 });
 
 describe("getDefaultRepresentationCampaign", () => {
-	it("opens on January 1st and closes on December 31st of the campaign year", () => {
+	it("opens on March 1st and closes on the last day of February", () => {
 		const campaign = getDefaultRepresentationCampaign(2027);
 		expect(campaign.campaignStartDate).toEqual(
-			new Date("2027-01-01T00:00:00Z"),
+			new Date("2027-03-01T00:00:00Z"),
 		);
-		expect(campaign.campaignEndDate).toEqual(new Date("2027-12-31T00:00:00Z"));
+		expect(campaign.campaignEndDate).toEqual(new Date("2028-02-29T00:00:00Z"));
+	});
+
+	it("closes on February 28th when the following year is not a leap year", () => {
+		const campaign = getDefaultRepresentationCampaign(2026);
+		expect(campaign.campaignStartDate).toEqual(
+			new Date("2026-03-01T00:00:00Z"),
+		);
+		expect(campaign.campaignEndDate).toEqual(new Date("2027-02-28T00:00:00Z"));
 	});
 
 	it("derives the declaration deadline from the remuneration first-declaration default", () => {
@@ -493,10 +502,10 @@ describe("getDefaultRepresentationCampaign", () => {
 			vi.stubEnv("TZ", "Pacific/Tahiti");
 			const campaign = getDefaultRepresentationCampaign(2027);
 			expect(campaign.campaignStartDate.toISOString()).toBe(
-				"2027-01-01T00:00:00.000Z",
+				"2027-03-01T00:00:00.000Z",
 			);
 			expect(campaign.campaignEndDate.toISOString()).toBe(
-				"2027-12-31T00:00:00.000Z",
+				"2028-02-29T00:00:00.000Z",
 			);
 			expect(campaign.declarationDeadline.toISOString()).toBe(
 				"2027-06-01T00:00:00.000Z",
@@ -507,9 +516,9 @@ describe("getDefaultRepresentationCampaign", () => {
 	it("follows the requested campaign year", () => {
 		const campaign = getDefaultRepresentationCampaign(2030);
 		expect(campaign.campaignStartDate).toEqual(
-			new Date("2030-01-01T00:00:00Z"),
+			new Date("2030-03-01T00:00:00Z"),
 		);
-		expect(campaign.campaignEndDate).toEqual(new Date("2030-12-31T00:00:00Z"));
+		expect(campaign.campaignEndDate).toEqual(new Date("2031-02-28T00:00:00Z"));
 		expect(campaign.declarationDeadline).toEqual(
 			new Date("2030-06-01T00:00:00Z"),
 		);
@@ -526,39 +535,81 @@ describe("getDefaultRepresentationCampaign", () => {
 	});
 });
 
+describe("getCurrentRepresentationCampaignYear", () => {
+	beforeEach(() => {
+		vi.useFakeTimers();
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
+		delete (globalThis as { __egaproCampaignYear?: number })
+			.__egaproCampaignYear;
+	});
+
+	it("still returns the previous campaign throughout January and February", () => {
+		vi.setSystemTime(new Date(2027, 0, 15, 12, 0));
+		expect(getCurrentRepresentationCampaignYear()).toBe(2026);
+		vi.setSystemTime(new Date(2027, 1, 28, 23, 59));
+		expect(getCurrentRepresentationCampaignYear()).toBe(2026);
+	});
+
+	it("switches to the new campaign on March 1st", () => {
+		vi.setSystemTime(new Date(2027, 2, 1, 0, 0));
+		expect(getCurrentRepresentationCampaignYear()).toBe(2027);
+	});
+
+	it("stays on the campaign year until the end of the calendar year", () => {
+		vi.setSystemTime(new Date(2027, 11, 31, 23, 59));
+		expect(getCurrentRepresentationCampaignYear()).toBe(2027);
+	});
+
+	it("honours the recette clock override", () => {
+		vi.setSystemTime(new Date(2025, 5, 15, 10, 0));
+		(globalThis as { __egaproCampaignYear?: number }).__egaproCampaignYear =
+			2030;
+		expect(getCurrentRepresentationCampaignYear()).toBe(2030);
+	});
+
+	it("does not shift getCurrentYear", () => {
+		vi.setSystemTime(new Date(2027, 0, 15, 12, 0));
+		expect(getCurrentRepresentationCampaignYear()).toBe(2026);
+		expect(getCurrentYear()).toBe(2027);
+	});
+});
+
 describe("isRepresentationCampaignOpen", () => {
 	const campaign = getDefaultRepresentationCampaign(2027);
 
 	it("returns false the day before the campaign starts", () => {
 		expect(
-			isRepresentationCampaignOpen(campaign, new Date("2026-12-31T00:00:00Z")),
+			isRepresentationCampaignOpen(campaign, new Date("2027-02-28T00:00:00Z")),
 		).toBe(false);
 	});
 
 	it("returns true on the first day of the campaign", () => {
 		expect(
-			isRepresentationCampaignOpen(campaign, new Date("2027-01-01T00:00:00Z")),
+			isRepresentationCampaignOpen(campaign, new Date("2027-03-01T00:00:00Z")),
 		).toBe(true);
 	});
 
 	it("returns true in the middle of the campaign", () => {
 		expect(
-			isRepresentationCampaignOpen(campaign, new Date("2027-06-15T00:00:00Z")),
+			isRepresentationCampaignOpen(campaign, new Date("2027-09-15T00:00:00Z")),
 		).toBe(true);
 	});
 
 	it.each([
-		["the first instant of the last day", "2027-12-31T00:00:00Z"],
-		["one minute into the last day", "2027-12-31T00:01:00Z"],
-		["the last minute of the last day", "2027-12-31T23:59:00Z"],
-		["the last millisecond of the last day", "2027-12-31T23:59:59.999Z"],
+		["the first instant of the last day", "2028-02-29T00:00:00Z"],
+		["one minute into the last day", "2028-02-29T00:01:00Z"],
+		["the last minute of the last day", "2028-02-29T23:59:00Z"],
+		["the last millisecond of the last day", "2028-02-29T23:59:59.999Z"],
 	])("returns true at %s", (_label, now) => {
 		expect(isRepresentationCampaignOpen(campaign, new Date(now))).toBe(true);
 	});
 
 	it("returns false from the first instant of the day after the campaign ends", () => {
 		expect(
-			isRepresentationCampaignOpen(campaign, new Date("2028-01-01T00:00:00Z")),
+			isRepresentationCampaignOpen(campaign, new Date("2028-03-01T00:00:00Z")),
 		).toBe(false);
 	});
 

@@ -36,7 +36,7 @@ const YEAR = 2025;
 const DECLARATION_DEADLINE = new Date(2026, 2, 1);
 const STEP_2_HREF = "/declaration-representation/etape/2";
 const REQUIRED_MESSAGE = "Sélectionner une date de début ou une date de fin.";
-const REFERENCE_YEAR_MESSAGE = `La date sélectionnée ne correspond pas à l'année de référence ${YEAR}.`;
+const REFERENCE_YEAR_MESSAGE = `La date sélectionnée ne correspond pas à l'année de calcul des indicateurs ${YEAR}.`;
 const TWELVE_MONTHS_HINT = "La période couvre 12 mois consécutifs.";
 const VALID_START = "2025-01-01";
 const VALID_END = "2025-12-31";
@@ -256,16 +256,15 @@ describe("Step1ReferencePeriod — submit validation", () => {
 		expect(push).not.toHaveBeenCalled();
 	});
 
-	it("rejects a start date whose year cannot open the reference period", async () => {
+	it("reports a start date whose year cannot open the reference period on the end date only", async () => {
 		renderStep1();
 
 		fillPeriod({ start: "2027-04-03" });
 		await clickNext();
 
-		// The derived end date (2028-04-02) is out of range too, so the same
-		// message shows under both fields.
-		expect(screen.getAllByText(REFERENCE_YEAR_MESSAGE)).not.toHaveLength(0);
-		expect(startInput()).toHaveAttribute("aria-invalid", "true");
+		expect(screen.getAllByText(REFERENCE_YEAR_MESSAGE)).toHaveLength(1);
+		expect(endInput()).toHaveAttribute("aria-invalid", "true");
+		expect(startInput()).not.toHaveAttribute("aria-invalid");
 		expect(push).not.toHaveBeenCalled();
 	});
 

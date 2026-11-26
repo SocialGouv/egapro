@@ -29,6 +29,7 @@ type MetadataField =
 	| "kind"
 	| "variant"
 	| "isResend"
+	| "resubmission"
 	| "attachmentsDropped"
 	| "id"
 	| "declarationId"
@@ -126,7 +127,7 @@ const FIELDS_BY_ACTION: Partial<
 	[AUDIT_ACTIONS.REPRESENTATION_GET]: ["year"],
 	[AUDIT_ACTIONS.REPRESENTATION_GET_DECLARANT]: ["year"],
 	[AUDIT_ACTIONS.REPRESENTATION_SAVE_DRAFT]: ["year"],
-	[AUDIT_ACTIONS.REPRESENTATION_SUBMIT]: ["year"],
+	[AUDIT_ACTIONS.REPRESENTATION_SUBMIT]: ["year", "resubmission"],
 	[AUDIT_ACTIONS.REPRESENTATION_DECLARE_NOT_SUBJECT]: ["year"],
 	[AUDIT_ACTIONS.PDF_DECLARATION_DOWNLOAD]: ["year"],
 	[AUDIT_ACTIONS.PDF_REPRESENTATION_DOWNLOAD]: ["year"],
@@ -313,6 +314,7 @@ const VALIDATORS: Record<MetadataField, Validator> = {
 	invalidYear: validBoolean,
 	testSeam: validBoolean,
 	isResend: validBoolean,
+	resubmission: validBoolean,
 	attachmentsDropped: validBoolean,
 	type: oneOf(RECEIPT_TYPES),
 	kind: oneOf(RECEIPT_KINDS),

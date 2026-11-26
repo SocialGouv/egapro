@@ -235,7 +235,11 @@ export const adminSettingsRouter = createTRPCRouter({
 				})
 				.onConflictDoUpdate({
 					target: representationCampaigns.year,
-					set: { declarationDeadline: input.declarationDeadline },
+					set: {
+						campaignStartDate: toPersistedIsoDate(defaults.campaignStartDate),
+						campaignEndDate: toPersistedIsoDate(defaults.campaignEndDate),
+						declarationDeadline: input.declarationDeadline,
+					},
 				});
 
 			return { success: true as const };

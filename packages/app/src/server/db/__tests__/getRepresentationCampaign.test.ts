@@ -35,9 +35,9 @@ describe("getRepresentationCampaign", () => {
 		const campaign = await getRepresentationCampaign(2027);
 
 		expect(campaign.campaignStartDate).toEqual(
-			new Date("2027-01-01T00:00:00Z"),
+			new Date("2027-03-01T00:00:00Z"),
 		);
-		expect(campaign.campaignEndDate).toEqual(new Date("2027-12-31T00:00:00Z"));
+		expect(campaign.campaignEndDate).toEqual(new Date("2028-02-29T00:00:00Z"));
 		expect(campaign.declarationDeadline).toEqual(
 			new Date("2027-06-01T00:00:00Z"),
 		);
@@ -52,12 +52,12 @@ describe("getRepresentationCampaign", () => {
 		);
 	});
 
-	it("gives precedence to the dates configured in database", async () => {
+	it("reads only the declaration deadline from the database and recomputes the window", async () => {
 		limitMock.mockResolvedValueOnce([
 			{
 				year: 2027,
-				campaignStartDate: "2027-02-15",
-				campaignEndDate: "2027-09-30",
+				campaignStartDate: "2027-01-01",
+				campaignEndDate: "2027-12-31",
 				declarationDeadline: "2027-04-01",
 			},
 		]);
@@ -66,15 +66,15 @@ describe("getRepresentationCampaign", () => {
 		const campaign = await getRepresentationCampaign(2027);
 
 		expect(campaign.campaignStartDate).toEqual(
-			new Date("2027-02-15T00:00:00Z"),
+			new Date("2027-03-01T00:00:00Z"),
 		);
-		expect(campaign.campaignEndDate).toEqual(new Date("2027-09-30T00:00:00Z"));
+		expect(campaign.campaignEndDate).toEqual(new Date("2028-02-29T00:00:00Z"));
 		expect(campaign.declarationDeadline).toEqual(
 			new Date("2027-04-01T00:00:00Z"),
 		);
 	});
 
-	it("parses stored dates at UTC midnight of their civil day", async () => {
+	it("parses the stored declaration deadline at UTC midnight of its civil day", async () => {
 		limitMock.mockResolvedValueOnce([
 			{
 				year: 2027,
@@ -87,11 +87,8 @@ describe("getRepresentationCampaign", () => {
 
 		const campaign = await getRepresentationCampaign(2027);
 
-		expect(campaign.campaignStartDate.toISOString()).toBe(
-			"2027-01-01T00:00:00.000Z",
-		);
-		expect(campaign.campaignEndDate.toISOString()).toBe(
-			"2027-12-31T00:00:00.000Z",
+		expect(campaign.declarationDeadline.toISOString()).toBe(
+			"2027-03-01T00:00:00.000Z",
 		);
 	});
 });

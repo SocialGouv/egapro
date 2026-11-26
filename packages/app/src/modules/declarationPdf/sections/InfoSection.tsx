@@ -12,6 +12,32 @@ type InfoRow = {
 
 type BannerTone = "section" | "category";
 
+export function InfoRow({
+	label,
+	value,
+	detail,
+	sheet = styles,
+}: InfoRow & { sheet?: PdfStyles }) {
+	return (
+		<View {...pdfTag("LI")} style={sheet.infoRow}>
+			<Text {...pdfTag("Lbl")} style={[sheet.infoLabelColumn, sheet.infoLabel]}>
+				{label}
+			</Text>
+			<Text
+				{...pdfTag("LBody")}
+				style={[sheet.infoValueColumn, sheet.infoValue]}
+			>
+				{normalizePdfText(value)}
+				{detail !== undefined && (
+					<Text style={sheet.infoDetail}>
+						{`\n${normalizePdfText(detail)}`}
+					</Text>
+				)}
+			</Text>
+		</View>
+	);
+}
+
 export function InfoSection({
 	title,
 	rows,
@@ -38,25 +64,13 @@ export function InfoSection({
 			</View>
 			<View {...pdfTag("L")} style={sheet.infoBody}>
 				{rows.map((row) => (
-					<View {...pdfTag("LI")} key={row.label} style={sheet.infoRow}>
-						<Text
-							{...pdfTag("Lbl")}
-							style={[sheet.infoLabelColumn, sheet.infoLabel]}
-						>
-							{row.label}
-						</Text>
-						<Text
-							{...pdfTag("LBody")}
-							style={[sheet.infoValueColumn, sheet.infoValue]}
-						>
-							{normalizePdfText(row.value)}
-							{row.detail !== undefined && (
-								<Text style={sheet.infoDetail}>
-									{`\n${normalizePdfText(row.detail)}`}
-								</Text>
-							)}
-						</Text>
-					</View>
+					<InfoRow
+						detail={row.detail}
+						key={row.label}
+						label={row.label}
+						sheet={sheet}
+						value={row.value}
+					/>
 				))}
 			</View>
 		</View>

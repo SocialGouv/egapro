@@ -23,7 +23,6 @@ const LOCK_RETRY_INTERVAL_MS = LOCK_HEARTBEAT_INTERVAL_MS;
 type Props = {
 	year: number;
 	campaignOpen: boolean;
-	isSubmitted: boolean;
 	enabled?: boolean;
 	children: React.ReactNode;
 };
@@ -77,7 +76,6 @@ export function RepresentationLockProvider({
 function ManagedRepresentationLockProvider({
 	year,
 	campaignOpen,
-	isSubmitted,
 	children,
 }: Omit<Props, "enabled">) {
 	const router = useRouter();
@@ -85,10 +83,7 @@ function ManagedRepresentationLockProvider({
 	const queryClient = useQueryClient();
 	const isImpersonating = Boolean(session.data?.user?.impersonation);
 	const canAcquire =
-		session.status === "authenticated" &&
-		!isImpersonating &&
-		campaignOpen &&
-		!isSubmitted;
+		session.status === "authenticated" && !isImpersonating && campaignOpen;
 	const [isReadOnly, setIsReadOnly] = useState(true);
 	const [isLoading, setIsLoading] = useState(true);
 	const [isUnavailable, setIsUnavailable] = useState(false);

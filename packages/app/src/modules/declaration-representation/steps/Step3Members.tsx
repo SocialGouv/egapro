@@ -19,6 +19,7 @@ import {
 	formatPercentInput,
 	PercentagePairFields,
 	parsePercentInput,
+	percentagePairError,
 } from "../shared/PercentagePairFields";
 import styles from "./Step3Members.module.scss";
 
@@ -72,8 +73,10 @@ export function Step3Members() {
 			womenPercent: formatPercentInput(draft.memberWomenPercent),
 			menPercent: formatPercentInput(draft.memberMenPercent),
 		}));
+	const [validationAttempted, setValidationAttempted] = useState(false);
 
 	function handleSelect(next: boolean) {
+		setValidationAttempted(false);
 		if (next) {
 			setDraftValues({ hasManagementBody: true });
 			return;
@@ -106,20 +109,20 @@ export function Step3Members() {
 	const isStepValid =
 		hasManagementBody !== undefined &&
 		(hasManagementBody === false || decidedVerdict !== undefined);
-	const [selectionAttempted, setSelectionAttempted] = useState(false);
 	const showSelectionError =
-		selectionAttempted && hasManagementBody === undefined;
+		validationAttempted && hasManagementBody === undefined;
+	const percentagesMissing =
+		hasManagementBody === true &&
+		(draft.memberWomenPercent === undefined ||
+			draft.memberMenPercent === undefined);
 
 	useEffect(() => {
 		registerStepValidator(() => {
-			if (hasManagementBody === undefined) {
-				setSelectionAttempted(true);
-				return false;
-			}
+			if (!isStepValid) setValidationAttempted(true);
 			return isStepValid;
 		});
 		return () => registerStepValidator(null);
-	}, [hasManagementBody, isStepValid, registerStepValidator]);
+	}, [isStepValid, registerStepValidator]);
 
 	return (
 		<div className="fr-mb-4w">
@@ -196,11 +199,10 @@ export function Step3Members() {
 			{hasManagementBody === true ? (
 				<div className="fr-mt-4w">
 					<PercentagePairFields
-						error={
-							sumError
-								? "La somme des pourcentages doit être égale à 100 %."
-								: undefined
-						}
+						error={percentagePairError({
+							missing: validationAttempted && percentagesMissing,
+							sumError,
+						})}
 						legend="Indiquez le pourcentage de représentation des femmes et des hommes parmi les membres des instances dirigeantes."
 						onChange={handlePercentageChange}
 						readOnly={isReadOnly}

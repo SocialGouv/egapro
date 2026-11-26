@@ -81,7 +81,7 @@ describe("Step5Review — restitution du brouillon (S18)", () => {
 	it("restitutes the reference year and period", () => {
 		renderReview({ draft: FULLY_COMPLIANT });
 
-		expect(definitionValue("Année de référence")).toBe(
+		expect(definitionValue("Année de calcul des indicateurs")).toBe(
 			String(REPRESENTATION_YEAR),
 		);
 		expect(definitionValue("Période de référence")).toBe(
