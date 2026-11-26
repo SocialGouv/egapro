@@ -179,15 +179,51 @@ export function getDefaultCampaignDeadlineColumns(
 	};
 }
 
+/** First day of a representation campaign: 1 March. */
+export function getRepresentationCampaignStartDate(campaignYear: number): Date {
+	return civilDate(campaignYear, 2, 1);
+}
+
+/**
+ * Last day of a representation campaign: the day before the next campaign opens,
+ * so 28 February, or 29 February when the year is a leap year. Day 0 of March is
+ * February's last day, whichever year it is.
+ *
+ * It doubles as the last day a transmitted declaration stays modifiable: the
+ * declaration campaign runs until the eve of the next one.
+ */
+export function getRepresentationCampaignEndDate(campaignYear: number): Date {
+	return civilDate(campaignYear + 1, 2, 0);
+}
+
 export function getDefaultRepresentationCampaign(
 	campaignYear: number,
 ): RepresentationCampaign {
 	return {
-		campaignStartDate: civilDate(campaignYear, 0, 1),
-		campaignEndDate: civilDate(campaignYear, 11, 31),
+		campaignStartDate: getRepresentationCampaignStartDate(campaignYear),
+		campaignEndDate: getRepresentationCampaignEndDate(campaignYear),
 		declarationDeadline:
 			getDefaultCampaignDeadlines(campaignYear).decl1ModificationDeadline,
 	};
+}
+
+/**
+ * Returns the representation campaign year in force. Representation campaigns
+ * open on 1 March, so January and February still belong to the previous one —
+ * that is the whole point of the window: the declaration stays modifiable until
+ * the eve of the next campaign.
+ *
+ * Deliberately separate from `getCurrentYear()`: the remuneration declaration
+ * and the observatory keep using the calendar year, and the two must not drift
+ * together. Reading the local month rather than comparing instants keeps the
+ * answer independent of the viewer's time zone, and honours the recette clock
+ * because `getCurrentDate()` pins the year for us.
+ */
+export function getCurrentRepresentationCampaignYear(
+	now: Date = getCurrentDate(),
+): number {
+	// Month index 2 is March; anything before it is still the previous campaign.
+	return now.getMonth() >= 2 ? now.getFullYear() : now.getFullYear() - 1;
 }
 
 export function isRepresentationCampaignOpen(

@@ -492,8 +492,8 @@ describe("adminSettingsRouter — getRepresentationCampaignByYear", () => {
 		expect(result).toEqual({
 			year: 2027,
 			isDefault: true,
-			campaignStartDate: "2027-01-01",
-			campaignEndDate: "2027-12-31",
+			campaignStartDate: "2027-03-01",
+			campaignEndDate: "2028-02-29",
 			declarationDeadline: "2027-06-01",
 		});
 	});
@@ -539,13 +539,13 @@ describe("adminSettingsRouter — upsertRepresentationCampaign", () => {
 		expect(db.insert).toHaveBeenCalledWith(representationCampaigns);
 		expect(db.__insert.values).toHaveBeenCalledWith({
 			year: 2026,
-			campaignStartDate: "2026-01-01",
-			campaignEndDate: "2026-12-31",
+			campaignStartDate: "2026-03-01",
+			campaignEndDate: "2027-02-28",
 			declarationDeadline: "2026-04-15",
 		});
 	});
 
-	it("only rewrites the declaration deadline on conflict, never the campaign window", async () => {
+	it("rewrites the recomputed window along with the declaration deadline on conflict", async () => {
 		const db = buildDb();
 		const caller = await buildCaller(db);
 
@@ -557,12 +557,16 @@ describe("adminSettingsRouter — upsertRepresentationCampaign", () => {
 
 		expect(db.__onConflict).toHaveBeenCalledWith({
 			target: representationCampaigns.year,
-			set: { declarationDeadline: "2026-04-15" },
+			set: {
+				campaignStartDate: "2026-03-01",
+				campaignEndDate: "2027-02-28",
+				declarationDeadline: "2026-04-15",
+			},
 		});
 		expect(db.__insert.values).toHaveBeenCalledWith(
 			expect.objectContaining({
-				campaignStartDate: "2026-01-01",
-				campaignEndDate: "2026-12-31",
+				campaignStartDate: "2026-03-01",
+				campaignEndDate: "2027-02-28",
 			}),
 		);
 	});

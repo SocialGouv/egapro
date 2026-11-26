@@ -113,7 +113,6 @@ function stepPageProps() {
 		year: number;
 		campaignYear: number;
 		campaignOpen: boolean;
-		isSubmitted: boolean;
 		declarationDeadline: string;
 		initialDraft: RepresentationDraft;
 	};
@@ -384,7 +383,6 @@ describe("RepresentationStepPage — draft hydration", () => {
 		await renderStepPage("5");
 
 		expect(stepPageProps()).toMatchObject({
-			isSubmitted: true,
 			initialDraft: {
 				currentStep: 5,
 				referencePeriodStart: "2025-01-01",
