@@ -217,7 +217,11 @@
 
 		{
 			"id": "submit_second_declaration_persistent_gap",
-			"from": ["corrective_actions_chosen", "awaiting_revision_choice"],
+			"from": [
+				"corrective_actions_chosen",
+				"awaiting_revision_choice",
+				"awaiting_cse_opinion"
+			],
 			"action": "submit_second_declaration",
 			"guard": { "fact": "action.stillHasGap", "op": "==", "value": true },
 			"to": "awaiting_revision_choice",
@@ -225,7 +229,11 @@
 		},
 		{
 			"id": "submit_second_declaration_resolved_with_cse",
-			"from": ["corrective_actions_chosen", "awaiting_revision_choice"],
+			"from": [
+				"corrective_actions_chosen",
+				"awaiting_revision_choice",
+				"awaiting_cse_opinion"
+			],
 			"action": "submit_second_declaration",
 			"guard": {
 				"all": [
@@ -238,7 +246,11 @@
 		},
 		{
 			"id": "submit_second_declaration_resolved_without_cse",
-			"from": ["corrective_actions_chosen", "awaiting_revision_choice"],
+			"from": [
+				"corrective_actions_chosen",
+				"awaiting_revision_choice",
+				"awaiting_cse_opinion"
+			],
 			"action": "submit_second_declaration",
 			"guard": {
 				"all": [

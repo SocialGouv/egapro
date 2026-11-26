@@ -992,6 +992,7 @@ describe("declarationRouter", () => {
 		it("transitions corrective_actions_chosen → awaiting_revision_choice when gap persists (S15)", async () => {
 			const declaration = buildDeclaration({
 				status: "corrective_actions_chosen",
+				firstDeclarationPathChoice: "corrective_action",
 				cseRequired: true,
 			});
 			const employeeCategories = [
@@ -1020,6 +1021,7 @@ describe("declarationRouter", () => {
 		it("transitions corrective_actions_chosen → demarche_completed when gap resolved without CSE (S13)", async () => {
 			const declaration = buildDeclaration({
 				status: "corrective_actions_chosen",
+				firstDeclarationPathChoice: "corrective_action",
 				cseRequired: false,
 			});
 			const employeeCategories = [
@@ -1044,6 +1046,7 @@ describe("declarationRouter", () => {
 		it("transitions corrective_actions_chosen → awaiting_cse_opinion when gap resolved with CSE (S14)", async () => {
 			const declaration = buildDeclaration({
 				status: "corrective_actions_chosen",
+				firstDeclarationPathChoice: "corrective_action",
 				cseRequired: true,
 			});
 			const employeeCategories = [
@@ -1061,6 +1064,7 @@ describe("declarationRouter", () => {
 		it("re-submit from awaiting_revision_choice stays awaiting_revision_choice when the gap still persists", async () => {
 			const declaration = buildDeclaration({
 				status: "awaiting_revision_choice",
+				firstDeclarationPathChoice: "corrective_action",
 				cseRequired: true,
 			});
 			const employeeCategories = [
@@ -1089,6 +1093,7 @@ describe("declarationRouter", () => {
 		it("re-submit from awaiting_revision_choice reaches awaiting_cse_opinion when the gap is resolved with CSE", async () => {
 			const declaration = buildDeclaration({
 				status: "awaiting_revision_choice",
+				firstDeclarationPathChoice: "corrective_action",
 				cseRequired: true,
 			});
 			const employeeCategories = [
@@ -1106,6 +1111,7 @@ describe("declarationRouter", () => {
 		it("re-submit from awaiting_revision_choice completes the démarche when the gap is resolved without CSE", async () => {
 			const declaration = buildDeclaration({
 				status: "awaiting_revision_choice",
+				firstDeclarationPathChoice: "corrective_action",
 				cseRequired: false,
 			});
 			const employeeCategories = [
@@ -1127,6 +1133,95 @@ describe("declarationRouter", () => {
 			]);
 		});
 
+		it("re-submit from awaiting_cse_opinion stays awaiting_cse_opinion and sends a new receipt when the gap is resolved", async () => {
+			const declaration = buildDeclaration({
+				status: "awaiting_cse_opinion",
+				firstDeclarationPathChoice: "corrective_action",
+				cseRequired: true,
+			});
+			const employeeCategories = [
+				{ annualBaseWomen: "100", annualBaseMen: "100" },
+			];
+			const ctx = createOneRowSelectDb(declaration, employeeCategories);
+			const caller = await createLockedCaller(
+				ctx.db,
+				undefined,
+				undefined,
+				"user@example.com",
+			);
+
+			const result = await caller.submitSecondDeclaration();
+
+			expect(result).toEqual({ success: true });
+			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(setCall.status).toBe("awaiting_cse_opinion");
+			expect(setCall.secondDeclarationStep).toBe(3);
+			const insertedEvents = ctx.insertValues.mock.calls[0]?.[0] as Array<{
+				eventType: string;
+				round: number | null;
+			}>;
+			expect(insertedEvents).toEqual([
+				expect.objectContaining({
+					eventType: "second_declaration_submit",
+					round: 2,
+				}),
+			]);
+			expect(mockEnqueueReceipt).toHaveBeenCalledWith(
+				expect.objectContaining({ kind: "secondDeclaration" }),
+			);
+		});
+
+		it("re-submit from awaiting_cse_opinion goes back to awaiting_revision_choice when a gap reappears", async () => {
+			const declaration = buildDeclaration({
+				status: "awaiting_cse_opinion",
+				firstDeclarationPathChoice: "corrective_action",
+				cseRequired: true,
+			});
+			const employeeCategories = [
+				{ annualBaseWomen: "80", annualBaseMen: "100" },
+			];
+			const ctx = createOneRowSelectDb(declaration, employeeCategories);
+			const caller = await createLockedCaller(ctx.db);
+
+			await caller.submitSecondDeclaration();
+
+			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(setCall.status).toBe("awaiting_revision_choice");
+		});
+
+		it.each([
+			["justify", null],
+			["joint_evaluation", null],
+			["corrective_action", "justify"],
+			["corrective_action", "joint_evaluation"],
+		] as const)("refuses a re-submit from awaiting_cse_opinion when the paths are %s then %s, recording nothing", async (firstDeclarationPathChoice, secondDeclarationPathChoice) => {
+			const declaration = buildDeclaration({
+				status: "awaiting_cse_opinion",
+				firstDeclarationPathChoice,
+				secondDeclarationPathChoice,
+				cseRequired: true,
+			});
+			const employeeCategories = [
+				{ annualBaseWomen: "80", annualBaseMen: "100" },
+			];
+			const ctx = createOneRowSelectDb(declaration, employeeCategories);
+			const caller = await createLockedCaller(
+				ctx.db,
+				undefined,
+				undefined,
+				"user@example.com",
+			);
+
+			await expect(caller.submitSecondDeclaration()).rejects.toMatchObject({
+				code: "PRECONDITION_FAILED",
+				message:
+					"La seconde déclaration ne peut pas être transmise à cette étape de la démarche.",
+			});
+			expect(ctx.insertValues).not.toHaveBeenCalled();
+			expect(ctx.set).not.toHaveBeenCalled();
+			expect(mockEnqueueReceipt).not.toHaveBeenCalled();
+		});
+
 		it("throws NOT_FOUND when declaration is missing", async () => {
 			const ctx = createOneRowSelectDb(null);
 			const caller = await createLockedCaller(ctx.db);
@@ -1140,6 +1235,7 @@ describe("declarationRouter", () => {
 			it("refuses a second declaration without any corrected category, recording nothing", async () => {
 				const declaration = buildDeclaration({
 					status: "corrective_actions_chosen",
+					firstDeclarationPathChoice: "corrective_action",
 					cseRequired: false,
 				});
 				const ctx = createOneRowSelectDb(declaration, []);
@@ -1187,6 +1283,7 @@ describe("declarationRouter", () => {
 		it("purges the second draft slice and keeps other slices after submitSecondDeclaration", async () => {
 			const declaration = buildDeclaration({
 				status: "corrective_actions_chosen",
+				firstDeclarationPathChoice: "corrective_action",
 				cseRequired: false,
 				draft: { second: { step1: { foo: "bar" } }, main: { step1: {} } },
 			});
@@ -1211,6 +1308,7 @@ describe("declarationRouter", () => {
 		it("sets draft to null when second was the only slice after submitSecondDeclaration", async () => {
 			const declaration = buildDeclaration({
 				status: "corrective_actions_chosen",
+				firstDeclarationPathChoice: "corrective_action",
 				cseRequired: false,
 				draft: { second: { step1: { foo: "bar" } } },
 			});
@@ -2232,7 +2330,10 @@ describe("declarationRouter", () => {
 
 		it("submitSecondDeclaration takes the lock before its first read", async () => {
 			const ctx = createOneRowSelectDb(
-				buildDeclaration({ status: "corrective_actions_chosen" }),
+				buildDeclaration({
+					status: "corrective_actions_chosen",
+					firstDeclarationPathChoice: "corrective_action",
+				}),
 				[GAP_FREE_CATEGORY],
 			);
 			const caller = await createLockedCaller(ctx.db);

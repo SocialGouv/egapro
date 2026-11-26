@@ -9,6 +9,7 @@ import { useDraftHydration } from "~/modules/declaration-remuneration/shared/dra
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import {
+	type CompliancePathValue,
 	type DeclarationFsmStatus,
 	getReferenceYearFor,
 	isSecondDeclarationWritable,
@@ -30,6 +31,8 @@ type Props = {
 	initialEndDate?: string;
 	sameWorkforceByPayBasis?: boolean;
 	status: DeclarationFsmStatus | null;
+	firstDeclarationPathChoice: CompliancePathValue | null;
+	secondDeclarationPathChoice: CompliancePathValue | null;
 	lastTransmission: LastTransmission | null;
 };
 
@@ -43,12 +46,19 @@ export function SecondDeclarationStep2Form({
 	initialEndDate = "",
 	sameWorkforceByPayBasis = false,
 	status,
+	firstDeclarationPathChoice,
+	secondDeclarationPathChoice,
 	lastTransmission,
 }: Props) {
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
 	const { isLoading: isLockLoading, isReadOnly: isLocked } = useLockContext();
-	const isWritable = isSecondDeclarationWritable(status, lastTransmission);
+	const isWritable = isSecondDeclarationWritable({
+		status,
+		firstDeclarationPathChoice,
+		secondDeclarationPathChoice,
+		lastTransmission,
+	});
 	const isFormDisabled = isImpersonating || !isWritable;
 	const [startDate, setStartDate] = useState(initialStartDate);
 	const [endDate, setEndDate] = useState(initialEndDate);

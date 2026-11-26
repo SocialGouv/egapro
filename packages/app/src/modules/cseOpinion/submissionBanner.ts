@@ -33,10 +33,7 @@ export function getSubmissionBannerState(declaration: {
 	if (declaration.hasSubmittedSecondDeclaration) {
 		return {
 			variant: "second_declaration",
-			depositModifiable: isSecondDeclarationWritable(
-				declaration.status,
-				declaration.lastTransmission,
-			),
+			depositModifiable: isSecondDeclarationWritable(declaration),
 		};
 	}
 	return null;

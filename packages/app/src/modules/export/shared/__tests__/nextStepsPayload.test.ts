@@ -122,6 +122,15 @@ describe("buildNextStepsPayload — ruleset 2027.1", () => {
 		expect(stepsFor({ status, cancelled: true })).toEqual([]);
 	});
 
+	it("advertises only the CSE opinion while it is pending, never the optional second-declaration resubmission", () => {
+		const steps = stepsFor({
+			status: "awaiting_cse_opinion",
+			firstDeclarationPathChoice: "corrective_action",
+		});
+
+		expect(steps.map((step) => step.Action)).toEqual(["submit_cse_opinion"]);
+	});
+
 	it("still offers the CSE opinion once the démarche is completed (S6)", () => {
 		const steps = stepsFor({ status: "demarche_completed" });
 

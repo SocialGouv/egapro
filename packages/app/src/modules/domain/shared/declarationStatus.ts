@@ -74,6 +74,7 @@ export function hasStartedSecondDeclaration(declaration: {
 }
 
 const SECOND_DECLARATION_SAVED_STEP = 2;
+const SECOND_DECLARATION_SUBMITTED_STEP = 3;
 
 export function hasSavedSecondDeclarationData(declaration: {
 	secondDeclarationStep: number | null;
@@ -81,6 +82,23 @@ export function hasSavedSecondDeclarationData(declaration: {
 	return (
 		declaration.secondDeclarationStep !== null &&
 		declaration.secondDeclarationStep >= SECOND_DECLARATION_SAVED_STEP
+	);
+}
+
+// A corrective second declaration rewritten after its last transmission: the
+// CSE opinions prepared in the meantime no longer cover the numbers on file, so
+// the démarche must not close on them.
+export function isSecondDeclarationResubmissionPending(declaration: {
+	status: DeclarationFsmStatus | null;
+	firstDeclarationPathChoice: CompliancePath | null;
+	secondDeclarationPathChoice: CompliancePath | null;
+	secondDeclarationStep: number | null;
+}): boolean {
+	return (
+		declaration.status === "awaiting_cse_opinion" &&
+		getCurrentCompliancePath(declaration) === "corrective_action" &&
+		declaration.secondDeclarationStep !== null &&
+		declaration.secondDeclarationStep < SECOND_DECLARATION_SUBMITTED_STEP
 	);
 }
 
@@ -144,22 +162,31 @@ export function isCompliancePathStepApplicable(declaration: {
 	}
 }
 
-// The corrective-action second declaration may only be written while its funnel
-// is actually open: right after the corrective-action path choice, once the
-// declaration has been re-opened for revision, or while the second declaration
-// is still the last transmission of a closed démarche (epic #5128).
-export function isSecondDeclarationWritable(
-	status: DeclarationFsmStatus | null,
-	lastTransmission: LastTransmission | null,
-): boolean {
+const SECOND_DECLARATION_WRITABLE_STATUSES = new Set<DeclarationFsmStatus>([
+	"corrective_actions_chosen",
+	"awaiting_revision_choice",
+	"awaiting_cse_opinion",
+]);
+
+// The current path must stay corrective (`awaiting_cse_opinion` is also reached
+// by `justify` and joint evaluation), and a closed démarche keeps its last
+// second declaration writable until the next campaign (epic #5128).
+export function isSecondDeclarationWritable(declaration: {
+	status: DeclarationFsmStatus | null;
+	firstDeclarationPathChoice: CompliancePath | null;
+	secondDeclarationPathChoice: CompliancePath | null;
+	lastTransmission: LastTransmission | null;
+}): boolean {
 	if (
-		status === "corrective_actions_chosen" ||
-		status === "awaiting_revision_choice"
+		declaration.status === "demarche_completed" &&
+		declaration.lastTransmission === "second_declaration"
 	) {
 		return true;
 	}
 	return (
-		status === "demarche_completed" && lastTransmission === "second_declaration"
+		declaration.status !== null &&
+		SECOND_DECLARATION_WRITABLE_STATUSES.has(declaration.status) &&
+		getCurrentCompliancePath(declaration) === "corrective_action"
 	);
 }
 

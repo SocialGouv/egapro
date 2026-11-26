@@ -21,6 +21,8 @@ describe("isConcernedDeclarationModifiable", () => {
 			isConcernedDeclarationModifiable({
 				isSecondRound: false,
 				status: "awaiting_compliance_path_choice",
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
 				isFirstDeclarationLocked: false,
 				lastTransmission: null,
 			}),
@@ -32,6 +34,8 @@ describe("isConcernedDeclarationModifiable", () => {
 			isConcernedDeclarationModifiable({
 				isSecondRound: false,
 				status: "awaiting_cse_opinion",
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: null,
 				isFirstDeclarationLocked: true,
 				lastTransmission: null,
 			}),
@@ -39,15 +43,18 @@ describe("isConcernedDeclarationModifiable", () => {
 	});
 
 	it.each([
-		["corrective_actions_chosen", true],
-		["awaiting_revision_choice", true],
-		["awaiting_cse_opinion", false],
-		["demarche_completed", false],
-	] as const)("second declaration follows isSecondDeclarationWritable (%s → %s)", (status, expected) => {
+		["corrective_actions_chosen", null, true],
+		["awaiting_revision_choice", null, true],
+		["awaiting_cse_opinion", null, true],
+		["awaiting_cse_opinion", "justify", false],
+		["demarche_completed", null, false],
+	] as const)("second declaration follows isSecondDeclarationWritable (%s, revised path %s → %s)", (status, secondDeclarationPathChoice, expected) => {
 		expect(
 			isConcernedDeclarationModifiable({
 				isSecondRound: true,
 				status,
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice,
 				isFirstDeclarationLocked: true,
 				lastTransmission: null,
 			}),
@@ -59,6 +66,8 @@ describe("isConcernedDeclarationModifiable", () => {
 			isConcernedDeclarationModifiable({
 				isSecondRound: true,
 				status: "corrective_actions_chosen",
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: null,
 				isFirstDeclarationLocked: true,
 				lastTransmission: null,
 			}),
@@ -75,6 +84,8 @@ describe("isConcernedDeclarationModifiable", () => {
 			isConcernedDeclarationModifiable({
 				isSecondRound: true,
 				status: "demarche_completed",
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: null,
 				isFirstDeclarationLocked: true,
 				lastTransmission,
 			});

@@ -14,6 +14,7 @@ import { getSubmissionErrorMessage } from "~/modules/declaration-remuneration/sh
 import { useRefreshAfterSubmissionError } from "~/modules/declaration-remuneration/shared/useRefreshAfterSubmissionError";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import {
+	type CompliancePathValue,
 	type DeclarationFsmStatus,
 	hasHighGap,
 	isSecondDeclarationWritable,
@@ -41,6 +42,8 @@ type Props = {
 	secondDeclarationCategories: EmployeeCategoryRow[];
 	siren: string;
 	status: DeclarationFsmStatus | null;
+	firstDeclarationPathChoice: CompliancePathValue | null;
+	secondDeclarationPathChoice: CompliancePathValue | null;
 	lastTransmission: LastTransmission | null;
 };
 
@@ -52,11 +55,18 @@ export function SecondDeclarationStep3Review({
 	secondDeclarationCategories,
 	siren,
 	status,
+	firstDeclarationPathChoice,
+	secondDeclarationPathChoice,
 	lastTransmission,
 }: Props) {
 	const router = useRouter();
 	const modalRef = useRef<HTMLDialogElement>(null);
-	const isWritable = isSecondDeclarationWritable(status, lastTransmission);
+	const isWritable = isSecondDeclarationWritable({
+		status,
+		firstDeclarationPathChoice,
+		secondDeclarationPathChoice,
+		lastTransmission,
+	});
 	const submissionAttemptFingerprintRef = useRef(
 		secondDeclarationSubmissionCount,
 	);
