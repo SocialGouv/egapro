@@ -8,6 +8,11 @@ describe("mapFailureToHttp", () => {
 		["not_found", 403, "HTTP 403 declaration_not_found"],
 		["max_files", 400, "HTTP 400 max_files"],
 		["formal_notice_unavailable", 403, "HTTP 403 formal_notice_unavailable"],
+		[
+			"joint_evaluation_unavailable",
+			403,
+			"HTTP 403 joint_evaluation_unavailable",
+		],
 		["too_large", 400, "HTTP 400 too_large"],
 		["wrong_type", 400, "HTTP 400 wrong_type"],
 		["empty", 400, "HTTP 400 empty_file"],

@@ -191,9 +191,10 @@ export function isSecondDeclarationWritable(declaration: {
 }
 
 // The joint-evaluation report may only be written while its funnel is actually
-// open: right after the joint-evaluation path choice, once the declaration has
-// been re-opened for a revised joint evaluation, or while that report is still
-// the last transmission of a closed démarche (epic #5128).
+// open: right after the joint-evaluation path choice, or once the declaration
+// has been re-opened for a revised joint evaluation. It also stays writable
+// while it is the last transmission — until the CSE opinion lands, and, without
+// a CSE, until the next campaign (epic #5128).
 export function isJointEvaluationWritable(
 	status: DeclarationFsmStatus | null,
 	lastTransmission: LastTransmission | null,
@@ -205,7 +206,8 @@ export function isJointEvaluationWritable(
 		return true;
 	}
 	return (
-		status === "demarche_completed" && lastTransmission === "joint_evaluation"
+		(status === "awaiting_cse_opinion" || status === "demarche_completed") &&
+		lastTransmission === "joint_evaluation"
 	);
 }
 

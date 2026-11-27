@@ -21,7 +21,6 @@ import {
 	getObligationWorkforce,
 	hasGapsAboveThreshold,
 	isCseOpinionRequired,
-	isDraft,
 	isIndicatorGRequiredForGip,
 	isLockedBySubsequentSubmission,
 	isSecondDeclarationWritable,
@@ -162,6 +161,7 @@ function buildSubmitFacts(
 	gipWorkforce: number | null,
 	hasIndicatorGData: boolean,
 	hasGap: boolean,
+	lastTransmission: LastTransmission | null,
 ): Record<string, unknown> {
 	return {
 		currentState: declaration.status,
@@ -171,6 +171,7 @@ function buildSubmitFacts(
 		gap: hasGap ? 100 : 0,
 		year: declaration.year,
 		isTriennialYear: isTriennialYear(declaration.year),
+		lastTransmission,
 	};
 }
 
@@ -757,6 +758,7 @@ export const declarationRouter = createTRPCRouter({
 			const hasIndicatorGData = initialCategories.length > 0;
 			const hasGap =
 				hasIndicatorGData && hasGapsAboveThreshold(initialCategories);
+			const lastTransmission = await loadLastTransmission(tx, declaration.id);
 
 			const { nextStatus, events } = applyActionOrRefuse(
 				buildSubmitFacts(
@@ -765,6 +767,7 @@ export const declarationRouter = createTRPCRouter({
 					gipWorkforce,
 					hasIndicatorGData,
 					hasGap,
+					lastTransmission,
 				),
 				"submit",
 				loadRules(declaration.rulesVersion),
@@ -797,7 +800,7 @@ export const declarationRouter = createTRPCRouter({
 				events,
 				ctx.session.user.id,
 			);
-			if (isDraft(declaration.status) && historyInserts.length > 0) {
+			if (historyInserts.length > 0) {
 				await tx.insert(declarationStatusHistory).values(historyInserts);
 			}
 			await tx

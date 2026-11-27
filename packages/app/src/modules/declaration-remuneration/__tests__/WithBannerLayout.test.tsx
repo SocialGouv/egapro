@@ -311,6 +311,19 @@ describe("WithBannerLayout", () => {
 			expect(await lockAcquisitionSuspended()).toBe(expected);
 		});
 
+		it.each([
+			["demarche_completed", true, "cse_opinion", true],
+			["demarche_completed", true, "joint_evaluation", false],
+			["demarche_completed", true, "second_declaration", false],
+			["demarche_completed", true, "path_choice_round_1", false],
+			["demarche_completed", true, "path_choice_round_2", false],
+			["demarche_completed", true, null, false],
+		])("status %s, first declaration superseded %s, last transmission %s → suspended %s", async (status, isFirstDeclarationLocked, lastTransmission, expected) => {
+			mockLayout({ status, isFirstDeclarationLocked, lastTransmission });
+
+			expect(await lockAcquisitionSuspended()).toBe(expected);
+		});
+
 		it("never reads the campaign deadlines", async () => {
 			vi.mocked(getCampaignDeadlines).mockClear();
 			mockLayout({

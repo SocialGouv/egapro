@@ -73,7 +73,7 @@ const CSE_OPINION_ROW = "Vos avis du CSE ont été transmis";
 const SECOND_DECLARATION_PATH_MENTION =
 	"Modifiable jusqu'au choix de votre nouveau parcours";
 const SECOND_DECLARATION_CSE_MENTION =
-	"Modifiable jusqu'à la transmission des avis du CSE";
+	"Modifiable jusqu'à la transmission de vos avis du CSE";
 const SUPERSEDED_BANNER =
 	/Votre déclaration n'est plus modifiable : une étape suivante de votre démarche a déjà été transmise/;
 const STEP2_EDITED_CELL = "Annuelle brute moyenne — Hommes";
@@ -372,7 +372,9 @@ test.describe("Campaign deadlines are informational; only the last submission is
 				),
 			).toBeVisible();
 			await expect(
-				page.getByText(/Échéance pour transmettre l'avis ou les avis du CSE/),
+				page.getByText(
+					"Vous pouvez modifier votre dépôt jusqu'à ce que vous transmettiez l'avis ou les avis du CSE.",
+				),
 			).toBeVisible();
 			await expect(
 				page.getByRole("link", {

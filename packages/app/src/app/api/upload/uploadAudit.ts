@@ -22,6 +22,11 @@ export function mapFailureToHttp(reason: PipelineFailureReason): {
 				status: 403,
 				errorMessage: "HTTP 403 formal_notice_unavailable",
 			};
+		case "joint_evaluation_unavailable":
+			return {
+				status: 403,
+				errorMessage: "HTTP 403 joint_evaluation_unavailable",
+			};
 		case "too_large":
 			return { status: 400, errorMessage: "HTTP 400 too_large" };
 		case "wrong_type":

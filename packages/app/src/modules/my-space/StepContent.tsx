@@ -45,11 +45,22 @@ const NEXT_TRANSMISSION_MENTION =
 	"Modifiable jusqu'à votre prochaine transmission";
 const SECOND_DECLARATION_MENTION =
 	"Modifiable jusqu'au choix de votre nouveau parcours";
-const SECOND_DECLARATION_CSE_MENTION =
-	"Modifiable jusqu'à la transmission des avis du CSE";
+const CSE_OPINION_MENTION =
+	"Modifiable jusqu'à la transmission de vos avis du CSE";
 const CLOSED_MENTION = "Modifiable jusqu'à la nouvelle campagne";
 
 const PATH_CHOICE_LABEL = "Choix du parcours de mise en conformité";
+
+function getDepositMention(
+	variant: PanelVariant,
+	declarationFsmStatus: DeclarationFsmStatus | null,
+	writableMention: string,
+): string {
+	if (variant === "closed") return CLOSED_MENTION;
+	if (declarationFsmStatus === "awaiting_cse_opinion")
+		return CSE_OPINION_MENTION;
+	return writableMention;
+}
 
 function StepTitle({
 	children,
@@ -184,7 +195,7 @@ export function Step2Content({
 		: undefined;
 	const secondDeclarationWritableMention =
 		declarationFsmStatus === "awaiting_cse_opinion"
-			? SECOND_DECLARATION_CSE_MENTION
+			? CSE_OPINION_MENTION
 			: SECOND_DECLARATION_MENTION;
 	const secondDeclarationMention = secondDeclarationModification
 		? variant === "closed"
@@ -301,8 +312,12 @@ export function Step2Content({
 				<TransmittedRow
 					label="Votre rapport de l'évaluation conjointe a été transmis"
 					mention={
-						jointEvaluationWritable && variant === "closed"
-							? CLOSED_MENTION
+						jointEvaluationWritable
+							? getDepositMention(
+									variant,
+									declarationFsmStatus,
+									NEXT_TRANSMISSION_MENTION,
+								)
 							: undefined
 					}
 					modification={

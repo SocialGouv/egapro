@@ -4,10 +4,15 @@ import { and, count, eq, sql } from "drizzle-orm";
 
 import { MAX_CSE_FILES } from "~/modules/cseOpinion/types";
 import {
+	type DeclarationFsmStatus,
+	isJointEvaluationWritable,
+} from "~/modules/domain";
+import {
 	ALLOWED_UPLOAD_MIME_TYPES,
 	type FlowType,
 	UPLOAD_REQUEST_TIMEOUT_MS,
 } from "~/modules/shared/uploadConfig";
+import { loadLastTransmission } from "~/server/api/routers/statusHistoryHelpers";
 import { db } from "~/server/db";
 import { resolveCurrentDeclarationId } from "~/server/db/declarationConditions";
 import { declarations, files } from "~/server/db/schema";
@@ -24,6 +29,7 @@ export type PipelineFailureReason =
 	| "not_found"
 	| "max_files"
 	| "formal_notice_unavailable"
+	| "joint_evaluation_unavailable"
 	| "server_error";
 
 type SuccessResult = {
@@ -74,7 +80,8 @@ export type UploadPipelineInput = {
  *   4. On a clean scan, insert the `files` row in a transaction that also
  *      applies the flow-specific write semantics:
  *        - `cse_opinion`: re-check the file count inside the tx, then insert.
- *        - `joint_evaluation`: delete any existing row, then insert (upsert).
+ *        - `joint_evaluation`: re-check the deposit window under the row lock,
+ *          then delete any existing row and insert (upsert).
  *   5. If the DB write fails *after* the S3 commit, best-effort
  *      {@link deleteS3File} the newly-committed object so no orphan blob is
  *      left behind, and surface the failure as `server_error` with a
@@ -111,6 +118,16 @@ export async function runUploadPipeline(
 			error:
 				"Le dépôt du rapport de l'évaluation conjointe suite à une mise en demeure n'est pas ouvert pour cette démarche.",
 		};
+	}
+
+	if (input.flowType === "joint_evaluation") {
+		const [status, lastTransmission] = await Promise.all([
+			readDeclarationStatus(db, declaration.id),
+			loadLastTransmission(db, declaration.id),
+		]);
+		if (!isJointEvaluationWritable(status, lastTransmission)) {
+			return jointEvaluationUnavailable();
+		}
 	}
 
 	if (input.flowType === "cse_opinion") {
@@ -187,6 +204,11 @@ export async function runUploadPipeline(
 			};
 		}
 
+		if (dbError instanceof JointEvaluationUnavailableError) {
+			const s3Cleanup = await compensateS3Commit(streamResult.key);
+			return { ...jointEvaluationUnavailable(), s3Cleanup };
+		}
+
 		console.error("[uploadPipeline] DB write failed after S3 commit", dbError);
 		const s3Cleanup = await compensateS3Commit(streamResult.key);
 
@@ -201,6 +223,15 @@ export async function runUploadPipeline(
 
 function formatMaxFilesError(quota: number): string {
 	return `Vous avez atteint la limite de ${quota} fichier${quota > 1 ? "s" : ""}. Supprimez-en un avant d'en ajouter un nouveau.`;
+}
+
+function jointEvaluationUnavailable(): FailureResult {
+	return {
+		ok: false,
+		reason: "joint_evaluation_unavailable",
+		error:
+			"Le dépôt du rapport de l'évaluation conjointe n'est pas ouvert pour cette démarche.",
+	};
 }
 
 // The S3 object was already committed before the failure, so every failure
@@ -224,6 +255,18 @@ async function findCurrentDeclaration(
 ): Promise<{ id: string } | null> {
 	const id = await resolveCurrentDeclarationId(db, siren, year);
 	return id === null ? null : { id };
+}
+
+async function readDeclarationStatus(
+	client: Pick<typeof db, "select">,
+	declarationId: string,
+): Promise<DeclarationFsmStatus | null> {
+	const [row] = await client
+		.select({ status: declarations.status })
+		.from(declarations)
+		.where(eq(declarations.id, declarationId))
+		.limit(1);
+	return row?.status ?? null;
 }
 
 async function countFilesByType(
@@ -288,6 +331,19 @@ async function commitFileRow(
 			.where(eq(declarations.id, input.declarationId))
 			.for("update")
 			.limit(1);
+
+		// The deposit window is re-read under the same lock: the pre-check ran
+		// before the stream, which can take minutes, and a concurrent CSE
+		// finalization (or any FSM transition) may have closed it since (#4982).
+		if (input.flowType === "joint_evaluation") {
+			const [status, lastTransmission] = await Promise.all([
+				readDeclarationStatus(tx, input.declarationId),
+				loadLastTransmission(tx, input.declarationId),
+			]);
+			if (!isJointEvaluationWritable(status, lastTransmission)) {
+				throw new JointEvaluationUnavailableError();
+			}
+		}
 
 		let replacedFilePath: string | null = null;
 
@@ -361,6 +417,18 @@ export class MaxFilesReachedError extends Error {
 	constructor(quota: number) {
 		super("Max files reached (race condition)");
 		this.quota = quota;
+	}
+}
+
+/**
+ * Thrown inside the DB transaction when the joint-evaluation deposit window
+ * closed between the pre-check and the commit — the stream outlived the state
+ * it started in. The caller compensates the already-committed S3 object and
+ * surfaces the same refusal as the pre-check.
+ */
+class JointEvaluationUnavailableError extends Error {
+	constructor() {
+		super("Joint evaluation deposit is not writable anymore");
 	}
 }
 

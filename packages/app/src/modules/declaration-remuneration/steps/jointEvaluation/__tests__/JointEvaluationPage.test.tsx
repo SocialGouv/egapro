@@ -35,10 +35,12 @@ vi.mock("../JointEvaluationForm", () => ({
 		jointEvaluationDeadline,
 		existingFile,
 		jointEvaluationRound,
+		writable,
 	}: {
 		jointEvaluationDeadline: Date;
 		existingFile: { fileName: string } | null;
 		jointEvaluationRound: 1 | 2;
+		writable: boolean;
 	}) => (
 		<div>
 			<span data-testid="joint-evaluation-deadline">
@@ -48,12 +50,19 @@ vi.mock("../JointEvaluationForm", () => ({
 				{existingFile?.fileName ?? "none"}
 			</span>
 			<span data-testid="joint-evaluation-round">{jointEvaluationRound}</span>
+			<span data-testid="joint-evaluation-writable">
+				{writable ? "open" : "closed"}
+			</span>
 		</div>
 	),
 }));
 
 import { redirect } from "next/navigation";
-import { getDefaultCampaignDeadlines } from "~/modules/domain";
+import {
+	type DeclarationFsmStatus,
+	getDefaultCampaignDeadlines,
+	type LastTransmission,
+} from "~/modules/domain";
 import { api } from "~/trpc/server";
 import { JointEvaluationPage } from "../JointEvaluationPage";
 
@@ -66,6 +75,10 @@ function mockDeclaration(
 		secondDeclarationPathChoice?: string | null;
 	},
 	updatedAt: Date | null,
+	transmission: {
+		status?: DeclarationFsmStatus;
+		lastTransmission?: LastTransmission | null;
+	} = {},
 ) {
 	vi.mocked(api.declaration.getOrCreate).mockResolvedValue({
 		declaration: {
@@ -73,10 +86,12 @@ function mockDeclaration(
 				pathChoices.firstDeclarationPathChoice ?? null,
 			secondDeclarationPathChoice:
 				pathChoices.secondDeclarationPathChoice ?? null,
+			status: transmission.status ?? "joint_evaluation_chosen",
 			updatedAt,
 			siren: "123456789",
 			year: DECLARATION_YEAR,
 		},
+		lastTransmission: transmission.lastTransmission ?? null,
 	} as never);
 	vi.mocked(api.company.get).mockResolvedValue({ hasCse: null } as never);
 	vi.mocked(api.jointEvaluation.getFile).mockResolvedValue(null as never);
@@ -193,5 +208,47 @@ describe("JointEvaluationPage", () => {
 		render(page);
 
 		expect(screen.getByTestId("existing-file")).toHaveTextContent("none");
+	});
+
+	it.each<{
+		status: DeclarationFsmStatus;
+		lastTransmission: LastTransmission | null;
+		expected: string;
+	}>([
+		{
+			status: "joint_evaluation_chosen",
+			lastTransmission: "path_choice_round_1",
+			expected: "open",
+		},
+		{
+			status: "awaiting_cse_opinion",
+			lastTransmission: "joint_evaluation",
+			expected: "open",
+		},
+		{
+			status: "awaiting_cse_opinion",
+			lastTransmission: "path_choice_round_2",
+			expected: "closed",
+		},
+		{
+			status: "awaiting_cse_opinion",
+			lastTransmission: "cse_opinion",
+			expected: "closed",
+		},
+	])("tells the form whether the report is writable ($status / $lastTransmission)", async ({
+		status,
+		lastTransmission,
+		expected,
+	}) => {
+		mockDeclaration({ firstDeclarationPathChoice: "joint_evaluation" }, null, {
+			status,
+			lastTransmission,
+		});
+
+		render(await JointEvaluationPage());
+
+		expect(screen.getByTestId("joint-evaluation-writable")).toHaveTextContent(
+			expected,
+		);
 	});
 });

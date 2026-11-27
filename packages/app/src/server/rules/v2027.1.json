@@ -40,7 +40,7 @@
 		{ "id": "awaiting_revision_choice", "stage": 4 },
 		{ "id": "revised_joint_evaluation_chosen", "stage": 5 },
 		{ "id": "awaiting_cse_opinion", "stage": 6 },
-		{ "id": "demarche_completed", "stage": 7 }
+		{ "id": "demarche_completed", "stage": 7, "terminal": true }
 	],
 
 	"computations": {
@@ -490,6 +490,60 @@
 				"value": "justify"
 			},
 			"reopens": "awaiting_revision_choice"
+		},
+		{
+			"id": "revise_first_declaration_before_cse_opinion",
+			"description": "Une 1re déclaration transmise directement à l'avis CSE reste re-transmissible tant que l'avis n'est pas transmis : le renvoi repart de draft pour réévaluer l'écart et l'obligation CSE sur les données corrigées.",
+			"action": "submit",
+			"from": ["awaiting_cse_opinion"],
+			"guard": {
+				"fact": "lastTransmission",
+				"op": "==",
+				"value": "first_declaration"
+			},
+			"reopens": "draft"
+		},
+		{
+			"id": "revise_joint_evaluation_before_cse_opinion",
+			"description": "Le rapport d'évaluation conjointe du 1er tour reste modifiable tant que l'avis du CSE n'est pas transmis : le renvoi repart de joint_evaluation_chosen.",
+			"action": "submit_joint_evaluation",
+			"from": ["awaiting_cse_opinion"],
+			"guard": {
+				"all": [
+					{
+						"fact": "lastTransmission",
+						"op": "==",
+						"value": "joint_evaluation"
+					},
+					{
+						"fact": "action.round",
+						"op": "==",
+						"value": 1
+					}
+				]
+			},
+			"reopens": "joint_evaluation_chosen"
+		},
+		{
+			"id": "revise_revised_joint_evaluation_before_cse_opinion",
+			"description": "Idem pour le rapport d'évaluation conjointe du 2e tour : le renvoi repart de revised_joint_evaluation_chosen et conserve son round.",
+			"action": "submit_joint_evaluation",
+			"from": ["awaiting_cse_opinion"],
+			"guard": {
+				"all": [
+					{
+						"fact": "lastTransmission",
+						"op": "==",
+						"value": "joint_evaluation"
+					},
+					{
+						"fact": "action.round",
+						"op": "==",
+						"value": 2
+					}
+				]
+			},
+			"reopens": "revised_joint_evaluation_chosen"
 		},
 		{
 			"id": "revise_path_choice_round_1_after_completion",

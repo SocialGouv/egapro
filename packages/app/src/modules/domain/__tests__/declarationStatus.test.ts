@@ -99,6 +99,36 @@ describe("isDeclarationWritingClosed", () => {
 			isDeclarationWritingClosed("demarche_completed", true, "cse_opinion"),
 		).toBe(true);
 	});
+
+	it("keeps writing open on a closed démarche whose last transmission is not the CSE opinion", () => {
+		expect(
+			isDeclarationWritingClosed(
+				"demarche_completed",
+				true,
+				"joint_evaluation",
+			),
+		).toBe(false);
+		expect(
+			isDeclarationWritingClosed(
+				"demarche_completed",
+				true,
+				"second_declaration",
+			),
+		).toBe(false);
+		expect(
+			isDeclarationWritingClosed(
+				"demarche_completed",
+				true,
+				"path_choice_round_1",
+			),
+		).toBe(false);
+	});
+
+	it("keeps writing closed when the CSE opinion is the last transmission", () => {
+		expect(
+			isDeclarationWritingClosed("demarche_completed", true, "cse_opinion"),
+		).toBe(true);
+	});
 });
 
 describe("isDeclarationSubmitted", () => {
@@ -687,8 +717,23 @@ describe("isJointEvaluationWritable", () => {
 		expect(
 			isJointEvaluationWritable("demarche_completed", "second_declaration"),
 		).toBe(false);
+	});
+
+	it("keeps the report writable while the CSE opinion is still owed", () => {
 		expect(
 			isJointEvaluationWritable("awaiting_cse_opinion", "joint_evaluation"),
+		).toBe(true);
+	});
+
+	it("stays closed in awaiting_cse_opinion when another step is the last transmission", () => {
+		expect(
+			isJointEvaluationWritable("awaiting_cse_opinion", "cse_opinion"),
+		).toBe(false);
+		expect(
+			isJointEvaluationWritable("awaiting_cse_opinion", "second_declaration"),
+		).toBe(false);
+		expect(
+			isJointEvaluationWritable("awaiting_cse_opinion", "path_choice_round_2"),
 		).toBe(false);
 	});
 });

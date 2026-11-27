@@ -44,6 +44,8 @@ const SECOND_DECLARATION_ROW = "Votre seconde déclaration a été transmise";
 const PATH_CHOICE_ROW = "Votre choix de parcours a été transmis";
 const CSE_OPINION_ROW = "Vos avis du CSE ont été transmis";
 const CLOSED_MENTION = "Modifiable jusqu'à la nouvelle campagne";
+const CSE_OPINION_MENTION =
+	"Modifiable jusqu'à la transmission de vos avis du CSE";
 const CSE_CLOSED_MESSAGE =
 	"Cette démarche est terminée. Vos avis du CSE restent modifiables.";
 
@@ -68,7 +70,7 @@ async function expectClosedDemarche(page: Page, message: string) {
 async function expectRowModifiable(
 	page: Page,
 	label: string,
-	options: { modifiable: boolean; closedMention?: boolean },
+	options: { modifiable: boolean; mention?: string | null },
 ) {
 	await test.step(`panneau « Mon espace » — ${label}`, async () => {
 		const row = transmittedRow(page, label);
@@ -76,12 +78,12 @@ async function expectRowModifiable(
 		const modify = row.getByRole("link", { name: "Modifier", exact: true });
 		if (options.modifiable) {
 			await expect(modify).toBeVisible();
-			// The CSE row bears no mention: its modification window is the opinion
-			// itself, not the campaign.
-			if (options.closedMention !== false) {
-				await expect(
-					row.getByText(CLOSED_MENTION, { exact: true }),
-				).toBeVisible();
+			// `undefined` means the usual campaign-window mention; `null` means the
+			// row bears none (the CSE opinion's own window is the opinion itself).
+			const mention =
+				options.mention === undefined ? CLOSED_MENTION : options.mention;
+			if (mention !== null) {
+				await expect(row.getByText(mention, { exact: true })).toBeVisible();
 			}
 		} else {
 			await expect(modify).toHaveCount(0);
@@ -248,13 +250,13 @@ test.describe("The last transmitted step stays modifiable (epic #5128)", () => {
 		});
 	});
 
-	test("S4 — avec CSE, seul l'avis reste modifiable et le rapport est en lecture seule", async ({
+	test("S4 — avec CSE, le dernier dépôt reste modifiable jusqu'à l'avis du CSE (#4982)", async ({
 		page,
 	}) => {
 		test.setTimeout(300_000);
 		await setCompanyHasCse(true);
 
-		await test.step("rapport d'évaluation conjointe puis avis du CSE", async () => {
+		await test.step("rapport d'évaluation conjointe transmis, avis du CSE en attente", async () => {
 			await completeDeclaration(page, { hasGap: true });
 			await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 15_000 });
 			await selectCompliancePath(page, "path-joint");
@@ -264,6 +266,48 @@ test.describe("The last transmitted step stays modifiable (epic #5128)", () => {
 			await page.waitForURL(urlGlob(cseOpinionStepHref(1)), {
 				timeout: 60_000,
 			});
+			// Acceptance criterion: the banner states the deposit stays modifiable
+			// until the opinion lands, instead of showing the bare deadline.
+			await expect(
+				page.getByText(
+					"Vous pouvez modifier votre dépôt jusqu'à ce que vous transmettiez l'avis ou les avis du CSE.",
+				),
+			).toBeVisible();
+		});
+
+		await test.step("le rapport reste modifiable jusqu'à la transmission de l'avis", async () => {
+			const panel = await openPanneauDemarche(page);
+			await expect(panel.getByText("Démarche close")).toHaveCount(0);
+			await expectRowModifiable(page, JOINT_REPORT_ROW, {
+				modifiable: true,
+				mention: CSE_OPINION_MENTION,
+			});
+
+			await transmittedRow(page, JOINT_REPORT_ROW)
+				.getByRole("link", { name: "Modifier", exact: true })
+				.click();
+			await page.waitForURL(urlGlob(COMPLIANCE_JOINT_EVALUATION), {
+				timeout: 15_000,
+			});
+			await expect(page.locator("#joint-evaluation-file-upload")).toBeEnabled();
+			await expect(
+				page.getByRole("button", { name: /transmettre/i }),
+			).toBeEnabled();
+		});
+
+		await test.step("re-transmission du rapport, la démarche reste en attente de l'avis", async () => {
+			await uploadJointEvalPdf(page, { fileName: "rapport-conjoint-v2.pdf" });
+			await page.waitForURL(urlGlob(cseOpinionStepHref(1)), {
+				timeout: 60_000,
+			});
+			await page.goto(MY_SPACE_JOINT_EVALUATION_VIEW);
+			await expect(
+				page.getByRole("link", { name: /rapport-conjoint-v2\.pdf/ }),
+			).toBeVisible();
+		});
+
+		await test.step("une fois l'avis transmis, plus aucun dépôt n'est modifiable", async () => {
+			await page.goto(cseOpinionStepHref(1));
 			await fillCseStep1(page, { firstDeclJustification: true });
 			await submitCseStep2(page, {
 				columns: [
@@ -271,19 +315,15 @@ test.describe("The last transmitted step stays modifiable (epic #5128)", () => {
 					{ declarationNumber: 1, type: "gap" },
 				],
 			});
-		});
 
-		await expectClosedDemarche(page, CSE_CLOSED_MESSAGE);
-		await expectRowModifiable(page, CSE_OPINION_ROW, {
-			modifiable: true,
-			closedMention: false,
-		});
-		await expectRowModifiable(page, JOINT_REPORT_ROW, { modifiable: false });
-
-		await test.step("le rapport reste consultable mais non modifiable", async () => {
-			const row = transmittedRow(page, JOINT_REPORT_ROW);
+			await expectClosedDemarche(page, CSE_CLOSED_MESSAGE);
+			await expectRowModifiable(page, CSE_OPINION_ROW, {
+				modifiable: true,
+				mention: null,
+			});
+			await expectRowModifiable(page, JOINT_REPORT_ROW, { modifiable: false });
 			await expect(
-				row.getByRole("link", {
+				transmittedRow(page, JOINT_REPORT_ROW).getByRole("link", {
 					name: "Voir le rapport de l'évaluation conjointe",
 				}),
 			).toBeVisible();
