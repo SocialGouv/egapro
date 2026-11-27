@@ -41,6 +41,10 @@ jobs:
             base=$(basename "$f" .md)
             # Portable first-letter uppercase (avoids ${var^} which needs Bash 4+)
             page="$(echo "${base:0:1}" | tr '[:lower:]' '[:upper:]')${base:1}.md"
+            # This inventory is maintained in the wiki, including its list of SIRETs.
+            if [[ "$page" == SIRET-de-test.md && -f "/tmp/wiki/$page" ]]; then
+              continue
+            fi
             cp "$f" "/tmp/wiki/${page}"
             echo "  $f -> ${page}"
           done
