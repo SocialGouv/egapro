@@ -112,18 +112,17 @@ test("Codex command policy covers the flag directly after the subcommand", () =>
 });
 
 test("MCP servers do not depend on the directory the tool is launched from", () => {
-	const args = JSON.parse(read(".mcp.json")).mcpServers.ultra11y.args;
-	assert.ok(
-		!args.includes("--dir"),
-		"pnpm --dir <relative path> resolves against the launch directory",
-	);
-	assert.deepEqual(args.slice(0, 3), ["--filter", "app", "exec"]);
-	assert.match(
-		read(".codex/config.toml"),
-		/args = \["--filter", "app", "exec", "ultra11y", "mcp"\]/,
-	);
-	assert.deepEqual(
-		JSON.parse(read("opencode.json")).mcp.ultra11y.command.slice(1, 4),
-		["--filter", "app", "exec"],
-	);
+	const servers = JSON.parse(read(".mcp.json")).mcpServers;
+	for (const [name, server] of Object.entries(servers)) {
+		assert.ok(
+			!(server.args ?? []).includes("--dir"),
+			`${name}: pnpm --dir <relative path> resolves against the launch directory`,
+		);
+	}
+});
+
+test("ultra11y is not an MCP server (the command was removed in ultra11y 7.0.0)", () => {
+	assert.equal(JSON.parse(read(".mcp.json")).mcpServers.ultra11y, undefined);
+	assert.equal(JSON.parse(read("opencode.json")).mcp.ultra11y, undefined);
+	assert.doesNotMatch(read(".codex/config.toml"), /mcp_servers\.ultra11y/);
 });

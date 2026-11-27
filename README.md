@@ -175,9 +175,7 @@ Les identifiants (`EGAPRO_PROCONNECT_CLIENT_ID`, `EGAPRO_PROCONNECT_CLIENT_SECRE
 
 | Fichier | Déclencheur | Rôle |
 |---|---|---|
-| `ci.yaml` | chaque push | build · lint · format · patterns · typecheck · tests · cohérence des versions ultra11y |
-| `a11y.yaml` | PR, cron lundi 04:00 UTC, manuel | ultra11y. Sur **PR** : `a11y-gate` seul — audit statique de tout `src`, **bloquant**. Sur **cron** ou **manuel** : chaîne complète (`a11y-pages` + `a11y-bundle`), non bloquante et payante |
-| `a11y-lite.yaml` | PR → `alpha`, push `alpha` | ultra11y mode lite. Sur **PR** : capture des pages que le diff peut changer, moteur seul, **bloquant** sur un constat de rendu nouveau ou une route non échantillonnée. Sur **push `alpha`** : capture tout et écrit la baseline |
+| `ci.yaml` | chaque push | build · lint · format · patterns · typecheck · tests |
 | `e2e.yaml` | PR → `alpha`, manuel | suite Playwright complète **et** les coordonnées de la grille de recette, en shards parallèles ; le check requis « Test e2e » est le job agrégateur |
 | `e2e-grille.yaml` | cron nocturne (02:00 UTC), manuel | grille de recette seule, rapport de recette |
 | `lighthouse.yaml` | `deployment_status` (success, hors env `build-*`) | audit Lighthouse sur l'URL déployée |
@@ -193,6 +191,8 @@ Les identifiants (`EGAPRO_PROCONNECT_CLIENT_ID`, `EGAPRO_PROCONNECT_CLIENT_SECRE
 | `sync-docs-to-wiki.yaml` | push `alpha`/`master` sur `docs/**`, manuel | miroir `docs/` → wiki |
 | `ticket-end-date.yaml` | PR closed | estampille « End date » sur le board |
 | `claude-question.yml` | issue labellisée `question` | réponse automatique |
+
+> L'accessibilité ne tourne pas dans GitHub Actions : dans le dépôt, c'est la revue manuelle `/review gates` (skill `review`, qui lance `review-a11y` sur le diff) ; l'audit RGAA complet est le bot iterion `rgaa-audit` (Acci) sur iterion.cloud, lié au dépôt (chaque lundi 05:00 UTC, et `/acci` en commentaire d'une PR), configuré là-bas ; la revue de code des PR passe par le bot Revi d'iterion. Détail : [`docs/accessibilite-ultra11y.md`](docs/accessibilite-ultra11y.md).
 
 ## Sécurisation de l'API SUIT (via passerelle APISIX)
 
@@ -297,13 +297,14 @@ Ce qui reste propre à chaque développeur (config utilisateur, plugins perso, m
 | **git pre-commit** (`lefthook.yml`, installe par `pnpm install`) | chaque commit | `biome check --write`, `check-patterns.sh --staged`, audit statique ultra11y |
 | **git pre-push** | chaque push | typecheck |
 | **`pnpm verify`** | avant de declarer une tache terminee | patterns, a11y, lint, format, typecheck, tests |
-| **CI** | chaque push / PR | les memes, plus e2e, `a11y-gate`, `a11y-lite` |
+| **CI** | chaque push / PR | les memes (hors a11y), plus e2e |
+| **iterion** (iterion.cloud) | lundi 05:00 UTC, `/acci` sur une PR, chaque PR | audit RGAA complet par le bot `rgaa-audit` (Acci) ; revue de PR par le bot Revi |
 
 `scripts/quality/check-patterns.sh` porte les interdits mecaniques sur les lignes ajoutees : suppressions de lint, `: any`, `process.env`, `../../`, `dangerouslySetInnerHTML`, `style={}`, `<svg>`, `<img>`, couleurs en dur et `@media` en SCSS, `zod` dans un routeur ou un composant, helpers `domain` re-inlines, composant sur mesure dans `src/app/`. `--self-test` verifie chaque regle.
 
 ### Accessibilite
 
-ultra11y est le dispositif unique, a chaque etage : devDependency (moteur, pre-commit, `pnpm verify`), skills `review-a11y` et `ultra11y` lus depuis la devDependency par les trois outils (symlinks dans `.agents/skills/`), gate commit / push / PR cote agent (hook Claude Code dans `.claude/settings.json`, plugin OpenCode dans `opencode.json`, tous deux charges depuis la devDependency ; Codex : `ultra11y install --codex`, portee utilisateur), serveur MCP `ultra11y`, Action CI. Detail : [`docs/accessibilite-ultra11y.md`](docs/accessibilite-ultra11y.md).
+ultra11y est le dispositif unique, a chaque etage : devDependency (moteur, pre-commit, `pnpm verify`), skills `review-a11y` et `ultra11y` lus depuis la devDependency par les trois outils (symlinks dans `.agents/skills/`), gate commit / push / PR cote agent (hook Claude Code dans `.claude/settings.json`, plugin OpenCode dans `opencode.json`, tous deux charges depuis la devDependency ; Codex : `ultra11y install --codex`, portee utilisateur), revue manuelle par `/review gates` (qui lance `review-a11y`), audit RGAA complet par le bot iterion `rgaa-audit` (Acci) sur iterion.cloud, chaque lundi et via `/acci` sur une PR, revue de PR par le bot iterion Revi ; rien ne tourne dans GitHub Actions. Detail : [`docs/accessibilite-ultra11y.md`](docs/accessibilite-ultra11y.md).
 
 > Hooks git : rien a installer a la main. `lefthook` est une devDependency (binaire precompile par plateforme, comme husky), et `pnpm install` pose les hooks ; un `core.hooksPath` local qui pointe vers un repertoire disparu est retire automatiquement.
 

@@ -23,16 +23,6 @@
 				"-y",
 				"@playwright/mcp@latest"
 			]
-		},
-		"ultra11y": {
-			"command": "pnpm",
-			"args": [
-				"--filter",
-				"app",
-				"exec",
-				"ultra11y",
-				"mcp"
-			]
 		}
 	}
 }

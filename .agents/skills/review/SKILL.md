@@ -22,7 +22,7 @@ Deux modes. Choisis-le à l'étape 0, puis suis **uniquement** la section du mod
 |---|---|
 | un `.ts` / `.tsx` / un test est dans le diff | [references/structural.md](references/structural.md) |
 | le diff touche `src/server/**`, `routers/`, tRPC, `src/app/api/**`, l'auth | [references/security.md](references/security.md) |
-| un `.tsx` est dans le diff | [references/a11y.md](references/a11y.md) |
+| **toujours**, quel que soit le diff (modes gates et pr) | [references/a11y.md](references/a11y.md) (lance le skill `review-a11y`) |
 | un `.tsx` / `.scss` est dans le diff | [references/design-fidelity.md](references/design-fidelity.md) |
 | le diff change le comportement de l'app (pas seulement tests, docs, config d'outillage) | [references/functional.md](references/functional.md) |
 | mode **pr** | [references/pr-comments.md](references/pr-comments.md) |
@@ -47,7 +47,7 @@ Tu **rapportes**, tu ne corriges pas. L'appelant (toi plus tard, ou le skill `im
    ```bash
    pnpm verify
    ```
-   (patterns sur le diff, audit statique ultra11y de tout `src` — comme la gate CI —, lint, format, typecheck, tests.) Si ce code exact a déjà passé `pnpm verify` au vert (l'étape 5 de `/implement`), la commande répond aussitôt — lance-la quand même, c'est elle qui fait foi.
+   (patterns sur le diff, audit statique ultra11y de tout `src`, lint, format, typecheck, tests.) Si ce code exact a déjà passé `pnpm verify` au vert (l'étape 5 de `/implement`), la commande répond aussitôt — lance-la quand même, c'est elle qui fait foi.
    **FAIL → STOP.** Rends le tableau avec `verify: FAIL` et les lignes d'erreur utiles. Les checklists ne servent à rien tant que la machine est rouge.
    Si un dev server tourne : appelle aussi `nextjs_call` (`get_errors`) du MCP `next-devtools`.
 
@@ -70,7 +70,7 @@ Tu **rapportes**, tu ne corriges pas. L'appelant (toi plus tard, ou le skill `im
    | verify | PASS / FAIL | — |
    | structure | PASS / NEEDS WORK / MINOR / skip | <n> |
    | sécurité | SECURE / VULNERABLE / HARDENING NEEDED / skip | <n> |
-   | accessibilité | PASS / NEEDS WORK / MINOR / skip | <n> (+ risques résiduels) |
+   | accessibilité | PASS / NEEDS WORK / MINOR | <n> (+ risques résiduels) |
    | fidélité Figma | PASS / RETRY / REFACTO / degraded / skip | <n> |
    | fonctionnel | PASS / RETRY / REFACTO / degraded / skip | <n> |
 
@@ -107,7 +107,7 @@ Lis d'abord [references/pr-comments.md](references/pr-comments.md) : il porte le
 
 5. **Corriger** les `fix`, en suivant `AGENTS.md`, `packages/app/AGENTS.md` et les conventions. Pas de commentaire ajouté dans le code. Si le comportement change : mets à jour les tests vitest ; si un parcours utilisateur est touché : mets à jour l'E2E selon `../implement/references/e2e.md`.
 
-6. **Revue** : exécute le **mode gates** ci-dessus sur la branche. Pas PASS → corrige → relance, jusqu'au PASS.
+6. **Revue** : exécute le **mode gates** ci-dessus sur la branche, avec `VERIFY_BASE=origin/<base de la PR>` : il inclut toujours la revue RGAA `review-a11y` du diff de la PR face à sa base ([references/a11y.md](references/a11y.md)). Pas PASS → corrige → relance, jusqu'au PASS. Ses constats RGAA (et risques résiduels) vont dans le rapport final et, quand ils touchent un thread, dans sa réponse.
 
 7. **Push.** `git commit` signé (`fix(review): <résumé>`), `git push origin <branche>`. Jamais `--no-verify`, jamais `--no-gpg-sign`, jamais de force-push sans accord explicite de l'utilisateur.
 
@@ -126,6 +126,7 @@ Lis d'abord [references/pr-comments.md](references/pr-comments.md) : il porte le
     PR: #N1, #N2  ·  Branche: <branche>
     Threads: <total> — corrigés <a>, justifiés <b>, questions <c>, déjà adressés <d>, en attente <e>
     Commits: <sha…>  ·  CI: verte | rouge (<check>)
+    Accessibilité (RGAA, review-a11y) : PASS | NEEDS WORK | MINOR — <n> constats (+ risques résiduels)
     ```
     Proposer ensuite : « Je surveille les nouveaux commentaires ? » — si oui, refaire depuis l'étape 3 plus tard.
 

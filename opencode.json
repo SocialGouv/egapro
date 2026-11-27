@@ -33,17 +33,6 @@
 				"-y",
 				"@playwright/mcp@latest"
 			]
-		},
-		"ultra11y": {
-			"type": "local",
-			"command": [
-				"pnpm",
-				"--filter",
-				"app",
-				"exec",
-				"ultra11y",
-				"mcp"
-			]
 		}
 	},
 	"permission": {
