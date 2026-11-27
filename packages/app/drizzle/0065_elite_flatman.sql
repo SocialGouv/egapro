@@ -1,2 +1,2 @@
-ALTER TABLE "app_user" ADD COLUMN "last_activity_at" timestamp with time zone DEFAULT now() NOT NULL;--> statement-breakpoint
-ALTER TABLE "app_user" ADD COLUMN "anonymized_at" timestamp with time zone;
+ALTER TABLE "app_user" ADD COLUMN IF NOT EXISTS "last_activity_at" timestamp with time zone DEFAULT now() NOT NULL;--> statement-breakpoint
+ALTER TABLE "app_user" ADD COLUMN IF NOT EXISTS "anonymized_at" timestamp with time zone;
