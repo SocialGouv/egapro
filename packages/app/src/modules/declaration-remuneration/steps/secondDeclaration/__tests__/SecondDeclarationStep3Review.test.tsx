@@ -10,6 +10,7 @@ const mockPush = vi.fn();
 const mockRefresh = vi.fn();
 const mockReset = vi.fn();
 const mockConceal = vi.fn();
+const mockSetDraftData = vi.fn();
 const { mockMarkSecondDeclarationTransmissionSuccess } = vi.hoisted(() => ({
 	mockMarkSecondDeclarationTransmissionSuccess: vi.fn(),
 }));
@@ -47,6 +48,9 @@ vi.mock(
 
 vi.mock("~/trpc/react", () => ({
 	api: {
+		useUtils: () => ({
+			declarationDraft: { get: { setData: mockSetDraftData } },
+		}),
 		declaration: {
 			submitSecondDeclaration: {
 				useMutation: (opts: {
@@ -189,6 +193,7 @@ describe("SecondDeclarationStep3Review", () => {
 		mockRefresh.mockClear();
 		mockReset.mockClear();
 		mockConceal.mockClear();
+		mockSetDraftData.mockClear();
 		mockMarkSecondDeclarationTransmissionSuccess.mockClear();
 		mockMutationState.error = null;
 		mockMutationState.isPending = false;
@@ -658,6 +663,37 @@ describe("SecondDeclarationStep3Review", () => {
 		).toBeInTheDocument();
 	});
 
+	it("warns that the prepared CSE opinions will be deleted before a resubmission", () => {
+		renderStep3({ status: "awaiting_cse_opinion", cseOpinionRequired: true });
+
+		expect(
+			screen.getByText("Les avis du CSE seront supprimés"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(/vous supprimez les avis et les fichiers du CSE/i),
+		).toBeInTheDocument();
+	});
+
+	it("does not warn about CSE deletion before the opinions stage", () => {
+		renderStep3({ status: "corrective_actions_chosen" });
+
+		expect(
+			screen.queryByText("Les avis du CSE seront supprimés"),
+		).not.toBeInTheDocument();
+	});
+
+	it("does not warn about CSE deletion when the second declaration is no longer writable", () => {
+		renderStep3({
+			status: "awaiting_cse_opinion",
+			cseOpinionRequired: true,
+			secondDeclarationPathChoice: "justify",
+		});
+
+		expect(
+			screen.queryByText("Les avis du CSE seront supprimés"),
+		).not.toBeInTheDocument();
+	});
+
 	it("hides Transmettre in awaiting_cse_opinion once the revised path is justify", () => {
 		renderStep3({
 			status: "awaiting_cse_opinion",
@@ -683,6 +719,20 @@ describe("SecondDeclarationStep3Review", () => {
 
 		expect(mockMutate).toHaveBeenCalledTimes(1);
 		expect(mockPush).toHaveBeenCalledWith("/avis-cse");
+	});
+
+	it("drops the cached declaration draft so the purged CSE values do not come back", async () => {
+		renderStep3({
+			status: "awaiting_cse_opinion",
+			cseOpinionRequired: true,
+			secondDeclarationCategories: noGapCategories,
+		});
+		await submitDeclaration();
+
+		expect(mockSetDraftData).toHaveBeenCalledWith(
+			{ siren: "532847196", year: 2025 },
+			null,
+		);
 	});
 
 	it("goes to the compliance path after a resubmission with a gap from awaiting_cse_opinion", async () => {

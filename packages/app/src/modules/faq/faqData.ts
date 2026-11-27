@@ -248,6 +248,12 @@ export const FAQ_SECTIONS: FaqSection[] = [
 						answer:
 							"Non. Le sens de l'avis est enregistré et transmis tel quel ; il ne conditionne pas la validité de votre déclaration.",
 					},
+					{
+						question:
+							"Que deviennent les avis du CSE déjà préparés si je modifie ma seconde déclaration ?",
+						answer:
+							"Ils sont supprimés. Transmettre une nouvelle version de votre seconde déclaration remet l'étape des avis du CSE à zéro : les avis déjà saisis et les PDF déjà déposés sont effacés, et vous les renseignez à nouveau sur les données à jour. Cette remise à zéro n'a lieu qu'avant la transmission de vos avis : une fois vos avis transmis, la seconde déclaration n'est plus modifiable.",
+					},
 				],
 			},
 		],

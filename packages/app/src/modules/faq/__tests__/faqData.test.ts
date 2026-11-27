@@ -159,6 +159,13 @@ describe("FAQ describes the scheme the application implements", () => {
 		expect(cse).toContain(`${MAX_CSE_FILES} fichiers`);
 	});
 
+	it("states that re-transmitting the second declaration clears prepared CSE opinions", () => {
+		const cse = answersOf("avis-cse");
+
+		expect(cse).toMatch(/avis du CSE déjà préparés/i);
+		expect(cse).toMatch(/remet l'étape des avis du CSE à zéro/i);
+	});
+
 	it("states the quartile counts the domain defines", () => {
 		const quartiles = answersOf("quartiles");
 

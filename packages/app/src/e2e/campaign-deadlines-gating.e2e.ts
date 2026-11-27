@@ -19,6 +19,7 @@ import {
 	saveSecondDeclaration,
 	selectCompliancePath,
 	submitCseStep2,
+	uploadCseFiles,
 	uploadJointEvalPdf,
 } from "./helpers/compliance-flows";
 import {
@@ -418,15 +419,18 @@ test.describe("Campaign deadlines are informational; only the last submission is
 		test("S8 — a resolved second declaration stays modifiable until the CSE opinions are transmitted", async ({
 			page,
 		}) => {
-			test.setTimeout(300_000);
+			test.setTimeout(480_000);
 			const continueCta = (panel: Locator) =>
 				panel.getByRole("link", { name: /^Continuer/ });
-			const resubmitSecondDeclaration = async (hasGap: boolean) => {
+			const resubmitSecondDeclaration = async (
+				hasGap: boolean,
+				options: { expectCsePurgeWarning?: boolean } = {},
+			) => {
 				await openPanneauDemarche(page);
 				await transmittedRow(page, SECOND_DECLARATION_ROW)
 					.getByRole("link", { name: "Modifier", exact: true })
 					.click();
-				await completeSecondDeclaration(page, { hasGap });
+				await completeSecondDeclaration(page, { hasGap, ...options });
 			};
 
 			await test.step("la seconde déclaration résout l'écart : avis du CSE attendus", async () => {
@@ -478,6 +482,36 @@ test.describe("Campaign deadlines are informational; only the last submission is
 				});
 			});
 
+			await test.step("les avis du CSE préparés sont supprimés à la re-transmission", async () => {
+				await page.goto(cseOpinionStepHref(1));
+				await fillCseStep1(page, { hasSecondDeclaration: true });
+				await uploadCseFiles(page, ["avis-cse-1.pdf", "avis-cse-2.pdf"]);
+				const selectFiles = page.getByRole("button", {
+					name: "Sélectionner des fichiers",
+				});
+				await expect(selectFiles).toBeDisabled();
+
+				await resubmitSecondDeclaration(false, {
+					expectCsePurgeWarning: true,
+				});
+				await page.waitForURL(urlGlob(cseOpinionStepHref(1)), {
+					timeout: 15_000,
+				});
+				expect(
+					await getSecondDeclarationSubmissionState(testDeclarationYear),
+				).toEqual({ status: "awaiting_cse_opinion", submissions: 3 });
+
+				await expect(page.locator("#first-decl-accuracy-date")).toHaveValue("");
+				await expect(
+					page.locator("#first-decl-accuracy-favorable"),
+				).not.toBeChecked();
+
+				await page.goto(cseOpinionStepHref(2));
+				await expect(page.getByText("avis-cse-1.pdf")).toHaveCount(0);
+				await expect(page.getByText("avis-cse-2.pdf")).toHaveCount(0);
+				await expect(selectFiles).toBeEnabled();
+			});
+
 			await test.step("une modification non retransmise ramène à la seconde déclaration avant les avis du CSE", async () => {
 				await openPanneauDemarche(page);
 				await transmittedRow(page, SECOND_DECLARATION_ROW)
@@ -486,7 +520,7 @@ test.describe("Campaign deadlines are informational; only the last submission is
 				await saveSecondDeclaration(page, { hasGap: false });
 				expect(
 					await getSecondDeclarationSubmissionState(testDeclarationYear),
-				).toEqual({ status: "awaiting_cse_opinion", submissions: 2 });
+				).toEqual({ status: "awaiting_cse_opinion", submissions: 3 });
 
 				await page.goto(cseOpinionStepHref(1));
 				await page.waitForURL(urlGlob(complianceStepHref(3)), {
@@ -499,7 +533,7 @@ test.describe("Campaign deadlines are informational; only the last submission is
 				await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 15_000 });
 				expect(
 					await getSecondDeclarationSubmissionState(testDeclarationYear),
-				).toEqual({ status: "awaiting_revision_choice", submissions: 3 });
+				).toEqual({ status: "awaiting_revision_choice", submissions: 4 });
 				const panel = await openPanneauDemarche(page);
 				await expect(
 					transmittedRow(page, SECOND_DECLARATION_ROW).getByText(
