@@ -2,6 +2,7 @@ import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import type { Sql } from "postgres";
 import postgres from "postgres";
+import { DECLARATION_RETENTION_YEARS } from "~/modules/domain/shared/retention";
 import { cleanupErrorDiagnostic } from "./cleanup-error-diagnostic";
 
 type PurgeSummary = {
@@ -27,7 +28,7 @@ type RunDeclarationCleanupArgs = {
 const DECLARATION_CLEANUP_ACTION = "system.declaration_cleanup";
 const DECLARATION_CLEANUP_CATEGORY = "system";
 const DECLARATION_CLEANUP_FAILURE_CODE = "DECLARATION_CLEANUP_FAILED";
-const DEFAULT_RETENTION_YEARS = 6;
+const DEFAULT_RETENTION_YEARS = DECLARATION_RETENTION_YEARS;
 
 function getDatabaseUrl(): string {
 	if (process.env.DATABASE_URL) return process.env.DATABASE_URL;

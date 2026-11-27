@@ -456,6 +456,20 @@
 			"when": 1794908035687,
 			"tag": "0064_declaration-has-cse",
 			"breakpoints": true
+		},
+		{
+			"idx": 65,
+			"version": "7",
+			"when": 1794908035688,
+			"tag": "0065_elite_flatman",
+			"breakpoints": true
+		},
+		{
+			"idx": 66,
+			"version": "7",
+			"when": 1794908035689,
+			"tag": "0066_backfill-user-last-activity",
+			"breakpoints": true
 		}
 	]
 }

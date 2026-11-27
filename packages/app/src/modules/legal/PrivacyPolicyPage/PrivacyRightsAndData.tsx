@@ -1,3 +1,7 @@
+import {
+	DECLARATION_RETENTION_YEARS,
+	USER_ACCOUNT_INACTIVITY_RETENTION_YEARS,
+} from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout";
 
 import {
@@ -26,13 +30,23 @@ export function PrivacyRightsAndData() {
 						<tr>
 							<td>Données des utilisateurs d'Egapro</td>
 							<td>
-								À compter de la suppression par l'utilisateur ou 2 ans à compter
-								de la dernière démarche ou de l'inactivité du compte
+								À compter de la suppression par l'utilisateur ou{" "}
+								{USER_ACCOUNT_INACTIVITY_RETENTION_YEARS} ans à compter de la
+								dernière démarche ou de l'inactivité du compte
 							</td>
 						</tr>
 					</tbody>
 				</table>
 			</div>
+			<p>
+				Le délai d'inactivité court à compter de la dernière connexion au
+				compte. À l'échéance, le compte est anonymisé : prénom, nom, adresse
+				e-mail, téléphone et rattachement à une entreprise sont effacés. Les
+				déclarations déposées ne sont pas supprimées : elles restent conservées{" "}
+				{DECLARATION_RETENTION_YEARS} ans et rattachées à cet identifiant
+				anonyme. Pour supprimer votre compte à votre demande, écrivez à
+				l'adresse indiquée à la rubrique « Quels sont vos droits ? ».
+			</p>
 
 			<h2 className="fr-h4">Quels sont vos droits ?</h2>
 			<p>Vous disposez :</p>

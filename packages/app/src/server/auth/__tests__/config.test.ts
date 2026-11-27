@@ -27,7 +27,12 @@ vi.mock("~/server/db", () => ({
 	},
 }));
 vi.mock("~/server/db/schema", () => ({
-	users: { email: "email", id: "id" },
+	users: {
+		email: "email",
+		id: "id",
+		lastActivityAt: "lastActivityAt",
+		anonymizedAt: "anonymizedAt",
+	},
 	companies: { siren: "siren" },
 	userCompanies: {},
 	// The sign-in branch closes any open impersonation row (#4466), so the
@@ -172,6 +177,28 @@ describe("auth config", () => {
 			expect(result.phone).toBe("0123456789");
 			expect(result.id_token).toBe("stored-token");
 		});
+
+		it("stamps the last activity on a session refresh, not only at sign-in", async () => {
+			vi.useFakeTimers();
+			vi.setSystemTime(new Date("2026-11-17T09:00:00.000Z"));
+			try {
+				const where = vi.fn().mockResolvedValue(undefined);
+				const set = vi.fn().mockReturnValue({ where });
+				mockUpdate.mockReturnValue({ set });
+
+				await callJwt({
+					token: { id: "uuid-123" } as JWT,
+					account: null,
+				});
+
+				expect(set).toHaveBeenCalledWith({
+					lastActivityAt: new Date("2026-11-17T09:00:00.000Z"),
+				});
+				expect(where).toHaveBeenCalled();
+			} finally {
+				vi.useRealTimers();
+			}
+		});
 	});
 
 	const DECLARANT_EMAIL = "declarant@example.fr";
@@ -209,16 +236,6 @@ describe("auth config", () => {
 	}
 
 	describe("jwt callback — ProConnect identity seeding", () => {
-		// Every sign-in also closes any open impersonation row (#4466), which is
-		// an UPDATE against another table. These tests are about name seeding,
-		// so they count the updates aimed at `users` rather than all of them.
-		function userTableUpdates() {
-			return mockUpdate.mock.calls.filter(
-				([table]) =>
-					(table as { email?: string } | undefined)?.email === "email",
-			);
-		}
-
 		function armUpdate() {
 			const where = vi.fn().mockResolvedValue(undefined);
 			const set = vi.fn().mockReturnValue({ where });
@@ -232,6 +249,7 @@ describe("auth config", () => {
 			await signIn({ firstName: null, lastName: null });
 
 			expect(set).toHaveBeenCalledWith({
+				lastActivityAt: expect.any(Date),
 				firstName: "Alice",
 				lastName: "Martin",
 			});
@@ -242,23 +260,51 @@ describe("auth config", () => {
 
 			await signIn({ firstName: "Camille", lastName: null });
 
-			expect(set).toHaveBeenCalledWith({ lastName: "Martin" });
+			expect(set).toHaveBeenCalledWith({
+				lastActivityAt: expect.any(Date),
+				lastName: "Martin",
+			});
 		});
 
 		it("never overwrites a name already stored, so a Mon profil edit survives the next login", async () => {
-			armUpdate();
+			const set = armUpdate();
 
 			await signIn({ firstName: "Camille", lastName: "Durand" });
 
-			expect(userTableUpdates()).toHaveLength(0);
+			// The sign-in still stamps the activity; only the names are kept.
+			expect(set).toHaveBeenCalledWith({
+				lastActivityAt: expect.any(Date),
+			});
 		});
 
-		it("leaves the DB row untouched when ProConnect sends no name", async () => {
-			armUpdate();
+		it("stamps the last activity with the sign-in time, even for an account whose names are known", async () => {
+			vi.useFakeTimers();
+			vi.setSystemTime(new Date("2026-11-17T09:00:00.000Z"));
+			try {
+				const set = armUpdate();
+
+				await signIn({
+					firstName: "Camille",
+					lastName: "Durand",
+					lastActivityAt: new Date("2024-01-01T00:00:00.000Z"),
+				});
+
+				expect(set).toHaveBeenCalledWith({
+					lastActivityAt: new Date("2026-11-17T09:00:00.000Z"),
+				});
+			} finally {
+				vi.useRealTimers();
+			}
+		});
+
+		it("writes nothing but the activity stamp when ProConnect sends no name", async () => {
+			const set = armUpdate();
 
 			await signIn({ firstName: null, lastName: null }, namelessProconnectUser);
 
-			expect(userTableUpdates()).toHaveLength(0);
+			expect(set).toHaveBeenCalledWith({
+				lastActivityAt: expect.any(Date),
+			});
 		});
 	});
 

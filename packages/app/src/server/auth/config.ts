@@ -1,4 +1,4 @@
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { headers as nextHeaders } from "next/headers";
 import type { DefaultSession, NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -28,6 +28,10 @@ import { resolveRedirectTarget } from "./redirectTarget";
 /** Cap on the `name` field of an impersonation payload — avoids oversized
  *  tokens if an admin forges a huge string in the `session.update` call. */
 const IMPERSONATION_NAME_MAX = 255;
+
+/** A JWT session is refreshed on every read; activity is stamped at most
+ *  once per day to keep session reads from writing the user row each time. */
+const ACTIVITY_STAMP_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
 /**
  * Close every open impersonation row for this admin. Run on stop, and
@@ -629,22 +633,23 @@ export const authConfig = {
 					}
 					dbUser = inserted;
 				} else {
-					// ProConnect only seeds a name the DB does not have yet.
-					const updates: Record<string, string | null> = {};
+					// ProConnect only seeds a missing name; the activity stamp is
+					// always written — it is the retention clock.
+					const updates: {
+						lastActivityAt: Date;
+						firstName?: string | null;
+						lastName?: string | null;
+					} = { lastActivityAt: new Date() };
 					if (profileData.firstName && !existingUser.firstName)
 						updates.firstName = profileData.firstName;
 					if (profileData.lastName && !existingUser.lastName)
 						updates.lastName = profileData.lastName;
 
-					if (Object.keys(updates).length > 0) {
-						await db
-							.update(users)
-							.set(updates)
-							.where(eq(users.id, existingUser.id));
-						dbUser = { ...existingUser, ...updates } as typeof existingUser;
-					} else {
-						dbUser = existingUser;
-					}
+					await db
+						.update(users)
+						.set(updates)
+						.where(eq(users.id, existingUser.id));
+					dbUser = { ...existingUser, ...updates } as typeof existingUser;
 				}
 
 				// ProConnect is the only source of the link: a user moved elsewhere loses the former company.
@@ -762,6 +767,22 @@ export const authConfig = {
 					ipAddress: requestContext.ipAddress,
 					userAgent: requestContext.userAgent,
 				});
+			}
+
+			// A JWT session slides on every read: a user who comes back at least
+			// once a month never signs in again, so the sign-in alone would date
+			// them inactive. The predicate keeps this to one row write per day.
+			if (!user && token.id) {
+				await db
+					.update(users)
+					.set({ lastActivityAt: new Date() })
+					.where(
+						and(
+							eq(users.id, token.id),
+							isNull(users.anonymizedAt),
+							sql`${users.lastActivityAt} < now() - make_interval(secs => ${ACTIVITY_STAMP_INTERVAL_MS / 1000})`,
+						),
+					);
 			}
 
 			// Last, so it never doubles a close the branches above already made:

@@ -36,7 +36,12 @@ vi.mock("~/server/db", () => ({
 	},
 }));
 vi.mock("~/server/db/schema", () => ({
-	users: { email: "email", id: "id" },
+	users: {
+		email: "email",
+		id: "id",
+		lastActivityAt: "lastActivityAt",
+		anonymizedAt: "anonymizedAt",
+	},
 	companies: { siren: "siren" },
 	userCompanies: {},
 	adminImpersonationEvents: {},
