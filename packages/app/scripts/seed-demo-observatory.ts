@@ -17,6 +17,7 @@ import { fileURLToPath } from "node:url";
 import type { Sql, TransactionSql } from "postgres";
 import postgres from "postgres";
 import { getDefaultCampaignDeadlineColumns } from "~/modules/domain";
+import { assertDemoSeedAllowed } from "./demoSeedGuard";
 import {
 	DEMO_PUBLIC_RELEASE_DATE,
 	DEMO_SEED_USER_EMAIL,
@@ -65,6 +66,8 @@ if (!Number.isFinite(SCHEMA_WAIT_SECONDS) || SCHEMA_WAIT_SECONDS < 0) {
 	);
 	process.exit(1);
 }
+
+assertDemoSeedAllowed();
 
 const DATABASE_URL = resolveDatabaseUrl();
 
